@@ -12,11 +12,15 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// Parses the XML information for a Lines object
-func ParseUtoGLines(items []*structs.InvoiceLine) []*bill.Line {
-	lines := make([]*bill.Line, 0, len(items))
+// ParseUtoGLines parses the XML information for Lines objects from the entire invoice
+func ParseUtoGLines(invoice *structs.Invoice) []*bill.Line {
+	if invoice == nil || invoice.InvoiceLine == nil {
+		return nil
+	}
 
-	for _, item := range items {
+	lines := make([]*bill.Line, 0, len(invoice.InvoiceLine))
+
+	for _, item := range invoice.InvoiceLine {
 		price, _ := num.AmountFromString(item.Price.PriceAmount.Value)
 		line := &bill.Line{
 			Quantity: num.MakeAmount(1, 0),

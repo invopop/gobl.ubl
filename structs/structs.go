@@ -188,8 +188,8 @@ type Delivery struct {
 }
 
 type Location struct {
-	ID      string        `xml:"ID"`
-	Address PostalAddress `xml:"Address"`
+	ID      string         `xml:"ID"`
+	Address *PostalAddress `xml:"Address"`
 }
 
 type DeliveryTerms struct {
@@ -251,11 +251,11 @@ type TaxSubtotal struct {
 }
 
 type TaxCategory struct {
-	ID                     string    `xml:"ID"`
-	Percent                string    `xml:"Percent"`
-	TaxExemptionReasonCode string    `xml:"TaxExemptionReasonCode"`
-	TaxExemptionReason     string    `xml:"TaxExemptionReason"`
-	TaxScheme              TaxScheme `xml:"TaxScheme"`
+	ID                     string     `xml:"ID"`
+	Percent                *string    `xml:"Percent"`
+	TaxExemptionReasonCode string     `xml:"TaxExemptionReasonCode"`
+	TaxExemptionReason     string     `xml:"TaxExemptionReason"`
+	TaxScheme              *TaxScheme `xml:"TaxScheme"`
 }
 
 type MonetaryTotal struct {

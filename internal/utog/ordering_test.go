@@ -3,44 +3,36 @@ package ubl_test
 import (
 	"testing"
 
-	cii "github.com/invopop/gobl.cii"
-	ubl "github.com/invopop/gobl.ubl"
+	utog "github.com/invopop/gobl.ubl/internal/utog"
 	"github.com/invopop/gobl.ubl/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseCtoGOrdering(t *testing.T) {
-	t.Run("CII_example7.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("CII_example7.xml")
+func TestParseUtoGOrdering(t *testing.T) {
+	t.Run("UBL_example1.xml", func(t *testing.T) {
+		doc, err := test.LoadTestXMLDoc("UBL_example1.xml")
 		require.NoError(t, err)
 
-		goblEnv, err := ubl.NewGOBLFromCII(doc)
-		require.NoError(t, err)
+		invoice := &bill.Invoice{}
+		ordering := utog.ParseUtoGOrdering(invoice, doc)
 
-		invoice, ok := goblEnv.Extract().(*bill.Invoice)
-		require.True(t, ok, "Document should be an invoice")
-
-		require.NotNil(t, invoice.Ordering, "Ordering should not be nil")
-		require.NotNil(t, invoice.Ordering.Period, "OrderingPeriod should not be nil")
-		assert.Equal(t, "2013-01-01", invoice.Ordering.Period.Start.String(), "OrderingPeriod start date should match")
-		assert.Equal(t, "2013-12-31", invoice.Ordering.Period.End.String(), "OrderingPeriod end date should match")
-	})
-	t.Run("CII_example8.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("CII_example8.xml")
-		require.NoError(t, err)
-
-		goblEnv, err := cii.NewGOBLFromCII(doc)
-		require.NoError(t, err)
-
-		invoice, ok := goblEnv.Extract().(*bill.Invoice)
-		require.True(t, ok, "Document should be an invoice")
-
-		require.NotNil(t, invoice.Ordering, "Ordering should not be nil")
-		require.NotNil(t, invoice.Ordering.Period, "OrderingPeriod should not be nil")
-		assert.Equal(t, "2014-08-01", invoice.Ordering.Period.Start.String(), "OrderingPeriod start date should match")
-		assert.Equal(t, "2014-08-31", invoice.Ordering.Period.End.String(), "OrderingPeriod end date should match")
+		require.NotNil(t, ordering, "Ordering should not be nil")
+		assert.Equal(t, "AEG012345", string(ordering.Code), "Order reference should match")
 	})
 
+	t.Run("UBL_example2.xml", func(t *testing.T) {
+		doc, err := test.LoadTestXMLDoc("UBL_example2.xml")
+		require.NoError(t, err)
+
+		invoice := &bill.Invoice{}
+		ordering := utog.ParseUtoGOrdering(invoice, doc)
+
+		require.NotNil(t, ordering, "Ordering should not be nil")
+		assert.Equal(t, "5009567", string(ordering.Code), "Order reference should match")
+		require.NotNil(t, ordering.Period, "OrderingPeriod should not be nil")
+		assert.Equal(t, "2005-06-20", ordering.Period.Start.String(), "OrderingPeriod start date should match")
+		assert.Equal(t, "2005-06-21", ordering.Period.End.String(), "OrderingPeriod end date should match")
+	})
 }

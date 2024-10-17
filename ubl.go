@@ -91,12 +91,12 @@ func mapUBLToInvoice(doc *structs.Invoice) *bill.Invoice {
 		Currency:  currency.Code(doc.DocumentCurrencyCode),
 		Supplier:  utog.ParseUtoGParty(&doc.AccountingSupplierParty.Party),
 		Customer:  utog.ParseUtoGParty(&doc.AccountingCustomerParty.Party),
-		Lines:     utog.ParseUtoGLines(&doc.InvoiceLine),
+		Lines:     utog.ParseUtoGLines(doc),
 	}
 
 	// Payment comprised of terms, means and payee. Check there is relevant info in at least one of them to create a payment
 	if doc.PaymentMeans != nil || len(doc.PaymentTerms) > 0 {
-		inv.Payment = utog.ParseUtoGPayment(doc.PaymentMeans, doc.PaymentTerms)
+		inv.Payment = utog.ParseUtoGPayment(doc)
 	}
 
 	if len(doc.Note) > 0 {

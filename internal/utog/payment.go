@@ -1,117 +1,83 @@
 package ubl
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
 )
 
-// Parses the XML information for a Payment object
-func ParseCtoGPayment(settlement *structs.ApplicableHeaderTradeSettlement) *bill.Payment {
+// ParseUtoGPayment parses the UBL XML information for a Payment object
+func ParseUtoGPayment(doc *structs.Invoice) *bill.Payment {
 	payment := &bill.Payment{}
 
-	if settlement.PayeeTradeParty != nil {
-		payee := &org.Party{Name: settlement.PayeeTradeParty.Name}
-		if settlement.PayeeTradeParty.PostalTradeAddress != nil {
-			payee.Addresses = []*org.Address{
-				parseAddress(settlement.PayeeTradeParty.PostalTradeAddress),
+	if doc.PayeeParty != nil {
+		payment.Payee = ParseUtoGParty(doc.PayeeParty)
+	}
+
+	if len(doc.PaymentTerms) > 0 {
+		payment.Terms = &pay.Terms{}
+		var notes []string
+		for _, term := range doc.PaymentTerms {
+			if term.Note != "" {
+				notes = append(notes, term.Note)
 			}
 		}
-		payment.Payee = payee
-	}
-	if len(settlement.SpecifiedTradePaymentTerms) > 0 {
-		if settlement.SpecifiedTradePaymentTerms[0].DueDateDateTime != nil {
-			payment.Terms = parsePaymentTerms(settlement)
+		if len(notes) > 0 {
+			payment.Terms.Notes = strings.Join(notes, " ")
 		}
 	}
 
-	if len(settlement.SpecifiedTradeSettlementPaymentMeans) > 0 && settlement.SpecifiedTradeSettlementPaymentMeans[0].TypeCode != "1" {
-		payment.Instructions = parsePaymentMeans(settlement)
+	if len(doc.PaymentMeans) > 0 {
+		payment.Instructions = parsePaymentMeans(doc.PaymentMeans[0])
 	}
 
-	if len(settlement.SpecifiedAdvancePayment) > 0 {
-		for _, advancePayment := range settlement.SpecifiedAdvancePayment {
-			advance := &pay.Advance{
-				Amount: num.AmountFromFloat64(advancePayment.PaidAmount, 0),
-			}
-			if advancePayment.FormattedReceivedDateTime != nil {
-				advancePaymentReceivedDateTime := ParseDate(advancePayment.FormattedReceivedDateTime.DateTimeString)
-				advance.Date = &advancePaymentReceivedDateTime
-			}
-			payment.Advances = append(payment.Advances, advance)
+	if doc.PrepaidPayment != nil {
+		advance := &pay.Advance{
+			Amount: num.MakeAmount(doc.PrepaidPayment.PaidAmount, 2),
 		}
+		if doc.PrepaidPayment.PaidDate != "" {
+			advancePaymentDate := ParseDate(doc.PrepaidPayment.PaidDate)
+			advance.Date = &advancePaymentDate
+		}
+		payment.Advances = []*pay.Advance{advance}
 	}
 
 	return payment
 }
 
-func parsePaymentTerms(settlement *structs.ApplicableHeaderTradeSettlement) *pay.Terms {
-	terms := &pay.Terms{}
-	var dueDates []*pay.DueDate
-
-	for _, paymentTerm := range settlement.SpecifiedTradePaymentTerms {
-		if paymentTerm.Description != nil {
-			terms.Detail = *paymentTerm.Description
-		}
-
-		if paymentTerm.DueDateDateTime != nil {
-			dueDateTime := ParseDate(paymentTerm.DueDateDateTime.DateTimeString)
-			dueDate := &pay.DueDate{
-				Date: &dueDateTime,
-			}
-			if paymentTerm.PartialPaymentAmount != nil {
-				dueDate.Amount, _ = num.AmountFromString(*paymentTerm.PartialPaymentAmount)
-			} else if len(dueDates) == 0 {
-				percent, _ := num.PercentageFromString("100%")
-				dueDate.Percent = &percent
-			}
-			dueDates = append(dueDates, dueDate)
-		}
-	}
-	terms.DueDates = dueDates
-	return terms
-}
-
-func parsePaymentMeans(settlement *structs.ApplicableHeaderTradeSettlement) *pay.Instructions {
-	paymentMeans := settlement.SpecifiedTradeSettlementPaymentMeans[0]
+func parsePaymentMeans(paymentMeans *structs.PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
-		Key: PaymentMeansTypeCodeParse(paymentMeans.TypeCode),
+		Key: PaymentMeansTypeCodeParse(paymentMeans.PaymentMeansCode),
 	}
 
-	if paymentMeans.Information != nil {
-		instructions.Detail = *paymentMeans.Information
+	if paymentMeans.PaymentID != "" {
+		instructions.Detail = paymentMeans.PaymentID
 	}
 
-	if paymentMeans.ApplicableTradeSettlementFinancialCard != nil {
-		if paymentMeans.ApplicableTradeSettlementFinancialCard != nil {
-			card := paymentMeans.ApplicableTradeSettlementFinancialCard
-			instructions.Card = &pay.Card{
-				Last4: card.ID[len(card.ID)-4:],
-			}
-			if card.CardholderName != "" {
-				instructions.Card.Holder = card.CardholderName
-			}
-		}
-	}
-
-	if paymentMeans.PayeePartyCreditorFinancialAccount != nil {
-		account := paymentMeans.PayeePartyCreditorFinancialAccount
-		if account.IBANID != "" {
+	if paymentMeans.PayeeFinancialAccount != nil {
+		account := paymentMeans.PayeeFinancialAccount
+		if account.ID != "" {
 			instructions.CreditTransfer = []*pay.CreditTransfer{
 				{
-					IBAN: account.IBANID,
+					IBAN: account.ID,
 				},
 			}
 		}
-		if account.AccountName != "" {
-			//No issue because X-Rechnung only supports one credit transfer per instruction
-			instructions.CreditTransfer[0].Name = account.AccountName
+		if account.Name != "" {
+			if len(instructions.CreditTransfer) > 0 {
+				instructions.CreditTransfer[0].Name = account.Name
+			}
 		}
-		if paymentMeans.PayeeSpecifiedCreditorFinancialInstitution != nil {
-			instructions.CreditTransfer[0].BIC = paymentMeans.PayeeSpecifiedCreditorFinancialInstitution.BICID
+		if paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch != nil &&
+			paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID != "" {
+			if len(instructions.CreditTransfer) > 0 {
+				instructions.CreditTransfer[0].BIC = paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID
+			}
 		}
 	}
+
 	return instructions
 }
