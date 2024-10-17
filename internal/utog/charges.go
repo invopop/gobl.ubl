@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"strings"
-
 	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -11,48 +9,42 @@ import (
 )
 
 // ParseAllowanceCharges extracts the charges logic from the CII document
-func ParseCtoGCharges(settlement *structs.ApplicableHeaderTradeSettlement) ([]*bill.Charge, []*bill.Discount) {
+func ParseUtoGCharges(doc *structs.Invoice) ([]*bill.Charge, []*bill.Discount) {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
-	for _, allowanceCharge := range settlement.SpecifiedTradeAllowanceCharge {
-		if allowanceCharge.ChargeIndicator.Indicator {
+	for _, allowanceCharge := range doc.AllowanceCharge {
+		if allowanceCharge.ChargeIndicator {
 			// This is a charge
 			charge := &bill.Charge{}
-			if allowanceCharge.Reason != nil {
-				charge.Reason = *allowanceCharge.Reason
+			if allowanceCharge.AllowanceChargeReason != nil {
+				charge.Reason = *allowanceCharge.AllowanceChargeReason
 			}
-			if allowanceCharge.ActualAmount != "" {
-				charge.Amount, _ = num.AmountFromString(allowanceCharge.ActualAmount)
+			if allowanceCharge.Amount.Value != "" {
+				charge.Amount, _ = num.AmountFromString(allowanceCharge.Amount.Value)
 			}
-			if allowanceCharge.ReasonCode != nil {
-				charge.Code = *allowanceCharge.ReasonCode
+			if allowanceCharge.AllowanceChargeReasonCode != nil {
+				charge.Code = *allowanceCharge.AllowanceChargeReasonCode
 			}
-			if allowanceCharge.BasisAmount != nil {
-				basis, _ := num.AmountFromString(*allowanceCharge.BasisAmount)
+			if allowanceCharge.BaseAmount != nil {
+				basis, _ := num.AmountFromString(allowanceCharge.BaseAmount.Value)
 				charge.Base = &basis
 			}
-			if allowanceCharge.CalculationPercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CalculationPercent, "%") {
-					*allowanceCharge.CalculationPercent += "%"
-				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+			if allowanceCharge.MultiplierFactorNumeric != nil {
+				percent, _ := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
 				charge.Percent = &percent
 			}
-			if allowanceCharge.CategoryTradeTax.TypeCode != "" {
+			if allowanceCharge.TaxCategory != nil && allowanceCharge.TaxCategory.TaxScheme != nil {
 				charge.Taxes = tax.Set{
 					{
-						Category: cbc.Code(allowanceCharge.CategoryTradeTax.TypeCode),
-						Rate:     FindTaxKey(allowanceCharge.CategoryTradeTax.CategoryCode),
+						Category: cbc.Code(*allowanceCharge.TaxCategory.TaxScheme.ID),
+						Rate:     FindTaxKey(allowanceCharge.TaxCategory.ID),
 					},
 				}
-			}
-			if allowanceCharge.CategoryTradeTax.RateApplicablePercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CategoryTradeTax.RateApplicablePercent, "%") {
-					*allowanceCharge.CategoryTradeTax.RateApplicablePercent += "%"
+				if allowanceCharge.TaxCategory.Percent != nil {
+					percent, _ := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					charge.Taxes[0].Percent = &percent
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
-				charge.Taxes[0].Percent = &percent
 			}
 			if charges == nil {
 				charges = make([]*bill.Charge, 0)
@@ -61,40 +53,34 @@ func ParseCtoGCharges(settlement *structs.ApplicableHeaderTradeSettlement) ([]*b
 		} else {
 			// This is a discount
 			discount := &bill.Discount{}
-			if allowanceCharge.Reason != nil {
-				discount.Reason = *allowanceCharge.Reason
+			if allowanceCharge.AllowanceChargeReason != nil {
+				discount.Reason = *allowanceCharge.AllowanceChargeReason
 			}
-			if allowanceCharge.ActualAmount != "" {
-				discount.Amount, _ = num.AmountFromString(allowanceCharge.ActualAmount)
+			if allowanceCharge.Amount.Value != "" {
+				discount.Amount, _ = num.AmountFromString(allowanceCharge.Amount.Value)
 			}
-			if allowanceCharge.ReasonCode != nil {
-				discount.Code = *allowanceCharge.ReasonCode
+			if allowanceCharge.AllowanceChargeReasonCode != nil {
+				discount.Code = *allowanceCharge.AllowanceChargeReasonCode
 			}
-			if allowanceCharge.BasisAmount != nil {
-				basis, _ := num.AmountFromString(*allowanceCharge.BasisAmount)
+			if allowanceCharge.BaseAmount != nil {
+				basis, _ := num.AmountFromString(allowanceCharge.BaseAmount.Value)
 				discount.Base = &basis
 			}
-			if allowanceCharge.CalculationPercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CalculationPercent, "%") {
-					*allowanceCharge.CalculationPercent += "%"
-				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CalculationPercent)
+			if allowanceCharge.MultiplierFactorNumeric != nil {
+				percent, _ := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
 				discount.Percent = &percent
 			}
-			if allowanceCharge.CategoryTradeTax.TypeCode != "" {
+			if allowanceCharge.TaxCategory != nil && allowanceCharge.TaxCategory.TaxScheme != nil {
 				discount.Taxes = tax.Set{
 					{
-						Category: cbc.Code(allowanceCharge.CategoryTradeTax.TypeCode),
-						Rate:     FindTaxKey(allowanceCharge.CategoryTradeTax.CategoryCode),
+						Category: cbc.Code(*allowanceCharge.TaxCategory.TaxScheme.ID),
+						Rate:     FindTaxKey(allowanceCharge.TaxCategory.ID),
 					},
 				}
-			}
-			if allowanceCharge.CategoryTradeTax.RateApplicablePercent != nil {
-				if !strings.HasSuffix(*allowanceCharge.CategoryTradeTax.RateApplicablePercent, "%") {
-					*allowanceCharge.CategoryTradeTax.RateApplicablePercent += "%"
+				if allowanceCharge.TaxCategory.Percent != nil {
+					percent, _ := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					discount.Taxes[0].Percent = &percent
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.CategoryTradeTax.RateApplicablePercent)
-				discount.Taxes[0].Percent = &percent
 			}
 			if discounts == nil {
 				discounts = make([]*bill.Discount, 0)

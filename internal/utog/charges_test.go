@@ -10,13 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseCtoGCharges(t *testing.T) {
+func TestParseUtoGCharges(t *testing.T) {
 	// Invoice with Charge
-	t.Run("CII_example3.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("CII_example3.xml")
+	t.Run("UBL_example3.xml", func(t *testing.T) {
+		doc, err := test.LoadTestXMLDoc("UBL_example3.xml")
 		require.NoError(t, err)
 
-		charges, discounts := utog.ParseUtoGCharges(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+		charges, discounts := utog.ParseUtoGCharges(doc)
 		require.NotEmpty(t, charges)
 
 		// Check if there's a charge in the parsed output
@@ -30,11 +30,11 @@ func TestParseCtoGCharges(t *testing.T) {
 
 	})
 	// Invoice with Discount and Charge
-	t.Run("CII_business_example_02.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("CII_business_example_02.xml")
+	t.Run("UBL_business_example_02.xml", func(t *testing.T) {
+		doc, err := test.LoadTestXMLDoc("UBL_business_example_02.xml")
 		require.NoError(t, err)
 
-		charges, discounts := utog.ParseUtoGCharges(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+		charges, discounts := utog.ParseUtoGCharges(doc)
 
 		// Check if there's a discount in the parsed output
 		require.Len(t, discounts, 1)
@@ -52,11 +52,11 @@ func TestParseCtoGCharges(t *testing.T) {
 	})
 
 	// Invoice with Discount and Charge
-	t.Run("CII_example2.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("CII_example2.xml")
+	t.Run("UBL_example2.xml", func(t *testing.T) {
+		doc, err := test.LoadTestXMLDoc("UBL_example2.xml")
 		require.NoError(t, err)
 
-		charges, discounts := utog.ParseUtoGCharges(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
+		charges, discounts := utog.ParseUtoGCharges(doc)
 
 		require.Len(t, charges, 1)
 		require.Len(t, discounts, 1)
