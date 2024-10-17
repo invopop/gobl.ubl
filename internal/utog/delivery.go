@@ -7,27 +7,32 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func ParseUtoGDelivery(inv *bill.Invoice, doc *structs.XMLDoc) *bill.Delivery {
+func ParseUtoGDelivery(inv *bill.Invoice, doc *structs.Invoice) *bill.Delivery {
 	delivery := &bill.Delivery{}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty != nil {
-		delivery.Receiver = ParseUtoGParty(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ShipToTradeParty)
-	}
+	if len(doc.Delivery) > 0 {
+		if doc.Delivery[0].DeliveryLocation.Address != nil {
+			delivery.Receiver = &org.Party{
+				Addresses: []*org.Address{
+					parseAddress(doc.Delivery[0].DeliveryLocation.Address),
+				},
+			}
+		}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent != nil &&
-		doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent.OccurrenceDateTime != nil {
-		deliveryDate := ParseDate(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.ActualDeliverySupplyChainEvent.OccurrenceDateTime.DateTimeString)
-		delivery.Date = &deliveryDate
+		if doc.Delivery[0].ActualDeliveryDate != "" {
+			deliveryDate := ParseDate(doc.Delivery[0].ActualDeliveryDate)
+			delivery.Date = &deliveryDate
+		}
 	}
 
 	if delivery.Receiver != nil || delivery.Date != nil {
 		return delivery
 	}
 
-	if doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DeliveryNoteReferencedDocument != nil {
+	if doc.DeliveryTerms != nil {
 		delivery.Identities = []*org.Identity{
 			{
-				Code: cbc.Code(doc.SupplyChainTradeTransaction.ApplicableHeaderTradeDelivery.DeliveryNoteReferencedDocument.IssuerAssignedID),
+				Code: cbc.Code(doc.DeliveryTerms.ID),
 			},
 		}
 	}
