@@ -17,14 +17,24 @@ func (c *Conversor) getPayment(doc *Document) error {
 
 	if len(doc.PaymentTerms) > 0 {
 		payment.Terms = &pay.Terms{}
-		var notes []string
+		notes := make([]string, 0)
 		for _, term := range doc.PaymentTerms {
-			if term.Note != "" {
-				notes = append(notes, term.Note)
+			for _, note := range term.Note {
+				notes = append(notes, string(note))
 			}
 		}
 		if len(notes) > 0 {
 			payment.Terms.Notes = strings.Join(notes, " ")
+		}
+		if doc.DueDate != nil {
+			d, err := ParseDate(*doc.DueDate)
+			if err != nil {
+				return err
+			}
+			payment.Terms.DueDates = make([]*pay.DueDate, 0)
+			payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
+				Date: &d,
+			})
 		}
 	}
 

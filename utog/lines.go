@@ -1,7 +1,6 @@
 package utog
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -114,7 +113,6 @@ func (c *Conversor) getLines(doc *Document) error {
 		lines = append(lines, line)
 	}
 	c.inv.Lines = lines
-	fmt.Println(c.inv.Lines)
 	return nil
 }
 

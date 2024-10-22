@@ -2,7 +2,6 @@ package utog
 
 import (
 	"encoding/xml"
-	"fmt"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
@@ -49,7 +48,7 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 
 func (c *Conversor) NewInvoice(doc *Document) error {
 
-	inv := &bill.Invoice{
+	c.inv = &bill.Invoice{
 		Code:     cbc.Code(doc.ID),
 		Type:     cbc.Key(*doc.InvoiceTypeCode),
 		Currency: currency.Code(*doc.DocumentCurrencyCode),
@@ -61,13 +60,12 @@ func (c *Conversor) NewInvoice(doc *Document) error {
 	if err != nil {
 		return err
 	}
-	inv.IssueDate = issueDate
+	c.inv.IssueDate = issueDate
 
 	err = c.getLines(doc)
 	if err != nil {
 		return err
 	}
-	fmt.Println(inv.Lines)
 
 	err = c.getPayment(doc)
 	if err != nil {
@@ -85,17 +83,17 @@ func (c *Conversor) NewInvoice(doc *Document) error {
 	}
 
 	if len(doc.Note) > 0 {
-		inv.Notes = make([]*cbc.Note, 0, len(doc.Note))
+		c.inv.Notes = make([]*cbc.Note, 0, len(doc.Note))
 		for _, note := range doc.Note {
 			n := &cbc.Note{
 				Text: note,
 			}
-			inv.Notes = append(inv.Notes, n)
+			c.inv.Notes = append(c.inv.Notes, n)
 		}
 	}
 
 	if len(doc.BillingReference) > 0 {
-		inv.Preceding = make([]*org.DocumentRef, 0, len(doc.BillingReference))
+		c.inv.Preceding = make([]*org.DocumentRef, 0, len(doc.BillingReference))
 		for _, ref := range doc.BillingReference {
 			docRef := &org.DocumentRef{
 				Code: cbc.Code(ref.InvoiceDocumentReference.ID),
@@ -107,19 +105,19 @@ func (c *Conversor) NewInvoice(doc *Document) error {
 				}
 				docRef.IssueDate = &refDate
 			}
-			inv.Preceding = append(inv.Preceding, docRef)
+			c.inv.Preceding = append(c.inv.Preceding, docRef)
 		}
 	}
 
 	if doc.TaxRepresentativeParty != nil {
 		// Move the original seller to the ordering.seller party
-		if inv.Ordering == nil {
-			inv.Ordering = &bill.Ordering{}
+		if c.inv.Ordering == nil {
+			c.inv.Ordering = &bill.Ordering{}
 		}
-		inv.Ordering.Seller = inv.Supplier
+		c.inv.Ordering.Seller = c.inv.Supplier
 
 		// Overwrite the seller field with the tax representative
-		inv.Supplier = c.getParty(doc.TaxRepresentativeParty)
+		c.inv.Supplier = c.getParty(doc.TaxRepresentativeParty)
 	}
 
 	if len(doc.AllowanceCharge) > 0 {
@@ -128,6 +126,5 @@ func (c *Conversor) NewInvoice(doc *Document) error {
 			return err
 		}
 	}
-
 	return nil
 }

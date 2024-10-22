@@ -140,8 +140,9 @@ type Identification struct {
 }
 
 type IDType struct {
-	SchemeID string `xml:"schemeID,attr"`
-	Value    string `xml:",chardata"`
+	SchemeID   *string `xml:"schemeID,attr"`
+	SchemeName *string `xml:"schemeName,attr"`
+	Value      string  `xml:",chardata"`
 }
 
 type PartyName struct {
@@ -222,7 +223,7 @@ type Branch struct {
 }
 
 type PaymentTerms struct {
-	Note string `xml:"Note"`
+	Note []string `xml:"Note"`
 }
 
 type PrepaidPayment struct {

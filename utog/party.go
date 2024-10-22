@@ -14,8 +14,8 @@ var onlyDigitsRegex = regexp.MustCompile(`\D`)
 func (c *Conversor) getParty(party *Party) *org.Party {
 	p := &org.Party{}
 
-	if party.PartyName != nil {
-		p.Name = party.PartyName.Name
+	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
+		p.Name = *party.PartyLegalEntity.RegistrationName
 	}
 
 	if party.Contact != nil && party.Contact.Name != nil {
@@ -69,6 +69,20 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 					}
 					p.Identities = append(p.Identities, identity)
 				}
+			}
+		}
+	}
+
+	if party.PartyIdentification != nil {
+		for i, id := range party.PartyIdentification {
+			p.Identities = append(p.Identities, &org.Identity{
+				Code: cbc.Code(id.ID.Value),
+			})
+			if id.ID.SchemeID != nil {
+				p.Identities[i].Label = *id.ID.SchemeID
+			}
+			if id.ID.SchemeName != nil {
+				p.Identities[i].Label = *id.ID.SchemeName
 			}
 		}
 	}
