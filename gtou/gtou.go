@@ -6,6 +6,8 @@ import (
 	"github.com/invopop/gobl"
 )
 
+//TODO
+
 type Conversor struct {
 	doc *Document
 }
