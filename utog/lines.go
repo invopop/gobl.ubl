@@ -47,10 +47,11 @@ func (c *Conversor) getLines(invoice *Document) error {
 			line.Item.Unit = UnitFromUNECE(cbc.Code(item.InvoicedQuantity.UnitCode))
 		}
 
-		if item.Item.SellersItemIdentification.ID != nil {
+		if item.Item.SellersItemIdentification != nil && item.Item.SellersItemIdentification.ID != nil {
 			line.Item.Ref = *item.Item.SellersItemIdentification.ID
 		}
-		if item.Item.BuyersItemIdentification.ID != nil {
+
+		if item.Item.BuyersItemIdentification != nil && item.Item.BuyersItemIdentification.ID != nil {
 			if line.Item.Identities == nil {
 				line.Item.Identities = make([]*org.Identity, 0)
 			}
@@ -59,7 +60,7 @@ func (c *Conversor) getLines(invoice *Document) error {
 			})
 		}
 
-		if item.Item.StandardItemIdentification.ID != nil {
+		if item.Item.StandardItemIdentification != nil && item.Item.StandardItemIdentification.ID != nil {
 			if line.Item.Identities == nil {
 				line.Item.Identities = make([]*org.Identity, 0)
 			}

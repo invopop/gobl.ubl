@@ -58,7 +58,7 @@ const (
 
 // Convert a date string to a cal.Date
 func ParseDate(date string) (cal.Date, error) {
-	t, err := time.Parse("20060102", date)
+	t, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return cal.Date{}, err
 	}

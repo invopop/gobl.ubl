@@ -15,8 +15,8 @@ func TestParseDate(t *testing.T) {
 		expected    string
 		expectError bool
 	}{
-		{"Valid date", "20230515", "2023-05-15", false},
-		{"Invalid date", "20231345", "", true},
+		{"Valid date", "2023-05-15", "2023-05-15", false},
+		{"Invalid date", "2023-13-45", "", true},
 		{"Empty string", "", "", true},
 	}
 

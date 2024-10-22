@@ -12,8 +12,10 @@ import (
 var onlyDigitsRegex = regexp.MustCompile(`\D`)
 
 func (c *Conversor) getParty(party *Party) *org.Party {
-	p := &org.Party{
-		Name: party.PartyName.Name,
+	p := &org.Party{}
+
+	if party.PartyName != nil {
+		p.Name = party.PartyName.Name
 	}
 
 	if party.Contact != nil && party.Contact.Name != nil {

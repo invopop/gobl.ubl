@@ -79,7 +79,7 @@ func parsePaymentMeans(paymentMeans *PaymentMeans) *pay.Instructions {
 				instructions.CreditTransfer[0].Name = *account.Name
 			}
 		}
-		if paymentMeans.PayeeFinancialAccount != nil {
+		if paymentMeans.PayeeFinancialAccount != nil && paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
 			if paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID != nil {
 				if len(instructions.CreditTransfer) > 0 {
 					instructions.CreditTransfer[0].BIC = *paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID
