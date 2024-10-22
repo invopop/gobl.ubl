@@ -13,9 +13,10 @@ func TestParseUtoGDelivery(t *testing.T) {
 		require.NoError(t, err)
 
 		conversor := NewConversor()
-		inv, err := conversor.NewInvoice(doc)
+		err = conversor.NewInvoice(doc)
 		require.NoError(t, err)
 
+		inv := conversor.GetInvoice()
 		assert.NotNil(t, inv.Delivery)
 	})
 
@@ -24,9 +25,10 @@ func TestParseUtoGDelivery(t *testing.T) {
 		require.NoError(t, err)
 
 		conversor := NewConversor()
-		inv, err := conversor.NewInvoice(doc)
+		err = conversor.NewInvoice(doc)
 		require.NoError(t, err)
 
+		inv := conversor.GetInvoice()
 		assert.NotNil(t, inv.Delivery)
 	})
 
@@ -35,9 +37,10 @@ func TestParseUtoGDelivery(t *testing.T) {
 		require.NoError(t, err)
 
 		conversor := NewConversor()
-		inv, err := conversor.NewInvoice(doc)
+		err = conversor.NewInvoice(doc)
 		require.NoError(t, err)
 
+		inv := conversor.GetInvoice()
 		assert.NotNil(t, inv.Delivery)
 	})
 

@@ -13,9 +13,9 @@ func TestParseCtoGPayment(t *testing.T) {
 	require.NoError(t, err)
 
 	conversor := NewConversor()
-	inv, err := conversor.NewInvoice(doc)
+	err = conversor.NewInvoice(doc)
 	require.NoError(t, err)
-	payment := inv.Payment
+	payment := conversor.GetInvoice().Payment
 	assert.NotNil(t, payment)
 
 }

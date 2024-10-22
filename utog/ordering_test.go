@@ -13,9 +13,9 @@ func TestParseUtoGOrdering(t *testing.T) {
 		require.NoError(t, err)
 
 		conversor := NewConversor()
-		inv, err := conversor.NewInvoice(doc)
+		err = conversor.NewInvoice(doc)
 		require.NoError(t, err)
-		ordering := inv.Ordering
+		ordering := conversor.GetInvoice().Ordering
 		assert.NotNil(t, ordering)
 	})
 

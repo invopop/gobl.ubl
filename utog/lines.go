@@ -1,6 +1,7 @@
 package utog
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -11,9 +12,8 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// ParseUtoGLines parses the XML information for Lines objects from the entire invoice
-func (c *Conversor) getLines(invoice *Document) error {
-	items := invoice.InvoiceLine
+func (c *Conversor) getLines(doc *Document) error {
+	items := doc.InvoiceLine
 
 	lines := make([]*bill.Line, 0, len(items))
 
@@ -114,6 +114,7 @@ func (c *Conversor) getLines(invoice *Document) error {
 		lines = append(lines, line)
 	}
 	c.inv.Lines = lines
+	fmt.Println(c.inv.Lines)
 	return nil
 }
 

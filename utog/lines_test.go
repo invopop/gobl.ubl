@@ -15,9 +15,10 @@ func TestParseUtoGLines(t *testing.T) {
 		require.NoError(t, err)
 
 		conversor := NewConversor()
-		inv, err := conversor.NewInvoice(doc)
+		err = conversor.NewInvoice(doc)
 		require.NoError(t, err)
 
+		inv := conversor.GetInvoice()
 		lines := inv.Lines
 		assert.NotNil(t, lines)
 		require.Len(t, lines, 2)

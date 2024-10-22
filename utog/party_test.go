@@ -12,13 +12,13 @@ func TestParseUtoGParty(t *testing.T) {
 		doc, err := LoadTestXMLDoc("UBL_example1.xml")
 		require.NoError(t, err)
 		conversor := NewConversor()
-		inv, err := conversor.NewInvoice(doc)
+		err = conversor.NewInvoice(doc)
 		require.NoError(t, err)
 
-		supplier := inv.Supplier
+		supplier := conversor.GetInvoice().Supplier
 		require.NotNil(t, supplier)
 
-		customer := inv.Customer
+		customer := conversor.GetInvoice().Customer
 		require.NotNil(t, customer)
 	})
 }

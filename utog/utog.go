@@ -2,6 +2,7 @@ package utog
 
 import (
 	"encoding/xml"
+	"fmt"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
@@ -10,40 +11,43 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
+// Conversor is a struct that contains the necessary elements to convert between GOBL and UBL
 type Conversor struct {
-	doc *Document
 	inv *bill.Invoice
+	doc *Document
 }
 
+// NewConversor Builder function
 func NewConversor() *Conversor {
 	c := new(Conversor)
-	c.doc = new(Document)
 	c.inv = new(bill.Invoice)
+	c.doc = new(Document)
 	return c
 }
 
+// GetInvoice returns the invoice from the conversor
 func (c *Conversor) GetInvoice() *bill.Invoice {
 	return c.inv
 }
 
+// ConvertToGOBL converts a UBL document into a GOBL envelope
 func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 	if err := xml.Unmarshal(xmlData, &c.doc); err != nil {
 		return nil, err
 	}
 
-	inv, err := c.NewInvoice(c.doc)
-
+	err := c.NewInvoice(c.doc)
 	if err != nil {
 		return nil, err
 	}
-	env, err := gobl.Envelop(inv)
+	env, err := gobl.Envelop(c.inv)
 	if err != nil {
 		return nil, err
 	}
 	return env, nil
 }
 
-func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
+func (c *Conversor) NewInvoice(doc *Document) error {
 
 	inv := &bill.Invoice{
 		Code:     cbc.Code(doc.ID),
@@ -55,28 +59,29 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 
 	issueDate, err := ParseDate(*doc.IssueDate)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	inv.IssueDate = issueDate
 
 	err = c.getLines(doc)
 	if err != nil {
-		return nil, err
+		return err
 	}
+	fmt.Println(inv.Lines)
 
 	err = c.getPayment(doc)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = c.getOrdering(doc)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = c.getDelivery(doc)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if len(doc.Note) > 0 {
@@ -98,7 +103,7 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 			if ref.InvoiceDocumentReference.IssueDate != nil {
 				refDate, err := ParseDate(*ref.InvoiceDocumentReference.IssueDate)
 				if err != nil {
-					return nil, err
+					return err
 				}
 				docRef.IssueDate = &refDate
 			}
@@ -120,9 +125,9 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 	if len(doc.AllowanceCharge) > 0 {
 		err := c.getCharges(doc)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return inv, nil
+	return nil
 }

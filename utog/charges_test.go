@@ -13,9 +13,10 @@ func TestParseUtoGCharges(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)
 		c := NewConversor()
-		inv, err := c.NewInvoice(doc)
+		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 
+		inv := c.GetInvoice()
 		charges := inv.Charges
 		discounts := inv.Discounts
 
