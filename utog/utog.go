@@ -50,7 +50,7 @@ func (c *Conversor) NewInvoice(doc *Document) error {
 
 	c.inv = &bill.Invoice{
 		Code:     cbc.Code(doc.ID),
-		Type:     cbc.Key(*doc.InvoiceTypeCode),
+		Type:     TypeCodeParse(*doc.InvoiceTypeCode),
 		Currency: currency.Code(*doc.DocumentCurrencyCode),
 		Supplier: c.getParty(&doc.AccountingSupplierParty.Party),
 		Customer: c.getParty(&doc.AccountingCustomerParty.Party),

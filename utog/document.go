@@ -223,7 +223,10 @@ type Branch struct {
 }
 
 type PaymentTerms struct {
-	Note []string `xml:"Note"`
+	Note           []string `xml:"Note"`
+	Amount         *Amount  `xml:"Amount"`
+	PaymentPercent *string  `xml:"PaymentPercent"`
+	PaymentDueDate *string  `xml:"PaymentDueDate"`
 }
 
 type PrepaidPayment struct {

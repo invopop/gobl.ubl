@@ -76,20 +76,6 @@ func (c *Conversor) getLines(doc *Document) error {
 			line.Item.Origin = l10n.ISOCountryCode(item.Item.OriginCountry.IdentificationCode)
 		}
 
-		// if len(item.AssociatedDocumentLineDocument.IncludedNote) > 0 {
-		// 	line.Notes = make([]*cbc.Note, 0, len(item.AssociatedDocumentLineDocument.IncludedNote))
-		// 	for _, note := range item.AssociatedDocumentLineDocument.IncludedNote {
-		// 		n := &cbc.Note{}
-		// 		if note.Content != "" {
-		// 			n.Text = note.Content
-		// 		}
-		// 		if note.ContentCode != "" {
-		// 			n.Code = note.ContentCode
-		// 		}
-		// 		line.Notes = append(line.Notes, n)
-		// 	}
-		// }
-
 		if item.Item.ClassifiedTaxCategory != nil && item.Item.ClassifiedTaxCategory.Percent != "" {
 			percentStr := item.Item.ClassifiedTaxCategory.Percent
 			if !strings.HasSuffix(percentStr, "%") {

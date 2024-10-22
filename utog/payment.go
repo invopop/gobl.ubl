@@ -22,6 +22,15 @@ func (c *Conversor) getPayment(doc *Document) error {
 			for _, note := range term.Note {
 				notes = append(notes, string(note))
 			}
+			if term.Amount != nil {
+				amount, err := num.AmountFromString(term.Amount.Value)
+				if err != nil {
+					return err
+				}
+				payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
+					Amount: amount,
+				})
+			}
 		}
 		if len(notes) > 0 {
 			payment.Terms.Notes = strings.Join(notes, " ")
@@ -35,6 +44,14 @@ func (c *Conversor) getPayment(doc *Document) error {
 			payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
 				Date: &d,
 			})
+		}
+		// If there's only one due date, set its percent to 100
+		if len(payment.Terms.DueDates) == 1 {
+			percent, err := num.PercentageFromString("100%")
+			if err != nil {
+				return err
+			}
+			payment.Terms.DueDates[0].Percent = &percent
 		}
 	}
 
