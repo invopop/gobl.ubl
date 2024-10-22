@@ -1,13 +1,12 @@
-package ubl
+package utog
 
 import (
-	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
 
-func ParseUtoGDelivery(inv *bill.Invoice, doc *structs.Invoice) *bill.Delivery {
+func (c *Conversor) getDelivery(doc *Document) error {
 	delivery := &bill.Delivery{}
 
 	if len(doc.Delivery) > 0 {
@@ -20,13 +19,12 @@ func ParseUtoGDelivery(inv *bill.Invoice, doc *structs.Invoice) *bill.Delivery {
 		}
 
 		if doc.Delivery[0].ActualDeliveryDate != "" {
-			deliveryDate := ParseDate(doc.Delivery[0].ActualDeliveryDate)
+			deliveryDate, err := ParseDate(doc.Delivery[0].ActualDeliveryDate)
+			if err != nil {
+				return err
+			}
 			delivery.Date = &deliveryDate
 		}
-	}
-
-	if delivery.Receiver != nil || delivery.Date != nil {
-		return delivery
 	}
 
 	if doc.DeliveryTerms != nil {
@@ -38,7 +36,7 @@ func ParseUtoGDelivery(inv *bill.Invoice, doc *structs.Invoice) *bill.Delivery {
 	}
 
 	if delivery.Receiver != nil || delivery.Date != nil || delivery.Identities != nil {
-		return delivery
+		c.inv.Delivery = delivery
 	}
 	return nil
 }

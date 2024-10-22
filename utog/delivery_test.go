@@ -1,10 +1,8 @@
-package ubl_test
+package utog
 
 import (
 	"testing"
 
-	ubl "github.com/invopop/gobl.ubl"
-	"github.com/invopop/gobl.ubl/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
@@ -13,10 +11,11 @@ import (
 
 func TestParseUtoGDelivery(t *testing.T) {
 	t.Run("UBL_example1.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example1.xml")
+		doc, err := LoadTestXMLDoc("UBL_example1.xml")
 		require.NoError(t, err)
 
-		goblEnv, err := ubl.NewGOBLFromUBL(doc)
+		conversor := NewConversor()
+		goblEnv, err := conversor.ConvertToGOBL(doc)
 		require.NoError(t, err)
 
 		invoice, ok := goblEnv.Extract().(*bill.Invoice)
@@ -34,10 +33,11 @@ func TestParseUtoGDelivery(t *testing.T) {
 	})
 
 	t.Run("UBL_example2.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example2.xml")
+		doc, err := LoadTestXMLDoc("UBL_example2.xml")
 		require.NoError(t, err)
 
-		goblEnv, err := ubl.NewGOBLFromUBL(doc)
+		conversor := NewConversor()
+		goblEnv, err := conversor.ConvertToGOBL(doc)
 		require.NoError(t, err)
 
 		invoice, ok := goblEnv.Extract().(*bill.Invoice)

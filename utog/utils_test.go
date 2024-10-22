@@ -1,9 +1,8 @@
-package ubl_test
+package utog
 
 import (
 	"testing"
 
-	utog "github.com/invopop/gobl.ubl/internal/utog"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 )
@@ -11,19 +10,26 @@ import (
 // Define tests for the ParseDate function
 func TestParseDate(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		expected string
+		name        string
+		input       string
+		expected    string
+		expectError bool
 	}{
-		{"Valid date", "20230515", "2023-05-15"},
-		{"Invalid date", "20231345", "0000-00-00"},
-		{"Empty string", "", "0000-00-00"},
+		{"Valid date", "20230515", "2023-05-15", false},
+		{"Invalid date", "20231345", "", true},
+		{"Empty string", "", "", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := utog.ParseDate(tt.input)
-			assert.Equal(t, tt.expected, result.String())
+			result, err := ParseDate(tt.input)
+			if tt.expectError {
+				assert.Error(t, err)
+				assert.Empty(t, result)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.expected, result.String())
+			}
 		})
 	}
 }
@@ -43,7 +49,7 @@ func TestFindTaxKey(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := utog.FindTaxKey(tt.input)
+			result := FindTaxKey(tt.input)
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}
@@ -66,7 +72,7 @@ func TestTypeCodeParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := utog.TypeCodeParse(tt.input)
+			result := TypeCodeParse(tt.input)
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}
@@ -88,7 +94,7 @@ func TestUnitFromUNECE(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := utog.UnitFromUNECE(cbc.Code(tt.input))
+			result := UnitFromUNECE(cbc.Code(tt.input))
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}

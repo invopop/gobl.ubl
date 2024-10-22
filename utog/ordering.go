@@ -1,29 +1,37 @@
-package ubl
+package utog
 
 import (
-	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
 
-func ParseUtoGOrdering(inv *bill.Invoice, doc *structs.Invoice) *bill.Ordering {
+func (c *Conversor) getOrdering(doc *Document) error {
 	ordering := &bill.Ordering{}
 
 	if doc.OrderReference != nil && doc.OrderReference.ID != "" {
 		ordering.Code = cbc.Code(doc.OrderReference.ID)
 	}
 
+	// GOBL does not currently support multiple periods, so only the first one is taken
 	if doc.InvoicePeriod != nil {
 		period := &cal.Period{}
 
-		if doc.InvoicePeriod.StartDate != "" {
-			period.Start = ParseDate(doc.InvoicePeriod.StartDate)
+		if doc.InvoicePeriod[0].StartDate != nil {
+			start, err := ParseDate(*doc.InvoicePeriod[0].StartDate)
+			if err != nil {
+				return err
+			}
+			period.Start = start
 		}
 
-		if doc.InvoicePeriod.EndDate != "" {
-			period.End = ParseDate(doc.InvoicePeriod.EndDate)
+		if doc.InvoicePeriod[0].EndDate != nil {
+			end, err := ParseDate(*doc.InvoicePeriod[0].EndDate)
+			if err != nil {
+				return err
+			}
+			period.End = end
 		}
 
 		ordering.Period = period

@@ -2,13 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"io"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ubl"
-	"github.com/invopop/gobl.ubl/structs"
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/spf13/cobra"
 )
 
@@ -54,7 +52,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 
 	// Check if input is JSON or XML
 	isJSON := json.Valid(inData)
-
+	conversor := ubl.NewConversor()
 	var outputData []byte
 
 	if isJSON {
@@ -62,23 +60,19 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		if err := json.Unmarshal(inData, env); err != nil {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
 		}
-		doc, err := ubl.NewDocument(env)
+		doc, err := conversor.ConvertToUBL(env)
 		if err != nil {
 			return fmt.Errorf("building UBL document: %w", err)
 		}
 
 		outputData, err = doc.Bytes()
 		if err != nil {
-			return fmt.Errorf("generating XRechnung and Factur-X xml: %w", err)
+			return fmt.Errorf("generating UBL xml: %w", err)
 		}
 	} else {
 		// Assume XML if not JSON
-		doc := new(structs.Invoice)
-		if err := xml.Unmarshal(inData, doc); err != nil {
-			return fmt.Errorf("parsing input document: %w", err)
-		}
 
-		env, err := ubl.NewGOBLFromUBL(doc)
+		env, err := conversor.ConvertToGOBL(inData)
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}

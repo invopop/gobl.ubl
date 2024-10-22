@@ -1,60 +1,63 @@
-package structs
+package utog
 
 import (
 	"encoding/xml"
 )
 
-type Invoice struct {
+type Document struct {
 	XMLName                        xml.Name            `xml:"Invoice"`
-	Extensions                     *Extensions         `xml:"Extensions,omitempty"`
-	VersionID                      string              `xml:"VersionID"`
-	CustomizationID                string              `xml:"CustomizationID"`
-	ProfileID                      string              `xml:"ProfileID"`
-	ProfileExecutionID             string              `xml:"ProfileExecutionID"`
+	UBLExtensions                  *Extensions         `xml:"UBLExtensions,omitempty"`
+	UBLVersionID                   *string             `xml:"UBLVersionID,omitempty"`
+	CustomizationID                *string             `xml:"CustomizationID,omitempty"`
+	ProfileID                      *string             `xml:"ProfileID,omitempty"`
+	ProfileExecutionID             *string             `xml:"ProfileExecutionID,omitempty"`
 	ID                             string              `xml:"ID"`
-	CopyIndicator                  bool                `xml:"CopyIndicator"`
-	UUID                           string              `xml:"UUID"`
-	IssueDate                      string              `xml:"IssueDate"`
-	IssueTime                      string              `xml:"IssueTime"`
-	DueDate                        string              `xml:"DueDate"`
-	InvoiceTypeCode                string              `xml:"InvoiceTypeCode"`
-	Note                           []string            `xml:"Note"`
-	TaxPointDate                   string              `xml:"TaxPointDate"`
-	DocumentCurrencyCode           string              `xml:"DocumentCurrencyCode"`
-	TaxCurrencyCode                string              `xml:"TaxCurrencyCode"`
-	PricingCurrencyCode            string              `xml:"PricingCurrencyCode"`
-	PaymentCurrencyCode            string              `xml:"PaymentCurrencyCode"`
-	PaymentAlternativeCurrencyCode string              `xml:"PaymentAlternativeCurrencyCode"`
-	AccountingCost                 string              `xml:"AccountingCost"`
-	LineCountNumeric               int                 `xml:"LineCountNumeric"`
-	BuyerReference                 string              `xml:"BuyerReference"`
-	InvoicePeriod                  *Period             `xml:"InvoicePeriod"`
-	OrderReference                 *OrderReference     `xml:"OrderReference"`
-	BillingReference               *BillingReference   `xml:"BillingReference"`
-	DespatchDocumentReference      *DocumentReference  `xml:"DespatchDocumentReference"`
-	ReceiptDocumentReference       *DocumentReference  `xml:"ReceiptDocumentReference"`
-	OriginatorDocumentReference    *DocumentReference  `xml:"OriginatorDocumentReference"`
-	ContractDocumentReference      *DocumentReference  `xml:"ContractDocumentReference"`
-	AdditionalDocumentReference    []DocumentReference `xml:"AdditionalDocumentReference"`
-	ProjectReference               *ProjectReference   `xml:"ProjectReference"`
+	CopyIndicator                  *bool               `xml:"CopyIndicator,omitempty"`
+	UUID                           *string             `xml:"UUID,omitempty"`
+	IssueDate                      *string             `xml:"IssueDate"`
+	IssueTime                      *string             `xml:"IssueTime,omitempty"`
+	DueDate                        *string             `xml:"DueDate,omitempty"`
+	InvoiceTypeCode                *string             `xml:"InvoiceTypeCode,omitempty"`
+	Note                           []string            `xml:"Note,omitempty"`
+	TaxPointDate                   *string             `xml:"TaxPointDate,omitempty"`
+	DocumentCurrencyCode           *string             `xml:"DocumentCurrencyCode,omitempty"`
+	TaxCurrencyCode                *string             `xml:"TaxCurrencyCode,omitempty"`
+	PricingCurrencyCode            *string             `xml:"PricingCurrencyCode,omitempty"`
+	PaymentCurrencyCode            *string             `xml:"PaymentCurrencyCode,omitempty"`
+	PaymentAlternativeCurrencyCode *string             `xml:"PaymentAlternativeCurrencyCode,omitempty"`
+	AccountingCostCode             *string             `xml:"AccountingCostCode,omitempty"`
+	AccountingCost                 *string             `xml:"AccountingCost,omitempty"`
+	LineCountNumeric               *int                `xml:"LineCountNumeric,omitempty"`
+	BuyerReference                 *string             `xml:"BuyerReference,omitempty"`
+	InvoicePeriod                  []Period            `xml:"InvoicePeriod,omitempty"`
+	OrderReference                 *OrderReference     `xml:"OrderReference,omitempty"`
+	BillingReference               []BillingReference  `xml:"BillingReference,omitempty"`
+	DespatchDocumentReference      []DocumentReference `xml:"DespatchDocumentReference,omitempty"`
+	ReceiptDocumentReference       []DocumentReference `xml:"ReceiptDocumentReference,omitempty"`
+	StatementDocumentReference     []DocumentReference `xml:"StatementDocumentReference,omitempty"`
+	OriginatorDocumentReference    []DocumentReference `xml:"OriginatorDocumentReference,omitempty"`
+	ContractDocumentReference      []DocumentReference `xml:"ContractDocumentReference,omitempty"`
+	AdditionalDocumentReference    []DocumentReference `xml:"AdditionalDocumentReference,omitempty"`
+	ProjectReference               []ProjectReference  `xml:"ProjectReference,omitempty"`
+	Signature                      []Signature         `xml:"Signature,omitempty"`
 	AccountingSupplierParty        SupplierParty       `xml:"AccountingSupplierParty"`
 	AccountingCustomerParty        CustomerParty       `xml:"AccountingCustomerParty"`
-	PayeeParty                     *Party              `xml:"PayeeParty"`
-	BuyerCustomerParty             *CustomerParty      `xml:"BuyerCustomerParty"`
-	SellerSupplierParty            *SupplierParty      `xml:"SellerSupplierParty"`
-	TaxRepresentativeParty         *Party              `xml:"TaxRepresentativeParty"`
-	Delivery                       []Delivery          `xml:"Delivery"`
-	DeliveryTerms                  *DeliveryTerms      `xml:"DeliveryTerms"`
-	PaymentMeans                   []PaymentMeans      `xml:"PaymentMeans"`
-	PaymentTerms                   []PaymentTerms      `xml:"PaymentTerms"`
-	PrepaidPayment                 *PrepaidPayment     `xml:"PrepaidPayment"`
-	AllowanceCharge                []AllowanceCharge   `xml:"AllowanceCharge"`
-	TaxExchangeRate                *ExchangeRate       `xml:"TaxExchangeRate"`
-	PricingExchangeRate            *ExchangeRate       `xml:"PricingExchangeRate"`
-	PaymentExchangeRate            *ExchangeRate       `xml:"PaymentExchangeRate"`
-	PaymentAlternativeExchangeRate *ExchangeRate       `xml:"PaymentAlternativeExchangeRate"`
-	TaxTotal                       []TaxTotal          `xml:"TaxTotal"`
-	WithholdingTaxTotal            []TaxTotal          `xml:"WithholdingTaxTotal"`
+	PayeeParty                     *Party              `xml:"PayeeParty,omitempty"`
+	BuyerCustomerParty             *CustomerParty      `xml:"BuyerCustomerParty,omitempty"`
+	SellerSupplierParty            *SupplierParty      `xml:"SellerSupplierParty,omitempty"`
+	TaxRepresentativeParty         *Party              `xml:"TaxRepresentativeParty,omitempty"`
+	Delivery                       []Delivery          `xml:"Delivery,omitempty"`
+	DeliveryTerms                  *DeliveryTerms      `xml:"DeliveryTerms,omitempty"`
+	PaymentMeans                   []PaymentMeans      `xml:"PaymentMeans,omitempty"`
+	PaymentTerms                   []PaymentTerms      `xml:"PaymentTerms,omitempty"`
+	PrepaidPayment                 []PrepaidPayment    `xml:"PrepaidPayment,omitempty"`
+	AllowanceCharge                []AllowanceCharge   `xml:"AllowanceCharge,omitempty"`
+	TaxExchangeRate                *ExchangeRate       `xml:"TaxExchangeRate,omitempty"`
+	PricingExchangeRate            *ExchangeRate       `xml:"PricingExchangeRate,omitempty"`
+	PaymentExchangeRate            *ExchangeRate       `xml:"PaymentExchangeRate,omitempty"`
+	PaymentAlternativeExchangeRate *ExchangeRate       `xml:"PaymentAlternativeExchangeRate,omitempty"`
+	TaxTotal                       []TaxTotal          `xml:"TaxTotal,omitempty"`
+	WithholdingTaxTotal            []TaxTotal          `xml:"WithholdingTaxTotal,omitempty"`
 	LegalMonetaryTotal             MonetaryTotal       `xml:"LegalMonetaryTotal"`
 	InvoiceLine                    []InvoiceLine       `xml:"InvoiceLine"`
 }
@@ -64,19 +67,21 @@ type Extensions struct {
 }
 
 type Extension struct {
-	ExtensionURI     string `xml:"ExtensionURI"`
-	ExtensionContent string `xml:"ExtensionContent"`
+	ID               *string `xml:"ID"`
+	ExtensionURI     *string `xml:"ExtensionURI"`
+	ExtensionContent string  `xml:"ExtensionContent"`
 }
 
 type Period struct {
-	StartDate string `xml:"StartDate"`
-	EndDate   string `xml:"EndDate"`
+	StartDate *string `xml:"StartDate"`
+	EndDate   *string `xml:"EndDate"`
 }
 
 type OrderReference struct {
-	ID           string `xml:"ID"`
-	SalesOrderID string `xml:"SalesOrderID"`
-	IssueDate    string `xml:"IssueDate"`
+	ID                string  `xml:"ID"`
+	SalesOrderID      *string `xml:"SalesOrderID"`
+	IssueDate         *string `xml:"IssueDate"`
+	CustomerReference *string `xml:"CustomerReference"`
 }
 
 type BillingReference struct {
@@ -85,7 +90,7 @@ type BillingReference struct {
 
 type DocumentReference struct {
 	ID           string      `xml:"ID"`
-	IssueDate    string      `xml:"IssueDate"`
+	IssueDate    *string     `xml:"IssueDate"`
 	DocumentType string      `xml:"DocumentType"`
 	Attachment   *Attachment `xml:"Attachment"`
 }
@@ -117,10 +122,10 @@ type CustomerParty struct {
 
 type Party struct {
 	EndpointID          *EndpointID       `xml:"EndpointID"`
-	PartyIdentification *[]Identification `xml:"PartyIdentification"`
+	PartyIdentification []Identification  `xml:"PartyIdentification"`
 	PartyName           *PartyName        `xml:"PartyName"`
 	PostalAddress       *PostalAddress    `xml:"PostalAddress"`
-	PartyTaxScheme      *[]PartyTaxScheme `xml:"PartyTaxScheme"`
+	PartyTaxScheme      []PartyTaxScheme  `xml:"PartyTaxScheme"`
 	PartyLegalEntity    *PartyLegalEntity `xml:"PartyLegalEntity"`
 	Contact             *Contact          `xml:"Contact"`
 }
@@ -144,13 +149,13 @@ type PartyName struct {
 }
 
 type PostalAddress struct {
-	StreetName           *string        `xml:"StreetName"`
-	AdditionalStreetName *string        `xml:"AdditionalStreetName"`
-	CityName             *string        `xml:"CityName"`
-	PostalZone           *string        `xml:"PostalZone"`
-	CountrySubentity     *string        `xml:"CountrySubentity"`
-	AddressLine          *[]AddressLine `xml:"AddressLine"`
-	Country              *Country       `xml:"Country"`
+	StreetName           *string       `xml:"StreetName"`
+	AdditionalStreetName *string       `xml:"AdditionalStreetName"`
+	CityName             *string       `xml:"CityName"`
+	PostalZone           *string       `xml:"PostalZone"`
+	CountrySubentity     *string       `xml:"CountrySubentity"`
+	AddressLine          []AddressLine `xml:"AddressLine"`
+	Country              *Country      `xml:"Country"`
 }
 
 type AddressLine struct {
@@ -337,4 +342,17 @@ type Price struct {
 	PriceAmount     Amount          `xml:"PriceAmount"`
 	BaseQuantity    Quantity        `xml:"BaseQuantity"`
 	AllowanceCharge AllowanceCharge `xml:"AllowanceCharge"`
+}
+
+type Signature struct {
+	ID                         string             `xml:"cbc:ID"`
+	Note                       []string           `xml:"cbc:Note,omitempty"`
+	ValidationDate             string             `xml:"cbc:ValidationDate,omitempty"`
+	ValidationTime             string             `xml:"cbc:ValidationTime,omitempty"`
+	ValidatorID                string             `xml:"cbc:ValidatorID,omitempty"`
+	CanonicalizationMethod     string             `xml:"cbc:CanonicalizationMethod,omitempty"`
+	SignatureMethod            string             `xml:"cbc:SignatureMethod,omitempty"`
+	SignatoryParty             *Party             `xml:"cac:SignatoryParty,omitempty"`
+	DigitalSignatureAttachment *Attachment        `xml:"cac:DigitalSignatureAttachment,omitempty"`
+	OriginalDocumentReference  *DocumentReference `xml:"cac:OriginalDocumentReference,omitempty"`
 }

@@ -1,10 +1,8 @@
-package ubl_test
+package utog
 
 import (
 	"testing"
 
-	utog "github.com/invopop/gobl.ubl/internal/utog"
-	"github.com/invopop/gobl.ubl/test"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
@@ -16,10 +14,10 @@ import (
 func TestParseUtoGLines(t *testing.T) {
 	// Basic Invoice 1
 	t.Run("UBL_example1.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example1.xml")
+		doc, err := LoadTestXMLDoc("UBL_example1.xml")
 		require.NoError(t, err)
 
-		lines := utog.ParseUtoGLines(doc)
+		lines := ParseUtoGLines(doc)
 		require.Len(t, lines, 2)
 		priceLine1, _ := num.AmountFromString("5350.00")
 		priceLine2, _ := num.AmountFromString("149.00")
@@ -44,10 +42,10 @@ func TestParseUtoGLines(t *testing.T) {
 
 	//Basic Invoice 2
 	t.Run("UBL_example2.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example2.xml")
+		doc, err := LoadTestXMLDoc("UBL_example2.xml")
 		require.NoError(t, err)
 
-		lines := utog.ParseUtoGLines(doc)
+		lines := ParseUtoGLines(doc)
 		require.Len(t, lines, 20)
 
 		assert.Equal(t, "PATAT FRITES 10MM 10KG", lines[0].Item.Name)
@@ -81,10 +79,10 @@ func TestParseUtoGLines(t *testing.T) {
 
 	// Invoice with Description and Origin Country
 	t.Run("UBL_example3.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example3.xml")
+		doc, err := LoadTestXMLDoc("UBL_example3.xml")
 		require.NoError(t, err)
 
-		lines := utog.ParseUtoGLines(doc)
+		lines := ParseUtoGLines(doc)
 		require.NotEmpty(t, lines)
 
 		assert.Equal(t, "Laptop computer", lines[0].Item.Name)

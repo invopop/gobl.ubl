@@ -1,9 +1,8 @@
-package ubl
+package utog
 
 import (
 	"strings"
 
-	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -13,15 +12,16 @@ import (
 )
 
 // ParseUtoGLines parses the XML information for Lines objects from the entire invoice
-func ParseUtoGLines(invoice *structs.Invoice) []*bill.Line {
-	if invoice == nil || invoice.InvoiceLine == nil {
-		return nil
-	}
+func (c *Conversor) getLines(invoice *Document) error {
+	items := invoice.InvoiceLine
 
-	lines := make([]*bill.Line, 0, len(invoice.InvoiceLine))
+	lines := make([]*bill.Line, 0, len(items))
 
-	for _, item := range invoice.InvoiceLine {
-		price, _ := num.AmountFromString(item.Price.PriceAmount.Value)
+	for _, item := range items {
+		price, err := num.AmountFromString(item.Price.PriceAmount.Value)
+		if err != nil {
+			return err
+		}
 		line := &bill.Line{
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
@@ -37,7 +37,10 @@ func ParseUtoGLines(invoice *structs.Invoice) []*bill.Line {
 		}
 
 		if item.InvoicedQuantity != nil {
-			line.Quantity, _ = num.AmountFromString(item.InvoicedQuantity.Value)
+			line.Quantity, err = num.AmountFromString(item.InvoicedQuantity.Value)
+			if err != nil {
+				return err
+			}
 		}
 
 		if item.InvoicedQuantity.UnitCode != "" {

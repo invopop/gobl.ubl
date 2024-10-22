@@ -1,7 +1,6 @@
-package ubl
+package utog
 
 import (
-	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -9,7 +8,7 @@ import (
 )
 
 // ParseAllowanceCharges extracts the charges logic from the CII document
-func ParseUtoGCharges(doc *structs.Invoice) ([]*bill.Charge, []*bill.Discount) {
+func (c *Conversor) getCharges(doc *Document) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
@@ -21,17 +20,27 @@ func ParseUtoGCharges(doc *structs.Invoice) ([]*bill.Charge, []*bill.Discount) {
 				charge.Reason = *allowanceCharge.AllowanceChargeReason
 			}
 			if allowanceCharge.Amount.Value != "" {
-				charge.Amount, _ = num.AmountFromString(allowanceCharge.Amount.Value)
+				amount, err := num.AmountFromString(allowanceCharge.Amount.Value)
+				if err != nil {
+					return err
+				}
+				charge.Amount = amount
 			}
 			if allowanceCharge.AllowanceChargeReasonCode != nil {
 				charge.Code = *allowanceCharge.AllowanceChargeReasonCode
 			}
 			if allowanceCharge.BaseAmount != nil {
-				basis, _ := num.AmountFromString(allowanceCharge.BaseAmount.Value)
+				basis, err := num.AmountFromString(allowanceCharge.BaseAmount.Value)
+				if err != nil {
+					return err
+				}
 				charge.Base = &basis
 			}
 			if allowanceCharge.MultiplierFactorNumeric != nil {
-				percent, _ := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
+				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
+				if err != nil {
+					return err
+				}
 				charge.Percent = &percent
 			}
 			if allowanceCharge.TaxCategory != nil && allowanceCharge.TaxCategory.TaxScheme != nil {
@@ -42,7 +51,10 @@ func ParseUtoGCharges(doc *structs.Invoice) ([]*bill.Charge, []*bill.Discount) {
 					},
 				}
 				if allowanceCharge.TaxCategory.Percent != nil {
-					percent, _ := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					if err != nil {
+						return err
+					}
 					charge.Taxes[0].Percent = &percent
 				}
 			}
@@ -57,17 +69,27 @@ func ParseUtoGCharges(doc *structs.Invoice) ([]*bill.Charge, []*bill.Discount) {
 				discount.Reason = *allowanceCharge.AllowanceChargeReason
 			}
 			if allowanceCharge.Amount.Value != "" {
-				discount.Amount, _ = num.AmountFromString(allowanceCharge.Amount.Value)
+				amount, err := num.AmountFromString(allowanceCharge.Amount.Value)
+				if err != nil {
+					return err
+				}
+				discount.Amount = amount
 			}
 			if allowanceCharge.AllowanceChargeReasonCode != nil {
 				discount.Code = *allowanceCharge.AllowanceChargeReasonCode
 			}
 			if allowanceCharge.BaseAmount != nil {
-				basis, _ := num.AmountFromString(allowanceCharge.BaseAmount.Value)
+				basis, err := num.AmountFromString(allowanceCharge.BaseAmount.Value)
+				if err != nil {
+					return err
+				}
 				discount.Base = &basis
 			}
 			if allowanceCharge.MultiplierFactorNumeric != nil {
-				percent, _ := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
+				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
+				if err != nil {
+					return err
+				}
 				discount.Percent = &percent
 			}
 			if allowanceCharge.TaxCategory != nil && allowanceCharge.TaxCategory.TaxScheme != nil {
@@ -78,7 +100,10 @@ func ParseUtoGCharges(doc *structs.Invoice) ([]*bill.Charge, []*bill.Discount) {
 					},
 				}
 				if allowanceCharge.TaxCategory.Percent != nil {
-					percent, _ := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					if err != nil {
+						return err
+					}
 					discount.Taxes[0].Percent = &percent
 				}
 			}
@@ -88,6 +113,11 @@ func ParseUtoGCharges(doc *structs.Invoice) ([]*bill.Charge, []*bill.Discount) {
 			discounts = append(discounts, discount)
 		}
 	}
-
-	return charges, discounts
+	if charges != nil {
+		c.inv.Charges = charges
+	}
+	if discounts != nil {
+		c.inv.Discounts = discounts
+	}
+	return nil
 }

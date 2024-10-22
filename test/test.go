@@ -12,7 +12,6 @@ import (
 
 	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
-	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	// "github.com/lestrrat-go/libxml2"
 	// "github.com/lestrrat-go/libxml2/xsd"

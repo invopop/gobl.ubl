@@ -1,10 +1,8 @@
-package ubl_test
+package utog
 
 import (
 	"testing"
 
-	utog "github.com/invopop/gobl.ubl/internal/utog"
-	"github.com/invopop/gobl.ubl/test"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -12,22 +10,22 @@ import (
 
 func TestParseUtoGOrdering(t *testing.T) {
 	t.Run("UBL_example1.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example1.xml")
+		doc, err := LoadTestXMLDoc("UBL_example1.xml")
 		require.NoError(t, err)
 
 		invoice := &bill.Invoice{}
-		ordering := utog.ParseUtoGOrdering(invoice, doc)
+		ordering := ParseUtoGOrdering(invoice, doc)
 
 		require.NotNil(t, ordering, "Ordering should not be nil")
 		assert.Equal(t, "AEG012345", string(ordering.Code), "Order reference should match")
 	})
 
 	t.Run("UBL_example2.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example2.xml")
+		doc, err := LoadTestXMLDoc("UBL_example2.xml")
 		require.NoError(t, err)
 
 		invoice := &bill.Invoice{}
-		ordering := utog.ParseUtoGOrdering(invoice, doc)
+		ordering := ParseUtoGOrdering(invoice, doc)
 
 		require.NotNil(t, ordering, "Ordering should not be nil")
 		assert.Equal(t, "5009567", string(ordering.Code), "Order reference should match")

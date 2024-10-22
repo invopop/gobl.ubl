@@ -1,10 +1,8 @@
-package ubl_test
+package utog
 
 import (
 	"testing"
 
-	utog "github.com/invopop/gobl.ubl/internal/utog"
-	"github.com/invopop/gobl.ubl/test"
 	"github.com/invopop/gobl/num"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,11 +11,14 @@ import (
 func TestParseUtoGCharges(t *testing.T) {
 	// Invoice with Charge
 	t.Run("UBL_example3.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example3.xml")
+		doc, err := LoadTestXMLDoc("UBL_example3.xml")
+		require.NoError(t, err)
+		c := NewConversor()
+		inv, err := c.NewInvoice(doc)
 		require.NoError(t, err)
 
-		charges, discounts := utog.ParseUtoGCharges(doc)
-		require.NotEmpty(t, charges)
+		charges := inv.Charges
+		discounts := inv.Discounts
 
 		// Check if there's a charge in the parsed output
 		require.Len(t, charges, 1)
@@ -31,10 +32,15 @@ func TestParseUtoGCharges(t *testing.T) {
 	})
 	// Invoice with Discount and Charge
 	t.Run("UBL_business_example_02.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_business_example_02.xml")
+		doc, err := LoadTestXMLDoc("UBL_business_example_02.xml")
 		require.NoError(t, err)
 
-		charges, discounts := utog.ParseUtoGCharges(doc)
+		c := NewConversor()
+		inv, err := c.NewInvoice(doc)
+		require.NoError(t, err)
+
+		charges := inv.Charges
+		discounts := inv.Discounts
 
 		// Check if there's a discount in the parsed output
 		require.Len(t, discounts, 1)
@@ -53,10 +59,10 @@ func TestParseUtoGCharges(t *testing.T) {
 
 	// Invoice with Discount and Charge
 	t.Run("UBL_example2.xml", func(t *testing.T) {
-		doc, err := test.LoadTestXMLDoc("UBL_example2.xml")
+		doc, err := LoadTestXMLDoc("UBL_example2.xml")
 		require.NoError(t, err)
 
-		charges, discounts := utog.ParseUtoGCharges(doc)
+		charges, discounts := ParseUtoGCharges(doc)
 
 		require.Len(t, charges, 1)
 		require.Len(t, discounts, 1)
