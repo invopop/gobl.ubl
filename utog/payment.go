@@ -3,18 +3,16 @@ package utog
 import (
 	"strings"
 
-	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
 )
 
-// ParseUtoGPayment parses the UBL XML information for a Payment object
-func ParseUtoGPayment(doc *structs.Invoice) *bill.Payment {
+func (c *Conversor) getPayment(doc *Document) error {
 	payment := &bill.Payment{}
 
 	if doc.PayeeParty != nil {
-		payment.Payee = ParseUtoGParty(doc.PayeeParty)
+		payment.Payee = c.getParty(doc.PayeeParty)
 	}
 
 	if len(doc.PaymentTerms) > 0 {
@@ -31,50 +29,61 @@ func ParseUtoGPayment(doc *structs.Invoice) *bill.Payment {
 	}
 
 	if len(doc.PaymentMeans) > 0 {
-		payment.Instructions = parsePaymentMeans(doc.PaymentMeans[0])
+		payment.Instructions = parsePaymentMeans(&doc.PaymentMeans[0])
 	}
 
-	if doc.PrepaidPayment != nil {
-		advance := &pay.Advance{
-			Amount: num.MakeAmount(doc.PrepaidPayment.PaidAmount, 2),
+	if len(doc.PrepaidPayment) > 0 {
+		payment.Advances = make([]*pay.Advance, 0, len(doc.PrepaidPayment))
+		for _, p := range doc.PrepaidPayment {
+			amount, err := num.AmountFromString(p.PaidAmount.Value)
+			if err != nil {
+				return err
+			}
+			advance := &pay.Advance{
+				Amount: amount,
+			}
+			if p.ReceivedDate != nil {
+				d, err := ParseDate(*p.ReceivedDate)
+				if err != nil {
+					return err
+				}
+				advance.Date = &d
+			}
+			payment.Advances = append(payment.Advances, advance)
 		}
-		if doc.PrepaidPayment.PaidDate != "" {
-			advancePaymentDate := ParseDate(doc.PrepaidPayment.PaidDate)
-			advance.Date = &advancePaymentDate
-		}
-		payment.Advances = []*pay.Advance{advance}
 	}
-
-	return payment
+	c.inv.Payment = payment
+	return nil
 }
 
-func parsePaymentMeans(paymentMeans *structs.PaymentMeans) *pay.Instructions {
+func parsePaymentMeans(paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
 		Key: PaymentMeansTypeCodeParse(paymentMeans.PaymentMeansCode),
 	}
 
-	if paymentMeans.PaymentID != "" {
-		instructions.Detail = paymentMeans.PaymentID
+	if paymentMeans.PaymentID != nil {
+		instructions.Detail = *paymentMeans.PaymentID
 	}
 
 	if paymentMeans.PayeeFinancialAccount != nil {
 		account := paymentMeans.PayeeFinancialAccount
-		if account.ID != "" {
+		if account.ID != nil {
 			instructions.CreditTransfer = []*pay.CreditTransfer{
 				{
-					IBAN: account.ID,
+					IBAN: *account.ID,
 				},
 			}
 		}
-		if account.Name != "" {
+		if account.Name != nil {
 			if len(instructions.CreditTransfer) > 0 {
-				instructions.CreditTransfer[0].Name = account.Name
+				instructions.CreditTransfer[0].Name = *account.Name
 			}
 		}
-		if paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch != nil &&
-			paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID != "" {
-			if len(instructions.CreditTransfer) > 0 {
-				instructions.CreditTransfer[0].BIC = paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID
+		if paymentMeans.PayeeFinancialAccount != nil {
+			if paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID != nil {
+				if len(instructions.CreditTransfer) > 0 {
+					instructions.CreditTransfer[0].BIC = *paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID
+				}
 			}
 		}
 	}

@@ -117,6 +117,9 @@ go test
 There are certain assumptions and lost information in the conversion from UBL to GOBL that should be considered:
 
 1. GOBL does not currently support additional embedded documents, so the AdditionalReferencedDocument field (BG-24 in EN 16931) is not supported and lost in the conversion.
+2. GOBL only supports a single period in the ordering, so only the first InvoicePeriod (BG-14) in the UBL is taken.
+
+
 2. Payment advances do not include their own tax rate, they use the global tax rate of the invoice.
 3. The field TotalPrepaidAmount (BT-113) in CII is not directly mapped to GOBL, so payment advances must be included in the SpecifiedAdvancePayment field in CII, or they will be lost in conversion.
 4. Fields BusinessProcessSpecifiedDocumentContextParameter (BT-10) and GuidelineSpecifiedDocumentContextParameter (BT-11) in CII are not supported and lost in the conversion.

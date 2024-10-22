@@ -3,7 +3,6 @@ package utog
 import (
 	"regexp"
 
-	"github.com/invopop/gobl.ubl/structs"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -12,8 +11,7 @@ import (
 
 var onlyDigitsRegex = regexp.MustCompile(`\D`)
 
-// Parses the XML information for a Party object
-func ParseUtoGParty(party *structs.Party) *org.Party {
+func (c *Conversor) getParty(party *Party) *org.Party {
 	p := &org.Party{
 		Name: party.PartyName.Name,
 	}
@@ -53,7 +51,7 @@ func ParseUtoGParty(party *structs.Party) *org.Party {
 	}
 
 	if party.PartyTaxScheme != nil {
-		for _, taxReg := range *party.PartyTaxScheme {
+		for _, taxReg := range party.PartyTaxScheme {
 			if taxReg.CompanyID != nil {
 				switch *taxReg.TaxScheme.ID {
 				//Source https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
@@ -76,7 +74,7 @@ func ParseUtoGParty(party *structs.Party) *org.Party {
 	return p
 }
 
-func parseAddress(address *structs.PostalAddress) *org.Address {
+func parseAddress(address *PostalAddress) *org.Address {
 	if address == nil {
 		return nil
 	}

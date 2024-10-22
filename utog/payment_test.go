@@ -12,8 +12,10 @@ func TestParseCtoGPayment(t *testing.T) {
 	doc, err := LoadTestXMLDoc("invoice-test-4.xml")
 	require.NoError(t, err)
 
-	payment := ctog.ParseCtoGPayment(&doc.SupplyChainTradeTransaction.ApplicableHeaderTradeSettlement)
-
+	conversor := NewConversor()
+	inv, err := conversor.NewInvoice(doc)
+	require.NoError(t, err)
+	payment := inv.Payment
 	assert.NotNil(t, payment)
 
 }

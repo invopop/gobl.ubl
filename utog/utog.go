@@ -46,48 +46,60 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 
 	inv := &bill.Invoice{
-		Code:      cbc.Code(doc.ID),
-		Type:      cbc.Key(doc.InvoiceTypeCode),
-		IssueDate: ParseDate(doc.IssueDate),
-		Currency:  currency.Code(doc.DocumentCurrencyCode),
-		Supplier:  ParseUtoGParty(&doc.AccountingSupplierParty.Party),
-		Customer:  ParseUtoGParty(&doc.AccountingCustomerParty.Party),
-		Lines:     ParseUtoGLines(doc),
+		Code:     cbc.Code(doc.ID),
+		Type:     cbc.Key(*doc.InvoiceTypeCode),
+		Currency: currency.Code(*doc.DocumentCurrencyCode),
+		Supplier: c.getParty(&doc.AccountingSupplierParty.Party),
+		Customer: c.getParty(&doc.AccountingCustomerParty.Party),
 	}
 
-	// Payment comprised of terms, means and payee. Check there is relevant info in at least one of them to create a payment
-	if doc.PaymentMeans != nil || len(doc.PaymentTerms) > 0 {
-		inv.Payment = ParseUtoGPayment(doc)
+	issueDate, err := ParseDate(*doc.IssueDate)
+	if err != nil {
+		return nil, err
+	}
+	inv.IssueDate = issueDate
+
+	err = c.getLines(doc)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.getPayment(doc)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.getOrdering(doc)
+	if err != nil {
+		return nil, err
+	}
+
+	err = c.getDelivery(doc)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(doc.Note) > 0 {
 		inv.Notes = make([]*cbc.Note, 0, len(doc.Note))
 		for _, note := range doc.Note {
 			n := &cbc.Note{
-				Text: note.Value,
+				Text: note,
 			}
 			inv.Notes = append(inv.Notes, n)
 		}
 	}
 
-	ordering := ParseUtoGOrdering(inv, doc)
-	if ordering != nil {
-		inv.Ordering = ordering
-	}
-
-	delivery := ParseUtoGDelivery(inv, doc)
-	if delivery != nil {
-		inv.Delivery = delivery
-	}
-
-	if len(doc.BillingReference) != nil {
+	if len(doc.BillingReference) > 0 {
 		inv.Preceding = make([]*org.DocumentRef, 0, len(doc.BillingReference))
 		for _, ref := range doc.BillingReference {
 			docRef := &org.DocumentRef{
-				Code: cbc.Code(ref.InvoiceDocumentReference.ID.Value),
+				Code: cbc.Code(ref.InvoiceDocumentReference.ID),
 			}
-			if ref.InvoiceDocumentReference.IssueDate != "" {
-				refDate := ParseDate(ref.InvoiceDocumentReference.IssueDate)
+			if ref.InvoiceDocumentReference.IssueDate != nil {
+				refDate, err := ParseDate(*ref.InvoiceDocumentReference.IssueDate)
+				if err != nil {
+					return nil, err
+				}
 				docRef.IssueDate = &refDate
 			}
 			inv.Preceding = append(inv.Preceding, docRef)
@@ -102,18 +114,15 @@ func (c *Conversor) NewInvoice(doc *Document) (*bill.Invoice, error) {
 		inv.Ordering.Seller = inv.Supplier
 
 		// Overwrite the seller field with the tax representative
-		inv.Supplier = ParseutoGParty(doc.TaxRepresentativeParty)
+		inv.Supplier = c.getParty(doc.TaxRepresentativeParty)
 	}
 
 	if len(doc.AllowanceCharge) > 0 {
-		charges, discounts := ParseutoGCharges(doc.AllowanceCharge)
-		if len(charges) > 0 {
-			inv.Charges = charges
-		}
-		if len(discounts) > 0 {
-			inv.Discounts = discounts
+		err := c.getCharges(doc)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	return inv
+	return inv, nil
 }

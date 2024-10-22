@@ -38,26 +38,36 @@ func (c *Conversor) getOrdering(doc *Document) error {
 	}
 
 	if doc.DespatchDocumentReference != nil {
-		ordering.Despatch = []*org.DocumentRef{
-			{
-				Code: cbc.Code(doc.DespatchDocumentReference.ID),
-			},
-		}
-		if doc.DespatchDocumentReference.IssueDate != "" {
-			refDate := ParseDate(doc.DespatchDocumentReference.IssueDate)
-			ordering.Despatch[0].IssueDate = &refDate
+		ordering.Despatch = make([]*org.DocumentRef, 0)
+		for _, despatchRef := range doc.DespatchDocumentReference {
+			docRef := &org.DocumentRef{
+				Code: cbc.Code(despatchRef.ID),
+			}
+			if despatchRef.IssueDate != nil {
+				refDate, err := ParseDate(*despatchRef.IssueDate)
+				if err != nil {
+					return err
+				}
+				docRef.IssueDate = &refDate
+			}
+			ordering.Despatch = append(ordering.Despatch, docRef)
 		}
 	}
 
 	if doc.ReceiptDocumentReference != nil {
-		ordering.Receiving = []*org.DocumentRef{
-			{
-				Code: cbc.Code(doc.ReceiptDocumentReference.ID),
-			},
-		}
-		if doc.ReceiptDocumentReference.IssueDate != "" {
-			refDate := ParseDate(doc.ReceiptDocumentReference.IssueDate)
-			ordering.Receiving[0].IssueDate = &refDate
+		ordering.Receiving = make([]*org.DocumentRef, 0)
+		for _, receiptRef := range doc.ReceiptDocumentReference {
+			docRef := &org.DocumentRef{
+				Code: cbc.Code(receiptRef.ID),
+			}
+			if receiptRef.IssueDate != nil {
+				refDate, err := ParseDate(*receiptRef.IssueDate)
+				if err != nil {
+					return err
+				}
+				docRef.IssueDate = &refDate
+			}
+			ordering.Receiving = append(ordering.Receiving, docRef)
 		}
 	}
 
@@ -71,8 +81,11 @@ func (c *Conversor) getOrdering(doc *Document) error {
 				docRef := &org.DocumentRef{
 					Code: cbc.Code(ref.ID),
 				}
-				if ref.IssueDate != "" {
-					refDate := ParseDate(ref.IssueDate)
+				if ref.IssueDate != nil {
+					refDate, err := ParseDate(*ref.IssueDate)
+					if err != nil {
+						return err
+					}
 					docRef.IssueDate = &refDate
 				}
 				ordering.Tender = append(ordering.Tender, docRef)
@@ -89,7 +102,7 @@ func (c *Conversor) getOrdering(doc *Document) error {
 	}
 
 	if ordering.Code != "" || ordering.Period != nil || ordering.Despatch != nil || ordering.Receiving != nil || ordering.Tender != nil || ordering.Identities != nil {
-		return ordering
+		c.inv.Ordering = ordering
 	}
 	return nil
 }

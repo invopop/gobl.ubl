@@ -202,20 +202,23 @@ type DeliveryTerms struct {
 }
 
 type PaymentMeans struct {
-	PaymentMeansCode      string           `xml:"PaymentMeansCode"`
-	PaymentID             string           `xml:"PaymentID"`
-	PayeeFinancialAccount FinancialAccount `xml:"PayeeFinancialAccount"`
+	PaymentMeansCode      string            `xml:"PaymentMeansCode"`
+	PaymentID             *string           `xml:"PaymentID"`
+	PayeeFinancialAccount *FinancialAccount `xml:"PayeeFinancialAccount"`
+	PayerFinancialAccount *FinancialAccount `xml:"PayerFinancialAccount"`
+	InstructionID         *string           `xml:"InstructionID"`
 }
 
 type FinancialAccount struct {
-	ID                         string `xml:"ID"`
-	Name                       string `xml:"Name"`
-	FinancialInstitutionBranch Branch `xml:"FinancialInstitutionBranch"`
+	ID                         *string `xml:"ID"`
+	Name                       *string `xml:"Name"`
+	FinancialInstitutionBranch *Branch `xml:"FinancialInstitutionBranch"`
+	AccountTypeCode            *string `xml:"AccountTypeCode"`
 }
 
 type Branch struct {
-	ID   string `xml:"ID"`
-	Name string `xml:"Name"`
+	ID   *string `xml:"ID"`
+	Name *string `xml:"Name"`
 }
 
 type PaymentTerms struct {
@@ -223,8 +226,10 @@ type PaymentTerms struct {
 }
 
 type PrepaidPayment struct {
-	PaidAmount   Amount `xml:"PaidAmount"`
-	ReceivedDate string `xml:"ReceivedDate"`
+	ID            *string `xml:"ID"`
+	PaidAmount    *Amount `xml:"PaidAmount"`
+	ReceivedDate  *string `xml:"ReceivedDate"`
+	InstructionID *string `xml:"InstructionID"`
 }
 
 type AllowanceCharge struct {

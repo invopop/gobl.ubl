@@ -1,6 +1,8 @@
 package utog
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -37,7 +39,10 @@ func (c *Conversor) getCharges(doc *Document) error {
 				charge.Base = &basis
 			}
 			if allowanceCharge.MultiplierFactorNumeric != nil {
-				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
+				if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
+					*allowanceCharge.MultiplierFactorNumeric += "%"
+				}
+				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
 				if err != nil {
 					return err
 				}
@@ -51,7 +56,10 @@ func (c *Conversor) getCharges(doc *Document) error {
 					},
 				}
 				if allowanceCharge.TaxCategory.Percent != nil {
-					percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					if !strings.HasSuffix(*allowanceCharge.TaxCategory.Percent, "%") {
+						*allowanceCharge.TaxCategory.Percent += "%"
+					}
+					percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent)
 					if err != nil {
 						return err
 					}
@@ -86,7 +94,10 @@ func (c *Conversor) getCharges(doc *Document) error {
 				discount.Base = &basis
 			}
 			if allowanceCharge.MultiplierFactorNumeric != nil {
-				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric + "%")
+				if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
+					*allowanceCharge.MultiplierFactorNumeric += "%"
+				}
+				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
 				if err != nil {
 					return err
 				}
@@ -100,7 +111,10 @@ func (c *Conversor) getCharges(doc *Document) error {
 					},
 				}
 				if allowanceCharge.TaxCategory.Percent != nil {
-					percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent + "%")
+					if !strings.HasSuffix(*allowanceCharge.TaxCategory.Percent, "%") {
+						*allowanceCharge.TaxCategory.Percent += "%"
+					}
+					percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent)
 					if err != nil {
 						return err
 					}

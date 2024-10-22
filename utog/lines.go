@@ -103,19 +103,25 @@ func (c *Conversor) getLines(invoice *Document) error {
 			line.Taxes[0].Percent = &percent
 		}
 
-		// if item.AllowanceCharge != nil {
-		// 	line = parseLineCharges(item.AllowanceCharge, line)
-		// }
+		if item.AllowanceCharge != nil {
+			line, err = parseLineCharges(*item.AllowanceCharge, line)
+			if err != nil {
+				return err
+			}
+		}
 
 		lines = append(lines, line)
 	}
-
-	return lines
+	c.inv.Lines = lines
+	return nil
 }
 
-func parseLineCharges(allowances []*structs.AllowanceCharge, line *bill.Line) *bill.Line {
+func parseLineCharges(allowances []AllowanceCharge, line *bill.Line) (*bill.Line, error) {
 	for _, allowanceCharge := range allowances {
-		amount, _ := num.AmountFromString(allowanceCharge.Amount.Value)
+		amount, err := num.AmountFromString(allowanceCharge.Amount.Value)
+		if err != nil {
+			return nil, err
+		}
 		if allowanceCharge.ChargeIndicator {
 			charge := &bill.LineCharge{
 				Amount: amount,
@@ -130,7 +136,10 @@ func parseLineCharges(allowances []*structs.AllowanceCharge, line *bill.Line) *b
 				if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
 					*allowanceCharge.MultiplierFactorNumeric += "%"
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
+				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
+				if err != nil {
+					return nil, err
+				}
 				charge.Percent = &percent
 			}
 			if line.Charges == nil {
@@ -151,7 +160,10 @@ func parseLineCharges(allowances []*structs.AllowanceCharge, line *bill.Line) *b
 				if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
 					*allowanceCharge.MultiplierFactorNumeric += "%"
 				}
-				percent, _ := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
+				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
+				if err != nil {
+					return nil, err
+				}
 				discount.Percent = &percent
 			}
 			if line.Discounts == nil {
@@ -160,5 +172,5 @@ func parseLineCharges(allowances []*structs.AllowanceCharge, line *bill.Line) *b
 			line.Discounts = append(line.Discounts, discount)
 		}
 	}
-	return line
+	return line, nil
 }
