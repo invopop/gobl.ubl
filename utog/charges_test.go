@@ -26,13 +26,13 @@ func TestParseUtoGCharges(t *testing.T) {
 
 		// Check the values of the charge
 		charge := charges[0]
-		assert.Equal(t, "Packing cost", charge.Reason)
+		assert.Equal(t, "Freight", charge.Reason)
 		assert.Equal(t, "100.00", charge.Amount.String())
 
 		// Check the tax category of the charge
 		require.NotNil(t, charge.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), charge.Taxes[0].Category)
-		assert.Equal(t, "standard", charge.Taxes[0].Rate)
+		assert.Equal(t, cbc.Key("standard"), charge.Taxes[0].Rate)
 		assert.Equal(t, "25%", charge.Taxes[0].Percent.String())
 
 		// Check the values of the discount
@@ -44,7 +44,7 @@ func TestParseUtoGCharges(t *testing.T) {
 		// Check the tax category of the discount
 		require.NotNil(t, discount.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), discount.Taxes[0].Category)
-		assert.Equal(t, "standard", discount.Taxes[0].Rate)
+		assert.Equal(t, cbc.Key("standard"), discount.Taxes[0].Rate)
 		assert.Equal(t, "25%", discount.Taxes[0].Percent.String())
 	})
 
@@ -72,7 +72,7 @@ func TestParseUtoGCharges(t *testing.T) {
 		// Check the tax category of the charge
 		require.NotNil(t, charge.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), charge.Taxes[0].Category)
-		assert.Equal(t, "standard", charge.Taxes[0].Rate)
+		assert.Equal(t, cbc.Key("standard"), charge.Taxes[0].Rate)
 		assert.Equal(t, "25%", charge.Taxes[0].Percent.String())
 
 		// Check the values of the discount
@@ -84,7 +84,7 @@ func TestParseUtoGCharges(t *testing.T) {
 		// Check the tax category of the discount
 		require.NotNil(t, discount.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), discount.Taxes[0].Category)
-		assert.Equal(t, "standard", discount.Taxes[0].Rate)
+		assert.Equal(t, cbc.Key("standard"), discount.Taxes[0].Rate)
 		assert.Equal(t, "25%", discount.Taxes[0].Percent.String())
 	})
 

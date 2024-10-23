@@ -1,23 +1,24 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b551-6d38-73dd-8c70-25b8a7fae875",
+    "uuid": "0192b9fa-3eba-7426-8f8e-c1e099a3ea87",
     "dig": {
       "alg": "sha256",
-      "val": "ee201b86e41628f7e45b61559c30e008b2aa1c63d3b26802bdb49cc3f4805568"
+      "val": "a799761791c6cc75a7eb284e9364578b5714c9936230305b1e52286681577d20"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192b551-6d38-7484-b01a-86f47b34a5f4",
+    "uuid": "0192b9fa-3eba-7493-8e74-dc1afe9f1110",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
     "currency": "NOK",
     "supplier": {
+      "alias": "Tax handling company AS",
       "tax_id": {
         "country": "NO",
-        "code": "967611265"
+        "code": "967611265MVA"
       },
       "addresses": [
         {
@@ -34,11 +35,15 @@
       "name": "The Buyercompany",
       "tax_id": {
         "country": "NO",
-        "code": "987654321"
+        "code": "987654321MVA"
       },
       "identities": [
         {
           "label": "0088",
+          "code": "987654321"
+        },
+        {
+          "label": "Party Identification",
           "code": "3456789012098"
         }
       ],
@@ -79,7 +84,16 @@
           "name": "Laptop computer",
           "identities": [
             {
+              "label": "0088",
               "code": "1234567890128"
+            },
+            {
+              "label": "ZZZ",
+              "code": "12344321"
+            },
+            {
+              "label": "STI",
+              "code": "65434568"
             }
           ],
           "description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
@@ -107,7 +121,16 @@
             "percent": "25%"
           }
         ],
-        "total": "2546.00"
+        "total": "2546.00",
+        "notes": [
+          {
+            "text": "Scratch on box"
+          },
+          {
+            "key": "buyer-accounting-ref",
+            "text": "BookingCode001"
+          }
+        ]
       },
       {
         "i": 2,
@@ -117,7 +140,16 @@
           "name": "Returned \"Advanced computing\" book",
           "identities": [
             {
+              "label": "0088",
               "code": "1234567890135"
+            },
+            {
+              "label": "ZZZ",
+              "code": "32344324"
+            },
+            {
+              "label": "STI",
+              "code": "65434567"
             }
           ],
           "price": "3.96",
@@ -131,7 +163,16 @@
             "percent": "15%"
           }
         ],
-        "total": "-3.96"
+        "total": "-3.96",
+        "notes": [
+          {
+            "text": "Cover is slightly damaged."
+          },
+          {
+            "key": "buyer-accounting-ref",
+            "text": "BookingCode002"
+          }
+        ]
       },
       {
         "i": 3,
@@ -141,7 +182,16 @@
           "name": "\"Computing for dummies\" book",
           "identities": [
             {
+              "label": "0088",
               "code": "1234567890135"
+            },
+            {
+              "label": "ZZZ",
+              "code": "32344324"
+            },
+            {
+              "label": "STI",
+              "code": "65434567"
             }
           ],
           "price": "2.48",
@@ -155,7 +205,13 @@
             "percent": "15%"
           }
         ],
-        "total": "4.96"
+        "total": "4.96",
+        "notes": [
+          {
+            "key": "buyer-accounting-ref",
+            "text": "BookingCode003"
+          }
+        ]
       },
       {
         "i": 4,
@@ -165,7 +221,16 @@
           "name": "Returned IBM 5150 desktop",
           "identities": [
             {
+              "label": "0088",
               "code": "1234567890159"
+            },
+            {
+              "label": "ZZZ",
+              "code": "12344322"
+            },
+            {
+              "label": "STI",
+              "code": "65434565"
             }
           ],
           "price": "25.00",
@@ -179,7 +244,13 @@
             "percent": "0%"
           }
         ],
-        "total": "-25.00"
+        "total": "-25.00",
+        "notes": [
+          {
+            "key": "buyer-accounting-ref",
+            "text": "BookingCode004"
+          }
+        ]
       },
       {
         "i": 5,
@@ -189,7 +260,16 @@
           "name": "Network cable",
           "identities": [
             {
+              "label": "0088",
               "code": "1234567890166"
+            },
+            {
+              "label": "ZZZ",
+              "code": "12344325"
+            },
+            {
+              "label": "STI",
+              "code": "65434564"
             }
           ],
           "price": "0.75",
@@ -203,7 +283,13 @@
             "percent": "25%"
           }
         ],
-        "total": "187.50"
+        "total": "187.50",
+        "notes": [
+          {
+            "key": "buyer-accounting-ref",
+            "text": "BookingCode005"
+          }
+        ]
       }
     ],
     "discounts": [
@@ -245,11 +331,15 @@
         "name": "Salescompany ltd.",
         "tax_id": {
           "country": "NO",
-          "code": "123456789"
+          "code": "123456789MVA"
         },
         "identities": [
           {
             "label": "0088",
+            "code": "123456789"
+          },
+          {
+            "label": "Party Identification",
             "code": "1238764941386"
           }
         ],
@@ -280,13 +370,23 @@
             "num": "46211230"
           }
         ]
-      }
+      },
+      "contracts": [
+        {
+          "code": "Contract321"
+        }
+      ]
     },
     "payment": {
       "payee": {
+        "alias": "Ebeneser Scrooge AS",
         "identities": [
           {
             "label": "0088",
+            "code": "989823401"
+          },
+          {
+            "label": "Party Identification",
             "code": "2298740918237"
           }
         ]
@@ -325,6 +425,12 @@
           }
         ]
       },
+      "identities": [
+        {
+          "label": "0088",
+          "code": "6754238987643"
+        }
+      ],
       "date": "2013-06-15"
     },
     "totals": {
