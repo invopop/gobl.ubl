@@ -72,34 +72,25 @@ func (c *Conversor) getLines(doc *Document) error {
 		}
 
 		if docLine.Item.BuyersItemIdentification != nil && docLine.Item.BuyersItemIdentification.ID != nil {
-			id := &org.Identity{
-				Code: cbc.Code(docLine.Item.BuyersItemIdentification.ID.Value),
+			id := getIdentity(docLine.Item.BuyersItemIdentification.ID)
+			if id != nil {
+				ids = append(ids, id)
 			}
-			if docLine.Item.BuyersItemIdentification.ID.SchemeID != nil {
-				id.Key = cbc.Key(*docLine.Item.BuyersItemIdentification.ID.SchemeID)
-			}
-			ids = append(ids, id)
 		}
 
 		if docLine.Item.StandardItemIdentification != nil && docLine.Item.StandardItemIdentification.ID != nil {
-			id := &org.Identity{
-				Code: cbc.Code(docLine.Item.StandardItemIdentification.ID.Value),
+			id := getIdentity(docLine.Item.StandardItemIdentification.ID)
+			if id != nil {
+				ids = append(ids, id)
 			}
-			if docLine.Item.StandardItemIdentification.ID.SchemeID != nil {
-				id.Key = cbc.Key(*docLine.Item.StandardItemIdentification.ID.SchemeID)
-			}
-			ids = append(ids, id)
 		}
 
 		if docLine.Item.CommodityClassification != nil && len(*docLine.Item.CommodityClassification) > 0 {
 			for _, classification := range *docLine.Item.CommodityClassification {
-				id := &org.Identity{
-					Code: cbc.Code(classification.ItemClassificationCode.Value),
+				id := getIdentity(classification.ItemClassificationCode)
+				if id != nil {
+					ids = append(ids, id)
 				}
-				if classification.ItemClassificationCode.Name != nil {
-					id.Label = *classification.ItemClassificationCode.Name
-				}
-				ids = append(ids, id)
 			}
 		}
 
@@ -143,6 +134,31 @@ func (c *Conversor) getLines(doc *Document) error {
 	}
 	c.inv.Lines = lines
 	return nil
+}
+
+func getIdentity(id *IDType) *org.Identity {
+	if id == nil {
+		return nil
+	}
+	identity := &org.Identity{
+		Code: cbc.Code(id.Value),
+	}
+	if id.SchemeID != nil {
+		identity.Label = *id.SchemeID
+	}
+	if id.ListID != nil {
+		identity.Label = *id.ListID
+	}
+	if id.ListVersionID != nil {
+		identity.Label = *id.ListVersionID
+	}
+	if id.SchemeName != nil {
+		identity.Label = *id.SchemeName
+	}
+	if id.Name != nil {
+		identity.Label = *id.Name
+	}
+	return identity
 }
 
 func parseLineCharges(allowances []AllowanceCharge, line *bill.Line) (*bill.Line, error) {

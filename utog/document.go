@@ -162,9 +162,12 @@ type Identification struct {
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
-	SchemeID   *string `xml:"schemeID,attr"`
-	SchemeName *string `xml:"schemeName,attr"`
-	Value      string  `xml:",chardata"`
+	ListID        *string `xml:"listID,attr"`
+	ListVersionID *string `xml:"listVersionID,attr"`
+	SchemeID      *string `xml:"schemeID,attr"`
+	SchemeName    *string `xml:"schemeName,attr"`
+	Name          *string `xml:"name,attr"`
+	Value         string  `xml:",chardata"`
 }
 
 // PartyName represents the name of a party
@@ -380,16 +383,16 @@ type ItemIdentification struct {
 
 // CommodityClassification represents a commodity classification
 type CommodityClassification struct {
-	ItemClassificationCode CodeType `xml:"ItemClassificationCode"`
+	ItemClassificationCode *IDType `xml:"ItemClassificationCode"`
 }
 
-// CodeType represents a code with associated metadata
-type CodeType struct {
-	ListID        *string `xml:"listID,attr"`
-	ListVersionID *string `xml:"listVersionID,attr"`
-	Name          *string `xml:"name,attr"`
-	Value         string  `xml:",chardata"`
-}
+// // CodeType represents a code with associated metadata
+// type CodeType struct {
+// 	ListID        *string `xml:"listID,attr"`
+// 	ListVersionID *string `xml:"listVersionID,attr"`
+// 	Name          *string `xml:"name,attr"`
+// 	Value         string  `xml:",chardata"`
+// }
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
