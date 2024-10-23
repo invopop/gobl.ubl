@@ -16,23 +16,7 @@ func (c *Conversor) getOrdering(doc *Document) error {
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if doc.InvoicePeriod != nil {
-		period := &cal.Period{}
-		if doc.InvoicePeriod[0].StartDate != nil {
-			start, err := ParseDate(*doc.InvoicePeriod[0].StartDate)
-			if err != nil {
-				return err
-			}
-			period.Start = start
-		}
-		if doc.InvoicePeriod[0].EndDate != nil {
-			end, err := ParseDate(*doc.InvoicePeriod[0].EndDate)
-			if err != nil {
-				return err
-			}
-			period.End = end
-		}
-
-		ordering.Period = period
+		ordering.Period = c.setPeriodDates(doc.InvoicePeriod[0])
 	}
 
 	if doc.DespatchDocumentReference != nil {
@@ -70,27 +54,29 @@ func (c *Conversor) getOrdering(doc *Document) error {
 
 	if doc.AdditionalDocumentReference != nil {
 		for _, ref := range doc.AdditionalDocumentReference {
-			switch *ref.DocumentTypeCode {
-			case "50":
-				if ordering.Tender == nil {
-					ordering.Tender = make([]*org.DocumentRef, 0)
+			if ref.DocumentTypeCode != nil {
+				switch *ref.DocumentTypeCode {
+				case "50":
+					if ordering.Tender == nil {
+						ordering.Tender = make([]*org.DocumentRef, 0)
+					}
+					docRef, err := c.getReference(&ref)
+					if err != nil {
+						return err
+					}
+					ordering.Tender = append(ordering.Tender, docRef)
+				case "130":
+					if ordering.Identities == nil {
+						ordering.Identities = make([]*org.Identity, 0)
+					}
+					identity := &org.Identity{
+						Code: cbc.Code(ref.ID.Value),
+					}
+					if ref.ID.SchemeID != nil {
+						identity.Label = *ref.ID.SchemeID
+					}
+					ordering.Identities = append(ordering.Identities, identity)
 				}
-				docRef, err := c.getReference(&ref)
-				if err != nil {
-					return err
-				}
-				ordering.Tender = append(ordering.Tender, docRef)
-			case "130":
-				if ordering.Identities == nil {
-					ordering.Identities = make([]*org.Identity, 0)
-				}
-				identity := &org.Identity{
-					Code: cbc.Code(ref.ID.Value),
-				}
-				if ref.ID.SchemeID != nil {
-					identity.Label = *ref.ID.SchemeID
-				}
-				ordering.Identities = append(ordering.Identities, identity)
 			}
 			// Other document types not mapped to GOBL
 		}
@@ -120,22 +106,26 @@ func (c *Conversor) getReference(ref *DocumentReference) (*org.DocumentRef, erro
 		docRef.Description = *ref.DocumentDescription
 	}
 	if ref.ValidityPeriod != nil {
-		period := &cal.Period{}
-		if ref.ValidityPeriod.StartDate != nil {
-			start, err := ParseDate(*ref.ValidityPeriod.StartDate)
-			if err != nil {
-				return nil, err
-			}
-			period.Start = start
-		}
-		if ref.ValidityPeriod.EndDate != nil {
-			end, err := ParseDate(*ref.ValidityPeriod.EndDate)
-			if err != nil {
-				return nil, err
-			}
-			period.End = end
-		}
-		docRef.Period = period
+		docRef.Period = c.setPeriodDates(*ref.ValidityPeriod)
 	}
 	return docRef, nil
+}
+
+func (c *Conversor) setPeriodDates(invoicePeriod Period) *cal.Period {
+	period := &cal.Period{}
+	if invoicePeriod.StartDate != nil {
+		start, err := ParseDate(*invoicePeriod.StartDate)
+		if err != nil {
+			return nil
+		}
+		period.Start = start
+	}
+	if invoicePeriod.EndDate != nil {
+		end, err := ParseDate(*invoicePeriod.EndDate)
+		if err != nil {
+			return nil
+		}
+		period.End = end
+	}
+	return period
 }

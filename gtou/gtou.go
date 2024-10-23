@@ -1,3 +1,4 @@
+// Package gtou provides a conversor from GOBL to UBL.
 package gtou
 
 import (
@@ -6,8 +7,7 @@ import (
 	"github.com/invopop/gobl"
 )
 
-//TODO
-
+// Conversor is a struct that contains the necessary elements to convert between GOBL and UBL
 type Conversor struct {
 	doc *Document
 }

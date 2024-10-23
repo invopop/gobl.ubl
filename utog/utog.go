@@ -1,3 +1,4 @@
+// Package utog provides a conversor from UBL to GOBL.
 package utog
 
 import (
@@ -46,6 +47,7 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 	return env, nil
 }
 
+// NewInvoice creates a new invoice from a UBL document
 func (c *Conversor) NewInvoice(doc *Document) error {
 
 	c.inv = &bill.Invoice{

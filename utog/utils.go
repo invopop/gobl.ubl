@@ -56,7 +56,7 @@ const (
 	invoiceTypeFinalConstruction        = "877"
 )
 
-// Convert a date string to a cal.Date
+// ParseDate converts a date string to a cal.Date.
 func ParseDate(date string) (cal.Date, error) {
 	t, err := time.Parse("2006-01-02", date)
 	if err != nil {
@@ -66,7 +66,7 @@ func ParseDate(date string) (cal.Date, error) {
 	return cal.MakeDate(t.Year(), t.Month(), t.Day()), nil
 }
 
-// Map UBL rate to GOBL equivalent
+// FindTaxKey maps UBL rate to GOBL equivalent.
 func FindTaxKey(taxType string) cbc.Key {
 	switch taxType {
 	case standardSalesTax:
@@ -79,8 +79,8 @@ func FindTaxKey(taxType string) cbc.Key {
 	return tax.RateStandard
 }
 
-// Map CII invoice type to GOBL equivalent
-// Source https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
+// TypeCodeParse maps CII invoice type to GOBL equivalent.
+// Source: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
 func TypeCodeParse(typeCode string) cbc.Key {
 	switch typeCode {
 	case invoiceTypeStandard:
@@ -105,18 +105,17 @@ func TypeCodeParse(typeCode string) cbc.Key {
 	return bill.InvoiceTypeOther
 }
 
-// Map UN/ECE code to GOBL equivalent
+// UnitFromUNECE maps UN/ECE code to GOBL equivalent.
 func UnitFromUNECE(unece cbc.Code) org.Unit {
 	for _, def := range org.UnitDefinitions {
 		if def.UNECE == unece {
 			return def.Unit
 		}
 	}
-	// If no match is found, return the original UN/ECE code as a Unit
 	return org.Unit(unece)
 }
 
-// Map UBL payment means to GOBL equivalent
+// PaymentMeansTypeCodeParse maps UBL payment means to GOBL equivalent.
 func PaymentMeansTypeCodeParse(typeCode string) cbc.Key {
 	switch typeCode {
 	case paymentMeansCash:

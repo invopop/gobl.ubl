@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 )
 
+// Document represents the main structure of an UBL invoice
 type Document struct {
 	XMLName                        xml.Name            `xml:"Invoice"`
 	UBLExtensions                  *Extensions         `xml:"UBLExtensions,omitempty"`
@@ -62,21 +63,25 @@ type Document struct {
 	InvoiceLine                    []InvoiceLine       `xml:"InvoiceLine"`
 }
 
+// Extensions represents UBL extensions
 type Extensions struct {
 	Extension []Extension `xml:"Extension"`
 }
 
+// Extension represents a single UBL extension
 type Extension struct {
 	ID               *string `xml:"ID"`
 	ExtensionURI     *string `xml:"ExtensionURI"`
 	ExtensionContent string  `xml:"ExtensionContent"`
 }
 
+// Period represents a time period with start and end dates
 type Period struct {
 	StartDate *string `xml:"StartDate"`
 	EndDate   *string `xml:"EndDate"`
 }
 
+// OrderReference represents a reference to an order
 type OrderReference struct {
 	ID                string  `xml:"ID"`
 	SalesOrderID      *string `xml:"SalesOrderID"`
@@ -84,6 +89,7 @@ type OrderReference struct {
 	CustomerReference *string `xml:"CustomerReference"`
 }
 
+// BillingReference represents a reference to a billing document
 type BillingReference struct {
 	InvoiceDocumentReference           *DocumentReference `xml:"InvoiceDocumentReference"`
 	SelfBilledInvoiceDocumentReference *DocumentReference `xml:"SelfBilledInvoiceDocumentReference"`
@@ -91,6 +97,7 @@ type BillingReference struct {
 	AdditionalDocumentReference        *DocumentReference `xml:"AdditionalDocumentReference"`
 }
 
+// DocumentReference represents a reference to a document
 type DocumentReference struct {
 	ID                  IDType      `xml:"ID"`
 	IssueDate           *string     `xml:"IssueDate"`
@@ -101,10 +108,12 @@ type DocumentReference struct {
 	ValidityPeriod      *Period     `xml:"ValidityPeriod"`
 }
 
+// Attachment represents an attached document
 type Attachment struct {
 	EmbeddedDocumentBinaryObject BinaryObject `xml:"EmbeddedDocumentBinaryObject"`
 }
 
+// BinaryObject represents binary data with associated metadata
 type BinaryObject struct {
 	MimeCode         string `xml:"mimeCode,attr"`
 	Filename         string `xml:"filename,attr"`
@@ -114,18 +123,22 @@ type BinaryObject struct {
 	Value            string `xml:",chardata"`
 }
 
+// ProjectReference represents a reference to a project
 type ProjectReference struct {
 	ID string `xml:"ID"`
 }
 
+// SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
 	Party Party `xml:"Party"`
 }
 
+// CustomerParty represents the customer party in a transaction
 type CustomerParty struct {
 	Party Party `xml:"Party"`
 }
 
+// Party represents a party involved in a transaction
 type Party struct {
 	EndpointID          *EndpointID       `xml:"EndpointID"`
 	PartyIdentification []Identification  `xml:"PartyIdentification"`
@@ -136,25 +149,30 @@ type Party struct {
 	Contact             *Contact          `xml:"Contact"`
 }
 
+// EndpointID represents an endpoint identifier
 type EndpointID struct {
 	SchemeID string `xml:"schemeID,attr"`
 	Value    string `xml:",chardata"`
 }
 
+// Identification represents an identification
 type Identification struct {
 	ID IDType `xml:"ID"`
 }
 
+// IDType represents an ID with optional scheme attributes
 type IDType struct {
 	SchemeID   *string `xml:"schemeID,attr"`
 	SchemeName *string `xml:"schemeName,attr"`
 	Value      string  `xml:",chardata"`
 }
 
+// PartyName represents the name of a party
 type PartyName struct {
 	Name string `xml:"Name"`
 }
 
+// PostalAddress represents a postal address
 type PostalAddress struct {
 	StreetName           *string       `xml:"StreetName"`
 	AdditionalStreetName *string       `xml:"AdditionalStreetName"`
@@ -165,49 +183,59 @@ type PostalAddress struct {
 	Country              *Country      `xml:"Country"`
 }
 
+// AddressLine represents a line in an address
 type AddressLine struct {
 	Line string `xml:"Line"`
 }
 
+// Country represents a country
 type Country struct {
 	IdentificationCode string `xml:"IdentificationCode"`
 }
 
+// PartyTaxScheme represents a party's tax scheme
 type PartyTaxScheme struct {
 	CompanyID *string    `xml:"CompanyID"`
 	TaxScheme *TaxScheme `xml:"TaxScheme"`
 }
 
+// TaxScheme represents a tax scheme
 type TaxScheme struct {
 	ID *string `xml:"ID"`
 }
 
+// PartyLegalEntity represents the legal entity of a party
 type PartyLegalEntity struct {
 	RegistrationName *string `xml:"RegistrationName"`
 	CompanyID        *IDType `xml:"CompanyID"`
 	CompanyLegalForm *string `xml:"CompanyLegalForm"`
 }
 
+// Contact represents contact information
 type Contact struct {
 	Name           *string `xml:"Name"`
 	Telephone      *string `xml:"Telephone"`
 	ElectronicMail *string `xml:"ElectronicMail"`
 }
 
+// Delivery represents delivery information
 type Delivery struct {
 	ActualDeliveryDate string   `xml:"ActualDeliveryDate"`
 	DeliveryLocation   Location `xml:"DeliveryLocation"`
 }
 
+// Location represents a location
 type Location struct {
 	ID      string         `xml:"ID"`
 	Address *PostalAddress `xml:"Address"`
 }
 
+// DeliveryTerms represents the terms of delivery
 type DeliveryTerms struct {
 	ID string `xml:"ID"`
 }
 
+// PaymentMeans represents the means of payment
 type PaymentMeans struct {
 	PaymentMeansCode      string            `xml:"PaymentMeansCode"`
 	PaymentID             *string           `xml:"PaymentID"`
@@ -216,6 +244,7 @@ type PaymentMeans struct {
 	InstructionID         *string           `xml:"InstructionID"`
 }
 
+// FinancialAccount represents a financial account
 type FinancialAccount struct {
 	ID                         *string `xml:"ID"`
 	Name                       *string `xml:"Name"`
@@ -223,11 +252,13 @@ type FinancialAccount struct {
 	AccountTypeCode            *string `xml:"AccountTypeCode"`
 }
 
+// Branch represents a branch of a financial institution
 type Branch struct {
 	ID   *string `xml:"ID"`
 	Name *string `xml:"Name"`
 }
 
+// PaymentTerms represents the terms of payment
 type PaymentTerms struct {
 	Note           []string `xml:"Note"`
 	Amount         *Amount  `xml:"Amount"`
@@ -235,6 +266,7 @@ type PaymentTerms struct {
 	PaymentDueDate *string  `xml:"PaymentDueDate"`
 }
 
+// PrepaidPayment represents a prepaid payment
 type PrepaidPayment struct {
 	ID            *string `xml:"ID"`
 	PaidAmount    *Amount `xml:"PaidAmount"`
@@ -242,6 +274,7 @@ type PrepaidPayment struct {
 	InstructionID *string `xml:"InstructionID"`
 }
 
+// AllowanceCharge represents an allowance or charge
 type AllowanceCharge struct {
 	ChargeIndicator           bool         `xml:"ChargeIndicator"`
 	AllowanceChargeReasonCode *string      `xml:"AllowanceChargeReasonCode"`
@@ -252,6 +285,7 @@ type AllowanceCharge struct {
 	TaxCategory               *TaxCategory `xml:"TaxCategory"`
 }
 
+// ExchangeRate represents an exchange rate
 type ExchangeRate struct {
 	SourceCurrencyCode string `xml:"SourceCurrencyCode"`
 	TargetCurrencyCode string `xml:"TargetCurrencyCode"`
@@ -259,17 +293,20 @@ type ExchangeRate struct {
 	Date               string `xml:"Date"`
 }
 
+// TaxTotal represents a tax total
 type TaxTotal struct {
 	TaxAmount   Amount        `xml:"TaxAmount"`
 	TaxSubtotal []TaxSubtotal `xml:"TaxSubtotal"`
 }
 
+// TaxSubtotal represents a tax subtotal
 type TaxSubtotal struct {
 	TaxableAmount Amount      `xml:"TaxableAmount"`
 	TaxAmount     Amount      `xml:"TaxAmount"`
 	TaxCategory   TaxCategory `xml:"TaxCategory"`
 }
 
+// TaxCategory represents a tax category
 type TaxCategory struct {
 	ID                     string     `xml:"ID"`
 	Percent                *string    `xml:"Percent"`
@@ -278,6 +315,7 @@ type TaxCategory struct {
 	TaxScheme              *TaxScheme `xml:"TaxScheme"`
 }
 
+// MonetaryTotal represents a monetary total
 type MonetaryTotal struct {
 	LineExtensionAmount   Amount `xml:"LineExtensionAmount"`
 	TaxExclusiveAmount    Amount `xml:"TaxExclusiveAmount"`
@@ -289,11 +327,13 @@ type MonetaryTotal struct {
 	PayableAmount         Amount `xml:"PayableAmount"`
 }
 
+// Amount represents a monetary amount
 type Amount struct {
 	CurrencyID string `xml:"currencyID,attr"`
 	Value      string `xml:",chardata"`
 }
 
+// InvoiceLine represents a line item in an invoice
 type InvoiceLine struct {
 	ID                  *string             `xml:"ID"`
 	InvoicedQuantity    *Quantity           `xml:"InvoicedQuantity"`
@@ -306,15 +346,18 @@ type InvoiceLine struct {
 	Price               *Price              `xml:"Price"`
 }
 
+// Quantity represents a quantity with a unit code
 type Quantity struct {
 	UnitCode string `xml:"unitCode,attr"`
 	Value    string `xml:",chardata"`
 }
 
+// OrderLineReference represents a reference to an order line
 type OrderLineReference struct {
 	LineID string `xml:"LineID"`
 }
 
+// Item represents an item in an invoice line
 type Item struct {
 	Description                *string                    `xml:"Description"`
 	Name                       *string                    `xml:"Name"`
@@ -327,14 +370,17 @@ type Item struct {
 	AdditionalItemProperty     *[]AdditionalItemProperty  `xml:"AdditionalItemProperty"`
 }
 
+// ItemIdentification represents an item identification
 type ItemIdentification struct {
 	ID *string `xml:"ID"`
 }
 
+// CommodityClassification represents a commodity classification
 type CommodityClassification struct {
 	ItemClassificationCode CodeType `xml:"ItemClassificationCode"`
 }
 
+// CodeType represents a code with associated metadata
 type CodeType struct {
 	ListID        string `xml:"listID,attr"`
 	ListVersionID string `xml:"listVersionID,attr"`
@@ -342,23 +388,27 @@ type CodeType struct {
 	Value         string `xml:",chardata"`
 }
 
+// ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
 	ID        string    `xml:"ID"`
 	Percent   string    `xml:"Percent"`
 	TaxScheme TaxScheme `xml:"TaxScheme"`
 }
 
+// AdditionalItemProperty represents an additional property of an item
 type AdditionalItemProperty struct {
 	Name  string `xml:"Name"`
 	Value string `xml:"Value"`
 }
 
+// Price represents the price of an item
 type Price struct {
 	PriceAmount     Amount          `xml:"PriceAmount"`
 	BaseQuantity    Quantity        `xml:"BaseQuantity"`
 	AllowanceCharge AllowanceCharge `xml:"AllowanceCharge"`
 }
 
+// Signature represents a digital signature
 type Signature struct {
 	ID                         string             `xml:"cbc:ID"`
 	Note                       []string           `xml:"cbc:Note,omitempty"`

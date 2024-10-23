@@ -1,4 +1,4 @@
-// Package cii helps convert GOBL into Cross Industry Invoice documents and vice versa.
+// Package ubl helps convert GOBL into UBL documents and vice versa.
 package ubl
 
 import (
@@ -21,12 +21,12 @@ func NewConversor() *Conversor {
 	return c
 }
 
-// ConvertToGOBL converts a CII document to a GOBL envelope
+// ConvertToGOBL converts a UBL document to a GOBL envelope
 func (c *Conversor) ConvertToGOBL(ublDoc []byte) (*gobl.Envelope, error) {
 	return c.UtoG.ConvertToGOBL(ublDoc)
 }
 
-// ConvertToCII converts a GOBL envelope to a CII document
+// ConvertToUBL converts a GOBL envelope to a UBL document
 func (c *Conversor) ConvertToUBL(env *gobl.Envelope) (*gtou.Document, error) {
 	ublDoc, err := c.GtoU.ConvertToUBL(env)
 	if err != nil {

@@ -19,9 +19,7 @@ func (c *Conversor) getPayment(doc *Document) error {
 		payment.Terms = &pay.Terms{}
 		notes := make([]string, 0)
 		for _, term := range doc.PaymentTerms {
-			for _, note := range term.Note {
-				notes = append(notes, string(note))
-			}
+			notes = append(notes, term.Note...)
 			if term.Amount != nil {
 				amount, err := num.AmountFromString(term.Amount.Value)
 				if err != nil {
