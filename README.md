@@ -118,14 +118,12 @@ There are certain assumptions and lost information in the conversion from UBL to
 
 1. GOBL does not currently support additional embedded documents, so the AdditionalReferencedDocument field (BG-24 in EN 16931) is not supported and lost in the conversion.
 2. GOBL only supports a single period in the ordering, so only the first InvoicePeriod (BG-14) in the UBL is taken.
+3. Fields ProfileID (BT-23) and CustomizationID (BT-24) in UBL are not supported and lost in the conversion.
+4. The AccountingCost (BT-19, BT-133) fields are added as notes.
+5. Payment advances do not include their own tax rate, they use the global tax rate of the invoice.
+6. Identification fields that use ISO/IEC 6523 codes are currently not directly mapped to their [codelist](https://docs.peppol.eu/poacc/billing/3.0/codelist/ICD/), with their reference code being mapped to the Label.
+7. The field AdditionalItemProperty (BG-32) is currently not supported in GOBL and lost in the conversion.
 
-
-2. Payment advances do not include their own tax rate, they use the global tax rate of the invoice.
-3. The field TotalPrepaidAmount (BT-113) in CII is not directly mapped to GOBL, so payment advances must be included in the SpecifiedAdvancePayment field in CII, or they will be lost in conversion.
-4. Fields BusinessProcessSpecifiedDocumentContextParameter (BT-10) and GuidelineSpecifiedDocumentContextParameter (BT-11) in CII are not supported and lost in the conversion.
-5. The fields ReceivableSpecifiedTradeAccountingAccount (BT-133) and DesignatedProductClassification (BT-158) are added as a note to the line, with the type code as the key.
-6. The field ApplicableProductCharacteristic (BG-32) is currently not supported in GOBLand lost in the conversion.
-7. The GlobalID (BT-29, BT-46, BT-60,BT-157) fields are currently not directly mapped to their [codelist](https://docs.peppol.eu/poacc/billing/3.0/codelist/ICD/) ISO 6523 ICD, with their reference code being mapped to the Label.
 
 ## Development
 
