@@ -220,13 +220,15 @@ type Contact struct {
 
 // Delivery represents delivery information
 type Delivery struct {
-	ActualDeliveryDate string   `xml:"ActualDeliveryDate"`
-	DeliveryLocation   Location `xml:"DeliveryLocation"`
+	ActualDeliveryDate      *string   `xml:"ActualDeliveryDate"`
+	DeliveryLocation        *Location `xml:"DeliveryLocation"`
+	EstimatedDeliveryPeriod *Period   `xml:"EstimatedDeliveryPeriod"`
+	DeliveryParty           *Party    `xml:"DeliveryParty"`
 }
 
 // Location represents a location
 type Location struct {
-	ID      string         `xml:"ID"`
+	ID      *IDType        `xml:"ID"`
 	Address *PostalAddress `xml:"Address"`
 }
 
