@@ -16,68 +16,103 @@ func (c *Conversor) getLines(doc *Document) error {
 
 	lines := make([]*bill.Line, 0, len(items))
 
-	for _, item := range items {
-		price, err := num.AmountFromString(item.Price.PriceAmount.Value)
+	for _, docLine := range items {
+		price, err := num.AmountFromString(docLine.Price.PriceAmount.Value)
 		if err != nil {
 			return err
 		}
 		line := &bill.Line{
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
-				Name:  *item.Item.Name,
+				Name:  *docLine.Item.Name,
 				Price: price,
 			},
 			Taxes: tax.Set{
 				{
-					Rate:     FindTaxKey(item.Item.ClassifiedTaxCategory.ID),
-					Category: cbc.Code(*item.Item.ClassifiedTaxCategory.TaxScheme.ID),
+					Rate:     FindTaxKey(docLine.Item.ClassifiedTaxCategory.ID),
+					Category: cbc.Code(*docLine.Item.ClassifiedTaxCategory.TaxScheme.ID),
 				},
 			},
 		}
 
-		if item.InvoicedQuantity != nil {
-			line.Quantity, err = num.AmountFromString(item.InvoicedQuantity.Value)
+		ids := make([]*org.Identity, 0)
+		notes := make([]*cbc.Note, 0)
+
+		if docLine.InvoicedQuantity != nil {
+			line.Quantity, err = num.AmountFromString(docLine.InvoicedQuantity.Value)
 			if err != nil {
 				return err
 			}
 		}
 
-		if item.InvoicedQuantity.UnitCode != "" {
-			line.Item.Unit = UnitFromUNECE(cbc.Code(item.InvoicedQuantity.UnitCode))
-		}
-
-		if item.Item.SellersItemIdentification != nil && item.Item.SellersItemIdentification.ID != nil {
-			line.Item.Ref = *item.Item.SellersItemIdentification.ID
-		}
-
-		if item.Item.BuyersItemIdentification != nil && item.Item.BuyersItemIdentification.ID != nil {
-			if line.Item.Identities == nil {
-				line.Item.Identities = make([]*org.Identity, 0)
+		if len(docLine.Note) > 0 {
+			for _, note := range docLine.Note {
+				if note != "" {
+					notes = append(notes, &cbc.Note{
+						Text: note,
+					})
+				}
 			}
-			line.Item.Identities = append(line.Item.Identities, &org.Identity{
-				Code: cbc.Code(*item.Item.BuyersItemIdentification.ID),
+		}
+
+		// As there is no specific GOBL field for BT-133, we use a note to store it
+		if docLine.AccountingCost != nil {
+			notes = append(notes, &cbc.Note{
+				Key:  "buyer-accounting-ref",
+				Text: *docLine.AccountingCost,
 			})
 		}
 
-		if item.Item.StandardItemIdentification != nil && item.Item.StandardItemIdentification.ID != nil {
-			if line.Item.Identities == nil {
-				line.Item.Identities = make([]*org.Identity, 0)
+		if docLine.InvoicedQuantity.UnitCode != "" {
+			line.Item.Unit = UnitFromUNECE(cbc.Code(docLine.InvoicedQuantity.UnitCode))
+		}
+
+		if docLine.Item.SellersItemIdentification != nil && docLine.Item.SellersItemIdentification.ID != nil {
+			line.Item.Ref = docLine.Item.SellersItemIdentification.ID.Value
+		}
+
+		if docLine.Item.BuyersItemIdentification != nil && docLine.Item.BuyersItemIdentification.ID != nil {
+			id := &org.Identity{
+				Code: cbc.Code(docLine.Item.BuyersItemIdentification.ID.Value),
 			}
-			line.Item.Identities = append(line.Item.Identities, &org.Identity{
-				Code: cbc.Code(*item.Item.StandardItemIdentification.ID),
-			})
+			if docLine.Item.BuyersItemIdentification.ID.SchemeID != nil {
+				id.Key = cbc.Key(*docLine.Item.BuyersItemIdentification.ID.SchemeID)
+			}
+			ids = append(ids, id)
 		}
 
-		if item.Item.Description != nil {
-			line.Item.Description = *item.Item.Description
+		if docLine.Item.StandardItemIdentification != nil && docLine.Item.StandardItemIdentification.ID != nil {
+			id := &org.Identity{
+				Code: cbc.Code(docLine.Item.StandardItemIdentification.ID.Value),
+			}
+			if docLine.Item.StandardItemIdentification.ID.SchemeID != nil {
+				id.Key = cbc.Key(*docLine.Item.StandardItemIdentification.ID.SchemeID)
+			}
+			ids = append(ids, id)
 		}
 
-		if item.Item.OriginCountry != nil {
-			line.Item.Origin = l10n.ISOCountryCode(item.Item.OriginCountry.IdentificationCode)
+		if docLine.Item.CommodityClassification != nil && len(*docLine.Item.CommodityClassification) > 0 {
+			for _, classification := range *docLine.Item.CommodityClassification {
+				id := &org.Identity{
+					Code: cbc.Code(classification.ItemClassificationCode.Value),
+				}
+				if classification.ItemClassificationCode.Name != nil {
+					id.Label = *classification.ItemClassificationCode.Name
+				}
+				ids = append(ids, id)
+			}
 		}
 
-		if item.Item.ClassifiedTaxCategory != nil && item.Item.ClassifiedTaxCategory.Percent != "" {
-			percentStr := item.Item.ClassifiedTaxCategory.Percent
+		if docLine.Item.Description != nil {
+			line.Item.Description = *docLine.Item.Description
+		}
+
+		if docLine.Item.OriginCountry != nil {
+			line.Item.Origin = l10n.ISOCountryCode(docLine.Item.OriginCountry.IdentificationCode)
+		}
+
+		if docLine.Item.ClassifiedTaxCategory != nil && docLine.Item.ClassifiedTaxCategory.Percent != "" {
+			percentStr := docLine.Item.ClassifiedTaxCategory.Percent
 			if !strings.HasSuffix(percentStr, "%") {
 				percentStr += "%"
 			}
@@ -89,11 +124,19 @@ func (c *Conversor) getLines(doc *Document) error {
 			line.Taxes[0].Percent = &percent
 		}
 
-		if item.AllowanceCharge != nil {
-			line, err = parseLineCharges(*item.AllowanceCharge, line)
+		if docLine.AllowanceCharge != nil {
+			line, err = parseLineCharges(*docLine.AllowanceCharge, line)
 			if err != nil {
 				return err
 			}
+		}
+
+		if len(ids) > 0 {
+			line.Item.Identities = ids
+		}
+
+		if len(notes) > 0 {
+			line.Notes = notes
 		}
 
 		lines = append(lines, line)

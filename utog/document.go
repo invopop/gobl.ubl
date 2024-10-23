@@ -338,6 +338,7 @@ type Amount struct {
 // InvoiceLine represents a line item in an invoice
 type InvoiceLine struct {
 	ID                  *string             `xml:"ID"`
+	Note                []string            `xml:"Note"`
 	InvoicedQuantity    *Quantity           `xml:"InvoicedQuantity"`
 	LineExtensionAmount Amount              `xml:"LineExtensionAmount"`
 	AccountingCost      *string             `xml:"AccountingCost"`
@@ -374,7 +375,7 @@ type Item struct {
 
 // ItemIdentification represents an item identification
 type ItemIdentification struct {
-	ID *string `xml:"ID"`
+	ID *IDType `xml:"ID"`
 }
 
 // CommodityClassification represents a commodity classification
@@ -384,10 +385,10 @@ type CommodityClassification struct {
 
 // CodeType represents a code with associated metadata
 type CodeType struct {
-	ListID        string `xml:"listID,attr"`
-	ListVersionID string `xml:"listVersionID,attr"`
-	Name          string `xml:"name,attr"`
-	Value         string `xml:",chardata"`
+	ListID        *string `xml:"listID,attr"`
+	ListVersionID *string `xml:"listVersionID,attr"`
+	Name          *string `xml:"name,attr"`
+	Value         string  `xml:",chardata"`
 }
 
 // ClassifiedTaxCategory represents a classified tax category
