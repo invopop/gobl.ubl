@@ -8,7 +8,7 @@ import (
 )
 
 // Define tests for the ParseXMLLines function
-func TestParseUtoGLines(t *testing.T) {
+func TestGetLines(t *testing.T) {
 	// Basic Invoice 1
 	t.Run("UBL_example1.xml", func(t *testing.T) {
 		doc, err := LoadTestXMLDoc("UBL_example1.xml")

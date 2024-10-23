@@ -49,7 +49,7 @@ func GetOutPath() string {
 
 // GetTestDataPath returns the path to the `test/data/ctog` folder
 func GetTestDataPath() string {
-	return filepath.Join(getRootFolder(), "test", "data", "ctog")
+	return filepath.Join(getRootFolder(), "test", "data", "utog")
 }
 
 // TODO: adapt to new folder structure

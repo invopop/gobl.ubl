@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseUtoGDelivery(t *testing.T) {
+func TestGetDelivery(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)

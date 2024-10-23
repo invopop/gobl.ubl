@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseCtoGPayment(t *testing.T) {
+func TestGetPayment(t *testing.T) {
 	// Read the XML file
 	doc, err := LoadTestXMLDoc("invoice-test-4.xml")
 	require.NoError(t, err)

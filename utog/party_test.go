@@ -7,7 +7,7 @@ import (
 )
 
 // Define tests for the ParseParty function
-func TestParseUtoGParty(t *testing.T) {
+func TestGetParty(t *testing.T) {
 	t.Run("UBL_example1.xml", func(t *testing.T) {
 		doc, err := LoadTestXMLDoc("UBL_example1.xml")
 		require.NoError(t, err)

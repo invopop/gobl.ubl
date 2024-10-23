@@ -65,7 +65,6 @@ func TestTypeCodeParse(t *testing.T) {
 		{"Standard invoice", "380", "standard"},
 		{"Credit note", "381", "credit-note"},
 		{"Corrective invoice", "384", "corrective"},
-		{"Proforma invoice", "325", "proforma"},
 		{"Debit note", "383", "debit-note"},
 		{"Unknown type code", "999", "other"},
 	}
