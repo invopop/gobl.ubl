@@ -1,21 +1,21 @@
 package utog
 
 import (
-	"regexp"
-
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 )
 
-var onlyDigitsRegex = regexp.MustCompile(`\D`)
-
 func (c *Conversor) getParty(party *Party) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
 		p.Name = *party.PartyLegalEntity.RegistrationName
+	}
+
+	if party.PartyName != nil {
+		p.Alias = party.PartyName.Name
 	}
 
 	if party.Contact != nil && party.Contact.Name != nil {
@@ -42,7 +42,6 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 				},
 			}
 		}
-
 		if party.Contact.ElectronicMail != nil {
 			p.Emails = []*org.Email{
 				{
@@ -50,6 +49,23 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 				},
 			}
 		}
+	}
+
+	if party.PartyLegalEntity != nil && party.PartyLegalEntity.CompanyID != nil {
+		if p.Identities == nil {
+			p.Identities = make([]*org.Identity, 0)
+		}
+		id := &org.Identity{
+			Code:  cbc.Code(party.PartyLegalEntity.CompanyID.Value),
+			Label: "CompanyID",
+		}
+		if party.PartyLegalEntity.CompanyID.SchemeID != nil {
+			id.Label = *party.PartyLegalEntity.CompanyID.SchemeID
+		}
+		if party.PartyLegalEntity.CompanyID.SchemeName != nil {
+			id.Label = *party.PartyLegalEntity.CompanyID.SchemeName
+		}
+		p.Identities = append(p.Identities, id)
 	}
 
 	if party.PartyTaxScheme != nil {
@@ -60,14 +76,17 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 				case "VAT":
 					p.TaxID = &tax.Identity{
 						Country: l10n.TaxCountryCode(party.PostalAddress.Country.IdentificationCode),
-						Code:    cbc.Code(onlyDigitsRegex.ReplaceAllString(*taxReg.CompanyID, "")),
+						Code:    cbc.Code(*taxReg.CompanyID),
 					}
 				default:
-					identity := &org.Identity{
+					id := &org.Identity{
 						Country: l10n.ISOCountryCode(party.PostalAddress.Country.IdentificationCode),
 						Code:    cbc.Code(*taxReg.CompanyID),
 					}
-					p.Identities = append(p.Identities, identity)
+					if p.Identities == nil {
+						p.Identities = make([]*org.Identity, 0)
+					}
+					p.Identities = append(p.Identities, id)
 				}
 			}
 		}
@@ -76,7 +95,8 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 	if party.PartyIdentification != nil {
 		for i, id := range party.PartyIdentification {
 			p.Identities = append(p.Identities, &org.Identity{
-				Code: cbc.Code(id.ID.Value),
+				Code:  cbc.Code(id.ID.Value),
+				Label: "Party Identification",
 			})
 			if id.ID.SchemeID != nil {
 				p.Identities[i].Label = *id.ID.SchemeID

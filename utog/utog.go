@@ -95,17 +95,25 @@ func (c *Conversor) NewInvoice(doc *Document) error {
 	if len(doc.BillingReference) > 0 {
 		c.inv.Preceding = make([]*org.DocumentRef, 0, len(doc.BillingReference))
 		for _, ref := range doc.BillingReference {
-			docRef := &org.DocumentRef{
-				Code: cbc.Code(ref.InvoiceDocumentReference.ID),
+			var docRef *org.DocumentRef
+			var err error
+
+			switch {
+			case ref.InvoiceDocumentReference != nil:
+				docRef, err = c.getReference(ref.InvoiceDocumentReference)
+			case ref.SelfBilledInvoiceDocumentReference != nil:
+				docRef, err = c.getReference(ref.SelfBilledInvoiceDocumentReference)
+			case ref.CreditNoteDocumentReference != nil:
+				docRef, err = c.getReference(ref.CreditNoteDocumentReference)
+			case ref.AdditionalDocumentReference != nil:
+				docRef, err = c.getReference(ref.AdditionalDocumentReference)
 			}
-			if ref.InvoiceDocumentReference.IssueDate != nil {
-				refDate, err := ParseDate(*ref.InvoiceDocumentReference.IssueDate)
-				if err != nil {
-					return err
-				}
-				docRef.IssueDate = &refDate
+			if err != nil {
+				return err
 			}
-			c.inv.Preceding = append(c.inv.Preceding, docRef)
+			if docRef != nil {
+				c.inv.Preceding = append(c.inv.Preceding, docRef)
+			}
 		}
 	}
 

@@ -85,14 +85,20 @@ type OrderReference struct {
 }
 
 type BillingReference struct {
-	InvoiceDocumentReference DocumentReference `xml:"InvoiceDocumentReference"`
+	InvoiceDocumentReference           *DocumentReference `xml:"InvoiceDocumentReference"`
+	SelfBilledInvoiceDocumentReference *DocumentReference `xml:"SelfBilledInvoiceDocumentReference"`
+	CreditNoteDocumentReference        *DocumentReference `xml:"CreditNoteDocumentReference"`
+	AdditionalDocumentReference        *DocumentReference `xml:"AdditionalDocumentReference"`
 }
 
 type DocumentReference struct {
-	ID           string      `xml:"ID"`
-	IssueDate    *string     `xml:"IssueDate"`
-	DocumentType string      `xml:"DocumentType"`
-	Attachment   *Attachment `xml:"Attachment"`
+	ID                  IDType      `xml:"ID"`
+	IssueDate           *string     `xml:"IssueDate"`
+	DocumentTypeCode    *string     `xml:"DocumentTypeCode"`
+	DocumentType        *string     `xml:"DocumentType"`
+	Attachment          *Attachment `xml:"Attachment"`
+	DocumentDescription *string     `xml:"DocumentDescription"`
+	ValidityPeriod      *Period     `xml:"ValidityPeriod"`
 }
 
 type Attachment struct {
@@ -178,7 +184,7 @@ type TaxScheme struct {
 
 type PartyLegalEntity struct {
 	RegistrationName *string `xml:"RegistrationName"`
-	CompanyID        *string `xml:"CompanyID"`
+	CompanyID        *IDType `xml:"CompanyID"`
 	CompanyLegalForm *string `xml:"CompanyLegalForm"`
 }
 
