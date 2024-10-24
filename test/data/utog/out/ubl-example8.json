@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be3a-0c84-721d-ab9d-c4959e4aba5d",
+    "uuid": "0192be93-0b0c-7234-abe6-e05203f7be2b",
     "dig": {
       "alg": "sha256",
-      "val": "120628b42cc8742b613d50166d19663899529b400add018179211fe76efb1ffe"
+      "val": "e83fca7eecc439d1d44a81469052f4efdd6ae396918e490735bf840edfa9e1d3"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192be3a-0c84-72af-85c5-83ad2b88bc3e",
+    "uuid": "0192be93-0b0c-72ac-9edf-8fb7693bf50f",
     "type": "standard",
     "code": "1100512149",
     "issue_date": "2014-11-10",
@@ -331,10 +331,6 @@
     "notes": [
       {
         "text": "Periodieke afrekening\n        U vindt een toelichting op uw factuur via www.enexis.nl/factuur_grootzakelijk\n        Op alle diensten en overeenkomsten zijn de algemene voorwaarden aansluiting en\n        transport grootverbruik elektriciteit, respectievelijk gas van toepassing\n        www.enexis.nl"
-      }
-    ]
-  }
-}n        www.enexis.nl"
       }
     ]
   }

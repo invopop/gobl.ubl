@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be3a-0c5a-7070-be6c-0fc8301a5eb8",
+    "uuid": "0192be93-0aea-7bc5-8daa-37fb4f3c44ed",
     "dig": {
       "alg": "sha256",
-      "val": "6e370419ed8d6a01e03cbfe4184aafacb35d63e13a3d51935fdac06402fdfd52"
+      "val": "654093c48cf5c7aabb4b54e94d3bb2fd27a5d832102a215a52a4aa4a172cfe20"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be3a-0c5a-70e2-93cf-39fda065220e",
+    "uuid": "0192be93-0aea-7c5c-a701-333be96fff55",
     "type": "standard",
     "code": "INVOICE_test_7",
     "issue_date": "2013-03-11",
@@ -158,18 +158,6 @@
       "tax": "0.00",
       "total_with_tax": "3200.00",
       "payable": "3200.00"
-    },
-    "notes": [
-      {
-        "text": "Testscenario 7"
-      }
-    ]
-  }
-}text": "Testscenario 7"
-      }
-    ]
-  }
-}able": "3200.00"
     },
     "notes": [
       {

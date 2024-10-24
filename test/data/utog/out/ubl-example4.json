@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be3a-0bea-7118-80a3-11665d35351f",
+    "uuid": "0192be93-0a86-763e-a587-4787b9b25b70",
     "dig": {
       "alg": "sha256",
-      "val": "f342d5b93b9b8556b9f9b40fc8046d99674a94856db97314f660d1350fab993c"
+      "val": "aeb0e101299997224d1e55f24230ac847d08b0ab7c9df48975d12164cb296f40"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be3a-0bea-7185-89b4-a2cdde334ad5",
+    "uuid": "0192be93-0a86-76d4-ac15-4e981f46fbbf",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",
@@ -190,18 +190,6 @@
         "sum": "675.00"
       },
       "tax": "675.00",
-      "total_with_tax": "4675.00",
-      "payable": "4675.00"
-    },
-    "notes": [
-      {
-        "text": "Ordered through our website"
-      }
-    ]
-  }
-}    ]
-  }
-}: "675.00",
       "total_with_tax": "4675.00",
       "payable": "4675.00"
     },
