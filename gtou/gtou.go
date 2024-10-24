@@ -5,9 +5,8 @@ import (
 	"fmt"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -47,29 +46,28 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 
 	// Create the UBL document
 	c.doc = &Document{
-		CACNamespace:         CAC,
-		CBCNamespace:         CBC,
-		QDTNamespace:         QDT,
-		UDTNamespace:         UDT,
-		CCTSNamespace:        CCTS,
-		CustomizationID:      "urn:cen.eu:en16931:2017",
-		ProfileID:            "Invoicing on purchase order",
-		ID:                   invoiceNumber(inv.Series, inv.Code),
-		IssueDate:            formatDate(inv.IssueDate),
-		InvoiceTypeCode:      invoiceTypeCode(inv),
-		DocumentCurrencyCode: string(inv.Currency),
+		CACNamespace:            CAC,
+		CBCNamespace:            CBC,
+		QDTNamespace:            QDT,
+		UDTNamespace:            UDT,
+		CCTSNamespace:           CCTS,
+		CustomizationID:         "urn:cen.eu:en16931:2017",
+		ProfileID:               "Invoicing on purchase order",
+		ID:                      invoiceNumber(inv.Series, inv.Code),
+		IssueDate:               formatDate(inv.IssueDate),
+		InvoiceTypeCode:         invoiceTypeCode(inv),
+		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: newSupplier(inv.Supplier),
 		AccountingCustomerParty: newCustomer(inv.Customer),
-		LegalMonetaryTotal: createMonetaryTotal(inv.MonetaryTotal),
-		InvoiceLine:        createInvoiceLines(inv.Lines),
+		LegalMonetaryTotal:      createMonetaryTotal(inv.MonetaryTotal),
+		InvoiceLine:             createInvoiceLines(inv.Lines),
 	}
 
-
 	// DueDate:              formatDate(inv.DueDate),
-	PaymentMeans:       createPaymentMeans(inv.PaymentMeans),
-	PaymentTerms:       createPaymentTerms(inv.PaymentTerms),
-	AllowanceCharge:    createAllowanceCharges(inv.AllowanceCharges),
-	TaxTotal:           createTaxTotals(inv.TaxTotals),
+	// PaymentMeans:       createPaymentMeans(inv.PaymentMeans),
+	// PaymentTerms:       createPaymentTerms(inv.PaymentTerms),
+	// AllowanceCharge:    createAllowanceCharges(inv.AllowanceCharges),
+	// TaxTotal:           createTaxTotals(inv.TaxTotals),
 
 	if len(inv.Payment.Terms.DueDates) > 0 {
 		c.doc.DueDate = formatDate(inv.Payment.Terms.DueDates[0])
@@ -79,14 +77,12 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		c.doc.PayeeParty = createPayeeParty(inv.Payment.Payee)
 	}
 
-
 	if len(inv.Notes) > 0 {
 		c.doc.Note = make([]string, len(inv.Notes))
 		for i, note := range inv.Notes {
 			c.doc.Note[i] = note.Text
 		}
 	}
-
 
 	if inv.Ordering != nil {
 		err := c.getOrdering(inv.Ordering)

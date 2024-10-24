@@ -7,6 +7,10 @@ import (
 )
 
 func (c *Conversor) createInvoiceLines(inv *bill.Invoice) error {
+	if len(inv.Lines) == 0 {
+		return nil
+	}
+
 	var invoiceLines []InvoiceLine
 
 	for _, line := range inv.Lines {
