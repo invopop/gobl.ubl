@@ -1,6 +1,8 @@
 package gtou
 
 import (
+	"strconv"
+
 	"github.com/invopop/gobl/bill"
 )
 
@@ -8,67 +10,101 @@ func (c *Conversor) createInvoiceLines(inv *bill.Invoice) error {
 	var invoiceLines []InvoiceLine
 
 	for _, line := range inv.Lines {
-		invoiceLines = append(invoiceLines, InvoiceLine{
-			ID:               line.ID,
-			Note:             line.Notes,
-			InvoicedQuantity: &Quantity{UnitCode: line.UnitCode, Value: line.Quantity},
+		invoiceLine := InvoiceLine{
+			ID: strconv.Itoa(line.Index),
+			InvoicedQuantity: &Quantity{
+				UnitCode: string(line.Item.Unit.UNECE()),
+				Value:    line.Quantity.String(),
+			},
 			LineExtensionAmount: Amount{
-				CurrencyID: line.Currency,
-				Value:      line.LineExtensionAmount,
+				CurrencyID: line.Item.Currency.String(),
+				Value:      line.Total.String(),
 			},
-			AccountingCost: line.AccountingCost,
-			InvoicePeriod: &Period{
-				StartDate: line.Period.StartDate.Format("2006-01-02"),
-				EndDate:   line.Period.EndDate.Format("2006-01-02"),
-			},
-			OrderLineReference: &OrderLineReference{
-				LineID: line.OrderLineID,
-			},
-			AllowanceCharge: createAllowanceCharges(line.AllowanceCharges),
-			Item: &Item{
-				Description: line.ItemDescription,
-				Name:        line.ItemName,
-				SellersItemIdentification: &ItemIdentification{
-					ID: &IDType{Value: line.SellersItemID},
-				},
-				StandardItemIdentification: &ItemIdentification{
-					ID: &IDType{Value: line.StandardItemID},
-				},
-				OriginCountry: &Country{
-					IdentificationCode: line.OriginCountryCode,
-				},
-				CommodityClassification: &[]CommodityClassification{
-					{ItemClassificationCode: &IDType{Value: line.CommodityCode}},
-				},
-				ClassifiedTaxCategory: &ClassifiedTaxCategory{
-					ID:      line.TaxCategoryID,
-					Percent: line.TaxPercent,
-					TaxScheme: TaxScheme{
-						ID: line.TaxSchemeID,
-					},
-				},
-				AdditionalItemProperty: &[]AdditionalItemProperty{
-					{Name: "Color", Value: line.ItemColor},
-				},
-			},
-			Price: &Price{
-				PriceAmount: Amount{
-					CurrencyID: line.Currency,
-					Value:      line.PriceAmount,
-				},
-				BaseAmount: &Amount{
-					CurrencyID: line.Currency,
-					Value:      line.BaseAmount,
-				},
-				AllowanceCharge: &AllowanceCharge{
-					ChargeIndicator: line.PriceAllowanceCharge.ChargeIndicator,
-					Amount: Amount{
-						CurrencyID: line.Currency,
-						Value:      line.PriceAllowanceCharge.Amount,
-					},
-				},
-			},
-		})
+		}
+
+		if len(line.Notes) > 0 {
+			var notes []string
+			for _, note := range line.Notes {
+				notes = append(notes, note.Text)
+			}
+			invoiceLine.Note = notes
+		}
+
+		if len(line.Charges) > 0 || len(line.Discounts) > 0 {
+			invoiceLine.AllowanceCharge = makeLineCharges(line.Charges, line.Discounts)
+		}
+
+		if line.Item != nil {
+			item := &Item{}
+
+			if line.Item.Description != "" {
+				item.Description = line.Item.Description
+			}
+
+			if line.Item.Name != "" {
+				item.Name = line.Item.Name
+			}
+
+			if line.Item.Origin != "" {
+				item.OriginCountry = &Country{
+					IdentificationCode: line.Item.Origin.String(),
+				}
+			}
+
+			if line.Item.Meta != nil {
+				var properties []AdditionalItemProperty
+				for key, value := range line.Item.Meta {
+					properties = append(properties, AdditionalItemProperty{Name: key.String(), Value: value})
+				}
+				item.AdditionalItemProperty = &properties
+			}
+
+			invoiceLine.Item = item
+		}
+
+		invoiceLines = append(invoiceLines, invoiceLine)
 	}
+	c.doc.InvoiceLine = invoiceLines
 	return nil
+}
+
+func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount) []*AllowanceCharge {
+	var allowanceCharges []*AllowanceCharge
+	for _, charge := range charges {
+		allowanceCharge := &AllowanceCharge{
+			ChargeIndicator: true,
+			Amount: Amount{
+				Value: charge.Amount.String(),
+			},
+		}
+		if charge.Code != "" {
+			allowanceCharge.AllowanceChargeReasonCode = charge.Code
+		}
+		if charge.Reason != "" {
+			allowanceCharge.AllowanceChargeReason = charge.Reason
+		}
+		if charge.Percent != nil {
+			allowanceCharge.MultiplierFactorNumeric = charge.Percent.String()
+		}
+		allowanceCharges = append(allowanceCharges, allowanceCharge)
+	}
+	for _, discount := range discounts {
+		allowanceCharge := &AllowanceCharge{
+			ChargeIndicator: false,
+			Amount: Amount{
+				Value: discount.Amount.String(),
+			},
+		}
+		if discount.Code != "" {
+			allowanceCharge.AllowanceChargeReasonCode = discount.Code
+		}
+		if discount.Reason != "" {
+			allowanceCharge.AllowanceChargeReason = discount.Reason
+		}
+		if discount.Percent != nil {
+			allowanceCharge.MultiplierFactorNumeric = discount.Percent.String()
+		}
+		allowanceCharges = append(allowanceCharges, allowanceCharge)
+	}
+	return allowanceCharges
 }

@@ -60,21 +60,12 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		DocumentCurrencyCode: string(inv.Currency),
 		AccountingSupplierParty: newSupplier(inv.Supplier),
 		AccountingCustomerParty: newCustomer(inv.Customer),
-		// Delivery:                createDelivery(inv.Delivery),
 		LegalMonetaryTotal: createMonetaryTotal(inv.MonetaryTotal),
 		InvoiceLine:        createInvoiceLines(inv.Lines),
 	}
-	OrderReference:       createOrderReference(inv),
-	ContractDocumentReference: []DocumentReference{
-		{ID: "Contract321"},
-	},
-	AdditionalDocumentReference: []DocumentReference{
-		{ID: "Doc1", DocumentDescription: "Timesheet"},
-		{ID: "Doc2", DocumentDescription: "EHF specification"},
-	},
-	AccountingCost:       "Project cost code 123",
-	Note:                 []string{"Ordered in our booth at the convention"},
-	DueDate:              formatDate(inv.DueDate),
+
+
+	// DueDate:              formatDate(inv.DueDate),
 	PaymentMeans:       createPaymentMeans(inv.PaymentMeans),
 	PaymentTerms:       createPaymentTerms(inv.PaymentTerms),
 	AllowanceCharge:    createAllowanceCharges(inv.AllowanceCharges),
@@ -88,16 +79,14 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		c.doc.PayeeParty = createPayeeParty(inv.Payment.Payee)
 	}
 
-	// If both ordering.seller and seller are present, the original seller is used
-	// as the tax representative.
-	if inv.Ordering != nil && inv.Ordering.Seller != nil {
-		c.doc.TaxRepresentativeParty = c.doc.Seller.Party
-		c.doc.Seller = newSeller(inv.Ordering.Seller)
+
+	if len(inv.Notes) > 0 {
+		c.doc.Note = make([]string, len(inv.Notes))
+		for i, note := range inv.Notes {
+			c.doc.Note[i] = note.Text
+		}
 	}
 
-	if inv.Ordering != nil && inv.Ordering.Period != nil {
-		c.doc.InvoicePeriod = []Period{makePeriod(inv.Ordering.Period)}
-	}
 
 	if inv.Ordering != nil {
 		err := c.getOrdering(inv.Ordering)

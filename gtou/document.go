@@ -375,7 +375,7 @@ type InvoiceLine struct {
 	AccountingCost      string              `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
-	AllowanceCharge     *[]AllowanceCharge  `xml:"cac:AllowanceCharge"`
+	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
 	Item                *Item               `xml:"cac:Item"`
 	Price               *Price              `xml:"cac:Price"`
 }
