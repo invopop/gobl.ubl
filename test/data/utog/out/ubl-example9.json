@@ -1,0 +1,134 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0192be93-0b33-7dda-ad9d-9f7762cc877e",
+    "dig": {
+      "alg": "sha256",
+      "val": "6a4f7b79879319451238b87f0904b959e3d461e890a4664ab7e556a94f7659b0"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "$regime": "NL",
+    "uuid": "0192be93-0b33-7e50-bcda-764422033caa",
+    "type": "standard",
+    "code": "20150483",
+    "issue_date": "2015-04-01",
+    "currency": "EUR",
+    "supplier": {
+      "name": "Bluem BV",
+      "tax_id": {
+        "country": "NL",
+        "code": "809163160B01"
+      },
+      "identities": [
+        {
+          "label": "CompanyID",
+          "code": "32081330 Amersfoort"
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Lindeboomseweg 41",
+          "locality": "Amersfoort",
+          "code": "3825 AL",
+          "country": "NL"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "info@bluem.nl"
+        }
+      ],
+      "telephones": [
+        {
+          "num": "033-4549055"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Provide Verzekeringen",
+      "addresses": [
+        {
+          "street": "Henry Dunantweg 42",
+          "locality": "Alphen aan den Rijn",
+          "code": "2402 NR",
+          "country": "NL"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "3",
+        "item": {
+          "name": "IExpress licentiekosten",
+          "price": "49.00",
+          "unit": "mon",
+          "meta": {
+            "verbruikscategorie": "Start"
+          }
+        },
+        "sum": "147.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "21%"
+          }
+        ],
+        "total": "147.00"
+      }
+    ],
+    "ordering": {
+      "period": {
+        "start": "2016-04-01",
+        "end": "2016-06-30"
+      },
+      "contracts": [
+        {
+          "code": "iExpress 20110412"
+        }
+      ]
+    },
+    "payment": {
+      "instructions": {
+        "key": "credit-transfer",
+        "ref": "2015 0483 0000 0000",
+        "credit_transfer": [
+          {
+            "iban": "NL13RABO0377815500",
+            "bic": "RABONL2U"
+          }
+        ]
+      }
+    },
+    "totals": {
+      "sum": "147.00",
+      "total": "147.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "base": "147.00",
+                "percent": "21%",
+                "amount": "30.87"
+              }
+            ],
+            "amount": "30.87"
+          }
+        ],
+        "sum": "30.87"
+      },
+      "tax": "30.87",
+      "total_with_tax": "177.87",
+      "payable": "177.87"
+    },
+    "notes": [
+      {
+        "text": "Vriendelijk verzoeken wij u ervoor te zorgen dat het bedrag voor de vervaldatum op onze rekening staat onder vermelding van\n        het factuurnummer. Het bankrekeningnummer is 37.78.15.500, Rabobank, t.n.v. Bluem te Amersfoort. Reclames gaarne binnen\n        10 dagen. Gelieve bij navraag en correspondentie uw firma naam en factuurnummer vermelden. \n        "
+      }
+    ]
+  }
+}

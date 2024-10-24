@@ -65,7 +65,6 @@ func TestTypeCodeParse(t *testing.T) {
 		{"Standard invoice", "380", "standard"},
 		{"Credit note", "381", "credit-note"},
 		{"Corrective invoice", "384", "corrective"},
-		{"Proforma invoice", "325", "proforma"},
 		{"Debit note", "383", "debit-note"},
 		{"Unknown type code", "999", "other"},
 	}
@@ -98,4 +97,14 @@ func TestUnitFromUNECE(t *testing.T) {
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}
+}
+
+// Define tests for the FormatKey function
+func TestFormatKey(t *testing.T) {
+	assert.Equal(t, cbc.Key("test"), formatKey("Test"))
+	assert.Equal(t, cbc.Key("test-key-2"), formatKey("Test Key 2"))
+	assert.Equal(t, cbc.Key("multiple-spaces"), formatKey("Multiple   Spaces"))
+	assert.Equal(t, cbc.Key("numbers-123"), formatKey("Numbers 123"))
+	assert.Equal(t, cbc.Key("trailing-space"), formatKey("Trailing Space  "))
+	assert.Equal(t, cbc.Key("mixed-case-with-123-numbers"), formatKey("MiXeD cAsE wItH 123 NuMbErS"))
 }

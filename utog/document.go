@@ -242,11 +242,27 @@ type DeliveryTerms struct {
 
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
-	PaymentMeansCode      string            `xml:"PaymentMeansCode"`
+	PaymentMeansCode      IDType            `xml:"PaymentMeansCode"`
 	PaymentID             *string           `xml:"PaymentID"`
 	PayeeFinancialAccount *FinancialAccount `xml:"PayeeFinancialAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"PayerFinancialAccount"`
+	CardAccount           *CardAccount      `xml:"CardAccount"`
 	InstructionID         *string           `xml:"InstructionID"`
+	InstructionNote       []*string         `xml:"InstructionNote"`
+	PaymentMandate        *PaymentMandate   `xml:"PaymentMandate"`
+}
+
+// PaymentMandate represents a payment mandate
+type PaymentMandate struct {
+	ID                    IDType            `xml:"ID"`
+	PayerFinancialAccount *FinancialAccount `xml:"PayerFinancialAccount"`
+}
+
+// CardAccount represents a card account
+type CardAccount struct {
+	PrimaryAccountNumberID *string `xml:"PrimaryAccountNumberID"`
+	NetworkID              *string `xml:"NetworkID"`
+	HolderName             *string `xml:"HolderName"`
 }
 
 // FinancialAccount represents a financial account
@@ -403,8 +419,8 @@ type ClassifiedTaxCategory struct {
 
 // AdditionalItemProperty represents an additional property of an item
 type AdditionalItemProperty struct {
-	Name  string `xml:"Name"`
-	Value string `xml:"Value"`
+	Name  string  `xml:"Name"`
+	Value *string `xml:"Value"`
 }
 
 // Price represents the price of an item

@@ -54,7 +54,7 @@ func (c *Conversor) getPayment(doc *Document) error {
 	}
 
 	if len(doc.PaymentMeans) > 0 {
-		payment.Instructions = parsePaymentMeans(&doc.PaymentMeans[0])
+		payment.Instructions = c.getInstructions(&doc.PaymentMeans[0])
 	}
 
 	if len(doc.PrepaidPayment) > 0 {
@@ -79,39 +79,4 @@ func (c *Conversor) getPayment(doc *Document) error {
 	}
 	c.inv.Payment = payment
 	return nil
-}
-
-func parsePaymentMeans(paymentMeans *PaymentMeans) *pay.Instructions {
-	instructions := &pay.Instructions{
-		Key: PaymentMeansTypeCodeParse(paymentMeans.PaymentMeansCode),
-	}
-
-	if paymentMeans.PaymentID != nil {
-		instructions.Detail = *paymentMeans.PaymentID
-	}
-
-	if paymentMeans.PayeeFinancialAccount != nil {
-		account := paymentMeans.PayeeFinancialAccount
-		if account.ID != nil {
-			instructions.CreditTransfer = []*pay.CreditTransfer{
-				{
-					IBAN: *account.ID,
-				},
-			}
-		}
-		if account.Name != nil {
-			if len(instructions.CreditTransfer) > 0 {
-				instructions.CreditTransfer[0].Name = *account.Name
-			}
-		}
-		if paymentMeans.PayeeFinancialAccount != nil && paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
-			if paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID != nil {
-				if len(instructions.CreditTransfer) > 0 {
-					instructions.CreditTransfer[0].BIC = *paymentMeans.PayeeFinancialAccount.FinancialInstitutionBranch.ID
-				}
-			}
-		}
-	}
-
-	return instructions
 }

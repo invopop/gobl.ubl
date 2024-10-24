@@ -1,0 +1,202 @@
+{
+  "$schema": "https://gobl.org/draft-0/envelope",
+  "head": {
+    "uuid": "0192be93-0a86-763e-a587-4787b9b25b70",
+    "dig": {
+      "alg": "sha256",
+      "val": "aeb0e101299997224d1e55f24230ac847d08b0ab7c9df48975d12164cb296f40"
+    }
+  },
+  "doc": {
+    "$schema": "https://gobl.org/draft-0/bill/invoice",
+    "uuid": "0192be93-0a86-76d4-ac15-4e981f46fbbf",
+    "type": "standard",
+    "code": "TOSL110",
+    "issue_date": "2013-04-10",
+    "currency": "DKK",
+    "supplier": {
+      "name": "SellerCompany",
+      "tax_id": {
+        "country": "DK",
+        "code": "16356706"
+      },
+      "identities": [
+        {
+          "label": "CompanyID",
+          "code": "DK16356706"
+        },
+        {
+          "label": "0088",
+          "code": "5790000436101"
+        }
+      ],
+      "people": [
+        {
+          "name": {
+            "given": "Anthon Larsen"
+          }
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Main street 2, Building 4",
+          "locality": "Big city",
+          "code": "54321",
+          "country": "DK"
+        }
+      ],
+      "emails": [
+        {
+          "addr": "antonio@SubscriptionsSeller.dk"
+        }
+      ],
+      "telephones": [
+        {
+          "num": "+4598989898"
+        }
+      ]
+    },
+    "customer": {
+      "name": "Buyercompany ltd",
+      "identities": [
+        {
+          "label": "0088",
+          "code": "5790000436057"
+        }
+      ],
+      "people": [
+        {
+          "name": {
+            "given": "John Hansen"
+          }
+        }
+      ],
+      "addresses": [
+        {
+          "street": "Anystreet, Building 1",
+          "locality": "Anytown",
+          "code": "101",
+          "country": "DK"
+        }
+      ]
+    },
+    "lines": [
+      {
+        "i": 1,
+        "quantity": "1000",
+        "item": {
+          "ref": "JB007",
+          "name": "Printing paper",
+          "description": "Printing paper, 2mm",
+          "price": "1.00",
+          "unit": "item"
+        },
+        "sum": "1000.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "25%"
+          }
+        ],
+        "total": "1000.00"
+      },
+      {
+        "i": 2,
+        "quantity": "100",
+        "item": {
+          "ref": "JB008",
+          "name": "Parker Pen",
+          "description": "Parker Pen, Black, model Sansa",
+          "price": "5.00",
+          "unit": "item"
+        },
+        "sum": "500.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "25%"
+          }
+        ],
+        "total": "500.00"
+      },
+      {
+        "i": 3,
+        "quantity": "500",
+        "item": {
+          "ref": "JB009",
+          "name": "American Cookies",
+          "price": "5.00",
+          "unit": "item"
+        },
+        "sum": "2500.00",
+        "taxes": [
+          {
+            "cat": "VAT",
+            "percent": "12%"
+          }
+        ],
+        "total": "2500.00"
+      }
+    ],
+    "ordering": {
+      "code": "123"
+    },
+    "payment": {
+      "instructions": {
+        "key": "credit-transfer",
+        "ref": "Payref1",
+        "credit_transfer": [
+          {
+            "iban": "DK1212341234123412"
+          }
+        ]
+      }
+    },
+    "delivery": {
+      "receiver": {
+        "addresses": [
+          {
+            "street": "Deliverystreet",
+            "locality": "Deliverycity",
+            "code": "9000",
+            "country": "DK"
+          }
+        ]
+      },
+      "date": "2013-04-15"
+    },
+    "totals": {
+      "sum": "4000.00",
+      "total": "4000.00",
+      "taxes": {
+        "categories": [
+          {
+            "code": "VAT",
+            "rates": [
+              {
+                "base": "1500.00",
+                "percent": "25%",
+                "amount": "375.00"
+              },
+              {
+                "base": "2500.00",
+                "percent": "12%",
+                "amount": "300.00"
+              }
+            ],
+            "amount": "675.00"
+          }
+        ],
+        "sum": "675.00"
+      },
+      "tax": "675.00",
+      "total_with_tax": "4675.00",
+      "payable": "4675.00"
+    },
+    "notes": [
+      {
+        "text": "Ordered through our website"
+      }
+    ]
+  }
+}
