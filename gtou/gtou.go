@@ -46,19 +46,19 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 
 	// Create the UBL document
 	c.doc = &Document{
-		CACNamespace:            CAC,
-		CBCNamespace:            CBC,
-		QDTNamespace:            QDT,
-		UDTNamespace:            UDT,
-		CCTSNamespace:           CCTS,
+		CACNamespace: CAC,
+		CBCNamespace: CBC,
+		// QDTNamespace:            QDT,
+		// UDTNamespace:            UDT,
+		// CCTSNamespace:           CCTS,
 		CustomizationID:         "urn:cen.eu:en16931:2017",
 		ProfileID:               "Invoicing on purchase order",
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		InvoiceTypeCode:         invoiceTypeCode(inv),
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: newSupplier(inv.Supplier),
-		AccountingCustomerParty: newCustomer(inv.Customer),
+		AccountingSupplierParty: SupplierParty{Party: c.newParty(inv.Supplier)},
+		AccountingCustomerParty: CustomerParty{Party: c.newParty(inv.Customer)},
 		LegalMonetaryTotal:      createMonetaryTotal(inv.MonetaryTotal),
 		InvoiceLine:             createInvoiceLines(inv.Lines),
 	}
