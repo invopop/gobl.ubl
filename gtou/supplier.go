@@ -1,66 +1,106 @@
 package gtou
 
 import (
-	"github.com/invopop/gobl/bill"
+	"fmt"
+
+	"github.com/invopop/gobl/org"
 )
 
-// createSupplierParty creates the SupplierParty part of a UBL invoice
-func (c *Conversor) createSupplierParty(inv *bill.Invoice) error {
-	if inv.Supplier == nil {
+func (c *Conversor) newSupplier(supplier *org.Party) error {
+	if supplier == nil {
 		return nil
 	}
 
-	supplier := inv.Supplier
-	c.doc.AccountingSupplierParty = SupplierParty{
+	supplierParty := SupplierParty{
 		Party: Party{
-			PartyIdentification: createPartyIdentification(supplier),
-			PartyName:           createPartyName(supplier),
-			PostalAddress:       createPostalAddress(supplier),
-			PartyTaxScheme:      createPartyTaxScheme(supplier),
-			PartyLegalEntity:    createPartyLegalEntity(supplier),
-			Contact:             createContact(supplier),
+			// PartyIdentification:
+			PartyName: &PartyName{
+				Name: supplier.Name,
+			},
+			PostalAddress:    newAddress(supplier.Addresses),
+			PartyTaxScheme:   createPartyTaxScheme(supplier),
+			PartyLegalEntity: createPartyLegalEntity(supplier),
+			Contact:          createContact(supplier),
 		},
 	}
+	if supplier.TaxID != nil {
+		supplierParty.Party.PartyTaxScheme = []PartyTaxScheme{
+			{
+				CompanyID: supplier.TaxID.String(),
+			},
+		}
+	}
+	if supplier.Name != "" {
+		supplierParty.Party.PartyLegalEntity = &PartyLegalEntity{
+			RegistrationName: supplier.Name,
+		}
+	}
+	c.doc.AccountingSupplierParty = supplierParty
 
 	return nil
 }
 
-func createPartyIdentification(supplier *bill.Supplier) []Identification {
-	return []Identification{
-		{ID: supplier.ID},
+func (c *Conversor) createPartyName(supplier *org.Party) {
+	c.doc.AccountingSupplierParty.Party.PartyName = &PartyName{
+		Name: supplier.Name,
 	}
 }
 
-func createPartyName(supplier *bill.Supplier) *PartyName {
-	return &PartyName{Name: supplier.Name}
-}
-
-func createPostalAddress(supplier *bill.Supplier) *PostalAddress {
-	return &PostalAddress{
-		StreetName: supplier.Address.Street,
-		CityName:   supplier.Address.City,
-		PostalZone: supplier.Address.PostalCode,
-		Country:    &Country{IdentificationCode: supplier.Address.CountryCode},
+func (c *Conversor) createPartyTaxScheme(supplier *org.Party) {
+	c.doc.AccountingSupplierParty.Party.PartyTaxScheme = []PartyTaxScheme{
+		{
+			CompanyID: supplier.TaxID.String(),
+		},
 	}
 }
 
-func createPartyTaxScheme(supplier *bill.Supplier) []PartyTaxScheme {
-	return []PartyTaxScheme{
-		{CompanyID: supplier.TaxID},
+func (c *Conversor) createPartyLegalEntity(supplier *org.Party) {
+	c.doc.AccountingSupplierParty.Party.PartyLegalEntity = &PartyLegalEntity{
+		RegistrationName: supplier.Name,
+	}
+
+}
+
+func (c *Conversor) createContact(supplier *org.Party) {
+	c.doc.AccountingSupplierParty.Party.Contact = &Contact{
+		Name:           contactName(supplier.People[0].Name),
+		Telephone:      supplier.Telephones[0].Number,
+		ElectronicMail: supplier.Emails[0].Address,
 	}
 }
 
-func createPartyLegalEntity(supplier *bill.Supplier) *PartyLegalEntity {
-	return &PartyLegalEntity{
-		RegistrationName: supplier.LegalName,
-		CompanyID:        supplier.CompanyID,
+func newAddress(addresses []*org.Address) *PostalAddress {
+	if len(addresses) == 0 {
+		return nil
 	}
+	// Only return the first address
+	address := addresses[0]
+
+	postalTradeAddress := &PostalAddress{
+		StreetName:           address.Street,
+		AdditionalStreetName: address.StreetExtra,
+		CityName:             address.Locality,
+		PostalZone:           address.Code,
+		CountrySubentity:     address.Region,
+		Country:              &Country{IdentificationCode: string(address.Country)},
+	}
+
+	return postalTradeAddress
 }
 
-func createContact(supplier *bill.Supplier) *Contact {
-	return &Contact{
-		Name:           supplier.ContactName,
-		Telephone:      supplier.ContactPhone,
-		ElectronicMail: supplier.ContactEmail,
+func contactName(personName *org.Name) string {
+	given := personName.Given
+	surname := personName.Surname
+
+	if given == "" && surname == "" {
+		return ""
 	}
+	if given == "" {
+		return surname
+	}
+	if surname == "" {
+		return given
+	}
+
+	return fmt.Sprintf("%s %s", given, surname)
 }

@@ -1,8 +1,8 @@
 package gtou
 
-import "github.com/invopop/gobl/bill"
+import "github.com/invopop/gobl/org"
 
-func (c *Conversor) createCustomerParty(customer *bill.Customer) error {
+func (c *Conversor) newCustomer(customer *org.Party) error {
 	c.doc.AccountingCustomerParty = CustomerParty{
 		Party: Party{
 			PartyIdentification: []Identification{

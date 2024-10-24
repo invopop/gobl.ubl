@@ -6,9 +6,11 @@ import (
 
 // UBL schema constants
 const (
-	CBC = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-	CAC = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-	UBL = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+	CBC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+	CAC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+	QDT  = "urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2"
+	UDT  = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
+	CCTS = "urn:un:unece:uncefact:documentation:2"
 )
 
 // Document represents the root element of a UBL invoice
