@@ -35,8 +35,18 @@ func (c *Conversor) ConvertToUBL(env *gobl.Envelope) (*Document, error) {
 		return nil, fmt.Errorf("invalid type %T", env.Document)
 	}
 
+	err := c.newDocument(inv)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.doc, nil
+}
+
+func (c *Conversor) newDocument(inv *bill.Invoice) error {
+
 	// Create the UBL document
-	doc := &Document{
+	c.doc = &Document{
 		CACNamespace:         CAC,
 		CBCNamespace:         CBC,
 		QDTNamespace:         QDT,
@@ -71,35 +81,42 @@ func (c *Conversor) ConvertToUBL(env *gobl.Envelope) (*Document, error) {
 	TaxTotal:           createTaxTotals(inv.TaxTotals),
 
 	if len(inv.Payment.Terms.DueDates) > 0 {
-		doc.DueDate = formatDate(inv.Payment.Terms.DueDates[0])
+		c.doc.DueDate = formatDate(inv.Payment.Terms.DueDates[0])
 	}
 
 	if inv.Payment != nil && inv.Payment.Payee != nil {
-		doc.PayeeParty = createPayeeParty(inv.Payment.Payee)
+		c.doc.PayeeParty = createPayeeParty(inv.Payment.Payee)
 	}
 
 	// If both ordering.seller and seller are present, the original seller is used
 	// as the tax representative.
 	if inv.Ordering != nil && inv.Ordering.Seller != nil {
-		doc.TaxRepresentativeParty = doc.Seller.Party
-		doc.Seller = newSeller(inv.Ordering.Seller)
+		c.doc.TaxRepresentativeParty = c.doc.Seller.Party
+		c.doc.Seller = newSeller(inv.Ordering.Seller)
 	}
 
 	if inv.Ordering != nil && inv.Ordering.Period != nil {
-		doc.InvoicePeriod = []Period{makePeriod(inv.Ordering.Period)}
+		c.doc.InvoicePeriod = []Period{makePeriod(inv.Ordering.Period)}
+	}
+
+	if inv.Ordering != nil {
+		err := c.getOrdering(inv.Ordering)
+		if err != nil {
+			return err
+		}
 	}
 
 	err := c.createCustomerParty(inv.Customer)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = c.createDelivery(inv.Delivery)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return doc, nil
+	return nil
 }
 
 func invoiceNumber(series cbc.Code, code cbc.Code) string {
