@@ -15,7 +15,11 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 	}
 
 	if party.PartyName != nil {
-		p.Alias = party.PartyName.Name
+		if p.Name == "" {
+			p.Name = party.PartyName.Name
+		} else {
+			p.Alias = party.PartyName.Name
+		}
 	}
 
 	if party.Contact != nil && party.Contact.Name != nil {
@@ -94,6 +98,9 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 
 	if party.PartyIdentification != nil {
 		for i, id := range party.PartyIdentification {
+			if p.Identities == nil {
+				p.Identities = make([]*org.Identity, 0)
+			}
 			p.Identities = append(p.Identities, &org.Identity{
 				Code:  cbc.Code(id.ID.Value),
 				Label: "Party Identification",

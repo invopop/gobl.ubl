@@ -1,103 +1,25 @@
---- FAIL: TestGetLines (0.01s)
-    --- FAIL: TestGetLines/ubl-example2.xml (0.00s)
-        lines_test.go:58: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/lines_test.go:58
-            	Error:      	"[0xc000484f00 0xc000484fc0 0xc000485080 0xc000485140 0xc000485200]" should have 4 item(s), but has 5
-            	Test:       	TestGetLines/ubl-example2.xml
-        lines_test.go:92: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/lines_test.go:92
+--- FAIL: TestGetParty (0.00s)
+    --- FAIL: TestGetParty/ubl-example2.xml (0.00s)
+        party_test.go:59: 
+            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/party_test.go:59
             	Error:      	Not equal: 
-            	            	expected: "color"
-            	            	actual  : "Black"
+            	            	expected: "987654321MVA"
+            	            	actual  : "NO987654321MVA"
             	            	
             	            	Diff:
             	            	--- Expected
             	            	+++ Actual
-            	            	@@ -1 +1 @@
-            	            	-color
-            	            	+Black
-            	Test:       	TestGetLines/ubl-example2.xml
---- FAIL: TestGetOrdering (0.00s)
-    --- FAIL: TestGetOrdering/ubl-example2.xml (0.00s)
-        ordering_test.go:21: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/ordering_test.go:21
-            	Error:      	Not equal: 
-            	            	expected: string("123")
-            	            	actual  : cbc.Code("123")
-            	Test:       	TestGetOrdering/ubl-example2.xml
-        ordering_test.go:24: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/ordering_test.go:24
-            	Error:      	Not equal: 
-            	            	expected: string("Contract321")
-            	            	actual  : cbc.Code("Contract321")
-            	Test:       	TestGetOrdering/ubl-example2.xml
-    --- FAIL: TestGetOrdering/ubl-example5.xml (0.00s)
-        ordering_test.go:37: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/ordering_test.go:37
-            	Error:      	Not equal: 
-            	            	expected: string("PO4711")
-            	            	actual  : cbc.Code("PO4711")
-            	Test:       	TestGetOrdering/ubl-example5.xml
-        ordering_test.go:40: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/ordering_test.go:40
-            	Error:      	Not equal: 
-            	            	expected: string("2013-05")
-            	            	actual  : cbc.Code("2013-05")
-            	Test:       	TestGetOrdering/ubl-example5.xml
-        ordering_test.go:41: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/ordering_test.go:41
-            	Error:      	Not equal: 
-            	            	expected: string("3544")
-            	            	actual  : cbc.Code("3544")
-            	Test:       	TestGetOrdering/ubl-example5.xml
-        ordering_test.go:42: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/ordering_test.go:42
-            	Error:      	Not equal: 
-            	            	expected: string("5433")
-            	            	actual  : cbc.Code("5433")
-            	Test:       	TestGetOrdering/ubl-example5.xml
---- FAIL: TestGetParty (0.00s)
-    --- FAIL: TestGetParty/UBL_example1.xml (0.00s)
-        party_test.go:13: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/party_test.go:13
-            	Error:      	Received unexpected error:
-            	            	open /home/antonio/workspace/invopop/gobl.ubl/test/data/utog/UBL_example1.xml: no such file or directory
-            	Test:       	TestGetParty/UBL_example1.xml
+            	            	@@ -1,2 +1,2 @@
+            	            	-(cbc.Code) (len=12) "987654321MVA"
+            	            	+(cbc.Code) (len=14) "NO987654321MVA"
+            	            	 
+            	Test:       	TestGetParty/ubl-example2.xml
 --- FAIL: TestGetPayment (0.00s)
     payment_test.go:13: 
         	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/payment_test.go:13
         	Error:      	Received unexpected error:
         	            	open /home/antonio/workspace/invopop/gobl.ubl/test/data/utog/invoice-test-4.xml: no such file or directory
         	Test:       	TestGetPayment
---- FAIL: TestFormatKey (0.00s)
-    utils_test.go:107: 
-        	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/utils_test.go:107
-        	Error:      	Not equal: 
-        	            	expected: "special-chars"
-        	            	actual  : "specialchars"
-        	            	
-        	            	Diff:
-        	            	--- Expected
-        	            	+++ Actual
-        	            	@@ -1,2 +1,2 @@
-        	            	-(cbc.Key) (len=13) "special-chars"
-        	            	+(cbc.Key) (len=12) "specialchars"
-        	            	 
-        	Test:       	TestFormatKey
-    utils_test.go:110: 
-        	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/utils_test.go:110
-        	Error:      	Not equal: 
-        	            	expected: "mixed-case-with-numbers"
-        	            	actual  : "mixed-case-with-123-numbers"
-        	            	
-        	            	Diff:
-        	            	--- Expected
-        	            	+++ Actual
-        	            	@@ -1,2 +1,2 @@
-        	            	-(cbc.Key) (len=23) "mixed-case-with-numbers"
-        	            	+(cbc.Key) (len=27) "mixed-case-with-123-numbers"
-        	            	 
-        	Test:       	TestFormatKey
 FAIL
-FAIL	github.com/invopop/gobl.ubl/utog	0.043s
+FAIL	github.com/invopop/gobl.ubl/utog	0.041s
 FAIL
