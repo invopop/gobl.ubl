@@ -1,25 +1,19 @@
---- FAIL: TestGetParty (0.00s)
-    --- FAIL: TestGetParty/ubl-example2.xml (0.00s)
-        party_test.go:59: 
-            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/party_test.go:59
+--- FAIL: TestGetPayment (0.01s)
+    --- FAIL: TestGetPayment/ubl-example5.xml (0.00s)
+        payment_test.go:51: 
+            	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/payment_test.go:51
             	Error:      	Not equal: 
-            	            	expected: "987654321MVA"
-            	            	actual  : "NO987654321MVA"
+            	            	expected: "989823401"
+            	            	actual  : "DK16356608"
             	            	
             	            	Diff:
             	            	--- Expected
             	            	+++ Actual
             	            	@@ -1,2 +1,2 @@
-            	            	-(cbc.Code) (len=12) "987654321MVA"
-            	            	+(cbc.Code) (len=14) "NO987654321MVA"
+            	            	-(cbc.Code) (len=9) "989823401"
+            	            	+(cbc.Code) (len=10) "DK16356608"
             	            	 
-            	Test:       	TestGetParty/ubl-example2.xml
---- FAIL: TestGetPayment (0.00s)
-    payment_test.go:13: 
-        	Error Trace:	/home/antonio/workspace/invopop/gobl.ubl/utog/payment_test.go:13
-        	Error:      	Received unexpected error:
-        	            	open /home/antonio/workspace/invopop/gobl.ubl/test/data/utog/invoice-test-4.xml: no such file or directory
-        	Test:       	TestGetPayment
+            	Test:       	TestGetPayment/ubl-example5.xml
 FAIL
-FAIL	github.com/invopop/gobl.ubl/utog	0.041s
+FAIL	github.com/invopop/gobl.ubl/utog	0.054s
 FAIL

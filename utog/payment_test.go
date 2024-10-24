@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -21,13 +22,18 @@ func TestGetPayment(t *testing.T) {
 
 		require.NotNil(t, payment.Payee)
 		assert.Equal(t, "Ebeneser Scrooge AS", payment.Payee.Name)
-		assert.Equal(t, "NO", payment.Payee.TaxID.Country)
-		assert.Equal(t, "989823401", payment.Payee.TaxID.Code)
 
-		assert.Equal(t, "2013-06-10", payment.Terms.DueDates[0].Date.Format("2006-01-02"))
-		assert.Equal(t, "30", payment.Instructions.Key)
+		require.Len(t, payment.Payee.Identities, 2)
+		assert.Equal(t, "CompanyID", payment.Payee.Identities[0].Label)
+		assert.Equal(t, cbc.Code("989823401"), payment.Payee.Identities[0].Code)
+		assert.Equal(t, "0088", payment.Payee.Identities[1].Label)
+		assert.Equal(t, cbc.Code("2298740918237"), payment.Payee.Identities[1].Code)
+
+		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
 		assert.Equal(t, "NO9386011117947", payment.Instructions.CreditTransfer[0].IBAN)
 		assert.Equal(t, "DNBANOKK", payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, "0003434323213231", payment.Instructions.Ref)
+		assert.Equal(t, "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date", payment.Terms.Notes)
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
@@ -42,12 +48,14 @@ func TestGetPayment(t *testing.T) {
 		require.NotNil(t, payment)
 
 		assert.Equal(t, "Dagobert Duck", payment.Payee.Name)
+		assert.Equal(t, cbc.Code("DK16356608"), payment.Payee.Identities[0].Code)
+		assert.Equal(t, "CompanyID", payment.Payee.Identities[0].Label)
 
 		assert.Equal(t, "50% prepaid, 50% within one month", payment.Terms.Notes)
-		assert.Equal(t, "49", payment.Instructions.Key)
-		assert.Equal(t, "Payref1", payment.Instructions.Detail)
-		assert.Equal(t, "123456", payment.Instructions.Mandate.ID)
-		assert.Equal(t, "DK1212341234123412", payment.Instructions.Mandate.Account.IBAN)
+		assert.Equal(t, cbc.Key("direct-debit"), payment.Instructions.Key)
+		assert.Equal(t, "Payref1", payment.Instructions.Ref)
+		assert.Equal(t, "123456", payment.Instructions.DirectDebit.Ref)
+		assert.Equal(t, "DK1212341234123412", payment.Instructions.DirectDebit.Account)
 	})
 
 	t.Run("ubl-example7.xml", func(t *testing.T) {
@@ -61,10 +69,10 @@ func TestGetPayment(t *testing.T) {
 		payment := conversor.GetInvoice().Payment
 		require.NotNil(t, payment)
 
-		assert.Equal(t, "2013-04-10", payment.DueDate)
-		assert.Equal(t, "30", payment.Terms)
-		assert.Equal(t, "SE:BANKGIRO", payment.Details[0].Type)
-		assert.Equal(t, "5896-7771", payment.Details[0].Number)
+		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
+		assert.Equal(t, "SEXDABCD", payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, "SE1212341234123412", payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, "Payment within 30 days", payment.Terms.Notes)
 	})
 
 	t.Run("ubl-example8.xml", func(t *testing.T) {
@@ -78,12 +86,10 @@ func TestGetPayment(t *testing.T) {
 		payment := conversor.GetInvoice().Payment
 		require.NotNil(t, payment)
 
-		assert.Equal(t, "2014-11-25", payment.DueDate)
-		assert.Equal(t, "15", payment.Terms)
-		assert.Equal(t, "NL:IBAN", payment.Details[0].Type)
-		assert.Equal(t, "NL78RABO0106741292", payment.Details[0].Number)
-		assert.Equal(t, "NL:BIC", payment.Details[1].Type)
-		assert.Equal(t, "RABONL2U", payment.Details[1].Number)
+		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
+		assert.Equal(t, "1100512149", payment.Instructions.Ref)
+		assert.Equal(t, "NL28RBOS0420242228", payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, "Enexis brengt wettelijke rente in rekening over te laat betaalde\n            facturen. Kijk voor informatie op www.enexis.nl/rentenota", payment.Terms.Notes)
 	})
 
 }

@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192ba0d-b901-7003-9612-0a90396ed994",
+    "uuid": "0192be3a-0bea-7118-80a3-11665d35351f",
     "dig": {
       "alg": "sha256",
-      "val": "7a0bbdb911ba3c54661a1500162ec3a8523661d106ad7fba7ec261c859805e93"
+      "val": "f342d5b93b9b8556b9f9b40fc8046d99674a94856db97314f660d1350fab993c"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192ba0d-b901-709c-aca3-2277f5a729fa",
+    "uuid": "0192be3a-0bea-7185-89b4-a2cdde334ad5",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",
@@ -22,11 +22,11 @@
       },
       "identities": [
         {
-          "label": "0088",
+          "label": "CompanyID",
           "code": "DK16356706"
         },
         {
-          "label": "Party Identification",
+          "label": "0088",
           "code": "5790000436101"
         }
       ],
@@ -95,7 +95,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -115,7 +114,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -134,7 +132,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "12%"
           }
         ],
@@ -147,7 +144,7 @@
     "payment": {
       "instructions": {
         "key": "credit-transfer",
-        "detail": "Payref1",
+        "ref": "Payref1",
         "credit_transfer": [
           {
             "iban": "DK1212341234123412"
@@ -177,13 +174,11 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "1500.00",
                 "percent": "25%",
                 "amount": "375.00"
               },
               {
-                "key": "standard",
                 "base": "2500.00",
                 "percent": "12%",
                 "amount": "300.00"
@@ -195,6 +190,18 @@
         "sum": "675.00"
       },
       "tax": "675.00",
+      "total_with_tax": "4675.00",
+      "payable": "4675.00"
+    },
+    "notes": [
+      {
+        "text": "Ordered through our website"
+      }
+    ]
+  }
+}    ]
+  }
+}: "675.00",
       "total_with_tax": "4675.00",
       "payable": "4675.00"
     },

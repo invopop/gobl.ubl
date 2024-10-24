@@ -152,20 +152,11 @@ func getIdentity(id *IDType) *org.Identity {
 	identity := &org.Identity{
 		Code: cbc.Code(id.Value),
 	}
-	if id.SchemeID != nil {
-		identity.Label = *id.SchemeID
-	}
-	if id.ListID != nil {
-		identity.Label = *id.ListID
-	}
-	if id.ListVersionID != nil {
-		identity.Label = *id.ListVersionID
-	}
-	if id.SchemeName != nil {
-		identity.Label = *id.SchemeName
-	}
-	if id.Name != nil {
-		identity.Label = *id.Name
+	for _, field := range []*string{id.SchemeID, id.ListID, id.ListVersionID, id.SchemeName, id.Name} {
+		if field != nil {
+			identity.Label = *field
+			break
+		}
 	}
 	return identity
 }

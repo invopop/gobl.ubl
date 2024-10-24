@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192ba05-ddec-7620-8fa7-78b9f2f9b5b4",
+    "uuid": "0192be3a-0bc8-7d70-9a99-9e220ba162ea",
     "dig": {
       "alg": "sha256",
-      "val": "d08fe6c208c714727d7a57227d0ffa64501572cddc28684c4756bacd4e6f2d5b"
+      "val": "11b5fafdb9841b73dee1c66b436d8716a4abb6e0229bd971cba9f4e57b61e27d"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192ba05-ddec-76b9-872d-1e08d0c9336f",
+    "uuid": "0192be3a-0bc8-7ded-b74a-28033c0d277e",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-04-10",
@@ -22,11 +22,11 @@
       },
       "identities": [
         {
-          "label": "0088",
+          "label": "CompanyID",
           "code": "DK16356706"
         },
         {
-          "label": "Party Identification",
+          "label": "0088",
           "code": "1238764941386"
         }
       ],
@@ -52,11 +52,11 @@
       },
       "identities": [
         {
-          "label": "0088",
+          "label": "CompanyID",
           "code": "987654321"
         },
         {
-          "label": "Party Identification",
+          "label": "0088",
           "code": "5790000435975"
         }
       ],
@@ -83,7 +83,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -102,7 +101,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "10%"
           }
         ],
@@ -137,7 +135,7 @@
     "payment": {
       "instructions": {
         "key": "credit-transfer",
-        "detail": "Payref1",
+        "ref": "Payref1",
         "credit_transfer": [
           {
             "iban": "DK1212341234123412"
@@ -155,13 +153,11 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "1700.00",
                 "percent": "25%",
                 "amount": "425.00"
               },
               {
-                "key": "standard",
                 "base": "1600.00",
                 "percent": "10%",
                 "amount": "160.00"
@@ -179,6 +175,10 @@
     "notes": [
       {
         "text": "Contract was established through our website"
+      }
+    ]
+  }
+}e"
       }
     ]
   }

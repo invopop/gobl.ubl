@@ -97,20 +97,15 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 	}
 
 	if party.PartyIdentification != nil {
-		for i, id := range party.PartyIdentification {
+		for _, id := range party.PartyIdentification {
+			identity := getIdentity(&id.ID)
+			if identity == nil {
+				continue
+			}
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)
 			}
-			p.Identities = append(p.Identities, &org.Identity{
-				Code:  cbc.Code(id.ID.Value),
-				Label: "Party Identification",
-			})
-			if id.ID.SchemeID != nil {
-				p.Identities[i].Label = *id.ID.SchemeID
-			}
-			if id.ID.SchemeName != nil {
-				p.Identities[i].Label = *id.ID.SchemeName
-			}
+			p.Identities = append(p.Identities, identity)
 		}
 	}
 

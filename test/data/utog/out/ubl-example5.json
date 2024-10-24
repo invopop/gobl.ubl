@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192b9e2-760f-78ca-b968-36e5ab6257e9",
+    "uuid": "0192be3a-0c11-768b-bbd4-07325d1efd60",
     "dig": {
       "alg": "sha256",
-      "val": "d36ceb42ab2dc012da333ca56122c01921f09277d54ae692535d5da5f36efccd"
+      "val": "e27df7b61c5415f7ffbfb82a54fffb54dc57c680f44e34dd4d2c35a5506e5b0f"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192b9e2-760f-798b-9e3a-74b7e0f8d720",
+    "uuid": "0192be3a-0c11-7739-b6b1-2d5f6393f8ad",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",
@@ -21,7 +21,7 @@
       }
     ],
     "supplier": {
-      "alias": "Dick Panama",
+      "name": "Dick Panama",
       "tax_id": {
         "country": "DK",
         "code": "16356609"
@@ -46,11 +46,11 @@
       },
       "identities": [
         {
-          "label": "0088",
+          "label": "CompanyID",
           "code": "DK16356607"
         },
         {
-          "label": "Party Identification",
+          "label": "0088",
           "code": "5790000436057"
         }
       ],
@@ -105,7 +105,10 @@
           "description": "Printing paper, 2mm",
           "price": "1.00",
           "unit": "item",
-          "origin": "NL"
+          "origin": "NL",
+          "meta": {
+            "thickness": "2 mm"
+          }
         },
         "sum": "1000.00",
         "discounts": [
@@ -127,7 +130,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -157,7 +159,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
@@ -185,7 +186,6 @@
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "12%"
           }
         ],
@@ -241,7 +241,7 @@
         },
         "identities": [
           {
-            "label": "0088",
+            "label": "CompanyID",
             "code": "NL16356706"
           },
           {
@@ -249,7 +249,7 @@
             "code": "NL16356706"
           },
           {
-            "label": "Party Identification",
+            "label": "0088",
             "code": "5790000436101"
           }
         ],
@@ -299,14 +299,13 @@
     },
     "payment": {
       "payee": {
-        "alias": "Dagobert Duck",
+        "name": "Dagobert Duck",
         "identities": [
           {
             "label": "CompanyID",
             "code": "DK16356608"
           },
           {
-            "label": "Party Identification",
             "code": "DK16356608"
           }
         ]
@@ -323,7 +322,11 @@
       },
       "instructions": {
         "key": "direct-debit",
-        "detail": "Payref1"
+        "ref": "Payref1",
+        "direct_debit": {
+          "ref": "123456",
+          "account": "DK1212341234123412"
+        }
       }
     },
     "delivery": {
@@ -357,13 +360,11 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "1500.00",
                 "percent": "25%",
                 "amount": "375.00"
               },
               {
-                "key": "standard",
                 "base": "2500.00",
                 "percent": "12%",
                 "amount": "300.00"
@@ -381,6 +382,10 @@
     "notes": [
       {
         "text": "Ordered through our website#Ordering information"
+      }
+    ]
+  }
+}dered through our website#Ordering information"
       }
     ]
   }

@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192ba0e-ab42-7827-bd47-d053ff6efcd1",
+    "uuid": "0192be3a-0cb2-7a76-bdde-f0f6ea16093d",
     "dig": {
       "alg": "sha256",
-      "val": "62282e7c9f2e6da96c19d815abead130ec3f10aa575249e48360751b391803df"
+      "val": "b2c632b0ea73be74d95104d75434cc3ddfbc16c09ebfa712cdb3475475836301"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192ba0e-ab42-78b4-a1f5-2036ac396798",
+    "uuid": "0192be3a-0cb2-7af1-9e48-36d9220130bc",
     "type": "standard",
     "code": "20150483",
     "issue_date": "2015-04-01",
@@ -64,14 +64,16 @@
         "item": {
           "name": "IExpress licentiekosten",
           "price": "49.00",
-          "unit": "mon"
+          "unit": "mon",
+          "meta": {
+            "verbruikscategorie": "Start"
+          }
         },
         "sum": "147.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
-            "percent": "21.0%"
+            "percent": "21%"
           }
         ],
         "total": "147.00"
@@ -91,7 +93,7 @@
     "payment": {
       "instructions": {
         "key": "credit-transfer",
-        "detail": "2015 0483 0000 0000",
+        "ref": "2015 0483 0000 0000",
         "credit_transfer": [
           {
             "iban": "NL13RABO0377815500",
@@ -109,9 +111,8 @@
             "code": "VAT",
             "rates": [
               {
-                "key": "standard",
                 "base": "147.00",
-                "percent": "21.0%",
+                "percent": "21%",
                 "amount": "30.87"
               }
             ],
