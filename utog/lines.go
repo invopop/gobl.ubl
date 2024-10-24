@@ -29,7 +29,6 @@ func (c *Conversor) getLines(doc *Document) error {
 			},
 			Taxes: tax.Set{
 				{
-					Rate:     FindTaxKey(docLine.Item.ClassifiedTaxCategory.ID),
 					Category: cbc.Code(*docLine.Item.ClassifiedTaxCategory.TaxScheme.ID),
 				},
 			},
@@ -119,6 +118,16 @@ func (c *Conversor) getLines(doc *Document) error {
 			line, err = parseLineCharges(*docLine.AllowanceCharge, line)
 			if err != nil {
 				return err
+			}
+		}
+
+		if docLine.Item.AdditionalItemProperty != nil {
+			line.Item.Meta = make(cbc.Meta)
+			for _, property := range *docLine.Item.AdditionalItemProperty {
+				if property.Name != "" && property.Value != nil {
+					key := formatKey(property.Name)
+					line.Item.Meta[key] = *property.Value
+				}
 			}
 		}
 

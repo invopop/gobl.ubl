@@ -98,3 +98,13 @@ func TestUnitFromUNECE(t *testing.T) {
 		})
 	}
 }
+
+// Define tests for the FormatKey function
+func TestFormatKey(t *testing.T) {
+	assert.Equal(t, cbc.Key("test"), formatKey("Test"))
+	assert.Equal(t, cbc.Key("test-key-2"), formatKey("Test Key 2"))
+	assert.Equal(t, cbc.Key("multiple-spaces"), formatKey("Multiple   Spaces"))
+	assert.Equal(t, cbc.Key("numbers-123"), formatKey("Numbers 123"))
+	assert.Equal(t, cbc.Key("trailing-space"), formatKey("Trailing Space  "))
+	assert.Equal(t, cbc.Key("mixed-case-with-123-numbers"), formatKey("MiXeD cAsE wItH 123 NuMbErS"))
+}

@@ -403,8 +403,8 @@ type ClassifiedTaxCategory struct {
 
 // AdditionalItemProperty represents an additional property of an item
 type AdditionalItemProperty struct {
-	Name  string `xml:"Name"`
-	Value string `xml:"Value"`
+	Name  string  `xml:"Name"`
+	Value *string `xml:"Value"`
 }
 
 // Price represents the price of an item
