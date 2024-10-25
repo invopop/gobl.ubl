@@ -62,11 +62,11 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 	address := addresses[0]
 
 	postalTradeAddress := &PostalAddress{
-		StreetName:           address.Street,
-		AdditionalStreetName: address.StreetExtra,
-		CityName:             address.Locality,
-		PostalZone:           address.Code,
-		CountrySubentity:     address.Region,
+		StreetName:           &address.Street,
+		AdditionalStreetName: &address.StreetExtra,
+		CityName:             &address.Locality,
+		PostalZone:           &address.Code,
+		CountrySubentity:     &address.Region,
 		Country:              &Country{IdentificationCode: string(address.Country)},
 	}
 

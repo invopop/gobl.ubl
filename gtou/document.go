@@ -11,6 +11,7 @@ const (
 	QDT  = "urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2"
 	UDT  = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
 	CCTS = "urn:un:unece:uncefact:documentation:2"
+	XSI  = "http://www.w3.org/2001/XMLSchema-instance"
 )
 
 // Document represents the root element of a UBL invoice
@@ -18,7 +19,11 @@ type Document struct {
 	XMLName                        xml.Name            `xml:"Invoice"`
 	CBCNamespace                   string              `xml:"xmlns:cbc,attr"`
 	CACNamespace                   string              `xml:"xmlns:cac,attr"`
+	QDTNamespace                   string              `xml:"xmlns:qdt,attr"`
+	UDTNamespace                   string              `xml:"xmlns:udt,attr"`
+	CCTSNamespace                  string              `xml:"xmlns:ccts,attr"`
 	UBLNamespace                   string              `xml:"xmlns,attr"`
+	XSINamespace                   string              `xml:"xmlns:xsi,attr"`
 	UBLExtensions                  *Extensions         `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID                   string              `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID                string              `xml:"cbc:CustomizationID,omitempty"`
@@ -82,23 +87,23 @@ type Extensions struct {
 
 // Extension represents a single UBL extension
 type Extension struct {
-	ID               string `xml:"cbc:ID"`
-	ExtensionURI     string `xml:"cbc:ExtensionURI"`
-	ExtensionContent string `xml:"ext:ExtensionContent"`
+	ID               string  `xml:"cbc:ID"`
+	ExtensionURI     *string `xml:"cbc:ExtensionURI"`
+	ExtensionContent *string `xml:"ext:ExtensionContent"`
 }
 
 // Period represents a time period with start and end dates
 type Period struct {
-	StartDate string `xml:"cbc:StartDate"`
-	EndDate   string `xml:"cbc:EndDate"`
+	StartDate *string `xml:"cbc:StartDate"`
+	EndDate   *string `xml:"cbc:EndDate"`
 }
 
 // OrderReference represents a reference to an order
 type OrderReference struct {
-	ID                string `xml:"cbc:ID"`
-	SalesOrderID      string `xml:"cbc:SalesOrderID"`
-	IssueDate         string `xml:"cbc:IssueDate"`
-	CustomerReference string `xml:"cbc:CustomerReference"`
+	ID                string  `xml:"cbc:ID"`
+	SalesOrderID      *string `xml:"cbc:SalesOrderID"`
+	IssueDate         *string `xml:"cbc:IssueDate"`
+	CustomerReference *string `xml:"cbc:CustomerReference"`
 }
 
 // BillingReference represents a reference to a billing document
@@ -112,11 +117,11 @@ type BillingReference struct {
 // DocumentReference represents a reference to a document
 type DocumentReference struct {
 	ID                  IDType      `xml:"cbc:ID"`
-	IssueDate           string      `xml:"cbc:IssueDate"`
-	DocumentTypeCode    string      `xml:"cbc:DocumentTypeCode"`
-	DocumentType        string      `xml:"cbc:DocumentType"`
+	IssueDate           *string     `xml:"cbc:IssueDate"`
+	DocumentTypeCode    *string     `xml:"cbc:DocumentTypeCode"`
+	DocumentType        *string     `xml:"cbc:DocumentType"`
 	Attachment          *Attachment `xml:"cac:Attachment"`
-	DocumentDescription string      `xml:"cbc:DocumentDescription"`
+	DocumentDescription *string     `xml:"cbc:DocumentDescription"`
 	ValidityPeriod      *Period     `xml:"cac:ValidityPeriod"`
 }
 
@@ -127,17 +132,17 @@ type Attachment struct {
 
 // BinaryObject represents binary data with associated metadata
 type BinaryObject struct {
-	MimeCode         string `xml:"mimeCode,attr"`
-	Filename         string `xml:"filename,attr"`
-	EncodingCode     string `xml:"encodingCode,attr"`
-	CharacterSetCode string `xml:"characterSetCode,attr"`
-	URI              string `xml:"uri,attr"`
-	Value            string `xml:",chardata"`
+	MimeCode         *string `xml:"mimeCode,attr"`
+	Filename         *string `xml:"filename,attr"`
+	EncodingCode     *string `xml:"encodingCode,attr"`
+	CharacterSetCode *string `xml:"characterSetCode,attr"`
+	URI              *string `xml:"uri,attr"`
+	Value            string  `xml:",chardata"`
 }
 
 // ProjectReference represents a reference to a project
 type ProjectReference struct {
-	ID string `xml:"cbc:ID"`
+	ID *string `xml:"cbc:ID"`
 }
 
 // SupplierParty represents the supplier party in a transaction
@@ -174,12 +179,12 @@ type Identification struct {
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
-	ListID        string `xml:"listID,attr"`
-	ListVersionID string `xml:"listVersionID,attr"`
-	SchemeID      string `xml:"schemeID,attr"`
-	SchemeName    string `xml:"schemeName,attr"`
-	Name          string `xml:"name,attr"`
-	Value         string `xml:",chardata"`
+	ListID        *string `xml:"listID,attr"`
+	ListVersionID *string `xml:"listVersionID,attr"`
+	SchemeID      *string `xml:"schemeID,attr"`
+	SchemeName    *string `xml:"schemeName,attr"`
+	Name          *string `xml:"name,attr"`
+	Value         string  `xml:",chardata"`
 }
 
 // PartyName represents the name of a party
@@ -189,11 +194,11 @@ type PartyName struct {
 
 // PostalAddress represents a postal address
 type PostalAddress struct {
-	StreetName           string        `xml:"cbc:StreetName"`
-	AdditionalStreetName string        `xml:"cbc:AdditionalStreetName"`
-	CityName             string        `xml:"cbc:CityName"`
-	PostalZone           string        `xml:"cbc:PostalZone"`
-	CountrySubentity     string        `xml:"cbc:CountrySubentity"`
+	StreetName           *string       `xml:"cbc:StreetName"`
+	AdditionalStreetName *string       `xml:"cbc:AdditionalStreetName"`
+	CityName             *string       `xml:"cbc:CityName"`
+	PostalZone           *string       `xml:"cbc:PostalZone"`
+	CountrySubentity     *string       `xml:"cbc:CountrySubentity"`
 	AddressLine          []AddressLine `xml:"cac:AddressLine"`
 	Country              *Country      `xml:"cac:Country"`
 }
@@ -282,7 +287,7 @@ type FinancialAccount struct {
 	ID                         string  `xml:"cbc:ID"`
 	Name                       string  `xml:"cbc:Name"`
 	FinancialInstitutionBranch *Branch `xml:"cac:FinancialInstitutionBranch"`
-	AccountTypeCode            string  `xml:"cbc:AccountTypeCode"`
+	AccountTypeCode            *string `xml:"cbc:AccountTypeCode"`
 }
 
 // Branch represents a branch of a financial institution
@@ -303,16 +308,16 @@ type PaymentTerms struct {
 type PrepaidPayment struct {
 	ID            string  `xml:"cbc:ID"`
 	PaidAmount    *Amount `xml:"cbc:PaidAmount"`
-	ReceivedDate  string  `xml:"cbc:ReceivedDate"`
-	InstructionID string  `xml:"cbc:InstructionID"`
+	ReceivedDate  *string `xml:"cbc:ReceivedDate"`
+	InstructionID *string `xml:"cbc:InstructionID"`
 }
 
 // AllowanceCharge represents an allowance or charge
 type AllowanceCharge struct {
 	ChargeIndicator           bool         `xml:"cbc:ChargeIndicator"`
-	AllowanceChargeReasonCode string       `xml:"cbc:AllowanceChargeReasonCode"`
-	AllowanceChargeReason     string       `xml:"cbc:AllowanceChargeReason"`
-	MultiplierFactorNumeric   string       `xml:"cbc:MultiplierFactorNumeric"`
+	AllowanceChargeReasonCode *string      `xml:"cbc:AllowanceChargeReasonCode"`
+	AllowanceChargeReason     *string      `xml:"cbc:AllowanceChargeReason"`
+	MultiplierFactorNumeric   *string      `xml:"cbc:MultiplierFactorNumeric"`
 	Amount                    Amount       `xml:"cbc:Amount"`
 	BaseAmount                *Amount      `xml:"cbc:BaseAmount"`
 	TaxCategory               *TaxCategory `xml:"cac:TaxCategory"`
@@ -320,10 +325,10 @@ type AllowanceCharge struct {
 
 // ExchangeRate represents an exchange rate
 type ExchangeRate struct {
-	SourceCurrencyCode string `xml:"cbc:SourceCurrencyCode"`
-	TargetCurrencyCode string `xml:"cbc:TargetCurrencyCode"`
-	CalculationRate    string `xml:"cbc:CalculationRate"`
-	Date               string `xml:"cbc:Date"`
+	SourceCurrencyCode *string `xml:"cbc:SourceCurrencyCode"`
+	TargetCurrencyCode *string `xml:"cbc:TargetCurrencyCode"`
+	CalculationRate    *string `xml:"cbc:CalculationRate"`
+	Date               *string `xml:"cbc:Date"`
 }
 
 // TaxTotal represents a tax total
@@ -342,9 +347,9 @@ type TaxSubtotal struct {
 // TaxCategory represents a tax category
 type TaxCategory struct {
 	ID                     string     `xml:"cbc:ID"`
-	Percent                string     `xml:"cbc:Percent"`
-	TaxExemptionReasonCode string     `xml:"cbc:TaxExemptionReasonCode"`
-	TaxExemptionReason     string     `xml:"cbc:TaxExemptionReason"`
+	Percent                *string    `xml:"cbc:Percent"`
+	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode"`
+	TaxExemptionReason     *string    `xml:"cbc:TaxExemptionReason"`
 	TaxScheme              *TaxScheme `xml:"cac:TaxScheme"`
 }
 
@@ -362,8 +367,8 @@ type MonetaryTotal struct {
 
 // Amount represents a monetary amount
 type Amount struct {
-	CurrencyID string `xml:"currencyID,attr"`
-	Value      string `xml:",chardata"`
+	CurrencyID *string `xml:"currencyID,attr"`
+	Value      string  `xml:",chardata"`
 }
 
 // InvoiceLine represents a line item in an invoice
@@ -372,7 +377,7 @@ type InvoiceLine struct {
 	Note                []string            `xml:"cbc:Note"`
 	InvoicedQuantity    *Quantity           `xml:"cbc:InvoicedQuantity"`
 	LineExtensionAmount Amount              `xml:"cbc:LineExtensionAmount"`
-	AccountingCost      string              `xml:"cbc:AccountingCost"`
+	AccountingCost      *string             `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
 	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
@@ -393,7 +398,7 @@ type OrderLineReference struct {
 
 // Item represents an item in an invoice line
 type Item struct {
-	Description                string                     `xml:"cbc:Description"`
+	Description                *string                    `xml:"cbc:Description"`
 	Name                       string                     `xml:"cbc:Name"`
 	BuyersItemIdentification   *ItemIdentification        `xml:"cac:BuyersItemIdentification"`
 	SellersItemIdentification  *ItemIdentification        `xml:"cac:SellersItemIdentification"`
@@ -416,9 +421,9 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        string    `xml:"cbc:ID"`
-	Percent   string    `xml:"cbc:Percent"`
-	TaxScheme TaxScheme `xml:"cac:TaxScheme"`
+	ID        *string    `xml:"cbc:ID"`
+	Percent   *string    `xml:"cbc:Percent"`
+	TaxScheme *TaxScheme `xml:"cac:TaxScheme"`
 }
 
 // AdditionalItemProperty represents an additional property of an item

@@ -2,6 +2,14 @@ package gtou
 
 import (
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
+)
+
+const (
+	StandardSalesTax  = "S"
+	ZeroRatedGoodsTax = "Z"
+	TaxExempt         = "E"
 )
 
 func formatDate(date cal.Date) string {
@@ -13,8 +21,23 @@ func formatDate(date cal.Date) string {
 }
 
 func makePeriod(period *cal.Period) Period {
+	start := formatDate(period.Start)
+	end := formatDate(period.End)
 	return Period{
-		StartDate: formatDate(period.Start),
-		EndDate:   formatDate(period.End),
+		StartDate: &start,
+		EndDate:   &end,
 	}
+}
+
+func findTaxCode(taxRate cbc.Key) string {
+	switch taxRate {
+	case tax.RateStandard:
+		return StandardSalesTax
+	case tax.RateZero:
+		return ZeroRatedGoodsTax
+	case tax.RateExempt:
+		return TaxExempt
+	}
+
+	return StandardSalesTax
 }

@@ -28,38 +28,37 @@ func (c *Conversor) newOrdering(ordering *bill.Ordering) error {
 
 	if len(ordering.Despatch) > 0 {
 		c.doc.DespatchDocumentReference = make([]DocumentReference, len(ordering.Despatch))
-		for i, despatch := range ordering.Despatch {
-			c.doc.DespatchDocumentReference[i] = DocumentReference{
-				ID:           IDType{Value: string(despatch.Code)},
-				DocumentType: string(despatch.Type),
-			}
+		for _, despatch := range ordering.Despatch {
+			c.doc.DespatchDocumentReference = append(c.doc.DespatchDocumentReference, DocumentReference{
+				ID: IDType{Value: string(despatch.Code)},
+			})
 		}
 	}
 
 	if len(ordering.Receiving) > 0 {
 		c.doc.ReceiptDocumentReference = make([]DocumentReference, len(ordering.Receiving))
-		for i, receiving := range ordering.Receiving {
-			c.doc.ReceiptDocumentReference[i] = DocumentReference{
+		for _, receiving := range ordering.Receiving {
+			c.doc.ReceiptDocumentReference = append(c.doc.ReceiptDocumentReference, DocumentReference{
 				ID: IDType{Value: string(receiving.Code)},
-			}
+			})
 		}
 	}
 
 	if len(ordering.Contracts) > 0 {
 		c.doc.ContractDocumentReference = make([]DocumentReference, len(ordering.Contracts))
-		for i, contract := range ordering.Contracts {
-			c.doc.ContractDocumentReference[i] = DocumentReference{
+		for _, contract := range ordering.Contracts {
+			c.doc.ContractDocumentReference = append(c.doc.ContractDocumentReference, DocumentReference{
 				ID: IDType{Value: string(contract.Code)},
-			}
+			})
 		}
 	}
 
 	if len(ordering.Tender) > 0 {
 		c.doc.AdditionalDocumentReference = make([]DocumentReference, len(ordering.Tender))
-		for i, tender := range ordering.Tender {
-			c.doc.AdditionalDocumentReference[i] = DocumentReference{
+		for _, tender := range ordering.Tender {
+			c.doc.AdditionalDocumentReference = append(c.doc.AdditionalDocumentReference, DocumentReference{
 				ID: IDType{Value: string(tender.Code)},
-			}
+			})
 		}
 	}
 

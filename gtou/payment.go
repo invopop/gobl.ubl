@@ -40,8 +40,9 @@ func (c *Conversor) newPayment(payment *bill.Payment) error {
 		c.doc.PaymentTerms = make([]PaymentTerms, 0)
 		if len(payment.Terms.DueDates) > 1 {
 			for _, dueDate := range payment.Terms.DueDates {
+				currency := dueDate.Currency.String()
 				term := PaymentTerms{
-					Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: string(dueDate.Currency)},
+					Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: &currency},
 				}
 				if dueDate.Date != nil {
 					term.PaymentDueDate = formatDate(*dueDate.Date)

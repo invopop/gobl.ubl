@@ -47,11 +47,12 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 
 	// Create the UBL document
 	c.doc = &Document{
-		CACNamespace: CAC,
-		CBCNamespace: CBC,
-		// QDTNamespace:            QDT,
-		// UDTNamespace:            UDT,
-		// CCTSNamespace:           CCTS,
+		CACNamespace:            CAC,
+		CBCNamespace:            CBC,
+		QDTNamespace:            QDT,
+		UDTNamespace:            UDT,
+		CCTSNamespace:           CCTS,
+		XSINamespace:            XSI,
 		CustomizationID:         "urn:cen.eu:en16931:2017",
 		ProfileID:               "Invoicing on purchase order",
 		ID:                      invoiceNumber(inv.Series, inv.Code),
