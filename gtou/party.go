@@ -10,49 +10,40 @@ func (c *Conversor) newParty(party *org.Party) Party {
 	if party == nil {
 		return Party{}
 	}
-
+	taxID := party.TaxID.Code.String()
 	p := Party{
-		// PartyIdentification:
-		PartyName: &PartyName{
-			Name: party.Name,
-		},
 		PostalAddress: newAddress(party.Addresses),
 		PartyTaxScheme: []PartyTaxScheme{
 			{
-				CompanyID: nil,
-				TaxScheme: &TaxScheme{
-					ID: party.TaxID.Code.String(),
-				},
+				CompanyID: &taxID,
 			},
 		},
-		Contact: createContact(party),
+		PartyLegalEntity: &PartyLegalEntity{
+			RegistrationName: party.Name,
+		},
 	}
 
-	if party.TaxID != nil {
-		p.PartyTaxScheme = []PartyTaxScheme{
-			{
-				CompanyID: party.TaxID.String(),
-			},
-		}
-	}
+	contact := &Contact{}
 
 	if len(party.Emails) > 0 {
-		p.Contact = &Contact{
-			ElectronicMail: party.Emails[0].Address,
-		}
+		contact.ElectronicMail = party.Emails[0].Address
 	}
 
-	if party.Name != "" {
-		p.Party.PartyLegalEntity = &PartyLegalEntity{
-			RegistrationName: party.Name,
-		}
+	if len(party.Telephones) > 0 {
+		contact.Telephone = party.Telephones[0].Number
 	}
-	if party.LegalEntity != nil {
-		p.Party.PartyLegalEntity = &PartyLegalEntity{
-			RegistrationName:      party.LegalEntity.RegistrationName,
-			CompanyID:             party.LegalEntity.CompanyID,
-			CompanyType:           party.LegalEntity.CompanyType,
-			CorporateRegistration: party.LegalEntity.CorporateRegistration,
+
+	if len(party.People) > 0 {
+		contact.Name = contactName(party.People[0].Name)
+	}
+
+	if contact.Name != "" || contact.Telephone != "" || contact.ElectronicMail != "" {
+		p.Contact = contact
+	}
+
+	if party.Alias != "" {
+		p.PartyName = &PartyName{
+			Name: party.Alias,
 		}
 	}
 	return p

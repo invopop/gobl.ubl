@@ -59,16 +59,7 @@ func (c *Conversor) getParty(party *Party) *org.Party {
 		if p.Identities == nil {
 			p.Identities = make([]*org.Identity, 0)
 		}
-		id := &org.Identity{
-			Code:  cbc.Code(party.PartyLegalEntity.CompanyID.Value),
-			Label: "CompanyID",
-		}
-		if party.PartyLegalEntity.CompanyID.SchemeID != nil {
-			id.Label = *party.PartyLegalEntity.CompanyID.SchemeID
-		}
-		if party.PartyLegalEntity.CompanyID.SchemeName != nil {
-			id.Label = *party.PartyLegalEntity.CompanyID.SchemeName
-		}
+		id := getIdentity(party.PartyLegalEntity.CompanyID)
 		p.Identities = append(p.Identities, id)
 	}
 

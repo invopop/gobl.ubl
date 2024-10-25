@@ -17,9 +17,8 @@ func (c *Conversor) getOrdering(ordering *bill.Ordering) error {
 	// as the tax representative.
 	if ordering.Seller != nil {
 		c.doc.TaxRepresentativeParty = &c.doc.AccountingSupplierParty.Party
-		err := c.newSupplier(ordering.Seller)
-		if err != nil {
-			return err
+		c.doc.AccountingSupplierParty = SupplierParty{
+			Party: c.newParty(ordering.Seller),
 		}
 	}
 
