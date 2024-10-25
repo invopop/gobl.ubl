@@ -10,20 +10,25 @@ func (c *Conversor) newParty(party *org.Party) Party {
 	if party == nil {
 		return Party{}
 	}
-	taxID := party.TaxID.Code.String()
 	p := Party{
 		PostalAddress: newAddress(party.Addresses),
-		PartyTaxScheme: []PartyTaxScheme{
-			{
-				CompanyID: &taxID,
-			},
-		},
 		PartyLegalEntity: &PartyLegalEntity{
 			RegistrationName: party.Name,
 		},
 	}
 
 	contact := &Contact{}
+
+	// Although taxID is mandatory, when there is a Tax Representative and the seller comes from
+	// Ordering.Seller, the pointer could be nil
+	if party.TaxID != nil && party.TaxID.Code != "" {
+		taxID := party.TaxID.Code.String()
+		p.PartyTaxScheme = []PartyTaxScheme{
+			{
+				CompanyID: &taxID,
+			},
+		}
+	}
 
 	if len(party.Emails) > 0 {
 		contact.ElectronicMail = party.Emails[0].Address

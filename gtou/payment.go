@@ -37,16 +37,25 @@ func (c *Conversor) newPayment(payment *bill.Payment) error {
 	}
 
 	if payment.Terms != nil {
-		c.doc.PaymentTerms = make([]PaymentTerms, 1)
-		if len(payment.Terms.DueDates) > 0 {
+		c.doc.PaymentTerms = make([]PaymentTerms, 0)
+		if len(payment.Terms.DueDates) > 1 {
 			for _, dueDate := range payment.Terms.DueDates {
-				c.doc.PaymentTerms = append(c.doc.PaymentTerms, PaymentTerms{
-					Note:           []string{dueDate.Notes},
-					Amount:         &Amount{Value: dueDate.Amount.String(), CurrencyID: string(dueDate.Currency)},
-					PaymentPercent: dueDate.Percent.String(),
-					PaymentDueDate: dueDate.Date.String(),
-				})
+				term := PaymentTerms{
+					Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: string(dueDate.Currency)},
+				}
+				if dueDate.Date != nil {
+					term.PaymentDueDate = formatDate(*dueDate.Date)
+				}
+				if dueDate.Percent != nil {
+					term.PaymentPercent = dueDate.Percent.String()
+				}
+				if dueDate.Notes != "" {
+					term.Note = []string{dueDate.Notes}
+				}
+				c.doc.PaymentTerms = append(c.doc.PaymentTerms, term)
 			}
+		} else if len(payment.Terms.DueDates) == 1 {
+			c.doc.DueDate = formatDate(*payment.Terms.DueDates[0].Date)
 		} else {
 			c.doc.PaymentTerms = append(c.doc.PaymentTerms, PaymentTerms{
 				Note: []string{payment.Terms.Detail},

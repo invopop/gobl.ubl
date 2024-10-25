@@ -2,6 +2,7 @@
 package gtou
 
 import (
+	"encoding/xml"
 	"fmt"
 
 	"github.com/invopop/gobl"
@@ -120,4 +121,13 @@ func invoiceTypeCode(inv *bill.Invoice) string {
 		bill.InvoiceTypeCreditNote: "381",
 	}
 	return hash[inv.Type]
+}
+
+// Bytes returns the XML representation of the document in bytes
+func (d *Document) Bytes() ([]byte, error) {
+	bytes, err := xml.MarshalIndent(d, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append([]byte(xml.Header), bytes...), nil
 }
