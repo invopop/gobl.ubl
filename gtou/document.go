@@ -346,7 +346,7 @@ type TaxSubtotal struct {
 
 // TaxCategory represents a tax category
 type TaxCategory struct {
-	ID                     string     `xml:"cbc:ID"`
+	ID                     *string    `xml:"cbc:ID"`
 	Percent                *string    `xml:"cbc:Percent"`
 	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode"`
 	TaxExemptionReason     *string    `xml:"cbc:TaxExemptionReason"`
