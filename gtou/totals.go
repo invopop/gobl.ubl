@@ -5,6 +5,9 @@ import (
 )
 
 func (c *Conversor) newTotals(totals *bill.Totals, currency string) error {
+	if totals == nil {
+		return nil
+	}
 	c.doc.LegalMonetaryTotal = MonetaryTotal{
 		LineExtensionAmount:   Amount{Value: totals.Sum.String(), CurrencyID: currency},
 		AllowanceTotalAmount:  Amount{Value: totals.Discount.String(), CurrencyID: currency},

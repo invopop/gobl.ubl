@@ -59,7 +59,6 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: SupplierParty{Party: c.newParty(inv.Supplier)},
 		AccountingCustomerParty: CustomerParty{Party: c.newParty(inv.Customer)},
-		InvoiceLine:             createInvoiceLines(inv.Lines),
 	}
 
 	// DueDate:              formatDate(inv.DueDate),
@@ -68,15 +67,6 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 	// AllowanceCharge:    createAllowanceCharges(inv.AllowanceCharges),
 	// TaxTotal:           createTaxTotals(inv.TaxTotals),
 
-	if len(inv.Payment.Terms.DueDates) > 0 {
-		c.doc.DueDate = formatDate(inv.Payment.Terms.DueDates[0])
-	}
-
-	if inv.Payment != nil && inv.Payment.Payee != nil {
-		payee := c.newParty(inv.Payment.Payee)
-		c.doc.PayeeParty = &payee
-	}
-
 	if len(inv.Notes) > 0 {
 		c.doc.Note = make([]string, len(inv.Notes))
 		for i, note := range inv.Notes {
@@ -84,20 +74,27 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		}
 	}
 
-	if inv.Ordering != nil {
-		err := c.getOrdering(inv.Ordering)
-		if err != nil {
-			return err
-		}
+	err := c.newOrdering(inv.Ordering)
+	if err != nil {
+		return err
 	}
 
-	if inv.Delivery != nil {
-		err := c.createDelivery(inv.Delivery)
-		if err != nil {
-			return err
-		}
+	err = c.newPayment(inv.Payment)
+	if err != nil {
+		return err
 	}
-	err := c.newTotals(inv.Totals, string(inv.Currency))
+
+	err = c.newDelivery(inv.Delivery)
+	if err != nil {
+		return err
+	}
+
+	err = c.newTotals(inv.Totals, string(inv.Currency))
+	if err != nil {
+		return err
+	}
+
+	err = c.newLines(inv)
 	if err != nil {
 		return err
 	}

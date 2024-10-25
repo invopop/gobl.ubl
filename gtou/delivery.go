@@ -2,12 +2,12 @@ package gtou
 
 import "github.com/invopop/gobl/bill"
 
-func (c *Conversor) createDelivery(delivery *bill.Delivery) error {
+func (c *Conversor) newDelivery(delivery *bill.Delivery) error {
 	if delivery == nil {
 		return nil
 	}
 	c.doc.Delivery = []Delivery{
-		Delivery{
+		{
 			ActualDeliveryDate: formatDate(*delivery.Date),
 			DeliveryLocation: &Location{
 				Address: newAddress(delivery.Receiver.Addresses),

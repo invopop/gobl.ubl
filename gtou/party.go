@@ -49,12 +49,6 @@ func (c *Conversor) newParty(party *org.Party) Party {
 	return p
 }
 
-func (c *Conversor) createPartyName(party *org.Party) {
-	c.doc.AccountingSupplierParty.Party.PartyName = &PartyName{
-		Name: party.Name,
-	}
-}
-
 func newAddress(addresses []*org.Address) *PostalAddress {
 	if len(addresses) == 0 {
 		return nil
