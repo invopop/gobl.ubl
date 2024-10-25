@@ -13,7 +13,7 @@ func (c *Conversor) newParty(party *org.Party) Party {
 	p := Party{
 		PostalAddress: newAddress(party.Addresses),
 		PartyLegalEntity: &PartyLegalEntity{
-			RegistrationName: party.Name,
+			RegistrationName: &party.Name,
 		},
 	}
 

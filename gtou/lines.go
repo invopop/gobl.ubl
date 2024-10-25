@@ -96,6 +96,15 @@ func (c *Conversor) newLines(inv *bill.Invoice) error {
 			}
 
 			invoiceLine.Item = item
+
+			if line.Item.Price != (num.Amount{}) {
+				invoiceLine.Price = &Price{
+					PriceAmount: Amount{
+						CurrencyID: &currency,
+						Value:      line.Item.Price.String(),
+					},
+				}
+			}
 		}
 
 		invoiceLines = append(invoiceLines, invoiceLine)

@@ -6,17 +6,17 @@ func (c *Conversor) newPayment(payment *bill.Payment) error {
 	if payment.Instructions != nil {
 		c.doc.PaymentMeans = []PaymentMeans{
 			{
-				PaymentMeansCode: IDType{Value: string(payment.Instructions.Key)},
-				PaymentID:        payment.Instructions.Ref,
+				PaymentMeansCode: IDType{Value: findPaymentKey(payment.Instructions.Key)},
+				PaymentID:        &payment.Instructions.Ref,
 			},
 		}
 
 		if payment.Instructions.CreditTransfer != nil {
 			c.doc.PaymentMeans[0].PayeeFinancialAccount = &FinancialAccount{
-				ID:   payment.Instructions.CreditTransfer[0].IBAN,
-				Name: payment.Instructions.CreditTransfer[0].Name,
+				ID:   &payment.Instructions.CreditTransfer[0].IBAN,
+				Name: &payment.Instructions.CreditTransfer[0].Name,
 				FinancialInstitutionBranch: &Branch{
-					ID: payment.Instructions.CreditTransfer[0].BIC,
+					ID: &payment.Instructions.CreditTransfer[0].BIC,
 				},
 			}
 		}
@@ -24,7 +24,7 @@ func (c *Conversor) newPayment(payment *bill.Payment) error {
 			c.doc.PaymentMeans[0].PaymentMandate = &PaymentMandate{
 				ID: IDType{Value: payment.Instructions.DirectDebit.Ref},
 				PayerFinancialAccount: &FinancialAccount{
-					ID: payment.Instructions.DirectDebit.Account,
+					ID: &payment.Instructions.DirectDebit.Account,
 				},
 			}
 		}

@@ -226,9 +226,9 @@ type TaxScheme struct {
 
 // PartyLegalEntity represents the legal entity of a party
 type PartyLegalEntity struct {
-	RegistrationName string  `xml:"cbc:RegistrationName"`
+	RegistrationName *string `xml:"cbc:RegistrationName"`
 	CompanyID        *IDType `xml:"cbc:CompanyID"`
-	CompanyLegalForm string  `xml:"cbc:CompanyLegalForm"`
+	CompanyLegalForm *string `xml:"cbc:CompanyLegalForm"`
 }
 
 // Contact represents contact information
@@ -260,11 +260,11 @@ type DeliveryTerms struct {
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
-	PaymentID             string            `xml:"cbc:PaymentID"`
+	PaymentID             *string           `xml:"cbc:PaymentID"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
-	InstructionID         string            `xml:"cbc:InstructionID"`
+	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote"`
 	PaymentMandate        *PaymentMandate   `xml:"cac:PaymentMandate"`
 }
@@ -284,16 +284,16 @@ type CardAccount struct {
 
 // FinancialAccount represents a financial account
 type FinancialAccount struct {
-	ID                         string  `xml:"cbc:ID"`
-	Name                       string  `xml:"cbc:Name"`
+	ID                         *string `xml:"cbc:ID"`
+	Name                       *string `xml:"cbc:Name"`
 	FinancialInstitutionBranch *Branch `xml:"cac:FinancialInstitutionBranch"`
 	AccountTypeCode            *string `xml:"cbc:AccountTypeCode"`
 }
 
 // Branch represents a branch of a financial institution
 type Branch struct {
-	ID   string `xml:"cbc:ID"`
-	Name string `xml:"cbc:Name"`
+	ID   *string `xml:"cbc:ID"`
+	Name *string `xml:"cbc:Name"`
 }
 
 // PaymentTerms represents the terms of payment
@@ -355,14 +355,14 @@ type TaxCategory struct {
 
 // MonetaryTotal represents the monetary totals of the invoice
 type MonetaryTotal struct {
-	LineExtensionAmount   Amount `xml:"cbc:LineExtensionAmount"`
-	TaxExclusiveAmount    Amount `xml:"cbc:TaxExclusiveAmount"`
-	TaxInclusiveAmount    Amount `xml:"cbc:TaxInclusiveAmount"`
-	AllowanceTotalAmount  Amount `xml:"cbc:AllowanceTotalAmount"`
-	ChargeTotalAmount     Amount `xml:"cbc:ChargeTotalAmount"`
-	PrepaidAmount         Amount `xml:"cbc:PrepaidAmount"`
-	PayableRoundingAmount Amount `xml:"cbc:PayableRoundingAmount"`
-	PayableAmount         Amount `xml:"cbc:PayableAmount"`
+	LineExtensionAmount   Amount  `xml:"cbc:LineExtensionAmount"`
+	TaxExclusiveAmount    Amount  `xml:"cbc:TaxExclusiveAmount"`
+	TaxInclusiveAmount    Amount  `xml:"cbc:TaxInclusiveAmount"`
+	AllowanceTotalAmount  *Amount `xml:"cbc:AllowanceTotalAmount"`
+	ChargeTotalAmount     *Amount `xml:"cbc:ChargeTotalAmount"`
+	PrepaidAmount         *Amount `xml:"cbc:PrepaidAmount"`
+	PayableRoundingAmount *Amount `xml:"cbc:PayableRoundingAmount"`
+	PayableAmount         *Amount `xml:"cbc:PayableAmount"`
 }
 
 // Amount represents a monetary amount
@@ -443,11 +443,11 @@ type Price struct {
 type Signature struct {
 	ID                         string             `xml:"cbc:ID"`
 	Note                       []string           `xml:"cbc:Note,omitempty"`
-	ValidationDate             string             `xml:"cbc:ValidationDate,omitempty"`
-	ValidationTime             string             `xml:"cbc:ValidationTime,omitempty"`
-	ValidatorID                string             `xml:"cbc:ValidatorID,omitempty"`
-	CanonicalizationMethod     string             `xml:"cbc:CanonicalizationMethod,omitempty"`
-	SignatureMethod            string             `xml:"cbc:SignatureMethod,omitempty"`
+	ValidationDate             *string            `xml:"cbc:ValidationDate,omitempty"`
+	ValidationTime             *string            `xml:"cbc:ValidationTime,omitempty"`
+	ValidatorID                *string            `xml:"cbc:ValidatorID,omitempty"`
+	CanonicalizationMethod     *string            `xml:"cbc:CanonicalizationMethod,omitempty"`
+	SignatureMethod            *string            `xml:"cbc:SignatureMethod,omitempty"`
 	SignatoryParty             *Party             `xml:"cac:SignatoryParty,omitempty"`
 	DigitalSignatureAttachment *Attachment        `xml:"cac:DigitalSignatureAttachment,omitempty"`
 	OriginalDocumentReference  *DocumentReference `xml:"cac:OriginalDocumentReference,omitempty"`
