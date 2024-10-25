@@ -59,7 +59,6 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: SupplierParty{Party: c.newParty(inv.Supplier)},
 		AccountingCustomerParty: CustomerParty{Party: c.newParty(inv.Customer)},
-		LegalMonetaryTotal:      createMonetaryTotal(inv.MonetaryTotal),
 		InvoiceLine:             createInvoiceLines(inv.Lines),
 	}
 
@@ -74,7 +73,8 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 	}
 
 	if inv.Payment != nil && inv.Payment.Payee != nil {
-		c.doc.PayeeParty = createPayeeParty(inv.Payment.Payee)
+		payee := c.newParty(inv.Payment.Payee)
+		c.doc.PayeeParty = &payee
 	}
 
 	if len(inv.Notes) > 0 {
@@ -91,12 +91,13 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		}
 	}
 
-	err := c.createCustomerParty(inv.Customer)
-	if err != nil {
-		return err
+	if inv.Delivery != nil {
+		err := c.createDelivery(inv.Delivery)
+		if err != nil {
+			return err
+		}
 	}
-
-	err = c.createDelivery(inv.Delivery)
+	err := c.newTotals(inv.Totals, string(inv.Currency))
 	if err != nil {
 		return err
 	}
