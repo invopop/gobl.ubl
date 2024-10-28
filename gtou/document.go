@@ -233,14 +233,14 @@ type PartyLegalEntity struct {
 
 // Contact represents contact information
 type Contact struct {
-	Name           string `xml:"cbc:Name"`
-	Telephone      string `xml:"cbc:Telephone"`
-	ElectronicMail string `xml:"cbc:ElectronicMail"`
+	Name           *string `xml:"cbc:Name"`
+	Telephone      *string `xml:"cbc:Telephone"`
+	ElectronicMail *string `xml:"cbc:ElectronicMail"`
 }
 
 // Delivery represents delivery information
 type Delivery struct {
-	ActualDeliveryDate      string    `xml:"cbc:ActualDeliveryDate"`
+	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
 	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
 	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
@@ -277,9 +277,9 @@ type PaymentMandate struct {
 
 // CardAccount represents a card account
 type CardAccount struct {
-	PrimaryAccountNumberID string `xml:"cbc:PrimaryAccountNumberID"`
-	NetworkID              string `xml:"cbc:NetworkID"`
-	HolderName             string `xml:"cbc:HolderName"`
+	PrimaryAccountNumberID *string `xml:"cbc:PrimaryAccountNumberID"`
+	NetworkID              *string `xml:"cbc:NetworkID"`
+	HolderName             *string `xml:"cbc:HolderName"`
 }
 
 // FinancialAccount represents a financial account
@@ -300,8 +300,8 @@ type Branch struct {
 type PaymentTerms struct {
 	Note           []string `xml:"cbc:Note"`
 	Amount         *Amount  `xml:"cbc:Amount"`
-	PaymentPercent string   `xml:"cbc:PaymentPercent"`
-	PaymentDueDate string   `xml:"cbc:PaymentDueDate"`
+	PaymentPercent *string  `xml:"cbc:PaymentPercent"`
+	PaymentDueDate *string  `xml:"cbc:PaymentDueDate"`
 }
 
 // PrepaidPayment represents a prepaid payment

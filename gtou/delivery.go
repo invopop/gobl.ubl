@@ -6,9 +6,10 @@ func (c *Conversor) newDelivery(delivery *bill.Delivery) error {
 	if delivery == nil {
 		return nil
 	}
+	d := formatDate(*delivery.Date)
 	c.doc.Delivery = []Delivery{
 		{
-			ActualDeliveryDate: formatDate(*delivery.Date),
+			ActualDeliveryDate: &d,
 			DeliveryLocation: &Location{
 				Address: newAddress(delivery.Receiver.Addresses),
 			},

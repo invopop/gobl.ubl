@@ -30,8 +30,8 @@ func (c *Conversor) newPayment(payment *bill.Payment) error {
 		}
 		if payment.Instructions.Card != nil {
 			c.doc.PaymentMeans[0].CardAccount = &CardAccount{
-				PrimaryAccountNumberID: payment.Instructions.Card.Last4,
-				HolderName:             payment.Instructions.Card.Holder,
+				PrimaryAccountNumberID: &payment.Instructions.Card.Last4,
+				HolderName:             &payment.Instructions.Card.Holder,
 			}
 		}
 	}
@@ -45,10 +45,12 @@ func (c *Conversor) newPayment(payment *bill.Payment) error {
 					Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: &currency},
 				}
 				if dueDate.Date != nil {
-					term.PaymentDueDate = formatDate(*dueDate.Date)
+					d := formatDate(*dueDate.Date)
+					term.PaymentDueDate = &d
 				}
 				if dueDate.Percent != nil {
-					term.PaymentPercent = dueDate.Percent.String()
+					p := dueDate.Percent.String()
+					term.PaymentPercent = &p
 				}
 				if dueDate.Notes != "" {
 					term.Note = []string{dueDate.Notes}

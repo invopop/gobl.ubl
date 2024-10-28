@@ -31,18 +31,19 @@ func (c *Conversor) newParty(party *org.Party) Party {
 	}
 
 	if len(party.Emails) > 0 {
-		contact.ElectronicMail = party.Emails[0].Address
+		contact.ElectronicMail = &party.Emails[0].Address
 	}
 
 	if len(party.Telephones) > 0 {
-		contact.Telephone = party.Telephones[0].Number
+		contact.Telephone = &party.Telephones[0].Number
 	}
 
 	if len(party.People) > 0 {
-		contact.Name = contactName(party.People[0].Name)
+		n := contactName(party.People[0].Name)
+		contact.Name = &n
 	}
 
-	if contact.Name != "" || contact.Telephone != "" || contact.ElectronicMail != "" {
+	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil {
 		p.Contact = contact
 	}
 
