@@ -3,6 +3,9 @@ package gtou
 import "github.com/invopop/gobl/bill"
 
 func (c *Conversor) newPayment(payment *bill.Payment) error {
+	if payment == nil {
+		return nil
+	}
 	if payment.Instructions != nil {
 		c.doc.PaymentMeans = []PaymentMeans{
 			{

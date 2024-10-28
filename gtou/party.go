@@ -2,6 +2,7 @@ package gtou
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/invopop/gobl/org"
 )
@@ -62,13 +63,39 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 	// Only return the first address
 	address := addresses[0]
 
-	postalTradeAddress := &PostalAddress{
-		StreetName:           &address.Street,
-		AdditionalStreetName: &address.StreetExtra,
-		CityName:             &address.Locality,
-		PostalZone:           &address.Code,
-		CountrySubentity:     &address.Region,
-		Country:              &Country{IdentificationCode: string(address.Country)},
+	postalTradeAddress := &PostalAddress{}
+
+	if address.Street != "" {
+		postalTradeAddress.StreetName = &address.Street
+	}
+
+	if address.StreetExtra != "" {
+		postalTradeAddress.AdditionalStreetName = &address.StreetExtra
+	}
+
+	if address.Locality != "" {
+		postalTradeAddress.CityName = &address.Locality
+	}
+
+	if address.Region != "" {
+		postalTradeAddress.CountrySubentity = &address.Region
+	}
+
+	if address.Code != "" {
+		postalTradeAddress.PostalZone = &address.Code
+	}
+
+	if address.Country != "" {
+		postalTradeAddress.Country = &Country{IdentificationCode: string(address.Country)}
+	}
+
+	if address.Coordinates != nil {
+		latitude := strconv.FormatFloat(*address.Coordinates.Latitude, 'f', -1, 64)
+		longitude := strconv.FormatFloat(*address.Coordinates.Longitude, 'f', -1, 64)
+		postalTradeAddress.LocationCoordinate = &LocationCoordinate{
+			LatitudeDegreesMeasure:  &latitude,
+			LongitudeDegreesMeasure: &longitude,
+		}
 	}
 
 	return postalTradeAddress

@@ -194,13 +194,21 @@ type PartyName struct {
 
 // PostalAddress represents a postal address
 type PostalAddress struct {
-	StreetName           *string       `xml:"cbc:StreetName"`
-	AdditionalStreetName *string       `xml:"cbc:AdditionalStreetName"`
-	CityName             *string       `xml:"cbc:CityName"`
-	PostalZone           *string       `xml:"cbc:PostalZone"`
-	CountrySubentity     *string       `xml:"cbc:CountrySubentity"`
-	AddressLine          []AddressLine `xml:"cac:AddressLine"`
-	Country              *Country      `xml:"cac:Country"`
+	StreetName           *string             `xml:"cbc:StreetName"`
+	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
+	CityName             *string             `xml:"cbc:CityName"`
+	PostalZone           *string             `xml:"cbc:PostalZone"`
+	CountrySubentity     *string             `xml:"cbc:CountrySubentity"`
+	AddressLine          []AddressLine       `xml:"cac:AddressLine"`
+	Country              *Country            `xml:"cac:Country"`
+	LocationCoordinate   *LocationCoordinate `xml:"cac:LocationCoordinate"`
+}
+
+type LocationCoordinate struct {
+	LatitudeDegreesMeasure  *string `xml:"cbc:LatitudeDegreesMeasure"`
+	LatitudeMinutesMeasure  *string `xml:"cbc:LatitudeMinutesMeasure"`
+	LongitudeDegreesMeasure *string `xml:"cbc:LongitudeDegreesMeasure"`
+	LongitudeMinutesMeasure *string `xml:"cbc:LongitudeMinutesMeasure"`
 }
 
 // AddressLine represents a line in an address
