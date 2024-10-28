@@ -91,7 +91,7 @@ func (c *Conversor) newLines(inv *bill.Invoice) error {
 				}
 				if line.Taxes[0].Rate != "" {
 					rate := findTaxCode(line.Taxes[0].Rate)
-					item.ClassifiedTaxCategory.TaxScheme.ID = &rate
+					item.ClassifiedTaxCategory.ID = &rate
 				}
 			}
 

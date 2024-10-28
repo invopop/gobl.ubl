@@ -13,10 +13,11 @@
     <cac:Party>
       <cac:PostalAddress>
         <cbc:StreetName>Dietmar-Hopp-Allee</cbc:StreetName>
-        <cbc:AdditionalStreetName></cbc:AdditionalStreetName>
         <cbc:CityName>Walldorf</cbc:CityName>
         <cbc:PostalZone>69190</cbc:PostalZone>
-        <cbc:CountrySubentity></cbc:CountrySubentity>
+        <cac:AddressLine>
+          <cbc:Line>16</cbc:Line>
+        </cac:AddressLine>
         <cac:Country>
           <cbc:IdentificationCode>DE</cbc:IdentificationCode>
         </cac:Country>
@@ -38,10 +39,11 @@
     <cac:Party>
       <cac:PostalAddress>
         <cbc:StreetName>Werner-Heisenberg-Allee</cbc:StreetName>
-        <cbc:AdditionalStreetName></cbc:AdditionalStreetName>
         <cbc:CityName>München</cbc:CityName>
         <cbc:PostalZone>80939</cbc:PostalZone>
-        <cbc:CountrySubentity></cbc:CountrySubentity>
+        <cac:AddressLine>
+          <cbc:Line>25</cbc:Line>
+        </cac:AddressLine>
         <cac:Country>
           <cbc:IdentificationCode>DE</cbc:IdentificationCode>
         </cac:Country>
@@ -115,6 +117,9 @@
     </cac:Item>
     <cac:Price>
       <cbc:PriceAmount currencyID="">90.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>ceAmount>
     </cac:Price>
   </cac:InvoiceLine>
 </Invoice>

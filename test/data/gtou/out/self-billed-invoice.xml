@@ -4,6 +4,7 @@
   <cbc:ProfileID>Invoicing on purchase order</cbc:ProfileID>
   <cbc:ID>SAMPLE-001</cbc:ID>
   <cbc:IssueDate>2024-02-13</cbc:IssueDate>
+  <cbc:DueDate>2013-07-20</cbc:DueDate>
   <cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
   <cac:OrderReference>
@@ -13,10 +14,11 @@
     <cac:Party>
       <cac:PostalAddress>
         <cbc:StreetName>Dietmar-Hopp-Allee</cbc:StreetName>
-        <cbc:AdditionalStreetName></cbc:AdditionalStreetName>
         <cbc:CityName>Walldorf</cbc:CityName>
         <cbc:PostalZone>69190</cbc:PostalZone>
-        <cbc:CountrySubentity></cbc:CountrySubentity>
+        <cac:AddressLine>
+          <cbc:Line>16</cbc:Line>
+        </cac:AddressLine>
         <cac:Country>
           <cbc:IdentificationCode>DE</cbc:IdentificationCode>
         </cac:Country>
@@ -38,10 +40,11 @@
     <cac:Party>
       <cac:PostalAddress>
         <cbc:StreetName>Werner-Heisenberg-Allee</cbc:StreetName>
-        <cbc:AdditionalStreetName></cbc:AdditionalStreetName>
         <cbc:CityName>München</cbc:CityName>
         <cbc:PostalZone>80939</cbc:PostalZone>
-        <cbc:CountrySubentity></cbc:CountrySubentity>
+        <cac:AddressLine>
+          <cbc:Line>25</cbc:Line>
+        </cac:AddressLine>
         <cac:Country>
           <cbc:IdentificationCode>DE</cbc:IdentificationCode>
         </cac:Country>
@@ -57,9 +60,22 @@
       </cac:Contact>
     </cac:Party>
   </cac:AccountingCustomerParty>
-  <cac:PaymentTerms>
-    <cbc:Note>lorem ipsum</cbc:Note>
-  </cac:PaymentTerms>
+  <cac:PayeeParty>
+    <cac:PartyLegalEntity>
+      <cbc:RegistrationName>Ebeneser Scrooge AS</cbc:RegistrationName>
+    </cac:PartyLegalEntity>
+  </cac:PayeeParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+    <cbc:PaymentID>0003434323213231</cbc:PaymentID>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>NO9386011117947</cbc:ID>
+      <cbc:Name></cbc:Name>
+      <cac:FinancialInstitutionBranch>
+        <cbc:ID>DNBANOKK</cbc:ID>
+      </cac:FinancialInstitutionBranch>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
     <cac:TaxSubtotal>
@@ -89,12 +105,6 @@
           <cbc:ID>S</cbc:ID>
         </cac:TaxScheme>
       </cac:ClassifiedTaxCategory>
-    </cac:Item>
-    <cac:Price>
-      <cbc:PriceAmount currencyID="">90.00</cbc:PriceAmount>
-    </cac:Price>
-  </cac:InvoiceLine>
-</Invoice>assifiedTaxCategory>
     </cac:Item>
     <cac:Price>
       <cbc:PriceAmount currencyID="">90.00</cbc:PriceAmount>

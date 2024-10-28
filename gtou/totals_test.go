@@ -21,10 +21,10 @@ func TestNewTotals(t *testing.T) {
 
 		doc := conversor.GetDocument()
 
-		assert.Equal(t, "1800.00", doc.LegalMonetaryTotal.PayableAmount.Value)
 		assert.Equal(t, "1800.00", doc.LegalMonetaryTotal.LineExtensionAmount.Value)
-		assert.Equal(t, "342.00", doc.LegalMonetaryTotal.TaxExclusiveAmount.Value)
+		assert.Equal(t, "1800.00", doc.LegalMonetaryTotal.TaxExclusiveAmount.Value)
 		assert.Equal(t, "2142.00", doc.LegalMonetaryTotal.TaxInclusiveAmount.Value)
+		assert.Equal(t, "2142.00", doc.LegalMonetaryTotal.PayableAmount.Value)
 
 		assert.Equal(t, "342.00", doc.TaxTotal[0].TaxAmount.Value)
 		assert.Equal(t, "VAT", doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID)
