@@ -16,7 +16,8 @@ func (c *Conversor) newOrdering(ordering *bill.Ordering) error {
 	// If both ordering.seller and seller are present, the original seller is used
 	// as the tax representative.
 	if ordering.Seller != nil {
-		c.doc.TaxRepresentativeParty = &c.doc.AccountingSupplierParty.Party
+		p := c.doc.AccountingSupplierParty.Party
+		c.doc.TaxRepresentativeParty = &p
 		c.doc.AccountingSupplierParty = SupplierParty{
 			Party: c.newParty(ordering.Seller),
 		}

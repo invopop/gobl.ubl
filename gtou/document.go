@@ -6,24 +6,28 @@ import (
 
 // UBL schema constants
 const (
-	CBC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-	CAC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-	QDT  = "urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2"
-	UDT  = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
-	CCTS = "urn:un:unece:uncefact:documentation:2"
-	XSI  = "http://www.w3.org/2001/XMLSchema-instance"
+	CBC             = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+	CAC             = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
+	QDT             = "urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2"
+	UDT             = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
+	CCTS            = "urn:un:unece:uncefact:documentation:2"
+	UBL             = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+	XSI             = "http://www.w3.org/2001/XMLSchema-instance"
+	SchemaLocation  = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
+	CustomizationID = "urn:cen.eu:en16931:2017"
 )
 
 // Document represents the root element of a UBL invoice
 type Document struct {
 	XMLName                        xml.Name            `xml:"Invoice"`
-	CBCNamespace                   string              `xml:"xmlns:cbc,attr"`
 	CACNamespace                   string              `xml:"xmlns:cac,attr"`
+	CBCNamespace                   string              `xml:"xmlns:cbc,attr"`
 	QDTNamespace                   string              `xml:"xmlns:qdt,attr"`
 	UDTNamespace                   string              `xml:"xmlns:udt,attr"`
 	CCTSNamespace                  string              `xml:"xmlns:ccts,attr"`
 	UBLNamespace                   string              `xml:"xmlns,attr"`
 	XSINamespace                   string              `xml:"xmlns:xsi,attr"`
+	SchemaLocation                 string              `xml:"xsi:schemaLocation,attr"`
 	UBLExtensions                  *Extensions         `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID                   string              `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID                string              `xml:"cbc:CustomizationID,omitempty"`

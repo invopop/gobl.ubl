@@ -89,7 +89,7 @@ func (c *Conversor) newLines(inv *bill.Invoice) error {
 					},
 				}
 				if line.Taxes[0].Percent != nil {
-					percent := line.Taxes[0].Percent.String()
+					percent := line.Taxes[0].Percent.StringWithoutSymbol()
 					item.ClassifiedTaxCategory.Percent = &percent
 				}
 				if line.Taxes[0].Rate != "" {

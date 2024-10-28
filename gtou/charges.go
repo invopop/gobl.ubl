@@ -76,7 +76,7 @@ func makeTaxCategory(taxes tax.Set) *[]TaxCategory {
 		c := tax.Category.String()
 		category.TaxScheme = &TaxScheme{ID: &c}
 		if tax.Percent != nil {
-			p := tax.Percent.String()
+			p := tax.Percent.StringWithoutSymbol()
 			category.Percent = &p
 		}
 		if tax.Rate != "" {

@@ -44,7 +44,7 @@ func (c *Conversor) newTotals(totals *bill.Totals, currency string) error {
 				}
 				taxCat := TaxCategory{}
 				if rate.Percent != nil {
-					p := rate.Percent.String()
+					p := rate.Percent.StringWithoutSymbol()
 					taxCat.Percent = &p
 				}
 				if rate.Key != cbc.KeyEmpty {
