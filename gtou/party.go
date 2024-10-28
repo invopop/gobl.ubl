@@ -69,6 +69,14 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 		postalTradeAddress.StreetName = &address.Street
 	}
 
+	if address.Number != "" {
+		postalTradeAddress.AddressLine = []AddressLine{
+			{
+				Line: address.Number,
+			},
+		}
+	}
+
 	if address.StreetExtra != "" {
 		postalTradeAddress.AdditionalStreetName = &address.StreetExtra
 	}

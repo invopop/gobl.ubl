@@ -99,8 +99,38 @@
 			"code": "XR-2024-2"
 		},
 		"payment": {
+			"payee": {
+			  "name": "Ebeneser Scrooge AS",
+			  "identities": [
+				{
+				  "label": "CompanyID",
+				  "code": "989823401"
+				},
+				{
+				  "label": "0088",
+				  "code": "2298740918237"
+				}
+			  ]
+			},
 			"terms": {
-				"detail": "lorem ipsum"
+			  "due_dates": [
+				{
+				  "date": "2013-07-20",
+				  "amount": "2142.00",
+				  "percent": "100%"
+				}
+			  ],
+			  "notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
+			},
+			"instructions": {
+			  "key": "credit-transfer",
+			  "ref": "0003434323213231",
+			  "credit_transfer": [
+				{
+				  "iban": "NO9386011117947",
+				  "bic": "DNBANOKK"
+				}
+			  ]
 			}
 		},
 		"totals": {

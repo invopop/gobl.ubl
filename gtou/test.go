@@ -36,7 +36,7 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 	return env, nil
 }
 
-// NewDocumentFrom creates a UBL ß from a GOBL file in the `test/data` folder
+// NewDocumentFrom creates a UBL from a GOBL file in the `test/data` folder
 func NewDocumentFrom(name string) (*Document, error) {
 	env, err := LoadTestEnvelope(name)
 	if err != nil {

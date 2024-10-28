@@ -92,8 +92,27 @@
 			}
 		],
 		"ordering": {
-			"code": "XR-2024-2"
-		},
+      "code": "PO4711",
+      "period": {
+        "start": "2013-03-10",
+        "end": "2013-04-10"
+      },
+      "contracts": [
+        {
+          "code": "2013-05"
+        }
+      ],
+      "receiving": [
+        {
+          "code": "3544"
+        }
+      ],
+      "despatch": [
+        {
+          "code": "5433"
+        }
+      ]
+    },
 		"payment": {
 			"terms": {
 				"detail": "lorem ipsum"

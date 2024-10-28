@@ -63,12 +63,6 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		AccountingCustomerParty: CustomerParty{Party: c.newParty(inv.Customer)},
 	}
 
-	// DueDate:              formatDate(inv.DueDate),
-	// PaymentMeans:       createPaymentMeans(inv.PaymentMeans),
-	// PaymentTerms:       createPaymentTerms(inv.PaymentTerms),
-	// AllowanceCharge:    createAllowanceCharges(inv.AllowanceCharges),
-	// TaxTotal:           createTaxTotals(inv.TaxTotals),
-
 	if len(inv.Notes) > 0 {
 		c.doc.Note = make([]string, len(inv.Notes))
 		for i, note := range inv.Notes {

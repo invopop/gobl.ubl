@@ -6,9 +6,31 @@
   <cbc:IssueDate>2024-02-13</cbc:IssueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cac:InvoicePeriod>
+    <cbc:StartDate>2013-03-10</cbc:StartDate>
+    <cbc:EndDate>2013-04-10</cbc:EndDate>
+  </cac:InvoicePeriod>
   <cac:OrderReference>
-    <cbc:ID>XR-2024-2</cbc:ID>
+    <cbc:ID>PO4711</cbc:ID>
   </cac:OrderReference>
+  <cac:DespatchDocumentReference>
+    <cbc:ID></cbc:ID>
+  </cac:DespatchDocumentReference>
+  <cac:DespatchDocumentReference>
+    <cbc:ID>5433</cbc:ID>
+  </cac:DespatchDocumentReference>
+  <cac:ReceiptDocumentReference>
+    <cbc:ID></cbc:ID>
+  </cac:ReceiptDocumentReference>
+  <cac:ReceiptDocumentReference>
+    <cbc:ID>3544</cbc:ID>
+  </cac:ReceiptDocumentReference>
+  <cac:ContractDocumentReference>
+    <cbc:ID></cbc:ID>
+  </cac:ContractDocumentReference>
+  <cac:ContractDocumentReference>
+    <cbc:ID>2013-05</cbc:ID>
+  </cac:ContractDocumentReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PostalAddress>
@@ -89,12 +111,6 @@
           <cbc:ID>S</cbc:ID>
         </cac:TaxScheme>
       </cac:ClassifiedTaxCategory>
-    </cac:Item>
-    <cac:Price>
-      <cbc:PriceAmount currencyID="">90.00</cbc:PriceAmount>
-    </cac:Price>
-  </cac:InvoiceLine>
-</Invoice>assifiedTaxCategory>
     </cac:Item>
     <cac:Price>
       <cbc:PriceAmount currencyID="">90.00</cbc:PriceAmount>
