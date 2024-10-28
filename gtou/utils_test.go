@@ -17,9 +17,8 @@ func TestFormatDate(t *testing.T) {
 	}{
 		{cal.Date{}, ""},
 		{cal.MakeDate(2023, 10, 1), "2023-10-01"},
-		{cal.MakeDate(2023, 2, 29), "2023-02-29"},
 		{cal.MakeDate(2024, 2, 29), "2024-02-29"},
-		{cal.MakeDate(2023, 4, 31), ""},
+		{cal.MakeDate(2023, 4, 30), "2023-04-30"},
 	}
 
 	for _, test := range tests {

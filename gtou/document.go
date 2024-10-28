@@ -322,13 +322,13 @@ type PrepaidPayment struct {
 
 // AllowanceCharge represents an allowance or charge
 type AllowanceCharge struct {
-	ChargeIndicator           bool         `xml:"cbc:ChargeIndicator"`
-	AllowanceChargeReasonCode *string      `xml:"cbc:AllowanceChargeReasonCode"`
-	AllowanceChargeReason     *string      `xml:"cbc:AllowanceChargeReason"`
-	MultiplierFactorNumeric   *string      `xml:"cbc:MultiplierFactorNumeric"`
-	Amount                    Amount       `xml:"cbc:Amount"`
-	BaseAmount                *Amount      `xml:"cbc:BaseAmount"`
-	TaxCategory               *TaxCategory `xml:"cac:TaxCategory"`
+	ChargeIndicator           bool           `xml:"cbc:ChargeIndicator"`
+	AllowanceChargeReasonCode *string        `xml:"cbc:AllowanceChargeReasonCode"`
+	AllowanceChargeReason     *string        `xml:"cbc:AllowanceChargeReason"`
+	MultiplierFactorNumeric   *string        `xml:"cbc:MultiplierFactorNumeric"`
+	Amount                    Amount         `xml:"cbc:Amount"`
+	BaseAmount                *Amount        `xml:"cbc:BaseAmount"`
+	TaxCategory               *[]TaxCategory `xml:"cac:TaxCategory"`
 }
 
 // ExchangeRate represents an exchange rate

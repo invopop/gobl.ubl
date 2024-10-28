@@ -30,10 +30,10 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "VAT", *doc.InvoiceLine[0].Item.ClassifiedTaxCategory.TaxScheme.ID)
 		assert.Equal(t, "S", *doc.InvoiceLine[0].Item.ClassifiedTaxCategory.ID)
 		assert.Equal(t, "19%", *doc.InvoiceLine[0].Item.ClassifiedTaxCategory.Percent)
-		assert.Equal(t, true, doc.InvoiceLine[0].AllowanceCharge[0].ChargeIndicator)
+		assert.True(t, doc.InvoiceLine[0].AllowanceCharge[0].ChargeIndicator)
 		assert.Equal(t, "Testing", *doc.InvoiceLine[0].AllowanceCharge[0].AllowanceChargeReason)
 		assert.Equal(t, "12.00", doc.InvoiceLine[0].AllowanceCharge[0].Amount.Value)
-		assert.Equal(t, false, doc.InvoiceLine[0].AllowanceCharge[1].ChargeIndicator)
+		assert.False(t, doc.InvoiceLine[0].AllowanceCharge[1].ChargeIndicator)
 		assert.Equal(t, "Damage", *doc.InvoiceLine[0].AllowanceCharge[1].AllowanceChargeReason)
 		assert.Equal(t, "12.00", doc.InvoiceLine[0].AllowanceCharge[1].Amount.Value)
 

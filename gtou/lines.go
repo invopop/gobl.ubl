@@ -16,6 +16,9 @@ func (c *Conversor) newLines(inv *bill.Invoice) error {
 
 	for _, line := range inv.Lines {
 		currency := line.Item.Currency.String()
+		if currency == "" {
+			currency = inv.Currency.String()
+		}
 		invoiceLine := InvoiceLine{
 			ID: strconv.Itoa(line.Index),
 

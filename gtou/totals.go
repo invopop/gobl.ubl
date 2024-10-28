@@ -51,6 +51,10 @@ func (c *Conversor) newTotals(totals *bill.Totals, currency string) error {
 					k := findTaxCode(rate.Key)
 					taxCat.ID = &k
 				}
+				if cat.Code != cbc.CodeEmpty {
+					c := cat.Code.String()
+					taxCat.TaxScheme = &TaxScheme{ID: &c}
+				}
 				subtotal.TaxCategory = taxCat
 				c.doc.TaxTotal[0].TaxSubtotal = append(c.doc.TaxTotal[0].TaxSubtotal, subtotal)
 			}

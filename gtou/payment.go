@@ -16,25 +16,33 @@ func (c *Conversor) newPayment(payment *bill.Payment) error {
 
 		if payment.Instructions.CreditTransfer != nil {
 			c.doc.PaymentMeans[0].PayeeFinancialAccount = &FinancialAccount{
-				ID:   &payment.Instructions.CreditTransfer[0].IBAN,
-				Name: &payment.Instructions.CreditTransfer[0].Name,
-				FinancialInstitutionBranch: &Branch{
+				ID: &payment.Instructions.CreditTransfer[0].IBAN,
+			}
+			if payment.Instructions.CreditTransfer[0].Name != "" {
+				c.doc.PaymentMeans[0].PayeeFinancialAccount.Name = &payment.Instructions.CreditTransfer[0].Name
+			}
+			if payment.Instructions.CreditTransfer[0].BIC != "" {
+				c.doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch = &Branch{
 					ID: &payment.Instructions.CreditTransfer[0].BIC,
-				},
+				}
 			}
 		}
 		if payment.Instructions.DirectDebit != nil {
 			c.doc.PaymentMeans[0].PaymentMandate = &PaymentMandate{
 				ID: IDType{Value: payment.Instructions.DirectDebit.Ref},
-				PayerFinancialAccount: &FinancialAccount{
+			}
+			if payment.Instructions.DirectDebit.Account != "" {
+				c.doc.PaymentMeans[0].PayerFinancialAccount = &FinancialAccount{
 					ID: &payment.Instructions.DirectDebit.Account,
-				},
+				}
 			}
 		}
 		if payment.Instructions.Card != nil {
 			c.doc.PaymentMeans[0].CardAccount = &CardAccount{
 				PrimaryAccountNumberID: &payment.Instructions.Card.Last4,
-				HolderName:             &payment.Instructions.Card.Holder,
+			}
+			if payment.Instructions.Card.Holder != "" {
+				c.doc.PaymentMeans[0].CardAccount.HolderName = &payment.Instructions.Card.Holder
 			}
 		}
 	}

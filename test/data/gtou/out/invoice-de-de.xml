@@ -109,17 +109,4 @@
       <cbc:PriceAmount currencyID="">90.00</cbc:PriceAmount>
     </cac:Price>
   </cac:InvoiceLine>
-</Invoice>9%</cbc:Percent>
-        <cac:TaxScheme>
-          <cbc:ID>S</cbc:ID>
-        </cac:TaxScheme>
-      </cac:ClassifiedTaxCategory>
-    </cac:Item>
-    <cac:Price>
-      <cbc:PriceAmount currencyID="">90.00</cbc:PriceAmount>
-    </cac:Price>
-  </cac:InvoiceLine>
-</Invoice>ceAmount>
-    </cac:Price>
-  </cac:InvoiceLine>
 </Invoice>

@@ -85,6 +85,11 @@ func (c *Conversor) newDocument(inv *bill.Invoice) error {
 		return err
 	}
 
+	err = c.newCharges(inv)
+	if err != nil {
+		return err
+	}
+
 	err = c.newTotals(inv.Totals, string(inv.Currency))
 	if err != nil {
 		return err
