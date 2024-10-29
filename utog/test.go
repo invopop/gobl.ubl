@@ -10,7 +10,7 @@ import (
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
 func LoadTestXMLDoc(name string) (*Document, error) {
-	src, err := os.Open(filepath.Join(GetTestDataPath(), name))
+	src, err := os.Open(filepath.Join(getTestDataPath(), name))
 	if err != nil {
 		return nil, err
 	}
@@ -32,27 +32,22 @@ func LoadTestXMLDoc(name string) (*Document, error) {
 	return doc, err
 }
 
-// GetDataGlob returns a list of files in the `test/data` folder that match the pattern
-func GetDataGlob() ([]string, error) {
-	return filepath.Glob(filepath.Join(GetTestDataPath(), "*.xml"))
+func getDataGlob() ([]string, error) {
+	return filepath.Glob(filepath.Join(getTestDataPath(), "*.xml"))
 }
 
-// GetSchemaPath returns the path to the `test/data/schema` folder
-func GetSchemaPath() string {
-	return filepath.Join(GetTestDataPath(), "schema")
+func getSchemaPath() string {
+	return filepath.Join(getTestDataPath(), "schema")
 }
 
-// GetOutPath returns the path to the `test/data/out` folder
-func GetOutPath() string {
-	return filepath.Join(GetTestDataPath(), "out")
+func getOutPath() string {
+	return filepath.Join(getTestDataPath(), "out")
 }
 
-// GetTestDataPath returns the path to the `test/data/ctog` folder
-func GetTestDataPath() string {
+func getTestDataPath() string {
 	return filepath.Join(getRootFolder(), "test", "data", "utog")
 }
 
-// TODO: adapt to new folder structure
 func getRootFolder() string {
 	cwd, _ := os.Getwd()
 

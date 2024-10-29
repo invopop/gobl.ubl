@@ -6,7 +6,7 @@ import (
 )
 
 func (c *Converter) newCharges(inv *bill.Invoice) error {
-	if inv.Charges == nil || inv.Discounts == nil {
+	if inv.Charges == nil && inv.Discounts == nil {
 		return nil
 	}
 	c.doc.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))

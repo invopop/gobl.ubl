@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0aa7-70d8-9d12-2f67267147b0",
+    "uuid": "0192d8de-c94b-709b-b476-4f52779fa78c",
     "dig": {
       "alg": "sha256",
-      "val": "3cda32452cf014fa928ae92b0dec7ea0620de55597b16e0379139c2a72180562"
+      "val": "54dc471448a10971c3e23beb716b4efc3f45caa8b7c7e2d2d47e6bb4373aabfe"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be93-0aa7-7163-abf8-ac45a1a6ee6c",
+    "uuid": "0192d8de-c94b-7111-a8d6-77f31e58efe9",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",
@@ -46,7 +46,6 @@
       },
       "identities": [
         {
-          "label": "CompanyID",
           "code": "DK16356607"
         },
         {
@@ -87,7 +86,6 @@
         "i": 1,
         "quantity": "1000",
         "item": {
-          "ref": "JB007",
           "name": "Printing paper",
           "identities": [
             {
@@ -148,7 +146,6 @@
         "i": 2,
         "quantity": "100",
         "item": {
-          "ref": "JB008",
           "name": "Parker Pen",
           "description": "Parker Pen, Black, model Sansa",
           "price": "5.00",
@@ -177,7 +174,6 @@
         "i": 3,
         "quantity": "500",
         "item": {
-          "ref": "JB009",
           "name": "American Cookies",
           "price": "5.00",
           "unit": "item"
@@ -241,7 +237,6 @@
         },
         "identities": [
           {
-            "label": "CompanyID",
             "code": "NL16356706"
           },
           {
@@ -302,7 +297,6 @@
         "name": "Dagobert Duck",
         "identities": [
           {
-            "label": "CompanyID",
             "code": "DK16356608"
           },
           {

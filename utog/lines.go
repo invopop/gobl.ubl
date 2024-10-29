@@ -66,32 +66,7 @@ func (c *Conversor) getLines(doc *Document) error {
 			line.Item.Unit = UnitFromUNECE(cbc.Code(docLine.InvoicedQuantity.UnitCode))
 		}
 
-		if docLine.Item.SellersItemIdentification != nil && docLine.Item.SellersItemIdentification.ID != nil {
-			line.Item.Ref = docLine.Item.SellersItemIdentification.ID.Value
-		}
-
-		if docLine.Item.BuyersItemIdentification != nil && docLine.Item.BuyersItemIdentification.ID != nil {
-			id := getIdentity(docLine.Item.BuyersItemIdentification.ID)
-			if id != nil {
-				ids = append(ids, id)
-			}
-		}
-
-		if docLine.Item.StandardItemIdentification != nil && docLine.Item.StandardItemIdentification.ID != nil {
-			id := getIdentity(docLine.Item.StandardItemIdentification.ID)
-			if id != nil {
-				ids = append(ids, id)
-			}
-		}
-
-		if docLine.Item.CommodityClassification != nil && len(*docLine.Item.CommodityClassification) > 0 {
-			for _, classification := range *docLine.Item.CommodityClassification {
-				id := getIdentity(classification.ItemClassificationCode)
-				if id != nil {
-					ids = append(ids, id)
-				}
-			}
-		}
+		line.Item.Identities = c.getIdentities(docLine)
 
 		if docLine.Item.Description != nil {
 			line.Item.Description = *docLine.Item.Description
@@ -143,6 +118,35 @@ func (c *Conversor) getLines(doc *Document) error {
 	}
 	c.inv.Lines = lines
 	return nil
+}
+
+func (c *Conversor) getIdentities(docLine InvoiceLine) []*org.Identity {
+	ids := make([]*org.Identity, 0)
+
+	if docLine.Item.BuyersItemIdentification != nil && docLine.Item.BuyersItemIdentification.ID != nil {
+		id := getIdentity(docLine.Item.BuyersItemIdentification.ID)
+		if id != nil {
+			ids = append(ids, id)
+		}
+	}
+
+	if docLine.Item.StandardItemIdentification != nil && docLine.Item.StandardItemIdentification.ID != nil {
+		id := getIdentity(docLine.Item.StandardItemIdentification.ID)
+		if id != nil {
+			ids = append(ids, id)
+		}
+	}
+
+	if docLine.Item.CommodityClassification != nil && len(*docLine.Item.CommodityClassification) > 0 {
+		for _, classification := range *docLine.Item.CommodityClassification {
+			id := getIdentity(classification.ItemClassificationCode)
+			if id != nil {
+				ids = append(ids, id)
+			}
+		}
+	}
+
+	return ids
 }
 
 func getIdentity(id *IDType) *org.Identity {

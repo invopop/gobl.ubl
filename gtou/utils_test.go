@@ -45,10 +45,10 @@ func TestFindTaxCode(t *testing.T) {
 		input    cbc.Key
 		expected string
 	}{
-		{tax.RateStandard, StandardSalesTax},
-		{tax.RateZero, ZeroRatedGoodsTax},
-		{tax.RateExempt, TaxExempt},
-		{cbc.Key("unknown"), StandardSalesTax},
+		{tax.RateStandard, standardSalesTax},
+		{tax.RateZero, zeroRatedGoodsTax},
+		{tax.RateExempt, taxExempt},
+		{cbc.Key("unknown"), standardSalesTax},
 	}
 
 	for _, test := range tests {

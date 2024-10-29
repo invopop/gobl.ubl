@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0a86-763e-a587-4787b9b25b70",
+    "uuid": "0192d8de-c922-7398-b093-8bd8bb768c07",
     "dig": {
       "alg": "sha256",
-      "val": "aeb0e101299997224d1e55f24230ac847d08b0ab7c9df48975d12164cb296f40"
+      "val": "f9dbb8e36e565762ca11a9d7a8475a9b5064a59b89f96f0439555754bb7d5bb4"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be93-0a86-76d4-ac15-4e981f46fbbf",
+    "uuid": "0192d8de-c922-7432-b2b2-e8a280a7e1e4",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",
@@ -22,7 +22,6 @@
       },
       "identities": [
         {
-          "label": "CompanyID",
           "code": "DK16356706"
         },
         {
@@ -85,7 +84,6 @@
         "i": 1,
         "quantity": "1000",
         "item": {
-          "ref": "JB007",
           "name": "Printing paper",
           "description": "Printing paper, 2mm",
           "price": "1.00",
@@ -104,7 +102,6 @@
         "i": 2,
         "quantity": "100",
         "item": {
-          "ref": "JB008",
           "name": "Parker Pen",
           "description": "Parker Pen, Black, model Sansa",
           "price": "5.00",
@@ -123,7 +120,6 @@
         "i": 3,
         "quantity": "500",
         "item": {
-          "ref": "JB009",
           "name": "American Cookies",
           "price": "5.00",
           "unit": "item"

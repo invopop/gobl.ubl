@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	StandardSalesTax  = "S"
-	ZeroRatedGoodsTax = "Z"
-	TaxExempt         = "E"
+	standardSalesTax  = "S"
+	zeroRatedGoodsTax = "Z"
+	taxExempt         = "E"
 )
 
 // One GOBL Release, update this to use catalogues
@@ -44,14 +44,13 @@ func makePeriod(period *cal.Period) Period {
 func findTaxCode(taxRate cbc.Key) string {
 	switch taxRate {
 	case tax.RateStandard:
-		return StandardSalesTax
+		return standardSalesTax
 	case tax.RateZero:
-		return ZeroRatedGoodsTax
+		return zeroRatedGoodsTax
 	case tax.RateExempt:
-		return TaxExempt
+		return taxExempt
 	}
-
-	return StandardSalesTax
+	return standardSalesTax
 }
 
 func findPaymentKey(key cbc.Key) string {

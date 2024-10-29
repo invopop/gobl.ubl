@@ -208,6 +208,7 @@ type PostalAddress struct {
 	LocationCoordinate   *LocationCoordinate `xml:"cac:LocationCoordinate"`
 }
 
+// LocationCoordinate represents a location coordinate
 type LocationCoordinate struct {
 	LatitudeDegreesMeasure  *string `xml:"cbc:LatitudeDegreesMeasure"`
 	LatitudeMinutesMeasure  *string `xml:"cbc:LatitudeMinutesMeasure"`

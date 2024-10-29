@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0b33-7dda-ad9d-9f7762cc877e",
+    "uuid": "0192d8de-c9d7-72bb-a5a8-36d602751b6c",
     "dig": {
       "alg": "sha256",
-      "val": "6a4f7b79879319451238b87f0904b959e3d461e890a4664ab7e556a94f7659b0"
+      "val": "3583a65cde517a917bac605ef4566c035a2a9ee6d5d76db2a37c936860fe5f42"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192be93-0b33-7e50-bcda-764422033caa",
+    "uuid": "0192d8de-c9d7-7324-84a2-a216729e00c8",
     "type": "standard",
     "code": "20150483",
     "issue_date": "2015-04-01",
@@ -23,7 +23,6 @@
       },
       "identities": [
         {
-          "label": "CompanyID",
           "code": "32081330 Amersfoort"
         }
       ],

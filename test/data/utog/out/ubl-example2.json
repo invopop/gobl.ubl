@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0a3f-734c-a464-1025cb808b2c",
+    "uuid": "0192d8de-c8df-7428-a0e8-56892ec592df",
     "dig": {
       "alg": "sha256",
-      "val": "48e2d235a96b0a39c59247bd4f12669ad957b78dfe14009529e9c2d7d5195dca"
+      "val": "b7e8ce478142d5a1e8c853ce66f90ffba9f6a3925cfb3dfcbda1f11f9891a2c4"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be93-0a3f-73ca-89a5-3792eb8e6fce",
+    "uuid": "0192d8de-c8df-7481-be1b-03442d0fad8f",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -39,7 +39,6 @@
       },
       "identities": [
         {
-          "label": "CompanyID",
           "code": "987654321"
         },
         {
@@ -80,7 +79,6 @@
         "i": 1,
         "quantity": "2",
         "item": {
-          "ref": "JB007",
           "name": "Laptop computer",
           "identities": [
             {
@@ -138,7 +136,6 @@
         "i": 2,
         "quantity": "-1",
         "item": {
-          "ref": "JB008",
           "name": "Returned \"Advanced computing\" book",
           "identities": [
             {
@@ -179,7 +176,6 @@
         "i": 3,
         "quantity": "2",
         "item": {
-          "ref": "JB009",
           "name": "\"Computing for dummies\" book",
           "identities": [
             {
@@ -217,7 +213,6 @@
         "i": 4,
         "quantity": "-1",
         "item": {
-          "ref": "JB010",
           "name": "Returned IBM 5150 desktop",
           "identities": [
             {
@@ -255,7 +250,6 @@
         "i": 5,
         "quantity": "250",
         "item": {
-          "ref": "JB011",
           "name": "Network cable",
           "identities": [
             {
@@ -336,7 +330,6 @@
         },
         "identities": [
           {
-            "label": "CompanyID",
             "code": "123456789"
           },
           {
@@ -383,7 +376,6 @@
         "name": "Ebeneser Scrooge AS",
         "identities": [
           {
-            "label": "CompanyID",
             "code": "989823401"
           },
           {
