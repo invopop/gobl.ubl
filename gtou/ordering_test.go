@@ -15,11 +15,11 @@ func TestNewOrdering(t *testing.T) {
 
 		inv := env.Extract().(*bill.Invoice)
 
-		conversor := NewConverter()
-		err = conversor.newDocument(inv)
+		converter := NewConverter()
+		err = converter.newDocument(inv)
 		require.NoError(t, err)
 
-		doc := conversor.GetDocument()
+		doc := converter.GetDocument()
 
 		assert.Equal(t, "PO4711", doc.OrderReference.ID)
 		assert.Equal(t, "2013-03-10", *doc.InvoicePeriod[0].StartDate)

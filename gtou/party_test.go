@@ -15,11 +15,11 @@ func TestNewParty(t *testing.T) {
 
 		inv := env.Extract().(*bill.Invoice)
 
-		conversor := NewConverter()
-		err = conversor.newDocument(inv)
+		converter := NewConverter()
+		err = converter.newDocument(inv)
 		require.NoError(t, err)
 
-		doc := conversor.GetDocument()
+		doc := converter.GetDocument()
 
 		assert.Equal(t, "111111125", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
 		assert.Equal(t, "Provide One GmbH", *doc.AccountingSupplierParty.Party.PartyLegalEntity.RegistrationName)

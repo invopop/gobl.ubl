@@ -61,7 +61,7 @@ var update = flag.Bool("update", false, "Update out directory")
 // }
 
 func TestUtoG(t *testing.T) {
-	examples, err := GetDataGlob("*.xml")
+	examples, err := getDataGlob("*.xml")
 	require.NoError(t, err)
 
 	for _, example := range examples {
@@ -132,7 +132,7 @@ func NewDocumentFrom(name string) (*gtou.Document, error) {
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
 func LoadTestXMLDoc(name string) (*utog.Document, error) {
-	src, err := os.Open(filepath.Join(GetConversionTypePath(xmlPattern), name))
+	src, err := os.Open(filepath.Join(getConversionTypePath(xmlPattern), name))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func LoadTestInvoice(name string) (*bill.Invoice, error) {
 
 // LoadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
 func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
-	src, _ := os.Open(filepath.Join(GetConversionTypePath(jsonPattern), name))
+	src, _ := os.Open(filepath.Join(getConversionTypePath(jsonPattern), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err
@@ -187,7 +187,7 @@ func LoadOutputFile(name string) ([]byte, error) {
 	} else {
 		pattern = jsonPattern
 	}
-	src, _ := os.Open(filepath.Join(GetOutPath(pattern), name))
+	src, _ := os.Open(filepath.Join(getOutPath(pattern), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err
@@ -204,39 +204,33 @@ func SaveOutputFile(name string, data []byte) error {
 	} else {
 		pattern = jsonPattern
 	}
-	return os.WriteFile(filepath.Join(GetOutPath(pattern), name), data, 0644)
+	return os.WriteFile(filepath.Join(getOutPath(pattern), name), data, 0644)
 }
 
-// GetDataGlob returns a list of files in the `test/data` folder that match the pattern
-func GetDataGlob(pattern string) ([]string, error) {
-	return filepath.Glob(filepath.Join(GetConversionTypePath(pattern), pattern))
+func getDataGlob(pattern string) ([]string, error) {
+	return filepath.Glob(filepath.Join(getConversionTypePath(pattern), pattern))
 }
 
-// GetSchemaPath returns the path to the `test/data/schema` folder
-func GetSchemaPath(pattern string) string {
-	return filepath.Join(GetConversionTypePath(pattern), "schema")
+func getSchemaPath(pattern string) string {
+	return filepath.Join(getConversionTypePath(pattern), "schema")
 }
 
-// GetOutPath returns the path to the `test/data/out` folder
-func GetOutPath(pattern string) string {
-	return filepath.Join(GetConversionTypePath(pattern), "out")
+func getOutPath(pattern string) string {
+	return filepath.Join(getConversionTypePath(pattern), "out")
 }
 
-// GetDataPath returns the path to the `test/data` folder
-func GetDataPath() string {
-	return filepath.Join(GetTestPath(), "data")
+func getDataPath() string {
+	return filepath.Join(getTestPath(), "data")
 }
 
-// Differentiates between the conversion types
-func GetConversionTypePath(pattern string) string {
+func getConversionTypePath(pattern string) string {
 	if pattern == xmlPattern {
-		return filepath.Join(GetDataPath(), "utog")
+		return filepath.Join(getDataPath(), "utog")
 	}
-	return filepath.Join(GetDataPath(), "gtou")
+	return filepath.Join(getDataPath(), "gtou")
 }
 
-// GetTestPath returns the path to the `test` folder
-func GetTestPath() string {
+func getTestPath() string {
 	return filepath.Join(getRootFolder(), "test")
 }
 

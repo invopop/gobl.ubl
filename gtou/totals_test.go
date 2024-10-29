@@ -15,11 +15,11 @@ func TestNewTotals(t *testing.T) {
 
 		inv := env.Extract().(*bill.Invoice)
 
-		conversor := NewConverter()
-		err = conversor.newDocument(inv)
+		converter := NewConverter()
+		err = converter.newDocument(inv)
 		require.NoError(t, err)
 
-		doc := conversor.GetDocument()
+		doc := converter.GetDocument()
 
 		assert.Equal(t, "1800.00", doc.LegalMonetaryTotal.LineExtensionAmount.Value)
 		assert.Equal(t, "1800.00", doc.LegalMonetaryTotal.TaxExclusiveAmount.Value)

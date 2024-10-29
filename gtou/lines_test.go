@@ -15,11 +15,11 @@ func TestNewLines(t *testing.T) {
 
 		inv := env.Extract().(*bill.Invoice)
 
-		conversor := NewConverter()
-		err = conversor.newDocument(inv)
+		converter := NewConverter()
+		err = converter.newDocument(inv)
 		require.NoError(t, err)
 
-		doc := conversor.GetDocument()
+		doc := converter.GetDocument()
 
 		assert.NotNil(t, doc.InvoiceLine)
 		assert.Len(t, doc.InvoiceLine, 1)

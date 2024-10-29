@@ -15,11 +15,11 @@ func TestNewDelivery(t *testing.T) {
 
 		inv := env.Extract().(*bill.Invoice)
 
-		conversor := NewConverter()
-		err = conversor.newDocument(inv)
+		converter := NewConverter()
+		err = converter.newDocument(inv)
 		require.NoError(t, err)
 
-		doc := conversor.GetDocument()
+		doc := converter.GetDocument()
 		assert.NotNil(t, doc.Delivery)
 		assert.Len(t, doc.Delivery, 1)
 		assert.Equal(t, "2024-02-10", *doc.Delivery[0].ActualDeliveryDate)

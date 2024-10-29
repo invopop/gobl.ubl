@@ -32,18 +32,6 @@ func LoadTestXMLDoc(name string) (*Document, error) {
 	return doc, err
 }
 
-func getDataGlob() ([]string, error) {
-	return filepath.Glob(filepath.Join(getTestDataPath(), "*.xml"))
-}
-
-func getSchemaPath() string {
-	return filepath.Join(getTestDataPath(), "schema")
-}
-
-func getOutPath() string {
-	return filepath.Join(getTestDataPath(), "out")
-}
-
 func getTestDataPath() string {
 	return filepath.Join(getRootFolder(), "test", "data", "utog")
 }
