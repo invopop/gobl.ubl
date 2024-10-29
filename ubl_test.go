@@ -126,7 +126,7 @@ func NewDocumentFrom(name string) (*gtou.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &gtou.Conversor{}
+	c := &gtou.Converter{}
 	return c.ConvertToUBL(env)
 }
 

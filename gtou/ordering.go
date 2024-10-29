@@ -4,7 +4,7 @@ import (
 	"github.com/invopop/gobl/bill"
 )
 
-func (c *Conversor) newOrdering(ordering *bill.Ordering) error {
+func (c *Converter) newOrdering(ordering *bill.Ordering) error {
 	if ordering == nil {
 		return nil
 	}

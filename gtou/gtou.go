@@ -11,25 +11,25 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// Conversor is a struct that contains the necessary elements to convert between GOBL and UBL
-type Conversor struct {
+// Converter is a struct that contains the necessary elements to convert between GOBL and UBL
+type Converter struct {
 	doc *Document
 }
 
-// NewConversor creates a new Conversor instance
-func NewConversor() *Conversor {
-	c := new(Conversor)
+// NewConverter creates a new Converter instance
+func NewConverter() *Converter {
+	c := new(Converter)
 	c.doc = new(Document)
 	return c
 }
 
 // GetDocument returns the document from the conversor
-func (c *Conversor) GetDocument() *Document {
+func (c *Converter) GetDocument() *Document {
 	return c.doc
 }
 
 // ConvertToUBL converts a GOBL envelope into a UBL document
-func (c *Conversor) ConvertToUBL(env *gobl.Envelope) (*Document, error) {
+func (c *Converter) ConvertToUBL(env *gobl.Envelope) (*Document, error) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return nil, fmt.Errorf("invalid type %T", env.Document)
@@ -43,7 +43,7 @@ func (c *Conversor) ConvertToUBL(env *gobl.Envelope) (*Document, error) {
 	return c.doc, nil
 }
 
-func (c *Conversor) newDocument(inv *bill.Invoice) error {
+func (c *Converter) newDocument(inv *bill.Invoice) error {
 
 	// Create the UBL document
 	c.doc = &Document{

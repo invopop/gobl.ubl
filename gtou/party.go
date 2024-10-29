@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Conversor) newParty(party *org.Party) Party {
+func (c *Converter) newParty(party *org.Party) Party {
 	if party == nil {
 		return Party{}
 	}

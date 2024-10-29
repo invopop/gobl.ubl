@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/gobl/num"
 )
 
-func (c *Conversor) newLines(inv *bill.Invoice) error {
+func (c *Converter) newLines(inv *bill.Invoice) error {
 	if len(inv.Lines) == 0 {
 		return nil
 	}

@@ -2,7 +2,7 @@ package gtou
 
 import "github.com/invopop/gobl/bill"
 
-func (c *Conversor) newDelivery(delivery *bill.Delivery) error {
+func (c *Converter) newDelivery(delivery *bill.Delivery) error {
 	if delivery == nil {
 		return nil
 	}

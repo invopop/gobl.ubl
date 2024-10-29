@@ -6,7 +6,7 @@ import (
 	"github.com/invopop/gobl/num"
 )
 
-func (c *Conversor) newTotals(totals *bill.Totals, currency string) error {
+func (c *Converter) newTotals(totals *bill.Totals, currency string) error {
 	if totals == nil {
 		return nil
 	}

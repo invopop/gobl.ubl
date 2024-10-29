@@ -15,7 +15,7 @@ func TestNewCharges(t *testing.T) {
 
 		inv := env.Extract().(*bill.Invoice)
 
-		conversor := NewConversor()
+		conversor := NewConverter()
 		err = conversor.newDocument(inv)
 		require.NoError(t, err)
 

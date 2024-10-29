@@ -10,14 +10,14 @@ import (
 // Conversor is a struct that encapsulates both CtoG and GtoC conversors
 type Conversor struct {
 	UtoG *utog.Conversor
-	GtoU *gtou.Conversor
+	GtoU *gtou.Converter
 }
 
 // NewConversor creates a new Conversor instance
 func NewConversor() *Conversor {
 	c := new(Conversor)
 	c.UtoG = utog.NewConversor()
-	c.GtoU = gtou.NewConversor()
+	c.GtoU = gtou.NewConverter()
 	return c
 }
 

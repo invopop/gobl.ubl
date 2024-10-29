@@ -5,7 +5,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Conversor) newCharges(inv *bill.Invoice) error {
+func (c *Converter) newCharges(inv *bill.Invoice) error {
 	if inv.Charges == nil || inv.Discounts == nil {
 		return nil
 	}

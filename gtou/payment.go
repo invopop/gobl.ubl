@@ -2,7 +2,7 @@ package gtou
 
 import "github.com/invopop/gobl/bill"
 
-func (c *Conversor) newPayment(payment *bill.Payment) error {
+func (c *Converter) newPayment(payment *bill.Payment) error {
 	if payment == nil {
 		return nil
 	}
