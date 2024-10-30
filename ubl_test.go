@@ -17,6 +17,9 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/lestrrat-go/libxml2"
+	"github.com/lestrrat-go/libxml2/xsd"
 )
 
 const (
@@ -26,39 +29,39 @@ const (
 
 var update = flag.Bool("update", false, "Update out directory")
 
-// func TestGtoU(t *testing.T) {
-// 	// schema, err := test.LoadSchema("schema.xsd")
-// 	// require.NoError(t, err)
+func TestGtoU(t *testing.T) {
+	schema, err := loadSchema("schema.xsd")
+	require.NoError(t, err)
 
-// 	examples, err := GetDataGlob("*.json")
-// 	require.NoError(t, err)
+	examples, err := getDataGlob("*.json")
+	require.NoError(t, err)
 
-// 	for _, example := range examples {
-// 		inName := filepath.Base(example)
-// 		outName := strings.Replace(inName, ".json", ".xml", 1)
+	for _, example := range examples {
+		inName := filepath.Base(example)
+		outName := strings.Replace(inName, ".json", ".xml", 1)
 
-// 		t.Run(inName, func(t *testing.T) {
-// 			doc, err := NewDocumentFrom(inName)
-// 			require.NoError(t, err)
+		t.Run(inName, func(t *testing.T) {
+			doc, err := NewDocumentFrom(inName)
+			require.NoError(t, err)
 
-// 			data, err := doc.Bytes()
-// 			require.NoError(t, err)
+			data, err := doc.Bytes()
+			require.NoError(t, err)
 
-// 			// err = test.ValidateXML(schema, data)
-// 			// require.NoError(t, err)
+			err = ValidateXML(schema, data)
+			require.NoError(t, err)
 
-// 			output, err := LoadOutputFile(outName)
-// 			assert.NoError(t, err)
+			output, err := LoadOutputFile(outName)
+			assert.NoError(t, err)
 
-// 			if *update {
-// 				err = SaveOutputFile(outName, data)
-// 				require.NoError(t, err)
-// 			} else {
-// 				assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
-// 			}
-// 		})
-// 	}
-// }
+			if *update {
+				err = SaveOutputFile(outName, data)
+				require.NoError(t, err)
+			} else {
+				assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
+			}
+		})
+	}
+}
 
 func TestUtoG(t *testing.T) {
 	examples, err := getDataGlob("*.xml")
@@ -205,6 +208,25 @@ func SaveOutputFile(name string, data []byte) error {
 		pattern = jsonPattern
 	}
 	return os.WriteFile(filepath.Join(getOutPath(pattern), name), data, 0644)
+}
+
+func loadSchema(name string) (*xsd.Schema, error) {
+	return xsd.ParseFromFile(filepath.Join(getSchemaPath(name), name))
+}
+
+// ValidateXML validates a XML document against a XSD Schema
+func ValidateXML(schema *xsd.Schema, data []byte) error {
+	xmlDoc, err := libxml2.Parse(data)
+	if err != nil {
+		return err
+	}
+
+	err = schema.Validate(xmlDoc)
+	if err != nil {
+		return err.(xsd.SchemaValidationError).Errors()[0]
+	}
+
+	return nil
 }
 
 func getDataGlob(pattern string) ([]string, error) {

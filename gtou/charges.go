@@ -73,8 +73,7 @@ func makeTaxCategory(taxes tax.Set) *[]TaxCategory {
 	set := []TaxCategory{}
 	for _, tax := range taxes {
 		category := TaxCategory{}
-		c := tax.Category.String()
-		category.TaxScheme = &TaxScheme{ID: &c}
+		category.TaxScheme = &TaxScheme{ID: tax.Category.String()}
 		if tax.Percent != nil {
 			p := tax.Percent.StringWithoutSymbol()
 			category.Percent = &p

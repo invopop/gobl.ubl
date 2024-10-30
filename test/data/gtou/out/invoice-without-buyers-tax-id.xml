@@ -23,6 +23,9 @@
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
         <cbc:CompanyID>111111125</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Provide One GmbH</cbc:RegistrationName>
@@ -101,12 +104,12 @@
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
       <cbc:AllowanceChargeReason>Testing</cbc:AllowanceChargeReason>
-      <cbc:Amount>12.00</cbc:Amount>
+      <cbc:Amount currencyID="EUR">12.00</cbc:Amount>
     </cac:AllowanceCharge>
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
       <cbc:AllowanceChargeReason>Damage</cbc:AllowanceChargeReason>
-      <cbc:Amount>12.00</cbc:Amount>
+      <cbc:Amount currencyID="EUR">12.00</cbc:Amount>
     </cac:AllowanceCharge>
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>

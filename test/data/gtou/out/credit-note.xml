@@ -23,6 +23,9 @@
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
         <cbc:CompanyID>111111125</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Provide One GmbH</cbc:RegistrationName>
@@ -49,6 +52,9 @@
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
         <cbc:CompanyID>282741168</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Sample Consumer</cbc:RegistrationName>

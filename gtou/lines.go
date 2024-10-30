@@ -52,7 +52,7 @@ func (c *Converter) newLines(inv *bill.Invoice) error {
 		}
 
 		if len(line.Charges) > 0 || len(line.Discounts) > 0 {
-			invoiceLine.AllowanceCharge = makeLineCharges(line.Charges, line.Discounts)
+			invoiceLine.AllowanceCharge = makeLineCharges(line.Charges, line.Discounts, currency)
 		}
 
 		if line.Item != nil {
@@ -82,10 +82,9 @@ func (c *Converter) newLines(inv *bill.Invoice) error {
 			}
 
 			if len(line.Taxes) > 0 && line.Taxes[0].Category != "" {
-				category := line.Taxes[0].Category.String()
 				item.ClassifiedTaxCategory = &ClassifiedTaxCategory{
 					TaxScheme: &TaxScheme{
-						ID: &category,
+						ID: line.Taxes[0].Category.String(),
 					},
 				}
 				if line.Taxes[0].Percent != nil {
@@ -116,13 +115,14 @@ func (c *Converter) newLines(inv *bill.Invoice) error {
 	return nil
 }
 
-func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount) []*AllowanceCharge {
+func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, currency string) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
 	for _, charge := range charges {
 		allowanceCharge := &AllowanceCharge{
 			ChargeIndicator: true,
 			Amount: Amount{
-				Value: charge.Amount.String(),
+				Value:      charge.Amount.String(),
+				CurrencyID: &currency,
 			},
 		}
 		if charge.Code != "" {
@@ -141,7 +141,8 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount)
 		allowanceCharge := &AllowanceCharge{
 			ChargeIndicator: false,
 			Amount: Amount{
-				Value: discount.Amount.String(),
+				Value:      discount.Amount.String(),
+				CurrencyID: &currency,
 			},
 		}
 		if discount.Code != "" {

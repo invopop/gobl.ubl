@@ -27,6 +27,9 @@ func (c *Converter) newParty(party *org.Party) Party {
 		p.PartyTaxScheme = []PartyTaxScheme{
 			{
 				CompanyID: &taxID,
+				TaxScheme: &TaxScheme{
+					ID: "VAT",
+				},
 			},
 		}
 	}
