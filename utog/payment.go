@@ -8,7 +8,7 @@ import (
 	"github.com/invopop/gobl/pay"
 )
 
-func (c *Conversor) getPayment(doc *Document) error {
+func (c *Converter) getPayment(doc *Document) error {
 	payment := &bill.Payment{}
 
 	if doc.PayeeParty != nil {

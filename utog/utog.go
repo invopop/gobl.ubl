@@ -1,4 +1,4 @@
-// Package utog provides a conversor from UBL to GOBL.
+// Package utog provides a converter from UBL to GOBL.
 package utog
 
 import (
@@ -11,27 +11,27 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-// Conversor is a struct that contains the necessary elements to convert between GOBL and UBL
-type Conversor struct {
+// Converter is a struct that contains the necessary elements to convert between GOBL and UBL
+type Converter struct {
 	inv *bill.Invoice
 	doc *Document
 }
 
-// NewConversor Builder function
-func NewConversor() *Conversor {
-	c := new(Conversor)
+// NewConverter Builder function
+func NewConverter() *Converter {
+	c := new(Converter)
 	c.inv = new(bill.Invoice)
 	c.doc = new(Document)
 	return c
 }
 
-// GetInvoice returns the invoice from the conversor
-func (c *Conversor) GetInvoice() *bill.Invoice {
+// GetInvoice returns the invoice from the converter
+func (c *Converter) GetInvoice() *bill.Invoice {
 	return c.inv
 }
 
 // ConvertToGOBL converts a UBL document into a GOBL envelope
-func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
+func (c *Converter) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 	if err := xml.Unmarshal(xmlData, &c.doc); err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *Conversor) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 }
 
 // NewInvoice creates a new invoice from a UBL document
-func (c *Conversor) NewInvoice(doc *Document) error {
+func (c *Converter) NewInvoice(doc *Document) error {
 
 	c.inv = &bill.Invoice{
 		Code:     cbc.Code(doc.ID),

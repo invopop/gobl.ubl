@@ -15,11 +15,11 @@ func TestNewPayment(t *testing.T) {
 
 		inv := env.Extract().(*bill.Invoice)
 
-		conversor := NewConverter()
-		err = conversor.newDocument(inv)
+		converter := NewConverter()
+		err = converter.newDocument(inv)
 		require.NoError(t, err)
 
-		doc := conversor.GetDocument()
+		doc := converter.GetDocument()
 
 		assert.Equal(t, "Ebeneser Scrooge AS", *doc.PayeeParty.PartyLegalEntity.RegistrationName)
 		assert.Equal(t, "2013-07-20", doc.DueDate)

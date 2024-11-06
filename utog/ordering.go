@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Conversor) getOrdering(doc *Document) error {
+func (c *Converter) getOrdering(doc *Document) error {
 	ordering := &bill.Ordering{}
 
 	if doc.OrderReference != nil && doc.OrderReference.ID != "" {
@@ -88,7 +88,7 @@ func (c *Conversor) getOrdering(doc *Document) error {
 	return nil
 }
 
-func (c *Conversor) getReference(ref *DocumentReference) (*org.DocumentRef, error) {
+func (c *Converter) getReference(ref *DocumentReference) (*org.DocumentRef, error) {
 	docRef := &org.DocumentRef{
 		Code: cbc.Code(ref.ID.Value),
 	}
@@ -111,7 +111,7 @@ func (c *Conversor) getReference(ref *DocumentReference) (*org.DocumentRef, erro
 	return docRef, nil
 }
 
-func (c *Conversor) setPeriodDates(invoicePeriod Period) *cal.Period {
+func (c *Converter) setPeriodDates(invoicePeriod Period) *cal.Period {
 	period := &cal.Period{}
 	if invoicePeriod.StartDate != nil {
 		start, err := ParseDate(*invoicePeriod.StartDate)

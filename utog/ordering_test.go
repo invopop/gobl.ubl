@@ -13,10 +13,10 @@ func TestGetOrdering(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
-		ordering := conversor.GetInvoice().Ordering
+		ordering := converter.GetInvoice().Ordering
 		assert.NotNil(t, ordering)
 
 		assert.Equal(t, cbc.Code("123"), ordering.Code)
@@ -29,10 +29,10 @@ func TestGetOrdering(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example5.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
-		ordering := conversor.GetInvoice().Ordering
+		ordering := converter.GetInvoice().Ordering
 		assert.NotNil(t, ordering)
 
 		assert.Equal(t, cbc.Code("PO4711"), ordering.Code)

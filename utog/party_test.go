@@ -14,11 +14,11 @@ func TestGetParty(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		supplier := conversor.GetInvoice().Supplier
+		supplier := converter.GetInvoice().Supplier
 		require.NotNil(t, supplier)
 		assert.Equal(t, "Tax handling company AS", supplier.Name)
 		assert.Equal(t, cbc.Code("NO967611265MVA"), supplier.TaxID.Code)
@@ -30,7 +30,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "202", supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), supplier.Addresses[0].Country)
 
-		seller := conversor.GetInvoice().Ordering.Seller
+		seller := converter.GetInvoice().Ordering.Seller
 		require.NotNil(t, seller)
 		assert.Equal(t, "Salescompany ltd.", seller.Name)
 		assert.Equal(t, cbc.Code("NO123456789MVA"), seller.TaxID.Code)
@@ -53,7 +53,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "antonio@salescompany.no", seller.Emails[0].Address)
 		assert.Equal(t, "46211230", seller.Telephones[0].Number)
 
-		customer := conversor.GetInvoice().Customer
+		customer := converter.GetInvoice().Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "The Buyercompany", customer.Name)
 		assert.Equal(t, cbc.Code("NO987654321MVA"), customer.TaxID.Code)
@@ -79,11 +79,11 @@ func TestGetParty(t *testing.T) {
 	t.Run("ubl-example3.xml", func(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example3.xml")
 		require.NoError(t, err)
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		supplier := conversor.GetInvoice().Supplier
+		supplier := converter.GetInvoice().Supplier
 		require.NotNil(t, supplier)
 		assert.Equal(t, "SubscriptionSeller", supplier.Name)
 		assert.Equal(t, cbc.Code("DK16356706"), supplier.TaxID.Code)
@@ -100,7 +100,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "0088", supplier.Identities[1].Label)
 		assert.Equal(t, cbc.Code("1238764941386"), supplier.Identities[1].Code)
 
-		customer := conversor.GetInvoice().Customer
+		customer := converter.GetInvoice().Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "Buyercompany ltd", customer.Name)
 		assert.Equal(t, cbc.Code("NO987654321MVA"), customer.TaxID.Code)

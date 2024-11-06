@@ -1,4 +1,4 @@
-// Package gtou provides a conversor from GOBL to UBL.
+// Package gtou provides a converter from GOBL to UBL.
 package gtou
 
 import (
@@ -23,7 +23,7 @@ func NewConverter() *Converter {
 	return c
 }
 
-// GetDocument returns the document from the conversor
+// GetDocument returns the document from the converter
 func (c *Converter) GetDocument() *Document {
 	return c.doc
 }

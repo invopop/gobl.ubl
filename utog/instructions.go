@@ -4,7 +4,7 @@ import (
 	"github.com/invopop/gobl/pay"
 )
 
-func (c *Conversor) getInstructions(paymentMeans *PaymentMeans) *pay.Instructions {
+func (c *Converter) getInstructions(paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
 		Key: PaymentMeansTypeCodeParse(paymentMeans.PaymentMeansCode.Value),
 	}
@@ -29,7 +29,7 @@ func (c *Conversor) getInstructions(paymentMeans *PaymentMeans) *pay.Instruction
 	return instructions
 }
 
-func (c *Conversor) getCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
+func (c *Converter) getCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	creditTransfer := &pay.CreditTransfer{}
 
 	if paymentMeans.PayeeFinancialAccount != nil {
@@ -48,7 +48,7 @@ func (c *Conversor) getCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditT
 	return []*pay.CreditTransfer{creditTransfer}
 }
 
-func (c *Conversor) getDirectDebit(paymentMeans *PaymentMeans) *pay.DirectDebit {
+func (c *Converter) getDirectDebit(paymentMeans *PaymentMeans) *pay.DirectDebit {
 	directDebit := &pay.DirectDebit{}
 
 	if paymentMeans.PaymentMandate != nil {
@@ -80,7 +80,7 @@ func (c *Conversor) getDirectDebit(paymentMeans *PaymentMeans) *pay.DirectDebit 
 	return directDebit
 }
 
-func (c *Conversor) getCard(paymentMeans *PaymentMeans) *pay.Card {
+func (c *Converter) getCard(paymentMeans *PaymentMeans) *pay.Card {
 	card := &pay.Card{}
 	if paymentMeans.CardAccount != nil {
 		if paymentMeans.CardAccount.PrimaryAccountNumberID != nil {

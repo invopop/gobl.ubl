@@ -11,7 +11,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Conversor) getLines(doc *Document) error {
+func (c *Converter) getLines(doc *Document) error {
 	items := doc.InvoiceLine
 
 	lines := make([]*bill.Line, 0, len(items))
@@ -120,7 +120,7 @@ func (c *Conversor) getLines(doc *Document) error {
 	return nil
 }
 
-func (c *Conversor) getIdentities(docLine InvoiceLine) []*org.Identity {
+func (c *Converter) getIdentities(docLine InvoiceLine) []*org.Identity {
 	ids := make([]*org.Identity, 0)
 
 	if docLine.Item.BuyersItemIdentification != nil && docLine.Item.BuyersItemIdentification.ID != nil {

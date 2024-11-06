@@ -13,11 +13,11 @@ func TestGetInstructions(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		payment := conversor.GetInvoice().Payment
+		payment := converter.GetInvoice().Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
@@ -31,11 +31,11 @@ func TestGetInstructions(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example5.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		payment := conversor.GetInvoice().Payment
+		payment := converter.GetInvoice().Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("direct-debit"), payment.Instructions.Key)
@@ -48,11 +48,11 @@ func TestGetInstructions(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example7.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		payment := conversor.GetInvoice().Payment
+		payment := converter.GetInvoice().Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
@@ -65,11 +65,11 @@ func TestGetInstructions(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example8.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		payment := conversor.GetInvoice().Payment
+		payment := converter.GetInvoice().Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)

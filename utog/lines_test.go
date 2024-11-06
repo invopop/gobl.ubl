@@ -16,11 +16,11 @@ func TestGetLines(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example1.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		inv := conversor.GetInvoice()
+		inv := converter.GetInvoice()
 		lines := inv.Lines
 		assert.NotNil(t, lines)
 
@@ -48,11 +48,11 @@ func TestGetLines(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		inv := conversor.GetInvoice()
+		inv := converter.GetInvoice()
 		lines := inv.Lines
 		assert.NotNil(t, lines)
 		assert.Len(t, lines, 5)

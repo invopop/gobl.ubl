@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Conversor) getParty(party *Party) *org.Party {
+func (c *Converter) getParty(party *Party) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {

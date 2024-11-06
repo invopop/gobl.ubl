@@ -12,7 +12,7 @@ func TestParseUtoGCharges(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 
@@ -51,7 +51,7 @@ func TestParseUtoGCharges(t *testing.T) {
 	t.Run("ubl-example5.xml", func(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example5.xml")
 		require.NoError(t, err)
-		c := NewConversor()
+		c := NewConverter()
 		err = c.NewInvoice(doc)
 		require.NoError(t, err)
 

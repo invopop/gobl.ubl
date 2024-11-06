@@ -76,11 +76,11 @@ func TestUtoG(t *testing.T) {
 			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			// Create a new conversor
-			conversor := utog.NewConversor()
+			// Create a new converter
+			converter := utog.NewConverter()
 
 			// Convert CII XML to GOBL
-			goblEnv, err := conversor.ConvertToGOBL(xmlData)
+			goblEnv, err := converter.ConvertToGOBL(xmlData)
 			require.NoError(t, err)
 
 			// Extract the invoice from the envelope

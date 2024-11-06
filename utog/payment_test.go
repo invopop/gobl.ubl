@@ -13,11 +13,11 @@ func TestGetPayment(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example2.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		payment := conversor.GetInvoice().Payment
+		payment := converter.GetInvoice().Payment
 		require.NotNil(t, payment)
 
 		require.NotNil(t, payment.Payee)
@@ -35,11 +35,11 @@ func TestGetPayment(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example5.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		payment := conversor.GetInvoice().Payment
+		payment := converter.GetInvoice().Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, "Dagobert Duck", payment.Payee.Name)

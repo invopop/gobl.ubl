@@ -10,7 +10,7 @@ import (
 )
 
 // ParseAllowanceCharges extracts the charges logic from the CII document
-func (c *Conversor) getCharges(doc *Document) error {
+func (c *Converter) getCharges(doc *Document) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
@@ -44,7 +44,7 @@ func (c *Conversor) getCharges(doc *Document) error {
 	return nil
 }
 
-func (c *Conversor) parseCharge(allowanceCharge *AllowanceCharge) (*bill.Charge, error) {
+func (c *Converter) parseCharge(allowanceCharge *AllowanceCharge) (*bill.Charge, error) {
 	charge := &bill.Charge{}
 	if allowanceCharge.AllowanceChargeReason != nil {
 		charge.Reason = *allowanceCharge.AllowanceChargeReason
@@ -97,7 +97,7 @@ func (c *Conversor) parseCharge(allowanceCharge *AllowanceCharge) (*bill.Charge,
 	return charge, nil
 }
 
-func (c *Conversor) parseDiscount(allowanceCharge *AllowanceCharge) (*bill.Discount, error) {
+func (c *Converter) parseDiscount(allowanceCharge *AllowanceCharge) (*bill.Discount, error) {
 	discount := &bill.Discount{}
 	if allowanceCharge.AllowanceChargeReason != nil {
 		discount.Reason = *allowanceCharge.AllowanceChargeReason

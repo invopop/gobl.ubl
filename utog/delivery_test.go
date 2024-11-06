@@ -13,11 +13,11 @@ func TestGetDelivery(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example4.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		inv := conversor.GetInvoice()
+		inv := converter.GetInvoice()
 		assert.NotNil(t, inv.Delivery)
 		assert.Equal(t, "2013-04-15", inv.Delivery.Date.String())
 		assert.NotNil(t, inv.Delivery.Receiver)
@@ -32,11 +32,11 @@ func TestGetDelivery(t *testing.T) {
 		doc, err := LoadTestXMLDoc("ubl-example5.xml")
 		require.NoError(t, err)
 
-		conversor := NewConversor()
-		err = conversor.NewInvoice(doc)
+		converter := NewConverter()
+		err = converter.NewInvoice(doc)
 		require.NoError(t, err)
 
-		inv := conversor.GetInvoice()
+		inv := converter.GetInvoice()
 		assert.NotNil(t, inv.Delivery)
 		assert.Equal(t, "2013-04-15", inv.Delivery.Date.String())
 		assert.NotNil(t, inv.Delivery.Receiver)
