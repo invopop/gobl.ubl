@@ -3,6 +3,7 @@ package utog
 import (
 	"strings"
 
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -11,7 +12,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) getLines(doc *Document) error {
+func (c *Converter) getLines(doc *document.Document) error {
 	items := doc.InvoiceLine
 
 	lines := make([]*bill.Line, 0, len(items))
@@ -24,12 +25,12 @@ func (c *Converter) getLines(doc *Document) error {
 		line := &bill.Line{
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
-				Name:  *docLine.Item.Name,
+				Name:  docLine.Item.Name,
 				Price: price,
 			},
 			Taxes: tax.Set{
 				{
-					Category: cbc.Code(*docLine.Item.ClassifiedTaxCategory.TaxScheme.ID),
+					Category: cbc.Code(docLine.Item.ClassifiedTaxCategory.TaxScheme.ID),
 				},
 			},
 		}
@@ -54,6 +55,10 @@ func (c *Converter) getLines(doc *Document) error {
 			}
 		}
 
+		if docLine.Item.SellersItemIdentification != nil && docLine.Item.SellersItemIdentification.ID != nil {
+			line.Item.Ref = docLine.Item.SellersItemIdentification.ID.Value
+		}
+
 		// As there is no specific GOBL field for BT-133, we use a note to store it
 		if docLine.AccountingCost != nil {
 			notes = append(notes, &cbc.Note{
@@ -66,7 +71,7 @@ func (c *Converter) getLines(doc *Document) error {
 			line.Item.Unit = UnitFromUNECE(cbc.Code(docLine.InvoicedQuantity.UnitCode))
 		}
 
-		line.Item.Identities = c.getIdentities(docLine)
+		line.Item.Identities = c.getIdentities(&docLine)
 
 		if docLine.Item.Description != nil {
 			line.Item.Description = *docLine.Item.Description
@@ -76,8 +81,8 @@ func (c *Converter) getLines(doc *Document) error {
 			line.Item.Origin = l10n.ISOCountryCode(docLine.Item.OriginCountry.IdentificationCode)
 		}
 
-		if docLine.Item.ClassifiedTaxCategory != nil && docLine.Item.ClassifiedTaxCategory.Percent != "" {
-			percentStr := docLine.Item.ClassifiedTaxCategory.Percent
+		if docLine.Item.ClassifiedTaxCategory != nil && docLine.Item.ClassifiedTaxCategory.Percent != nil {
+			percentStr := *docLine.Item.ClassifiedTaxCategory.Percent
 			if !strings.HasSuffix(percentStr, "%") {
 				percentStr += "%"
 			}
@@ -90,7 +95,7 @@ func (c *Converter) getLines(doc *Document) error {
 		}
 
 		if docLine.AllowanceCharge != nil {
-			line, err = parseLineCharges(*docLine.AllowanceCharge, line)
+			line, err = parseLineCharges(docLine.AllowanceCharge, line)
 			if err != nil {
 				return err
 			}
@@ -99,9 +104,9 @@ func (c *Converter) getLines(doc *Document) error {
 		if docLine.Item.AdditionalItemProperty != nil {
 			line.Item.Meta = make(cbc.Meta)
 			for _, property := range *docLine.Item.AdditionalItemProperty {
-				if property.Name != "" && property.Value != nil {
+				if property.Name != "" && property.Value != "" {
 					key := formatKey(property.Name)
-					line.Item.Meta[key] = *property.Value
+					line.Item.Meta[key] = property.Value
 				}
 			}
 		}
@@ -120,7 +125,7 @@ func (c *Converter) getLines(doc *Document) error {
 	return nil
 }
 
-func (c *Converter) getIdentities(docLine InvoiceLine) []*org.Identity {
+func (c *Converter) getIdentities(docLine *document.InvoiceLine) []*org.Identity {
 	ids := make([]*org.Identity, 0)
 
 	if docLine.Item.BuyersItemIdentification != nil && docLine.Item.BuyersItemIdentification.ID != nil {
@@ -149,7 +154,7 @@ func (c *Converter) getIdentities(docLine InvoiceLine) []*org.Identity {
 	return ids
 }
 
-func getIdentity(id *IDType) *org.Identity {
+func getIdentity(id *document.IDType) *org.Identity {
 	if id == nil {
 		return nil
 	}
@@ -165,55 +170,21 @@ func getIdentity(id *IDType) *org.Identity {
 	return identity
 }
 
-func parseLineCharges(allowances []AllowanceCharge, line *bill.Line) (*bill.Line, error) {
-	for _, allowanceCharge := range allowances {
-		amount, err := num.AmountFromString(allowanceCharge.Amount.Value)
-		if err != nil {
-			return nil, err
-		}
-		if allowanceCharge.ChargeIndicator {
-			charge := &bill.LineCharge{
-				Amount: amount,
-			}
-			if allowanceCharge.AllowanceChargeReasonCode != nil {
-				charge.Code = *allowanceCharge.AllowanceChargeReasonCode
-			}
-			if allowanceCharge.AllowanceChargeReason != nil {
-				charge.Reason = *allowanceCharge.AllowanceChargeReason
-			}
-			if allowanceCharge.MultiplierFactorNumeric != nil {
-				if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
-					*allowanceCharge.MultiplierFactorNumeric += "%"
-				}
-				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
-				if err != nil {
-					return nil, err
-				}
-				charge.Percent = &percent
+func parseLineCharges(allowances []*document.AllowanceCharge, line *bill.Line) (*bill.Line, error) {
+	for _, ac := range allowances {
+		if ac.ChargeIndicator {
+			charge, err := getLineCharge(ac)
+			if err != nil {
+				return nil, err
 			}
 			if line.Charges == nil {
 				line.Charges = make([]*bill.LineCharge, 0)
 			}
 			line.Charges = append(line.Charges, charge)
 		} else {
-			discount := &bill.LineDiscount{
-				Amount: amount,
-			}
-			if allowanceCharge.AllowanceChargeReasonCode != nil {
-				discount.Code = *allowanceCharge.AllowanceChargeReasonCode
-			}
-			if allowanceCharge.AllowanceChargeReason != nil {
-				discount.Reason = *allowanceCharge.AllowanceChargeReason
-			}
-			if allowanceCharge.MultiplierFactorNumeric != nil {
-				if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
-					*allowanceCharge.MultiplierFactorNumeric += "%"
-				}
-				percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
-				if err != nil {
-					return nil, err
-				}
-				discount.Percent = &percent
+			discount, err := getLineDiscount(ac)
+			if err != nil {
+				return nil, err
 			}
 			if line.Discounts == nil {
 				line.Discounts = make([]*bill.LineDiscount, 0)

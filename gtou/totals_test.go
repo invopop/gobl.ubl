@@ -28,8 +28,7 @@ func TestNewTotals(t *testing.T) {
 
 		assert.Equal(t, "342.00", doc.TaxTotal[0].TaxAmount.Value)
 		assert.Equal(t, "VAT", doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.ID)
-		assert.Equal(t, "S", *doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.ID)
-		assert.Equal(t, "19%", *doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent)
+		assert.Equal(t, "19", *doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent)
 
 	})
 }

@@ -34,27 +34,6 @@ func TestParseDate(t *testing.T) {
 	}
 }
 
-// Define tests for the FindTaxKey function
-func TestFindTaxKey(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected string
-	}{
-		{"Standard sales tax", "S", "standard"},
-		{"Zero rated goods tax", "Z", "zero"},
-		{"Tax exempt", "E", "exempt"},
-		{"Unknown tax type", "X", "standard"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := FindTaxKey(tt.input)
-			assert.Equal(t, tt.expected, string(result))
-		})
-	}
-}
-
 // Define tests for the TypeCodeParse function
 func TestTypeCodeParse(t *testing.T) {
 	tests := []struct {

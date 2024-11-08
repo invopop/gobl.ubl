@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192d8de-c9d7-72bb-a5a8-36d602751b6c",
+    "uuid": "01930b26-29c9-7b5b-b460-a850f3e1ffb1",
     "dig": {
       "alg": "sha256",
-      "val": "3583a65cde517a917bac605ef4566c035a2a9ee6d5d76db2a37c936860fe5f42"
+      "val": "247143271cd61ddcf1116a64ef9b63a223db38d0fc99d4e07b1f55c0ed41bdb7"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192d8de-c9d7-7324-84a2-a216729e00c8",
+    "uuid": "01930b26-29c9-7bb1-b1ad-d2bbb2b73a6a",
     "type": "standard",
     "code": "20150483",
     "issue_date": "2015-04-01",
@@ -23,6 +23,7 @@
       },
       "identities": [
         {
+          "label": "CompanyID",
           "code": "32081330 Amersfoort"
         }
       ],
@@ -98,7 +99,10 @@
             "iban": "NL13RABO0377815500",
             "bic": "RABONL2U"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

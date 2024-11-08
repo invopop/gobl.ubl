@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 )
 
@@ -37,7 +38,7 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 }
 
 // NewDocumentFrom creates a UBL from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*Document, error) {
+func NewDocumentFrom(name string) (*document.Document, error) {
 	env, err := LoadTestEnvelope(name)
 	if err != nil {
 		return nil, err

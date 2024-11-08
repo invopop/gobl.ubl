@@ -1,22 +1,25 @@
 package gtou
 
-import "github.com/invopop/gobl/bill"
+import (
+	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl/bill"
+)
 
-func (c *Converter) newDelivery(delivery *bill.Delivery) error {
-	if delivery == nil {
+func (c *Converter) newDelivery(del *bill.Delivery) error {
+	if del == nil {
 		return nil
 	}
-	d := formatDate(*delivery.Date)
-	c.doc.Delivery = []Delivery{
+	d := formatDate(*del.Date)
+	c.doc.Delivery = []document.Delivery{
 		{
 			ActualDeliveryDate: &d,
-			DeliveryLocation: &Location{
-				Address: newAddress(delivery.Receiver.Addresses),
+			DeliveryLocation: &document.Location{
+				Address: newAddress(del.Receiver.Addresses),
 			},
 		},
 	}
-	if len(delivery.Identities) > 0 {
-		c.doc.Delivery[0].DeliveryLocation.ID = &IDType{Value: delivery.Identities[0].Code.String()}
+	if len(del.Identities) > 0 {
+		c.doc.Delivery[0].DeliveryLocation.ID = &document.IDType{Value: del.Identities[0].Code.String()}
 	}
 	return nil
 }

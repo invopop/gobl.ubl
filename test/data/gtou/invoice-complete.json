@@ -103,7 +103,10 @@
 				}
 			  ],
 			  "code": "88",
-			  "reason": "Promotion discount"
+			  "reason": "Promotion discount",
+			  "ext": {
+				"untdid-allowance": "88"
+			  }
 			}
 		  ],
 		  "charges": [
@@ -197,6 +200,11 @@
 			  }
 			],
 			"date": "2024-02-10"
+		},
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"totals": {
 			"sum": "1800.00",

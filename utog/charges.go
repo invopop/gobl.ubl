@@ -3,14 +3,16 @@ package utog
 import (
 	"strings"
 
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
 )
 
 // ParseAllowanceCharges extracts the charges logic from the CII document
-func (c *Converter) getCharges(doc *Document) error {
+func (c *Converter) getCharges(doc *document.Document) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
@@ -44,108 +46,168 @@ func (c *Converter) getCharges(doc *Document) error {
 	return nil
 }
 
-func (c *Converter) parseCharge(allowanceCharge *AllowanceCharge) (*bill.Charge, error) {
-	charge := &bill.Charge{}
-	if allowanceCharge.AllowanceChargeReason != nil {
-		charge.Reason = *allowanceCharge.AllowanceChargeReason
+func (c *Converter) parseCharge(ac *document.AllowanceCharge) (*bill.Charge, error) {
+	ch := &bill.Charge{}
+	if ac.AllowanceChargeReason != nil {
+		ch.Reason = *ac.AllowanceChargeReason
 	}
-	if allowanceCharge.Amount.Value != "" {
-		amount, err := num.AmountFromString(allowanceCharge.Amount.Value)
+	if ac.Amount.Value != "" {
+		a, err := num.AmountFromString(ac.Amount.Value)
 		if err != nil {
 			return nil, err
 		}
-		charge.Amount = amount
+		ch.Amount = a
 	}
-	if allowanceCharge.AllowanceChargeReasonCode != nil {
-		charge.Code = *allowanceCharge.AllowanceChargeReasonCode
+	if ac.AllowanceChargeReasonCode != nil {
+		ch.Ext = tax.Extensions{
+			untdid.ExtKeyCharge: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+		}
 	}
-	if allowanceCharge.BaseAmount != nil {
-		basis, err := num.AmountFromString(allowanceCharge.BaseAmount.Value)
+	if ac.BaseAmount != nil {
+		b, err := num.AmountFromString(ac.BaseAmount.Value)
 		if err != nil {
 			return nil, err
 		}
-		charge.Base = &basis
+		ch.Base = &b
 	}
-	if allowanceCharge.MultiplierFactorNumeric != nil {
-		if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
-			*allowanceCharge.MultiplierFactorNumeric += "%"
+	if ac.MultiplierFactorNumeric != nil {
+		if !strings.HasSuffix(*ac.MultiplierFactorNumeric, "%") {
+			*ac.MultiplierFactorNumeric += "%"
 		}
-		percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
+		p, err := num.PercentageFromString(*ac.MultiplierFactorNumeric)
 		if err != nil {
 			return nil, err
 		}
-		charge.Percent = &percent
+		ch.Percent = &p
 	}
-	if allowanceCharge.TaxCategory != nil && allowanceCharge.TaxCategory.TaxScheme != nil {
-		charge.Taxes = tax.Set{
+	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
+		ch.Taxes = tax.Set{
 			{
-				Category: cbc.Code(*allowanceCharge.TaxCategory.TaxScheme.ID),
-				Rate:     FindTaxKey(allowanceCharge.TaxCategory.ID),
+				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID),
 			},
 		}
-		if allowanceCharge.TaxCategory.Percent != nil {
-			if !strings.HasSuffix(*allowanceCharge.TaxCategory.Percent, "%") {
-				*allowanceCharge.TaxCategory.Percent += "%"
+		if ac.TaxCategory[0].Percent != nil {
+			if !strings.HasSuffix(*ac.TaxCategory[0].Percent, "%") {
+				*ac.TaxCategory[0].Percent += "%"
 			}
-			percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent)
+			p, err := num.PercentageFromString(*ac.TaxCategory[0].Percent)
 			if err != nil {
 				return nil, err
 			}
-			charge.Taxes[0].Percent = &percent
+			ch.Taxes[0].Percent = &p
 		}
 	}
-	return charge, nil
+	return ch, nil
 }
 
-func (c *Converter) parseDiscount(allowanceCharge *AllowanceCharge) (*bill.Discount, error) {
-	discount := &bill.Discount{}
-	if allowanceCharge.AllowanceChargeReason != nil {
-		discount.Reason = *allowanceCharge.AllowanceChargeReason
+func (c *Converter) parseDiscount(ac *document.AllowanceCharge) (*bill.Discount, error) {
+	d := &bill.Discount{}
+	if ac.AllowanceChargeReason != nil {
+		d.Reason = *ac.AllowanceChargeReason
 	}
-	if allowanceCharge.Amount.Value != "" {
-		amount, err := num.AmountFromString(allowanceCharge.Amount.Value)
+	if ac.Amount.Value != "" {
+		a, err := num.AmountFromString(ac.Amount.Value)
 		if err != nil {
 			return nil, err
 		}
-		discount.Amount = amount
+		d.Amount = a
 	}
-	if allowanceCharge.AllowanceChargeReasonCode != nil {
-		discount.Code = *allowanceCharge.AllowanceChargeReasonCode
+	if ac.AllowanceChargeReasonCode != nil {
+		d.Ext = tax.Extensions{
+			untdid.ExtKeyAllowance: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+		}
 	}
-	if allowanceCharge.BaseAmount != nil {
-		basis, err := num.AmountFromString(allowanceCharge.BaseAmount.Value)
+	if ac.BaseAmount != nil {
+		b, err := num.AmountFromString(ac.BaseAmount.Value)
 		if err != nil {
 			return nil, err
 		}
-		discount.Base = &basis
+		d.Base = &b
 	}
-	if allowanceCharge.MultiplierFactorNumeric != nil {
-		if !strings.HasSuffix(*allowanceCharge.MultiplierFactorNumeric, "%") {
-			*allowanceCharge.MultiplierFactorNumeric += "%"
+	if ac.MultiplierFactorNumeric != nil {
+		if !strings.HasSuffix(*ac.MultiplierFactorNumeric, "%") {
+			*ac.MultiplierFactorNumeric += "%"
 		}
-		percent, err := num.PercentageFromString(*allowanceCharge.MultiplierFactorNumeric)
+		p, err := num.PercentageFromString(*ac.MultiplierFactorNumeric)
 		if err != nil {
 			return nil, err
 		}
-		discount.Percent = &percent
+		d.Percent = &p
 	}
-	if allowanceCharge.TaxCategory != nil && allowanceCharge.TaxCategory.TaxScheme != nil {
-		discount.Taxes = tax.Set{
+	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
+		d.Taxes = tax.Set{
 			{
-				Category: cbc.Code(*allowanceCharge.TaxCategory.TaxScheme.ID),
-				Rate:     FindTaxKey(allowanceCharge.TaxCategory.ID),
+				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID),
 			},
 		}
-		if allowanceCharge.TaxCategory.Percent != nil {
-			if !strings.HasSuffix(*allowanceCharge.TaxCategory.Percent, "%") {
-				*allowanceCharge.TaxCategory.Percent += "%"
+		if ac.TaxCategory[0].Percent != nil {
+			if !strings.HasSuffix(*ac.TaxCategory[0].Percent, "%") {
+				*ac.TaxCategory[0].Percent += "%"
 			}
-			percent, err := num.PercentageFromString(*allowanceCharge.TaxCategory.Percent)
+			percent, err := num.PercentageFromString(*ac.TaxCategory[0].Percent)
 			if err != nil {
 				return nil, err
 			}
-			discount.Taxes[0].Percent = &percent
+			d.Taxes[0].Percent = &percent
 		}
 	}
-	return discount, nil
+	return d, nil
+}
+
+func getLineCharge(ac *document.AllowanceCharge) (*bill.LineCharge, error) {
+	amount, err := num.AmountFromString(ac.Amount.Value)
+	if err != nil {
+		return nil, err
+	}
+	ch := &bill.LineCharge{
+		Amount: amount,
+	}
+	if ac.AllowanceChargeReasonCode != nil {
+		ch.Ext = tax.Extensions{
+			untdid.ExtKeyCharge: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+		}
+	}
+	if ac.AllowanceChargeReason != nil {
+		ch.Reason = *ac.AllowanceChargeReason
+	}
+	if ac.MultiplierFactorNumeric != nil {
+		if !strings.HasSuffix(*ac.MultiplierFactorNumeric, "%") {
+			*ac.MultiplierFactorNumeric += "%"
+		}
+		percent, err := num.PercentageFromString(*ac.MultiplierFactorNumeric)
+		if err != nil {
+			return nil, err
+		}
+		ch.Percent = &percent
+	}
+	return ch, nil
+}
+
+func getLineDiscount(ac *document.AllowanceCharge) (*bill.LineDiscount, error) {
+	a, err := num.AmountFromString(ac.Amount.Value)
+	if err != nil {
+		return nil, err
+	}
+	d := &bill.LineDiscount{
+		Amount: a,
+	}
+	if ac.AllowanceChargeReasonCode != nil {
+		d.Ext = tax.Extensions{
+			untdid.ExtKeyAllowance: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+		}
+	}
+	if ac.AllowanceChargeReason != nil {
+		d.Reason = *ac.AllowanceChargeReason
+	}
+	if ac.MultiplierFactorNumeric != nil {
+		if !strings.HasSuffix(*ac.MultiplierFactorNumeric, "%") {
+			*ac.MultiplierFactorNumeric += "%"
+		}
+		p, err := num.PercentageFromString(*ac.MultiplierFactorNumeric)
+		if err != nil {
+			return nil, err
+		}
+		d.Percent = &p
+	}
+	return d, nil
 }

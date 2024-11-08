@@ -1,13 +1,14 @@
 package utog
 
 import (
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Converter) getOrdering(doc *Document) error {
+func (c *Converter) getOrdering(doc *document.Document) error {
 	ordering := &bill.Ordering{}
 
 	if doc.OrderReference != nil && doc.OrderReference.ID != "" {
@@ -15,8 +16,8 @@ func (c *Converter) getOrdering(doc *Document) error {
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
-	if doc.InvoicePeriod != nil {
-		ordering.Period = c.setPeriodDates(doc.InvoicePeriod[0])
+	if len(doc.InvoicePeriod) > 0 {
+		ordering.Period = c.setPeriodDates(&doc.InvoicePeriod[0])
 	}
 
 	if doc.DespatchDocumentReference != nil {
@@ -88,7 +89,7 @@ func (c *Converter) getOrdering(doc *Document) error {
 	return nil
 }
 
-func (c *Converter) getReference(ref *DocumentReference) (*org.DocumentRef, error) {
+func (c *Converter) getReference(ref *document.Reference) (*org.DocumentRef, error) {
 	docRef := &org.DocumentRef{
 		Code: cbc.Code(ref.ID.Value),
 	}
@@ -106,12 +107,12 @@ func (c *Converter) getReference(ref *DocumentReference) (*org.DocumentRef, erro
 		docRef.Description = *ref.DocumentDescription
 	}
 	if ref.ValidityPeriod != nil {
-		docRef.Period = c.setPeriodDates(*ref.ValidityPeriod)
+		docRef.Period = c.setPeriodDates(ref.ValidityPeriod)
 	}
 	return docRef, nil
 }
 
-func (c *Converter) setPeriodDates(invoicePeriod Period) *cal.Period {
+func (c *Converter) setPeriodDates(invoicePeriod *document.Period) *cal.Period {
 	period := &cal.Period{}
 	if invoicePeriod.StartDate != nil {
 		start, err := ParseDate(*invoicePeriod.StartDate)

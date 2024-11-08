@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192d8de-c8df-7428-a0e8-56892ec592df",
+    "uuid": "01930b26-28c8-7db2-86a4-951c8a9abdbf",
     "dig": {
       "alg": "sha256",
-      "val": "b7e8ce478142d5a1e8c853ce66f90ffba9f6a3925cfb3dfcbda1f11f9891a2c4"
+      "val": "8402dded5a3969bf96f52b8bf4470c6f76d60a6382703094d63eb364191f0193"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192d8de-c8df-7481-be1b-03442d0fad8f",
+    "uuid": "01930b26-28c8-7e42-b2fa-9e283f1d76cb",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -39,6 +39,7 @@
       },
       "identities": [
         {
+          "label": "CompanyID",
           "code": "987654321"
         },
         {
@@ -79,6 +80,7 @@
         "i": 1,
         "quantity": "2",
         "item": {
+          "ref": "JB007",
           "name": "Laptop computer",
           "identities": [
             {
@@ -105,14 +107,14 @@
         "sum": "2546.00",
         "discounts": [
           {
-            "amount": "12.00",
-            "reason": "Damage"
+            "reason": "Damage",
+            "amount": "12.00"
           }
         ],
         "charges": [
           {
-            "amount": "12.00",
-            "reason": "Testing"
+            "reason": "Testing",
+            "amount": "12.00"
           }
         ],
         "taxes": [
@@ -136,6 +138,7 @@
         "i": 2,
         "quantity": "-1",
         "item": {
+          "ref": "JB008",
           "name": "Returned \"Advanced computing\" book",
           "identities": [
             {
@@ -176,6 +179,7 @@
         "i": 3,
         "quantity": "2",
         "item": {
+          "ref": "JB009",
           "name": "\"Computing for dummies\" book",
           "identities": [
             {
@@ -213,6 +217,7 @@
         "i": 4,
         "quantity": "-1",
         "item": {
+          "ref": "JB010",
           "name": "Returned IBM 5150 desktop",
           "identities": [
             {
@@ -250,6 +255,7 @@
         "i": 5,
         "quantity": "250",
         "item": {
+          "ref": "JB011",
           "name": "Network cable",
           "identities": [
             {
@@ -290,30 +296,30 @@
     "discounts": [
       {
         "i": 1,
+        "reason": "Promotion discount",
         "amount": "100.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
-        "code": "88",
-        "reason": "Promotion discount"
+        "ext": {
+          "untdid-allowance": "88"
+        }
       }
     ],
     "charges": [
       {
         "i": 1,
+        "reason": "Freight",
         "amount": "100.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
-        ],
-        "reason": "Freight"
+        ]
       }
     ],
     "ordering": {
@@ -330,6 +336,7 @@
         },
         "identities": [
           {
+            "label": "CompanyID",
             "code": "123456789"
           },
           {
@@ -376,6 +383,7 @@
         "name": "Ebeneser Scrooge AS",
         "identities": [
           {
+            "label": "CompanyID",
             "code": "989823401"
           },
           {
@@ -402,7 +410,10 @@
             "iban": "NO9386011117947",
             "bic": "DNBANOKK"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "delivery": {

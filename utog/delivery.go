@@ -1,13 +1,14 @@
 package utog
 
 import (
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Converter) getDelivery(doc *Document) error {
-	delivery := &bill.Delivery{}
+func (c *Converter) getDelivery(doc *document.Document) error {
+	d := &bill.Delivery{}
 
 	// Only one delivery Location and Receiver are supported, so if more than one is passed the former will be overwritten
 	if len(doc.Delivery) > 0 {
@@ -17,10 +18,10 @@ func (c *Converter) getDelivery(doc *Document) error {
 				if err != nil {
 					return err
 				}
-				delivery.Date = &deliveryDate
+				d.Date = &deliveryDate
 			}
 			if del.EstimatedDeliveryPeriod != nil {
-				delivery.Period = c.setPeriodDates(*del.EstimatedDeliveryPeriod)
+				d.Period = c.setPeriodDates(del.EstimatedDeliveryPeriod)
 			}
 			if del.DeliveryLocation != nil && del.DeliveryLocation.ID != nil {
 				id := &org.Identity{
@@ -29,13 +30,13 @@ func (c *Converter) getDelivery(doc *Document) error {
 				if del.DeliveryLocation.ID.SchemeID != nil {
 					id.Label = *del.DeliveryLocation.ID.SchemeID
 				}
-				delivery.Identities = []*org.Identity{id}
+				d.Identities = []*org.Identity{id}
 			}
 			if del.DeliveryParty != nil {
-				delivery.Receiver = c.getParty(del.DeliveryParty)
+				d.Receiver = c.getParty(del.DeliveryParty)
 			}
 			if del.DeliveryLocation != nil && del.DeliveryLocation.Address != nil {
-				delivery.Receiver = &org.Party{
+				d.Receiver = &org.Party{
 					Addresses: []*org.Address{
 						parseAddress(del.DeliveryLocation.Address),
 					},
@@ -45,15 +46,15 @@ func (c *Converter) getDelivery(doc *Document) error {
 	}
 
 	if doc.DeliveryTerms != nil {
-		delivery.Identities = []*org.Identity{
+		d.Identities = []*org.Identity{
 			{
 				Code: cbc.Code(doc.DeliveryTerms.ID),
 			},
 		}
 	}
 
-	if delivery.Receiver != nil || delivery.Date != nil || delivery.Identities != nil {
-		c.inv.Delivery = delivery
+	if d.Receiver != nil || d.Date != nil || d.Identities != nil {
+		c.inv.Delivery = d
 	}
 	return nil
 }

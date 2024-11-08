@@ -3,12 +3,13 @@ package utog
 import (
 	"strings"
 
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
 )
 
-func (c *Converter) getPayment(doc *Document) error {
+func (c *Converter) getPayment(doc *document.Document) error {
 	payment := &bill.Payment{}
 
 	if doc.PayeeParty != nil {
@@ -33,8 +34,8 @@ func (c *Converter) getPayment(doc *Document) error {
 		if len(notes) > 0 {
 			payment.Terms.Notes = strings.Join(notes, " ")
 		}
-		if doc.DueDate != nil {
-			d, err := ParseDate(*doc.DueDate)
+		if doc.DueDate != "" {
+			d, err := ParseDate(doc.DueDate)
 			if err != nil {
 				return err
 			}

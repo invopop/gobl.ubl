@@ -1,15 +1,18 @@
 package utog
 
 import (
-	"encoding/xml"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/nbio/xml"
+
+	"github.com/invopop/gobl.ubl/document"
 )
 
-// LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func LoadTestXMLDoc(name string) (*Document, error) {
+// LoadTestXMLDoc returns a UBL XMLDoc from a file in the test data folder
+func LoadTestXMLDoc(name string) (*document.Document, error) {
 	src, err := os.Open(filepath.Join(getTestDataPath(), name))
 	if err != nil {
 		return nil, err
@@ -19,16 +22,14 @@ func LoadTestXMLDoc(name string) (*Document, error) {
 			err = cerr
 		}
 	}()
-
 	inData, err := io.ReadAll(src)
 	if err != nil {
 		return nil, err
 	}
-	doc := new(Document)
+	doc := new(document.Document)
 	if err := xml.Unmarshal(inData, doc); err != nil {
 		return nil, err
 	}
-
 	return doc, err
 }
 

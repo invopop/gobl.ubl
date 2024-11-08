@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,19 +33,17 @@ func TestParseUtoGCharges(t *testing.T) {
 		// Check the tax category of the charge
 		require.NotNil(t, charge.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), charge.Taxes[0].Category)
-		assert.Equal(t, cbc.Key("standard"), charge.Taxes[0].Rate)
 		assert.Equal(t, "25%", charge.Taxes[0].Percent.String())
 
 		// Check the values of the discount
 		discount := discounts[0]
 		assert.Equal(t, "Promotion discount", discount.Reason)
-		assert.Equal(t, "88", discount.Code)
+		assert.Equal(t, "88", discount.Ext[untdid.ExtKeyAllowance].String())
 		assert.Equal(t, "100.00", discount.Amount.String())
 
 		// Check the tax category of the discount
 		require.NotNil(t, discount.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), discount.Taxes[0].Category)
-		assert.Equal(t, cbc.Key("standard"), discount.Taxes[0].Rate)
 		assert.Equal(t, "25%", discount.Taxes[0].Percent.String())
 	})
 
@@ -66,25 +65,23 @@ func TestParseUtoGCharges(t *testing.T) {
 		// Check the values of the charge
 		charge := charges[0]
 		assert.Equal(t, "Packaging", charge.Reason)
-		assert.Equal(t, "ABL", charge.Code)
+		assert.Equal(t, "ABL", charge.Ext[untdid.ExtKeyCharge].String())
 		assert.Equal(t, "150.00", charge.Amount.String())
 
 		// Check the tax category of the charge
 		require.NotNil(t, charge.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), charge.Taxes[0].Category)
-		assert.Equal(t, cbc.Key("standard"), charge.Taxes[0].Rate)
 		assert.Equal(t, "25%", charge.Taxes[0].Percent.String())
 
 		// Check the values of the discount
 		discount := discounts[0]
 		assert.Equal(t, "Loyal customer", discount.Reason)
-		assert.Equal(t, "100", discount.Code)
+		assert.Equal(t, "100", discount.Ext[untdid.ExtKeyAllowance].String())
 		assert.Equal(t, "150.00", discount.Amount.String())
 
 		// Check the tax category of the discount
 		require.NotNil(t, discount.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), discount.Taxes[0].Category)
-		assert.Equal(t, cbc.Key("standard"), discount.Taxes[0].Rate)
 		assert.Equal(t, "25%", discount.Taxes[0].Percent.String())
 	})
 

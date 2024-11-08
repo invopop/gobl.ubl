@@ -1,64 +1,72 @@
 package gtou
 
 import (
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 )
 
-func (c *Converter) newOrdering(ordering *bill.Ordering) error {
-	if ordering == nil {
+func (c *Converter) newOrdering(o *bill.Ordering) error {
+	if o == nil {
 		return nil
 	}
 
-	if ordering.Code != "" {
-		c.doc.OrderReference = &OrderReference{ID: string(ordering.Code)}
+	if o.Code != "" {
+		c.doc.OrderReference = &document.OrderReference{ID: string(o.Code)}
 	}
 
 	// If both ordering.seller and seller are present, the original seller is used
 	// as the tax representative.
-	if ordering.Seller != nil {
+	if o.Seller != nil {
 		p := c.doc.AccountingSupplierParty.Party
 		c.doc.TaxRepresentativeParty = &p
-		c.doc.AccountingSupplierParty = SupplierParty{
-			Party: c.newParty(ordering.Seller),
+		c.doc.AccountingSupplierParty = document.SupplierParty{
+			Party: c.newParty(o.Seller),
 		}
 	}
 
-	if ordering.Period != nil {
-		c.doc.InvoicePeriod = []Period{makePeriod(ordering.Period)}
+	if o.Period != nil {
+		start := formatDate(o.Period.Start)
+		end := formatDate(o.Period.End)
+		c.doc.InvoicePeriod = []document.Period{
+			{
+				StartDate: &start,
+				EndDate:   &end,
+			},
+		}
 	}
 
-	if len(ordering.Despatch) > 0 {
-		c.doc.DespatchDocumentReference = make([]DocumentReference, 0, len(ordering.Despatch))
-		for _, despatch := range ordering.Despatch {
-			c.doc.DespatchDocumentReference = append(c.doc.DespatchDocumentReference, DocumentReference{
-				ID: IDType{Value: string(despatch.Code)},
+	if len(o.Despatch) > 0 {
+		c.doc.DespatchDocumentReference = make([]document.Reference, 0, len(o.Despatch))
+		for _, despatch := range o.Despatch {
+			c.doc.DespatchDocumentReference = append(c.doc.DespatchDocumentReference, document.Reference{
+				ID: document.IDType{Value: string(despatch.Code)},
 			})
 		}
 	}
 
-	if len(ordering.Receiving) > 0 {
-		c.doc.ReceiptDocumentReference = make([]DocumentReference, 0, len(ordering.Receiving))
-		for _, receiving := range ordering.Receiving {
-			c.doc.ReceiptDocumentReference = append(c.doc.ReceiptDocumentReference, DocumentReference{
-				ID: IDType{Value: string(receiving.Code)},
+	if len(o.Receiving) > 0 {
+		c.doc.ReceiptDocumentReference = make([]document.Reference, 0, len(o.Receiving))
+		for _, receiving := range o.Receiving {
+			c.doc.ReceiptDocumentReference = append(c.doc.ReceiptDocumentReference, document.Reference{
+				ID: document.IDType{Value: string(receiving.Code)},
 			})
 		}
 	}
 
-	if len(ordering.Contracts) > 0 {
-		c.doc.ContractDocumentReference = make([]DocumentReference, 0, len(ordering.Contracts))
-		for _, contract := range ordering.Contracts {
-			c.doc.ContractDocumentReference = append(c.doc.ContractDocumentReference, DocumentReference{
-				ID: IDType{Value: string(contract.Code)},
+	if len(o.Contracts) > 0 {
+		c.doc.ContractDocumentReference = make([]document.Reference, 0, len(o.Contracts))
+		for _, contract := range o.Contracts {
+			c.doc.ContractDocumentReference = append(c.doc.ContractDocumentReference, document.Reference{
+				ID: document.IDType{Value: string(contract.Code)},
 			})
 		}
 	}
 
-	if len(ordering.Tender) > 0 {
-		c.doc.AdditionalDocumentReference = make([]DocumentReference, 0, len(ordering.Tender))
-		for _, tender := range ordering.Tender {
-			c.doc.AdditionalDocumentReference = append(c.doc.AdditionalDocumentReference, DocumentReference{
-				ID: IDType{Value: string(tender.Code)},
+	if len(o.Tender) > 0 {
+		c.doc.AdditionalDocumentReference = make([]document.Reference, 0, len(o.Tender))
+		for _, tender := range o.Tender {
+			c.doc.AdditionalDocumentReference = append(c.doc.AdditionalDocumentReference, document.Reference{
+				ID: document.IDType{Value: string(tender.Code)},
 			})
 		}
 	}

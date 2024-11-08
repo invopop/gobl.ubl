@@ -2,9 +2,10 @@
 package utog
 
 import (
-	"encoding/xml"
+	"github.com/nbio/xml"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
@@ -14,14 +15,14 @@ import (
 // Converter is a struct that contains the necessary elements to convert between GOBL and UBL
 type Converter struct {
 	inv *bill.Invoice
-	doc *Document
+	doc *document.Document
 }
 
 // NewConverter Builder function
 func NewConverter() *Converter {
 	c := new(Converter)
 	c.inv = new(bill.Invoice)
-	c.doc = new(Document)
+	c.doc = new(document.Document)
 	return c
 }
 
@@ -48,17 +49,17 @@ func (c *Converter) ConvertToGOBL(xmlData []byte) (*gobl.Envelope, error) {
 }
 
 // NewInvoice creates a new invoice from a UBL document
-func (c *Converter) NewInvoice(doc *Document) error {
+func (c *Converter) NewInvoice(doc *document.Document) error {
 
 	c.inv = &bill.Invoice{
 		Code:     cbc.Code(doc.ID),
-		Type:     TypeCodeParse(*doc.InvoiceTypeCode),
-		Currency: currency.Code(*doc.DocumentCurrencyCode),
+		Type:     TypeCodeParse(doc.InvoiceTypeCode),
+		Currency: currency.Code(doc.DocumentCurrencyCode),
 		Supplier: c.getParty(&doc.AccountingSupplierParty.Party),
 		Customer: c.getParty(&doc.AccountingCustomerParty.Party),
 	}
 
-	issueDate, err := ParseDate(*doc.IssueDate)
+	issueDate, err := ParseDate(doc.IssueDate)
 	if err != nil {
 		return err
 	}

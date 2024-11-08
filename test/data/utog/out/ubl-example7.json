@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192d8de-c994-76f5-8970-c39823965219",
+    "uuid": "01930b26-2975-7993-b185-52d57fcfb13f",
     "dig": {
       "alg": "sha256",
-      "val": "5cf5e4417bfa205fd43553255802bc9833eb1572de7d74e51f477530a12fcf85"
+      "val": "df89525a78982d67540eca4b49cc3d3f3469eeda6a90cd461ff7269de91ad9e7"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192d8de-c994-7752-a88c-25073ecbc8ec",
+    "uuid": "01930b26-2975-7a1f-8e4d-6f44dbcf82c0",
     "type": "standard",
     "code": "INVOICE_test_7",
     "issue_date": "2013-03-11",
@@ -83,8 +83,9 @@
         "i": 1,
         "quantity": "1",
         "item": {
+          "ref": "RT3000",
           "name": "Road tax",
-          "description": "Weight-based tax, vehicles \u003e3000 KGM",
+          "description": "Weight-based tax, vehicles 3000 KGM",
           "price": "2500.00",
           "unit": "item"
         },
@@ -100,6 +101,7 @@
         "i": 2,
         "quantity": "1",
         "item": {
+          "ref": "REG",
           "name": "Road Register fee",
           "description": "Annual registration fee",
           "price": "700.00",
@@ -132,7 +134,10 @@
             "iban": "SE1212341234123412",
             "bic": "SEXDABCD"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

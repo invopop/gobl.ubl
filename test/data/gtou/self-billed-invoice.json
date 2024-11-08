@@ -19,7 +19,6 @@
 		"code": "001",
 		"issue_date": "2024-02-13",
 		"currency": "EUR",
-		"tax": {},
 		"supplier": {
 			"name": "Provide One GmbH",
 			"tax_id": {
@@ -130,7 +129,15 @@
 				  "iban": "NO9386011117947",
 				  "bic": "DNBANOKK"
 				}
-			  ]
+			  ],
+			  "ext": {
+				"untdid-payment-means": "30"
+			  }
+			}
+		},
+		"tax": {
+			"ext": {
+				"untdid-document-type": "389"
 			}
 		},
 		"totals": {

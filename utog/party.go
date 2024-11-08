@@ -1,13 +1,14 @@
 package utog
 
 import (
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) getParty(party *Party) *org.Party {
+func (c *Converter) getParty(party *document.Party) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
@@ -59,14 +60,17 @@ func (c *Converter) getParty(party *Party) *org.Party {
 		if p.Identities == nil {
 			p.Identities = make([]*org.Identity, 0)
 		}
-		id := getIdentity(party.PartyLegalEntity.CompanyID)
-		p.Identities = append(p.Identities, id)
+		// id := getIdentity(party.PartyLegalEntity.CompanyID)
+		p.Identities = append(p.Identities, &org.Identity{
+			Label: "CompanyID",
+			Code:  cbc.Code(party.PartyLegalEntity.CompanyID.Value),
+		})
 	}
 
 	if party.PartyTaxScheme != nil {
 		for _, taxReg := range party.PartyTaxScheme {
 			if taxReg.CompanyID != nil {
-				switch *taxReg.TaxScheme.ID {
+				switch taxReg.TaxScheme.ID {
 				//Source https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
 				case "VAT":
 					p.TaxID = &tax.Identity{
@@ -103,7 +107,7 @@ func (c *Converter) getParty(party *Party) *org.Party {
 	return p
 }
 
-func parseAddress(address *PostalAddress) *org.Address {
+func parseAddress(address *document.PostalAddress) *org.Address {
 	if address == nil {
 		return nil
 	}

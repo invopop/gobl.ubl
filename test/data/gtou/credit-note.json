@@ -99,6 +99,11 @@
 				"detail": "lorem ipsum"
 			}
 		},
+		"tax": {
+			"ext": {
+				"untdid-document-type": "381"
+			}
+		},
 		"totals": {
 			"sum": "1800.00",
 			"total": "1800.00",

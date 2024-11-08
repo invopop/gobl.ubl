@@ -100,7 +100,7 @@
     </cac:DeliveryLocation>
   </cac:Delivery>
   <cac:PaymentMeans>
-    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+    <cbc:PaymentMeansCode></cbc:PaymentMeansCode>
     <cbc:PaymentID>0003434323213231</cbc:PaymentID>
     <cac:PayeeFinancialAccount>
       <cbc:ID>NO9386011117947</cbc:ID>
@@ -114,7 +114,6 @@
     <cbc:AllowanceChargeReason>Freight</cbc:AllowanceChargeReason>
     <cbc:Amount currencyID="EUR">11.00</cbc:Amount>
     <cac:TaxCategory>
-      <cbc:ID>S</cbc:ID>
       <cbc:Percent>25</cbc:Percent>
       <cac:TaxScheme>
         <cbc:ID>VAT</cbc:ID>
@@ -127,7 +126,6 @@
     <cbc:AllowanceChargeReason>Promotion discount</cbc:AllowanceChargeReason>
     <cbc:Amount currencyID="EUR">10.00</cbc:Amount>
     <cac:TaxCategory>
-      <cbc:ID>S</cbc:ID>
       <cbc:Percent>25</cbc:Percent>
       <cac:TaxScheme>
         <cbc:ID>VAT</cbc:ID>
@@ -140,7 +138,6 @@
       <cbc:TaxableAmount currencyID="EUR">1800.00</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
       <cac:TaxCategory>
-        <cbc:ID>S</cbc:ID>
         <cbc:Percent>19</cbc:Percent>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
@@ -161,7 +158,6 @@
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>
       <cac:ClassifiedTaxCategory>
-        <cbc:ID>S</cbc:ID>
         <cbc:Percent>19</cbc:Percent>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>

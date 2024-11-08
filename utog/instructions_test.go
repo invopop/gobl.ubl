@@ -23,7 +23,7 @@ func TestGetInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
 		assert.Equal(t, "NO9386011117947", payment.Instructions.CreditTransfer[0].IBAN)
 		assert.Equal(t, "DNBANOKK", payment.Instructions.CreditTransfer[0].BIC)
-		assert.Equal(t, "0003434323213231", payment.Instructions.Ref)
+		assert.Equal(t, cbc.Code("0003434323213231"), payment.Instructions.Ref)
 		assert.Equal(t, "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date", payment.Terms.Notes)
 	})
 
@@ -39,7 +39,7 @@ func TestGetInstructions(t *testing.T) {
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("direct-debit"), payment.Instructions.Key)
-		assert.Equal(t, "Payref1", payment.Instructions.Ref)
+		assert.Equal(t, cbc.Code("Payref1"), payment.Instructions.Ref)
 		assert.Equal(t, "123456", payment.Instructions.DirectDebit.Ref)
 		assert.Equal(t, "DK1212341234123412", payment.Instructions.DirectDebit.Account)
 	})
@@ -73,7 +73,7 @@ func TestGetInstructions(t *testing.T) {
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
-		assert.Equal(t, "1100512149", payment.Instructions.Ref)
+		assert.Equal(t, cbc.Code("1100512149"), payment.Instructions.Ref)
 		assert.Equal(t, "NL28RBOS0420242228", payment.Instructions.CreditTransfer[0].IBAN)
 		assert.Equal(t, "Enexis brengt wettelijke rente in rekening over te laat betaalde\n            facturen. Kijk voor informatie op www.enexis.nl/rentenota", payment.Terms.Notes)
 	})

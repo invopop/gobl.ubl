@@ -4,30 +4,31 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Converter) newParty(party *org.Party) Party {
+func (c *Converter) newParty(party *org.Party) document.Party {
 	if party == nil {
-		return Party{}
+		return document.Party{}
 	}
-	p := Party{
+	p := document.Party{
 		PostalAddress: newAddress(party.Addresses),
-		PartyLegalEntity: &PartyLegalEntity{
+		PartyLegalEntity: &document.PartyLegalEntity{
 			RegistrationName: &party.Name,
 		},
 	}
 
-	contact := &Contact{}
+	contact := &document.Contact{}
 
 	// Although taxID is mandatory, when there is a Tax Representative and the seller comes from
 	// Ordering.Seller, the pointer could be nil
 	if party.TaxID != nil && party.TaxID.Code != "" {
 		taxID := party.TaxID.Code.String()
-		p.PartyTaxScheme = []PartyTaxScheme{
+		p.PartyTaxScheme = []document.PartyTaxScheme{
 			{
 				CompanyID: &taxID,
-				TaxScheme: &TaxScheme{
+				TaxScheme: &document.TaxScheme{
 					ID: "VAT",
 				},
 			},
@@ -52,69 +53,69 @@ func (c *Converter) newParty(party *org.Party) Party {
 	}
 
 	if party.Alias != "" {
-		p.PartyName = &PartyName{
+		p.PartyName = &document.PartyName{
 			Name: party.Alias,
 		}
 	}
 	return p
 }
 
-func newAddress(addresses []*org.Address) *PostalAddress {
+func newAddress(addresses []*org.Address) *document.PostalAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
-	// Only return the first address
-	address := addresses[0]
+	// Only return the first a
+	a := addresses[0]
 
-	postalTradeAddress := &PostalAddress{}
+	addr := &document.PostalAddress{}
 
-	if address.Street != "" {
-		postalTradeAddress.StreetName = &address.Street
+	if a.Street != "" {
+		addr.StreetName = &a.Street
 	}
 
-	if address.Number != "" {
-		postalTradeAddress.AddressLine = []AddressLine{
+	if a.Number != "" {
+		addr.AddressLine = []document.AddressLine{
 			{
-				Line: address.Number,
+				Line: a.Number,
 			},
 		}
 	}
 
-	if address.StreetExtra != "" {
-		postalTradeAddress.AdditionalStreetName = &address.StreetExtra
+	if a.StreetExtra != "" {
+		addr.AdditionalStreetName = &a.StreetExtra
 	}
 
-	if address.Locality != "" {
-		postalTradeAddress.CityName = &address.Locality
+	if a.Locality != "" {
+		addr.CityName = &a.Locality
 	}
 
-	if address.Region != "" {
-		postalTradeAddress.CountrySubentity = &address.Region
+	if a.Region != "" {
+		addr.CountrySubentity = &a.Region
 	}
 
-	if address.Code != "" {
-		postalTradeAddress.PostalZone = &address.Code
+	if a.Code != "" {
+		addr.PostalZone = &a.Code
 	}
 
-	if address.Country != "" {
-		postalTradeAddress.Country = &Country{IdentificationCode: string(address.Country)}
+	if a.Country != "" {
+		addr.Country = &document.Country{IdentificationCode: string(a.Country)}
 	}
 
-	if address.Coordinates != nil {
-		latitude := strconv.FormatFloat(*address.Coordinates.Latitude, 'f', -1, 64)
-		longitude := strconv.FormatFloat(*address.Coordinates.Longitude, 'f', -1, 64)
-		postalTradeAddress.LocationCoordinate = &LocationCoordinate{
-			LatitudeDegreesMeasure:  &latitude,
-			LongitudeDegreesMeasure: &longitude,
+	if a.Coordinates != nil {
+		lat := strconv.FormatFloat(*a.Coordinates.Latitude, 'f', -1, 64)
+		lon := strconv.FormatFloat(*a.Coordinates.Longitude, 'f', -1, 64)
+		addr.LocationCoordinate = &document.LocationCoordinate{
+			LatitudeDegreesMeasure:  &lat,
+			LongitudeDegreesMeasure: &lon,
 		}
 	}
 
-	return postalTradeAddress
+	return addr
 }
 
-func contactName(personName *org.Name) string {
-	given := personName.Given
-	surname := personName.Surname
+func contactName(n *org.Name) string {
+	given := n.Given
+	surname := n.Surname
 
 	if given == "" && surname == "" {
 		return ""

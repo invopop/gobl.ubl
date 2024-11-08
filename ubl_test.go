@@ -12,8 +12,9 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
-	gtou "github.com/invopop/gobl.ubl/gtou"
-	utog "github.com/invopop/gobl.ubl/utog"
+	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl.ubl/gtou"
+	"github.com/invopop/gobl.ubl/utog"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -124,7 +125,7 @@ func TestUtoG(t *testing.T) {
 }
 
 // NewDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*gtou.Document, error) {
+func NewDocumentFrom(name string) (*document.Document, error) {
 	env, err := LoadTestEnvelope(name)
 	if err != nil {
 		return nil, err
@@ -134,7 +135,7 @@ func NewDocumentFrom(name string) (*gtou.Document, error) {
 }
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func LoadTestXMLDoc(name string) (*utog.Document, error) {
+func LoadTestXMLDoc(name string) (*document.Document, error) {
 	src, err := os.Open(filepath.Join(getConversionTypePath(xmlPattern), name))
 	if err != nil {
 		return nil, err
@@ -149,7 +150,7 @@ func LoadTestXMLDoc(name string) (*utog.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	doc := new(utog.Document)
+	doc := new(document.Document)
 	if err := xml.Unmarshal(inData, doc); err != nil {
 		return nil, err
 	}

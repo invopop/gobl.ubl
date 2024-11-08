@@ -77,6 +77,11 @@
 				"total": "1800.00"
 			}
 		],
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
 		"totals": {
 			"sum": "1800.00",
 			"total": "1800.00",

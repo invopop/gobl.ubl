@@ -1,12 +1,19 @@
 package utog
 
 import (
+	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/pay"
+	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) getInstructions(paymentMeans *PaymentMeans) *pay.Instructions {
+func (c *Converter) getInstructions(paymentMeans *document.PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
-		Key: PaymentMeansTypeCodeParse(paymentMeans.PaymentMeansCode.Value),
+		Key: paymentMeansCode(paymentMeans.PaymentMeansCode.Value),
+		Ext: tax.Extensions{
+			untdid.ExtKeyPaymentMeans: tax.ExtValue(paymentMeans.PaymentMeansCode.Value),
+		},
 	}
 
 	if paymentMeans.PaymentMeansCode.Name != nil {
@@ -14,13 +21,13 @@ func (c *Converter) getInstructions(paymentMeans *PaymentMeans) *pay.Instruction
 	}
 
 	if paymentMeans.PaymentID != nil {
-		instructions.Ref = *paymentMeans.PaymentID
+		instructions.Ref = cbc.Code(*paymentMeans.PaymentID)
 	}
 
 	switch instructions.Key {
-	case pay.MeansKeyCreditTransfer, keyPaymentMeansSEPACreditTransfer:
+	case pay.MeansKeyCreditTransfer, pay.MeansKeyCreditTransfer.With(pay.MeansKeySEPA):
 		instructions.CreditTransfer = c.getCreditTransfer(paymentMeans)
-	case pay.MeansKeyDirectDebit, keyPaymentMeansSEPADirectDebit:
+	case pay.MeansKeyDirectDebit, pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA):
 		instructions.DirectDebit = c.getDirectDebit(paymentMeans)
 	case pay.MeansKeyCard:
 		instructions.Card = c.getCard(paymentMeans)
@@ -29,7 +36,7 @@ func (c *Converter) getInstructions(paymentMeans *PaymentMeans) *pay.Instruction
 	return instructions
 }
 
-func (c *Converter) getCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
+func (c *Converter) getCreditTransfer(paymentMeans *document.PaymentMeans) []*pay.CreditTransfer {
 	creditTransfer := &pay.CreditTransfer{}
 
 	if paymentMeans.PayeeFinancialAccount != nil {
@@ -48,7 +55,7 @@ func (c *Converter) getCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditT
 	return []*pay.CreditTransfer{creditTransfer}
 }
 
-func (c *Converter) getDirectDebit(paymentMeans *PaymentMeans) *pay.DirectDebit {
+func (c *Converter) getDirectDebit(paymentMeans *document.PaymentMeans) *pay.DirectDebit {
 	directDebit := &pay.DirectDebit{}
 
 	if paymentMeans.PaymentMandate != nil {
@@ -80,7 +87,7 @@ func (c *Converter) getDirectDebit(paymentMeans *PaymentMeans) *pay.DirectDebit 
 	return directDebit
 }
 
-func (c *Converter) getCard(paymentMeans *PaymentMeans) *pay.Card {
+func (c *Converter) getCard(paymentMeans *document.PaymentMeans) *pay.Card {
 	card := &pay.Card{}
 	if paymentMeans.CardAccount != nil {
 		if paymentMeans.CardAccount.PrimaryAccountNumberID != nil {

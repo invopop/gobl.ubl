@@ -3,8 +3,9 @@ package ubl
 
 import (
 	"github.com/invopop/gobl"
-	gtou "github.com/invopop/gobl.ubl/gtou"
-	utog "github.com/invopop/gobl.ubl/utog"
+	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl.ubl/gtou"
+	"github.com/invopop/gobl.ubl/utog"
 )
 
 // Converter is a struct that encapsulates both CtoG and GtoC converters
@@ -27,7 +28,7 @@ func (c *Converter) ConvertToGOBL(ublDoc []byte) (*gobl.Envelope, error) {
 }
 
 // ConvertToUBL converts a GOBL envelope to a UBL document
-func (c *Converter) ConvertToUBL(env *gobl.Envelope) (*gtou.Document, error) {
+func (c *Converter) ConvertToUBL(env *gobl.Envelope) (*document.Document, error) {
 	ublDoc, err := c.GtoU.ConvertToUBL(env)
 	if err != nil {
 		return nil, err

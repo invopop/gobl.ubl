@@ -1,7 +1,9 @@
 package gtou
 
 import (
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -9,80 +11,82 @@ func (c *Converter) newCharges(inv *bill.Invoice) error {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return nil
 	}
-	c.doc.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
-	for i, charge := range inv.Charges {
-		c.doc.AllowanceCharge[i] = makeCharge(charge, string(inv.Currency))
+	c.doc.AllowanceCharge = make([]document.AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
+	for i, ch := range inv.Charges {
+		c.doc.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency))
 	}
-	for i, discount := range inv.Discounts {
-		c.doc.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(discount, string(inv.Currency))
+	for i, d := range inv.Discounts {
+		c.doc.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency))
 	}
 	return nil
 }
 
-func makeCharge(charge *bill.Charge, currency string) AllowanceCharge {
-	c := AllowanceCharge{
+func makeCharge(ch *bill.Charge, ccy string) document.AllowanceCharge {
+	c := document.AllowanceCharge{
 		ChargeIndicator: true,
-		Amount: Amount{
-			Value:      charge.Amount.String(),
-			CurrencyID: &currency,
+		Amount: document.Amount{
+			Value:      ch.Amount.String(),
+			CurrencyID: &ccy,
 		},
 	}
-	if charge.Reason != "" {
-		c.AllowanceChargeReason = &charge.Reason
+	if ch.Reason != "" {
+		c.AllowanceChargeReason = &ch.Reason
 	}
-	if charge.Code != "" {
-		c.AllowanceChargeReasonCode = &charge.Code
+	if ch.Ext != nil && ch.Ext[untdid.ExtKeyCharge].String() != "" {
+		e := ch.Ext[untdid.ExtKeyCharge].String()
+		c.AllowanceChargeReasonCode = &e
 	}
-	if charge.Percent != nil {
-		p := charge.Percent.String()
+	if ch.Percent != nil {
+		p := ch.Percent.String()
 		c.MultiplierFactorNumeric = &p
 	}
-	if charge.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(charge.Taxes)
+	if ch.Taxes != nil {
+		c.TaxCategory = makeTaxCategory(ch.Taxes)
 	}
 
 	return c
 }
 
-func makeDiscount(discount *bill.Discount, currency string) AllowanceCharge {
-	c := AllowanceCharge{
+func makeDiscount(d *bill.Discount, ccy string) document.AllowanceCharge {
+	c := document.AllowanceCharge{
 		ChargeIndicator: false,
-		Amount: Amount{
-			Value:      discount.Amount.String(),
-			CurrencyID: &currency,
+		Amount: document.Amount{
+			Value:      d.Amount.String(),
+			CurrencyID: &ccy,
 		},
 	}
-	if discount.Reason != "" {
-		c.AllowanceChargeReason = &discount.Reason
+	if d.Reason != "" {
+		c.AllowanceChargeReason = &d.Reason
 	}
-	if discount.Code != "" {
-		c.AllowanceChargeReasonCode = &discount.Code
+	if d.Ext != nil && d.Ext[untdid.ExtKeyAllowance].String() != "" {
+		e := d.Ext[untdid.ExtKeyAllowance].String()
+		c.AllowanceChargeReasonCode = &e
 	}
-	if discount.Percent != nil {
-		p := discount.Percent.String()
+	if d.Percent != nil {
+		p := d.Percent.String()
 		c.MultiplierFactorNumeric = &p
 	}
-	if discount.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(discount.Taxes)
+	if d.Taxes != nil {
+		c.TaxCategory = makeTaxCategory(d.Taxes)
 	}
 
 	return c
 }
 
-func makeTaxCategory(taxes tax.Set) *[]TaxCategory {
-	set := []TaxCategory{}
-	for _, tax := range taxes {
-		category := TaxCategory{}
-		category.TaxScheme = &TaxScheme{ID: tax.Category.String()}
-		if tax.Percent != nil {
-			p := tax.Percent.StringWithoutSymbol()
+func makeTaxCategory(taxes tax.Set) []*document.TaxCategory {
+	set := []*document.TaxCategory{}
+	for _, t := range taxes {
+		category := document.TaxCategory{}
+		category.TaxScheme = &document.TaxScheme{ID: t.Category.String()}
+		if t.Percent != nil {
+			p := t.Percent.StringWithoutSymbol()
 			category.Percent = &p
 		}
-		if tax.Rate != "" {
-			rate := findTaxCode(tax.Rate)
-			category.ID = &rate
+		if t.Ext != nil && t.Ext[untdid.ExtKeyTaxCategory].String() != "" {
+			r := t.Ext[untdid.ExtKeyTaxCategory].String()
+			category.ID = &r
 		}
-		set = append(set, category)
+		set = append(set, &category)
 	}
-	return &set
+	return set
 }

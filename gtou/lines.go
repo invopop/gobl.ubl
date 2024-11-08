@@ -3,7 +3,9 @@ package gtou
 import (
 	"strconv"
 
+	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
 )
 
@@ -12,150 +14,152 @@ func (c *Converter) newLines(inv *bill.Invoice) error {
 		return nil
 	}
 
-	var invoiceLines []InvoiceLine
+	var lines []document.InvoiceLine
 
-	for _, line := range inv.Lines {
-		currency := line.Item.Currency.String()
-		if currency == "" {
-			currency = inv.Currency.String()
+	for _, l := range inv.Lines {
+		ccy := l.Item.Currency.String()
+		if ccy == "" {
+			ccy = inv.Currency.String()
 		}
-		invoiceLine := InvoiceLine{
-			ID: strconv.Itoa(line.Index),
+		invLine := document.InvoiceLine{
+			ID: strconv.Itoa(l.Index),
 
-			LineExtensionAmount: Amount{
-				CurrencyID: &currency,
-				Value:      line.Total.String(),
+			LineExtensionAmount: document.Amount{
+				CurrencyID: &ccy,
+				Value:      l.Total.String(),
 			},
 		}
 
-		if line.Quantity != (num.Amount{}) {
-			invoiceLine.InvoicedQuantity = &Quantity{
-				Value: line.Quantity.String(),
+		if l.Quantity != (num.Amount{}) {
+			invLine.InvoicedQuantity = &document.Quantity{
+				Value: l.Quantity.String(),
 			}
-			if line.Item != nil && line.Item.Unit != "" {
-				invoiceLine.InvoicedQuantity.UnitCode = string(line.Item.Unit.UNECE())
+			if l.Item != nil && l.Item.Unit != "" {
+				invLine.InvoicedQuantity.UnitCode = string(l.Item.Unit.UNECE())
 			}
 		}
 
-		if len(line.Notes) > 0 {
+		if len(l.Notes) > 0 {
 			var notes []string
-			for _, note := range line.Notes {
+			for _, note := range l.Notes {
 				if note.Key == "buyer-accounting-ref" {
-					invoiceLine.AccountingCost = &note.Text
+					invLine.AccountingCost = &note.Text
 				} else {
 					notes = append(notes, note.Text)
 				}
 			}
 			if len(notes) > 0 {
-				invoiceLine.Note = notes
+				invLine.Note = notes
 			}
 		}
 
-		if len(line.Charges) > 0 || len(line.Discounts) > 0 {
-			invoiceLine.AllowanceCharge = makeLineCharges(line.Charges, line.Discounts, currency)
+		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
+			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy)
 		}
 
-		if line.Item != nil {
-			item := &Item{}
+		if l.Item != nil {
+			it := &document.Item{}
 
-			if line.Item.Description != "" {
-				d := line.Item.Description
-				item.Description = &d
+			if l.Item.Description != "" {
+				d := l.Item.Description
+				it.Description = &d
 			}
 
-			if line.Item.Name != "" {
-				item.Name = line.Item.Name
+			if l.Item.Name != "" {
+				it.Name = l.Item.Name
 			}
 
-			if line.Item.Origin != "" {
-				item.OriginCountry = &Country{
-					IdentificationCode: line.Item.Origin.String(),
+			if l.Item.Origin != "" {
+				it.OriginCountry = &document.Country{
+					IdentificationCode: l.Item.Origin.String(),
 				}
 			}
 
-			if line.Item.Meta != nil {
-				var properties []AdditionalItemProperty
-				for key, value := range line.Item.Meta {
-					properties = append(properties, AdditionalItemProperty{Name: key.String(), Value: value})
+			if l.Item.Meta != nil {
+				var properties []document.AdditionalItemProperty
+				for key, value := range l.Item.Meta {
+					properties = append(properties, document.AdditionalItemProperty{Name: key.String(), Value: value})
 				}
-				item.AdditionalItemProperty = &properties
+				it.AdditionalItemProperty = &properties
 			}
 
-			if len(line.Taxes) > 0 && line.Taxes[0].Category != "" {
-				item.ClassifiedTaxCategory = &ClassifiedTaxCategory{
-					TaxScheme: &TaxScheme{
-						ID: line.Taxes[0].Category.String(),
+			if len(l.Taxes) > 0 && l.Taxes[0].Category != "" {
+				it.ClassifiedTaxCategory = &document.ClassifiedTaxCategory{
+					TaxScheme: &document.TaxScheme{
+						ID: l.Taxes[0].Category.String(),
 					},
 				}
-				if line.Taxes[0].Percent != nil {
-					percent := line.Taxes[0].Percent.StringWithoutSymbol()
-					item.ClassifiedTaxCategory.Percent = &percent
+				if l.Taxes[0].Percent != nil {
+					p := l.Taxes[0].Percent.StringWithoutSymbol()
+					it.ClassifiedTaxCategory.Percent = &p
 				}
-				if line.Taxes[0].Rate != "" {
-					rate := findTaxCode(line.Taxes[0].Rate)
-					item.ClassifiedTaxCategory.ID = &rate
+				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
+					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
+					it.ClassifiedTaxCategory.ID = &rate
 				}
 			}
 
-			invoiceLine.Item = item
+			invLine.Item = it
 
-			if line.Item.Price != (num.Amount{}) {
-				invoiceLine.Price = &Price{
-					PriceAmount: Amount{
-						CurrencyID: &currency,
-						Value:      line.Item.Price.String(),
+			if l.Item.Price != (num.Amount{}) {
+				invLine.Price = &document.Price{
+					PriceAmount: document.Amount{
+						CurrencyID: &ccy,
+						Value:      l.Item.Price.String(),
 					},
 				}
 			}
 		}
 
-		invoiceLines = append(invoiceLines, invoiceLine)
+		lines = append(lines, invLine)
 	}
-	c.doc.InvoiceLine = invoiceLines
+	c.doc.InvoiceLine = lines
 	return nil
 }
 
-func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, currency string) []*AllowanceCharge {
-	var allowanceCharges []*AllowanceCharge
-	for _, charge := range charges {
-		allowanceCharge := &AllowanceCharge{
+func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string) []*document.AllowanceCharge {
+	var allowanceCharges []*document.AllowanceCharge
+	for _, ch := range charges {
+		ac := &document.AllowanceCharge{
 			ChargeIndicator: true,
-			Amount: Amount{
-				Value:      charge.Amount.String(),
-				CurrencyID: &currency,
+			Amount: document.Amount{
+				Value:      ch.Amount.String(),
+				CurrencyID: &ccy,
 			},
 		}
-		if charge.Code != "" {
-			allowanceCharge.AllowanceChargeReasonCode = &charge.Code
+		if ch.Ext != nil && ch.Ext[untdid.ExtKeyCharge].String() != "" {
+			e := ch.Ext[untdid.ExtKeyCharge].String()
+			ac.AllowanceChargeReasonCode = &e
 		}
-		if charge.Reason != "" {
-			allowanceCharge.AllowanceChargeReason = &charge.Reason
+		if ch.Reason != "" {
+			ac.AllowanceChargeReason = &ch.Reason
 		}
-		if charge.Percent != nil {
-			percent := charge.Percent.String()
-			allowanceCharge.MultiplierFactorNumeric = &percent
+		if ch.Percent != nil {
+			p := ch.Percent.String()
+			ac.MultiplierFactorNumeric = &p
 		}
-		allowanceCharges = append(allowanceCharges, allowanceCharge)
+		allowanceCharges = append(allowanceCharges, ac)
 	}
-	for _, discount := range discounts {
-		allowanceCharge := &AllowanceCharge{
+	for _, d := range discounts {
+		ac := &document.AllowanceCharge{
 			ChargeIndicator: false,
-			Amount: Amount{
-				Value:      discount.Amount.String(),
-				CurrencyID: &currency,
+			Amount: document.Amount{
+				Value:      d.Amount.String(),
+				CurrencyID: &ccy,
 			},
 		}
-		if discount.Code != "" {
-			allowanceCharge.AllowanceChargeReasonCode = &discount.Code
+		if d.Ext != nil && d.Ext[untdid.ExtKeyAllowance].String() != "" {
+			e := d.Ext[untdid.ExtKeyAllowance].String()
+			ac.AllowanceChargeReasonCode = &e
 		}
-		if discount.Reason != "" {
-			allowanceCharge.AllowanceChargeReason = &discount.Reason
+		if d.Reason != "" {
+			ac.AllowanceChargeReason = &d.Reason
 		}
-		if discount.Percent != nil {
-			percent := discount.Percent.String()
-			allowanceCharge.MultiplierFactorNumeric = &percent
+		if d.Percent != nil {
+			p := d.Percent.String()
+			ac.MultiplierFactorNumeric = &p
 		}
-		allowanceCharges = append(allowanceCharges, allowanceCharge)
+		allowanceCharges = append(allowanceCharges, ac)
 	}
 	return allowanceCharges
 }
