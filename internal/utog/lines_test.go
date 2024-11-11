@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -13,14 +14,12 @@ import (
 // Define tests for the ParseXMLLines function
 func TestGetLines(t *testing.T) {
 	t.Run("ubl-example1.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example1.xml")
+		e, err := newDocumentFrom("ubl-example1.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		inv := converter.GetInvoice()
 		lines := inv.Lines
 		assert.NotNil(t, lines)
 
@@ -45,14 +44,12 @@ func TestGetLines(t *testing.T) {
 
 	// Line Charges and Discounts
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example2.xml")
+		e, err := newDocumentFrom("ubl-example2.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		inv := converter.GetInvoice()
 		lines := inv.Lines
 		assert.NotNil(t, lines)
 		assert.Len(t, lines, 5)

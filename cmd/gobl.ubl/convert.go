@@ -52,7 +52,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 
 	// Check if input is JSON or XML
 	isJSON := json.Valid(inData)
-	converter := ubl.NewConverter()
+
 	var outputData []byte
 
 	if isJSON {
@@ -60,7 +60,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		if err := json.Unmarshal(inData, env); err != nil {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
 		}
-		doc, err := converter.ConvertToUBL(env)
+		doc, err := ubl.ToUBL(env)
 		if err != nil {
 			return fmt.Errorf("building UBL document: %w", err)
 		}
@@ -72,7 +72,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	} else {
 		// Assume XML if not JSON
 
-		env, err := converter.ConvertToGOBL(inData)
+		env, err := ubl.ToGOBL(inData)
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}

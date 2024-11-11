@@ -3,23 +3,14 @@ package gtou
 import (
 	"testing"
 
-	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewParty(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		env, err := LoadTestEnvelope("invoice-de-de.json")
+		doc, err := newDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
-
-		inv := env.Extract().(*bill.Invoice)
-
-		converter := NewConverter()
-		err = converter.newDocument(inv)
-		require.NoError(t, err)
-
-		doc := converter.GetDocument()
 
 		assert.Equal(t, "111111125", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
 		assert.Equal(t, "Provide One GmbH", *doc.AccountingSupplierParty.Party.PartyLegalEntity.RegistrationName)

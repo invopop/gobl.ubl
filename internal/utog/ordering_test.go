@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -10,13 +11,13 @@ import (
 
 func TestGetOrdering(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example2.xml")
+		e, err := newDocumentFrom("ubl-example2.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
-		ordering := converter.GetInvoice().Ordering
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		ordering := inv.Ordering
 		assert.NotNil(t, ordering)
 
 		assert.Equal(t, cbc.Code("123"), ordering.Code)
@@ -26,13 +27,13 @@ func TestGetOrdering(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example5.xml")
+		e, err := newDocumentFrom("ubl-example5.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
-		ordering := converter.GetInvoice().Ordering
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		ordering := inv.Ordering
 		assert.NotNil(t, ordering)
 
 		assert.Equal(t, cbc.Code("PO4711"), ordering.Code)

@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
@@ -11,13 +12,11 @@ import (
 
 func TestParseUtoGCharges(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example2.xml")
-		require.NoError(t, err)
-		c := NewConverter()
-		err = c.NewInvoice(doc)
+		e, err := newDocumentFrom("ubl-example2.xml")
 		require.NoError(t, err)
 
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 		charges := inv.Charges
 		discounts := inv.Discounts
 
@@ -48,13 +47,12 @@ func TestParseUtoGCharges(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example5.xml")
-		require.NoError(t, err)
-		c := NewConverter()
-		err = c.NewInvoice(doc)
+		e, err := newDocumentFrom("ubl-example5.xml")
 		require.NoError(t, err)
 
-		inv := c.GetInvoice()
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
 		charges := inv.Charges
 		discounts := inv.Discounts
 

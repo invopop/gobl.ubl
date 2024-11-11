@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -10,14 +11,13 @@ import (
 
 func TestGetInstructions(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example2.xml")
+		e, err := newDocumentFrom("ubl-example2.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		payment := converter.GetInvoice().Payment
+		payment := inv.Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
@@ -28,14 +28,13 @@ func TestGetInstructions(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example5.xml")
+		e, err := newDocumentFrom("ubl-example5.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		payment := converter.GetInvoice().Payment
+		payment := inv.Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("direct-debit"), payment.Instructions.Key)
@@ -45,14 +44,13 @@ func TestGetInstructions(t *testing.T) {
 	})
 
 	t.Run("ubl-example7.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example7.xml")
+		e, err := newDocumentFrom("ubl-example7.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		payment := converter.GetInvoice().Payment
+		payment := inv.Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
@@ -62,14 +60,13 @@ func TestGetInstructions(t *testing.T) {
 	})
 
 	t.Run("ubl-example8.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example8.xml")
+		e, err := newDocumentFrom("ubl-example8.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		payment := converter.GetInvoice().Payment
+		payment := inv.Payment
 		require.NotNil(t, payment)
 
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)

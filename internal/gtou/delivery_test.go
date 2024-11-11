@@ -3,23 +3,15 @@ package gtou
 import (
 	"testing"
 
-	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewDelivery(t *testing.T) {
 	t.Run("invoice-without-buyers-tax-id.json", func(t *testing.T) {
-		env, err := LoadTestEnvelope("invoice-without-buyers-tax-id.json")
+		doc, err := newDocumentFrom("invoice-without-buyers-tax-id.json")
 		require.NoError(t, err)
 
-		inv := env.Extract().(*bill.Invoice)
-
-		converter := NewConverter()
-		err = converter.newDocument(inv)
-		require.NoError(t, err)
-
-		doc := converter.GetDocument()
 		assert.NotNil(t, doc.Delivery)
 		assert.Len(t, doc.Delivery, 1)
 		assert.Equal(t, "2024-02-10", *doc.Delivery[0].ActualDeliveryDate)

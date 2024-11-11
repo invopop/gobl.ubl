@@ -50,9 +50,9 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        *string    `xml:"cbc:ID"`
-	Percent   *string    `xml:"cbc:Percent"`
-	TaxScheme *TaxScheme `xml:"cac:TaxScheme"`
+	ID        *string    `xml:"cbc:ID,omitempty"`
+	Percent   *string    `xml:"cbc:Percent,omitempty"`
+	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
@@ -64,6 +64,6 @@ type AdditionalItemProperty struct {
 // Price represents the price of an item
 type Price struct {
 	PriceAmount     Amount           `xml:"cbc:PriceAmount"`
-	BaseAmount      *Amount          `xml:"cbc:BaseAmount"`
-	AllowanceCharge *AllowanceCharge `xml:"cac:AllowanceCharge"`
+	BaseAmount      *Amount          `xml:"cbc:BaseAmount,omitempty"`
+	AllowanceCharge *AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
 }

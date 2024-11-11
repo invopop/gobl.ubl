@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
@@ -12,16 +13,16 @@ import (
 // Define tests for the ParseParty function
 func TestGetParty(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example2.xml")
-		require.NoError(t, err)
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
+		e, err := newDocumentFrom("ubl-example2.xml")
 		require.NoError(t, err)
 
-		supplier := converter.GetInvoice().Supplier
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		supplier := inv.Supplier
 		require.NotNil(t, supplier)
 		assert.Equal(t, "Tax handling company AS", supplier.Name)
-		assert.Equal(t, cbc.Code("NO967611265MVA"), supplier.TaxID.Code)
+		assert.Equal(t, cbc.Code("967611265MVA"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
 		assert.Equal(t, "Regent street", supplier.Addresses[0].Street)
 		assert.Equal(t, "Newtown", supplier.Addresses[0].Locality)
@@ -30,10 +31,10 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "202", supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), supplier.Addresses[0].Country)
 
-		seller := converter.GetInvoice().Ordering.Seller
+		seller := inv.Ordering.Seller
 		require.NotNil(t, seller)
 		assert.Equal(t, "Salescompany ltd.", seller.Name)
-		assert.Equal(t, cbc.Code("NO123456789MVA"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("123456789MVA"), seller.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
 		require.Len(t, seller.Identities, 2)
 		assert.Equal(t, "CompanyID", seller.Identities[0].Label)
@@ -53,10 +54,10 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "antonio@salescompany.no", seller.Emails[0].Address)
 		assert.Equal(t, "46211230", seller.Telephones[0].Number)
 
-		customer := converter.GetInvoice().Customer
+		customer := inv.Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "The Buyercompany", customer.Name)
-		assert.Equal(t, cbc.Code("NO987654321MVA"), customer.TaxID.Code)
+		assert.Equal(t, cbc.Code("987654321MVA"), customer.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
 		assert.Equal(t, "Anystreet 8", customer.Addresses[0].Street)
 		assert.Equal(t, "Back door", customer.Addresses[0].StreetExtra)
@@ -77,16 +78,16 @@ func TestGetParty(t *testing.T) {
 	})
 
 	t.Run("ubl-example3.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example3.xml")
-		require.NoError(t, err)
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
+		e, err := newDocumentFrom("ubl-example3.xml")
 		require.NoError(t, err)
 
-		supplier := converter.GetInvoice().Supplier
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		supplier := inv.Supplier
 		require.NotNil(t, supplier)
 		assert.Equal(t, "SubscriptionSeller", supplier.Name)
-		assert.Equal(t, cbc.Code("DK16356706"), supplier.TaxID.Code)
+		assert.Equal(t, cbc.Code("16356706"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("DK"), supplier.TaxID.Country)
 		assert.Equal(t, "Main street 2, Building 4", supplier.Addresses[0].Street)
 		assert.Equal(t, "Big city", supplier.Addresses[0].Locality)
@@ -100,7 +101,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "0088", supplier.Identities[1].Label)
 		assert.Equal(t, cbc.Code("1238764941386"), supplier.Identities[1].Code)
 
-		customer := converter.GetInvoice().Customer
+		customer := inv.Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "Buyercompany ltd", customer.Name)
 		assert.Equal(t, cbc.Code("NO987654321MVA"), customer.TaxID.Code)

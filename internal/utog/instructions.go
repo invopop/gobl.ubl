@@ -64,7 +64,7 @@ func (c *Converter) getDirectDebit(paymentMeans *document.PaymentMeans) *pay.Dir
 			directDebit.Account = *paymentMeans.PaymentMandate.PayerFinancialAccount.ID
 		}
 	}
-	seller := c.GetInvoice().Supplier
+	seller := c.inv.Supplier
 	if seller != nil {
 		for _, id := range seller.Identities {
 			if id.Label == "SEPA" {
@@ -73,7 +73,7 @@ func (c *Converter) getDirectDebit(paymentMeans *document.PaymentMeans) *pay.Dir
 			}
 		}
 	}
-	payment := c.GetInvoice().Payment
+	payment := c.inv.Payment
 	if payment != nil && payment.Payee != nil {
 		payee := payment.Payee
 		for _, id := range payee.Identities {

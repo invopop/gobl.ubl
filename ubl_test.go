@@ -13,8 +13,8 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ubl/document"
-	"github.com/invopop/gobl.ubl/gtou"
-	"github.com/invopop/gobl.ubl/utog"
+	"github.com/invopop/gobl.ubl/internal/gtou"
+	"github.com/invopop/gobl.ubl/internal/utog"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -77,11 +77,8 @@ func TestUtoG(t *testing.T) {
 			xmlData, err := os.ReadFile(example)
 			require.NoError(t, err)
 
-			// Create a new converter
-			converter := utog.NewConverter()
-
-			// Convert CII XML to GOBL
-			goblEnv, err := converter.ConvertToGOBL(xmlData)
+			// Convert UBL XML to GOBL
+			goblEnv, err := utog.Convert(xmlData)
 			require.NoError(t, err)
 
 			// Extract the invoice from the envelope
@@ -130,8 +127,7 @@ func NewDocumentFrom(name string) (*document.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	c := &gtou.Converter{}
-	return c.ConvertToUBL(env)
+	return gtou.Convert(env)
 }
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder

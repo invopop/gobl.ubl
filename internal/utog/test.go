@@ -6,13 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nbio/xml"
-
-	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl"
 )
 
-// LoadTestXMLDoc returns a UBL XMLDoc from a file in the test data folder
-func LoadTestXMLDoc(name string) (*document.Document, error) {
+// newDocumentFrom creates a UBL Document from a GOBL file in the `test/data` folder
+func newDocumentFrom(name string) (*gobl.Envelope, error) {
 	src, err := os.Open(filepath.Join(getTestDataPath(), name))
 	if err != nil {
 		return nil, err
@@ -22,15 +20,12 @@ func LoadTestXMLDoc(name string) (*document.Document, error) {
 			err = cerr
 		}
 	}()
+
 	inData, err := io.ReadAll(src)
 	if err != nil {
 		return nil, err
 	}
-	doc := new(document.Document)
-	if err := xml.Unmarshal(inData, doc); err != nil {
-		return nil, err
-	}
-	return doc, err
+	return Convert(inData)
 }
 
 func getTestDataPath() string {

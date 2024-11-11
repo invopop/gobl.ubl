@@ -3,23 +3,15 @@ package gtou
 import (
 	"testing"
 
-	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewCharges(t *testing.T) {
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		env, err := LoadTestEnvelope("invoice-complete.json")
+		doc, err := newDocumentFrom("invoice-complete.json")
 		require.NoError(t, err)
 
-		inv := env.Extract().(*bill.Invoice)
-
-		converter := NewConverter()
-		err = converter.newDocument(inv)
-		require.NoError(t, err)
-
-		doc := converter.GetDocument()
 		assert.Len(t, doc.AllowanceCharge, 2)
 
 		assert.True(t, doc.AllowanceCharge[0].ChargeIndicator)

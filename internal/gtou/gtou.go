@@ -17,20 +17,10 @@ type Converter struct {
 	doc *document.Document
 }
 
-// NewConverter creates a new Converter instance
-func NewConverter() *Converter {
+// Convert converts a GOBL envelope into a UBL document
+func Convert(env *gobl.Envelope) (*document.Document, error) {
 	c := new(Converter)
 	c.doc = new(document.Document)
-	return c
-}
-
-// GetDocument returns the document from the converter
-func (c *Converter) GetDocument() *document.Document {
-	return c.doc
-}
-
-// ConvertToUBL converts a GOBL envelope into a UBL document
-func (c *Converter) ConvertToUBL(env *gobl.Envelope) (*document.Document, error) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return nil, fmt.Errorf("invalid type %T", env.Document)

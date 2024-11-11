@@ -3,6 +3,7 @@ package utog
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -10,14 +11,12 @@ import (
 
 func TestGetDelivery(t *testing.T) {
 	t.Run("ubl-example4.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example4.xml")
+		e, err := newDocumentFrom("ubl-example4.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		inv := converter.GetInvoice()
 		assert.NotNil(t, inv.Delivery)
 		assert.Equal(t, "2013-04-15", inv.Delivery.Date.String())
 		assert.NotNil(t, inv.Delivery.Receiver)
@@ -29,14 +28,12 @@ func TestGetDelivery(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		doc, err := LoadTestXMLDoc("ubl-example5.xml")
+		e, err := newDocumentFrom("ubl-example5.xml")
 		require.NoError(t, err)
 
-		converter := NewConverter()
-		err = converter.NewInvoice(doc)
-		require.NoError(t, err)
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
 
-		inv := converter.GetInvoice()
 		assert.NotNil(t, inv.Delivery)
 		assert.Equal(t, "2013-04-15", inv.Delivery.Date.String())
 		assert.NotNil(t, inv.Delivery.Receiver)

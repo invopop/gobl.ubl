@@ -9,21 +9,19 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ubl/document"
-	"github.com/invopop/gobl/bill"
 )
 
-// LoadTestInvoice returns a GOBL Invoice from a file in the `test/data` folder
-func LoadTestInvoice(name string) (*bill.Invoice, error) {
-	env, err := LoadTestEnvelope(name)
+// newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
+func newDocumentFrom(name string) (*document.Document, error) {
+	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
 	}
-
-	return env.Extract().(*bill.Invoice), nil
+	return Convert(env)
 }
 
-// LoadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
-func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
+// loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
+func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 	src, _ := os.Open(filepath.Join(getTestDataPath(), name))
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
@@ -39,12 +37,11 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 
 // NewDocumentFrom creates a UBL from a GOBL file in the `test/data` folder
 func NewDocumentFrom(name string) (*document.Document, error) {
-	env, err := LoadTestEnvelope(name)
+	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
 	}
-	c := &Converter{}
-	return c.ConvertToUBL(env)
+	return Convert(env)
 }
 
 func getTestDataPath() string {
