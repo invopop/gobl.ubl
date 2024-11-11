@@ -38,9 +38,8 @@ func main() {
         panic(err)
     }
 
-    // Prepare the CII document
-    converter := ubl.NewConverter()
-    doc, err := converter.ConvertToUBL(env)
+    // Prepare the UBL document
+    doc, err := ubl.ToUBL(env)
     if err != nil {
         panic(err)
     }
@@ -72,8 +71,7 @@ func main() {
 		panic(err)
 	}
 
-    converter := ubl.NewConverter()
-    env, err := converter.ConvertToGOBL(inData)
+    env, err := ubl.ToGOBL(inData)
     if err != nil {
         panic(err)
     }
