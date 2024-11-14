@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0a11-7d40-8e14-cda7a0a46986",
+    "uuid": "01930b26-28a5-7ece-af1c-ed1260949291",
     "dig": {
       "alg": "sha256",
-      "val": "754932a2439795ad38b617b3de69d01452fc67abb8cfb50ec3fde2f706956725"
+      "val": "5340ecdf464caed281e721ab25072b791e219e5a7f2b760eeb8113aeb91d2553"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192be93-0a11-7dd3-b66d-80f9b755fb60",
+    "uuid": "01930b26-28a5-7f28-a36f-472de7052cb8",
     "type": "standard",
     "code": "12115118",
     "issue_date": "2015-01-09",
@@ -424,12 +424,15 @@
     "payment": {
       "instructions": {
         "key": "credit-transfer",
-        "ref": "Deb. 10202 / Fact. 12115118",
+        "ref": "Deb.10202 Fact.12115118",
         "credit_transfer": [
           {
             "iban": "NL57 RABO 0107307510"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

@@ -3,34 +3,17 @@ package ubl
 
 import (
 	"github.com/invopop/gobl"
-	gtou "github.com/invopop/gobl.ubl/gtou"
-	utog "github.com/invopop/gobl.ubl/utog"
+	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl.ubl/internal/gtou"
+	"github.com/invopop/gobl.ubl/internal/utog"
 )
 
-// Conversor is a struct that encapsulates both CtoG and GtoC conversors
-type Conversor struct {
-	UtoG *utog.Conversor
-	GtoU *gtou.Conversor
+// ToGOBL converts a UBL document to a GOBL envelope
+func ToGOBL(ublDoc []byte) (*gobl.Envelope, error) {
+	return utog.Convert(ublDoc)
 }
 
-// NewConversor creates a new Conversor instance
-func NewConversor() *Conversor {
-	c := new(Conversor)
-	c.UtoG = utog.NewConversor()
-	c.GtoU = gtou.NewConversor()
-	return c
-}
-
-// ConvertToGOBL converts a UBL document to a GOBL envelope
-func (c *Conversor) ConvertToGOBL(ublDoc []byte) (*gobl.Envelope, error) {
-	return c.UtoG.ConvertToGOBL(ublDoc)
-}
-
-// ConvertToUBL converts a GOBL envelope to a UBL document
-func (c *Conversor) ConvertToUBL(env *gobl.Envelope) (*gtou.Document, error) {
-	ublDoc, err := c.GtoU.ConvertToUBL(env)
-	if err != nil {
-		return nil, err
-	}
-	return ublDoc, nil
+// ToUBL converts a GOBL envelope to a UBL document
+func ToUBL(env *gobl.Envelope) (*document.Invoice, error) {
+	return gtou.Convert(env)
 }

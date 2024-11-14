@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0b33-7dda-ad9d-9f7762cc877e",
+    "uuid": "01930b26-29c9-7b5b-b460-a850f3e1ffb1",
     "dig": {
       "alg": "sha256",
-      "val": "6a4f7b79879319451238b87f0904b959e3d461e890a4664ab7e556a94f7659b0"
+      "val": "247143271cd61ddcf1116a64ef9b63a223db38d0fc99d4e07b1f55c0ed41bdb7"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "0192be93-0b33-7e50-bcda-764422033caa",
+    "uuid": "01930b26-29c9-7bb1-b1ad-d2bbb2b73a6a",
     "type": "standard",
     "code": "20150483",
     "issue_date": "2015-04-01",
@@ -99,7 +99,10 @@
             "iban": "NL13RABO0377815500",
             "bic": "RABONL2U"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

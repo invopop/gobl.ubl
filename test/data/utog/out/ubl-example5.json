@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0aa7-70d8-9d12-2f67267147b0",
+    "uuid": "01930b26-2932-764f-a8ce-8438fd250484",
     "dig": {
       "alg": "sha256",
-      "val": "3cda32452cf014fa928ae92b0dec7ea0620de55597b16e0379139c2a72180562"
+      "val": "565879728ad2f826ab32e1cc2f599174c459794c754ce7c7ac52699bc2755461"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be93-0aa7-7163-abf8-ac45a1a6ee6c",
+    "uuid": "01930b26-2932-7686-abea-d84d6344618a",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",
@@ -113,18 +113,22 @@
         "sum": "1000.00",
         "discounts": [
           {
+            "reason": "Loyal customer",
             "percent": "10%",
             "amount": "100.00",
-            "code": "100",
-            "reason": "Loyal customer"
+            "ext": {
+              "untdid-allowance": "100"
+            }
           }
         ],
         "charges": [
           {
+            "reason": "Packaging",
             "percent": "10%",
             "amount": "100.00",
-            "code": "ABL",
-            "reason": "Packaging"
+            "ext": {
+              "untdid-charge": "ABL"
+            }
           }
         ],
         "taxes": [
@@ -195,35 +199,37 @@
     "discounts": [
       {
         "i": 1,
+        "reason": "Loyal customer",
         "base": "1500.00",
         "percent": "10%",
         "amount": "150.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
-        "code": "100",
-        "reason": "Loyal customer"
+        "ext": {
+          "untdid-allowance": "100"
+        }
       }
     ],
     "charges": [
       {
         "i": 1,
+        "reason": "Packaging",
         "base": "1500.00",
         "percent": "10%",
         "amount": "150.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
-        "code": "ABL",
-        "reason": "Packaging"
+        "ext": {
+          "untdid-charge": "ABL"
+        }
       }
     ],
     "ordering": {
@@ -326,6 +332,9 @@
         "direct_debit": {
           "ref": "123456",
           "account": "DK1212341234123412"
+        },
+        "ext": {
+          "untdid-payment-means": "49"
         }
       }
     },

@@ -113,7 +113,7 @@
             <cbc:LineID>1</cbc:LineID>
         </cac:OrderLineReference>
         <cac:Item>
-            <cbc:Description>Weight-based tax, vehicles >3000 KGM</cbc:Description>
+            <cbc:Description>Weight-based tax, vehicles 3000 KGM</cbc:Description>
             <cbc:Name>Road tax</cbc:Name>
             <cac:SellersItemIdentification>
                 <cbc:ID>RT3000</cbc:ID>

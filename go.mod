@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/invopop/gobl v0.201.0
+	github.com/invopop/gobl v0.204.1
 	github.com/joho/godotenv v1.5.1
 	// github.com/lestrrat-go/libxml2 v0.0.0-20240521004304-a75c203ac627
 	github.com/spf13/cobra v1.8.1
@@ -14,7 +14,12 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.115.1 // indirect
+	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
+	github.com/nbio/xml v0.0.0-20241028124227-eac89c735a80
+)
+
+require (
+	cloud.google.com/go v0.116.0 // indirect
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect

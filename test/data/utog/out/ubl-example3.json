@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0a64-7b95-80ad-28b3a132d317",
+    "uuid": "01930b26-28ec-74e0-84e4-10b472361757",
     "dig": {
       "alg": "sha256",
-      "val": "bf753a5b5f0c803b9c03a9c6bfe66d1a1e747910d463b8a74669dde1fccbc077"
+      "val": "b3bf6b29f65a693a9a2df9a9258c1900eb33350d467bc1fbbdc3958ffe7d07e1"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be93-0a64-7c10-84a3-0dc93bf0b361",
+    "uuid": "01930b26-28ec-7512-9e3b-072a58268fef",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-04-10",
@@ -110,15 +110,14 @@
     "charges": [
       {
         "i": 1,
+        "reason": "Freight charge",
         "amount": "100.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
-        ],
-        "reason": "Freight charge"
+        ]
       }
     ],
     "ordering": {
@@ -140,7 +139,10 @@
           {
             "iban": "DK1212341234123412"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {

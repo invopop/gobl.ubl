@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0a3f-734c-a464-1025cb808b2c",
+    "uuid": "01930b26-28c8-7db2-86a4-951c8a9abdbf",
     "dig": {
       "alg": "sha256",
-      "val": "48e2d235a96b0a39c59247bd4f12669ad957b78dfe14009529e9c2d7d5195dca"
+      "val": "8402dded5a3969bf96f52b8bf4470c6f76d60a6382703094d63eb364191f0193"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be93-0a3f-73ca-89a5-3792eb8e6fce",
+    "uuid": "01930b26-28c8-7e42-b2fa-9e283f1d76cb",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -107,14 +107,14 @@
         "sum": "2546.00",
         "discounts": [
           {
-            "amount": "12.00",
-            "reason": "Damage"
+            "reason": "Damage",
+            "amount": "12.00"
           }
         ],
         "charges": [
           {
-            "amount": "12.00",
-            "reason": "Testing"
+            "reason": "Testing",
+            "amount": "12.00"
           }
         ],
         "taxes": [
@@ -296,30 +296,30 @@
     "discounts": [
       {
         "i": 1,
+        "reason": "Promotion discount",
         "amount": "100.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
         ],
-        "code": "88",
-        "reason": "Promotion discount"
+        "ext": {
+          "untdid-allowance": "88"
+        }
       }
     ],
     "charges": [
       {
         "i": 1,
+        "reason": "Freight",
         "amount": "100.00",
         "taxes": [
           {
             "cat": "VAT",
-            "rate": "standard",
             "percent": "25%"
           }
-        ],
-        "reason": "Freight"
+        ]
       }
     ],
     "ordering": {
@@ -410,7 +410,10 @@
             "iban": "NO9386011117947",
             "bic": "DNBANOKK"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "delivery": {

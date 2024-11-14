@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2" xmlns:udt="urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
+  <cbc:ID>SAMPLE-001</cbc:ID>
+  <cbc:IssueDate>2024-02-13</cbc:IssueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cac:OrderReference>
+    <cbc:ID>XR-2024-3</cbc:ID>
+  </cac:OrderReference>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cac:PostalAddress>
+        <cbc:StreetName>Dietmar-Hopp-Allee</cbc:StreetName>
+        <cbc:CityName>Walldorf</cbc:CityName>
+        <cbc:PostalZone>69190</cbc:PostalZone>
+        <cac:AddressLine>
+          <cbc:Line>16</cbc:Line>
+        </cac:AddressLine>
+        <cac:Country>
+          <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>111111125</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Provide One GmbH</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Name>John Doe</cbc:Name>
+        <cbc:Telephone>+49100200300</cbc:Telephone>
+        <cbc:ElectronicMail>billing@example.com</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cac:PostalAddress>
+        <cbc:StreetName>Werner-Heisenberg-Allee</cbc:StreetName>
+        <cbc:CityName>München</cbc:CityName>
+        <cbc:PostalZone>80939</cbc:PostalZone>
+        <cac:AddressLine>
+          <cbc:Line>25</cbc:Line>
+        </cac:AddressLine>
+        <cac:Country>
+          <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Sample Consumer</cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:ElectronicMail>email@sample.com</cbc:ElectronicMail>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:Delivery>
+    <cbc:ActualDeliveryDate>2024-02-10</cbc:ActualDeliveryDate>
+    <cac:DeliveryLocation>
+      <cbc:ID>6754238987643</cbc:ID>
+      <cac:Address>
+        <cbc:StreetName>Deliverystreet 2</cbc:StreetName>
+        <cbc:AdditionalStreetName>Side door</cbc:AdditionalStreetName>
+        <cbc:CityName>DeliveryCity</cbc:CityName>
+        <cbc:PostalZone>523427</cbc:PostalZone>
+        <cbc:CountrySubentity>RegionD</cbc:CountrySubentity>
+        <cac:Country>
+          <cbc:IdentificationCode>NO</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:Address>
+    </cac:DeliveryLocation>
+  </cac:Delivery>
+  <cac:PaymentTerms>
+    <cbc:Note>lorem ipsum</cbc:Note>
+  </cac:PaymentTerms>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">1800.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">1800.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">2142.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">2142.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="HUR">20</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Testing</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="EUR">12.00</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Damage</cbc:AllowanceChargeReason>
+      <cbc:Amount currencyID="EUR">12.00</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:Item>
+      <cbc:Name>Development services</cbc:Name>
+      <cac:ClassifiedTaxCategory>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID>VAT</cbc:ID>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">90.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

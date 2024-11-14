@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "0192be93-0aea-7bc5-8daa-37fb4f3c44ed",
+    "uuid": "01930b26-2975-7993-b185-52d57fcfb13f",
     "dig": {
       "alg": "sha256",
-      "val": "654093c48cf5c7aabb4b54e94d3bb2fd27a5d832102a215a52a4aa4a172cfe20"
+      "val": "df89525a78982d67540eca4b49cc3d3f3469eeda6a90cd461ff7269de91ad9e7"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "0192be93-0aea-7c5c-a701-333be96fff55",
+    "uuid": "01930b26-2975-7a1f-8e4d-6f44dbcf82c0",
     "type": "standard",
     "code": "INVOICE_test_7",
     "issue_date": "2013-03-11",
@@ -85,7 +85,7 @@
         "item": {
           "ref": "RT3000",
           "name": "Road tax",
-          "description": "Weight-based tax, vehicles \u003e3000 KGM",
+          "description": "Weight-based tax, vehicles 3000 KGM",
           "price": "2500.00",
           "unit": "item"
         },
@@ -134,7 +134,10 @@
             "iban": "SE1212341234123412",
             "bic": "SEXDABCD"
           }
-        ]
+        ],
+        "ext": {
+          "untdid-payment-means": "30"
+        }
       }
     },
     "totals": {
