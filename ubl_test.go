@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"encoding/xml"
-	"flag"
 	"io"
 	"os"
 	"path/filepath"
@@ -28,13 +27,11 @@ const (
 	jsonPattern = "*.json"
 )
 
-var update = flag.Bool("update", false, "Update out directory")
-
 func TestGtoU(t *testing.T) {
 	schema, err := loadSchema("schema.xsd")
 	require.NoError(t, err)
 
-	examples, err := getDataGlob("*.json")
+	examples, err := getDataGlob(jsonPattern)
 	require.NoError(t, err)
 
 	for _, example := range examples {
@@ -53,19 +50,13 @@ func TestGtoU(t *testing.T) {
 
 			output, err := LoadOutputFile(outName)
 			assert.NoError(t, err)
-
-			if *update {
-				err = SaveOutputFile(outName, data)
-				require.NoError(t, err)
-			} else {
-				assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
-			}
+			assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
 		})
 	}
 }
 
 func TestUtoG(t *testing.T) {
-	examples, err := getDataGlob("*.xml")
+	examples, err := getDataGlob(xmlPattern)
 	require.NoError(t, err)
 
 	for _, example := range examples {
@@ -111,12 +102,7 @@ func TestUtoG(t *testing.T) {
 			expectedData, err := json.MarshalIndent(expectedInvoice, "", "  ")
 			require.NoError(t, err)
 
-			if *update {
-				err = SaveOutputFile(outName, data)
-				require.NoError(t, err)
-			} else {
-				assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
-			}
+			assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
 		})
 	}
 }
@@ -194,17 +180,6 @@ func LoadOutputFile(name string) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
-}
-
-// SaveOutputFile writes byte data to a file in the `test/data/out` folder
-func SaveOutputFile(name string, data []byte) error {
-	var pattern string
-	if strings.HasSuffix(name, jsonPattern) {
-		pattern = xmlPattern
-	} else {
-		pattern = jsonPattern
-	}
-	return os.WriteFile(filepath.Join(getOutPath(pattern), name), data, 0644)
 }
 
 func loadSchema(name string) (*xsd.Schema, error) {
