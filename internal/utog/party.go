@@ -129,7 +129,7 @@ func parseAddress(address *document.PostalAddress) *org.Address {
 	}
 
 	if address.PostalZone != nil {
-		addr.Code = *address.PostalZone
+		addr.Code = cbc.Code(*address.PostalZone)
 	}
 
 	if address.CountrySubentity != nil {

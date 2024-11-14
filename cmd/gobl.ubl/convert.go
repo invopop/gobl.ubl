@@ -30,7 +30,7 @@ func (c *convertOpts) cmd() *cobra.Command {
 
 func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	if len(args) == 0 || len(args) > 2 {
-		return fmt.Errorf("expected one or two arguments, the command usage is `gobl.cii convert <infile> [outfile]`")
+		return fmt.Errorf("expected one or two arguments, the command usage is `gobl.ubl convert <infile> [outfile]`")
 	}
 
 	input, err := openInput(cmd, args)

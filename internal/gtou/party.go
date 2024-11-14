@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
 
@@ -93,8 +94,9 @@ func newAddress(addresses []*org.Address) *document.PostalAddress {
 		addr.CountrySubentity = &a.Region
 	}
 
-	if a.Code != "" {
-		addr.PostalZone = &a.Code
+	if a.Code != cbc.CodeEmpty {
+		code := a.Code.String()
+		addr.PostalZone = &code
 	}
 
 	if a.Country != "" {
