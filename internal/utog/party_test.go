@@ -28,7 +28,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "Newtown", supplier.Addresses[0].Locality)
 		assert.Equal(t, "Front door", supplier.Addresses[0].StreetExtra)
 		assert.Equal(t, "RegionC", supplier.Addresses[0].Region)
-		assert.Equal(t, "202", supplier.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("202"), supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), supplier.Addresses[0].Country)
 
 		seller := inv.Ordering.Seller
@@ -46,7 +46,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "Suite 123", seller.Addresses[0].StreetExtra)
 		assert.Equal(t, "Big city", seller.Addresses[0].Locality)
 		assert.Equal(t, "RegionA", seller.Addresses[0].Region)
-		assert.Equal(t, "303", seller.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("303"), seller.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), seller.Addresses[0].Country)
 
 		require.Len(t, seller.People, 1)
@@ -63,7 +63,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "Back door", customer.Addresses[0].StreetExtra)
 		assert.Equal(t, "Anytown", customer.Addresses[0].Locality)
 		assert.Equal(t, "RegionB", customer.Addresses[0].Region)
-		assert.Equal(t, "101", customer.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("101"), customer.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), customer.Addresses[0].Country)
 
 		require.Len(t, customer.Identities, 2)
@@ -91,7 +91,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, l10n.TaxCountryCode("DK"), supplier.TaxID.Country)
 		assert.Equal(t, "Main street 2, Building 4", supplier.Addresses[0].Street)
 		assert.Equal(t, "Big city", supplier.Addresses[0].Locality)
-		assert.Equal(t, "54321", supplier.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("54321"), supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("DK"), supplier.Addresses[0].Country)
 
 		assert.Equal(t, "antonio@SubscriptionsSeller.dk", supplier.Emails[0].Address)
@@ -108,7 +108,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, l10n.TaxCountryCode("DK"), customer.TaxID.Country)
 		assert.Equal(t, "Anystreet, Building 1", customer.Addresses[0].Street)
 		assert.Equal(t, "Anytown", customer.Addresses[0].Locality)
-		assert.Equal(t, "101", customer.Addresses[0].Code)
+		assert.Equal(t, cbc.Code("101"), customer.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("DK"), customer.Addresses[0].Country)
 	})
 }
