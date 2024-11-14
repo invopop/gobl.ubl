@@ -18,8 +18,8 @@ const (
 	CustomizationID = "urn:cen.eu:en16931:2017"
 )
 
-// Document represents the root element of a UBL invoice
-type Document struct {
+// Invoice represents the root element of a UBL invoice
+type Invoice struct {
 	XMLName                        xml.Name           `xml:"Invoice"`
 	CACNamespace                   string             `xml:"xmlns:cac,attr"`
 	CBCNamespace                   string             `xml:"xmlns:cbc,attr"`

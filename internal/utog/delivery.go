@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Converter) getDelivery(doc *document.Document) error {
+func (c *Converter) getDelivery(doc *document.Invoice) error {
 	d := &bill.Delivery{}
 
 	// Only one delivery Location and Receiver are supported, so if more than one is passed the former will be overwritten

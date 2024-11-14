@@ -15,14 +15,14 @@ import (
 // Converter is a struct that contains the necessary elements to convert between GOBL and UBL
 type Converter struct {
 	inv *bill.Invoice
-	doc *document.Document
+	doc *document.Invoice
 }
 
 // Convert converts a UBL document into a GOBL envelope
 func Convert(xmlData []byte) (*gobl.Envelope, error) {
 	c := new(Converter)
 	c.inv = new(bill.Invoice)
-	c.doc = new(document.Document)
+	c.doc = new(document.Invoice)
 	if err := xml.Unmarshal(xmlData, &c.doc); err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func Convert(xmlData []byte) (*gobl.Envelope, error) {
 }
 
 // NewInvoice creates a new invoice from a UBL document
-func (c *Converter) NewInvoice(doc *document.Document) error {
+func (c *Converter) NewInvoice(doc *document.Invoice) error {
 
 	c.inv = &bill.Invoice{
 		Code:     cbc.Code(doc.ID),

@@ -14,13 +14,13 @@ import (
 
 // Converter is a struct that contains the necessary elements to convert between GOBL and UBL
 type Converter struct {
-	doc *document.Document
+	doc *document.Invoice
 }
 
 // Convert converts a GOBL envelope into a UBL document
-func Convert(env *gobl.Envelope) (*document.Document, error) {
+func Convert(env *gobl.Envelope) (*document.Invoice, error) {
 	c := new(Converter)
-	c.doc = new(document.Document)
+	c.doc = new(document.Invoice)
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return nil, fmt.Errorf("invalid type %T", env.Document)
@@ -37,7 +37,7 @@ func Convert(env *gobl.Envelope) (*document.Document, error) {
 func (c *Converter) newDocument(inv *bill.Invoice) error {
 
 	// Create the UBL document
-	c.doc = &document.Document{
+	c.doc = &document.Invoice{
 		CACNamespace:            document.CAC,
 		CBCNamespace:            document.CBC,
 		QDTNamespace:            document.QDT,

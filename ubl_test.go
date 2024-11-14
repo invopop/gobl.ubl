@@ -108,7 +108,7 @@ func TestUtoG(t *testing.T) {
 }
 
 // NewDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*document.Document, error) {
+func NewDocumentFrom(name string) (*document.Invoice, error) {
 	env, err := LoadTestEnvelope(name)
 	if err != nil {
 		return nil, err
@@ -117,7 +117,7 @@ func NewDocumentFrom(name string) (*document.Document, error) {
 }
 
 // LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func LoadTestXMLDoc(name string) (*document.Document, error) {
+func LoadTestXMLDoc(name string) (*document.Invoice, error) {
 	src, err := os.Open(filepath.Join(getConversionTypePath(xmlPattern), name))
 	if err != nil {
 		return nil, err
@@ -132,7 +132,7 @@ func LoadTestXMLDoc(name string) (*document.Document, error) {
 	if err != nil {
 		return nil, err
 	}
-	doc := new(document.Document)
+	doc := new(document.Invoice)
 	if err := xml.Unmarshal(inData, doc); err != nil {
 		return nil, err
 	}

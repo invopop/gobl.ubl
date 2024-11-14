@@ -12,7 +12,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (c *Converter) getLines(doc *document.Document) error {
+func (c *Converter) getLines(doc *document.Invoice) error {
 	items := doc.InvoiceLine
 
 	lines := make([]*bill.Line, 0, len(items))

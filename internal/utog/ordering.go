@@ -8,7 +8,7 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (c *Converter) getOrdering(doc *document.Document) error {
+func (c *Converter) getOrdering(doc *document.Invoice) error {
 	ordering := &bill.Ordering{}
 
 	if doc.OrderReference != nil && doc.OrderReference.ID != "" {

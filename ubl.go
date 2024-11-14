@@ -14,6 +14,6 @@ func ToGOBL(ublDoc []byte) (*gobl.Envelope, error) {
 }
 
 // ToUBL converts a GOBL envelope to a UBL document
-func ToUBL(env *gobl.Envelope) (*document.Document, error) {
+func ToUBL(env *gobl.Envelope) (*document.Invoice, error) {
 	return gtou.Convert(env)
 }

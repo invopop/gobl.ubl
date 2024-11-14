@@ -12,7 +12,7 @@ import (
 )
 
 // newDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func newDocumentFrom(name string) (*document.Document, error) {
+func newDocumentFrom(name string) (*document.Invoice, error) {
 	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,7 @@ func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 }
 
 // NewDocumentFrom creates a UBL from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*document.Document, error) {
+func NewDocumentFrom(name string) (*document.Invoice, error) {
 	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err

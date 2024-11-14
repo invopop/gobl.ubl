@@ -12,7 +12,7 @@ import (
 )
 
 // ParseAllowanceCharges extracts the charges logic from the CII document
-func (c *Converter) getCharges(doc *document.Document) error {
+func (c *Converter) getCharges(doc *document.Invoice) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
