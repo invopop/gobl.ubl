@@ -71,19 +71,13 @@ func newAddress(addresses []*org.Address) *document.PostalAddress {
 	addr := &document.PostalAddress{}
 
 	if a.Street != "" {
-		addr.StreetName = &a.Street
-	}
-
-	if a.Number != "" {
-		addr.AddressLine = []document.AddressLine{
-			{
-				Line: a.Number,
-			},
-		}
+		l := a.LineOne()
+		addr.StreetName = &l
 	}
 
 	if a.StreetExtra != "" {
-		addr.AdditionalStreetName = &a.StreetExtra
+		l := a.LineTwo()
+		addr.AdditionalStreetName = &l
 	}
 
 	if a.Locality != "" {
