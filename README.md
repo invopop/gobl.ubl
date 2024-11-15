@@ -119,7 +119,6 @@ There are certain assumptions and lost information in the conversion from UBL to
 3. Fields ProfileID (BT-23) and CustomizationID (BT-24) in UBL are not supported and lost in the conversion.
 4. The AccountingCost (BT-19, BT-133) fields are added as notes.
 5. Payment advances do not include their own tax rate, they use the global tax rate of the invoice.
-6. Identification fields that use ISO/IEC 6523 codes are currently not directly mapped to their [codelist](https://docs.peppol.eu/poacc/billing/3.0/codelist/ICD/), with their reference code being mapped to the Label.
 
 
 ## Development

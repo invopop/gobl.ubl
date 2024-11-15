@@ -106,6 +106,9 @@
     </cac:AllowanceCharge>
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>
+      <cac:StandardItemIdentification>
+        <cbc:ID schemeID="0088">1234567890128</cbc:ID>
+      </cac:StandardItemIdentification>
       <cac:ClassifiedTaxCategory>
         <cbc:Percent>19</cbc:Percent>
         <cac:TaxScheme>

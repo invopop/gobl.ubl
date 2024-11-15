@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "01930b26-28c8-7db2-86a4-951c8a9abdbf",
+    "uuid": "01933080-ae87-720b-a938-050d4dcc08ee",
     "dig": {
       "alg": "sha256",
-      "val": "8402dded5a3969bf96f52b8bf4470c6f76d60a6382703094d63eb364191f0193"
+      "val": "322d80f327812218e0e09c6d05bd1f1fe0a90c8a2b54e0e81c230238354c7f1e"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "01930b26-28c8-7e42-b2fa-9e283f1d76cb",
+    "uuid": "01933080-ae87-726a-893e-fafd54752ff9",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -43,8 +43,10 @@
           "code": "987654321"
         },
         {
-          "label": "0088",
-          "code": "3456789012098"
+          "code": "3456789012098",
+          "ext": {
+            "iso-scheme-id": "0088"
+          }
         }
       ],
       "people": [
@@ -84,8 +86,10 @@
           "name": "Laptop computer",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890128"
+              "code": "1234567890128",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             },
             {
               "label": "ZZZ",
@@ -142,8 +146,10 @@
           "name": "Returned \"Advanced computing\" book",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890135"
+              "code": "1234567890135",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             },
             {
               "label": "ZZZ",
@@ -183,8 +189,10 @@
           "name": "\"Computing for dummies\" book",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890135"
+              "code": "1234567890135",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             },
             {
               "label": "ZZZ",
@@ -221,8 +229,10 @@
           "name": "Returned IBM 5150 desktop",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890159"
+              "code": "1234567890159",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             },
             {
               "label": "ZZZ",
@@ -259,8 +269,10 @@
           "name": "Network cable",
           "identities": [
             {
-              "label": "0088",
-              "code": "1234567890166"
+              "code": "1234567890166",
+              "ext": {
+                "iso-scheme-id": "0088"
+              }
             },
             {
               "label": "ZZZ",
@@ -340,8 +352,10 @@
             "code": "123456789"
           },
           {
-            "label": "0088",
-            "code": "1238764941386"
+            "code": "1238764941386",
+            "ext": {
+              "iso-scheme-id": "0088"
+            }
           }
         ],
         "people": [
@@ -387,8 +401,10 @@
             "code": "989823401"
           },
           {
-            "label": "0088",
-            "code": "2298740918237"
+            "code": "2298740918237",
+            "ext": {
+              "iso-scheme-id": "0088"
+            }
           }
         ]
       },

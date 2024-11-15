@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
@@ -56,6 +57,21 @@ func (c *Converter) newParty(party *org.Party) document.Party {
 	if party.Alias != "" {
 		p.PartyName = &document.PartyName{
 			Name: party.Alias,
+		}
+	}
+
+	if len(party.Identities) > 0 {
+		for _, id := range party.Identities {
+
+			if id.Ext != nil {
+				s := id.Ext[iso.ExtKeySchemeID].String()
+				p.PartyIdentification = &document.Identification{
+					ID: &document.IDType{
+						SchemeID: &s,
+						Value:    id.Code.String(),
+					},
+				}
+			}
 		}
 	}
 	return p

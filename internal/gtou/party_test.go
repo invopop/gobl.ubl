@@ -30,6 +30,9 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "München", *doc.AccountingCustomerParty.Party.PostalAddress.CityName)
 		assert.Equal(t, "80939", *doc.AccountingCustomerParty.Party.PostalAddress.PostalZone)
 		assert.Equal(t, "DE", doc.AccountingCustomerParty.Party.PostalAddress.Country.IdentificationCode)
+
+		assert.Equal(t, "0088", *doc.AccountingCustomerParty.Party.PartyIdentification.ID.SchemeID)
+		assert.Equal(t, "1234567890128", doc.AccountingCustomerParty.Party.PartyIdentification.ID.Value)
 	})
 
 }

@@ -26,6 +26,8 @@ func TestNewLines(t *testing.T) {
 		assert.False(t, doc.InvoiceLine[0].AllowanceCharge[1].ChargeIndicator)
 		assert.Equal(t, "Damage", *doc.InvoiceLine[0].AllowanceCharge[1].AllowanceChargeReason)
 		assert.Equal(t, "12.00", doc.InvoiceLine[0].AllowanceCharge[1].Amount.Value)
+		assert.Equal(t, "0088", *doc.InvoiceLine[0].Item.StandardItemIdentification.ID.SchemeID)
+		assert.Equal(t, "1234567890128", doc.InvoiceLine[0].Item.StandardItemIdentification.ID.Value)
 
 	})
 
