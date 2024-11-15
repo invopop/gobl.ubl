@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "01930b26-2975-7993-b185-52d57fcfb13f",
+    "uuid": "01933080-af31-7255-bf0e-d2c89e276daa",
     "dig": {
       "alg": "sha256",
-      "val": "df89525a78982d67540eca4b49cc3d3f3469eeda6a90cd461ff7269de91ad9e7"
+      "val": "92931d10c6e04f334bbe20efe7fcf8e9ae6fd4d940c29bf488a2dafcef8a6031"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "01930b26-2975-7a1f-8e4d-6f44dbcf82c0",
+    "uuid": "01933080-af31-72b5-b6f3-412414f99f28",
     "type": "standard",
     "code": "INVOICE_test_7",
     "issue_date": "2013-03-11",
@@ -17,11 +17,6 @@
     "supplier": {
       "name": "The Sellercompany Incorporated",
       "alias": "Civic Service Centre",
-      "identities": [
-        {
-          "code": "5532331183"
-        }
-      ],
       "people": [
         {
           "name": {

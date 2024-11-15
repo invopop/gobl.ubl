@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
@@ -135,11 +136,19 @@ func (c *Converter) getIdentities(docLine *document.InvoiceLine) []*org.Identity
 		}
 	}
 
-	if docLine.Item.StandardItemIdentification != nil && docLine.Item.StandardItemIdentification.ID != nil {
-		id := getIdentity(docLine.Item.StandardItemIdentification.ID)
-		if id != nil {
-			ids = append(ids, id)
+	if docLine.Item.StandardItemIdentification != nil &&
+		docLine.Item.StandardItemIdentification.ID != nil &&
+		docLine.Item.StandardItemIdentification.ID.SchemeID != nil {
+		s := *docLine.Item.StandardItemIdentification.ID.SchemeID
+		id := &org.Identity{
+			Ext: tax.Extensions{
+				iso.ExtKeySchemeID: tax.ExtValue(s),
+			},
+			Code: cbc.Code(docLine.Item.StandardItemIdentification.ID.Value),
 		}
+
+		ids = append(ids, id)
+
 	}
 
 	if docLine.Item.CommodityClassification != nil && len(*docLine.Item.CommodityClassification) > 0 {

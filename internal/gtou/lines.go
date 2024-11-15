@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
 )
@@ -96,6 +97,18 @@ func (c *Converter) newLines(inv *bill.Invoice) error {
 				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
 					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
 					it.ClassifiedTaxCategory.ID = &rate
+				}
+			}
+
+			if len(l.Item.Identities) > 0 {
+				for _, id := range l.Item.Identities {
+					s := id.Ext[iso.ExtKeySchemeID].String()
+					it.StandardItemIdentification = &document.ItemIdentification{
+						ID: &document.IDType{
+							SchemeID: &s,
+							Value:    id.Code.String(),
+						},
+					}
 				}
 			}
 

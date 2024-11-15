@@ -69,6 +69,14 @@
 				{
 					"addr": "email@sample.com"
 				}
+			],
+			"identities": [
+				{
+					"code": "1234567890128",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
 			]
 		},
 		"lines": [

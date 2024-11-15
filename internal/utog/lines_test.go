@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -79,7 +80,7 @@ func TestGetLines(t *testing.T) {
 
 		assert.Len(t, line.Item.Identities, 3)
 		assert.Equal(t, cbc.Code("1234567890128"), line.Item.Identities[0].Code)
-		assert.Equal(t, "0088", line.Item.Identities[0].Label)
+		assert.Equal(t, "0088", line.Item.Identities[0].Ext[iso.ExtKeySchemeID].String())
 		assert.Equal(t, cbc.Code("12344321"), line.Item.Identities[1].Code)
 		assert.Equal(t, "ZZZ", line.Item.Identities[1].Label)
 		assert.Equal(t, cbc.Code("65434568"), line.Item.Identities[2].Code)

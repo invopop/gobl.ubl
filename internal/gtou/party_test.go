@@ -17,8 +17,7 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "+49100200300", *doc.AccountingSupplierParty.Party.Contact.Telephone)
 		assert.Equal(t, "billing@example.com", *doc.AccountingSupplierParty.Party.Contact.ElectronicMail)
 
-		assert.Equal(t, "16", doc.AccountingSupplierParty.Party.PostalAddress.AddressLine[0].Line)
-		assert.Equal(t, "Dietmar-Hopp-Allee", *doc.AccountingSupplierParty.Party.PostalAddress.StreetName)
+		assert.Equal(t, "Dietmar-Hopp-Allee 16", *doc.AccountingSupplierParty.Party.PostalAddress.StreetName)
 		assert.Equal(t, "Walldorf", *doc.AccountingSupplierParty.Party.PostalAddress.CityName)
 		assert.Equal(t, "69190", *doc.AccountingSupplierParty.Party.PostalAddress.PostalZone)
 		assert.Equal(t, "DE", doc.AccountingSupplierParty.Party.PostalAddress.Country.IdentificationCode)
@@ -27,11 +26,13 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "Sample Consumer", *doc.AccountingCustomerParty.Party.PartyLegalEntity.RegistrationName)
 		assert.Equal(t, "email@sample.com", *doc.AccountingCustomerParty.Party.Contact.ElectronicMail)
 
-		assert.Equal(t, "25", doc.AccountingCustomerParty.Party.PostalAddress.AddressLine[0].Line)
-		assert.Equal(t, "Werner-Heisenberg-Allee", *doc.AccountingCustomerParty.Party.PostalAddress.StreetName)
+		assert.Equal(t, "Werner-Heisenberg-Allee 25", *doc.AccountingCustomerParty.Party.PostalAddress.StreetName)
 		assert.Equal(t, "München", *doc.AccountingCustomerParty.Party.PostalAddress.CityName)
 		assert.Equal(t, "80939", *doc.AccountingCustomerParty.Party.PostalAddress.PostalZone)
 		assert.Equal(t, "DE", doc.AccountingCustomerParty.Party.PostalAddress.Country.IdentificationCode)
+
+		assert.Equal(t, "0088", *doc.AccountingCustomerParty.Party.PartyIdentification.ID.SchemeID)
+		assert.Equal(t, "1234567890128", doc.AccountingCustomerParty.Party.PartyIdentification.ID.Value)
 	})
 
 }

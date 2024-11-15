@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "01930b26-2999-708b-9213-83b392feac60",
+    "uuid": "01933080-af57-75f0-9016-3338b6cd2caf",
     "dig": {
       "alg": "sha256",
-      "val": "5746fd7fe071c3fa8a9582635e1c2aa888c6941172827ab58b8c57673b81e8d2"
+      "val": "c6939643f6a14cd7d96ae019f0558dc7dce9dee9a9a8c90cc00642a199a34709"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "01930b26-2999-70e9-a1d3-4914dd5e7f5e",
+    "uuid": "01933080-af57-762c-b7a8-beb8b4569e06",
     "type": "standard",
     "code": "1100512149",
     "issue_date": "2014-11-10",
@@ -44,11 +44,6 @@
     },
     "customer": {
       "name": "Klant",
-      "identities": [
-        {
-          "code": "1081119"
-        }
-      ],
       "addresses": [
         {
           "street": "Bedrijfslaan 4",

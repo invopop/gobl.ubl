@@ -1,16 +1,16 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "01930b26-28a5-7ece-af1c-ed1260949291",
+    "uuid": "01933080-ae64-7397-82cb-6c42b0cea3da",
     "dig": {
       "alg": "sha256",
-      "val": "5340ecdf464caed281e721ab25072b791e219e5a7f2b760eeb8113aeb91d2553"
+      "val": "237a85d46aa33c97daf7498b302adb41c91dbac5670f1f985a0990f2a88fae5d"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
     "$regime": "NL",
-    "uuid": "01930b26-28a5-7f28-a36f-472de7052cb8",
+    "uuid": "01933080-ae64-73db-87e5-aa6d5a4afa2e",
     "type": "standard",
     "code": "12115118",
     "issue_date": "2015-01-09",
@@ -38,11 +38,6 @@
     },
     "customer": {
       "name": "ODIN 59",
-      "identities": [
-        {
-          "code": "10202"
-        }
-      ],
       "people": [
         {
           "name": {
