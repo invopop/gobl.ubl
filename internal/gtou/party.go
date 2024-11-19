@@ -62,7 +62,6 @@ func (c *Converter) newParty(party *org.Party) document.Party {
 
 	if len(party.Identities) > 0 {
 		for _, id := range party.Identities {
-
 			if id.Ext != nil {
 				s := id.Ext[iso.ExtKeySchemeID].String()
 				p.PartyIdentification = &document.Identification{
