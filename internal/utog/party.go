@@ -2,6 +2,7 @@ package utog
 
 import (
 	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
@@ -91,17 +92,20 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 		}
 	}
 
-	if party.PartyIdentification != nil {
-		for _, id := range party.PartyIdentification {
-			identity := getIdentity(&id.ID)
-			if identity == nil {
-				continue
-			}
-			if p.Identities == nil {
-				p.Identities = make([]*org.Identity, 0)
-			}
-			p.Identities = append(p.Identities, identity)
+	if party.PartyIdentification != nil &&
+		party.PartyIdentification.ID != nil &&
+		party.PartyIdentification.ID.SchemeID != nil {
+		s := *party.PartyIdentification.ID.SchemeID
+		identity := &org.Identity{
+			Ext: tax.Extensions{
+				iso.ExtKeySchemeID: tax.ExtValue(s),
+			},
+			Code: cbc.Code(party.PartyIdentification.ID.Value),
 		}
+		if p.Identities == nil {
+			p.Identities = make([]*org.Identity, 0)
+		}
+		p.Identities = append(p.Identities, identity)
 	}
 
 	return p

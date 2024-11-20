@@ -13,7 +13,7 @@ type CustomerParty struct {
 // Party represents a party involved in a transaction
 type Party struct {
 	EndpointID          *EndpointID       `xml:"cbc:EndpointID"`
-	PartyIdentification []Identification  `xml:"cac:PartyIdentification"`
+	PartyIdentification *Identification   `xml:"cac:PartyIdentification"`
 	PartyName           *PartyName        `xml:"cac:PartyName"`
 	PostalAddress       *PostalAddress    `xml:"cac:PostalAddress"`
 	PartyTaxScheme      []PartyTaxScheme  `xml:"cac:PartyTaxScheme"`
@@ -29,7 +29,7 @@ type EndpointID struct {
 
 // Identification represents an identification
 type Identification struct {
-	ID IDType `xml:"cbc:ID"`
+	ID *IDType `xml:"cbc:ID"`
 }
 
 // PartyName represents the name of a party

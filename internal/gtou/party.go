@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
@@ -58,6 +59,20 @@ func (c *Converter) newParty(party *org.Party) document.Party {
 			Name: party.Alias,
 		}
 	}
+
+	if len(party.Identities) > 0 {
+		for _, id := range party.Identities {
+			if id.Ext != nil {
+				s := id.Ext[iso.ExtKeySchemeID].String()
+				p.PartyIdentification = &document.Identification{
+					ID: &document.IDType{
+						SchemeID: &s,
+						Value:    id.Code.String(),
+					},
+				}
+			}
+		}
+	}
 	return p
 }
 
@@ -71,19 +86,13 @@ func newAddress(addresses []*org.Address) *document.PostalAddress {
 	addr := &document.PostalAddress{}
 
 	if a.Street != "" {
-		addr.StreetName = &a.Street
-	}
-
-	if a.Number != "" {
-		addr.AddressLine = []document.AddressLine{
-			{
-				Line: a.Number,
-			},
-		}
+		l := a.LineOne()
+		addr.StreetName = &l
 	}
 
 	if a.StreetExtra != "" {
-		addr.AdditionalStreetName = &a.StreetExtra
+		l := a.LineTwo()
+		addr.AdditionalStreetName = &l
 	}
 
 	if a.Locality != "" {
