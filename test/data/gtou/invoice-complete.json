@@ -180,7 +180,10 @@
 				  "iban": "NO9386011117947",
 				  "bic": "DNBANOKK"
 				}
-			  ]
+			  ],
+			  "ext": {
+				"untdid-payment-means": "30"
+			  }
 			}
 		},
 		"delivery": {

@@ -3,11 +3,9 @@ package gtou
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ubl/document"
-	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -38,8 +36,9 @@ func Convert(env *gobl.Envelope) (*document.Invoice, error) {
 
 func (c *Converter) newDocument(inv *bill.Invoice) error {
 
-	if !slices.Contains(inv.GetAddons(), en16931.V2017) {
-		return fmt.Errorf("invoice must contain EN16931 addon")
+	tc, err := getTypeCode(inv)
+	if err != nil {
+		return err
 	}
 
 	// Create the UBL document
@@ -55,7 +54,7 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 		CustomizationID:         document.CustomizationID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
-		InvoiceTypeCode:         inv.Tax.Ext[untdid.ExtKeyDocumentType].String(),
+		InvoiceTypeCode:         tc,
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: document.SupplierParty{Party: c.newParty(inv.Supplier)},
 		AccountingCustomerParty: document.CustomerParty{Party: c.newParty(inv.Customer)},
@@ -68,7 +67,7 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 		}
 	}
 
-	err := c.newOrdering(inv.Ordering)
+	err = c.newOrdering(inv.Ordering)
 	if err != nil {
 		return err
 	}
@@ -99,6 +98,13 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 	}
 
 	return nil
+}
+
+func getTypeCode(inv *bill.Invoice) (string, error) {
+	if inv.Tax == nil || inv.Tax.Ext == nil || inv.Tax.Ext[untdid.ExtKeyDocumentType].String() == "" {
+		return "", fmt.Errorf("invoice must contain tax extensions")
+	}
+	return inv.Tax.Ext[untdid.ExtKeyDocumentType].String(), nil
 }
 
 func invoiceNumber(series cbc.Code, code cbc.Code) string {

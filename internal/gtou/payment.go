@@ -1,6 +1,8 @@
 package gtou
 
 import (
+	"fmt"
+
 	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -12,6 +14,9 @@ func (c *Converter) newPayment(pymt *bill.Payment) error {
 	}
 	if pymt.Instructions != nil {
 		ref := pymt.Instructions.Ref.String()
+		if pymt.Instructions.Ext == nil || pymt.Instructions.Ext[untdid.ExtKeyPaymentMeans].String() == "" {
+			return fmt.Errorf("payment must contain payment means extension")
+		}
 		c.doc.PaymentMeans = []document.PaymentMeans{
 			{
 				PaymentMeansCode: document.IDType{Value: pymt.Instructions.Ext[untdid.ExtKeyPaymentMeans].String()},

@@ -102,6 +102,9 @@ func (c *Converter) newLines(inv *bill.Invoice) error {
 
 			if len(l.Item.Identities) > 0 {
 				for _, id := range l.Item.Identities {
+					if id.Ext == nil || id.Ext[iso.ExtKeySchemeID].String() == "" {
+						continue
+					}
 					s := id.Ext[iso.ExtKeySchemeID].String()
 					it.StandardItemIdentification = &document.ItemIdentification{
 						ID: &document.IDType{
