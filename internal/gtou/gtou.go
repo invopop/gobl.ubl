@@ -102,7 +102,7 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 
 func getTypeCode(inv *bill.Invoice) (string, error) {
 	if inv.Tax == nil || inv.Tax.Ext == nil || inv.Tax.Ext[untdid.ExtKeyDocumentType].String() == "" {
-		return "", fmt.Errorf("invoice must contain tax extensions")
+		return "", fmt.Errorf("validation: invoice must contain document type extension, added automatically with the EN16931 addon")
 	}
 	return inv.Tax.Ext[untdid.ExtKeyDocumentType].String(), nil
 }

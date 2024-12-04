@@ -15,7 +15,7 @@ func (c *Converter) newPayment(pymt *bill.Payment) error {
 	if pymt.Instructions != nil {
 		ref := pymt.Instructions.Ref.String()
 		if pymt.Instructions.Ext == nil || pymt.Instructions.Ext[untdid.ExtKeyPaymentMeans].String() == "" {
-			return fmt.Errorf("payment must contain payment means extension")
+			return fmt.Errorf("validation: payment must contain payment means extension, added automatically with the EN16931 addon")
 		}
 		c.doc.PaymentMeans = []document.PaymentMeans{
 			{
