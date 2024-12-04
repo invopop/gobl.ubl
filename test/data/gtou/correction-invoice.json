@@ -10,6 +10,9 @@
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "019231f1-90f1-7101-ae31-2df13f03971a",
 		"type": "corrective",
 		"series": "COR",

@@ -3,9 +3,11 @@ package gtou
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.ubl/document"
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -35,6 +37,10 @@ func Convert(env *gobl.Envelope) (*document.Invoice, error) {
 }
 
 func (c *Converter) newDocument(inv *bill.Invoice) error {
+
+	if !slices.Contains(inv.GetAddons(), en16931.V2017) {
+		return fmt.Errorf("invoice must contain EN16931 addon")
+	}
 
 	// Create the UBL document
 	c.doc = &document.Invoice{
