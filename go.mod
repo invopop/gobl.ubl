@@ -7,13 +7,13 @@ toolchain go1.22.1
 require (
 	github.com/invopop/gobl v0.205.1
 	github.com/joho/godotenv v1.5.1
-	// github.com/lestrrat-go/libxml2 v0.0.0-20240521004304-a75c203ac627
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/flimzy/testy v0.14.0
 )
 
 require (
+	github.com/invopop/validation v0.8.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
 	github.com/nbio/xml v0.0.0-20241028124227-eac89c735a80
 )
@@ -28,7 +28,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.12.0 // indirect
-	github.com/invopop/validation v0.8.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/magefile/mage v1.15.0 // indirect
