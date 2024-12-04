@@ -85,6 +85,21 @@
 				"untdid-document-type": "380"
 			}
 		},
+		"payment": {
+			"instructions": {
+			  "key": "credit-transfer",
+			  "ref": "0003434323213231",
+			  "credit_transfer": [
+				{
+				  "iban": "NO9386011117947",
+				  "bic": "DNBANOKK"
+				}
+			  ],
+			  "ext": {
+				  "untdid-payment-means": "30"
+			  }
+			}
+		},
 		"totals": {
 			"sum": "1800.00",
 			"total": "1800.00",

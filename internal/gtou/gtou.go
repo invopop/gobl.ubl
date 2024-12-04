@@ -2,6 +2,7 @@
 package gtou
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/invopop/gobl"
@@ -10,6 +11,7 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/validation"
 )
 
 // Converter is a struct that contains the necessary elements to convert between GOBL and UBL
@@ -102,7 +104,13 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 
 func getTypeCode(inv *bill.Invoice) (string, error) {
 	if inv.Tax == nil || inv.Tax.Ext == nil || inv.Tax.Ext[untdid.ExtKeyDocumentType].String() == "" {
-		return "", fmt.Errorf("validation: invoice must contain document type extension, added automatically with the EN16931 addon")
+		return "", validation.Errors{
+			"tax": validation.Errors{
+				"ext": validation.Errors{
+					untdid.ExtKeyDocumentType.String(): errors.New("required"),
+				},
+			},
+		}
 	}
 	return inv.Tax.Ext[untdid.ExtKeyDocumentType].String(), nil
 }
