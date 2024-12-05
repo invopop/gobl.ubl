@@ -1,9 +1,12 @@
 package gtou
 
 import (
+	"errors"
+
 	"github.com/invopop/gobl.ubl/document"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/validation"
 )
 
 func (c *Converter) newPayment(pymt *bill.Payment) error {
@@ -12,9 +15,18 @@ func (c *Converter) newPayment(pymt *bill.Payment) error {
 	}
 	if pymt.Instructions != nil {
 		ref := pymt.Instructions.Ref.String()
+		if pymt.Instructions.Ext == nil || pymt.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
+			return validation.Errors{
+				"instructions": validation.Errors{
+					"ext": validation.Errors{
+						untdid.ExtKeyPaymentMeans.String(): errors.New("required"),
+					},
+				},
+			}
+		}
 		c.doc.PaymentMeans = []document.PaymentMeans{
 			{
-				PaymentMeansCode: document.IDType{Value: pymt.Instructions.Ext[untdid.ExtKeyPaymentMeans].String()},
+				PaymentMeansCode: document.IDType{Value: pymt.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
 				PaymentID:        &ref,
 			},
 		}

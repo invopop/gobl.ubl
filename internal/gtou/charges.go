@@ -32,8 +32,8 @@ func makeCharge(ch *bill.Charge, ccy string) document.AllowanceCharge {
 	if ch.Reason != "" {
 		c.AllowanceChargeReason = &ch.Reason
 	}
-	if ch.Ext != nil && ch.Ext[untdid.ExtKeyCharge].String() != "" {
-		e := ch.Ext[untdid.ExtKeyCharge].String()
+	e := ch.Ext.Get(untdid.ExtKeyCharge).String()
+	if e != "" {
 		c.AllowanceChargeReasonCode = &e
 	}
 	if ch.Percent != nil {
@@ -58,8 +58,8 @@ func makeDiscount(d *bill.Discount, ccy string) document.AllowanceCharge {
 	if d.Reason != "" {
 		c.AllowanceChargeReason = &d.Reason
 	}
-	if d.Ext != nil && d.Ext[untdid.ExtKeyAllowance].String() != "" {
-		e := d.Ext[untdid.ExtKeyAllowance].String()
+	e := d.Ext.Get(untdid.ExtKeyAllowance).String()
+	if e != "" {
 		c.AllowanceChargeReasonCode = &e
 	}
 	if d.Percent != nil {
@@ -82,9 +82,9 @@ func makeTaxCategory(taxes tax.Set) []*document.TaxCategory {
 			p := t.Percent.StringWithoutSymbol()
 			category.Percent = &p
 		}
-		if t.Ext != nil && t.Ext[untdid.ExtKeyTaxCategory].String() != "" {
-			r := t.Ext[untdid.ExtKeyTaxCategory].String()
-			category.ID = &r
+		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
+		if e != "" {
+			category.ID = &e
 		}
 		set = append(set, &category)
 	}
