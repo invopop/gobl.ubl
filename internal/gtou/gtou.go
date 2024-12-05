@@ -112,7 +112,7 @@ func getTypeCode(inv *bill.Invoice) (string, error) {
 			},
 		}
 	}
-	return inv.Tax.Ext[untdid.ExtKeyDocumentType].String(), nil
+	return inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String(), nil
 }
 
 func invoiceNumber(series cbc.Code, code cbc.Code) string {
