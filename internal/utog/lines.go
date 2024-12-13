@@ -142,7 +142,7 @@ func (c *Converter) getIdentities(docLine *document.InvoiceLine) []*org.Identity
 		s := *docLine.Item.StandardItemIdentification.ID.SchemeID
 		id := &org.Identity{
 			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: tax.ExtValue(s),
+				iso.ExtKeySchemeID: cbc.Code(s),
 			},
 			Code: cbc.Code(docLine.Item.StandardItemIdentification.ID.Value),
 		}
