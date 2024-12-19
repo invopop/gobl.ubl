@@ -53,6 +53,16 @@
       </cac:Contact>
     </cac:Party>
   </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+    <cbc:PaymentID>0003434323213231</cbc:PaymentID>
+    <cac:PayeeFinancialAccount>
+      <cbc:ID>NO9386011117947</cbc:ID>
+      <cac:FinancialInstitutionBranch>
+        <cbc:ID>DNBANOKK</cbc:ID>
+      </cac:FinancialInstitutionBranch>
+    </cac:PayeeFinancialAccount>
+  </cac:PaymentMeans>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
     <cac:TaxSubtotal>

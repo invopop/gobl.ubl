@@ -60,7 +60,7 @@ func (c *Converter) parseCharge(ac *document.AllowanceCharge) (*bill.Charge, err
 	}
 	if ac.AllowanceChargeReasonCode != nil {
 		ch.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
 		}
 	}
 	if ac.BaseAmount != nil {
@@ -114,7 +114,7 @@ func (c *Converter) parseDiscount(ac *document.AllowanceCharge) (*bill.Discount,
 	}
 	if ac.AllowanceChargeReasonCode != nil {
 		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
 		}
 	}
 	if ac.BaseAmount != nil {
@@ -164,7 +164,7 @@ func getLineCharge(ac *document.AllowanceCharge) (*bill.LineCharge, error) {
 	}
 	if ac.AllowanceChargeReasonCode != nil {
 		ch.Ext = tax.Extensions{
-			untdid.ExtKeyCharge: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
 		}
 	}
 	if ac.AllowanceChargeReason != nil {
@@ -193,7 +193,7 @@ func getLineDiscount(ac *document.AllowanceCharge) (*bill.LineDiscount, error) {
 	}
 	if ac.AllowanceChargeReasonCode != nil {
 		d.Ext = tax.Extensions{
-			untdid.ExtKeyAllowance: tax.ExtValue(*ac.AllowanceChargeReasonCode),
+			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
 		}
 	}
 	if ac.AllowanceChargeReason != nil {

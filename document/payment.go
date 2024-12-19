@@ -3,12 +3,12 @@ package document
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
-	PaymentID             *string           `xml:"cbc:PaymentID"`
-	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
-	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
-	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote"`
+	PaymentID             *string           `xml:"cbc:PaymentID"`
+	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
+	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
+	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
 	PaymentMandate        *PaymentMandate   `xml:"cac:PaymentMandate"`
 }
 
