@@ -72,11 +72,17 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 		for _, taxReg := range party.PartyTaxScheme {
 			if taxReg.CompanyID != nil {
 				switch taxReg.TaxScheme.ID {
-				//Source https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
+				// Source https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
 				case "VAT":
-					p.TaxID = &tax.Identity{
-						Country: l10n.TaxCountryCode(party.PostalAddress.Country.IdentificationCode),
-						Code:    cbc.Code(*taxReg.CompanyID),
+					// Parse the country code from the vat
+					if identity, err := tax.ParseIdentity(*taxReg.CompanyID); err == nil {
+						p.TaxID = identity
+					} else {
+						// Fallback to preserve the tax id
+						p.TaxID = &tax.Identity{
+							Country: l10n.TaxCountryCode(party.PostalAddress.Country.IdentificationCode),
+							Code:    cbc.Code(*taxReg.CompanyID),
+						}
 					}
 				default:
 					id := &org.Identity{
