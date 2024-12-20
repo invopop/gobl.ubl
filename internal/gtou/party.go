@@ -26,7 +26,7 @@ func (c *Converter) newParty(party *org.Party) document.Party {
 	// Although taxID is mandatory, when there is a Tax Representative and the seller comes from
 	// Ordering.Seller, the pointer could be nil
 	if party.TaxID != nil && party.TaxID.Code != "" {
-		taxID := party.TaxID.Code.String()
+		taxID := party.TaxID.String()
 		p.PartyTaxScheme = []document.PartyTaxScheme{
 			{
 				CompanyID: &taxID,
