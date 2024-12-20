@@ -11,7 +11,7 @@ func (c *Converter) newOrdering(o *bill.Ordering) error {
 	}
 
 	if o.Code != "" {
-		c.doc.OrderReference = &document.OrderReference{ID: string(o.Code)}
+		c.doc.BuyerReference = o.Code.String()
 	}
 
 	// If both ordering.seller and seller are present, the original seller is used
@@ -68,6 +68,13 @@ func (c *Converter) newOrdering(o *bill.Ordering) error {
 			c.doc.AdditionalDocumentReference = append(c.doc.AdditionalDocumentReference, document.Reference{
 				ID: document.IDType{Value: string(tender.Code)},
 			})
+		}
+	}
+
+	if len(o.Purchases) > 0 {
+		purchase := o.Purchases[0]
+		c.doc.OrderReference = &document.OrderReference{
+			ID: purchase.Code.String(),
 		}
 	}
 
