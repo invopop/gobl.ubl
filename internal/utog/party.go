@@ -98,7 +98,7 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 		s := *party.PartyIdentification.ID.SchemeID
 		identity := &org.Identity{
 			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: tax.ExtValue(s),
+				iso.ExtKeySchemeID: cbc.Code(s),
 			},
 			Code: cbc.Code(party.PartyIdentification.ID.Value),
 		}
