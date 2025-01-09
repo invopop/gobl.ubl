@@ -76,9 +76,9 @@ func (c *Converter) NewInvoice(doc *document.Invoice) error {
 	}
 
 	if len(doc.Note) > 0 {
-		c.inv.Notes = make([]*cbc.Note, 0, len(doc.Note))
+		c.inv.Notes = make([]*org.Note, 0, len(doc.Note))
 		for _, note := range doc.Note {
-			n := &cbc.Note{
+			n := &org.Note{
 				Text: note,
 			}
 			c.inv.Notes = append(c.inv.Notes, n)
