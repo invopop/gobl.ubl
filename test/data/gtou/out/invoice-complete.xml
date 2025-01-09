@@ -24,6 +24,7 @@
   </cac:ContractDocumentReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
+      <cbc:EndpointID schemeID="EM">inbox@example.com</cbc:EndpointID>
       <cac:PostalAddress>
         <cbc:StreetName>Dietmar-Hopp-Allee 16</cbc:StreetName>
         <cbc:CityName>Walldorf</cbc:CityName>

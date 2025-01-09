@@ -365,6 +365,11 @@
             }
           }
         ],
+        "inboxes": [
+          {
+            "email": "seller@email.de"
+          }
+        ],
         "addresses": [
           {
             "street": "Main street 34",

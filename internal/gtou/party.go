@@ -54,6 +54,13 @@ func (c *Converter) newParty(party *org.Party) document.Party {
 		p.Contact = contact
 	}
 
+	if len(party.Inboxes) > 0 {
+		p.EndpointID = &document.EndpointID{
+			Value:    party.Inboxes[0].Email,
+			SchemeID: "EM",
+		}
+	}
+
 	if party.Alias != "" {
 		p.PartyName = &document.PartyName{
 			Name: party.Alias,
