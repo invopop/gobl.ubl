@@ -22,7 +22,7 @@
     <cbc:DocumentCurrencyCode>DKK</cbc:DocumentCurrencyCode>
     <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
     <cbc:AccountingCost>67543</cbc:AccountingCost>
-    <cbc:BuyerReference>qwerty</cbc:BuyerReference>
+    <cbc:BuyerReference>123</cbc:BuyerReference>
     <cac:InvoicePeriod>
         <cbc:StartDate>2013-03-10</cbc:StartDate>
         <cbc:EndDate>2013-04-10</cbc:EndDate>

@@ -5,9 +5,7 @@
   <cbc:IssueDate>2024-02-13</cbc:IssueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cac:OrderReference>
-    <cbc:ID>XR-2024-3</cbc:ID>
-  </cac:OrderReference>
+  <cbc:BuyerReference>XR-2024-3</cbc:BuyerReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PostalAddress>

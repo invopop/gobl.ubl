@@ -44,6 +44,10 @@ func (c *Converter) getLines(doc *document.Invoice) error {
 			if err != nil {
 				return err
 			}
+
+			if docLine.InvoicedQuantity.UnitCode != "" {
+				line.Item.Unit = UnitFromUNECE(cbc.Code(docLine.InvoicedQuantity.UnitCode))
+			}
 		}
 
 		if len(docLine.Note) > 0 {
@@ -66,10 +70,6 @@ func (c *Converter) getLines(doc *document.Invoice) error {
 				Key:  "buyer-accounting-ref",
 				Text: *docLine.AccountingCost,
 			})
-		}
-
-		if docLine.InvoicedQuantity.UnitCode != "" {
-			line.Item.Unit = UnitFromUNECE(cbc.Code(docLine.InvoicedQuantity.UnitCode))
 		}
 
 		line.Item.Identities = c.getIdentities(&docLine)
