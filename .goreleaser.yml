@@ -1,0 +1,37 @@
+before:
+  hooks:
+    - go mod download
+builds:
+  - id: gobl.ubl
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    main: ./cmd/gobl.ubl
+    binary: gobl.ubl
+
+archives:
+  - id: gobl.ubl
+    builds:
+      - gobl.ubl
+    format: tar.gz
+    name_template: "gobl.ubl_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    wrap_in_directory: true
+
+checksum:
+  name_template: "checksums.txt"
+snapshot:
+  name_template: "{{ .Tag }}"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+release:
+  github:
+    owner: invopop
+    name: gobl.ubl
+  prerelease: auto
