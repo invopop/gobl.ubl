@@ -54,7 +54,7 @@ func TestGetParty(t *testing.T) {
 		assert.Equal(t, "Antonio Salesmacher", seller.People[0].Name.Given)
 		assert.Equal(t, "antonio@salescompany.no", seller.Emails[0].Address)
 		assert.Equal(t, "46211230", seller.Telephones[0].Number)
-
+		assert.Equal(t, "seller@email.de", seller.Inboxes[0].Email)
 		customer := inv.Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "The Buyercompany", customer.Name)

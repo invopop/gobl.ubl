@@ -37,7 +37,7 @@ func (c *Converter) getLines(doc *document.Invoice) error {
 		}
 
 		ids := make([]*org.Identity, 0)
-		notes := make([]*cbc.Note, 0)
+		notes := make([]*org.Note, 0)
 
 		if docLine.InvoicedQuantity != nil {
 			line.Quantity, err = num.AmountFromString(docLine.InvoicedQuantity.Value)
@@ -49,7 +49,7 @@ func (c *Converter) getLines(doc *document.Invoice) error {
 		if len(docLine.Note) > 0 {
 			for _, note := range docLine.Note {
 				if note != "" {
-					notes = append(notes, &cbc.Note{
+					notes = append(notes, &org.Note{
 						Text: note,
 					})
 				}
@@ -62,7 +62,7 @@ func (c *Converter) getLines(doc *document.Invoice) error {
 
 		// As there is no specific GOBL field for BT-133, we use a note to store it
 		if docLine.AccountingCost != nil {
-			notes = append(notes, &cbc.Note{
+			notes = append(notes, &org.Note{
 				Key:  "buyer-accounting-ref",
 				Text: *docLine.AccountingCost,
 			})
@@ -142,7 +142,7 @@ func (c *Converter) getIdentities(docLine *document.InvoiceLine) []*org.Identity
 		s := *docLine.Item.StandardItemIdentification.ID.SchemeID
 		id := &org.Identity{
 			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: tax.ExtValue(s),
+				iso.ExtKeySchemeID: cbc.Code(s),
 			},
 			Code: cbc.Code(docLine.Item.StandardItemIdentification.ID.Value),
 		}

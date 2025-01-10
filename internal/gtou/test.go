@@ -35,15 +35,6 @@ func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 	return env, nil
 }
 
-// NewDocumentFrom creates a UBL from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*document.Invoice, error) {
-	env, err := loadTestEnvelope(name)
-	if err != nil {
-		return nil, err
-	}
-	return Convert(env)
-}
-
 func getTestDataPath() string {
 	return filepath.Join(getRootFolder(), "test", "data", "gtou")
 }

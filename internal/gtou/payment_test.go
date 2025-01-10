@@ -3,6 +3,7 @@ package gtou
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -20,7 +21,18 @@ func TestNewPayment(t *testing.T) {
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
 		assert.Equal(t, "NO9386011117947", *doc.PaymentMeans[0].PayeeFinancialAccount.ID)
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
-
 	})
 
+	t.Run("document type extension", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-minimal.json")
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		assert.True(t, ok)
+
+		inv.Payment.Instructions.Ext = nil
+
+		_, err = Convert(env)
+		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
+	})
 }

@@ -12,7 +12,7 @@ func (c *Converter) getInstructions(paymentMeans *document.PaymentMeans) *pay.In
 	instructions := &pay.Instructions{
 		Key: paymentMeansCode(paymentMeans.PaymentMeansCode.Value),
 		Ext: tax.Extensions{
-			untdid.ExtKeyPaymentMeans: tax.ExtValue(paymentMeans.PaymentMeansCode.Value),
+			untdid.ExtKeyPaymentMeans: cbc.Code(paymentMeans.PaymentMeansCode.Value),
 		},
 	}
 

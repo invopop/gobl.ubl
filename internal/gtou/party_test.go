@@ -12,7 +12,7 @@ func TestNewParty(t *testing.T) {
 		doc, err := newDocumentFrom("invoice-de-de.json")
 		require.NoError(t, err)
 
-		assert.Equal(t, "111111125", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
+		assert.Equal(t, "DE111111125", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
 		assert.Equal(t, "Provide One GmbH", *doc.AccountingSupplierParty.Party.PartyLegalEntity.RegistrationName)
 		assert.Equal(t, "+49100200300", *doc.AccountingSupplierParty.Party.Contact.Telephone)
 		assert.Equal(t, "billing@example.com", *doc.AccountingSupplierParty.Party.Contact.ElectronicMail)
@@ -22,7 +22,7 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "69190", *doc.AccountingSupplierParty.Party.PostalAddress.PostalZone)
 		assert.Equal(t, "DE", doc.AccountingSupplierParty.Party.PostalAddress.Country.IdentificationCode)
 
-		assert.Equal(t, "282741168", *doc.AccountingCustomerParty.Party.PartyTaxScheme[0].CompanyID)
+		assert.Equal(t, "DE282741168", *doc.AccountingCustomerParty.Party.PartyTaxScheme[0].CompanyID)
 		assert.Equal(t, "Sample Consumer", *doc.AccountingCustomerParty.Party.PartyLegalEntity.RegistrationName)
 		assert.Equal(t, "email@sample.com", *doc.AccountingCustomerParty.Party.Contact.ElectronicMail)
 
@@ -33,6 +33,14 @@ func TestNewParty(t *testing.T) {
 
 		assert.Equal(t, "0088", *doc.AccountingCustomerParty.Party.PartyIdentification.ID.SchemeID)
 		assert.Equal(t, "1234567890128", doc.AccountingCustomerParty.Party.PartyIdentification.ID.Value)
+	})
+
+	t.Run("invoice-complete.json", func(t *testing.T) {
+		doc, err := newDocumentFrom("invoice-complete.json")
+		require.NoError(t, err)
+
+		assert.Equal(t, "inbox@example.com", doc.AccountingSupplierParty.Party.EndpointID.Value)
+		assert.Equal(t, "EM", doc.AccountingSupplierParty.Party.EndpointID.SchemeID)
 	})
 
 }

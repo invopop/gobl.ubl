@@ -2,6 +2,7 @@
 package gtou
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/invopop/gobl"
@@ -10,6 +11,7 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/validation"
 )
 
 // Converter is a struct that contains the necessary elements to convert between GOBL and UBL
@@ -36,6 +38,11 @@ func Convert(env *gobl.Envelope) (*document.Invoice, error) {
 
 func (c *Converter) newDocument(inv *bill.Invoice) error {
 
+	tc, err := getTypeCode(inv)
+	if err != nil {
+		return err
+	}
+
 	// Create the UBL document
 	c.doc = &document.Invoice{
 		CACNamespace:            document.CAC,
@@ -49,7 +56,7 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 		CustomizationID:         document.CustomizationID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
-		InvoiceTypeCode:         inv.Tax.Ext[untdid.ExtKeyDocumentType].String(),
+		InvoiceTypeCode:         tc,
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: document.SupplierParty{Party: c.newParty(inv.Supplier)},
 		AccountingCustomerParty: document.CustomerParty{Party: c.newParty(inv.Customer)},
@@ -62,7 +69,7 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 		}
 	}
 
-	err := c.newOrdering(inv.Ordering)
+	err = c.newOrdering(inv.Ordering)
 	if err != nil {
 		return err
 	}
@@ -93,6 +100,19 @@ func (c *Converter) newDocument(inv *bill.Invoice) error {
 	}
 
 	return nil
+}
+
+func getTypeCode(inv *bill.Invoice) (string, error) {
+	if inv.Tax == nil || inv.Tax.Ext == nil || inv.Tax.Ext[untdid.ExtKeyDocumentType].String() == "" {
+		return "", validation.Errors{
+			"tax": validation.Errors{
+				"ext": validation.Errors{
+					untdid.ExtKeyDocumentType.String(): errors.New("required"),
+				},
+			},
+		}
+	}
+	return inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String(), nil
 }
 
 func invoiceNumber(series cbc.Code, code cbc.Code) string {

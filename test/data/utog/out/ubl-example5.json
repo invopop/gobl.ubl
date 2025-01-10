@@ -63,6 +63,11 @@
           }
         }
       ],
+      "inboxes": [
+        {
+          "email": "info@buyercompany.dk"
+        }
+      ],
       "addresses": [
         {
           "street": "Anystreet, Building 1",
@@ -270,6 +275,11 @@
             "name": {
               "given": "Anthon Larsen"
             }
+          }
+        ],
+        "inboxes": [
+          {
+            "email": "info@selco.nl"
           }
         ],
         "addresses": [

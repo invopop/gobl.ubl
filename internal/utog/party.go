@@ -16,6 +16,14 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 		p.Name = *party.PartyLegalEntity.RegistrationName
 	}
 
+	if party.EndpointID != nil {
+		p.Inboxes = []*org.Inbox{
+			{
+				Email: party.EndpointID.Value,
+			},
+		}
+	}
+
 	if party.PartyName != nil {
 		if p.Name == "" {
 			p.Name = party.PartyName.Name
@@ -98,7 +106,7 @@ func (c *Converter) getParty(party *document.Party) *org.Party {
 		s := *party.PartyIdentification.ID.SchemeID
 		identity := &org.Identity{
 			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: tax.ExtValue(s),
+				iso.ExtKeySchemeID: cbc.Code(s),
 			},
 			Code: cbc.Code(party.PartyIdentification.ID.Value),
 		}
