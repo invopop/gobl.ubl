@@ -11,8 +11,8 @@ import (
 func (c *Converter) getOrdering(doc *document.Invoice) error {
 	ordering := &bill.Ordering{}
 
-	if doc.OrderReference != nil && doc.OrderReference.ID != "" {
-		ordering.Code = cbc.Code(doc.OrderReference.ID)
+	if doc.BuyerReference != "" {
+		ordering.Code = cbc.Code(doc.BuyerReference)
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
@@ -39,6 +39,14 @@ func (c *Converter) getOrdering(doc *document.Invoice) error {
 				return err
 			}
 			ordering.Receiving = append(ordering.Receiving, docRef)
+		}
+	}
+
+	if doc.OrderReference != nil && doc.OrderReference.ID != "" {
+		ordering.Purchases = []*org.DocumentRef{
+			{
+				Code: cbc.Code(doc.OrderReference.ID),
+			},
 		}
 	}
 

@@ -20,7 +20,6 @@ func TestGetOrdering(t *testing.T) {
 		ordering := inv.Ordering
 		assert.NotNil(t, ordering)
 
-		assert.Equal(t, cbc.Code("123"), ordering.Code)
 		assert.Equal(t, "2013-06-01", ordering.Period.Start.String())
 		assert.Equal(t, "2013-06-30", ordering.Period.End.String())
 		assert.Equal(t, cbc.Code("Contract321"), ordering.Contracts[0].Code)
@@ -36,10 +35,11 @@ func TestGetOrdering(t *testing.T) {
 		ordering := inv.Ordering
 		assert.NotNil(t, ordering)
 
-		assert.Equal(t, cbc.Code("PO4711"), ordering.Code)
+		assert.Equal(t, cbc.Code("123"), ordering.Code)
 		assert.Equal(t, "2013-03-10", ordering.Period.Start.String())
 		assert.Equal(t, "2013-04-10", ordering.Period.End.String())
 		assert.Equal(t, cbc.Code("2013-05"), ordering.Contracts[0].Code)
+		assert.Equal(t, cbc.Code("PO4711"), ordering.Purchases[0].Code)
 		assert.Equal(t, cbc.Code("3544"), ordering.Receiving[0].Code)
 		assert.Equal(t, cbc.Code("5433"), ordering.Despatch[0].Code)
 	})

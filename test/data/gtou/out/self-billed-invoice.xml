@@ -6,9 +6,7 @@
   <cbc:DueDate>2013-07-20</cbc:DueDate>
   <cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cac:OrderReference>
-    <cbc:ID>XR-2024-2</cbc:ID>
-  </cac:OrderReference>
+  <cbc:BuyerReference>XR-2024-2</cbc:BuyerReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PostalAddress>

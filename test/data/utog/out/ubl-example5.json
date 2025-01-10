@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "01933080-aeee-7771-a3b3-d3643091ccf8",
+    "uuid": "01945010-9b8a-7e77-9ae3-767b2525687d",
     "dig": {
       "alg": "sha256",
-      "val": "1d6dc2bf5d288ebf4935c4d3e4ef7299d750234c8c925411c482eccb11dc5863"
+      "val": "70800dce7e3501f096af0904250057198e03534e0f17e4946fca1a4933b5ad79"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "01933080-aeee-77c0-87ee-35fd6a8a03fe",
+    "uuid": "01945010-9b8a-7ea9-a4f8-893805efb822",
     "type": "standard",
     "code": "TOSL110",
     "issue_date": "2013-04-10",
@@ -242,7 +242,7 @@
       }
     ],
     "ordering": {
-      "code": "PO4711",
+      "code": "123",
       "period": {
         "start": "2013-03-10",
         "end": "2013-04-10"
@@ -306,6 +306,11 @@
       "contracts": [
         {
           "code": "2013-05"
+        }
+      ],
+      "purchases": [
+        {
+          "code": "PO4711"
         }
       ],
       "receiving": [
