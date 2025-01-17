@@ -21,9 +21,6 @@
         <cbc:EndDate>2013-06-30</cbc:EndDate>
         <cbc:DescriptionCode>3</cbc:DescriptionCode>
     </cac:InvoicePeriod>
-    <cac:OrderReference>
-        <cbc:ID>123</cbc:ID>
-    </cac:OrderReference>
     <cac:ContractDocumentReference>
         <cbc:ID>Contract321</cbc:ID>
     </cac:ContractDocumentReference>
@@ -45,6 +42,7 @@
     </cac:AdditionalDocumentReference>
     <cac:AccountingSupplierParty>
         <cac:Party>
+            <cbc:EndpointID schemeID="EM">seller@email.de</cbc:EndpointID>
             <cac:PartyIdentification>
                 <cbc:ID schemeID="0088">1238764941386</cbc:ID>
             </cac:PartyIdentification>

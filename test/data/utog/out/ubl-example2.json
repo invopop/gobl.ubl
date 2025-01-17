@@ -1,15 +1,15 @@
 {
   "$schema": "https://gobl.org/draft-0/envelope",
   "head": {
-    "uuid": "01933080-ae87-720b-a938-050d4dcc08ee",
+    "uuid": "01945010-9b1f-7f26-aff8-9d58d280843e",
     "dig": {
       "alg": "sha256",
-      "val": "322d80f327812218e0e09c6d05bd1f1fe0a90c8a2b54e0e81c230238354c7f1e"
+      "val": "618c16c2680a56426f988b02bea0a1dae1665c094625177cb9bdc9a6eab96b00"
     }
   },
   "doc": {
     "$schema": "https://gobl.org/draft-0/bill/invoice",
-    "uuid": "01933080-ae87-726a-893e-fafd54752ff9",
+    "uuid": "01945010-9b20-7021-a4cf-d82d55145c89",
     "type": "standard",
     "code": "TOSL108",
     "issue_date": "2013-06-30",
@@ -335,7 +335,6 @@
       }
     ],
     "ordering": {
-      "code": "123",
       "period": {
         "start": "2013-06-01",
         "end": "2013-06-30"
@@ -363,6 +362,11 @@
             "name": {
               "given": "Antonio Salesmacher"
             }
+          }
+        ],
+        "inboxes": [
+          {
+            "email": "seller@email.de"
           }
         ],
         "addresses": [

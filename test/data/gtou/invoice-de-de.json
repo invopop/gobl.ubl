@@ -113,6 +113,11 @@
           "code": "2013-05"
         }
       ],
+	  "purchases": [
+        {
+          "code": "PO4711"
+        }
+      ],
       "receiving": [
         {
           "code": "3544"

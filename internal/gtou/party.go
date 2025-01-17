@@ -10,6 +10,9 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
+// SchemeIDEmail is the EAS codelist value for email
+const SchemeIDEmail = "EM"
+
 func (c *Converter) newParty(party *org.Party) document.Party {
 	if party == nil {
 		return document.Party{}
@@ -52,6 +55,13 @@ func (c *Converter) newParty(party *org.Party) document.Party {
 
 	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil {
 		p.Contact = contact
+	}
+
+	if len(party.Inboxes) > 0 {
+		p.EndpointID = &document.EndpointID{
+			Value:    party.Inboxes[0].Email,
+			SchemeID: "EM",
+		}
 	}
 
 	if party.Alias != "" {
