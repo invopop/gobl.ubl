@@ -59,7 +59,7 @@ func TestGetLines(t *testing.T) {
 		line := lines[0]
 		assert.Equal(t, "Laptop computer", line.Item.Name)
 		assert.Equal(t, "2", line.Quantity.String())
-		assert.Equal(t, "JB007", line.Item.Ref)
+		assert.Equal(t, "JB007", line.Item.Ref.String())
 		assert.Equal(t, "Scratch on box", line.Notes[0].Text)
 		assert.Equal(t, "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900", line.Item.Description)
 		assert.Equal(t, org.Unit("item"), line.Item.Unit)
