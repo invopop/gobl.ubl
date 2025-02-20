@@ -61,7 +61,7 @@ func (c *Converter) getLines(doc *document.Invoice) error {
 		}
 
 		if docLine.Item.SellersItemIdentification != nil && docLine.Item.SellersItemIdentification.ID != nil {
-			line.Item.Ref = docLine.Item.SellersItemIdentification.ID.Value
+			line.Item.Ref = cbc.Code(docLine.Item.SellersItemIdentification.ID.Value)
 		}
 
 		// As there is no specific GOBL field for BT-133, we use a note to store it
