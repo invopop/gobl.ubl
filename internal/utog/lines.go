@@ -27,7 +27,7 @@ func (c *Converter) getLines(doc *document.Invoice) error {
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
 				Name:  docLine.Item.Name,
-				Price: price,
+				Price: &price,
 			},
 			Taxes: tax.Set{
 				{

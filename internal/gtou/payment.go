@@ -9,7 +9,7 @@ import (
 	"github.com/invopop/validation"
 )
 
-func (c *Converter) newPayment(pymt *bill.Payment) error {
+func (c *Converter) newPayment(pymt *bill.PaymentDetails) error {
 	if pymt == nil {
 		return nil
 	}
