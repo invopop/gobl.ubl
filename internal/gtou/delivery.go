@@ -5,7 +5,7 @@ import (
 	"github.com/invopop/gobl/bill"
 )
 
-func (c *Converter) newDelivery(del *bill.Delivery) error {
+func (c *Converter) newDelivery(del *bill.DeliveryDetails) error {
 	if del == nil {
 		return nil
 	}

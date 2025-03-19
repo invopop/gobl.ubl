@@ -10,7 +10,7 @@ import (
 )
 
 func (c *Converter) getPayment(doc *document.Invoice) error {
-	payment := &bill.Payment{}
+	payment := &bill.PaymentDetails{}
 
 	if doc.PayeeParty != nil {
 		payment.Payee = c.getParty(doc.PayeeParty)

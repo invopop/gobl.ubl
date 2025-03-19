@@ -117,7 +117,7 @@ func (c *Converter) newLines(inv *bill.Invoice) error {
 
 			invLine.Item = it
 
-			if l.Item.Price != (num.Amount{}) {
+			if l.Item.Price != nil {
 				invLine.Price = &document.Price{
 					PriceAmount: document.Amount{
 						CurrencyID: &ccy,
