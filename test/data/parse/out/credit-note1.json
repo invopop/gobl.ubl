@@ -1,0 +1,128 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195c8f2-c0a3-75b5-97d9-e99874ca9179",
+		"dig": {
+			"alg": "sha256",
+			"val": "5aa6a4bd369626b57d011f024f57285f427db32aae25e919f019b98242cc1d6d"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "GB",
+		"uuid": "0195c8f2-c0a3-7c91-a8db-e53ce2cfff13",
+		"type": "other",
+		"code": "CN758494",
+		"issue_date": "2005-06-25",
+		"currency": "GBP",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Consortial",
+			"tax_id": {
+				"country": "GB",
+				"code": "1752692355"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Mrs Bouquet"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Busy Street",
+					"locality": "Farthing",
+					"region": "Heremouthshire",
+					"code": "AA99 1BB",
+					"country": "GB"
+				}
+			],
+			"emails": [
+				{
+					"addr": "bouquet@fpconsortial.co.uk"
+				}
+			],
+			"telephones": [
+				{
+					"num": "0158 1233714"
+				}
+			]
+		},
+		"customer": {
+			"name": "IYT Corporation",
+			"identities": [
+				{
+					"country": "GB",
+					"code": "12356478"
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Mr Fred Churchill"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Avon Way",
+					"locality": "Bridgtow",
+					"region": "Avon",
+					"code": "ZZ99 1ZZ",
+					"country": "GB"
+				}
+			],
+			"emails": [
+				{
+					"addr": "fred@iytcorporation.gov.uk"
+				}
+			],
+			"telephones": [
+				{
+					"num": "0127 2653214"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "100",
+				"item": {
+					"ref": "17589683",
+					"name": "beeswax",
+					"identities": [
+						{
+							"code": "6578489"
+						}
+					],
+					"description": "Acme beeswax",
+					"price": "1.00",
+					"unit": "kg"
+				},
+				"sum": "100.00",
+				"total": "100.00",
+				"notes": [
+					{
+						"text": "as agreed on phone, the invoice should have been cancelled earlier, apologies"
+					}
+				]
+			}
+		],
+		"payment": {},
+		"totals": {
+			"sum": "100.00",
+			"total": "100.00",
+			"tax": "0.00",
+			"total_with_tax": "100.00",
+			"payable": "100.00"
+		},
+		"notes": [
+			{
+				"text": "sample"
+			}
+		]
+	}
+}

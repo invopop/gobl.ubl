@@ -2,52 +2,54 @@ package ubl
 
 import (
 	"encoding/xml"
-	"errors"
 	"fmt"
 
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/validation"
 	// "github.com/nbio/xml"
 )
 
-// UBL schema constants
+// Main UBL Invoice Namespace
 const (
-	NamespaceCBC    = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-	NamespaceCAC    = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
-	NamespaceQDT    = "urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2"
-	NamespaceUDT    = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
-	NamespaceCCTS   = "urn:un:unece:uncefact:documentation:2"
-	NamespaceUBL    = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-	NamespaceXSI    = "http://www.w3.org/2001/XMLSchema-instance"
-	SchemaLocation  = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
-	CustomizationID = "urn:cen.eu:en16931:2017"
+	NamespaceUBLInvoice    = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+	NamespaceUBLCreditNote = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
 )
 
-// Invoice represents the root element of a UBL invoice
+// Schema locationa and customization constants
+const (
+	SchemaLocationInvoice     = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
+	SchemaLocationCrediteNote = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd"
+)
+
+// Invoice represents the root element of a UBL Invoice **or** Credit Note; the structures
+// between the two types are so similar, that it doesn't make much sense to seperate.
 type Invoice struct {
-	XMLName                        xml.Name           `xml:"Invoice"`
-	CACNamespace                   string             `xml:"xmlns:cac,attr"`
-	CBCNamespace                   string             `xml:"xmlns:cbc,attr"`
-	QDTNamespace                   string             `xml:"xmlns:qdt,attr"`
-	UDTNamespace                   string             `xml:"xmlns:udt,attr"`
-	CCTSNamespace                  string             `xml:"xmlns:ccts,attr"`
-	UBLNamespace                   string             `xml:"xmlns,attr"`
-	XSINamespace                   string             `xml:"xmlns:xsi,attr"`
-	SchemaLocation                 string             `xml:"xsi:schemaLocation,attr"`
-	UBLExtensions                  *Extensions        `xml:"ext:UBLExtensions,omitempty"`
-	UBLVersionID                   string             `xml:"cbc:UBLVersionID,omitempty"`
-	CustomizationID                string             `xml:"cbc:CustomizationID,omitempty"`
-	ProfileID                      string             `xml:"cbc:ProfileID,omitempty"`
-	ProfileExecutionID             string             `xml:"cbc:ProfileExecutionID,omitempty"`
-	ID                             string             `xml:"cbc:ID"`
-	CopyIndicator                  bool               `xml:"cbc:CopyIndicator,omitempty"`
-	UUID                           string             `xml:"cbc:UUID,omitempty"`
-	IssueDate                      string             `xml:"cbc:IssueDate"`
-	IssueTime                      string             `xml:"cbc:IssueTime,omitempty"`
-	DueDate                        string             `xml:"cbc:DueDate,omitempty"`
-	InvoiceTypeCode                string             `xml:"cbc:InvoiceTypeCode,omitempty"`
+	// Attributes
+	XMLName        xml.Name
+	CACNamespace   string `xml:"xmlns:cac,attr"`
+	CBCNamespace   string `xml:"xmlns:cbc,attr"`
+	QDTNamespace   string `xml:"xmlns:qdt,attr"`
+	UDTNamespace   string `xml:"xmlns:udt,attr"`
+	CCTSNamespace  string `xml:"xmlns:ccts,attr"`
+	UBLNamespace   string `xml:"xmlns,attr"`
+	XSINamespace   string `xml:"xmlns:xsi,attr"`
+	SchemaLocation string `xml:"xsi:schemaLocation,attr"`
+
+	UBLExtensions      *Extensions `xml:"ext:UBLExtensions,omitempty"`
+	UBLVersionID       string      `xml:"cbc:UBLVersionID,omitempty"`
+	CustomizationID    string      `xml:"cbc:CustomizationID,omitempty"`
+	ProfileID          string      `xml:"cbc:ProfileID,omitempty"`
+	ProfileExecutionID string      `xml:"cbc:ProfileExecutionID,omitempty"`
+	ID                 string      `xml:"cbc:ID"`
+	CopyIndicator      bool        `xml:"cbc:CopyIndicator,omitempty"`
+	UUID               string      `xml:"cbc:UUID,omitempty"`
+	IssueDate          string      `xml:"cbc:IssueDate"`
+	IssueTime          string      `xml:"cbc:IssueTime,omitempty"`
+	DueDate            string      `xml:"cbc:DueDate,omitempty"`
+
+	InvoiceTypeCode    string `xml:"cbc:InvoiceTypeCode,omitempty"`
+	CreditNoteTypeCode string `xml:"cbc:CreditNoteTypeCode,omitempty"`
+
 	Note                           []string           `xml:"cbc:Note,omitempty"`
 	TaxPointDate                   string             `xml:"cbc:TaxPointDate,omitempty"`
 	DocumentCurrencyCode           string             `xml:"cbc:DocumentCurrencyCode,omitempty"`
@@ -89,66 +91,8 @@ type Invoice struct {
 	TaxTotal                       []TaxTotal         `xml:"cac:TaxTotal,omitempty"`
 	WithholdingTaxTotal            []TaxTotal         `xml:"cac:WithholdingTaxTotal,omitempty"`
 	LegalMonetaryTotal             MonetaryTotal      `xml:"cac:LegalMonetaryTotal"`
-	InvoiceLine                    []InvoiceLine      `xml:"cac:InvoiceLine"`
-}
-
-// Extensions represents UBL extensions
-type Extensions struct {
-	Extension []Extension `xml:"ext:Extension"`
-}
-
-// Extension represents a single UBL extension
-type Extension struct {
-	ID               string  `xml:"cbc:ID"`
-	ExtensionURI     *string `xml:"cbc:ExtensionURI"`
-	ExtensionContent *string `xml:"ext:ExtensionContent"`
-}
-
-// IDType represents an ID with optional scheme attributes
-type IDType struct {
-	ListID        *string `xml:"listID,attr"`
-	ListVersionID *string `xml:"listVersionID,attr"`
-	SchemeID      *string `xml:"schemeID,attr"`
-	SchemeName    *string `xml:"schemeName,attr"`
-	Name          *string `xml:"name,attr"`
-	Value         string  `xml:",chardata"`
-}
-
-// ExchangeRate represents an exchange rate
-type ExchangeRate struct {
-	SourceCurrencyCode *string `xml:"cbc:SourceCurrencyCode"`
-	TargetCurrencyCode *string `xml:"cbc:TargetCurrencyCode"`
-	CalculationRate    *string `xml:"cbc:CalculationRate"`
-	Date               *string `xml:"cbc:Date"`
-}
-
-// Amount represents a monetary amount
-type Amount struct {
-	CurrencyID *string `xml:"currencyID,attr"`
-	Value      string  `xml:",chardata"`
-}
-
-// Signature represents a digital signature
-type Signature struct {
-	ID                         string      `xml:"cbc:ID"`
-	Note                       []string    `xml:"cbc:Note,omitempty"`
-	ValidationDate             *string     `xml:"cbc:ValidationDate,omitempty"`
-	ValidationTime             *string     `xml:"cbc:ValidationTime,omitempty"`
-	ValidatorID                *string     `xml:"cbc:ValidatorID,omitempty"`
-	CanonicalizationMethod     *string     `xml:"cbc:CanonicalizationMethod,omitempty"`
-	SignatureMethod            *string     `xml:"cbc:SignatureMethod,omitempty"`
-	SignatoryParty             *Party      `xml:"cac:SignatoryParty,omitempty"`
-	DigitalSignatureAttachment *Attachment `xml:"cac:DigitalSignatureAttachment,omitempty"`
-	OriginalDocumentReference  *Reference  `xml:"cac:OriginalDocumentReference,omitempty"`
-}
-
-// Bytes returns the XML representation of the document in bytes
-func (d *Invoice) Bytes() ([]byte, error) {
-	bytes, err := xml.MarshalIndent(d, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return append([]byte(xml.Header), bytes...), nil
+	InvoiceLines                   []InvoiceLine      `xml:"cac:InvoiceLine,omitempty"`
+	CreditNoteLines                []InvoiceLine      `xml:"cac:CreditNoteLine,omitempty"`
 }
 
 func newInvoice(inv *bill.Invoice) (*Invoice, error) {
@@ -159,21 +103,30 @@ func newInvoice(inv *bill.Invoice) (*Invoice, error) {
 
 	// Create the UBL document
 	out := &Invoice{
+		XMLName:                 xml.Name{Local: "Invoice"},
 		CACNamespace:            NamespaceCAC,
 		CBCNamespace:            NamespaceCBC,
 		QDTNamespace:            NamespaceQDT,
 		UDTNamespace:            NamespaceUDT,
-		UBLNamespace:            NamespaceUBL,
+		UBLNamespace:            NamespaceUBLInvoice,
 		CCTSNamespace:           NamespaceCCTS,
 		XSINamespace:            NamespaceXSI,
-		SchemaLocation:          SchemaLocation,
-		CustomizationID:         CustomizationID,
+		SchemaLocation:          SchemaLocationInvoice,
+		CustomizationID:         CustomizationEN16931,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		InvoiceTypeCode:         tc,
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
+	}
+
+	if inv.Type.In(bill.InvoiceTypeCreditNote) {
+		out.XMLName = xml.Name{Local: "CreditNote"}
+		out.UBLNamespace = NamespaceUBLCreditNote
+		out.SchemaLocation = SchemaLocationCrediteNote
+		out.InvoiceTypeCode = ""
+		out.CreditNoteTypeCode = tc
 	}
 
 	if len(inv.Notes) > 0 {
@@ -198,17 +151,13 @@ func newInvoice(inv *bill.Invoice) (*Invoice, error) {
 	return out, nil
 }
 
-func getTypeCode(inv *bill.Invoice) (string, error) {
-	if inv.Tax == nil || inv.Tax.Ext == nil || inv.Tax.Ext[untdid.ExtKeyDocumentType].String() == "" {
-		return "", validation.Errors{
-			"tax": validation.Errors{
-				"ext": validation.Errors{
-					untdid.ExtKeyDocumentType.String(): errors.New("required"),
-				},
-			},
-		}
+// Bytes returns the raw XML of the UBL Invoice or Credit Note.
+func (out *Invoice) Bytes() ([]byte, error) {
+	bytes, err := xml.MarshalIndent(out, "", "  ")
+	if err != nil {
+		return nil, err
 	}
-	return inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String(), nil
+	return append([]byte(xml.Header), bytes...), nil
 }
 
 func invoiceNumber(series cbc.Code, code cbc.Code) string {

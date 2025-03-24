@@ -21,12 +21,11 @@ func ParseInvoice(ublDoc []byte) (*gobl.Envelope, error) {
 	return env, nil
 }
 
-// ConvertInvoice takes a GOBL envelope and converts to a UBL Invoice.
+// ConvertInvoice takes a GOBL envelope and converts to a UBL Invoice or Credit Note.
 func ConvertInvoice(env *gobl.Envelope) (*Invoice, error) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
 		return nil, fmt.Errorf("expected bill.Inboice, got %T", env.Document)
 	}
-
 	return newInvoice(inv)
 }

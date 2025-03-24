@@ -9,11 +9,12 @@ import (
 	"github.com/invopop/gobl/num"
 )
 
-// InvoiceLine represents a line item in an invoice
+// InvoiceLine represents a line item in an invoice and credit note
 type InvoiceLine struct {
 	ID                  string              `xml:"cbc:ID"`
 	Note                []string            `xml:"cbc:Note"`
-	InvoicedQuantity    *Quantity           `xml:"cbc:InvoicedQuantity"`
+	InvoicedQuantity    *Quantity           `xml:"cbc:InvoicedQuantity,omitempty"` // or CreditNoteQuantity
+	CreditedQuantity    *Quantity           `xml:"cbc:CreditedQuantity,omitempty"`
 	LineExtensionAmount Amount              `xml:"cbc:LineExtensionAmount"`
 	AccountingCost      *string             `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
@@ -21,60 +22,6 @@ type InvoiceLine struct {
 	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
 	Item                *Item               `xml:"cac:Item"`
 	Price               *Price              `xml:"cac:Price"`
-}
-
-// Quantity represents a quantity with a unit code
-type Quantity struct {
-	UnitCode string `xml:"unitCode,attr"`
-	Value    string `xml:",chardata"`
-}
-
-// OrderLineReference represents a reference to an order line
-type OrderLineReference struct {
-	LineID string `xml:"cbc:LineID"`
-}
-
-// Item represents an item in an invoice line
-type Item struct {
-	Description                *string                    `xml:"cbc:Description"`
-	Name                       string                     `xml:"cbc:Name"`
-	BuyersItemIdentification   *ItemIdentification        `xml:"cac:BuyersItemIdentification"`
-	SellersItemIdentification  *ItemIdentification        `xml:"cac:SellersItemIdentification"`
-	StandardItemIdentification *ItemIdentification        `xml:"cac:StandardItemIdentification"`
-	OriginCountry              *Country                   `xml:"cac:OriginCountry"`
-	CommodityClassification    *[]CommodityClassification `xml:"cac:CommodityClassification"`
-	ClassifiedTaxCategory      *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
-	AdditionalItemProperty     *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
-}
-
-// ItemIdentification represents an item identification
-type ItemIdentification struct {
-	ID *IDType `xml:"cbc:ID"`
-}
-
-// CommodityClassification represents a commodity classification
-type CommodityClassification struct {
-	ItemClassificationCode *IDType `xml:"cbc:ItemClassificationCode"`
-}
-
-// ClassifiedTaxCategory represents a classified tax category
-type ClassifiedTaxCategory struct {
-	ID        *string    `xml:"cbc:ID,omitempty"`
-	Percent   *string    `xml:"cbc:Percent,omitempty"`
-	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
-}
-
-// AdditionalItemProperty represents an additional property of an item
-type AdditionalItemProperty struct {
-	Name  string `xml:"cbc:Name"`
-	Value string `xml:"cbc:Value"`
-}
-
-// Price represents the price of an item
-type Price struct {
-	PriceAmount     Amount           `xml:"cbc:PriceAmount"`
-	BaseAmount      *Amount          `xml:"cbc:BaseAmount,omitempty"`
-	AllowanceCharge *AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
 }
 
 func (out *Invoice) addLines(inv *bill.Invoice) {
@@ -99,11 +46,16 @@ func (out *Invoice) addLines(inv *bill.Invoice) {
 		}
 
 		if l.Quantity != (num.Amount{}) {
-			invLine.InvoicedQuantity = &Quantity{
+			iq := &Quantity{
 				Value: l.Quantity.String(),
 			}
 			if l.Item != nil && l.Item.Unit != "" {
-				invLine.InvoicedQuantity.UnitCode = string(l.Item.Unit.UNECE())
+				iq.UnitCode = string(l.Item.Unit.UNECE())
+			}
+			if inv.Type.In(bill.InvoiceTypeCreditNote) {
+				invLine.CreditedQuantity = iq
+			} else {
+				invLine.InvoicedQuantity = iq
 			}
 		}
 
@@ -196,7 +148,11 @@ func (out *Invoice) addLines(inv *bill.Invoice) {
 
 		lines = append(lines, invLine)
 	}
-	out.InvoiceLine = lines
+	if inv.Type.In(bill.InvoiceTypeCreditNote) {
+		out.CreditNoteLines = lines
+	} else {
+		out.InvoiceLines = lines
+	}
 }
 
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string) []*AllowanceCharge {

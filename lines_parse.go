@@ -13,7 +13,10 @@ import (
 )
 
 func goblAddLines(in *Invoice, out *bill.Invoice) error {
-	items := in.InvoiceLine
+	items := in.InvoiceLines
+	if len(in.CreditNoteLines) > 0 {
+		items = in.CreditNoteLines
+	}
 
 	lines := make([]*bill.Line, 0, len(items))
 
@@ -28,24 +31,23 @@ func goblAddLines(in *Invoice, out *bill.Invoice) error {
 				Name:  docLine.Item.Name,
 				Price: &price,
 			},
-			Taxes: tax.Set{
-				{
-					Category: cbc.Code(docLine.Item.ClassifiedTaxCategory.TaxScheme.ID),
-				},
-			},
 		}
 
 		ids := make([]*org.Identity, 0)
 		notes := make([]*org.Note, 0)
 
-		if docLine.InvoicedQuantity != nil {
-			line.Quantity, err = num.AmountFromString(docLine.InvoicedQuantity.Value)
+		iq := docLine.InvoicedQuantity
+		if docLine.CreditedQuantity != nil {
+			iq = docLine.CreditedQuantity
+		}
+		if iq != nil {
+			line.Quantity, err = num.AmountFromString(iq.Value)
 			if err != nil {
 				return err
 			}
 
-			if docLine.InvoicedQuantity.UnitCode != "" {
-				line.Item.Unit = goblUnitFromUNECE(cbc.Code(docLine.InvoicedQuantity.UnitCode))
+			if iq.UnitCode != "" {
+				line.Item.Unit = goblUnitFromUNECE(cbc.Code(iq.UnitCode))
 			}
 		}
 
@@ -81,17 +83,24 @@ func goblAddLines(in *Invoice, out *bill.Invoice) error {
 			line.Item.Origin = l10n.ISOCountryCode(docLine.Item.OriginCountry.IdentificationCode)
 		}
 
-		if docLine.Item.ClassifiedTaxCategory != nil && docLine.Item.ClassifiedTaxCategory.Percent != nil {
-			percentStr := *docLine.Item.ClassifiedTaxCategory.Percent
-			if !strings.HasSuffix(percentStr, "%") {
-				percentStr += "%"
+		if ctc := docLine.Item.ClassifiedTaxCategory; ctc != nil && ctc.TaxScheme != nil {
+			line.Taxes = tax.Set{
+				{
+					Category: cbc.Code(ctc.TaxScheme.ID),
+				},
 			}
-			percent, _ := num.PercentageFromString(percentStr)
-			if line.Taxes == nil {
-				line.Taxes = make([]*tax.Combo, 1)
-				line.Taxes[0] = &tax.Combo{}
+			if ctc.Percent != nil {
+				percentStr := *ctc.Percent
+				if !strings.HasSuffix(percentStr, "%") {
+					percentStr += "%"
+				}
+				percent, _ := num.PercentageFromString(percentStr)
+				if line.Taxes == nil {
+					line.Taxes = make([]*tax.Combo, 1)
+					line.Taxes[0] = &tax.Combo{}
+				}
+				line.Taxes[0].Percent = &percent
 			}
-			line.Taxes[0].Percent = &percent
 		}
 
 		if docLine.AllowanceCharge != nil {

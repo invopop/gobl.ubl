@@ -22,14 +22,17 @@ import (
 const (
 	xmlPattern  = "*.xml"
 	jsonPattern = "*.json"
+
+	schemaInvoice    = "UBL-Invoice-2.1.xsd"
+	schemaCreditNote = "UBL-CreditNote-2.1.xsd"
 )
 
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
 func TestConvertToInvoice(t *testing.T) {
-	schema, err := loadSchema("schema.xsd")
-	require.NoError(t, err)
+	invoiceSchema := loadSchema(t, schemaInvoice)
+	creditNoteSchema := loadSchema(t, schemaCreditNote)
 
 	examples, err := getDataGlob(jsonPattern)
 	require.NoError(t, err)
@@ -46,9 +49,18 @@ func TestConvertToInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			if *updateOut {
-				err = ValidateXML(schema, data)
-				require.NoError(t, err)
 				err = os.WriteFile(outputFilepath(outName), data, 0644)
+				require.NoError(t, err)
+				var schema *xsd.Schema
+				switch doc.XMLName.Local {
+				case "Invoice":
+					schema = invoiceSchema
+				case "CreditNote":
+					schema = creditNoteSchema
+				default:
+					require.Fail(t, "unknown document schema")
+				}
+				err = ValidateXML(schema, data)
 				require.NoError(t, err)
 			}
 
@@ -207,8 +219,11 @@ func outputFilepath(name string) string {
 	return filepath.Join(getOutPath(pattern), name)
 }
 
-func loadSchema(name string) (*xsd.Schema, error) {
-	return xsd.ParseFromFile(filepath.Join(getSchemaPath(name), name))
+func loadSchema(t *testing.T, name string) *xsd.Schema {
+	t.Helper()
+	schema, err := xsd.ParseFromFile(filepath.Join(getSchemaPath(name), name))
+	require.NoError(t, err)
+	return schema
 }
 
 // ValidateXML validates a XML document against a XSD Schema
@@ -231,7 +246,7 @@ func getDataGlob(pattern string) ([]string, error) {
 }
 
 func getSchemaPath(pattern string) string {
-	return filepath.Join(getConversionTypePath(pattern), "schema")
+	return filepath.Join(getDataPath(), "schema", "maindoc")
 }
 
 func getOutPath(pattern string) string {
