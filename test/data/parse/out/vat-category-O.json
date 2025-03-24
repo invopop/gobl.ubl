@@ -1,29 +1,29 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-2241-7651-a0a5-b8e946073411",
+		"uuid": "0195c927-224f-77ab-84f4-d01a927ab578",
 		"dig": {
 			"alg": "sha256",
-			"val": "2d81c8ec058ba0afc107ca979d114bd974697fe0444bc1567bce9797a7f15b54"
+			"val": "8e11e63c08883344e39f13b226658325a733e49df626ad4fa80194aad53517f8"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c927-2242-706a-943a-e314aea0caa0",
+		"uuid": "0195c927-224f-7e98-abe6-65d9c7cefa9b",
 		"type": "standard",
-		"code": "INVOICE_test_7",
-		"issue_date": "2013-03-11",
+		"code": "Vat-O",
+		"issue_date": "2018-08-30",
 		"currency": "SEK",
 		"tax": {
 			"rounding": "currency"
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",
-			"alias": "Civic Service Centre",
-			"people": [
+			"inboxes": [
 				{
-					"name": {
-						"given": "Anthon Larsen"
+					"code": "7300010000001",
+					"ext": {
+						"iso-scheme-id": "0088"
 					}
 				}
 			],
@@ -34,24 +34,15 @@
 					"code": "54321",
 					"country": "SE"
 				}
-			],
-			"emails": [
-				{
-					"addr": "Anthon@SellerCompany.se"
-				}
-			],
-			"telephones": [
-				{
-					"num": "4698989898"
-				}
 			]
 		},
 		"customer": {
-			"name": "THe Buyercompany",
-			"people": [
+			"name": "The Buyercompany",
+			"inboxes": [
 				{
-					"name": {
-						"given": "A3150bdn"
+					"code": "987654325",
+					"ext": {
+						"iso-scheme-id": "0192"
 					}
 				}
 			],
@@ -62,17 +53,7 @@
 					"locality": "Anytown",
 					"region": "RegionB",
 					"code": "101",
-					"country": "SE"
-				}
-			],
-			"emails": [
-				{
-					"addr": "john@buyercompany.no"
-				}
-			],
-			"telephones": [
-				{
-					"num": "5121230"
+					"country": "NO"
 				}
 			]
 		},
@@ -83,11 +64,11 @@
 				"item": {
 					"ref": "RT3000",
 					"name": "Road tax",
-					"description": "Weight-based tax, vehicles 3000 KGM",
-					"price": "2500.00",
+					"description": "Weight-based tax, vehicles \u003e3000 KGM",
+					"price": "3200.00",
 					"unit": "item"
 				},
-				"sum": "2500.00",
+				"sum": "3200.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -96,40 +77,11 @@
 						}
 					}
 				],
-				"total": "2500.00"
-			},
-			{
-				"i": 2,
-				"quantity": "1",
-				"item": {
-					"ref": "REG",
-					"name": "Road Register fee",
-					"description": "Annual registration fee",
-					"price": "700.00",
-					"unit": "item"
-				},
-				"sum": "700.00",
-				"taxes": [
-					{
-						"cat": "VAT",
-						"ext": {
-							"untdid-tax-category": "O"
-						}
-					}
-				],
-				"total": "700.00"
+				"total": "3200.00"
 			}
 		],
 		"ordering": {
-			"period": {
-				"start": "2013-01-01",
-				"end": "2013-12-31"
-			},
-			"purchases": [
-				{
-					"code": "Order_9988_x"
-				}
-			]
+			"code": "test reference"
 		},
 		"payment": {
 			"terms": {
@@ -172,11 +124,6 @@
 			"tax": "0.00",
 			"total_with_tax": "3200.00",
 			"payable": "3200.00"
-		},
-		"notes": [
-			{
-				"text": "Testscenario 7"
-			}
-		]
+		}
 	}
 }

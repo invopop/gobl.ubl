@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c904-7865-738d-a862-f39b9de0f313",
+		"uuid": "0195c927-2244-706a-9d11-28c062191f41",
 		"dig": {
 			"alg": "sha256",
-			"val": "2fdecf8224a68ae8938b7c888d3d3b1be1e2a8028b29a26931151801490418dc"
+			"val": "58daf131c277fc5da2f97db2ca229e994f81750bc5c5fd76536e99f88019e438"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "NL",
-		"uuid": "0195c904-7867-7058-a988-55dcc1a538c8",
+		"uuid": "0195c927-2246-7b3e-b49e-f41ec2545cc5",
 		"type": "standard",
 		"code": "1100512149",
 		"issue_date": "2014-11-10",
@@ -75,7 +75,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "140.80"
@@ -98,7 +101,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "16.16"
@@ -121,7 +127,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "2011.68"
@@ -144,7 +153,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "88.74"
@@ -167,7 +179,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "441.00"
@@ -190,7 +205,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "678.00"
@@ -207,7 +225,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "83.34"
@@ -224,7 +245,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "190.31"
@@ -241,7 +265,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "64.21"
@@ -258,7 +285,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "64.46"
@@ -315,6 +345,9 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "3778.70",
 								"percent": "21%",
 								"amount": "793.53"

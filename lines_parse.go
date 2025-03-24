@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/num"
@@ -88,6 +89,11 @@ func goblAddLines(in *Invoice, out *bill.Invoice) error {
 				{
 					Category: cbc.Code(ctc.TaxScheme.ID),
 				},
+			}
+			if ctc.ID != nil {
+				line.Taxes[0].Ext = tax.Extensions{
+					untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
+				}
 			}
 			if ctc.Percent != nil {
 				percentStr := *ctc.Percent

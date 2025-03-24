@@ -1,0 +1,142 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195c927-224d-7483-b205-5e30caf31995",
+		"dig": {
+			"alg": "sha256",
+			"val": "f97495073ba53c56ade6342940f76f4bacb6eb53ef0f480bcd5c932f3271d35b"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "GB",
+		"uuid": "0195c927-224d-7b5e-bb7f-e9f54f560b37",
+		"type": "standard",
+		"code": "Vat-Z",
+		"issue_date": "2018-08-30",
+		"currency": "GBP",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "The Sellercompany Incorporated",
+			"tax_id": {
+				"country": "GB",
+				"code": "928741974"
+			},
+			"inboxes": [
+				{
+					"code": "7300010000001",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Main street 2, Building 4",
+					"locality": "Big city",
+					"code": "54321",
+					"country": "GB"
+				}
+			]
+		},
+		"customer": {
+			"name": "The Buyercompany",
+			"inboxes": [
+				{
+					"code": "DK12345678",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Anystreet 8",
+					"street_extra": "Back door",
+					"locality": "Anytown",
+					"region": "RegionB",
+					"code": "101",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Test item, category Z",
+					"identities": [
+						{
+							"code": "192387129837129873",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						}
+					],
+					"price": "120.00",
+					"unit": "item"
+				},
+				"sum": "1200.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "0%",
+						"ext": {
+							"untdid-tax-category": "E"
+						}
+					}
+				],
+				"total": "1200.00"
+			}
+		],
+		"ordering": {
+			"code": "test reference"
+		},
+		"payment": {
+			"terms": {
+				"notes": "Payment within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "SE1212341234123412",
+						"bic": "SEXDABCD"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "1200.00",
+			"total": "1200.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "E"
+								},
+								"base": "1200.00",
+								"percent": "0%",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "1200.00",
+			"payable": "1200.00"
+		}
+	}
+}

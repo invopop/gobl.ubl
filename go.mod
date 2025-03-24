@@ -15,7 +15,7 @@ require (
 require (
 	github.com/invopop/validation v0.8.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
-	github.com/nbio/xml v0.0.0-20241028124227-eac89c735a80
+	github.com/nbio/xml v0.0.0-20250127210239-7f9281fed8c6
 )
 
 require (

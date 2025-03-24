@@ -33,7 +33,6 @@ func parseInvoice(data []byte) (*bill.Invoice, error) {
 func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	out := &bill.Invoice{
 		Code:     cbc.Code(in.ID),
-		Type:     typeCodeParse(in.InvoiceTypeCode),
 		Currency: currency.Code(in.DocumentCurrencyCode),
 		Tax: &bill.Tax{
 			// Always default to currency rounding for incoming invoices
@@ -42,6 +41,12 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		},
 		Supplier: goblParty(in.AccountingSupplierParty.Party),
 		Customer: goblParty(in.AccountingCustomerParty.Party),
+	}
+
+	if in.InvoiceTypeCode != "" {
+		out.Type = typeCodeParse(in.InvoiceTypeCode)
+	} else {
+		out.Type = typeCodeParse(in.CreditNoteTypeCode)
 	}
 
 	issueDate, err := parseDate(in.IssueDate)

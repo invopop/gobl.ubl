@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c904-7846-7aec-9fbc-85f90df8c622",
+		"uuid": "0195c927-221d-7426-964a-e12862f42d50",
 		"dig": {
 			"alg": "sha256",
-			"val": "5e879bad2ad16160bceffa59c331cbdc43d762470f1e23e2396bf52cb342b852"
+			"val": "0d80ef9312865d67ce39b781a436b4fd47b46a2c08860a1d098703cabb4cc72d"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
-		"uuid": "0195c904-7847-7306-9a99-2a8f31c6f9bc",
+		"uuid": "0195c927-221d-7d85-80ca-60d075f09c24",
 		"type": "other",
 		"code": "CN758494",
 		"issue_date": "2005-06-25",

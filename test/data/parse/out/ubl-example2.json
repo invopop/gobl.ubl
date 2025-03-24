@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c904-784f-7911-aabd-465015fe90b2",
+		"uuid": "0195c927-222b-7c47-9e21-56736225dc5b",
 		"dig": {
 			"alg": "sha256",
-			"val": "369fe23dd7b5e7f4170aa6defc8694163a14f1cfe7ff5b110852309e84294653"
+			"val": "5f4bb2e846ed397c0d205debfd0b065da74f46fde2de01118929b568a5f81436"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c904-7851-70cb-a8aa-e5db25fc04e7",
+		"uuid": "0195c927-222d-755a-aaf1-2e708c27dfde",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-06-30",
@@ -127,7 +127,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "2546.00",
@@ -170,7 +173,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "15%"
+						"percent": "15%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "-3.96",
@@ -213,7 +219,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "15%"
+						"percent": "15%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "4.96",
@@ -253,7 +262,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "0%"
+						"percent": "0%",
+						"ext": {
+							"untdid-tax-category": "E"
+						}
 					}
 				],
 				"total": "-25.00",
@@ -296,7 +308,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "187.50",
@@ -474,18 +489,32 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "2733.50",
 								"percent": "25%",
 								"amount": "683.38"
 							},
 							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "1.00",
 								"percent": "15%",
 								"amount": "0.15"
 							},
 							{
+								"ext": {
+									"untdid-tax-category": "E"
+								},
 								"base": "-25.00",
 								"percent": "0%",
+								"amount": "0.00"
+							},
+							{
+								"base": "0.00",
+								"percent": "25%",
 								"amount": "0.00"
 							}
 						],

@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c904-7858-7147-94d1-41670c850c3e",
+		"uuid": "0195c927-2236-720a-98b3-77c5b11cf934",
 		"dig": {
 			"alg": "sha256",
-			"val": "8b980dd598747c7890cd4121fc8223996ead12f1f08d4487dd18af3c77db14d1"
+			"val": "33d3e22eac9981102e5d135aeb6ca9a8a9c4cb26a26be91e2d58c35cd858a76a"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c904-7858-7a03-b4f9-02fa142fe195",
+		"uuid": "0195c927-2236-7e12-8773-9c18777350fa",
 		"type": "standard",
 		"code": "TOSL110",
 		"issue_date": "2013-04-10",
@@ -102,7 +102,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "1000.00"
@@ -121,7 +124,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "500.00"
@@ -139,7 +145,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "12%"
+						"percent": "12%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "2500.00"
@@ -181,11 +190,17 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "1500.00",
 								"percent": "25%",
 								"amount": "375.00"
 							},
 							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "2500.00",
 								"percent": "12%",
 								"amount": "300.00"

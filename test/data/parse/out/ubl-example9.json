@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c904-786a-7589-84ac-5819adb67b68",
+		"uuid": "0195c927-224a-7db2-90f9-5c2ee5155976",
 		"dig": {
 			"alg": "sha256",
-			"val": "e144b15c54f7facd356892f3a89cc53763f128f7b524afd005d477ff75801fee"
+			"val": "f3a3cb61c270336fd8c3f9bc634f84242c53ff79421ab39ac24f9ef28ed8aee3"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "NL",
-		"uuid": "0195c904-786a-7d83-aa8f-deb763b21e20",
+		"uuid": "0195c927-224b-76d3-85b8-ad6c9fc7993a",
 		"type": "standard",
 		"code": "20150483",
 		"issue_date": "2015-04-01",
@@ -76,7 +76,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "21%"
+						"percent": "21%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "147.00"
@@ -117,6 +120,9 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "147.00",
 								"percent": "21%",
 								"amount": "30.87"
