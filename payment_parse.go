@@ -91,7 +91,10 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 			payment.Advances = append(payment.Advances, advance)
 		}
 	}
-	out.Payment = payment
+
+	if payment.Payee != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
+		out.Payment = payment
+	}
 	return nil
 }
 
