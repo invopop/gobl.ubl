@@ -2,18 +2,31 @@
 package ubl
 
 import (
+	"fmt"
+
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ubl/document"
-	"github.com/invopop/gobl.ubl/internal/gtou"
-	"github.com/invopop/gobl.ubl/internal/utog"
+	"github.com/invopop/gobl/bill"
 )
 
-// ToGOBL converts a UBL document to a GOBL envelope
-func ToGOBL(ublDoc []byte) (*gobl.Envelope, error) {
-	return utog.Convert(ublDoc)
+// ParseInvoice parses a raw UBL Invoice and converts to a GOBL envelope
+func ParseInvoice(ublDoc []byte) (*gobl.Envelope, error) {
+	env := gobl.NewEnvelope()
+	inv, err := parseInvoice(ublDoc)
+	if err != nil {
+		return nil, err
+	}
+	if err := env.Insert(inv); err != nil {
+		return nil, err
+	}
+	return env, nil
 }
 
-// ToUBL converts a GOBL envelope to a UBL document
-func ToUBL(env *gobl.Envelope) (*document.Invoice, error) {
-	return gtou.Convert(env)
+// ConvertInvoice takes a GOBL envelope and converts to a UBL Invoice.
+func ConvertInvoice(env *gobl.Envelope) (*Invoice, error) {
+	inv, ok := env.Extract().(*bill.Invoice)
+	if !ok {
+		return nil, fmt.Errorf("expected bill.Inboice, got %T", env.Document)
+	}
+
+	return newInvoice(inv)
 }

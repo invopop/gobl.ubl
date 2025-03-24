@@ -1,0 +1,173 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195c81d-1385-70d6-8b59-2321433d5402",
+		"dig": {
+			"alg": "sha256",
+			"val": "1ab2ab58ccf48643f9dbf385c2d7c827aa761245c7cab2123a4572ee22dd7a36"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "0195c81d-1385-77d0-bf29-98154664be2e",
+		"type": "standard",
+		"code": "INVOICE_test_7",
+		"issue_date": "2013-03-11",
+		"currency": "SEK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "The Sellercompany Incorporated",
+			"alias": "Civic Service Centre",
+			"people": [
+				{
+					"name": {
+						"given": "Anthon Larsen"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Main street 2, Building 4",
+					"locality": "Big city",
+					"code": "54321",
+					"country": "SE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "Anthon@SellerCompany.se"
+				}
+			],
+			"telephones": [
+				{
+					"num": "4698989898"
+				}
+			]
+		},
+		"customer": {
+			"name": "THe Buyercompany",
+			"people": [
+				{
+					"name": {
+						"given": "A3150bdn"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Anystreet 8",
+					"street_extra": "Back door",
+					"locality": "Anytown",
+					"region": "RegionB",
+					"code": "101",
+					"country": "SE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "john@buyercompany.no"
+				}
+			],
+			"telephones": [
+				{
+					"num": "5121230"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"ref": "RT3000",
+					"name": "Road tax",
+					"description": "Weight-based tax, vehicles 3000 KGM",
+					"price": "2500.00",
+					"unit": "item"
+				},
+				"sum": "2500.00",
+				"taxes": [
+					{
+						"cat": "VAT"
+					}
+				],
+				"total": "2500.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"ref": "REG",
+					"name": "Road Register fee",
+					"description": "Annual registration fee",
+					"price": "700.00",
+					"unit": "item"
+				},
+				"sum": "700.00",
+				"taxes": [
+					{
+						"cat": "VAT"
+					}
+				],
+				"total": "700.00"
+			}
+		],
+		"ordering": {
+			"period": {
+				"start": "2013-01-01",
+				"end": "2013-12-31"
+			},
+			"purchases": [
+				{
+					"code": "Order_9988_x"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "Payment within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "SE1212341234123412",
+						"bic": "SEXDABCD"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "3200.00",
+			"total": "3200.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"base": "3200.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "3200.00",
+			"payable": "3200.00"
+		},
+		"notes": [
+			{
+				"text": "Testscenario 7"
+			}
+		]
+	}
+}
