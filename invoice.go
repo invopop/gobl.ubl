@@ -153,7 +153,8 @@ func newInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	return out, nil
 }
 
-// Bytes returns the raw XML of the UBL Invoice or Credit Note.
+// Bytes returns the raw XML of the UBL Invoice or Credit Note including
+// the XML Header.
 func (out *Invoice) Bytes() ([]byte, error) {
 	bytes, err := xml.MarshalIndent(out, "", "  ")
 	if err != nil {
