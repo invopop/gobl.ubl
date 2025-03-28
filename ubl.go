@@ -8,8 +8,8 @@ import (
 	"github.com/invopop/gobl/bill"
 )
 
+// Peppol Billing Profile IDs
 const (
-	// Peppol Billing Profile ID default value
 	PeppolBillingProfileIDDefault = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
 )
 

@@ -229,7 +229,7 @@ func outputFilepath(name string) string {
 
 func loadSchema(t *testing.T, name string) *xsd.Schema {
 	t.Helper()
-	schema, err := xsd.ParseFromFile(filepath.Join(getSchemaPath(name), name))
+	schema, err := xsd.ParseFromFile(filepath.Join(getSchemaPath(), name))
 	require.NoError(t, err)
 	return schema
 }
@@ -253,7 +253,7 @@ func getDataGlob(pattern string) ([]string, error) {
 	return filepath.Glob(filepath.Join(getConversionTypePath(pattern), pattern))
 }
 
-func getSchemaPath(pattern string) string {
+func getSchemaPath() string {
 	return filepath.Join(getDataPath(), "schema", "maindoc")
 }
 

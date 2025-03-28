@@ -24,7 +24,7 @@ type InvoiceLine struct {
 	Price               *Price              `xml:"cac:Price"`
 }
 
-func (out *Invoice) addLines(inv *bill.Invoice) {
+func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
