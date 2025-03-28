@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-2206-7e10-a770-a681e9db50d7",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "85e41ae33302d7e36ffd4e0f8820730fce3e567a77281b8cad2340b5b638dd6b"
+			"val": "ca7f7f4cdd9182d51473e0dbfcedbbfeed33b4efbef93154cf85276750289e6b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
-		"uuid": "0195c927-2208-765b-bbd7-a87eef2eeb03",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "Snippet1",
 		"issue_date": "2017-11-13",
@@ -54,7 +54,8 @@
 			"alias": "BuyerTradingName AS",
 			"tax_id": {
 				"country": "SE",
-				"code": "4598375937"
+				"code": "4598375937",
+				"scheme": "VAT"
 			},
 			"identities": [
 				{

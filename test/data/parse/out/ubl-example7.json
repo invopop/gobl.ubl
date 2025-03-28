@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-2241-7651-a0a5-b8e946073411",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2d81c8ec058ba0afc107ca979d114bd974697fe0444bc1567bce9797a7f15b54"
+			"val": "b1ae6255ba9cafa80a5b3f715251d502c4f77577724c5c912032ff54236ee221"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c927-2242-706a-943a-e314aea0caa0",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "INVOICE_test_7",
 		"issue_date": "2013-03-11",

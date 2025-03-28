@@ -104,6 +104,17 @@ type Contact struct {
 	ElectronicMail *string `xml:"cbc:ElectronicMail"`
 }
 
+// CountryCode tries to determine the most appropriate tax country code
+// for the party.
+func (p *Party) CountryCode() string {
+	if pa := p.PostalAddress; pa != nil {
+		if c := pa.Country; c != nil {
+			return c.IdentificationCode
+		}
+	}
+	return ""
+}
+
 func newParty(party *org.Party) *Party {
 	if party == nil {
 		return nil
@@ -117,17 +128,19 @@ func newParty(party *org.Party) *Party {
 
 	contact := &Contact{}
 
-	// Although taxID is mandatory, when there is a Tax Representative and the seller comes from
-	// Ordering.Seller, the pointer could be nil
-	if party.TaxID != nil && party.TaxID.Code != "" {
-		taxID := party.TaxID.String()
+	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
+		code := party.TaxID.String()
 		p.PartyTaxScheme = []PartyTaxScheme{
 			{
-				CompanyID: &taxID,
+				CompanyID: &code,
 				TaxScheme: &TaxScheme{
-					ID: "VAT",
+					ID: tID.GetScheme().String(),
 				},
 			},
+		}
+		// Override the company address's country code
+		p.PostalAddress.Country = &Country{
+			IdentificationCode: tID.Country.String(),
 		}
 	}
 

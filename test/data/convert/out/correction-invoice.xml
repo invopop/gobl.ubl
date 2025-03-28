@@ -6,6 +6,12 @@
   <cbc:InvoiceTypeCode>384</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
   <cbc:BuyerReference>XR-2024-2</cbc:BuyerReference>
+  <cac:BillingReference>
+    <cac:InvoiceDocumentReference>
+      <cbc:ID>SAMPLE-001</cbc:ID>
+      <cbc:IssueDate>2024-02-13</cbc:IssueDate>
+    </cac:InvoiceDocumentReference>
+  </cac:BillingReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PostalAddress>

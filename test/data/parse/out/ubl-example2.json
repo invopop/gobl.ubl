@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-222b-7c47-9e21-56736225dc5b",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5f4bb2e846ed397c0d205debfd0b065da74f46fde2de01118929b568a5f81436"
+			"val": "a4375405196a78931ff8c4a4fad92a102f98bdceb552e380613ff5fcc6cbe11f"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c927-222d-755a-aaf1-2e708c27dfde",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-06-30",
@@ -21,7 +21,8 @@
 			"name": "Tax handling company AS",
 			"tax_id": {
 				"country": "NO",
-				"code": "967611265MVA"
+				"code": "967611265MVA",
+				"scheme": "VAT"
 			},
 			"addresses": [
 				{
@@ -38,7 +39,8 @@
 			"name": "The Buyercompany",
 			"tax_id": {
 				"country": "NO",
-				"code": "987654321MVA"
+				"code": "987654321MVA",
+				"scheme": "VAT"
 			},
 			"identities": [
 				{
@@ -361,7 +363,8 @@
 				"name": "Salescompany ltd.",
 				"tax_id": {
 					"country": "NO",
-					"code": "123456789MVA"
+					"code": "123456789MVA",
+					"scheme": "VAT"
 				},
 				"identities": [
 					{

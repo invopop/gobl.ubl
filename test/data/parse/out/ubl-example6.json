@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-223f-72d1-b6e3-f677818d0ed1",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "49d727749c0b08dc816b701d247967d419b59041b56b9760cf260a67ee246222"
+			"val": "773b8dc647a8e62852bd3a56ee52d8face738765c7b5106b89a1a462191e53d9"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c927-223f-7a85-8f34-01f9b683846b",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL110",
 		"issue_date": "2013-04-10",
@@ -21,7 +21,8 @@
 			"name": "SellerCompany",
 			"tax_id": {
 				"country": "DK",
-				"code": "123456789MVA"
+				"code": "123456789MVA",
+				"scheme": "VAT"
 			},
 			"addresses": [
 				{

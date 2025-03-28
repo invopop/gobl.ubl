@@ -81,26 +81,32 @@ func goblParty(party *Party) *org.Party {
 		})
 	}
 
-	if party.PartyTaxScheme != nil {
-		for _, taxReg := range party.PartyTaxScheme {
-			if taxReg.CompanyID != nil {
-				switch taxReg.TaxScheme.ID {
-				//Source https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v13%20-%20used%20from%202024-05-15.xlsx?version=2&modificationDate=1712937109681&api=v2
-				case "VAT":
-					p.TaxID = &tax.Identity{
-						Country: l10n.TaxCountryCode(party.PostalAddress.Country.IdentificationCode),
-						Code:    cbc.Code(*taxReg.CompanyID),
-					}
-				default:
-					id := &org.Identity{
-						Country: l10n.ISOCountryCode(party.PostalAddress.Country.IdentificationCode),
-						Code:    cbc.Code(*taxReg.CompanyID),
-					}
-					if p.Identities == nil {
-						p.Identities = make([]*org.Identity, 0)
-					}
-					p.Identities = append(p.Identities, id)
+	if len(party.PartyTaxScheme) > 0 {
+		// There may be more than one party tax scheme, Peppol allows two
+		// for example. We take the first valid entry that has a Tax Scheme
+		// as the source of truth, and store the rest as identities.
+		for _, pts := range party.PartyTaxScheme {
+			if pts.CompanyID == nil || *pts.CompanyID == "" {
+				continue
+			}
+			if pts.TaxScheme != nil && p.TaxID == nil {
+				p.TaxID = &tax.Identity{
+					Country: l10n.TaxCountryCode(party.CountryCode()),
+					Code:    cbc.Code(*pts.CompanyID),
 				}
+				sc := cbc.Code(pts.TaxScheme.ID)
+				if p.TaxID.GetScheme() != sc {
+					p.TaxID.Scheme = cbc.Code(pts.TaxScheme.ID)
+				}
+			} else {
+				id := &org.Identity{
+					Country: l10n.ISOCountryCode(party.CountryCode()),
+					Code:    cbc.Code(*pts.CompanyID),
+				}
+				if p.Identities == nil {
+					p.Identities = make([]*org.Identity, 0)
+				}
+				p.Identities = append(p.Identities, id)
 			}
 		}
 	}
@@ -129,29 +135,24 @@ func parseAddress(address *PostalAddress) *org.Address {
 		return nil
 	}
 
-	addr := &org.Address{
-		Country: l10n.ISOCountryCode(address.Country.IdentificationCode),
+	addr := new(org.Address)
+	if address.Country != nil {
+		addr.Country = l10n.ISOCountryCode(address.Country.IdentificationCode)
 	}
-
 	if address.StreetName != nil {
 		addr.Street = *address.StreetName
 	}
-
 	if address.AdditionalStreetName != nil {
 		addr.StreetExtra = *address.AdditionalStreetName
 	}
-
 	if address.CityName != nil {
 		addr.Locality = *address.CityName
 	}
-
 	if address.PostalZone != nil {
 		addr.Code = cbc.Code(*address.PostalZone)
 	}
-
 	if address.CountrySubentity != nil {
 		addr.Region = *address.CountrySubentity
 	}
-
 	return addr
 }

@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-221f-72ec-b613-82726fb900ad",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3c1556d5f7afd9447372edf40cef45714ce0f6923497bda26e9b89473708e4ce"
+			"val": "c2a435e45faacbefc463fbdc544cfd8fdb0cb1410b0761cba1ecd37cf4b31642"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "BE",
-		"uuid": "0195c927-221f-7ab9-ae42-ba1c7b69e16f",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "POP000274-128-20210525T044541",
 		"issue_date": "2021-05-25",

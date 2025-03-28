@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-221d-7426-964a-e12862f42d50",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0d80ef9312865d67ce39b781a436b4fd47b46a2c08860a1d098703cabb4cc72d"
+			"val": "a5c2553842f134eb8f9d738acbf4f844d895947149b4568404be6a2f6ad0d708"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
-		"uuid": "0195c927-221d-7d85-80ca-60d075f09c24",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "other",
 		"code": "CN758494",
 		"issue_date": "2005-06-25",
@@ -53,12 +53,11 @@
 		},
 		"customer": {
 			"name": "IYT Corporation",
-			"identities": [
-				{
-					"country": "GB",
-					"code": "12356478"
-				}
-			],
+			"tax_id": {
+				"country": "GB",
+				"code": "12356478",
+				"scheme": "UK VAT"
+			},
 			"people": [
 				{
 					"name": {

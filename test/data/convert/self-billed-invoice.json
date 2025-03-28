@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "8a51fd30-2a27-11ee-be56-0242ac120002",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c91e9e9492a31026dea7e139fffee9bf1dc22848f2a7762caa2f5d3e599c625e"
+			"val": "bb800fa848b1f3c8d0e529d4991b53581f133dba98f52ea4e96c594f10d67072"
 		}
 	},
 	"doc": {
@@ -16,7 +16,7 @@
 		"$tags": [
 			"self-billed"
 		],
-		"uuid": "019231f1-9184-7eb6-8216-12db835e52a1",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "SAMPLE",
 		"code": "001",

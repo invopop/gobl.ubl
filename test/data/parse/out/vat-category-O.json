@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-224f-77ab-84f4-d01a927ab578",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8e11e63c08883344e39f13b226658325a733e49df626ad4fa80194aad53517f8"
+			"val": "e623a1c6868cb5e0b3ae41bf9177302813121fdfb03eb2a1f0f00128367fcea6"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c927-224f-7e98-abe6-65d9c7cefa9b",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "Vat-O",
 		"issue_date": "2018-08-30",

@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-224d-7483-b205-5e30caf31995",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f97495073ba53c56ade6342940f76f4bacb6eb53ef0f480bcd5c932f3271d35b"
+			"val": "6cd1480b3630a3b075f192da82b1b20c21e37f7f6e708949a6d60674531f451f"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
-		"uuid": "0195c927-224d-7b5e-bb7f-e9f54f560b37",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "Vat-Z",
 		"issue_date": "2018-08-30",

@@ -1,11 +1,11 @@
 module github.com/invopop/gobl.ubl
 
-go 1.22
+go 1.23.0
 
-toolchain go1.22.1
+toolchain go1.23.4
 
 require (
-	github.com/invopop/gobl v0.212.1
+	github.com/invopop/gobl v0.213.2
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
@@ -37,6 +37,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/square/go-jose/v3 v3.0.0-20200630053402-0a67ce9b0693 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
-	golang.org/x/crypto v0.32.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

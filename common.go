@@ -18,11 +18,6 @@ const (
 	NamespaceXSI  = "http://www.w3.org/2001/XMLSchema-instance"
 )
 
-// Customization Identities
-const (
-	CustomizationEN16931 = "urn:cen.eu:en16931:2017"
-)
-
 // Extensions represents UBL extensions
 type Extensions struct {
 	Extension []Extension `xml:"ext:Extension"`

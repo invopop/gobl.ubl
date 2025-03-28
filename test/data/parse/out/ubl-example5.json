@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-2239-76b3-ad75-7e2a6e2cb79d",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "79061c8f57d3ff35702e1976ee927a2eaa1e93039fe4ca2e7fd49ebee1016c9f"
+			"val": "39905afb88801647ee1aacd364b19a69946fa14faee223470e25971d87ccb807"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c927-223b-711a-be4f-85191d4befa9",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL110",
 		"issue_date": "2013-04-10",
@@ -27,7 +27,8 @@
 			"name": "Dick Panama",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356609"
+				"code": "16356609",
+				"scheme": "VAT"
 			},
 			"addresses": [
 				{
@@ -45,7 +46,8 @@
 			"alias": "Buyco",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356607"
+				"code": "16356607",
+				"scheme": "VAT"
 			},
 			"identities": [
 				{

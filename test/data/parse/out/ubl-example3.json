@@ -1,15 +1,15 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-2231-7d5e-b528-4db9664149f0",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a4d01a4b771eb3ee54e60b7001fb7d621b8bd1e9880da3aa2136776254104448"
+			"val": "2718ac507b81170158a3395c043370c8c96f0d13311c8fa6a27ce5663bcfb666"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"uuid": "0195c927-2232-7c8f-87b7-7d2013933454",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-04-10",
@@ -21,7 +21,8 @@
 			"name": "SubscriptionSeller",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356706"
+				"code": "16356706",
+				"scheme": "VAT"
 			},
 			"identities": [
 				{
@@ -53,7 +54,8 @@
 			"name": "Buyercompany ltd",
 			"tax_id": {
 				"country": "DK",
-				"code": "NO987654321MVA"
+				"code": "NO987654321MVA",
+				"scheme": "VAT"
 			},
 			"identities": [
 				{

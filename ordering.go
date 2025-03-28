@@ -1,6 +1,10 @@
 package ubl
 
-import "github.com/invopop/gobl/bill"
+import (
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/org"
+)
 
 // Period represents a time period with start and end dates
 type Period struct {
@@ -18,10 +22,10 @@ type OrderReference struct {
 
 // BillingReference represents a reference to a billing document
 type BillingReference struct {
-	InvoiceDocumentReference           *Reference `xml:"cac:InvoiceDocumentReference"`
-	SelfBilledInvoiceDocumentReference *Reference `xml:"cac:SelfBilledInvoiceDocumentReference"`
-	CreditNoteDocumentReference        *Reference `xml:"cac:CreditNoteDocumentReference"`
-	AdditionalDocumentReference        *Reference `xml:"cac:AdditionalDocumentReference"`
+	InvoiceDocumentReference           *Reference `xml:"cac:InvoiceDocumentReference,omitempty"`
+	SelfBilledInvoiceDocumentReference *Reference `xml:"cac:SelfBilledInvoiceDocumentReference,omitempty"`
+	CreditNoteDocumentReference        *Reference `xml:"cac:CreditNoteDocumentReference,omitempty"`
+	AdditionalDocumentReference        *Reference `xml:"cac:AdditionalDocumentReference,omitempty"`
 }
 
 // Reference represents a reference to a document
@@ -53,6 +57,29 @@ type BinaryObject struct {
 // ProjectReference represents a reference to a project
 type ProjectReference struct {
 	ID *string `xml:"cbc:ID"`
+}
+
+func (out *Invoice) addPreceding(refs []*org.DocumentRef) {
+	if len(refs) == 0 {
+		return
+	}
+	out.BillingReference = make([]*BillingReference, len(refs))
+	for i, ref := range refs {
+		r := &Reference{
+			ID: IDType{Value: ref.Series.Join(ref.Code).String()},
+		}
+		if ref.IssueDate != nil {
+			id := ref.IssueDate.String()
+			r.IssueDate = &id
+		}
+		if dt := ref.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
+			dts := dt.String()
+			r.DocumentTypeCode = &dts
+		}
+		out.BillingReference[i] = &BillingReference{
+			InvoiceDocumentReference: r,
+		}
+	}
 }
 
 func (out *Invoice) addOrdering(o *bill.Ordering) {

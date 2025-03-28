@@ -21,7 +21,7 @@ var invoiceTypeMap = map[string]cbc.Key{
 }
 
 // parseInvoice takes the provided raw XML document and attempts to build
-// a
+// a bill.Invoice. Contents may be either an Invoice or CreditNote.
 func parseInvoice(data []byte) (*bill.Invoice, error) {
 	in := new(Invoice)
 	if err := xml.Unmarshal(data, in); err != nil {

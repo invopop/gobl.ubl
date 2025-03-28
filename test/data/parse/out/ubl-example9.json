@@ -1,16 +1,16 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "0195c927-224a-7db2-90f9-5c2ee5155976",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f3a3cb61c270336fd8c3f9bc634f84242c53ff79421ab39ac24f9ef28ed8aee3"
+			"val": "00a434d49de2ae867bb6ea83148f753da8ab763184c792304d41e2acd0c122f8"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "NL",
-		"uuid": "0195c927-224b-76d3-85b8-ad6c9fc7993a",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "20150483",
 		"issue_date": "2015-04-01",

@@ -12,6 +12,7 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -25,6 +26,8 @@ const (
 
 	schemaInvoice    = "UBL-Invoice-2.1.xsd"
 	schemaCreditNote = "UBL-CreditNote-2.1.xsd"
+
+	staticUUID uuid.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 )
 
 // updateOut is a flag that can be set to update example files
@@ -88,14 +91,16 @@ func TestParseInvoice(t *testing.T) {
 			env, err := ParseInvoice(xmlData)
 			require.NoError(t, err)
 
+			env.Head.UUID = staticUUID
+			if inv, ok := env.Extract().(*bill.Invoice); ok {
+				inv.UUID = staticUUID
+			}
+
 			writeEnvelope(outputFilepath(outName), env)
 
 			// Extract the invoice from the envelope
 			invoice, ok := env.Extract().(*bill.Invoice)
 			require.True(t, ok, "Document should be an invoice")
-
-			// Remove UUID from the invoice
-			invoice.UUID = ""
 
 			// Marshal only the invoice
 			data, err := json.MarshalIndent(invoice, "", "\t")
@@ -112,9 +117,6 @@ func TestParseInvoice(t *testing.T) {
 
 			expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
 			require.True(t, ok, "Expected document should be an invoice")
-
-			// Remove UUID from the expected invoice
-			expectedInvoice.UUID = ""
 
 			// Marshal the expected invoice
 			expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
@@ -170,6 +172,12 @@ func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 	env := new(gobl.Envelope)
 	if err := json.Unmarshal(buf.Bytes(), env); err != nil {
 		return nil, err
+	}
+
+	// Clear the IDs
+	env.Head.UUID = staticUUID
+	if inv, ok := env.Extract().(*bill.Invoice); ok {
+		inv.UUID = staticUUID
 	}
 
 	if err := env.Calculate(); err != nil {

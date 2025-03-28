@@ -1,10 +1,10 @@
 {
 	"$schema": "https://gobl.org/draft-0/envelope",
 	"head": {
-		"uuid": "8a51fd30-2a27-11ee-be56-0242ac120002",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "658986489472a63ac4c2717fb68fea897f243dda73895c45e2b20108f81bad89"
+			"val": "27f24cd5a304ff64ab833764fa1458f150d42b291886b4d4037326c416090864"
 		}
 	},
 	"doc": {
@@ -13,7 +13,7 @@
 		"$addons": [
 			"eu-en16931-v2017"
 		],
-		"uuid": "019231f1-9128-71fc-b0e2-820af3036d1b",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "SAMPLE",
 		"code": "001",
