@@ -1,0 +1,251 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "c2a435e45faacbefc463fbdc544cfd8fdb0cb1410b0761cba1ecd37cf4b31642"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "BE",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "POP000274-128-20210525T044541",
+		"issue_date": "2021-05-25",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Acme Corporation",
+			"alias": "Acme Corporation",
+			"tax_id": {
+				"country": "BE",
+				"code": "0000000000"
+			},
+			"identities": [
+				{
+					"code": "99100100100",
+					"ext": {
+						"iso-scheme-id": "0151"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"code": "99100100100",
+					"ext": {
+						"iso-scheme-id": "0151"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Acme Street 4001",
+					"locality": "Acme Town",
+					"code": "123 45",
+					"country": "BE"
+				}
+			]
+		},
+		"customer": {
+			"name": "OpenPEPPOL AISBL Testbed Operations",
+			"alias": "OpenPEPPOL AISBL Testbed Operations",
+			"tax_id": {
+				"country": "BE",
+				"code": "0848934496"
+			},
+			"identities": [
+				{
+					"code": "TBCNTRLS1001",
+					"ext": {
+						"iso-scheme-id": "0007"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"code": "TBCNTRLS1001",
+					"ext": {
+						"iso-scheme-id": "0007"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Rond-Point Robert Schuman 6",
+					"locality": "BRUXELLES",
+					"code": "BE1040",
+					"country": "BE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "26",
+				"item": {
+					"name": "Work description 1",
+					"price": "50.00",
+					"unit": "LH"
+				},
+				"sum": "1300.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1300.00"
+			},
+			{
+				"i": 2,
+				"quantity": "10",
+				"item": {
+					"name": "Work description 2",
+					"price": "98.00",
+					"unit": "LH"
+				},
+				"sum": "980.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "980.00"
+			},
+			{
+				"i": 3,
+				"quantity": "27",
+				"item": {
+					"name": "Work description 3",
+					"price": "66.00",
+					"unit": "LH"
+				},
+				"sum": "1782.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1782.00"
+			},
+			{
+				"i": 4,
+				"quantity": "12",
+				"item": {
+					"name": "Work description 4",
+					"price": "57.00",
+					"unit": "LH"
+				},
+				"sum": "684.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "684.00"
+			},
+			{
+				"i": 5,
+				"quantity": "9",
+				"item": {
+					"name": "Work description 5",
+					"price": "69.00",
+					"unit": "LH"
+				},
+				"sum": "621.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "621.00"
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Insurance",
+				"amount": "25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"code": "9392277012"
+		},
+		"payment": {
+			"instructions": {
+				"key": "credit-transfer",
+				"detail": "Credit transfer",
+				"credit_transfer": [
+					{
+						"iban": "GB33BUKB20201555555555",
+						"name": "Account Name"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "5367.00",
+			"charge": "25.00",
+			"total": "5392.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "5367.00",
+								"percent": "25%",
+								"amount": "1341.75"
+							},
+							{
+								"base": "25.00",
+								"percent": "25%",
+								"amount": "6.25"
+							}
+						],
+						"amount": "1348.00"
+					}
+				],
+				"sum": "1348.00"
+			},
+			"tax": "1348.00",
+			"total_with_tax": "6740.00",
+			"payable": "6740.00"
+		}
+	}
+}

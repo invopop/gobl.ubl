@@ -1,0 +1,138 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "773b8dc647a8e62852bd3a56ee52d8face738765c7b5106b89a1a462191e53d9"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "TOSL110",
+		"issue_date": "2013-04-10",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "SellerCompany",
+			"tax_id": {
+				"country": "DK",
+				"code": "123456789MVA",
+				"scheme": "VAT"
+			},
+			"addresses": [
+				{
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyercompany ltd",
+			"addresses": [
+				{
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1000",
+				"item": {
+					"name": "Printing paper",
+					"price": "1.00",
+					"unit": "item"
+				},
+				"sum": "1000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1000.00"
+			},
+			{
+				"i": 2,
+				"quantity": "100",
+				"item": {
+					"name": "Parker Pen",
+					"price": "5.00",
+					"unit": "item"
+				},
+				"sum": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "500.00"
+			},
+			{
+				"i": 3,
+				"quantity": "500",
+				"item": {
+					"name": "American Cookies",
+					"price": "5.00",
+					"unit": "item"
+				},
+				"sum": "2500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "12%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "2500.00"
+			}
+		],
+		"totals": {
+			"sum": "4000.00",
+			"total": "4000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1500.00",
+								"percent": "25%",
+								"amount": "375.00"
+							},
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "2500.00",
+								"percent": "12%",
+								"amount": "300.00"
+							}
+						],
+						"amount": "675.00"
+					}
+				],
+				"sum": "675.00"
+			},
+			"tax": "675.00",
+			"total_with_tax": "4675.00",
+			"payable": "4675.00"
+		}
+	}
+}

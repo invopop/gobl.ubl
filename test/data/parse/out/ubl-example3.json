@@ -1,0 +1,209 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "2718ac507b81170158a3395c043370c8c96f0d13311c8fa6a27ce5663bcfb666"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "TOSL108",
+		"issue_date": "2013-04-10",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "SubscriptionSeller",
+			"tax_id": {
+				"country": "DK",
+				"code": "16356706",
+				"scheme": "VAT"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "DK16356706"
+				},
+				{
+					"code": "1238764941386",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Main street 2, Building 4",
+					"locality": "Big city",
+					"code": "54321",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "antonio@SubscriptionsSeller.dk"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyercompany ltd",
+			"tax_id": {
+				"country": "DK",
+				"code": "NO987654321MVA",
+				"scheme": "VAT"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "987654321"
+				},
+				{
+					"code": "5790000435975",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Anystreet, Building 1",
+					"locality": "Anytown",
+					"code": "101",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "2",
+				"item": {
+					"name": "Paper subscription",
+					"description": "Subscription fee 1st quarter",
+					"price": "800.00",
+					"unit": "item"
+				},
+				"sum": "1600.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1600.00"
+			},
+			{
+				"i": 2,
+				"quantity": "2",
+				"item": {
+					"name": "Paper subscription",
+					"description": "Subscription fee 1st quarter",
+					"price": "800.00",
+					"unit": "item"
+				},
+				"sum": "1600.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "10%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1600.00"
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Freight charge",
+				"amount": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"period": {
+				"start": "2013-01-01",
+				"end": "2013-04-01"
+			},
+			"contracts": [
+				{
+					"code": "SUBSCR571"
+				}
+			]
+		},
+		"payment": {
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "Payref1",
+				"credit_transfer": [
+					{
+						"iban": "DK1212341234123412"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "3200.00",
+			"charge": "100.00",
+			"total": "3300.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1600.00",
+								"percent": "25%",
+								"amount": "400.00"
+							},
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1600.00",
+								"percent": "10%",
+								"amount": "160.00"
+							},
+							{
+								"base": "100.00",
+								"percent": "25%",
+								"amount": "25.00"
+							}
+						],
+						"amount": "585.00"
+					}
+				],
+				"sum": "585.00"
+			},
+			"tax": "585.00",
+			"total_with_tax": "3885.00",
+			"payable": "3885.00"
+		},
+		"notes": [
+			{
+				"text": "Contract was established through our website"
+			}
+		]
+	}
+}

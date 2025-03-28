@@ -1,0 +1,355 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "d26c5dcc61e61b94d2df953909dbe5d8f45469bac92a44f6456bda4e54412be5"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "GB",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "Snippet1",
+		"issue_date": "2017-11-13",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "SupplierOfficialName Ltd",
+			"alias": "SupplierTradingName Ltd.",
+			"tax_id": {
+				"country": "GB",
+				"code": "1232434"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "GB983294"
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "John Doe"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"code": "7300010000001",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Main street 1",
+					"street_extra": "Postbox 123",
+					"locality": "London",
+					"code": "GB 123 EW",
+					"country": "GB"
+				}
+			],
+			"emails": [
+				{
+					"addr": "john.doe@foo.bar"
+				}
+			],
+			"telephones": [
+				{
+					"num": "9384203984"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyer Official Name",
+			"alias": "BuyerTradingName AS",
+			"tax_id": {
+				"country": "SE",
+				"code": "4598375937",
+				"scheme": "VAT"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "39937423947"
+				},
+				{
+					"code": "FR23342",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"code": "FR23342",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Hovedgatan 32",
+					"street_extra": "Po box 878",
+					"locality": "Stockholm",
+					"code": "456 34",
+					"country": "SE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"ref": "97iugug876",
+					"name": "item name",
+					"identities": [
+						{
+							"code": "7300010000001",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
+						{
+							"label": "SRV",
+							"code": "09348023"
+						}
+					],
+					"description": "Description of item",
+					"price": "400.00",
+					"unit": "one",
+					"origin": "NO"
+				},
+				"sum": "4000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "4000.00",
+				"notes": [
+					{
+						"text": "Testing note on line level"
+					},
+					{
+						"key": "buyer-accounting-ref",
+						"text": "Konteringsstreng"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "10",
+				"item": {
+					"ref": "97iugug876",
+					"name": "item name",
+					"identities": [
+						{
+							"code": "7300010000001",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
+						{
+							"label": "SRV",
+							"code": "86776"
+						}
+					],
+					"description": "Description of item",
+					"price": "200.00",
+					"unit": "one"
+				},
+				"sum": "2000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "15.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "2000.00",
+				"notes": [
+					{
+						"key": "buyer-accounting-ref",
+						"text": "Konteringsstreng"
+					}
+				]
+			},
+			{
+				"i": 3,
+				"quantity": "10",
+				"item": {
+					"ref": "97iugug876",
+					"name": "item name",
+					"identities": [
+						{
+							"code": "873649827489",
+							"ext": {
+								"iso-scheme-id": "0160"
+							}
+						},
+						{
+							"label": "SRV",
+							"code": "86776"
+						}
+					],
+					"description": "Description of item",
+					"price": "90.00",
+					"unit": "one",
+					"meta": {
+						"additionalitemname": "AdditionalItemValue"
+					}
+				},
+				"sum": "900.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "900.00",
+				"notes": [
+					{
+						"key": "buyer-accounting-ref",
+						"text": "Konteringsstreng"
+					}
+				]
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Discount",
+				"amount": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				]
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Cleaning",
+				"amount": "200.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"code": "0150abc"
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2017-12-01",
+						"amount": "8550.00",
+						"percent": "100%"
+					}
+				],
+				"notes": "Payment within 10 days, 2% discount"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"detail": "Credit transfer",
+				"ref": "Snippet1",
+				"credit_transfer": [
+					{
+						"iban": "IBAN32423940",
+						"bic": "BIC324098",
+						"name": "AccountName"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"addresses": [
+					{
+						"street": "Delivery street 2",
+						"street_extra": "Building 56",
+						"locality": "Stockholm",
+						"region": "Södermalm",
+						"code": "21234",
+						"country": "SE"
+					}
+				]
+			},
+			"identities": [
+				{
+					"label": "0088",
+					"code": "7300010000001"
+				}
+			],
+			"date": "2017-11-01"
+		},
+		"totals": {
+			"sum": "6900.00",
+			"discount": "100.00",
+			"charge": "200.00",
+			"total": "7000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "4900.00",
+								"percent": "25.0%",
+								"amount": "1225.00"
+							},
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "2000.00",
+								"percent": "15.0%",
+								"amount": "300.00"
+							},
+							{
+								"base": "100.00",
+								"percent": "25%",
+								"amount": "25.00"
+							}
+						],
+						"amount": "1550.00"
+					}
+				],
+				"sum": "1550.00"
+			},
+			"tax": "1550.00",
+			"total_with_tax": "8550.00",
+			"payable": "8550.00"
+		}
+	}
+}

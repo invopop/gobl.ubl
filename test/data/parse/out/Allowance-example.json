@@ -1,0 +1,413 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "ca7f7f4cdd9182d51473e0dbfcedbbfeed33b4efbef93154cf85276750289e6b"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "GB",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "Snippet1",
+		"issue_date": "2017-11-13",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "SupplierOfficialName Ltd",
+			"alias": "SupplierTradingName Ltd.",
+			"tax_id": {
+				"country": "GB",
+				"code": "1232434"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "GB983294"
+				}
+			],
+			"inboxes": [
+				{
+					"code": "7300010000001",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Main street 1",
+					"street_extra": "Postbox 123",
+					"locality": "London",
+					"code": "GB 123 EW",
+					"country": "GB"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyer Official Name",
+			"alias": "BuyerTradingName AS",
+			"tax_id": {
+				"country": "SE",
+				"code": "4598375937",
+				"scheme": "VAT"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "39937423947"
+				},
+				{
+					"code": "4598375937",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Lisa Johnson"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"code": "4598375937",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Hovedgatan 32",
+					"street_extra": "Po box 878",
+					"locality": "Stockholm",
+					"region": "Södermalm",
+					"code": "456 34",
+					"country": "SE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "lj@buyer.se"
+				}
+			],
+			"telephones": [
+				{
+					"num": "23434234"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"ref": "97iugug876",
+					"name": "item name",
+					"identities": [
+						{
+							"label": "SRV",
+							"code": "09348023"
+						}
+					],
+					"description": "Description of item",
+					"price": "410.00",
+					"unit": "one",
+					"origin": "NO"
+				},
+				"sum": "4100.00",
+				"discounts": [
+					{
+						"reason": "Discount",
+						"amount": "101.00",
+						"ext": {
+							"untdid-allowance": "95"
+						}
+					}
+				],
+				"charges": [
+					{
+						"reason": "Cleaning",
+						"percent": "1%",
+						"amount": "41.00",
+						"ext": {
+							"untdid-charge": "CG"
+						}
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "4040.00",
+				"notes": [
+					{
+						"text": "Testing note on line level"
+					},
+					{
+						"key": "buyer-accounting-ref",
+						"text": "Konteringsstreng"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "10",
+				"item": {
+					"ref": "97iugug876",
+					"name": "item name",
+					"identities": [
+						{
+							"label": "SRV",
+							"code": "86776"
+						}
+					],
+					"description": "Description of item",
+					"price": "200.00",
+					"unit": "one",
+					"meta": {
+						"additionalitemname": "AdditionalItemValue"
+					}
+				},
+				"sum": "2000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "0.0%",
+						"ext": {
+							"untdid-tax-category": "E"
+						}
+					}
+				],
+				"total": "2000.00",
+				"notes": [
+					{
+						"text": "Testing note on line level"
+					},
+					{
+						"key": "buyer-accounting-ref",
+						"text": "Konteringsstreng"
+					}
+				]
+			},
+			{
+				"i": 3,
+				"quantity": "10",
+				"item": {
+					"ref": "97iugug876",
+					"name": "item name",
+					"identities": [
+						{
+							"label": "SRV",
+							"code": "86776"
+						}
+					],
+					"description": "Description of item",
+					"price": "100.00",
+					"unit": "one",
+					"meta": {
+						"additionalitemname": "AdditionalItemValue"
+					}
+				},
+				"sum": "1000.00",
+				"discounts": [
+					{
+						"reason": "Discount",
+						"amount": "101.00",
+						"ext": {
+							"untdid-allowance": "95"
+						}
+					}
+				],
+				"charges": [
+					{
+						"reason": "Charge",
+						"percent": "1%",
+						"amount": "10.00",
+						"ext": {
+							"untdid-charge": "CG"
+						}
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "909.00",
+				"notes": [
+					{
+						"text": "Testing note on line level"
+					},
+					{
+						"key": "buyer-accounting-ref",
+						"text": "Konteringsstreng"
+					}
+				]
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Discount",
+				"amount": "200.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"ext": {
+					"untdid-allowance": "95"
+				}
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Cleaning",
+				"base": "1000",
+				"percent": "20%",
+				"amount": "200",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25%"
+					}
+				],
+				"ext": {
+					"untdid-charge": "CG"
+				}
+			}
+		],
+		"ordering": {
+			"code": "0150abc",
+			"identities": [
+				{
+					"label": "ABT",
+					"code": "DR35141"
+				}
+			],
+			"period": {
+				"start": "2017-12-01",
+				"end": "2017-12-31"
+			},
+			"contracts": [
+				{
+					"code": "framework no 1"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2017-12-01",
+						"amount": "8186.25",
+						"percent": "100%"
+					}
+				],
+				"notes": "Payment within 10 days, 2% discount"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"detail": "Credit transfer",
+				"ref": "Snippet1",
+				"credit_transfer": [
+					{
+						"iban": "IBAN32423940",
+						"bic": "BIC324098",
+						"name": "AccountName"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"addresses": [
+					{
+						"street": "Delivery street 2",
+						"street_extra": "Building 56",
+						"locality": "Stockholm",
+						"region": "Södermalm",
+						"code": "21234",
+						"country": "SE"
+					}
+				]
+			},
+			"identities": [
+				{
+					"label": "0088",
+					"code": "7300010000001"
+				}
+			],
+			"date": "2017-11-01"
+		},
+		"totals": {
+			"sum": "6949.00",
+			"discount": "200.00",
+			"charge": "200.00",
+			"total": "6949.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "4949.00",
+								"percent": "25.0%",
+								"amount": "1237.25"
+							},
+							{
+								"ext": {
+									"untdid-tax-category": "E"
+								},
+								"base": "2000.00",
+								"percent": "0.0%",
+								"amount": "0.00"
+							},
+							{
+								"base": "0.00",
+								"percent": "25%",
+								"amount": "0.00"
+							}
+						],
+						"amount": "1237.25"
+					}
+				],
+				"sum": "1237.25"
+			},
+			"tax": "1237.25",
+			"total_with_tax": "8186.25",
+			"payable": "8186.25"
+		},
+		"notes": [
+			{
+				"text": "Please note we have a new phone number: 22 22 22 22"
+			}
+		]
+	}
+}

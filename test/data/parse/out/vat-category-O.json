@@ -1,0 +1,129 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "e623a1c6868cb5e0b3ae41bf9177302813121fdfb03eb2a1f0f00128367fcea6"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "Vat-O",
+		"issue_date": "2018-08-30",
+		"currency": "SEK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "The Sellercompany Incorporated",
+			"inboxes": [
+				{
+					"code": "7300010000001",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Main street 2, Building 4",
+					"locality": "Big city",
+					"code": "54321",
+					"country": "SE"
+				}
+			]
+		},
+		"customer": {
+			"name": "The Buyercompany",
+			"inboxes": [
+				{
+					"code": "987654325",
+					"ext": {
+						"iso-scheme-id": "0192"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Anystreet 8",
+					"street_extra": "Back door",
+					"locality": "Anytown",
+					"region": "RegionB",
+					"code": "101",
+					"country": "NO"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"ref": "RT3000",
+					"name": "Road tax",
+					"description": "Weight-based tax, vehicles \u003e3000 KGM",
+					"price": "3200.00",
+					"unit": "item"
+				},
+				"sum": "3200.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"ext": {
+							"untdid-tax-category": "O"
+						}
+					}
+				],
+				"total": "3200.00"
+			}
+		],
+		"ordering": {
+			"code": "test reference"
+		},
+		"payment": {
+			"terms": {
+				"notes": "Payment within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "SE1212341234123412",
+						"bic": "SEXDABCD"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "3200.00",
+			"total": "3200.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "O"
+								},
+								"base": "3200.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "3200.00",
+			"payable": "3200.00"
+		}
+	}
+}

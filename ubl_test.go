@@ -3,7 +3,7 @@ package ubl
 import (
 	"bytes"
 	"encoding/json"
-	"encoding/xml"
+	"flag"
 	"io"
 	"os"
 	"path/filepath"
@@ -11,10 +11,8 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.ubl/document"
-	"github.com/invopop/gobl.ubl/internal/gtou"
-	"github.com/invopop/gobl.ubl/internal/utog"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -25,11 +23,19 @@ import (
 const (
 	xmlPattern  = "*.xml"
 	jsonPattern = "*.json"
+
+	schemaInvoice    = "UBL-Invoice-2.1.xsd"
+	schemaCreditNote = "UBL-CreditNote-2.1.xsd"
+
+	staticUUID uuid.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 )
 
-func TestGtoU(t *testing.T) {
-	schema, err := loadSchema("schema.xsd")
-	require.NoError(t, err)
+// updateOut is a flag that can be set to update example files
+var updateOut = flag.Bool("update", false, "Update the example files in test/data")
+
+func TestConvertToInvoice(t *testing.T) {
+	invoiceSchema := loadSchema(t, schemaInvoice)
+	creditNoteSchema := loadSchema(t, schemaCreditNote)
 
 	examples, err := getDataGlob(jsonPattern)
 	require.NoError(t, err)
@@ -39,23 +45,36 @@ func TestGtoU(t *testing.T) {
 		outName := strings.Replace(inName, ".json", ".xml", 1)
 
 		t.Run(inName, func(t *testing.T) {
-			doc, err := NewDocumentFrom(inName)
+			doc, err := testInvoiceFrom(inName)
 			require.NoError(t, err)
 
 			data, err := doc.Bytes()
 			require.NoError(t, err)
 
-			err = ValidateXML(schema, data)
-			require.NoError(t, err)
+			if *updateOut {
+				err = os.WriteFile(outputFilepath(outName), data, 0644)
+				require.NoError(t, err)
+				var schema *xsd.Schema
+				switch doc.XMLName.Local {
+				case "Invoice":
+					schema = invoiceSchema
+				case "CreditNote":
+					schema = creditNoteSchema
+				default:
+					require.Fail(t, "unknown document schema")
+				}
+				err = ValidateXML(schema, data)
+				require.NoError(t, err)
+			}
 
-			output, err := LoadOutputFile(outName)
+			output, err := loadOutputFile(outName)
 			assert.NoError(t, err)
-			assert.Equal(t, output, data, "Output should match the expected XML. Update with --update flag.")
+			assert.Equal(t, string(output), string(data), "Output should match the expected XML. Update with --update flag.")
 		})
 	}
 }
 
-func TestUtoG(t *testing.T) {
+func TestParseInvoice(t *testing.T) {
 	examples, err := getDataGlob(xmlPattern)
 	require.NoError(t, err)
 
@@ -69,22 +88,26 @@ func TestUtoG(t *testing.T) {
 			require.NoError(t, err)
 
 			// Convert UBL XML to GOBL
-			goblEnv, err := utog.Convert(xmlData)
+			env, err := ParseInvoice(xmlData)
 			require.NoError(t, err)
 
+			env.Head.UUID = staticUUID
+			if inv, ok := env.Extract().(*bill.Invoice); ok {
+				inv.UUID = staticUUID
+			}
+
+			writeEnvelope(outputFilepath(outName), env)
+
 			// Extract the invoice from the envelope
-			invoice, ok := goblEnv.Extract().(*bill.Invoice)
+			invoice, ok := env.Extract().(*bill.Invoice)
 			require.True(t, ok, "Document should be an invoice")
 
-			// Remove UUID from the invoice
-			invoice.UUID = ""
-
 			// Marshal only the invoice
-			data, err := json.MarshalIndent(invoice, "", "  ")
+			data, err := json.MarshalIndent(invoice, "", "\t")
 			require.NoError(t, err)
 
 			// Load the expected output
-			output, err := LoadOutputFile(outName)
+			output, err := loadOutputFile(outName)
 			assert.NoError(t, err)
 
 			// Parse the expected output to extract the invoice
@@ -95,11 +118,8 @@ func TestUtoG(t *testing.T) {
 			expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
 			require.True(t, ok, "Expected document should be an invoice")
 
-			// Remove UUID from the expected invoice
-			expectedInvoice.UUID = ""
-
 			// Marshal the expected invoice
-			expectedData, err := json.MarshalIndent(expectedInvoice, "", "  ")
+			expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
 			require.NoError(t, err)
 
 			assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
@@ -107,17 +127,17 @@ func TestUtoG(t *testing.T) {
 	}
 }
 
-// NewDocumentFrom creates a cii Document from a GOBL file in the `test/data` folder
-func NewDocumentFrom(name string) (*document.Invoice, error) {
-	env, err := LoadTestEnvelope(name)
+// testInvoiceFrom creates a UBL Invoice from a GOBL file in the `test/data` folder
+func testInvoiceFrom(name string) (*Invoice, error) {
+	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
 	}
-	return gtou.Convert(env)
+	return ConvertInvoice(env)
 }
 
-// LoadTestXMLDoc returns a CII XMLDoc from a file in the test data folder
-func LoadTestXMLDoc(name string) (*document.Invoice, error) {
+// testLoadXML provides the raw data of a test XML file
+func testLoadXML(name string) ([]byte, error) {
 	src, err := os.Open(filepath.Join(getConversionTypePath(xmlPattern), name))
 	if err != nil {
 		return nil, err
@@ -128,31 +148,23 @@ func LoadTestXMLDoc(name string) (*document.Invoice, error) {
 		}
 	}()
 
-	inData, err := io.ReadAll(src)
+	return io.ReadAll(src)
+}
+
+// testParseInvoice takes the provided file and converts to a
+// GOBL
+func testParseInvoice(name string) (*gobl.Envelope, error) {
+	data, err := testLoadXML(name)
 	if err != nil {
 		return nil, err
 	}
-	doc := new(document.Invoice)
-	if err := xml.Unmarshal(inData, doc); err != nil {
-		return nil, err
-	}
-
-	return doc, err
+	return ParseInvoice(data)
 }
 
-// LoadTestInvoice returns a GOBL Invoice from a file in the `test/data` folder
-func LoadTestInvoice(name string) (*bill.Invoice, error) {
-	env, err := LoadTestEnvelope(name)
-	if err != nil {
-		return nil, err
-	}
-
-	return env.Extract().(*bill.Invoice), nil
-}
-
-// LoadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
-func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
-	src, _ := os.Open(filepath.Join(getConversionTypePath(jsonPattern), name))
+// loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
+func loadTestEnvelope(name string) (*gobl.Envelope, error) {
+	path := filepath.Join(getConversionTypePath(jsonPattern), name)
+	src, _ := os.Open(path)
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
 		return nil, err
@@ -162,28 +174,64 @@ func LoadTestEnvelope(name string) (*gobl.Envelope, error) {
 		return nil, err
 	}
 
+	// Clear the IDs
+	env.Head.UUID = staticUUID
+	if inv, ok := env.Extract().(*bill.Invoice); ok {
+		inv.UUID = staticUUID
+	}
+
+	if err := env.Calculate(); err != nil {
+		panic(err)
+	}
+
+	if err := env.Validate(); err != nil {
+		panic(err)
+	}
+
+	// Make an update if requested
+	writeEnvelope(path, env)
+
 	return env, nil
 }
 
-// LoadOutputFile returns byte data from a file in the `test/data/out` folder
-func LoadOutputFile(name string) ([]byte, error) {
+// loadOutputFile returns byte data from a file in the `test/data/out` folder
+func loadOutputFile(name string) ([]byte, error) {
+	src, _ := os.Open(outputFilepath(name))
+	buf := new(bytes.Buffer)
+	if _, err := buf.ReadFrom(src); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func writeEnvelope(path string, env *gobl.Envelope) {
+	if !*updateOut {
+		return
+	}
+	data, err := json.MarshalIndent(env, "", "\t")
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(path, data, 0644); err != nil {
+		panic(err)
+	}
+}
+
+func outputFilepath(name string) string {
 	var pattern string
 	if strings.HasSuffix(name, ".json") {
 		pattern = xmlPattern
 	} else {
 		pattern = jsonPattern
 	}
-	src, _ := os.Open(filepath.Join(getOutPath(pattern), name))
-	buf := new(bytes.Buffer)
-	if _, err := buf.ReadFrom(src); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
+	return filepath.Join(getOutPath(pattern), name)
 }
 
-func loadSchema(name string) (*xsd.Schema, error) {
-	return xsd.ParseFromFile(filepath.Join(getSchemaPath(name), name))
+func loadSchema(t *testing.T, name string) *xsd.Schema {
+	t.Helper()
+	schema, err := xsd.ParseFromFile(filepath.Join(getSchemaPath(), name))
+	require.NoError(t, err)
+	return schema
 }
 
 // ValidateXML validates a XML document against a XSD Schema
@@ -205,8 +253,8 @@ func getDataGlob(pattern string) ([]string, error) {
 	return filepath.Glob(filepath.Join(getConversionTypePath(pattern), pattern))
 }
 
-func getSchemaPath(pattern string) string {
-	return filepath.Join(getConversionTypePath(pattern), "schema")
+func getSchemaPath() string {
+	return filepath.Join(getDataPath(), "schema", "maindoc")
 }
 
 func getOutPath(pattern string) string {
@@ -219,9 +267,9 @@ func getDataPath() string {
 
 func getConversionTypePath(pattern string) string {
 	if pattern == xmlPattern {
-		return filepath.Join(getDataPath(), "utog")
+		return filepath.Join(getDataPath(), "parse")
 	}
-	return filepath.Join(getDataPath(), "gtou")
+	return filepath.Join(getDataPath(), "convert")
 }
 
 func getTestPath() string {

@@ -1,0 +1,284 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "a82f4ee6bd3098bad3df04477315f51b33b33649b8c74d7978718fd1a07e9dbb"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "GB",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "Correction1",
+		"issue_date": "2017-11-13",
+		"currency": "EUR",
+		"preceding": [
+			{
+				"code": "Snippet1"
+			}
+		],
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "SupplierOfficialName Ltd",
+			"alias": "SupplierTradingName Ltd.",
+			"tax_id": {
+				"country": "GB",
+				"code": "1232434"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "GB983294"
+				}
+			],
+			"inboxes": [
+				{
+					"code": "9482348239847239874",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Main street 1",
+					"street_extra": "Postbox 123",
+					"locality": "London",
+					"code": "GB 123 EW",
+					"country": "GB"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyer Official Name",
+			"alias": "BuyerTradingName AS",
+			"tax_id": {
+				"country": "SE",
+				"code": "4598375937",
+				"scheme": "VAT"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "39937423947"
+				},
+				{
+					"code": "FR23342",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Lisa Johnson"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"code": "FR23342",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Hovedgatan 32",
+					"street_extra": "Po box 878",
+					"locality": "Stockholm",
+					"code": "456 34",
+					"country": "SE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "lj@buyer.se"
+				}
+			],
+			"telephones": [
+				{
+					"num": "23434234"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "-7",
+				"item": {
+					"name": "item name",
+					"identities": [
+						{
+							"code": "21382183120983",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
+						{
+							"label": "SRV",
+							"code": "09348023"
+						}
+					],
+					"description": "Description of item",
+					"price": "400.00",
+					"unit": "day",
+					"origin": "NO"
+				},
+				"sum": "-2800.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "-2800.00",
+				"notes": [
+					{
+						"key": "buyer-accounting-ref",
+						"text": "Konteringsstreng"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "3",
+				"item": {
+					"name": "item name 2",
+					"identities": [
+						{
+							"code": "21382183120983",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
+						{
+							"label": "SRV",
+							"code": "09348023"
+						}
+					],
+					"description": "Description 2",
+					"price": "500.00",
+					"unit": "day",
+					"origin": "NO"
+				},
+				"sum": "1500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1500.00"
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Insurance",
+				"amount": "-25.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"percent": "25.0%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"code": "0150abc"
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2017-12-01",
+						"amount": "-1656.25",
+						"percent": "100%"
+					}
+				],
+				"notes": "Payment within 10 days, 2% discount"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"detail": "Credit transfer",
+				"ref": "Snippet1",
+				"credit_transfer": [
+					{
+						"iban": "IBAN32423940",
+						"bic": "BIC324098",
+						"name": "AccountName"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"addresses": [
+					{
+						"street": "Delivery street 2",
+						"street_extra": "Building 56",
+						"locality": "Stockholm",
+						"code": "21234",
+						"country": "SE"
+					}
+				]
+			},
+			"identities": [
+				{
+					"label": "0088",
+					"code": "9483759475923478"
+				}
+			],
+			"date": "2017-11-01"
+		},
+		"totals": {
+			"sum": "-1300.00",
+			"charge": "-25.00",
+			"total": "-1325.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "-1300.00",
+								"percent": "25.0%",
+								"amount": "-325.00"
+							},
+							{
+								"base": "-25.00",
+								"percent": "25.0%",
+								"amount": "-6.25"
+							}
+						],
+						"amount": "-331.25"
+					}
+				],
+				"sum": "-331.25"
+			},
+			"tax": "-331.25",
+			"total_with_tax": "-1656.25",
+			"payable": "-1656.25"
+		}
+	}
+}
