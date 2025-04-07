@@ -128,10 +128,10 @@
     </cac:TaxCategory>
   </cac:AllowanceCharge>
   <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="EUR">342.19</cbc:TaxAmount>
+    <cbc:TaxAmount currencyID="EUR">325.09</cbc:TaxAmount>
     <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="EUR">1801.00</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="EUR">342.19</cbc:TaxAmount>
+      <cbc:TaxableAmount currencyID="EUR">1711.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">325.09</cbc:TaxAmount>
       <cac:TaxCategory>
         <cbc:ID>S</cbc:ID>
         <cbc:Percent>19</cbc:Percent>
@@ -142,17 +142,22 @@
     </cac:TaxSubtotal>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">1801.00</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="EUR">2143.19</cbc:TaxInclusiveAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">1710.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">1711.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">2036.09</cbc:TaxInclusiveAmount>
     <cbc:AllowanceTotalAmount currencyID="EUR">10.00</cbc:AllowanceTotalAmount>
     <cbc:ChargeTotalAmount currencyID="EUR">11.00</cbc:ChargeTotalAmount>
-    <cbc:PayableAmount currencyID="EUR">2143.19</cbc:PayableAmount>
+    <cbc:PayableAmount currencyID="EUR">2036.09</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
     <cbc:InvoicedQuantity unitCode="HUR">20</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">1710.00</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:MultiplierFactorNumeric>5</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="EUR">90.00</cbc:Amount>
+    </cac:AllowanceCharge>
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>
       <cac:ClassifiedTaxCategory>
