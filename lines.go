@@ -173,7 +173,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &ch.Reason
 		}
 		if ch.Percent != nil {
-			p := ch.Percent.String()
+			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
 		}
 		allowanceCharges = append(allowanceCharges, ac)
@@ -194,7 +194,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &d.Reason
 		}
 		if d.Percent != nil {
-			p := d.Percent.String()
+			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
 		}
 		allowanceCharges = append(allowanceCharges, ac)

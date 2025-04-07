@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b63cba783f43520b8edcb4f3925417dcc0113c2823cf4c6db0ece42213bca663"
+			"val": "e0a4817ff43d930348b35252e9c8489e133807a83a510259b3b032dc787bda0e"
 		}
 	},
 	"doc": {
@@ -90,10 +90,17 @@
 				"quantity": "20",
 				"item": {
 					"name": "Development services",
+					"description": "Development services for project 123",
 					"price": "90.00",
 					"unit": "h"
 				},
 				"sum": "1800.00",
+				"discounts": [
+					{
+						"percent": "10%",
+						"amount": "180.00"
+					}
+				],
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -110,7 +117,6 @@
 		"discounts": [
 			{
 				"i": 1,
-				"code": "88",
 				"reason": "Promotion discount",
 				"amount": "10.00",
 				"taxes": [
@@ -142,7 +148,10 @@
 							"untdid-tax-category": "S"
 						}
 					}
-				]
+				],
+				"ext": {
+					"untdid-charge": "ABK"
+				}
 			}
 		],
 		"ordering": {
@@ -200,6 +209,15 @@
 						"bic": "DNBANOKK"
 					}
 				],
+				"card": {
+					"last4": "1234",
+					"holder": "John Doe"
+				},
+				"direct_debit": {
+					"ref": "1234567890",
+					"creditor": "987654321",
+					"account": "DE89370400440532013000"
+				},
 				"ext": {
 					"untdid-payment-means": "30"
 				}
