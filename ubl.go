@@ -13,6 +13,10 @@ const (
 	PeppolBillingProfileIDDefault = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
 )
 
+// Version is the version of UBL documents that will be generated
+// by this package.
+const Version = "2.1"
+
 // Context is used to ensure that the generated UBL document
 // uses a specific CustomizationID and ProfileID when generating
 // the output document.
