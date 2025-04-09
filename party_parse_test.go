@@ -55,7 +55,8 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, "antonio@salescompany.no", seller.Emails[0].Address)
 		assert.Equal(t, "46211230", seller.Telephones[0].Number)
 		assert.Equal(t, "seller@email.de", seller.Inboxes[0].Email)
-		assert.Equal(t, "EM", seller.Inboxes[0].Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "", seller.Inboxes[0].Scheme.String())
+
 		customer := inv.Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "The Buyercompany", customer.Name)
@@ -131,7 +132,7 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, cbc.Code("123 45"), supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("BE"), supplier.Addresses[0].Country)
 
-		assert.Equal(t, "0151", supplier.Inboxes[0].Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "0151", supplier.Inboxes[0].Scheme.String())
 		assert.Equal(t, "99100100100", supplier.Inboxes[0].Code.String())
 
 	})
