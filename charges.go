@@ -46,7 +46,7 @@ func makeCharge(ch *bill.Charge, ccy string) AllowanceCharge {
 		c.AllowanceChargeReasonCode = &e
 	}
 	if ch.Percent != nil {
-		p := ch.Percent.String()
+		p := ch.Percent.Base().String()
 		c.MultiplierFactorNumeric = &p
 	}
 	if ch.Taxes != nil {
@@ -72,7 +72,7 @@ func makeDiscount(d *bill.Discount, ccy string) AllowanceCharge {
 		c.AllowanceChargeReasonCode = &e
 	}
 	if d.Percent != nil {
-		p := d.Percent.String()
+		p := d.Percent.Base().String()
 		c.MultiplierFactorNumeric = &p
 	}
 	if d.Taxes != nil {
