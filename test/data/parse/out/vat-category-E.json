@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6cd1480b3630a3b075f192da82b1b20c21e37f7f6e708949a6d60674531f451f"
+			"val": "9cb16c90d41f92fa56f4cf79ddc470cb992b411e2035e8a84d5e8734df7b6aa8"
 		}
 	},
 	"doc": {
@@ -26,10 +26,8 @@
 			},
 			"inboxes": [
 				{
-					"code": "7300010000001",
-					"ext": {
-						"iso-scheme-id": "0088"
-					}
+					"scheme": "0088",
+					"code": "7300010000001"
 				}
 			],
 			"addresses": [
@@ -45,10 +43,8 @@
 			"name": "The Buyercompany",
 			"inboxes": [
 				{
-					"code": "DK12345678",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"scheme": "0184",
+					"code": "DK12345678"
 				}
 			],
 			"addresses": [

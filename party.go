@@ -139,6 +139,9 @@ func newParty(party *org.Party) *Party {
 			},
 		}
 		// Override the company address's country code
+		if p.PostalAddress == nil {
+			p.PostalAddress = new(PostalAddress)
+		}
 		p.PostalAddress.Country = &Country{
 			IdentificationCode: tID.Country.String(),
 		}
@@ -162,9 +165,17 @@ func newParty(party *org.Party) *Party {
 	}
 
 	if len(party.Inboxes) > 0 {
-		p.EndpointID = &EndpointID{
-			Value:    party.Inboxes[0].Email,
-			SchemeID: "EM",
+		ib := party.Inboxes[0]
+		if ib.Email != "" {
+			p.EndpointID = &EndpointID{
+				SchemeID: SchemeIDEmail,
+				Value:    ib.Email,
+			}
+		} else if ib.Scheme != "" {
+			p.EndpointID = &EndpointID{
+				SchemeID: ib.Scheme.String(),
+				Value:    ib.Code.String(),
+			}
 		}
 	}
 
