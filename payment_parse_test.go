@@ -1,4 +1,4 @@
-package ubl
+package ubl_test
 
 import (
 	"testing"

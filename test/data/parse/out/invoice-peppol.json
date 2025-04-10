@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c2a435e45faacbefc463fbdc544cfd8fdb0cb1410b0761cba1ecd37cf4b31642"
+			"val": "1a7be5007ab3b5b202e96795b6a0f20661b3406f45ea70b58ab1f1b6a56818ac"
 		}
 	},
 	"doc": {
@@ -35,10 +35,8 @@
 			],
 			"inboxes": [
 				{
-					"code": "99100100100",
-					"ext": {
-						"iso-scheme-id": "0151"
-					}
+					"scheme": "0151",
+					"code": "99100100100"
 				}
 			],
 			"addresses": [
@@ -67,10 +65,8 @@
 			],
 			"inboxes": [
 				{
-					"code": "TBCNTRLS1001",
-					"ext": {
-						"iso-scheme-id": "0007"
-					}
+					"scheme": "0007",
+					"code": "TBCNTRLS1001"
 				}
 			],
 			"addresses": [

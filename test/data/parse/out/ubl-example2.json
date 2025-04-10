@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a4375405196a78931ff8c4a4fad92a102f98bdceb552e380613ff5fcc6cbe11f"
+			"val": "5b72083d00545aa02e14c1e0d8c0d8dc9bc0438fdf38d38f87f7996d527bc60f"
 		}
 	},
 	"doc": {
@@ -387,10 +387,7 @@
 				],
 				"inboxes": [
 					{
-						"email": "seller@email.de",
-						"ext": {
-							"iso-scheme-id": "EM"
-						}
+						"email": "seller@email.de"
 					}
 				],
 				"addresses": [

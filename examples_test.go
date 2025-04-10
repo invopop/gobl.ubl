@@ -1,4 +1,4 @@
-package ubl
+package ubl_test
 
 import (
 	"bytes"
@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
 	"github.com/stretchr/testify/assert"
@@ -88,7 +89,7 @@ func TestParseInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			// Convert UBL XML to GOBL
-			env, err := ParseInvoice(xmlData)
+			env, err := ubl.ParseInvoice(xmlData)
 			require.NoError(t, err)
 
 			env.Head.UUID = staticUUID
@@ -128,12 +129,12 @@ func TestParseInvoice(t *testing.T) {
 }
 
 // testInvoiceFrom creates a UBL Invoice from a GOBL file in the `test/data` folder
-func testInvoiceFrom(name string) (*Invoice, error) {
+func testInvoiceFrom(name string) (*ubl.Invoice, error) {
 	env, err := loadTestEnvelope(name)
 	if err != nil {
 		return nil, err
 	}
-	return ConvertInvoice(env)
+	return ubl.ConvertInvoice(env)
 }
 
 // testLoadXML provides the raw data of a test XML file
@@ -158,7 +159,7 @@ func testParseInvoice(name string) (*gobl.Envelope, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ParseInvoice(data)
+	return ubl.ParseInvoice(data)
 }
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder

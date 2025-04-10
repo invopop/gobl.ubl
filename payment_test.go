@@ -1,8 +1,9 @@
-package ubl
+package ubl_test
 
 import (
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -32,7 +33,7 @@ func TestNewPayment(t *testing.T) {
 
 		inv.Payment.Instructions.Ext = nil
 
-		_, err = ConvertInvoice(env)
+		_, err = ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 }

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d26c5dcc61e61b94d2df953909dbe5d8f45469bac92a44f6456bda4e54412be5"
+			"val": "5a09f9f6bb82c38a65a6d2ee0aca4150b4807208ed52708e0e0f50b6fc648535"
 		}
 	},
 	"doc": {
@@ -40,10 +40,8 @@
 			],
 			"inboxes": [
 				{
-					"code": "7300010000001",
-					"ext": {
-						"iso-scheme-id": "0088"
-					}
+					"scheme": "0088",
+					"code": "7300010000001"
 				}
 			],
 			"addresses": [
@@ -88,10 +86,8 @@
 			],
 			"inboxes": [
 				{
-					"code": "FR23342",
-					"ext": {
-						"iso-scheme-id": "0002"
-					}
+					"scheme": "0002",
+					"code": "FR23342"
 				}
 			],
 			"addresses": [

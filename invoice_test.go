@@ -1,8 +1,9 @@
-package ubl
+package ubl_test
 
 import (
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -17,18 +18,20 @@ func TestInvoiceHeaders(t *testing.T) {
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 
-		code, err := getTypeCode(inv)
+		out, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
 		assert.NoError(t, err)
-		assert.Equal(t, "380", code)
+		assert.Equal(t, "380", out.InvoiceTypeCode)
 
 		inv.Tax = nil
-		_, err = getTypeCode(inv)
+		_, err = ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "tax: (ext: (untdid-document-type: required.).).")
 
 		inv.Tax = &bill.Tax{
 			Ext: tax.Extensions{},
 		}
-		_, err = getTypeCode(inv)
+		_, err = ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "ext: (untdid-document-type: required.).")
 	})
 
@@ -36,11 +39,9 @@ func TestInvoiceHeaders(t *testing.T) {
 		env, err := loadTestEnvelope("invoice-de-de.json")
 		require.NoError(t, err)
 
-		inv, ok := env.Extract().(*bill.Invoice)
-		assert.True(t, ok)
-
-		date := formatDate(inv.IssueDate)
-		assert.Equal(t, "2024-02-13", date)
+		out, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, "2024-02-13", out.IssueDate)
 	})
 
 	t.Run("invoice number", func(t *testing.T) {
@@ -49,12 +50,13 @@ func TestInvoiceHeaders(t *testing.T) {
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
-
-		number := invoiceNumber(inv.Series, inv.Code)
-		assert.Equal(t, "SAMPLE-001", number)
+		out, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, "SAMPLE-001", out.ID)
 
 		inv.Series = ""
-		number = invoiceNumber(inv.Series, inv.Code)
-		assert.Equal(t, "001", number)
+		out, err = ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, "001", out.ID)
 	})
 }

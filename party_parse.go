@@ -21,10 +21,8 @@ func goblParty(party *Party) *org.Party {
 		case "EM": // email
 			oi.Email = eID.Value
 		default:
+			oi.Scheme = cbc.Code(eID.SchemeID)
 			oi.Code = cbc.Code(eID.Value)
-		}
-		oi.Ext = tax.Extensions{
-			iso.ExtKeySchemeID: cbc.Code(eID.SchemeID),
 		}
 		p.Inboxes = append(p.Inboxes, oi)
 	}

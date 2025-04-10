@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "39905afb88801647ee1aacd364b19a69946fa14faee223470e25971d87ccb807"
+			"val": "a67af5f9a943786bb0b800ddb1b05a85d54a9488d8f6062a5a0cfaca7939ebce"
 		}
 	},
 	"doc": {
@@ -70,10 +70,7 @@
 			],
 			"inboxes": [
 				{
-					"email": "info@buyercompany.dk",
-					"ext": {
-						"iso-scheme-id": "EM"
-					}
+					"email": "info@buyercompany.dk"
 				}
 			],
 			"addresses": [
@@ -296,10 +293,7 @@
 				],
 				"inboxes": [
 					{
-						"email": "info@selco.nl",
-						"ext": {
-							"iso-scheme-id": "EM"
-						}
+						"email": "info@selco.nl"
 					}
 				],
 				"addresses": [
