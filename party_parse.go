@@ -9,6 +9,9 @@ import (
 )
 
 func goblParty(party *Party) *org.Party {
+	if party == nil {
+		return nil
+	}
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
