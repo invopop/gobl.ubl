@@ -72,7 +72,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	} else {
 		// Assume XML if not JSON
 
-		env, err := ubl.ParseInvoice(inData)
+		env, err := ubl.Parse(inData)
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}

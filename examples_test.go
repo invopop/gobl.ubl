@@ -89,7 +89,7 @@ func TestParseInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			// Convert UBL XML to GOBL
-			env, err := ubl.ParseInvoice(xmlData)
+			env, err := ubl.Parse(xmlData)
 			require.NoError(t, err)
 
 			env.Head.UUID = staticUUID
@@ -159,7 +159,7 @@ func testParseInvoice(name string) (*gobl.Envelope, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ubl.ParseInvoice(data)
+	return ubl.Parse(data)
 }
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder

@@ -2,10 +2,19 @@
 package ubl
 
 import (
+	"bytes"
+	"encoding/xml"
 	"fmt"
+	"io"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
+)
+
+var (
+	// ErrUnknownDocumentType is returned when the document type
+	// is not recognised.
+	ErrUnknownDocumentType = fmt.Errorf("unknown document type")
 )
 
 // Peppol Billing Profile IDs
@@ -46,24 +55,38 @@ var ContextXRechnung = Context{
 	ProfileID:       PeppolBillingProfileIDDefault,
 }
 
-// ParseInvoice parses a raw UBL Invoice and converts to a GOBL envelope
-func ParseInvoice(ublDoc []byte) (*gobl.Envelope, error) {
-	env := gobl.NewEnvelope()
-	inv, err := parseInvoice(ublDoc)
+// Parse parses a raw UBL document and converts to a GOBL envelope,
+// assuming we're dealing with a known document type.
+func Parse(ublDoc []byte) (*gobl.Envelope, error) {
+	ns, err := extractRootNamespace(ublDoc)
 	if err != nil {
 		return nil, err
 	}
-	if err := env.Insert(inv); err != nil {
+	env := gobl.NewEnvelope()
+	var res any
+	switch ns {
+	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
+		if res, err = parseInvoice(ublDoc); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, ErrUnknownDocumentType
+	}
+
+	// Whatever we get back, try inserting.
+	if err := env.Insert(res); err != nil {
 		return nil, err
 	}
+
 	return env, nil
 }
 
-// ConvertInvoice takes a GOBL envelope and converts to a UBL Invoice or Credit Note.
+// ConvertInvoice takes a GOBL envelope and converts to a UBL document of
+// type Invoice or Credit Note.
 func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	if !ok {
-		return nil, fmt.Errorf("expected bill.Inboice, got %T", env.Document)
+		return nil, fmt.Errorf("expected bill.Invoice, got %T", env.Document)
 	}
 	o := &options{
 		context: ContextEN16931,
@@ -72,6 +95,24 @@ func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 		opt(o)
 	}
 	return newInvoice(inv, o)
+}
+
+func extractRootNamespace(data []byte) (string, error) {
+	dc := xml.NewDecoder(bytes.NewReader(data))
+	for {
+		tk, err := dc.Token()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("error parsing XML: %w", err)
+		}
+		switch t := tk.(type) {
+		case xml.StartElement:
+			return t.Name.Space, nil // Extract and return the namespace
+		}
+	}
+	return "", ErrUnknownDocumentType
 }
 
 type options struct {
