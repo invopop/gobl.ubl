@@ -13,8 +13,12 @@ import (
 
 var (
 	// ErrUnknownDocumentType is returned when the document type
-	// is not recognised.
+	// is not recognized during parsing.
 	ErrUnknownDocumentType = fmt.Errorf("unknown document type")
+
+	// ErrUnsupportedDocumentType is returned when the document type
+	// is not supported for conversion.
+	ErrUnsupportedDocumentType = fmt.Errorf("unsupported document type")
 )
 
 // Peppol Billing Profile IDs
@@ -81,20 +85,35 @@ func Parse(ublDoc []byte) (*gobl.Envelope, error) {
 	return env, nil
 }
 
-// ConvertInvoice takes a GOBL envelope and converts to a UBL document of
-// type Invoice or Credit Note.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	inv, ok := env.Extract().(*bill.Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected bill.Invoice, got %T", env.Document)
-	}
+// Convert takes a GOBL envelope and converts to a UBL document of one
+// of the supported types.
+func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	o := &options{
 		context: ContextEN16931,
 	}
 	for _, opt := range opts {
 		opt(o)
 	}
-	return newInvoice(inv, o)
+	switch doc := env.Extract().(type) {
+	case *bill.Invoice:
+		return newInvoice(doc, o)
+	default:
+		return nil, ErrUnsupportedDocumentType
+	}
+}
+
+// ConvertInvoice is a convenience function that converts a GOBL envelope
+// containing an invoice into a UBL Invoice or CreditNote document.
+func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Convert(env, opts...)
+	if err != nil {
+		return nil, err
+	}
+	inv, ok := doc.(*Invoice)
+	if !ok {
+		return nil, fmt.Errorf("expected invoice, got %T", doc)
+	}
+	return inv, nil
 }
 
 func extractRootNamespace(data []byte) (string, error) {
