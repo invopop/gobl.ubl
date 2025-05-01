@@ -78,7 +78,7 @@
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
       <cbc:AllowanceChargeReason>Special discount</cbc:AllowanceChargeReason>
-      <cbc:MultiplierFactorNumeric>0.10</cbc:MultiplierFactorNumeric>
+      <cbc:MultiplierFactorNumeric>10</cbc:MultiplierFactorNumeric>
       <cbc:Amount currencyID="EUR">180.00</cbc:Amount>
     </cac:AllowanceCharge>
     <cac:Item>

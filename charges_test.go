@@ -22,5 +22,7 @@ func TestNewCharges(t *testing.T) {
 		assert.Equal(t, "88", *doc.AllowanceCharge[1].AllowanceChargeReasonCode)
 		assert.Equal(t, "10.00", doc.AllowanceCharge[1].Amount.Value)
 		assert.Equal(t, "Promotion discount", *doc.AllowanceCharge[1].AllowanceChargeReason)
+
+		assert.Equal(t, "5", *doc.InvoiceLines[0].AllowanceCharge[0].MultiplierFactorNumeric)
 	})
 }
