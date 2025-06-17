@@ -29,9 +29,15 @@ func goblAddLines(in *Invoice, out *bill.Invoice) error {
 		line := &bill.Line{
 			Quantity: num.MakeAmount(1, 0),
 			Item: &org.Item{
-				Name:  docLine.Item.Name,
 				Price: &price,
 			},
+		}
+		if i := docLine.Item; i != nil {
+			if i.Name != "" {
+				line.Item.Name = docLine.Item.Name
+			} else if i.Description != nil {
+				line.Item.Name = *docLine.Item.Description
+			}
 		}
 
 		ids := make([]*org.Identity, 0)
