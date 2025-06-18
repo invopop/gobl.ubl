@@ -23,129 +23,137 @@ func goblAddLines(in *Invoice, out *bill.Invoice) error {
 	lines := make([]*bill.Line, 0, len(items))
 
 	for _, docLine := range items {
-		if docLine.Price == nil {
-			return errors.New("invalid input: invoice line price is required")
-		}
-		if docLine.Item == nil {
-			return errors.New("invalid input: invoice line item is required")
-		}
-
-		price, err := num.AmountFromString(docLine.Price.PriceAmount.Value)
+		line, err := goblLine(&docLine)
 		if err != nil {
 			return err
 		}
-		line := &bill.Line{
-			Quantity: num.MakeAmount(1, 0),
-			Item: &org.Item{
-				Name:  docLine.Item.Name,
-				Price: &price,
-			},
-		}
-
-		ids := make([]*org.Identity, 0)
-		notes := make([]*org.Note, 0)
-
-		iq := docLine.InvoicedQuantity
-		if docLine.CreditedQuantity != nil {
-			iq = docLine.CreditedQuantity
-		}
-		if iq != nil {
-			line.Quantity, err = num.AmountFromString(iq.Value)
-			if err != nil {
-				return err
-			}
-
-			if iq.UnitCode != "" {
-				line.Item.Unit = goblUnitFromUNECE(cbc.Code(iq.UnitCode))
-			}
-		}
-
-		if len(docLine.Note) > 0 {
-			for _, note := range docLine.Note {
-				if note != "" {
-					notes = append(notes, &org.Note{
-						Text: note,
-					})
-				}
-			}
-		}
-
-		if docLine.Item.SellersItemIdentification != nil && docLine.Item.SellersItemIdentification.ID != nil {
-			line.Item.Ref = cbc.Code(docLine.Item.SellersItemIdentification.ID.Value)
-		}
-
-		// As there is no specific GOBL field for BT-133, we use a note to store it
-		if docLine.AccountingCost != nil {
-			notes = append(notes, &org.Note{
-				Key:  "buyer-accounting-ref",
-				Text: *docLine.AccountingCost,
-			})
-		}
-
-		line.Item.Identities = goblIdentities(&docLine)
-
-		if docLine.Item.Description != nil {
-			line.Item.Description = *docLine.Item.Description
-		}
-
-		if docLine.Item.OriginCountry != nil {
-			line.Item.Origin = l10n.ISOCountryCode(docLine.Item.OriginCountry.IdentificationCode)
-		}
-
-		if ctc := docLine.Item.ClassifiedTaxCategory; ctc != nil && ctc.TaxScheme != nil {
-			line.Taxes = tax.Set{
-				{
-					Category: cbc.Code(ctc.TaxScheme.ID),
-				},
-			}
-			if ctc.ID != nil {
-				line.Taxes[0].Ext = tax.Extensions{
-					untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
-				}
-			}
-			if ctc.Percent != nil {
-				percentStr := *ctc.Percent
-				if !strings.HasSuffix(percentStr, "%") {
-					percentStr += "%"
-				}
-				percent, _ := num.PercentageFromString(percentStr)
-				if line.Taxes == nil {
-					line.Taxes = make([]*tax.Combo, 1)
-					line.Taxes[0] = &tax.Combo{}
-				}
-				line.Taxes[0].Percent = &percent
-			}
-		}
-
-		if docLine.AllowanceCharge != nil {
-			line, err = goblLineCharges(docLine.AllowanceCharge, line)
-			if err != nil {
-				return err
-			}
-		}
-
-		if docLine.Item.AdditionalItemProperty != nil {
-			line.Item.Meta = make(cbc.Meta)
-			for _, property := range *docLine.Item.AdditionalItemProperty {
-				if property.Name != "" && property.Value != "" {
-					key := formatKey(property.Name)
-					line.Item.Meta[key] = property.Value
-				}
-			}
-		}
-
-		if len(ids) > 0 {
-			line.Item.Identities = ids
-		}
-
-		if len(notes) > 0 {
-			line.Notes = notes
-		}
-
 		lines = append(lines, line)
 	}
 	out.Lines = lines
 	return nil
+}
+
+func goblLine(docLine *InvoiceLine) (*bill.Line, error) {
+	if docLine.Price == nil {
+		return nil, errors.New("invalid input: invoice line price is required")
+	}
+	if docLine.Item == nil {
+		return nil, errors.New("invalid input: invoice line item is required")
+	}
+
+	price, err := num.AmountFromString(docLine.Price.PriceAmount.Value)
+	if err != nil {
+		return nil, err
+	}
+	line := &bill.Line{
+		Quantity: num.MakeAmount(1, 0),
+		Item: &org.Item{
+			Name:  docLine.Item.Name,
+			Price: &price,
+		},
+	}
+
+	ids := make([]*org.Identity, 0)
+	notes := make([]*org.Note, 0)
+
+	iq := docLine.InvoicedQuantity
+	if docLine.CreditedQuantity != nil {
+		iq = docLine.CreditedQuantity
+	}
+	if iq != nil {
+		line.Quantity, err = num.AmountFromString(iq.Value)
+		if err != nil {
+			return nil, err
+		}
+
+		if iq.UnitCode != "" {
+			line.Item.Unit = goblUnitFromUNECE(cbc.Code(iq.UnitCode))
+		}
+	}
+
+	if len(docLine.Note) > 0 {
+		for _, note := range docLine.Note {
+			if note != "" {
+				notes = append(notes, &org.Note{
+					Text: note,
+				})
+			}
+		}
+	}
+
+	if docLine.Item.SellersItemIdentification != nil && docLine.Item.SellersItemIdentification.ID != nil {
+		line.Item.Ref = cbc.Code(docLine.Item.SellersItemIdentification.ID.Value)
+	}
+
+	// As there is no specific GOBL field for BT-133, we use a note to store it
+	if docLine.AccountingCost != nil {
+		notes = append(notes, &org.Note{
+			Key:  "buyer-accounting-ref",
+			Text: *docLine.AccountingCost,
+		})
+	}
+
+	line.Item.Identities = goblIdentities(docLine)
+
+	if docLine.Item.Description != nil {
+		line.Item.Description = *docLine.Item.Description
+	}
+
+	if docLine.Item.OriginCountry != nil {
+		line.Item.Origin = l10n.ISOCountryCode(docLine.Item.OriginCountry.IdentificationCode)
+	}
+
+	if ctc := docLine.Item.ClassifiedTaxCategory; ctc != nil && ctc.TaxScheme != nil {
+		line.Taxes = tax.Set{
+			{
+				Category: cbc.Code(ctc.TaxScheme.ID),
+			},
+		}
+		if ctc.ID != nil {
+			line.Taxes[0].Ext = tax.Extensions{
+				untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
+			}
+		}
+		if ctc.Percent != nil {
+			percentStr := *ctc.Percent
+			if !strings.HasSuffix(percentStr, "%") {
+				percentStr += "%"
+			}
+			percent, _ := num.PercentageFromString(percentStr)
+			if line.Taxes == nil {
+				line.Taxes = make([]*tax.Combo, 1)
+				line.Taxes[0] = &tax.Combo{}
+			}
+			line.Taxes[0].Percent = &percent
+		}
+	}
+
+	if docLine.AllowanceCharge != nil {
+		line, err = goblLineCharges(docLine.AllowanceCharge, line)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if docLine.Item.AdditionalItemProperty != nil {
+		line.Item.Meta = make(cbc.Meta)
+		for _, property := range *docLine.Item.AdditionalItemProperty {
+			if property.Name != "" && property.Value != "" {
+				key := formatKey(property.Name)
+				line.Item.Meta[key] = property.Value
+			}
+		}
+	}
+
+	if len(ids) > 0 {
+		line.Item.Identities = ids
+	}
+
+	if len(notes) > 0 {
+		line.Notes = notes
+	}
+
+	return line, nil
 }
 
 func goblIdentities(docLine *InvoiceLine) []*org.Identity {
