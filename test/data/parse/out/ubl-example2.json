@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5b72083d00545aa02e14c1e0d8c0d8dc9bc0438fdf38d38f87f7996d527bc60f"
+			"val": "d4f4439ed840615f4a66565ad6dfbd7abe8015ff1f4a874b03c8b7fb7cf5c3cf"
 		}
 	},
 	"doc": {
@@ -86,6 +86,7 @@
 			{
 				"i": 1,
 				"quantity": "2",
+				"cost": "BookingCode001",
 				"item": {
 					"ref": "JB007",
 					"name": "Laptop computer",
@@ -139,16 +140,13 @@
 				"notes": [
 					{
 						"text": "Scratch on box"
-					},
-					{
-						"key": "buyer-accounting-ref",
-						"text": "BookingCode001"
 					}
 				]
 			},
 			{
 				"i": 2,
 				"quantity": "-1",
+				"cost": "BookingCode002",
 				"item": {
 					"ref": "JB008",
 					"name": "Returned \"Advanced computing\" book",
@@ -185,16 +183,13 @@
 				"notes": [
 					{
 						"text": "Cover is slightly damaged."
-					},
-					{
-						"key": "buyer-accounting-ref",
-						"text": "BookingCode002"
 					}
 				]
 			},
 			{
 				"i": 3,
 				"quantity": "2",
+				"cost": "BookingCode003",
 				"item": {
 					"ref": "JB009",
 					"name": "\"Computing for dummies\" book",
@@ -227,17 +222,12 @@
 						}
 					}
 				],
-				"total": "4.96",
-				"notes": [
-					{
-						"key": "buyer-accounting-ref",
-						"text": "BookingCode003"
-					}
-				]
+				"total": "4.96"
 			},
 			{
 				"i": 4,
 				"quantity": "-1",
+				"cost": "BookingCode004",
 				"item": {
 					"ref": "JB010",
 					"name": "Returned IBM 5150 desktop",
@@ -270,17 +260,12 @@
 						}
 					}
 				],
-				"total": "-25.00",
-				"notes": [
-					{
-						"key": "buyer-accounting-ref",
-						"text": "BookingCode004"
-					}
-				]
+				"total": "-25.00"
 			},
 			{
 				"i": 5,
 				"quantity": "250",
+				"cost": "BookingCode005",
 				"item": {
 					"ref": "JB011",
 					"name": "Network cable",
@@ -316,13 +301,7 @@
 						}
 					}
 				],
-				"total": "187.50",
-				"notes": [
-					{
-						"key": "buyer-accounting-ref",
-						"text": "BookingCode005"
-					}
-				]
+				"total": "187.50"
 			}
 		],
 		"discounts": [

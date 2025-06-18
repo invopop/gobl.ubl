@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "777e7e46a5023e73c5eb2ee2a4628e296990420b2804db4673580ad20f120c23"
+			"val": "c614aeab70ed5425ebdb2758a9502881aab1c1ddf6405ebb890c4f7b24d076f2"
 		}
 	},
 	"doc": {
@@ -109,6 +109,7 @@
 			{
 				"i": 1,
 				"quantity": "-7",
+				"cost": "Konteringsstreng",
 				"item": {
 					"name": "item name",
 					"identities": [
@@ -138,13 +139,7 @@
 						}
 					}
 				],
-				"total": "-2800.00",
-				"notes": [
-					{
-						"key": "buyer-accounting-ref",
-						"text": "Konteringsstreng"
-					}
-				]
+				"total": "-2800.00"
 			},
 			{
 				"i": 2,

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5a09f9f6bb82c38a65a6d2ee0aca4150b4807208ed52708e0e0f50b6fc648535"
+			"val": "3c28627e7f777c84874677269c30a63a3fa51ff2dc4982a068d960d744f1216d"
 		}
 	},
 	"doc": {
@@ -104,6 +104,7 @@
 			{
 				"i": 1,
 				"quantity": "10",
+				"cost": "Konteringsstreng",
 				"item": {
 					"ref": "97iugug876",
 					"name": "item name",
@@ -138,16 +139,13 @@
 				"notes": [
 					{
 						"text": "Testing note on line level"
-					},
-					{
-						"key": "buyer-accounting-ref",
-						"text": "Konteringsstreng"
 					}
 				]
 			},
 			{
 				"i": 2,
 				"quantity": "10",
+				"cost": "Konteringsstreng",
 				"item": {
 					"ref": "97iugug876",
 					"name": "item name",
@@ -177,17 +175,12 @@
 						}
 					}
 				],
-				"total": "2000.00",
-				"notes": [
-					{
-						"key": "buyer-accounting-ref",
-						"text": "Konteringsstreng"
-					}
-				]
+				"total": "2000.00"
 			},
 			{
 				"i": 3,
 				"quantity": "10",
+				"cost": "Konteringsstreng",
 				"item": {
 					"ref": "97iugug876",
 					"name": "item name",
@@ -220,13 +213,7 @@
 						}
 					}
 				],
-				"total": "900.00",
-				"notes": [
-					{
-						"key": "buyer-accounting-ref",
-						"text": "Konteringsstreng"
-					}
-				]
+				"total": "900.00"
 			}
 		],
 		"discounts": [

@@ -89,8 +89,14 @@ func TestParseInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			// Convert UBL XML to GOBL
-			env, err := ubl.ParseInvoice(xmlData)
+			env, err := ubl.Parse(xmlData)
 			require.NoError(t, err)
+
+			// Unfortunately, the sample UBL documents have lots of errors, including
+			// missing exchange rate data and invalid Tax ID codes. We're disabling
+			// validation here, but periodically it'd be good to re-enable and check
+			// for any major issues.
+			// require.NoError(t, env.Validate())
 
 			env.Head.UUID = staticUUID
 			if inv, ok := env.Extract().(*bill.Invoice); ok {
@@ -159,7 +165,7 @@ func testParseInvoice(name string) (*gobl.Envelope, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ubl.ParseInvoice(data)
+	return ubl.Parse(data)
 }
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder

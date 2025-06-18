@@ -87,7 +87,8 @@ type PartyTaxScheme struct {
 
 // TaxScheme represents a tax scheme
 type TaxScheme struct {
-	ID string `xml:"cbc:ID"`
+	ID          string `xml:"cbc:ID"`
+	TaxTypeCode string `xml:"cbc:TaxTypeCode,omitempty"`
 }
 
 // PartyLegalEntity represents the legal entity of a party
