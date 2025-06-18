@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a67af5f9a943786bb0b800ddb1b05a85d54a9488d8f6062a5a0cfaca7939ebce"
+			"val": "118bcef38e833334255159b0987738514bc4d7b66935696594afd9b22211e761"
 		}
 	},
 	"doc": {
@@ -98,6 +98,7 @@
 			{
 				"i": 1,
 				"quantity": "1000",
+				"cost": "ACC7654",
 				"item": {
 					"ref": "JB007",
 					"name": "Printing paper",
@@ -158,16 +159,13 @@
 				"notes": [
 					{
 						"text": "first line"
-					},
-					{
-						"key": "buyer-accounting-ref",
-						"text": "ACC7654"
 					}
 				]
 			},
 			{
 				"i": 2,
 				"quantity": "100",
+				"cost": "ACC7654",
 				"item": {
 					"ref": "JB008",
 					"name": "Parker Pen",
@@ -190,10 +188,6 @@
 				"notes": [
 					{
 						"text": "second line"
-					},
-					{
-						"key": "buyer-accounting-ref",
-						"text": "ACC7654"
 					}
 				]
 			},

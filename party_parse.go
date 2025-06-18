@@ -97,7 +97,13 @@ func goblParty(party *Party) *org.Party {
 				}
 				sc := cbc.Code(pts.TaxScheme.ID)
 				if p.TaxID.GetScheme() != sc {
-					p.TaxID.Scheme = cbc.Code(pts.TaxScheme.ID)
+					var scheme cbc.Code
+					if pts.TaxScheme.TaxTypeCode != "" {
+						scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
+					} else {
+						scheme = cbc.Code(pts.TaxScheme.ID)
+					}
+					p.TaxID.Scheme = scheme
 				}
 			} else {
 				id := &org.Identity{

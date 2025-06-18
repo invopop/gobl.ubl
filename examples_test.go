@@ -92,6 +92,12 @@ func TestParseInvoice(t *testing.T) {
 			env, err := ubl.Parse(xmlData)
 			require.NoError(t, err)
 
+			// Unfortunately, the sample UBL documents have lots of errors, including
+			// missing exchange rate data and invalid Tax ID codes. We're disabling
+			// validation here, but periodically it'd be good to re-enable and check
+			// for any major issues.
+			// require.NoError(t, env.Validate())
+
 			env.Head.UUID = staticUUID
 			if inv, ok := env.Extract().(*bill.Invoice); ok {
 				inv.UUID = staticUUID
