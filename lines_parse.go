@@ -1,6 +1,7 @@
 package ubl
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -22,6 +23,13 @@ func goblAddLines(in *Invoice, out *bill.Invoice) error {
 	lines := make([]*bill.Line, 0, len(items))
 
 	for _, docLine := range items {
+		if docLine.Price == nil {
+			return errors.New("invalid input: invoice line price is required")
+		}
+		if docLine.Item == nil {
+			return errors.New("invalid input: invoice line item is required")
+		}
+
 		price, err := num.AmountFromString(docLine.Price.PriceAmount.Value)
 		if err != nil {
 			return err
