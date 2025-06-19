@@ -93,13 +93,14 @@
 				"discounts": [
 					{
 						"reason": "Damage",
-						"amount": "12.00"
+						"percent": "1%",
+						"amount": "18.00"
 					}
 				],
 				"charges": [
 					{
 						"reason": "Testing",
-						"amount": "12.00"
+						"amount": "18.00"
 					}
 				],
 				"taxes": [
