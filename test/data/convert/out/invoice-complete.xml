@@ -170,7 +170,7 @@
     <cbc:LineExtensionAmount currencyID="EUR">1710.00</cbc:LineExtensionAmount>
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
-      <cbc:MultiplierFactorNumeric>0.05</cbc:MultiplierFactorNumeric>
+      <cbc:MultiplierFactorNumeric>5</cbc:MultiplierFactorNumeric>
       <cbc:Amount currencyID="EUR">90.00</cbc:Amount>
     </cac:AllowanceCharge>
     <cac:Item>

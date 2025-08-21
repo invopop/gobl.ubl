@@ -110,12 +110,13 @@
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
       <cbc:AllowanceChargeReason>Testing</cbc:AllowanceChargeReason>
-      <cbc:Amount currencyID="EUR">12.00</cbc:Amount>
+      <cbc:Amount currencyID="EUR">18.00</cbc:Amount>
     </cac:AllowanceCharge>
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
       <cbc:AllowanceChargeReason>Damage</cbc:AllowanceChargeReason>
-      <cbc:Amount currencyID="EUR">12.00</cbc:Amount>
+      <cbc:MultiplierFactorNumeric>1</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="EUR">18.00</cbc:Amount>
     </cac:AllowanceCharge>
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>
