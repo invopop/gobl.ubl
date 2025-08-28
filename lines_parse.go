@@ -43,6 +43,16 @@ func goblConvertLine(docLine *InvoiceLine) (*bill.Line, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if docLine.Price.BaseQuantity != nil {
+		// Base quantity is the number of item units to which the price applies
+		baseQuantity, err := num.AmountFromString(docLine.Price.BaseQuantity.Value)
+		if err != nil {
+			return nil, err
+		}
+		price = price.Divide(baseQuantity)
+	}
+
 	line := &bill.Line{
 		Quantity: num.MakeAmount(1, 0),
 		Item: &org.Item{

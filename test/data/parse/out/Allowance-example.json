@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6f35aa94c8fd506d9115bdea9b11f04a0f4a8919a9e874cfe01377d0f19756ff"
+			"val": "b967389763a8a34ab008247d4806984ea841cf6061b205fda0c7107e5ec31992"
 		}
 	},
 	"doc": {
@@ -170,13 +170,13 @@
 						}
 					],
 					"description": "Description of item",
-					"price": "200.00",
+					"price": "100.00",
 					"unit": "one",
 					"meta": {
 						"additionalitemname": "AdditionalItemValue"
 					}
 				},
-				"sum": "2000.00",
+				"sum": "1000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -186,7 +186,7 @@
 						}
 					}
 				],
-				"total": "2000.00",
+				"total": "1000.00",
 				"notes": [
 					{
 						"text": "Testing note on line level"
@@ -307,7 +307,7 @@
 				"due_dates": [
 					{
 						"date": "2017-12-01",
-						"amount": "8186.25",
+						"amount": "7186.25",
 						"percent": "100%"
 					}
 				],
@@ -351,10 +351,10 @@
 			"date": "2017-11-01"
 		},
 		"totals": {
-			"sum": "6949.00",
+			"sum": "5949.00",
 			"discount": "200.00",
 			"charge": "200.00",
-			"total": "6949.00",
+			"total": "5949.00",
 			"taxes": {
 				"categories": [
 					{
@@ -372,7 +372,7 @@
 								"ext": {
 									"untdid-tax-category": "E"
 								},
-								"base": "2000.00",
+								"base": "1000.00",
 								"percent": "0.0%",
 								"amount": "0.00"
 							},
@@ -388,8 +388,8 @@
 				"sum": "1237.25"
 			},
 			"tax": "1237.25",
-			"total_with_tax": "8186.25",
-			"payable": "8186.25"
+			"total_with_tax": "7186.25",
+			"payable": "7186.25"
 		},
 		"notes": [
 			{
