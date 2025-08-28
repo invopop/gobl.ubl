@@ -98,4 +98,27 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
 		assert.Equal(t, "15%", line.Taxes[0].Percent.String())
 	})
+
+	// Test BaseQuantity logic
+	t.Run("BaseQuantity price calculation", func(t *testing.T) {
+		e, err := testParseInvoice("Allowance-example.xml")
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		lines := inv.Lines
+		assert.NotNil(t, lines)
+		assert.Len(t, lines, 3)
+
+		// Check the second line which has BaseQuantity = 2 and PriceAmount = 200
+		// Expected unit price should be 200/2 = 100
+		line := lines[1]
+		assert.Equal(t, "100.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (200/2=100)")
+
+		// Check the first line which has BaseQuantity = 1 and PriceAmount = 410
+		// Expected unit price should be 410/1 = 410 (no change)
+		line = lines[0]
+		assert.Equal(t, "410.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (410/1=410)")
+	})
 }
