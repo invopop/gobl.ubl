@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ef14e2cb7d0f1f8b8e589fdf9136114dc8699231e791197e768e65f519b47692"
+			"val": "0af3f44d9a57141330ace03d37cd883dd01bae1acb79ac328a160925983ced20"
 		}
 	},
 	"doc": {
@@ -129,6 +129,7 @@
 				"discounts": [
 					{
 						"reason": "Loyal customer",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {
@@ -139,6 +140,7 @@
 				"charges": [
 					{
 						"reason": "Packaging",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {

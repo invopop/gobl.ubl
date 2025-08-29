@@ -178,6 +178,15 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 			return nil, err
 		}
 		ch.Percent = &percent
+
+		// Check if there is a base amount
+		if ac.BaseAmount != nil {
+			base, err := num.AmountFromString(ac.BaseAmount.Value)
+			if err != nil {
+				return nil, err
+			}
+			ch.Base = &base
+		}
 	}
 	return ch, nil
 }
@@ -207,6 +216,15 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 			return nil, err
 		}
 		d.Percent = &p
+
+		// Check if there is a base amount
+		if ac.BaseAmount != nil {
+			base, err := num.AmountFromString(ac.BaseAmount.Value)
+			if err != nil {
+				return nil, err
+			}
+			d.Base = &base
+		}
 	}
 	return d, nil
 }
