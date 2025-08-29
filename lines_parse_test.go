@@ -1,8 +1,10 @@
 package ubl_test
 
 import (
+	"strings"
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
@@ -120,5 +122,13 @@ func TestParseLines(t *testing.T) {
 		// Expected unit price should be 410/1 = 410 (no change)
 		line = lines[0]
 		assert.Equal(t, "410.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (410/1=410)")
+
+		// Test the convert amount from String error handling
+		data, err := testLoadXML("Allowance-example.xml")
+		require.NoError(t, err)
+		invalidXML := strings.ReplaceAll(string(data), `<cbc:BaseAmount currencyID="EUR">1000</cbc:BaseAmount>`, `<cbc:BaseAmount currencyID="EUR">invalid-amount</cbc:BaseAmount>`)
+		_, err = ubl.Parse([]byte(invalidXML))
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid major number")
 	})
 }

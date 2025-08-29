@@ -1,8 +1,10 @@
 package ubl_test
 
 import (
+	"strings"
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -127,4 +129,20 @@ func TestParseCharges(t *testing.T) {
 		assert.Nil(t, lineDiscount.Base)
 	})
 
+}
+
+func TestBaseAmountErrorHandling(t *testing.T) {
+	t.Run("invalid BaseAmount", func(t *testing.T) {
+		// Take the Allowance-example.xml content and modify the BaseAmount value to be invalid
+		data, err := testLoadXML("Allowance-example.xml")
+		require.NoError(t, err)
+
+		// Replace a valid BaseAmount with an invalid one
+		invalidXML := strings.ReplaceAll(string(data), `<cbc:BaseAmount currencyID="EUR">1000</cbc:BaseAmount>`, `<cbc:BaseAmount currencyID="EUR">invalid-amount</cbc:BaseAmount>`)
+
+		// Try to parse the modified XML - should fail due to invalid BaseAmount
+		_, err = ubl.Parse([]byte(invalidXML))
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid major number")
+	})
 }
