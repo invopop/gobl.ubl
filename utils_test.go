@@ -68,8 +68,8 @@ func TestTagCodeParse(t *testing.T) {
 		input    string
 		expected []cbc.Key
 	}{
-		{"Self-billed invoice", "389", []cbc.Key{"self-billed"}},
-		{"Partial invoice", "326", []cbc.Key{"partial"}},
+		{"Self-billed invoice", "389", []cbc.Key{tax.TagSelfBilled}},
+		{"Partial invoice", "326", []cbc.Key{tax.TagPartial}},
 		{"Self-billed credit note", "261", []cbc.Key{tax.TagSelfBilled}},
 		{"Standard invoice - no tag", "380", nil},
 		{"Credit note - no tag", "381", nil},
