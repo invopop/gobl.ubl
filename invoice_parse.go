@@ -21,10 +21,11 @@ var invoiceTypeMap = map[string]cbc.Key{
 	"261": bill.InvoiceTypeCreditNote,
 }
 
+// InvoiceTagMap maps UBL invoice type codes to GOBL tax tags.
 var InvoiceTagMap = map[string][]cbc.Key{
-	"389": []cbc.Key{tax.TagSelfBilled},
-	"326": []cbc.Key{tax.TagPartial},
-	"261": []cbc.Key{tax.TagSelfBilled},
+	"389": {tax.TagSelfBilled},
+	"326": {tax.TagPartial},
+	"261": {tax.TagSelfBilled},
 }
 
 // parseInvoice takes the provided raw XML document and attempts to build
@@ -58,7 +59,7 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 	tags := tagCodeParse(typeCode)
 
 	if len(tags) != 0 {
-		out.Tags.SetTags(tags...)
+		out.SetTags(tags...)
 	}
 
 	issueDate, err := parseDate(in.IssueDate)
@@ -145,7 +146,6 @@ func typeCodeParse(typeCode string) cbc.Key {
 
 // tagCodeParse maps UBL invoice type to GOBL equivalent tax tag.
 func tagCodeParse(typeCode string) []cbc.Key {
-
 	if val, ok := InvoiceTagMap[typeCode]; ok {
 		return val
 	}

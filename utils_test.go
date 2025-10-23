@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -69,20 +70,16 @@ func TestTagCodeParse(t *testing.T) {
 	}{
 		{"Self-billed invoice", "389", []cbc.Key{"self-billed"}},
 		{"Partial invoice", "326", []cbc.Key{"partial"}},
-		{"Self-billed credit note", "261", []cbc.Key{"self-billed"}},
-		{"Standard invoice - no tag", "380", []cbc.Key{}},
-		{"Credit note - no tag", "381", []cbc.Key{}},
-		{"Unknown code - no tag", "999", []cbc.Key{}},
+		{"Self-billed credit note", "261", []cbc.Key{tax.TagSelfBilled}},
+		{"Standard invoice - no tag", "380", nil},
+		{"Credit note - no tag", "381", nil},
+		{"Unknown code - no tag", "999", nil},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tagCodeParse(tt.input)
-			resultStrings := make([]cbc.Key, len(result))
-			for i, key := range result {
-				resultStrings[i] = key
-			}
-			assert.Equal(t, tt.expected, resultStrings)
+			assert.Equal(t, tt.expected, result)
 		})
 	}
 }

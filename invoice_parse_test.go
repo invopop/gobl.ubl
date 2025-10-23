@@ -52,7 +52,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 		require.True(t, ok)
 
 		assert.Equal(t, bill.InvoiceTypeStandard, inv.Type)
-		assert.True(t, inv.Tags.HasTags(tax.TagSelfBilled), "should have self-billed tag")
+		assert.True(t, inv.HasTags(tax.TagSelfBilled), "should have self-billed tag")
 	})
 
 	t.Run("partial invoice (326)", func(t *testing.T) {
@@ -63,7 +63,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 		require.True(t, ok)
 
 		assert.Equal(t, bill.InvoiceTypeStandard, inv.Type)
-		assert.True(t, inv.Tags.HasTags(tax.TagPartial), "should have partial tag")
+		assert.True(t, inv.HasTags(tax.TagPartial), "should have partial tag")
 	})
 
 	t.Run("self-billed credit note (261)", func(t *testing.T) {
@@ -74,7 +74,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 		require.True(t, ok)
 
 		assert.Equal(t, bill.InvoiceTypeCreditNote, inv.Type)
-		assert.True(t, inv.Tags.HasTags(tax.TagSelfBilled), "should have self-billed tag")
+		assert.True(t, inv.HasTags(tax.TagSelfBilled), "should have self-billed tag")
 	})
 }
 
@@ -86,7 +86,7 @@ func TestParseInvoiceTags(t *testing.T) {
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
-		assert.True(t, inv.Tags.HasTags(tax.TagSelfBilled), "should have self-billed tag")
+		assert.True(t, inv.HasTags(tax.TagSelfBilled), "should have self-billed tag")
 	})
 
 	t.Run("invoice with partial tag", func(t *testing.T) {
@@ -96,7 +96,7 @@ func TestParseInvoiceTags(t *testing.T) {
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
-		assert.True(t, inv.Tags.HasTags(tax.TagPartial), "should have partial tag")
+		assert.True(t, inv.HasTags(tax.TagPartial), "should have partial tag")
 	})
 
 	t.Run("credit note with self-billed tag", func(t *testing.T) {
@@ -106,7 +106,7 @@ func TestParseInvoiceTags(t *testing.T) {
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
-		assert.True(t, inv.Tags.HasTags(tax.TagSelfBilled), "should have self-billed tag")
+		assert.True(t, inv.HasTags(tax.TagSelfBilled), "should have self-billed tag")
 	})
 
 	t.Run("standard invoice without tags", func(t *testing.T) {
@@ -116,8 +116,8 @@ func TestParseInvoiceTags(t *testing.T) {
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
-		assert.False(t, inv.Tags.HasTags(tax.TagSelfBilled), "standard invoice should not have self-billed tag")
-		assert.False(t, inv.Tags.HasTags(tax.TagPartial), "standard invoice should not have partial tag")
+		assert.False(t, inv.HasTags(tax.TagSelfBilled), "standard invoice should not have self-billed tag")
+		assert.False(t, inv.HasTags(tax.TagPartial), "standard invoice should not have partial tag")
 	})
 }
 
@@ -177,11 +177,11 @@ func TestParseInvoiceTypeAndTagCombinations(t *testing.T) {
 			assert.Equal(t, tt.expectedType, string(inv.Type), "invoice type mismatch")
 
 			if tt.expectedTags == nil {
-				assert.False(t, inv.Tags.HasTags(tax.TagSelfBilled), "should not have self-billed tag")
-				assert.False(t, inv.Tags.HasTags(tax.TagPartial), "should not have partial tag")
+				assert.False(t, inv.HasTags(tax.TagSelfBilled), "should not have self-billed tag")
+				assert.False(t, inv.HasTags(tax.TagPartial), "should not have partial tag")
 			} else {
 				for _, tag := range tt.expectedTags {
-					assert.True(t, inv.Tags.HasTags(cbc.Key(tag)), "missing expected tag: %s", tag)
+					assert.True(t, inv.HasTags(cbc.Key(tag)), "missing expected tag: %s", tag)
 				}
 			}
 		})
