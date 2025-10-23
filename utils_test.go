@@ -41,10 +41,14 @@ func TestTypeCodeParse(t *testing.T) {
 		input    string
 		expected string
 	}{
+		{"Proforma invoice", "325", "proforma"},
 		{"Standard invoice", "380", "standard"},
 		{"Credit note", "381", "credit-note"},
-		{"Corrective invoice", "384", "corrective"},
 		{"Debit note", "383", "debit-note"},
+		{"Corrective invoice", "384", "corrective"},
+		{"Self-billed invoice", "389", "standard"},
+		{"Partial invoice", "326", "standard"},
+		{"Self-billed credit note", "261", "credit-note"},
 		{"Unknown type code", "999", "other"},
 	}
 
@@ -52,6 +56,33 @@ func TestTypeCodeParse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := typeCodeParse(tt.input)
 			assert.Equal(t, tt.expected, string(result))
+		})
+	}
+}
+
+// Define tests for the TagCodeParse function
+func TestTagCodeParse(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected []cbc.Key
+	}{
+		{"Self-billed invoice", "389", []cbc.Key{"self-billed"}},
+		{"Partial invoice", "326", []cbc.Key{"partial"}},
+		{"Self-billed credit note", "261", []cbc.Key{"self-billed"}},
+		{"Standard invoice - no tag", "380", []cbc.Key{}},
+		{"Credit note - no tag", "381", []cbc.Key{}},
+		{"Unknown code - no tag", "999", []cbc.Key{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tagCodeParse(tt.input)
+			resultStrings := make([]cbc.Key, len(result))
+			for i, key := range result {
+				resultStrings[i] = key
+			}
+			assert.Equal(t, tt.expected, resultStrings)
 		})
 	}
 }

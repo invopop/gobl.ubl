@@ -4,15 +4,18 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e375b241b7e57ca44342cb9acfc1cd62d397d9fc38d8e79fee4c7002fcceaa02"
+			"val": "1d2b544b4e52139f8682c611d4803f948eaf0e9a2137bb4180543a1bf0e6180b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$tags": [
+			"self-billed"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"code": "Snippet1",
+		"code": "SelfBilled1",
 		"issue_date": "2017-11-13",
 		"currency": "EUR",
 		"tax": {

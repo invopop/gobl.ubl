@@ -4,15 +4,18 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e375b241b7e57ca44342cb9acfc1cd62d397d9fc38d8e79fee4c7002fcceaa02"
+			"val": "3cfd099090c86cb1b21d1a375d7b2952431a17dd1b44f1e258e1c1341175ad67"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$tags": [
+			"partial"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"code": "Snippet1",
+		"code": "Partial1",
 		"issue_date": "2017-11-13",
 		"currency": "EUR",
 		"tax": {

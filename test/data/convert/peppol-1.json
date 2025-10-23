@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1844ebe928f4b50c3a0ee9b22f9711f29983d7630785445f0378c3a99f63232c"
+			"val": "da10590f29f7eb95a399a5f3c37023fe7756845e02192d1312b15d1ec0f3c6e1"
 		}
 	},
 	"doc": {
@@ -63,6 +63,16 @@
 					"scheme": "9920",
 					"code": "54387763P"
 				}
+			],
+			"addresses": [
+				{
+					"num": "10",
+					"street": "Avenida de la Constitución",
+					"locality": "Sevilla",
+					"region": "Andalucía",
+					"code": "41001",
+					"country": "ES"
+				}
 			]
 		},
 		"lines": [
@@ -85,7 +95,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "21.0%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -95,6 +106,17 @@
 				"total": "1620.00"
 			}
 		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-01-03",
+						"amount": "1960.20",
+						"percent": "100%"
+					}
+				]
+			}
+		},
 		"totals": {
 			"sum": "1620.00",
 			"total": "1620.00",

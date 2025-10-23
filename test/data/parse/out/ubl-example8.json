@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5a0fb21f40eb306cf9d0bc55b25f7acc01d387d90db6a2bdec04aab5242649a5"
+			"val": "9b561c820e37d533039f38e64e350dfb79d1d64b53064c7329ad878138da667e"
 		}
 	},
 	"doc": {
@@ -75,6 +75,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -101,6 +102,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -127,6 +129,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -153,6 +156,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -179,6 +183,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -205,6 +210,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -225,6 +231,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -245,6 +252,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -265,6 +273,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -285,6 +294,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -345,6 +355,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},

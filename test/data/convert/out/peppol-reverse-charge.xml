@@ -98,7 +98,7 @@
       <cbc:TaxableAmount currencyID="EUR">59.64</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
       <cac:TaxCategory>
-        <cbc:ID>E</cbc:ID>
+        <cbc:ID>O</cbc:ID>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
@@ -119,7 +119,7 @@
       <cbc:Description>Subscription 12345</cbc:Description>
       <cbc:Name>Software Subscription - Pro Plan</cbc:Name>
       <cac:ClassifiedTaxCategory>
-        <cbc:ID>E</cbc:ID>
+        <cbc:ID>O</cbc:ID>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
