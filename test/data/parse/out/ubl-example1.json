@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e1bdf5762d742335ec6e1550303e6c81c8f6a19f339c986d9076617a694d753c"
+			"val": "428965f834a19bed587e701254e52f2e10eae7f1179065d3f1239b8eb8eff24a"
 		}
 	},
 	"doc": {
@@ -500,6 +500,15 @@
 			}
 		],
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2015-01-09",
+						"amount": "483.49",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "Deb.10202 Fact.12115118",

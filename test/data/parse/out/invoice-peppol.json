@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fb7aaa84bb83b536f39be8ab1d700ab5a17b0d62701a782f8d5eb7025069e36d"
+			"val": "f9ed44487d88599b1e8b30bdf50b9e24cbb5748dcac9ac1b220b98cedc68d0c1"
 		}
 	},
 	"doc": {
@@ -203,6 +203,15 @@
 			"code": "9392277012"
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2021-06-24",
+						"amount": "6740.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"detail": "Credit transfer",
