@@ -1,0 +1,379 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "fddff4bfb9a0ef8b1b5b796551dabf98e106ca6903426bb15dbb1291157ee522"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "2025-08-28T14:18:51-4c42b50f",
+		"issue_date": "2025-08-28",
+		"currency": "SGD",
+		"preceding": [
+			{
+				"code": "PreviousInvoiceNumber123456"
+			}
+		],
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Test 0195 Identifier Storecove",
+			"alias": "Test 0195 Identifier Storecove",
+			"tax_id": {
+				"country": "SG",
+				"code": "123457890SC",
+				"scheme": "GST"
+			},
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "123457890SC"
+				},
+				{
+					"code": "123457890SC",
+					"ext": {
+						"iso-scheme-id": "0195"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Jony Ponski"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0195",
+					"code": "SGTST123457890SC"
+				}
+			],
+			"addresses": [
+				{
+					"street": "66 TANNERY LANE, #05-02",
+					"locality": "Singapore",
+					"region": "01",
+					"code": "347805",
+					"country": "SG"
+				}
+			],
+			"emails": [
+				{
+					"addr": "sender@company.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "088-333333333"
+				}
+			]
+		},
+		"customer": {
+			"name": "Test Party",
+			"alias": "Test Party",
+			"identities": [
+				{
+					"label": "CompanyID",
+					"code": "199912345A"
+				},
+				{
+					"code": "199912345A",
+					"ext": {
+						"iso-scheme-id": "0195"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Pon Johnson"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0195",
+					"code": "SGUEN199912345A"
+				}
+			],
+			"addresses": [
+				{
+					"street": "70 Jellicoe Rd",
+					"street_extra": "70 Jellicoe Rd",
+					"locality": "Singapore",
+					"code": "208767",
+					"country": "SG"
+				}
+			],
+			"emails": [
+				{
+					"addr": "receiver@company.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "088-444444444"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "63.992",
+				"cost": "23089",
+				"item": {
+					"ref": "E_DVK_PKlik_KVP_LP",
+					"name": "Supply peak",
+					"identities": [
+						{
+							"code": "9 008 115"
+						},
+						{
+							"code": "8718868597083",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
+						{
+							"label": "ZZZ",
+							"code": "CCCCCCCC"
+						}
+					],
+					"description": "Supply",
+					"price": "0.0573509",
+					"unit": "kwh",
+					"meta": {
+						"utilityconsumptionpoint": "871690930000222221",
+						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"
+					}
+				},
+				"sum": "3.67",
+				"discounts": [
+					{
+						"reason": "special discount",
+						"amount": "0.25"
+					},
+					{
+						"reason": "even more special discount",
+						"amount": "0.75"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "GST",
+						"percent": "9.0%",
+						"ext": {
+							"untdid-tax-category": "SR"
+						}
+					}
+				],
+				"total": "2.67",
+				"notes": [
+					{
+						"text": "Only half the story..."
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "12.888",
+				"cost": "23089",
+				"item": {
+					"ref": "E_DVK_PKlik_KVP_LP",
+					"name": "Supply peak",
+					"identities": [
+						{
+							"code": "9 008 115"
+						},
+						{
+							"code": "8718868597083",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
+						{
+							"label": "ZZZ",
+							"code": "CCCCCCCC"
+						}
+					],
+					"description": "Supply",
+					"price": "0.82790192",
+					"unit": "K6",
+					"meta": {
+						"utilityconsumptionpoint": "871690930000222221",
+						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"
+					}
+				},
+				"sum": "10.67",
+				"discounts": [
+					{
+						"reason": "special discount",
+						"amount": "0.25"
+					},
+					{
+						"reason": "even more special discount",
+						"amount": "0.75"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "GST",
+						"percent": "9.0%",
+						"ext": {
+							"untdid-tax-category": "SR"
+						}
+					}
+				],
+				"total": "9.67",
+				"notes": [
+					{
+						"text": "Only half the story..."
+					}
+				]
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "bonus",
+				"amount": "1.00",
+				"taxes": [
+					{
+						"cat": "GST",
+						"percent": "9.0%"
+					}
+				]
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "late payment",
+				"amount": "11.20",
+				"taxes": [
+					{
+						"cat": "GST",
+						"percent": "9.0%"
+					}
+				]
+			}
+		],
+		"ordering": {
+			"code": "buyer reference or purchase order reference is recommended",
+			"period": {
+				"start": "2025-07-29",
+				"end": "2025-08-28"
+			},
+			"contracts": [
+				{
+					"code": "contract123"
+				}
+			],
+			"purchases": [
+				{
+					"code": "buyer reference or purchase order reference is recommended"
+				}
+			],
+			"receiving": [
+				{
+					"code": "aaaaxxxx"
+				}
+			],
+			"despatch": [
+				{
+					"code": "DDT123"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-09-27",
+						"amount": "24.57",
+						"percent": "100%"
+					}
+				],
+				"notes": "For payment terms, only a note is supported by Peppol currently."
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "44556677",
+				"credit_transfer": [
+					{
+						"iban": "NL50RABO0162432445"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"addresses": [
+					{
+						"street": "line1",
+						"street_extra": "line2",
+						"locality": "CITY",
+						"region": "CA",
+						"code": "3423423",
+						"country": "US"
+					}
+				]
+			},
+			"identities": [
+				{
+					"label": "0088",
+					"code": "871690930000478611"
+				}
+			],
+			"date": "2025-08-27"
+		},
+		"totals": {
+			"sum": "12.34",
+			"discount": "1.00",
+			"charge": "11.20",
+			"total": "22.54",
+			"taxes": {
+				"categories": [
+					{
+						"code": "GST",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "SR"
+								},
+								"base": "12.34",
+								"percent": "9.0%",
+								"amount": "1.11"
+							},
+							{
+								"base": "10.20",
+								"percent": "9.0%",
+								"amount": "0.92"
+							}
+						],
+						"amount": "2.03"
+					}
+				],
+				"sum": "2.03"
+			},
+			"tax": "2.03",
+			"total_with_tax": "24.57",
+			"payable": "24.57"
+		},
+		"notes": [
+			{
+				"text": "This is the invoice note. Senders can enter free text. This may not be read by the receiver, so it is discouraged to use this for electronic invoicing."
+			}
+		]
+	}
+}

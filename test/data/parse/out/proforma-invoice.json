@@ -4,15 +4,15 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3d59aaa45d566376cdc6ee5b3271e956047f38f2170cf512dd0b4d4606ab7c98"
+			"val": "54c0dc81f94904ed15e34b867133329691b615f3687a0ce269986a65be8a671a"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "standard",
-		"code": "Snippet1",
+		"type": "proforma",
+		"code": "Proforma1",
 		"issue_date": "2017-11-13",
 		"currency": "EUR",
 		"tax": {
@@ -34,7 +34,7 @@
 			"inboxes": [
 				{
 					"scheme": "0088",
-					"code": "7300010000001"
+					"code": "9482348239847239874"
 				}
 			],
 			"addresses": [
@@ -61,7 +61,7 @@
 					"code": "39937423947"
 				},
 				{
-					"code": "4598375937",
+					"code": "FR23342",
 					"ext": {
 						"iso-scheme-id": "0002"
 					}
@@ -77,7 +77,7 @@
 			"inboxes": [
 				{
 					"scheme": "0002",
-					"code": "4598375937"
+					"code": "FR23342"
 				}
 			],
 			"addresses": [
@@ -85,7 +85,6 @@
 					"street": "Hovedgatan 32",
 					"street_extra": "Po box 878",
 					"locality": "Stockholm",
-					"region": "Södermalm",
 					"code": "456 34",
 					"country": "SE"
 				}
@@ -104,43 +103,28 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "10",
+				"quantity": "7",
 				"cost": "Konteringsstreng",
 				"item": {
-					"ref": "97iugug876",
 					"name": "item name",
 					"identities": [
+						{
+							"code": "21382183120983",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
 						{
 							"label": "SRV",
 							"code": "09348023"
 						}
 					],
 					"description": "Description of item",
-					"price": "410.00",
-					"unit": "one",
+					"price": "400.00",
+					"unit": "day",
 					"origin": "NO"
 				},
-				"sum": "4100.00",
-				"discounts": [
-					{
-						"reason": "Discount",
-						"amount": "101.00",
-						"ext": {
-							"untdid-allowance": "95"
-						}
-					}
-				],
-				"charges": [
-					{
-						"reason": "Cleaning",
-						"base": "100.00",
-						"percent": "1%",
-						"amount": "1.00",
-						"ext": {
-							"untdid-charge": "CG"
-						}
-					}
-				],
+				"sum": "2800.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -151,92 +135,31 @@
 						}
 					}
 				],
-				"total": "4000.00",
-				"notes": [
-					{
-						"text": "Testing note on line level"
-					}
-				]
+				"total": "2800.00"
 			},
 			{
 				"i": 2,
-				"quantity": "10",
-				"cost": "Konteringsstreng",
+				"quantity": "-3",
 				"item": {
-					"ref": "97iugug876",
-					"name": "item name",
+					"name": "item name 2",
 					"identities": [
 						{
-							"label": "SRV",
-							"code": "86776"
-						}
-					],
-					"description": "Description of item",
-					"price": "100.00",
-					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
-					}
-				},
-				"sum": "1000.00",
-				"taxes": [
-					{
-						"cat": "VAT",
-						"key": "zero",
-						"percent": "0.0%",
-						"ext": {
-							"untdid-tax-category": "E"
-						}
-					}
-				],
-				"total": "1000.00",
-				"notes": [
-					{
-						"text": "Testing note on line level"
-					}
-				]
-			},
-			{
-				"i": 3,
-				"quantity": "10",
-				"cost": "Konteringsstreng",
-				"item": {
-					"ref": "97iugug876",
-					"name": "item name",
-					"identities": [
+							"code": "21382183120983",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
 						{
 							"label": "SRV",
-							"code": "86776"
+							"code": "09348023"
 						}
 					],
-					"description": "Description of item",
-					"price": "100.00",
-					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
-					}
+					"description": "Description 2",
+					"price": "500.00",
+					"unit": "day",
+					"origin": "NO"
 				},
-				"sum": "1000.00",
-				"discounts": [
-					{
-						"reason": "Discount",
-						"amount": "101.00",
-						"ext": {
-							"untdid-allowance": "95"
-						}
-					}
-				],
-				"charges": [
-					{
-						"reason": "Charge",
-						"base": "100.00",
-						"percent": "1%",
-						"amount": "1.00",
-						"ext": {
-							"untdid-charge": "CG"
-						}
-					}
-				],
+				"sum": "-1500.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -247,74 +170,32 @@
 						}
 					}
 				],
-				"total": "900.00",
-				"notes": [
-					{
-						"text": "Testing note on line level"
-					}
-				]
-			}
-		],
-		"discounts": [
-			{
-				"i": 1,
-				"reason": "Discount",
-				"amount": "200.00",
-				"taxes": [
-					{
-						"cat": "VAT",
-						"key": "standard",
-						"percent": "25%"
-					}
-				],
-				"ext": {
-					"untdid-allowance": "95"
-				}
+				"total": "-1500.00"
 			}
 		],
 		"charges": [
 			{
 				"i": 1,
-				"reason": "Cleaning",
-				"base": "1000",
-				"percent": "20%",
-				"amount": "200",
+				"reason": "Insurance",
+				"amount": "25.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25.0%"
 					}
-				],
-				"ext": {
-					"untdid-charge": "CG"
-				}
+				]
 			}
 		],
 		"ordering": {
-			"code": "0150abc",
-			"identities": [
-				{
-					"label": "ABT",
-					"code": "DR35141"
-				}
-			],
-			"period": {
-				"start": "2017-12-01",
-				"end": "2017-12-31"
-			},
-			"contracts": [
-				{
-					"code": "framework no 1"
-				}
-			]
+			"code": "0150abc"
 		},
 		"payment": {
 			"terms": {
 				"due_dates": [
 					{
 						"date": "2017-12-01",
-						"amount": "7125.00",
+						"amount": "1656.25",
 						"percent": "100%"
 					}
 				],
@@ -343,7 +224,6 @@
 						"street": "Delivery street 2",
 						"street_extra": "Building 56",
 						"locality": "Stockholm",
-						"region": "Södermalm",
 						"code": "21234",
 						"country": "SE"
 					}
@@ -352,16 +232,15 @@
 			"identities": [
 				{
 					"label": "0088",
-					"code": "7300010000001"
+					"code": "9483759475923478"
 				}
 			],
 			"date": "2017-11-01"
 		},
 		"totals": {
-			"sum": "5900.00",
-			"discount": "200.00",
-			"charge": "200.00",
-			"total": "5900.00",
+			"sum": "1300.00",
+			"charge": "25.00",
+			"total": "1325.00",
 			"taxes": {
 				"categories": [
 					{
@@ -372,39 +251,25 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "4900.00",
+								"base": "1300.00",
 								"percent": "25.0%",
-								"amount": "1225.00"
-							},
-							{
-								"key": "zero",
-								"ext": {
-									"untdid-tax-category": "E"
-								},
-								"base": "1000.00",
-								"percent": "0.0%",
-								"amount": "0.00"
+								"amount": "325.00"
 							},
 							{
 								"key": "standard",
-								"base": "0.00",
-								"percent": "25%",
-								"amount": "0.00"
+								"base": "25.00",
+								"percent": "25.0%",
+								"amount": "6.25"
 							}
 						],
-						"amount": "1225.00"
+						"amount": "331.25"
 					}
 				],
-				"sum": "1225.00"
+				"sum": "331.25"
 			},
-			"tax": "1225.00",
-			"total_with_tax": "7125.00",
-			"payable": "7125.00"
-		},
-		"notes": [
-			{
-				"text": "Please note we have a new phone number: 22 22 22 22"
-			}
-		]
+			"tax": "331.25",
+			"total_with_tax": "1656.25",
+			"payable": "1656.25"
+		}
 	}
 }

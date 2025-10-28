@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bb800fa848b1f3c8d0e529d4991b53581f133dba98f52ea4e96c594f10d67072"
+			"val": "7d2b74fd10240c198fa2581e5362a1b6a97166a8d43b6193c62f0b7be0dc03b8"
 		}
 	},
 	"doc": {
@@ -95,7 +95,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -119,6 +120,15 @@
 					{
 						"label": "0088",
 						"code": "2298740918237"
+					}
+				],
+				"addresses": [
+					{
+						"num": "4",
+						"street": "Christmas Street",
+						"locality": "London",
+						"code": "E1 6AN",
+						"country": "GB"
 					}
 				]
 			},

@@ -118,7 +118,7 @@ type AdditionalItemProperty struct {
 // Price represents the price of an item
 type Price struct {
 	PriceAmount     Amount           `xml:"cbc:PriceAmount"`
-	BaseAmount      *Amount          `xml:"cbc:BaseAmount,omitempty"`
+	BaseQuantity    *Quantity        `xml:"cbc:BaseQuantity,omitempty"`
 	AllowanceCharge *AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
 }
 

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "71cd71602f31972bb2a371ac6042e27896f60acce0d0eac8e22dab72d8e2bd95"
+			"val": "ded304628b21266b714700a0d273c12fecec1c6ead07d111da519221b226fc64"
 		}
 	},
 	"doc": {
@@ -129,6 +129,7 @@
 				"discounts": [
 					{
 						"reason": "Loyal customer",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {
@@ -139,6 +140,7 @@
 				"charges": [
 					{
 						"reason": "Packaging",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {
@@ -149,6 +151,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -178,6 +181,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -204,6 +208,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "12%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -223,6 +228,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -241,6 +247,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -395,6 +402,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -403,6 +411,7 @@
 								"amount": "375.00"
 							},
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -411,6 +420,7 @@
 								"amount": "300.00"
 							},
 							{
+								"key": "standard",
 								"base": "0.00",
 								"percent": "25%",
 								"amount": "0.00"
