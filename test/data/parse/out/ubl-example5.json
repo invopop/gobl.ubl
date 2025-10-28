@@ -129,6 +129,7 @@
 				"discounts": [
 					{
 						"reason": "Loyal customer",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {
@@ -139,6 +140,7 @@
 				"charges": [
 					{
 						"reason": "Packaging",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {

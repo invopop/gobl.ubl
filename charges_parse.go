@@ -78,6 +78,15 @@ func goblCharge(ac *AllowanceCharge) (*bill.Charge, error) {
 			return nil, err
 		}
 		ch.Percent = &p
+
+		// Check if there is a base amount
+		if ac.BaseAmount != nil {
+			base, err := num.AmountFromString(ac.BaseAmount.Value)
+			if err != nil {
+				return nil, err
+			}
+			ch.Base = &base
+		}
 	}
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		ch.Taxes = tax.Set{
@@ -132,6 +141,15 @@ func goblDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
 			return nil, err
 		}
 		d.Percent = &p
+
+		// Check if there is a base amount
+		if ac.BaseAmount != nil {
+			base, err := num.AmountFromString(ac.BaseAmount.Value)
+			if err != nil {
+				return nil, err
+			}
+			d.Base = &base
+		}
 	}
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		d.Taxes = tax.Set{
@@ -178,6 +196,15 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 			return nil, err
 		}
 		ch.Percent = &percent
+
+		// Check if there is a base amount
+		if ac.BaseAmount != nil {
+			base, err := num.AmountFromString(ac.BaseAmount.Value)
+			if err != nil {
+				return nil, err
+			}
+			ch.Base = &base
+		}
 	}
 	return ch, nil
 }
@@ -207,6 +234,15 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 			return nil, err
 		}
 		d.Percent = &p
+
+		// Check if there is a base amount
+		if ac.BaseAmount != nil {
+			base, err := num.AmountFromString(ac.BaseAmount.Value)
+			if err != nil {
+				return nil, err
+			}
+			d.Base = &base
+		}
 	}
 	return d, nil
 }

@@ -116,7 +116,7 @@
 				"quantity": "132",
 				"item": {
 					"name": "Contract transportvermogen",
-					"price": "15.24",
+					"price": "1.27",
 					"unit": "KW",
 					"meta": {
 						"contract-transportvermogen": "132,00 kW",
@@ -125,7 +125,7 @@
 						"transporttarief": "Netvlak MSD Enexis"
 					}
 				},
-				"sum": "2011.68",
+				"sum": "167.64",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -136,7 +136,7 @@
 						}
 					}
 				],
-				"total": "2011.68"
+				"total": "167.64"
 			},
 			{
 				"i": 4,
@@ -170,7 +170,7 @@
 				"quantity": "1",
 				"item": {
 					"name": "Vastrecht Transportdienst",
-					"price": "441.00",
+					"price": "36.75",
 					"unit": "mon",
 					"meta": {
 						"contract-transportvermogen": "132,00 kW",
@@ -179,7 +179,7 @@
 						"transporttarief": "Netvlak MSD Enexis"
 					}
 				},
-				"sum": "441.00",
+				"sum": "36.75",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -190,14 +190,14 @@
 						}
 					}
 				],
-				"total": "441.00"
+				"total": "36.75"
 			},
 			{
 				"i": 6,
 				"quantity": "1",
 				"item": {
 					"name": "Vastrecht Aansluitdienst",
-					"price": "678.00",
+					"price": "56.50",
 					"unit": "mon",
 					"meta": {
 						"contract-transportvermogen": "132,00 kW",
@@ -206,7 +206,7 @@
 						"transporttarief": "Netvlak MSD Enexis"
 					}
 				},
-				"sum": "678.00",
+				"sum": "56.50",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -217,7 +217,7 @@
 						}
 					}
 				],
-				"total": "678.00"
+				"total": "56.50"
 			},
 			{
 				"i": 7,
@@ -315,7 +315,7 @@
 				"due_dates": [
 					{
 						"date": "2014-11-24",
-						"amount": "4572.23",
+						"amount": "1099.78",
 						"percent": "100%"
 					}
 				],
@@ -347,8 +347,8 @@
 			}
 		},
 		"totals": {
-			"sum": "3778.70",
-			"total": "3778.70",
+			"sum": "908.91",
+			"total": "908.91",
 			"taxes": {
 				"categories": [
 					{
@@ -359,19 +359,19 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "3778.70",
+								"base": "908.91",
 								"percent": "21%",
-								"amount": "793.53"
+								"amount": "190.87"
 							}
 						],
-						"amount": "793.53"
+						"amount": "190.87"
 					}
 				],
-				"sum": "793.53"
+				"sum": "190.87"
 			},
-			"tax": "793.53",
-			"total_with_tax": "4572.23",
-			"payable": "4572.23"
+			"tax": "190.87",
+			"total_with_tax": "1099.78",
+			"payable": "1099.78"
 		},
 		"notes": [
 			{
