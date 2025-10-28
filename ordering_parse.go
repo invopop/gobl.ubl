@@ -3,8 +3,10 @@ package ubl
 import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
@@ -60,32 +62,33 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 		}
 	}
 
+	if in.OriginatorDocumentReference != nil {
+		ordering.Tender = make([]*org.DocumentRef, 0)
+		for _, tenderRef := range in.OriginatorDocumentReference {
+			docRef, err := goblReference(&tenderRef)
+			if err != nil {
+				return err
+			}
+			ordering.Tender = append(ordering.Tender, docRef)
+		}
+	}
+
 	if in.AdditionalDocumentReference != nil {
 		for _, ref := range in.AdditionalDocumentReference {
-			if ref.DocumentTypeCode != nil {
-				switch *ref.DocumentTypeCode {
-				case "50":
-					if ordering.Tender == nil {
-						ordering.Tender = make([]*org.DocumentRef, 0)
-					}
-					docRef, err := goblReference(&ref)
-					if err != nil {
-						return err
-					}
-					ordering.Tender = append(ordering.Tender, docRef)
-				case "130":
-					if ordering.Identities == nil {
-						ordering.Identities = make([]*org.Identity, 0)
-					}
-					identity := &org.Identity{
-						Code: cbc.Code(ref.ID.Value),
-					}
-					if ref.ID.SchemeID != nil {
-						identity.Label = *ref.ID.SchemeID
-					}
-					ordering.Identities = append(ordering.Identities, identity)
+			if ref.DocumentTypeCode != nil && *ref.DocumentTypeCode == "130" {
+				if ordering.Identities == nil {
+					ordering.Identities = make([]*org.Identity, 0)
 				}
+				identity := &org.Identity{
+					Code: cbc.Code(ref.ID.Value),
+				}
+				if ref.ID.SchemeID != nil {
+					// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
+					identity.Ext.Merge(tax.Extensions{untdid.ExtKeyReference: cbc.Code(*ref.ID.SchemeID)})
+				}
+				ordering.Identities = append(ordering.Identities, identity)
 			}
+
 			// Other document types not mapped to GOBL
 		}
 	}

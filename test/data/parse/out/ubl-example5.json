@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "118bcef38e833334255159b0987738514bc4d7b66935696594afd9b22211e761"
+			"val": "e4ed0ef8b8e89b06e00c209d8aa28d9392187d0468e281e0fb995253d3c52bfa"
 		}
 	},
 	"doc": {
@@ -329,6 +329,11 @@
 			"despatch": [
 				{
 					"code": "5433"
+				}
+			],
+			"tender": [
+				{
+					"code": "Lot567"
 				}
 			]
 		},

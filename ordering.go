@@ -39,21 +39,6 @@ type Reference struct {
 	ValidityPeriod      *Period     `xml:"cac:ValidityPeriod"`
 }
 
-// Attachment represents an attached document
-type Attachment struct {
-	EmbeddedDocumentBinaryObject BinaryObject `xml:"cbc:EmbeddedDocumentBinaryObject"`
-}
-
-// BinaryObject represents binary data with associated metadata
-type BinaryObject struct {
-	MimeCode         *string `xml:"mimeCode,attr"`
-	Filename         *string `xml:"filename,attr"`
-	EncodingCode     *string `xml:"encodingCode,attr"`
-	CharacterSetCode *string `xml:"characterSetCode,attr"`
-	URI              *string `xml:"uri,attr"`
-	Value            string  `xml:",chardata"`
-}
-
 // ProjectReference represents a reference to a project
 type ProjectReference struct {
 	ID *string `xml:"cbc:ID"`
@@ -112,42 +97,6 @@ func (out *Invoice) addOrdering(o *bill.Ordering) {
 		}
 	}
 
-	if len(o.Despatch) > 0 {
-		out.DespatchDocumentReference = make([]Reference, 0, len(o.Despatch))
-		for _, despatch := range o.Despatch {
-			out.DespatchDocumentReference = append(out.DespatchDocumentReference, Reference{
-				ID: IDType{Value: string(despatch.Code)},
-			})
-		}
-	}
-
-	if len(o.Receiving) > 0 {
-		out.ReceiptDocumentReference = make([]Reference, 0, len(o.Receiving))
-		for _, receiving := range o.Receiving {
-			out.ReceiptDocumentReference = append(out.ReceiptDocumentReference, Reference{
-				ID: IDType{Value: string(receiving.Code)},
-			})
-		}
-	}
-
-	if len(o.Contracts) > 0 {
-		out.ContractDocumentReference = make([]Reference, 0, len(o.Contracts))
-		for _, contract := range o.Contracts {
-			out.ContractDocumentReference = append(out.ContractDocumentReference, Reference{
-				ID: IDType{Value: string(contract.Code)},
-			})
-		}
-	}
-
-	if len(o.Tender) > 0 {
-		out.AdditionalDocumentReference = make([]Reference, 0, len(o.Tender))
-		for _, tender := range o.Tender {
-			out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, Reference{
-				ID: IDType{Value: string(tender.Code)},
-			})
-		}
-	}
-
 	if len(o.Purchases) > 0 {
 		purchase := o.Purchases[0]
 		out.OrderReference = &OrderReference{
@@ -155,5 +104,49 @@ func (out *Invoice) addOrdering(o *bill.Ordering) {
 		}
 	}
 
-	// done
+	for _, despatch := range o.Despatch {
+		out.DespatchDocumentReference = append(out.DespatchDocumentReference, Reference{
+			ID: IDType{Value: string(despatch.Code)},
+		})
+	}
+
+	for _, receiving := range o.Receiving {
+		out.ReceiptDocumentReference = append(out.ReceiptDocumentReference, Reference{
+			ID: IDType{Value: string(receiving.Code)},
+		})
+	}
+
+	for _, contract := range o.Contracts {
+		out.ContractDocumentReference = append(out.ContractDocumentReference, Reference{
+			ID: IDType{Value: string(contract.Code)},
+		})
+	}
+
+	for _, tender := range o.Tender {
+		out.OriginatorDocumentReference = append(out.OriginatorDocumentReference, Reference{
+			ID: IDType{Value: string(tender.Code)},
+		})
+	}
+
+	if len(o.Identities) > 0 {
+		ioi := o.Identities[0]
+
+		for _, id := range o.Identities {
+			if id.Ext.Has(untdid.ExtKeyReference) {
+				ioi = id
+				break
+			}
+		}
+
+		id := IDType{Value: string(ioi.Code)}
+		if ref := ioi.Ext.Get(untdid.ExtKeyReference); ref != "" {
+			schemeID := ref.String()
+			id.SchemeID = &schemeID
+		}
+		dtc := "130"
+		out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, Reference{
+			ID:               id,
+			DocumentTypeCode: &dtc,
+		})
+	}
 }
