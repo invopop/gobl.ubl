@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0c56cfd8a37b4f75cc4dba4f5a675313f1af4f9c2073ffa6904e52466c5390c1"
+			"val": "d753a6fbd8518f7cd7207b96f56d39d8f054ed15194c82cb02762180451c51b3"
 		}
 	},
 	"doc": {
@@ -100,6 +100,17 @@
 				"total": "2500.00"
 			}
 		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "4675.00",
+						"percent": "100%"
+					}
+				]
+			}
+		},
 		"totals": {
 			"sum": "4000.00",
 			"total": "4000.00",

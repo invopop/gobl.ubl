@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6b89b325db9c9aa4df7258f53bfe591ba67cb225a7514bcb53d9181dec34c98e"
+			"val": "003c97791f4670900c8c1282ca0a5450558b6ce5c580c831325482953ac50b22"
 		}
 	},
 	"doc": {
@@ -156,6 +156,15 @@
 			}
 		],
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "4675.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "Payref1",
