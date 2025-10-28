@@ -102,6 +102,8 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	}
 }
 
+func Extract() {}
+
 // ConvertInvoice is a convenience function that converts a GOBL envelope
 // containing an invoice into a UBL Invoice or CreditNote document.
 func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
