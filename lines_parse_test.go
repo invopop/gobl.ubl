@@ -37,7 +37,7 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, "6%", line.Taxes[0].Percent.String())
 
 		line = lines[19]
-		assert.Equal(t, "FRITUUR VET 10 KG RETOUR ", line.Item.Name)
+		assert.Equal(t, "FRITUUR VET 10 KG RETOUR", line.Item.Name)
 		assert.Equal(t, "6", line.Quantity.String())
 		assert.Equal(t, org.Unit("item"), line.Item.Unit)
 		assert.Equal(t, "18.33", line.Item.Price.String())

@@ -25,15 +25,24 @@ func newDelivery(del *bill.DeliveryDetails) *Delivery {
 	if del == nil {
 		return nil
 	}
-	d := formatDate(*del.Date)
-	out := &Delivery{
-		ActualDeliveryDate: &d,
-		DeliveryLocation: &Location{
-			Address: newAddress(del.Receiver.Addresses),
-		},
+
+	out := new(Delivery)
+
+	if del.Date != nil {
+		date := formatDate(*del.Date)
+		out.ActualDeliveryDate = &date
 	}
-	if len(del.Identities) > 0 {
-		out.DeliveryLocation.ID = &IDType{Value: del.Identities[0].Code.String()}
+
+	if del.Receiver != nil {
+		out.DeliveryParty = newParty(del.Receiver)
+		out.DeliveryLocation =
+			&Location{
+				Address: newAddress(del.Receiver.Addresses),
+			}
+		if len(del.Identities) > 0 {
+			out.DeliveryLocation.ID = &IDType{Value: del.Identities[0].Code.String()}
+		}
 	}
+
 	return out
 }

@@ -4,17 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e375b241b7e57ca44342cb9acfc1cd62d397d9fc38d8e79fee4c7002fcceaa02"
+			"val": "8e7caaecb80736ecc02126ead1580949751b0e1e9ecd3ae88ced0b38b6936183"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$tags": [
+			"self-billed"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "standard",
-		"code": "Snippet1",
+		"type": "credit-note",
+		"code": "SelfBilledCN1",
 		"issue_date": "2017-11-13",
 		"currency": "EUR",
+		"preceding": [
+			{
+				"code": "Snippet1"
+			}
+		],
 		"tax": {
 			"rounding": "currency"
 		},
@@ -192,13 +200,6 @@
 		},
 		"payment": {
 			"terms": {
-				"due_dates": [
-					{
-						"date": "2017-12-01",
-						"amount": "1656.25",
-						"percent": "100%"
-					}
-				],
 				"notes": "Payment within 10 days, 2% discount"
 			},
 			"instructions": {
@@ -270,6 +271,11 @@
 			"tax": "331.25",
 			"total_with_tax": "1656.25",
 			"payable": "1656.25"
-		}
+		},
+		"notes": [
+			{
+				"text": "Please note we have a new phone number: 22 22 22 22"
+			}
+		]
 	}
 }

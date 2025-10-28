@@ -3,6 +3,7 @@
   <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
   <cbc:ID>SAMPLE-004</cbc:ID>
   <cbc:IssueDate>2024-12-04</cbc:IssueDate>
+  <cbc:DueDate>2025-01-03</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:Note>Random invoice</cbc:Note>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
@@ -36,6 +37,10 @@
     <cac:Party>
       <cbc:EndpointID schemeID="9920">54387763P</cbc:EndpointID>
       <cac:PostalAddress>
+        <cbc:StreetName>Avenida de la Constitución 10</cbc:StreetName>
+        <cbc:CityName>Sevilla</cbc:CityName>
+        <cbc:PostalZone>41001</cbc:PostalZone>
+        <cbc:CountrySubentity>Andalucía</cbc:CountrySubentity>
         <cac:Country>
           <cbc:IdentificationCode>ES</cbc:IdentificationCode>
         </cac:Country>

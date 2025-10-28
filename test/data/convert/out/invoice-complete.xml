@@ -72,6 +72,15 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:PayeeParty>
+    <cac:PostalAddress>
+      <cbc:StreetName>Paymentstreet 1</cbc:StreetName>
+      <cbc:CityName>PaymentCity</cbc:CityName>
+      <cbc:PostalZone>123456</cbc:PostalZone>
+      <cbc:CountrySubentity>RegionP</cbc:CountrySubentity>
+      <cac:Country>
+        <cbc:IdentificationCode>NO</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
     <cac:PartyLegalEntity>
       <cbc:RegistrationName>Ebeneser Scrooge AS</cbc:RegistrationName>
     </cac:PartyLegalEntity>
@@ -91,6 +100,21 @@
         </cac:Country>
       </cac:Address>
     </cac:DeliveryLocation>
+    <cac:DeliveryParty>
+      <cac:PostalAddress>
+        <cbc:StreetName>Deliverystreet 2</cbc:StreetName>
+        <cbc:AdditionalStreetName>Side door</cbc:AdditionalStreetName>
+        <cbc:CityName>DeliveryCity</cbc:CityName>
+        <cbc:PostalZone>523427</cbc:PostalZone>
+        <cbc:CountrySubentity>RegionD</cbc:CountrySubentity>
+        <cac:Country>
+          <cbc:IdentificationCode>NO</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName></cbc:RegistrationName>
+      </cac:PartyLegalEntity>
+    </cac:DeliveryParty>
   </cac:Delivery>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
@@ -155,6 +179,7 @@
     <cbc:LineExtensionAmount currencyID="EUR">1710.00</cbc:LineExtensionAmount>
     <cac:AllowanceCharge>
       <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReason>Loyalty discount</cbc:AllowanceChargeReason>
       <cbc:MultiplierFactorNumeric>0.05</cbc:MultiplierFactorNumeric>
       <cbc:Amount currencyID="EUR">90.00</cbc:Amount>
     </cac:AllowanceCharge>
