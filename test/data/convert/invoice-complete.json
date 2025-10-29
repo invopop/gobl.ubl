@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "120a6904ecd0a02127b878e045cbd36be52de2b97069447b3c9c3a0277ffe848"
+			"val": "54119e7504d54bef5b7359f6278fc4049eeeef210128fb12ef01c82f0d54fc14"
 		}
 	},
 	"doc": {
@@ -96,6 +96,7 @@
 				"sum": "1800.00",
 				"discounts": [
 					{
+						"reason": "Loyalty discount",
 						"percent": "5%",
 						"amount": "90.00"
 					}
@@ -103,7 +104,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -122,7 +124,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -142,7 +145,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -184,6 +188,15 @@
 					{
 						"label": "0088",
 						"code": "2298740918237"
+					}
+				],
+				"addresses": [
+					{
+						"street": "Paymentstreet 1",
+						"locality": "PaymentCity",
+						"region": "RegionP",
+						"code": "123456",
+						"country": "NO"
 					}
 				]
 			},

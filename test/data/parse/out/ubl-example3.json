@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c686ea29c4a4791f947430f6b7f1f73a69ac47a501f921bd0e1be8ca644abe1e"
+			"val": "82f9ebc379eefd73460bc8503d4794f633577b6fe2efc501d4ebf10a9ce8cad7"
 		}
 	},
 	"doc": {
@@ -92,6 +92,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -113,6 +114,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "10%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -130,6 +132,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				]
@@ -147,6 +150,15 @@
 			]
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "3885.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "Payref1",
@@ -170,6 +182,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -178,6 +191,7 @@
 								"amount": "400.00"
 							},
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -186,6 +200,7 @@
 								"amount": "160.00"
 							},
 							{
+								"key": "standard",
 								"base": "100.00",
 								"percent": "25%",
 								"amount": "25.00"

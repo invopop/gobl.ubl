@@ -47,24 +47,28 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 		if len(notes) > 0 {
 			payment.Terms.Notes = strings.Join(notes, " ")
 		}
-		if in.DueDate != "" {
-			d, err := parseDate(in.DueDate)
-			if err != nil {
-				return err
-			}
-			payment.Terms.DueDates = make([]*pay.DueDate, 0)
-			payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
-				Date: &d,
-			})
+	}
+
+	if in.DueDate != "" {
+		d, err := parseDate(in.DueDate)
+		if err != nil {
+			return err
 		}
-		// If there's only one due date, set its percent to 100
-		if len(payment.Terms.DueDates) == 1 {
-			percent, err := num.PercentageFromString("100%")
-			if err != nil {
-				return err
-			}
-			payment.Terms.DueDates[0].Percent = &percent
+		if payment.Terms == nil {
+			payment.Terms = &pay.Terms{}
 		}
+		payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
+			Date: &d,
+		})
+	}
+
+	// If there's only one due date, set its percent to 100
+	if payment.Terms != nil && len(payment.Terms.DueDates) == 1 {
+		percent, err := num.PercentageFromString("100%")
+		if err != nil {
+			return err
+		}
+		payment.Terms.DueDates[0].Percent = &percent
 	}
 
 	if len(in.PaymentMeans) > 0 {

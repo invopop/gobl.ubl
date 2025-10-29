@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6f35aa94c8fd506d9115bdea9b11f04a0f4a8919a9e874cfe01377d0f19756ff"
+			"val": "d3f461a1c3d21ab132908f5bb4a2779da02a21887c376acc409b4ab80a5f915e"
 		}
 	},
 	"doc": {
@@ -133,8 +133,9 @@
 				"charges": [
 					{
 						"reason": "Cleaning",
+						"base": "100.00",
 						"percent": "1%",
-						"amount": "41.00",
+						"amount": "1.00",
 						"ext": {
 							"untdid-charge": "CG"
 						}
@@ -143,13 +144,14 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25.0%",
 						"ext": {
 							"untdid-tax-category": "S"
 						}
 					}
 				],
-				"total": "4040.00",
+				"total": "4000.00",
 				"notes": [
 					{
 						"text": "Testing note on line level"
@@ -170,23 +172,24 @@
 						}
 					],
 					"description": "Description of item",
-					"price": "200.00",
+					"price": "100.00",
 					"unit": "one",
 					"meta": {
 						"additionalitemname": "AdditionalItemValue"
 					}
 				},
-				"sum": "2000.00",
+				"sum": "1000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "zero",
 						"percent": "0.0%",
 						"ext": {
 							"untdid-tax-category": "E"
 						}
 					}
 				],
-				"total": "2000.00",
+				"total": "1000.00",
 				"notes": [
 					{
 						"text": "Testing note on line level"
@@ -226,8 +229,9 @@
 				"charges": [
 					{
 						"reason": "Charge",
+						"base": "100.00",
 						"percent": "1%",
-						"amount": "10.00",
+						"amount": "1.00",
 						"ext": {
 							"untdid-charge": "CG"
 						}
@@ -236,13 +240,14 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25.0%",
 						"ext": {
 							"untdid-tax-category": "S"
 						}
 					}
 				],
-				"total": "909.00",
+				"total": "900.00",
 				"notes": [
 					{
 						"text": "Testing note on line level"
@@ -258,6 +263,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -276,6 +282,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				],
@@ -307,7 +314,7 @@
 				"due_dates": [
 					{
 						"date": "2017-12-01",
-						"amount": "8186.25",
+						"amount": "7125.00",
 						"percent": "100%"
 					}
 				],
@@ -351,45 +358,48 @@
 			"date": "2017-11-01"
 		},
 		"totals": {
-			"sum": "6949.00",
+			"sum": "5900.00",
 			"discount": "200.00",
 			"charge": "200.00",
-			"total": "6949.00",
+			"total": "5900.00",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "4949.00",
+								"base": "4900.00",
 								"percent": "25.0%",
-								"amount": "1237.25"
+								"amount": "1225.00"
 							},
 							{
+								"key": "zero",
 								"ext": {
 									"untdid-tax-category": "E"
 								},
-								"base": "2000.00",
+								"base": "1000.00",
 								"percent": "0.0%",
 								"amount": "0.00"
 							},
 							{
+								"key": "standard",
 								"base": "0.00",
 								"percent": "25%",
 								"amount": "0.00"
 							}
 						],
-						"amount": "1237.25"
+						"amount": "1225.00"
 					}
 				],
-				"sum": "1237.25"
+				"sum": "1225.00"
 			},
-			"tax": "1237.25",
-			"total_with_tax": "8186.25",
-			"payable": "8186.25"
+			"tax": "1225.00",
+			"total_with_tax": "7125.00",
+			"payable": "7125.00"
 		},
 		"notes": [
 			{

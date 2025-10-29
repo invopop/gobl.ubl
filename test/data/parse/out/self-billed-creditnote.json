@@ -4,17 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "044f4a132890ba95764cce6970e4822c93758e8cb0e3d48cde81faffa26fad63"
+			"val": "08c6da8f808680131e34069548243e351e92d10fb13d0d6542bac8b1f769d38b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$tags": [
+			"self-billed"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "standard",
-		"code": "Snippet1",
+		"type": "credit-note",
+		"code": "SelfBilledCN1",
 		"issue_date": "2017-11-13",
 		"currency": "EUR",
+		"preceding": [
+			{
+				"code": "Snippet1"
+			}
+		],
 		"tax": {
 			"rounding": "currency"
 		},
@@ -31,17 +39,10 @@
 					"code": "GB983294"
 				}
 			],
-			"people": [
-				{
-					"name": {
-						"given": "John Doe"
-					}
-				}
-			],
 			"inboxes": [
 				{
 					"scheme": "0088",
-					"code": "7300010000001"
+					"code": "9482348239847239874"
 				}
 			],
 			"addresses": [
@@ -51,16 +52,6 @@
 					"locality": "London",
 					"code": "GB 123 EW",
 					"country": "GB"
-				}
-			],
-			"emails": [
-				{
-					"addr": "john.doe@foo.bar"
-				}
-			],
-			"telephones": [
-				{
-					"num": "9384203984"
 				}
 			]
 		},
@@ -84,6 +75,13 @@
 					}
 				}
 			],
+			"people": [
+				{
+					"name": {
+						"given": "Lisa Johnson"
+					}
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "0002",
@@ -98,19 +96,28 @@
 					"code": "456 34",
 					"country": "SE"
 				}
+			],
+			"emails": [
+				{
+					"addr": "lj@buyer.se"
+				}
+			],
+			"telephones": [
+				{
+					"num": "23434234"
+				}
 			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "10",
+				"quantity": "7",
 				"cost": "Konteringsstreng",
 				"item": {
-					"ref": "97iugug876",
 					"name": "item name",
 					"identities": [
 						{
-							"code": "7300010000001",
+							"code": "21382183120983",
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
@@ -122,10 +129,10 @@
 					],
 					"description": "Description of item",
 					"price": "400.00",
-					"unit": "one",
+					"unit": "day",
 					"origin": "NO"
 				},
-				"sum": "4000.00",
+				"sum": "2800.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -136,76 +143,31 @@
 						}
 					}
 				],
-				"total": "4000.00",
-				"notes": [
-					{
-						"text": "Testing note on line level"
-					}
-				]
+				"total": "2800.00"
 			},
 			{
 				"i": 2,
-				"quantity": "10",
-				"cost": "Konteringsstreng",
+				"quantity": "-3",
 				"item": {
-					"ref": "97iugug876",
-					"name": "item name",
+					"name": "item name 2",
 					"identities": [
 						{
-							"code": "7300010000001",
+							"code": "21382183120983",
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
 						},
 						{
 							"label": "SRV",
-							"code": "86776"
+							"code": "09348023"
 						}
 					],
-					"description": "Description of item",
-					"price": "200.00",
-					"unit": "one"
+					"description": "Description 2",
+					"price": "500.00",
+					"unit": "day",
+					"origin": "NO"
 				},
-				"sum": "2000.00",
-				"taxes": [
-					{
-						"cat": "VAT",
-						"key": "standard",
-						"percent": "15.0%",
-						"ext": {
-							"untdid-tax-category": "S"
-						}
-					}
-				],
-				"total": "2000.00"
-			},
-			{
-				"i": 3,
-				"quantity": "10",
-				"cost": "Konteringsstreng",
-				"item": {
-					"ref": "97iugug876",
-					"name": "item name",
-					"identities": [
-						{
-							"code": "873649827489",
-							"ext": {
-								"iso-scheme-id": "0160"
-							}
-						},
-						{
-							"label": "SRV",
-							"code": "86776"
-						}
-					],
-					"description": "Description of item",
-					"price": "90.00",
-					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
-					}
-				},
-				"sum": "900.00",
+				"sum": "-1500.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -216,33 +178,19 @@
 						}
 					}
 				],
-				"total": "900.00"
-			}
-		],
-		"discounts": [
-			{
-				"i": 1,
-				"reason": "Discount",
-				"amount": "100.00",
-				"taxes": [
-					{
-						"cat": "VAT",
-						"key": "standard",
-						"percent": "25%"
-					}
-				]
+				"total": "-1500.00"
 			}
 		],
 		"charges": [
 			{
 				"i": 1,
-				"reason": "Cleaning",
-				"amount": "200.00",
+				"reason": "Insurance",
+				"amount": "25.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25.0%"
 					}
 				]
 			}
@@ -252,13 +200,6 @@
 		},
 		"payment": {
 			"terms": {
-				"due_dates": [
-					{
-						"date": "2017-12-01",
-						"amount": "8550.00",
-						"percent": "100%"
-					}
-				],
 				"notes": "Payment within 10 days, 2% discount"
 			},
 			"instructions": {
@@ -284,7 +225,6 @@
 						"street": "Delivery street 2",
 						"street_extra": "Building 56",
 						"locality": "Stockholm",
-						"region": "Södermalm",
 						"code": "21234",
 						"country": "SE"
 					}
@@ -293,16 +233,15 @@
 			"identities": [
 				{
 					"label": "0088",
-					"code": "7300010000001"
+					"code": "9483759475923478"
 				}
 			],
 			"date": "2017-11-01"
 		},
 		"totals": {
-			"sum": "6900.00",
-			"discount": "100.00",
-			"charge": "200.00",
-			"total": "7000.00",
+			"sum": "1300.00",
+			"charge": "25.00",
+			"total": "1325.00",
 			"taxes": {
 				"categories": [
 					{
@@ -313,34 +252,30 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "4900.00",
+								"base": "1300.00",
 								"percent": "25.0%",
-								"amount": "1225.00"
+								"amount": "325.00"
 							},
 							{
 								"key": "standard",
-								"ext": {
-									"untdid-tax-category": "S"
-								},
-								"base": "2000.00",
-								"percent": "15.0%",
-								"amount": "300.00"
-							},
-							{
-								"key": "standard",
-								"base": "100.00",
-								"percent": "25%",
-								"amount": "25.00"
+								"base": "25.00",
+								"percent": "25.0%",
+								"amount": "6.25"
 							}
 						],
-						"amount": "1550.00"
+						"amount": "331.25"
 					}
 				],
-				"sum": "1550.00"
+				"sum": "331.25"
 			},
-			"tax": "1550.00",
-			"total_with_tax": "8550.00",
-			"payable": "8550.00"
-		}
+			"tax": "331.25",
+			"total_with_tax": "1656.25",
+			"payable": "1656.25"
+		},
+		"notes": [
+			{
+				"text": "Please note we have a new phone number: 22 22 22 22"
+			}
+		]
 	}
 }

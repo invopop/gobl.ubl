@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fd604770360e57eada6231855d834d05cebd9c3f8aa3d62018de20f4ccffa390"
+			"val": "f9ed44487d88599b1e8b30bdf50b9e24cbb5748dcac9ac1b220b98cedc68d0c1"
 		}
 	},
 	"doc": {
@@ -91,6 +91,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -111,6 +112,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -131,6 +133,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -151,6 +154,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -171,6 +175,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -188,6 +193,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%"
 					}
 				]
@@ -197,6 +203,15 @@
 			"code": "9392277012"
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2021-06-24",
+						"amount": "6740.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"detail": "Credit transfer",
@@ -221,6 +236,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -229,6 +245,7 @@
 								"amount": "1341.75"
 							},
 							{
+								"key": "standard",
 								"base": "25.00",
 								"percent": "25%",
 								"amount": "6.25"
