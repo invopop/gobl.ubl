@@ -8,15 +8,18 @@ import (
 )
 
 func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
-	ordering := &bill.Ordering{}
-
+	ordering := new(bill.Ordering)
+	// set ensures that ordering is only added when needed
+	set := false
 	if in.BuyerReference != "" {
 		ordering.Code = cbc.Code(in.BuyerReference)
+		set = true
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(in.InvoicePeriod) > 0 {
 		ordering.Period = goblPeriodDates(&in.InvoicePeriod[0])
+		set = true
 	}
 
 	if in.DespatchDocumentReference != nil {
@@ -28,6 +31,7 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 			}
 			ordering.Despatch = append(ordering.Despatch, docRef)
 		}
+		set = true
 	}
 
 	if in.ReceiptDocumentReference != nil {
@@ -39,6 +43,7 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 			}
 			ordering.Receiving = append(ordering.Receiving, docRef)
 		}
+		set = true
 	}
 
 	if in.OrderReference != nil && in.OrderReference.ID != "" {
@@ -47,6 +52,7 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				Code: cbc.Code(in.OrderReference.ID),
 			},
 		}
+		set = true
 	}
 
 	if in.ContractDocumentReference != nil {
@@ -58,6 +64,7 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 			}
 			ordering.Contracts = append(ordering.Contracts, docRef)
 		}
+		set = true
 	}
 
 	if in.AdditionalDocumentReference != nil {
@@ -73,6 +80,7 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 						return err
 					}
 					ordering.Tender = append(ordering.Tender, docRef)
+					set = true
 				case "130":
 					if ordering.Identities == nil {
 						ordering.Identities = make([]*org.Identity, 0)
@@ -84,15 +92,17 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 						identity.Label = *ref.ID.SchemeID
 					}
 					ordering.Identities = append(ordering.Identities, identity)
+					set = true
 				}
 			}
 			// Other document types not mapped to GOBL
 		}
 	}
 
-	if ordering.Code != "" || ordering.Period != nil || ordering.Despatch != nil || ordering.Receiving != nil || ordering.Tender != nil || ordering.Identities != nil {
+	if set {
 		out.Ordering = ordering
 	}
+
 	return nil
 }
 
