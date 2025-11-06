@@ -158,6 +158,13 @@
 				"total": "2500.00"
 			}
 		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "123"
+				}
+			]
+		},
 		"payment": {
 			"terms": {
 				"due_dates": [
