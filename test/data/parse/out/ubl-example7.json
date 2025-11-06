@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fdb9022590f9a492f9cbf5a447c85d49864643727b94912f4c30b7b2252ec1c7"
+			"val": "184cba3886a9c3e18baeeb5566ecf33330a44f566e2c78aa4d025940996d53ea"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "INVOICE_test_7",
 		"issue_date": "2013-03-11",
 		"currency": "SEK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",
@@ -91,7 +97,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard",
+						"key": "outside-scope",
 						"ext": {
 							"untdid-tax-category": "O"
 						}
@@ -113,7 +119,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard",
+						"key": "outside-scope",
 						"ext": {
 							"untdid-tax-category": "O"
 						}
@@ -135,7 +141,7 @@
 		},
 		"payment": {
 			"terms": {
-				"notes": "Payment within 30 days"
+				"detail": "Payment within 30 days"
 			},
 			"instructions": {
 				"key": "credit-transfer",
@@ -159,7 +165,7 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
+								"key": "outside-scope",
 								"ext": {
 									"untdid-tax-category": "O"
 								},

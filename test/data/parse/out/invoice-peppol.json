@@ -4,19 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f9ed44487d88599b1e8b30bdf50b9e24cbb5748dcac9ac1b220b98cedc68d0c1"
+			"val": "eb37150cfed56ef317198dff3ccc2424168c72152f4210a250ac8b659931d563"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "BE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "POP000274-128-20210525T044541",
 		"issue_date": "2021-05-25",
 		"currency": "EUR",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Acme Corporation",
@@ -194,7 +200,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -240,15 +249,9 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "5367.00",
+								"base": "5392.00",
 								"percent": "25%",
-								"amount": "1341.75"
-							},
-							{
-								"key": "standard",
-								"base": "25.00",
-								"percent": "25%",
-								"amount": "6.25"
+								"amount": "1348.00"
 							}
 						],
 						"amount": "1348.00"
