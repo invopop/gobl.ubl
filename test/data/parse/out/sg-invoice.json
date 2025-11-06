@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a9011e3131157acaee79affe639810704d524d98b9aef5070d5c7d5269982f80"
+			"val": "e50d21ca69020d877698587271012a4155b568c0409dd2c6f709d6abeaeb8bb8"
 		}
 	},
 	"doc": {
@@ -127,6 +127,7 @@
 			{
 				"i": 1,
 				"quantity": "63.992",
+				"order": "1",
 				"cost": "23089",
 				"item": {
 					"ref": "E_DVK_PKlik_KVP_LP",
@@ -184,6 +185,7 @@
 			{
 				"i": 2,
 				"quantity": "12.888",
+				"order": "1",
 				"cost": "23089",
 				"item": {
 					"ref": "E_DVK_PKlik_KVP_LP",

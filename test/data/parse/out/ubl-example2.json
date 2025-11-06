@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c9de6acdc993ca0bdbd8c3e5d136019baf9b557992fa75bcae5513faafa0985e"
+			"val": "25c9d778e14ee934459233c250ac480e0a3eb9e1f0b0af1c9b7c97abd87193f3"
 		}
 	},
 	"doc": {
@@ -86,6 +86,7 @@
 			{
 				"i": 1,
 				"quantity": "2",
+				"order": "1",
 				"cost": "BookingCode001",
 				"item": {
 					"ref": "JB007",
@@ -147,6 +148,7 @@
 			{
 				"i": 2,
 				"quantity": "-1",
+				"order": "5",
 				"cost": "BookingCode002",
 				"item": {
 					"ref": "JB008",
@@ -191,6 +193,7 @@
 			{
 				"i": 3,
 				"quantity": "2",
+				"order": "3",
 				"cost": "BookingCode003",
 				"item": {
 					"ref": "JB009",
@@ -230,6 +233,7 @@
 			{
 				"i": 4,
 				"quantity": "-1",
+				"order": "2",
 				"cost": "BookingCode004",
 				"item": {
 					"ref": "JB010",

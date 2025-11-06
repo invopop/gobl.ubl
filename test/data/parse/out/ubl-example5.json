@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a2318bdd255bec70eb9dca72100c2b90dfe6bccee8b1781fde84f9447bc42876"
+			"val": "4d7cf84159bb47f38b9da204459705fb8a14e083422b183fb413d97301363d24"
 		}
 	},
 	"doc": {
@@ -98,6 +98,7 @@
 			{
 				"i": 1,
 				"quantity": "1000",
+				"order": "1",
 				"cost": "ACC7654",
 				"item": {
 					"ref": "JB007",
@@ -168,6 +169,7 @@
 			{
 				"i": 2,
 				"quantity": "100",
+				"order": "2",
 				"cost": "ACC7654",
 				"item": {
 					"ref": "JB008",

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "044f4a132890ba95764cce6970e4822c93758e8cb0e3d48cde81faffa26fad63"
+			"val": "c67e95ceb791a54207ddd7b879a3f5c08634127189a0b444d53454a40de56190"
 		}
 	},
 	"doc": {
@@ -104,6 +104,7 @@
 			{
 				"i": 1,
 				"quantity": "10",
+				"order": "123",
 				"cost": "Konteringsstreng",
 				"item": {
 					"ref": "97iugug876",

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "08c6da8f808680131e34069548243e351e92d10fb13d0d6542bac8b1f769d38b"
+			"val": "df811c121c972ab1e96644ce2d23e4d3e0fd37bf87f276ebfe7a08e15f4a181c"
 		}
 	},
 	"doc": {
@@ -112,6 +112,7 @@
 			{
 				"i": 1,
 				"quantity": "7",
+				"order": "123",
 				"cost": "Konteringsstreng",
 				"item": {
 					"name": "item name",
@@ -148,6 +149,7 @@
 			{
 				"i": 2,
 				"quantity": "-3",
+				"order": "123",
 				"item": {
 					"name": "item name 2",
 					"identities": [

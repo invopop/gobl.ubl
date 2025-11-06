@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "000749de84f2236a55c98f41e57c6724cd229c01a0c128866778e7af06080c58"
+			"val": "1d3d311d7a25c6923349a1aa7533c01ffbb7d5117fac267d3e2d7f4ef8c5d997"
 		}
 	},
 	"doc": {
@@ -57,6 +57,7 @@
 			{
 				"i": 1,
 				"quantity": "1",
+				"order": "1",
 				"item": {
 					"ref": "RT3000",
 					"name": "Road tax",
