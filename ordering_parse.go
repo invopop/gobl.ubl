@@ -30,8 +30,8 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				return err
 			}
 			ordering.Despatch = append(ordering.Despatch, docRef)
+			set = true
 		}
-		set = true
 	}
 
 	if in.ReceiptDocumentReference != nil {
@@ -42,8 +42,8 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				return err
 			}
 			ordering.Receiving = append(ordering.Receiving, docRef)
+			set = true
 		}
-		set = true
 	}
 
 	if in.OrderReference != nil && in.OrderReference.ID != "" {
@@ -63,8 +63,8 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				return err
 			}
 			ordering.Contracts = append(ordering.Contracts, docRef)
+			set = true
 		}
-		set = true
 	}
 
 	if in.AdditionalDocumentReference != nil {
