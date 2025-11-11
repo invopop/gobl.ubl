@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a232c67114c81718ed8c8bf158f583482de2a90855dbc6d37412e6936beb0c25"
+			"val": "8976180f392e5d2c207020bab4e2d63ef07bd60ec51593e2db1a5e89aa8afca7"
 		}
 	},
 	"doc": {
@@ -318,14 +318,14 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "Enexis brengt wettelijke rente in rekening over te laat betaalde\n            facturen. Kijk voor informatie op www.enexis.nl/rentenota",
 				"due_dates": [
 					{
 						"date": "2014-11-24",
 						"amount": "1099.78",
 						"percent": "100%"
 					}
-				]
+				],
+				"notes": "Enexis brengt wettelijke rente in rekening over te laat betaalde\n            facturen. Kijk voor informatie op www.enexis.nl/rentenota"
 			},
 			"instructions": {
 				"key": "credit-transfer",

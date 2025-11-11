@@ -31,9 +31,9 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 
 	if len(in.PaymentTerms) > 0 {
 		payment.Terms = &pay.Terms{}
-		details := make([]string, 0)
+		note := make([]string, 0)
 		for _, term := range in.PaymentTerms {
-			details = append(details, term.Note...)
+			note = append(note, term.Note...)
 			if term.Amount != nil {
 				amount, err := num.AmountFromString(term.Amount.Value)
 				if err != nil {
@@ -44,8 +44,8 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 				})
 			}
 		}
-		if len(details) > 0 {
-			payment.Terms.Detail = strings.Join(details, " ")
+		if len(note) > 0 {
+			payment.Terms.Notes = strings.Join(note, " ")
 		}
 	}
 

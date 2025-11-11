@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5904ad519a37c561e393d0827d2721927d01c5366220c8876fab920a8cfa8ac8"
+			"val": "5d1726d08a11dd4e62627da40b04c03ffc92c9bcd3248f83b5008dfb33a07273"
 		}
 	},
 	"doc": {
@@ -58,8 +58,7 @@
 			"alias": "BuyerTradingName AS",
 			"tax_id": {
 				"country": "SE",
-				"code": "4598375937",
-				"scheme": "VAT"
+				"code": "4598375937"
 			},
 			"identities": [
 				{

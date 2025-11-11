@@ -4,11 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9297c5ee7d9cd79c2bd9abb60d9474c61839357122c8318ae0385bc7a47973c2"
+			"val": "352ac284c857019f97f3a247634a6a7fd427ce64122e13b03824b1526f1bd494"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "SG",
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "2025-08-28T14:18:51-4c42b50f",
@@ -27,8 +28,7 @@
 			"alias": "Test 0195 Identifier Storecove",
 			"tax_id": {
 				"country": "SG",
-				"code": "123457890SC",
-				"scheme": "GST"
+				"code": "123457890SC"
 			},
 			"identities": [
 				{
@@ -168,6 +168,7 @@
 				"taxes": [
 					{
 						"cat": "GST",
+						"key": "standard",
 						"percent": "9.0%",
 						"ext": {
 							"untdid-tax-category": "SR"
@@ -225,6 +226,7 @@
 				"taxes": [
 					{
 						"cat": "GST",
+						"key": "standard",
 						"percent": "9.0%",
 						"ext": {
 							"untdid-tax-category": "SR"
@@ -247,6 +249,7 @@
 				"taxes": [
 					{
 						"cat": "GST",
+						"key": "standard",
 						"percent": "9.0%"
 					}
 				]
@@ -260,6 +263,7 @@
 				"taxes": [
 					{
 						"cat": "GST",
+						"key": "standard",
 						"percent": "9.0%"
 					}
 				]
@@ -348,6 +352,7 @@
 						"code": "GST",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "SR"
 								},
@@ -356,6 +361,7 @@
 								"amount": "1.11"
 							},
 							{
+								"key": "standard",
 								"base": "10.20",
 								"percent": "9.0%",
 								"amount": "0.92"

@@ -143,7 +143,7 @@ func (out *Invoice) addPayment(pymt *bill.PaymentDetails) error {
 			out.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 		} else {
 			out.PaymentTerms = append(out.PaymentTerms, PaymentTerms{
-				Note: []string{pymt.Terms.Detail},
+				Note: []string{pymt.Terms.Notes},
 			})
 		}
 	}
