@@ -9,17 +9,14 @@ import (
 
 func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
-	// set ensures that ordering is only added when needed
-	set := false
+
 	if in.BuyerReference != "" {
 		ordering.Code = cbc.Code(in.BuyerReference)
-		set = true
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(in.InvoicePeriod) > 0 {
 		ordering.Period = goblPeriodDates(&in.InvoicePeriod[0])
-		set = true
 	}
 
 	if in.DespatchDocumentReference != nil {
@@ -30,7 +27,6 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				return err
 			}
 			ordering.Despatch = append(ordering.Despatch, docRef)
-			set = true
 		}
 	}
 
@@ -42,7 +38,6 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				return err
 			}
 			ordering.Receiving = append(ordering.Receiving, docRef)
-			set = true
 		}
 	}
 
@@ -52,7 +47,6 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				Code: cbc.Code(in.OrderReference.ID),
 			},
 		}
-		set = true
 	}
 
 	if in.ContractDocumentReference != nil {
@@ -63,7 +57,6 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 				return err
 			}
 			ordering.Contracts = append(ordering.Contracts, docRef)
-			set = true
 		}
 	}
 
@@ -80,7 +73,6 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 						return err
 					}
 					ordering.Tender = append(ordering.Tender, docRef)
-					set = true
 				case "130":
 					if ordering.Identities == nil {
 						ordering.Identities = make([]*org.Identity, 0)
@@ -92,14 +84,20 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 						identity.Label = *ref.ID.SchemeID
 					}
 					ordering.Identities = append(ordering.Identities, identity)
-					set = true
 				}
 			}
 			// Other document types not mapped to GOBL
 		}
 	}
 
-	if set {
+	if ordering.Code != "" ||
+		ordering.Period != nil ||
+		len(ordering.Despatch) > 0 ||
+		len(ordering.Receiving) > 0 ||
+		len(ordering.Purchases) > 0 ||
+		len(ordering.Contracts) > 0 ||
+		len(ordering.Tender) > 0 ||
+		len(ordering.Identities) > 0 {
 		out.Ordering = ordering
 	}
 
