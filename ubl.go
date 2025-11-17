@@ -141,17 +141,23 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	switch doc := env.Extract().(type) {
 	case *bill.Invoice:
 		// Check addons
+		missingAddons := make([]cbc.Key, 0)
 		for _, ao := range o.context.Addons {
 			if !ao.In(doc.GetAddons()...) {
-				doc.SetAddons(append(doc.GetAddons(), ao)...)
-				err := doc.Validate()
-				if err != nil {
-					return nil, fmt.Errorf("gobl invoice missing addon %s: %w", ao, err)
-				}
-				err = doc.Calculate()
-				if err != nil {
-					return nil, fmt.Errorf("gobl invoice missing addon %s: %w", ao, err)
-				}
+				missingAddons = append(missingAddons, ao)
+			}
+		}
+
+		// only build if we have missing addons
+		if len(missingAddons) > 0 {
+			doc.SetAddons(append(doc.GetAddons(), missingAddons...)...)
+
+			if err := doc.Validate(); err != nil {
+				return nil, fmt.Errorf("gobl invoice missing addon %v: %w", missingAddons, err)
+			}
+
+			if err := doc.Calculate(); err != nil {
+				return nil, fmt.Errorf("gobl invoice missing addon %v: %w", missingAddons, err)
 			}
 		}
 
