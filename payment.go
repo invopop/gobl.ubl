@@ -81,8 +81,11 @@ func (out *Invoice) addPayment(pymt *bill.PaymentDetails) error {
 		out.PaymentMeans = []PaymentMeans{
 			{
 				PaymentMeansCode: IDType{Value: pymt.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
-				PaymentID:        &ref,
 			},
+		}
+
+		if ref != "" {
+			out.PaymentMeans[0].PaymentID = &ref
 		}
 
 		if pymt.Instructions.CreditTransfer != nil {
