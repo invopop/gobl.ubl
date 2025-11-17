@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.4
 
 require (
-	github.com/invopop/gobl v0.302.2-0.20251111122000-b1879a551d50
+	github.com/invopop/gobl v0.303.0
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
