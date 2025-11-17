@@ -7,6 +7,17 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
+func hasOrderingData(o *bill.Ordering) bool {
+	return o.Code != "" ||
+		o.Period != nil ||
+		len(o.Despatch) > 0 ||
+		len(o.Receiving) > 0 ||
+		len(o.Purchases) > 0 ||
+		len(o.Contracts) > 0 ||
+		len(o.Tender) > 0 ||
+		len(o.Identities) > 0
+}
+
 func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
@@ -90,14 +101,7 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 		}
 	}
 
-	if ordering.Code != "" ||
-		ordering.Period != nil ||
-		len(ordering.Despatch) > 0 ||
-		len(ordering.Receiving) > 0 ||
-		len(ordering.Purchases) > 0 ||
-		len(ordering.Contracts) > 0 ||
-		len(ordering.Tender) > 0 ||
-		len(ordering.Identities) > 0 {
+	if hasOrderingData(ordering) {
 		out.Ordering = ordering
 	}
 
