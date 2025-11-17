@@ -143,7 +143,15 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		// Check addons
 		for _, ao := range o.context.Addons {
 			if !ao.In(doc.GetAddons()...) {
-				return nil, fmt.Errorf("gobl invoice missing addon %s", ao)
+				doc.SetAddons(append(doc.GetAddons(), ao)...)
+				err := doc.Validate()
+				if err != nil {
+					return nil, fmt.Errorf("gobl invoice missing addon %s: %w", ao, err)
+				}
+				err = doc.Calculate()
+				if err != nil {
+					return nil, fmt.Errorf("gobl invoice missing addon %s: %w", ao, err)
+				}
 			}
 		}
 
