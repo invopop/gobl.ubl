@@ -96,6 +96,10 @@ func goblConvertLine(docLine *InvoiceLine) (*bill.Line, error) {
 		line.Cost = cbc.Code(*docLine.AccountingCost)
 	}
 
+	if docLine.OrderLineReference != nil && docLine.OrderLineReference.LineID != "" {
+		line.Order = cbc.Code(docLine.OrderLineReference.LineID)
+	}
+
 	if docLine.AllowanceCharge != nil {
 		line, err = goblLineCharges(docLine.AllowanceCharge, line)
 		if err != nil {

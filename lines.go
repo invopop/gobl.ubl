@@ -73,6 +73,12 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 			}
 		}
 
+		if l.Order != "" {
+			invLine.OrderLineReference = &OrderLineReference{
+				LineID: l.Order.String(),
+			}
+		}
+
 		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
 			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy)
 		}

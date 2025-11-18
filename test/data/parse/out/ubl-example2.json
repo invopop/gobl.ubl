@@ -92,6 +92,7 @@
 			{
 				"i": 1,
 				"quantity": "2",
+				"order": "1",
 				"cost": "BookingCode001",
 				"item": {
 					"ref": "JB007",
@@ -153,6 +154,7 @@
 			{
 				"i": 2,
 				"quantity": "-1",
+				"order": "5",
 				"cost": "BookingCode002",
 				"item": {
 					"ref": "JB008",
@@ -197,6 +199,7 @@
 			{
 				"i": 3,
 				"quantity": "2",
+				"order": "3",
 				"cost": "BookingCode003",
 				"item": {
 					"ref": "JB009",
@@ -236,6 +239,7 @@
 			{
 				"i": 4,
 				"quantity": "-1",
+				"order": "2",
 				"cost": "BookingCode004",
 				"item": {
 					"ref": "JB010",

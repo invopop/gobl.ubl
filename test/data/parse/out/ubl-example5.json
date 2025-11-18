@@ -104,6 +104,7 @@
 			{
 				"i": 1,
 				"quantity": "1000",
+				"order": "1",
 				"cost": "ACC7654",
 				"item": {
 					"ref": "JB007",
@@ -174,6 +175,7 @@
 			{
 				"i": 2,
 				"quantity": "100",
+				"order": "2",
 				"cost": "ACC7654",
 				"item": {
 					"ref": "JB008",

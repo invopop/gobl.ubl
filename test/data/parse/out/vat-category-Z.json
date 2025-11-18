@@ -68,6 +68,7 @@
 			{
 				"i": 1,
 				"quantity": "10",
+				"order": "1",
 				"item": {
 					"name": "Test item, category Z",
 					"identities": [

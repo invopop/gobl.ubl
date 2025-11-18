@@ -112,6 +112,7 @@
 			{
 				"i": 1,
 				"quantity": "7",
+				"order": "123",
 				"cost": "Konteringsstreng",
 				"item": {
 					"name": "item name",
@@ -148,6 +149,7 @@
 			{
 				"i": 2,
 				"quantity": "-3",
+				"order": "123",
 				"item": {
 					"name": "item name 2",
 					"identities": [

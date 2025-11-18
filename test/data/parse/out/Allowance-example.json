@@ -166,6 +166,7 @@
 			{
 				"i": 2,
 				"quantity": "10",
+				"order": "124",
 				"cost": "Konteringsstreng",
 				"item": {
 					"ref": "97iugug876",
@@ -204,6 +205,7 @@
 			{
 				"i": 3,
 				"quantity": "10",
+				"order": "124",
 				"cost": "Konteringsstreng",
 				"item": {
 					"ref": "97iugug876",

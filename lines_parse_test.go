@@ -101,6 +101,27 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, "15%", line.Taxes[0].Percent.String())
 	})
 
+	// Test OrderLineReference parsing
+	t.Run("partial-invoice.xml with OrderLineReference", func(t *testing.T) {
+		e, err := testParseInvoice("partial-invoice.xml")
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		lines := inv.Lines
+		assert.NotNil(t, lines)
+		assert.Len(t, lines, 2)
+
+		// Check the first line has order reference
+		line := lines[0]
+		assert.Equal(t, cbc.Code("123"), line.Order)
+
+		// Check the second line has order reference
+		line = lines[1]
+		assert.Equal(t, cbc.Code("123"), line.Order)
+	})
+
 	// Test BaseQuantity logic
 	t.Run("BaseQuantity price calculation", func(t *testing.T) {
 		e, err := testParseInvoice("Allowance-example.xml")

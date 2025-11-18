@@ -127,6 +127,7 @@
 			{
 				"i": 1,
 				"quantity": "63.992",
+				"order": "1",
 				"cost": "23089",
 				"item": {
 					"ref": "E_DVK_PKlik_KVP_LP",
@@ -185,6 +186,7 @@
 			{
 				"i": 2,
 				"quantity": "12.888",
+				"order": "1",
 				"cost": "23089",
 				"item": {
 					"ref": "E_DVK_PKlik_KVP_LP",

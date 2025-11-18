@@ -63,6 +63,7 @@
 			{
 				"i": 1,
 				"quantity": "1",
+				"order": "1",
 				"item": {
 					"ref": "RT3000",
 					"name": "Road tax",
