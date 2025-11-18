@@ -151,12 +151,10 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		// only build if we have missing addons
 		if len(missingAddons) > 0 {
 			doc.SetAddons(append(doc.GetAddons(), missingAddons...)...)
-
-			if err := doc.Validate(); err != nil {
+			if err := doc.Calculate(); err != nil {
 				return nil, fmt.Errorf("gobl invoice missing addon %v: %w", missingAddons, err)
 			}
-
-			if err := doc.Calculate(); err != nil {
+			if err := doc.Validate(); err != nil {
 				return nil, fmt.Errorf("gobl invoice missing addon %v: %w", missingAddons, err)
 			}
 		}
