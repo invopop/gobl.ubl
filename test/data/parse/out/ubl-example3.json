@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0fd4c69a92ee8b8a0a381ede9ce927c60680128887db4d5e3078aaee4766e128"
+			"val": "4479203ddfae32d31df81a6f2ea188a37ab86386f92cd7ee197229415ec68f0e"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-04-10",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "SubscriptionSeller",
@@ -133,7 +139,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -186,9 +195,9 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1600.00",
+								"base": "1700.00",
 								"percent": "25%",
-								"amount": "400.00"
+								"amount": "425.00"
 							},
 							{
 								"key": "standard",
@@ -198,12 +207,6 @@
 								"base": "1600.00",
 								"percent": "10%",
 								"amount": "160.00"
-							},
-							{
-								"key": "standard",
-								"base": "100.00",
-								"percent": "25%",
-								"amount": "25.00"
 							}
 						],
 						"amount": "585.00"

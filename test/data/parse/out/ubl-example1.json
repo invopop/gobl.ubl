@@ -4,19 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bd4866759a9139d28d17e6b194a1be06c7c936bfd6b1d7be93863368b8931e39"
+			"val": "3c9bdaf7ae95e7dbe542fa18891a89a2eab96f4d4bf68d9b685c3f65b2c75888"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "NL",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "12115118",
 		"issue_date": "2015-01-09",
 		"currency": "EUR",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "De Koksmaat",

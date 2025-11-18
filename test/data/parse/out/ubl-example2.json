@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "25c9d778e14ee934459233c250ac480e0a3eb9e1f0b0af1c9b7c97abd87193f3"
+			"val": "fc54ebebdafd5b34267227ab0fadb9fc01220ce11b296496fb90d1ca7f114ed7"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-06-30",
 		"currency": "NOK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Tax handling company AS",
@@ -264,7 +270,7 @@
 						"key": "zero",
 						"percent": "0%",
 						"ext": {
-							"untdid-tax-category": "E"
+							"untdid-tax-category": "Z"
 						}
 					}
 				],
@@ -322,7 +328,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -339,7 +348,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -499,16 +511,10 @@
 							{
 								"key": "zero",
 								"ext": {
-									"untdid-tax-category": "E"
+									"untdid-tax-category": "Z"
 								},
 								"base": "-25.00",
 								"percent": "0%",
-								"amount": "0.00"
-							},
-							{
-								"key": "standard",
-								"base": "0.00",
-								"percent": "25%",
 								"amount": "0.00"
 							}
 						],

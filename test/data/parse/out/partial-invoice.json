@@ -4,12 +4,15 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c6ce59751432830fff24e7980c6fc208642af843b675c8fc2aca5f9dd8e5f820"
+			"val": "e36e5d346c96f5405636034f4a401cf647ae432f3c77d942874da69b30580698"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"$tags": [
 			"partial"
 		],
@@ -19,7 +22,10 @@
 		"issue_date": "2017-11-13",
 		"currency": "EUR",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "326"
+			}
 		},
 		"supplier": {
 			"name": "SupplierOfficialName Ltd",
@@ -55,8 +61,7 @@
 			"alias": "BuyerTradingName AS",
 			"tax_id": {
 				"country": "SE",
-				"code": "4598375937",
-				"scheme": "VAT"
+				"code": "4598375937"
 			},
 			"identities": [
 				{
@@ -187,7 +192,10 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25.0%"
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -256,15 +264,9 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1300.00",
+								"base": "1325.00",
 								"percent": "25.0%",
-								"amount": "325.00"
-							},
-							{
-								"key": "standard",
-								"base": "25.00",
-								"percent": "25.0%",
-								"amount": "6.25"
+								"amount": "331.25"
 							}
 						],
 						"amount": "331.25"

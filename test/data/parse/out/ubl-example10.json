@@ -4,19 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8fed4c2e23138b628cecd53cce094c3e9c7687fd601230753d03613da153cefd"
+			"val": "cf3682f882aea91e66dceffe2aca9ae311017d7ab7440c1e7998ac6bfacd2d3f"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "NL",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "1100512149",
 		"issue_date": "2014-11-10",
 		"currency": "EUR",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Enexis B.V.",

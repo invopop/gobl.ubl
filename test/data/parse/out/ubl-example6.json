@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "31bd71ceb64ecdf0de896d31d0df9184dd0762c4173ecd79670cac31f753f412"
+			"val": "f19729868177d7919f5c72f77eb6438dd535518cdd904b0a7bcd4eae435cc2c5"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL110",
 		"issue_date": "2013-04-10",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "SellerCompany",
