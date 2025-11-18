@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "000749de84f2236a55c98f41e57c6724cd229c01a0c128866778e7af06080c58"
+			"val": "33429ca9ad57a199de30a847b9ceef0d997bf5797a53ac25611de2f6041f23d5"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "Vat-O",
 		"issue_date": "2018-08-30",
 		"currency": "SEK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",
@@ -68,7 +74,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard",
+						"key": "outside-scope",
 						"ext": {
 							"untdid-tax-category": "O"
 						}
@@ -106,7 +112,7 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
+								"key": "outside-scope",
 								"ext": {
 									"untdid-tax-category": "O"
 								},

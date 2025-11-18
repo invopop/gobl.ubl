@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"github.com/nbio/xml"
-
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
@@ -28,18 +26,11 @@ var InvoiceTagMap = map[string][]cbc.Key{
 	"261": {tax.TagSelfBilled},
 }
 
-// parseInvoice takes the provided raw XML document and attempts to build
-// a bill.Invoice. Contents may be either an Invoice or CreditNote.
-func parseInvoice(data []byte) (*bill.Invoice, error) {
-	in := new(Invoice)
-	if err := xml.Unmarshal(data, in); err != nil {
-		return nil, err
-	}
-	return goblInvoice(in)
-}
-
-func goblInvoice(in *Invoice) (*bill.Invoice, error) {
+func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 	out := &bill.Invoice{
+		Addons: tax.Addons{
+			List: o.context.Addons,
+		},
 		Code:     cbc.Code(in.ID),
 		Currency: currency.Code(in.DocumentCurrencyCode),
 		Tax: &bill.Tax{

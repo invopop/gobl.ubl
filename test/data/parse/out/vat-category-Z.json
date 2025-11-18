@@ -4,19 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "115957115d3d43b360af631ba1d136d5cd19adb0056e1673d6f9cf4ae685f5aa"
+			"val": "7bc1dff92c99816383a4033d6570cfa761c840953d57bc1c1628d1307536c4de"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "Vat-Z",
 		"issue_date": "2018-08-30",
 		"currency": "GBP",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",

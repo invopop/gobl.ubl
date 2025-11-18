@@ -81,8 +81,11 @@ func (out *Invoice) addPayment(pymt *bill.PaymentDetails) error {
 		out.PaymentMeans = []PaymentMeans{
 			{
 				PaymentMeansCode: IDType{Value: pymt.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
-				PaymentID:        &ref,
 			},
+		}
+
+		if ref != "" {
+			out.PaymentMeans[0].PaymentID = &ref
 		}
 
 		if pymt.Instructions.CreditTransfer != nil {
@@ -143,7 +146,7 @@ func (out *Invoice) addPayment(pymt *bill.PaymentDetails) error {
 			out.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 		} else {
 			out.PaymentTerms = append(out.PaymentTerms, PaymentTerms{
-				Note: []string{pymt.Terms.Detail},
+				Note: []string{pymt.Terms.Notes},
 			})
 		}
 	}

@@ -94,7 +94,7 @@ type Invoice struct {
 	CreditNoteLines                []InvoiceLine       `xml:"cac:CreditNoteLine,omitempty"`
 }
 
-func newInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
+func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	tc, err := getTypeCode(inv)
 	if err != nil {
 		return nil, err
