@@ -16,9 +16,10 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
 	"github.com/invopop/phive"
-	"github.com/invopop/phive/protocol"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/lestrrat-go/libxml2"
 	"github.com/lestrrat-go/libxml2/xsd"
@@ -38,9 +39,14 @@ const (
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
 func TestConvertToInvoice(t *testing.T) {
-	client, err := phive.NewClient("localhost:9090")
+	conn, err := grpc.NewClient(
+		"localhost:9090",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	require.NoError(t, err)
-	defer client.Close()
+	defer conn.Close()
+
+	pc := phive.NewValidationServiceClient(conn)
 
 	examples, err := getDataGlob(jsonPattern)
 	require.NoError(t, err)
@@ -57,17 +63,17 @@ func TestConvertToInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			if *updateOut {
-				resp := new(protocol.ValidateXmlResponse)
-				var err error
-				if doc.CreditNoteTypeCode == "" {
-					resp, err = client.ValidateXML(context.Background(), "org.oasis-open:invoice:2.2", data, "")
-				} else {
-					resp, err = client.ValidateXML(context.Background(), "org.oasis-open:creditnote:2.2", data, "")
-				}
-				require.NoError(t, err)
-				require.True(t, resp.Success, "Generated XML should be valid: %v+", resp.Results)
 				err = os.WriteFile(outputFilepath(outName), data, 0644)
 				require.NoError(t, err)
+				resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+					Vesid:      "eu.peppol.bis3:invoice:2024.5",
+					XmlContent: data,
+				})
+				require.NoError(t, err)
+				results, err := json.MarshalIndent(resp.Results, "", "  ")
+				require.NoError(t, err)
+				require.True(t, resp.Success, "Generated XML should be valid: %s", string(results))
+
 			}
 
 			output, err := loadOutputFile(outName)
@@ -147,7 +153,7 @@ func testInvoiceFrom(name string) (*ubl.Invoice, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ubl.ConvertInvoice(env)
+	return ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
 }
 
 // testLoadXML provides the raw data of a test XML file
@@ -283,7 +289,7 @@ func getConversionTypePath(pattern string) string {
 	if pattern == xmlPattern {
 		return filepath.Join(getDataPath(), "parse")
 	}
-	return filepath.Join(getDataPath(), "convert")
+	return filepath.Join(getDataPath(), "convert/pepol")
 }
 
 func getTestPath() string {

@@ -11,10 +11,11 @@ require (
 )
 
 require (
-	github.com/invopop/phive v0.4.0
+	github.com/invopop/phive v0.6.0
 	github.com/invopop/validation v0.8.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
 	github.com/nbio/xml v0.0.0-20250127210239-7f9281fed8c6
+	google.golang.org/grpc v1.77.0
 )
 
 require (
@@ -40,7 +41,6 @@ require (
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251022142026-3a174f9686a8 // indirect
-	google.golang.org/grpc v1.77.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
