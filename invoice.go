@@ -140,7 +140,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addPreceding(inv.Preceding)
 	out.addOrdering(inv.Ordering)
 	out.addCharges(inv)
-	out.addTotals(inv.Totals, string(inv.Currency))
+	out.addTotals(inv, string(inv.Currency))
 	out.addLines(inv)
 
 	if err = out.addPayment(inv.Payment); err != nil {
