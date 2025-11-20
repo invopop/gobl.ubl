@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ada0e16af547edca54ecbdd9c3b5efebe578e1c7ecc63cc711b473a5308958c2"
+			"val": "40059152ae1c84685332b830209f3846f5652d11dffb1e5431ad35902705f63b"
 		}
 	},
 	"doc": {
@@ -78,6 +78,7 @@
 				"quantity": "20",
 				"order": "123",
 				"item": {
+					"ref": "DEVSERV001",
 					"name": "Development services",
 					"identities": [
 						{
