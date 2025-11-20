@@ -150,6 +150,14 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					},
 				}
 			}
+
+			if l.Item.Ref != "" {
+				invLine.Item.SellersItemIdentification = &ItemIdentification{
+					ID: &IDType{
+						Value: l.Item.Ref.String(),
+					},
+				}
+			}
 		}
 
 		lines = append(lines, invLine)
