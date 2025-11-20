@@ -2,9 +2,11 @@ package ubl
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 )
 
 // TaxTotal represents a tax total
@@ -41,10 +43,12 @@ type MonetaryTotal struct {
 	PayableAmount         *Amount `xml:"cbc:PayableAmount,omitempty"`
 }
 
-func (out *Invoice) addTotals(t *bill.Totals, currency string) {
-	if t == nil {
+func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
+	if inv == nil || inv.Totals == nil {
 		return
 	}
+	t := inv.Totals
+
 	out.LegalMonetaryTotal = MonetaryTotal{
 		LineExtensionAmount: Amount{Value: t.Sum.String(), CurrencyID: &currency},
 		TaxExclusiveAmount:  Amount{Value: t.Total.String(), CurrencyID: &currency},
@@ -82,10 +86,27 @@ func (out *Invoice) addTotals(t *bill.Totals, currency string) {
 					p := r.Percent.StringWithoutSymbol()
 					taxCat.Percent = &p
 				}
-				if r.Ext != nil && r.Ext[untdid.ExtKeyTaxCategory].String() != "" {
-					k := r.Ext[untdid.ExtKeyTaxCategory].String()
-					taxCat.ID = &k
+				if r.Ext != nil {
+					if r.Ext[untdid.ExtKeyTaxCategory].String() != "" {
+						k := r.Ext[untdid.ExtKeyTaxCategory].String()
+						taxCat.ID = &k
+					}
+					if r.Ext[cef.ExtKeyVATEX].String() != "" {
+						v := r.Ext[cef.ExtKeyVATEX].String()
+						taxCat.TaxExemptionReasonCode = &v
+					}
 				}
+
+				if inv.Notes != nil {
+					for _, n := range inv.Notes {
+						if n.Key == org.NoteKeyLegal {
+							reason := n.Text
+							taxCat.TaxExemptionReason = &reason
+							break
+						}
+					}
+				}
+
 				if cat.Code != cbc.CodeEmpty {
 					taxCat.TaxScheme = &TaxScheme{ID: cat.Code.String()}
 				}
