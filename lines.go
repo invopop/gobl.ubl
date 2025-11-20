@@ -121,12 +121,12 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					it.ClassifiedTaxCategory.ID = &rate
 				}
 
+				// Set percent: required unless category is "O" (outside scope)
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
-				} else if it.ClassifiedTaxCategory.ID != nil && *it.ClassifiedTaxCategory.ID != "O" {
-					// If no percent is given, but the tax category is not "O" (outside of scope),
-					// we set it to 0 to avoid invalid UBL.
+				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
+					// Default to 0% when not outside scope
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
 				}

@@ -82,10 +82,7 @@ func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
 					subtotal.TaxableAmount = Amount{Value: r.Base.String(), CurrencyID: &currency}
 				}
 				taxCat := TaxCategory{}
-				if r.Percent != nil {
-					p := r.Percent.StringWithoutSymbol()
-					taxCat.Percent = &p
-				}
+
 				if r.Ext != nil {
 					if r.Ext[untdid.ExtKeyTaxCategory].String() != "" {
 						k := r.Ext[untdid.ExtKeyTaxCategory].String()
@@ -95,6 +92,16 @@ func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
 						v := r.Ext[cef.ExtKeyVATEX].String()
 						taxCat.TaxExemptionReasonCode = &v
 					}
+				}
+
+				// Set percent: required unless category is "O" (outside scope)
+				if r.Percent != nil {
+					p := r.Percent.StringWithoutSymbol()
+					taxCat.Percent = &p
+				} else if taxCat.ID == nil || *taxCat.ID != "O" {
+					// Default to 0% when not outside scope
+					p := "0"
+					taxCat.Percent = &p
 				}
 
 				if inv.Notes != nil {
