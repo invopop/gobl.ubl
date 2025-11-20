@@ -2,6 +2,7 @@ package ubl_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"io"
@@ -14,6 +15,8 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
+	"github.com/invopop/phive"
+	"github.com/invopop/phive/protocol"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -24,7 +27,7 @@ import (
 const (
 	xmlPattern  = "*.xml"
 	jsonPattern = "*.json"
-
+	ß
 	schemaInvoice    = "UBL-Invoice-2.1.xsd"
 	schemaCreditNote = "UBL-CreditNote-2.1.xsd"
 
@@ -35,8 +38,9 @@ const (
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
 func TestConvertToInvoice(t *testing.T) {
-	invoiceSchema := loadSchema(t, schemaInvoice)
-	creditNoteSchema := loadSchema(t, schemaCreditNote)
+	client, err := phive.NewClient("localhost:9090")
+	require.NoError(t, err)
+	defer client.Close()
 
 	examples, err := getDataGlob(jsonPattern)
 	require.NoError(t, err)
@@ -53,18 +57,16 @@ func TestConvertToInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			if *updateOut {
-				err = os.WriteFile(outputFilepath(outName), data, 0644)
-				require.NoError(t, err)
-				var schema *xsd.Schema
-				switch doc.XMLName.Local {
-				case "Invoice":
-					schema = invoiceSchema
-				case "CreditNote":
-					schema = creditNoteSchema
-				default:
-					require.Fail(t, "unknown document schema")
+				resp := new(protocol.ValidateXmlResponse)
+				var err error
+				if doc.CreditNoteTypeCode == "" {
+					resp, err = client.ValidateXML(context.Background(), "org.oasis-open:invoice:2.2", data, "")
+				} else {
+					resp, err = client.ValidateXML(context.Background(), "org.oasis-open:creditnote:2.2", data, "")
 				}
-				err = ValidateXML(schema, data)
+				require.NoError(t, err)
+				require.True(t, resp.Success, "Generated XML should be valid: %v+", resp.Results)
+				err = os.WriteFile(outputFilepath(outName), data, 0644)
 				require.NoError(t, err)
 			}
 
