@@ -115,10 +115,22 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 						ID: l.Taxes[0].Category.String(),
 					},
 				}
+
+				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
+					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
+					it.ClassifiedTaxCategory.ID = &rate
+				}
+
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
+				} else if it.ClassifiedTaxCategory.ID != nil && *it.ClassifiedTaxCategory.ID != "O" {
+					// If no percent is given, but the tax category is not "O" (outside of scope),
+					// we set it to 0 to avoid invalid UBL.
+					p := "0"
+					it.ClassifiedTaxCategory.Percent = &p
 				}
+
 				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
 					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
 					it.ClassifiedTaxCategory.ID = &rate
