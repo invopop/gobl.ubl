@@ -77,8 +77,8 @@ var ContextXRechnung = Context{
 var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung}
 
 // Is checks if two contexts are the same.
-func (c *Context) Is(Context) bool {
-	return c.CustomizationID == c.CustomizationID && c.ProfileID == c.ProfileID
+func (c *Context) Is(c2 Context) bool {
+	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
 }
 
 // FindContext looks up a context by CustomizationID and optionally ProfileID.
