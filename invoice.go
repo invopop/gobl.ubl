@@ -132,13 +132,13 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if len(inv.Notes) > 0 {
-		out.Note = make([]string, len(inv.Notes))
-		for i, note := range inv.Notes {
+		out.Note = make([]string, 0)
+		for _, note := range inv.Notes {
 			// Skip legal notes as they are represented in exemption reasons
 			if note.Key == org.NoteKeyLegal {
 				continue
 			}
-			out.Note[i] = note.Text
+			out.Note = append(out.Note, note.Text)
 			// Peppol only allows one note
 			if o.context.Is(ContextPeppol) {
 				break
