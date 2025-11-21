@@ -131,14 +131,20 @@ func newParty(party *org.Party) *Party {
 
 	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
 		code := party.TaxID.String()
-		p.PartyTaxScheme = []PartyTaxScheme{
-			{
-				CompanyID: &code,
-				TaxScheme: &TaxScheme{
-					ID: tID.GetScheme().String(),
-				},
+		id := tID.GetScheme()
+		if id == cbc.CodeEmpty {
+			// Peppol default
+			id = "VAT"
+		}
+
+		taxScheme := PartyTaxScheme{
+			CompanyID: &code,
+			TaxScheme: &TaxScheme{
+				ID: id.String(),
 			},
 		}
+
+		p.PartyTaxScheme = []PartyTaxScheme{taxScheme}
 		// Override the company address's country code
 		if p.PostalAddress == nil {
 			p.PostalAddress = new(PostalAddress)

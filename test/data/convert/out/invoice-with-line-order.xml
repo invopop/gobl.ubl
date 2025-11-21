@@ -123,6 +123,9 @@
     </cac:AllowanceCharge>
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>DEVSERV001</cbc:ID>
+      </cac:SellersItemIdentification>
       <cac:StandardItemIdentification>
         <cbc:ID schemeID="0088">1234567890128</cbc:ID>
       </cac:StandardItemIdentification>

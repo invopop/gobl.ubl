@@ -39,6 +39,7 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "1", doc.InvoiceLines[0].ID)
 		assert.NotNil(t, doc.InvoiceLines[0].OrderLineReference)
 		assert.Equal(t, "123", doc.InvoiceLines[0].OrderLineReference.LineID)
+		assert.Equal(t, "DEVSERV001", doc.InvoiceLines[0].Item.SellersItemIdentification.ID.Value)
 	})
 
 }
