@@ -83,76 +83,82 @@ func (out *Invoice) addPreceding(refs []*org.DocumentRef) {
 }
 
 func (out *Invoice) addOrdering(o *bill.Ordering) {
-	if o == nil {
-		return
-	}
+	if o != nil {
+		if o.Code != "" {
+			out.BuyerReference = o.Code.String()
+		}
 
-	if o.Code != "" {
-		out.BuyerReference = o.Code.String()
-	}
+		// If both ordering.seller and seller are present, the original seller is used
+		// as the tax representative.
+		if o.Seller != nil {
+			p := out.AccountingSupplierParty.Party
+			out.TaxRepresentativeParty = p
+			out.AccountingSupplierParty = SupplierParty{
+				Party: newParty(o.Seller),
+			}
+		}
 
-	// If both ordering.seller and seller are present, the original seller is used
-	// as the tax representative.
-	if o.Seller != nil {
-		p := out.AccountingSupplierParty.Party
-		out.TaxRepresentativeParty = p
-		out.AccountingSupplierParty = SupplierParty{
-			Party: newParty(o.Seller),
+		if o.Period != nil {
+			start := formatDate(o.Period.Start)
+			end := formatDate(o.Period.End)
+			out.InvoicePeriod = []Period{
+				{
+					StartDate: &start,
+					EndDate:   &end,
+				},
+			}
+		}
+
+		if len(o.Despatch) > 0 {
+			out.DespatchDocumentReference = make([]Reference, 0, len(o.Despatch))
+			for _, despatch := range o.Despatch {
+				out.DespatchDocumentReference = append(out.DespatchDocumentReference, Reference{
+					ID: IDType{Value: string(despatch.Code)},
+				})
+			}
+		}
+
+		if len(o.Receiving) > 0 {
+			out.ReceiptDocumentReference = make([]Reference, 0, len(o.Receiving))
+			for _, receiving := range o.Receiving {
+				out.ReceiptDocumentReference = append(out.ReceiptDocumentReference, Reference{
+					ID: IDType{Value: string(receiving.Code)},
+				})
+			}
+		}
+
+		if len(o.Contracts) > 0 {
+			out.ContractDocumentReference = make([]Reference, 0, len(o.Contracts))
+			for _, contract := range o.Contracts {
+				out.ContractDocumentReference = append(out.ContractDocumentReference, Reference{
+					ID: IDType{Value: string(contract.Code)},
+				})
+			}
+		}
+
+		if len(o.Tender) > 0 {
+			out.AdditionalDocumentReference = make([]Reference, 0, len(o.Tender))
+			for _, tender := range o.Tender {
+				out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, Reference{
+					ID: IDType{Value: string(tender.Code)},
+				})
+			}
+		}
+
+		if len(o.Purchases) > 0 {
+			purchase := o.Purchases[0]
+			out.OrderReference = &OrderReference{
+				ID: purchase.Code.String(),
+			}
 		}
 	}
 
-	if o.Period != nil {
-		start := formatDate(o.Period.Start)
-		end := formatDate(o.Period.End)
-		out.InvoicePeriod = []Period{
-			{
-				StartDate: &start,
-				EndDate:   &end,
-			},
+	// Ensure at least one of BuyerReference or OrderReference is set: PEPPOL-EN16931-R003
+	if out.BuyerReference == "" && (out.OrderReference == nil || out.OrderReference.ID == "") {
+		if out.OrderReference == nil {
+			out.OrderReference = &OrderReference{}
 		}
-	}
-
-	if len(o.Despatch) > 0 {
-		out.DespatchDocumentReference = make([]Reference, 0, len(o.Despatch))
-		for _, despatch := range o.Despatch {
-			out.DespatchDocumentReference = append(out.DespatchDocumentReference, Reference{
-				ID: IDType{Value: string(despatch.Code)},
-			})
-		}
-	}
-
-	if len(o.Receiving) > 0 {
-		out.ReceiptDocumentReference = make([]Reference, 0, len(o.Receiving))
-		for _, receiving := range o.Receiving {
-			out.ReceiptDocumentReference = append(out.ReceiptDocumentReference, Reference{
-				ID: IDType{Value: string(receiving.Code)},
-			})
-		}
-	}
-
-	if len(o.Contracts) > 0 {
-		out.ContractDocumentReference = make([]Reference, 0, len(o.Contracts))
-		for _, contract := range o.Contracts {
-			out.ContractDocumentReference = append(out.ContractDocumentReference, Reference{
-				ID: IDType{Value: string(contract.Code)},
-			})
-		}
-	}
-
-	if len(o.Tender) > 0 {
-		out.AdditionalDocumentReference = make([]Reference, 0, len(o.Tender))
-		for _, tender := range o.Tender {
-			out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, Reference{
-				ID: IDType{Value: string(tender.Code)},
-			})
-		}
-	}
-
-	if len(o.Purchases) > 0 {
-		purchase := o.Purchases[0]
-		out.OrderReference = &OrderReference{
-			ID: purchase.Code.String(),
-		}
+		out.OrderReference.ID = "NA"
 	}
 
 	// done

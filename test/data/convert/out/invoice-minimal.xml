@@ -5,6 +5,9 @@
   <cbc:IssueDate>2024-05-15</cbc:IssueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cac:OrderReference>
+    <cbc:ID>NA</cbc:ID>
+  </cac:OrderReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PostalAddress>
