@@ -76,6 +76,11 @@ var ContextXRechnung = Context{
 // When adding new contexts, remember to add them here AND as exported variables above.
 var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung}
 
+// Is checks if two contexts are the same.
+func (c *Context) Is(c2 Context) bool {
+	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
+}
+
 // FindContext looks up a context by CustomizationID and optionally ProfileID.
 // Returns nil if no matching context is found.
 func FindContext(customizationID string, profileID string) *Context {

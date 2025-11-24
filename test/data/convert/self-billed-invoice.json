@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7d2b74fd10240c198fa2581e5362a1b6a97166a8d43b6193c62f0b7be0dc03b8"
+			"val": "0b6e6138747d6c08b90276fa7f8c7ab4df4cf868ab45c72e0179322e174a1da4"
 		}
 	},
 	"doc": {
@@ -87,6 +87,7 @@
 				"i": 1,
 				"quantity": "20",
 				"item": {
+					"ref": "SERV-001",
 					"name": "Development services",
 					"price": "90.00",
 					"unit": "h"

@@ -115,10 +115,22 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 						ID: l.Taxes[0].Category.String(),
 					},
 				}
+
+				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
+					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
+					it.ClassifiedTaxCategory.ID = &rate
+				}
+
+				// Set percent: required unless category is "O" (outside scope)
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
+				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
+					// Default to 0% when not outside scope
+					p := "0"
+					it.ClassifiedTaxCategory.Percent = &p
 				}
+
 				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
 					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
 					it.ClassifiedTaxCategory.ID = &rate
@@ -147,6 +159,14 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					PriceAmount: Amount{
 						CurrencyID: &ccy,
 						Value:      l.Item.Price.String(),
+					},
+				}
+			}
+
+			if l.Item.Ref != "" {
+				invLine.Item.SellersItemIdentification = &ItemIdentification{
+					ID: &IDType{
+						Value: l.Item.Ref.String(),
 					},
 				}
 			}
