@@ -12,6 +12,7 @@ import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 	nbio "github.com/nbio/xml"
 )
 
@@ -48,6 +49,13 @@ type Context struct {
 	// and ProfileID.
 	Addons []cbc.Key
 }
+
+// AttachmentHandler is used to convert UBL attachments into GOBL attachments.
+// As GOBL does not handle binary data directly, the handler is responsible
+// for converting the attachment data into a suitable format for GOBL.
+// Our recomended approach is use this function to upload the binary to a spool
+// and set the link as the GOBL attachment.
+type AttachmentHandler func(att *Attachment) (org.Attachment, error)
 
 // When adding new contexts, remember to add them to both the exported
 // variable definitions below AND the contexts slice.
@@ -96,16 +104,46 @@ func FindContext(customizationID string, profileID string) *Context {
 	return nil
 }
 
+type options struct {
+	context           Context
+	attachmentHandler AttachmentHandler
+}
+
+// Option is used to define configuration options to use during
+// conversion processes.
+type Option func(*options)
+
+// WithContext sets the context to use for the configuration
+// and business profile.
+func WithContext(c Context) Option {
+	return func(o *options) {
+		o.context = c
+	}
+}
+
+// WithHandler sets the handler to use for attachment conversions.
+func WithAttachmentHandler(ah AttachmentHandler) Option {
+	return func(o *options) {
+		o.attachmentHandler = ah
+	}
+}
+
 // Parse parses a raw UBL document and converts to a GOBL envelope,
 // assuming we're dealing with a known document type.
-func Parse(ublDoc []byte) (*gobl.Envelope, error) {
+//
+// Add a WithAttachmentHandler option if you want to handle incoming attachments.
+// If no handler is provided, attachments will be ignored and left on the XML.
+func Parse(ublDoc []byte, opts ...Option) (*gobl.Envelope, error) {
+	o := new(options)
+	for _, opt := range opts {
+		opt(o)
+	}
 	ns, err := extractRootNamespace(ublDoc)
 	if err != nil {
 		return nil, err
 	}
 	env := gobl.NewEnvelope()
 	var res any
-	o := new(options)
 
 	switch ns {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
@@ -136,6 +174,9 @@ func Parse(ublDoc []byte) (*gobl.Envelope, error) {
 
 // Convert takes a GOBL envelope and converts to a UBL document of one
 // of the supported types.
+//
+// Add a WithContext option to specify the desired UBL Guideline and Profile ID.
+// If none is provided, EN16931 will be used by default.
 func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	o := &options{
 		context: ContextEN16931,
@@ -175,8 +216,6 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	}
 }
 
-func Extract() {}
-
 // ConvertInvoice is a convenience function that converts a GOBL envelope
 // containing an invoice into a UBL Invoice or CreditNote document.
 func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
@@ -207,20 +246,4 @@ func extractRootNamespace(data []byte) (string, error) {
 		}
 	}
 	return "", ErrUnknownDocumentType
-}
-
-type options struct {
-	context Context
-}
-
-// Option is used to define configuration options to use during
-// conversion processes.
-type Option func(*options)
-
-// WithContext sets the context to use for the configuration
-// and business profile.
-func WithContext(c Context) Option {
-	return func(o *options) {
-		o.context = c
-	}
 }
