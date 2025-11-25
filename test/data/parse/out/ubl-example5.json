@@ -4,11 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e4ed0ef8b8e89b06e00c209d8aa28d9392187d0468e281e0fb995253d3c52bfa"
+			"val": "d032ae20a716ce638cfdd8160d3adc1e281b18fef617a7fa7acc73de0bb13fa8"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL110",
@@ -21,7 +24,10 @@
 			}
 		],
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Dick Panama",
@@ -98,6 +104,7 @@
 			{
 				"i": 1,
 				"quantity": "1000",
+				"order": "1",
 				"cost": "ACC7654",
 				"item": {
 					"ref": "JB007",
@@ -129,6 +136,7 @@
 				"discounts": [
 					{
 						"reason": "Loyal customer",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {
@@ -139,6 +147,7 @@
 				"charges": [
 					{
 						"reason": "Packaging",
+						"base": "1000.00",
 						"percent": "10%",
 						"amount": "100.00",
 						"ext": {
@@ -149,6 +158,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -165,6 +175,7 @@
 			{
 				"i": 2,
 				"quantity": "100",
+				"order": "2",
 				"cost": "ACC7654",
 				"item": {
 					"ref": "JB008",
@@ -178,6 +189,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -204,6 +216,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "12%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -223,7 +236,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -241,7 +258,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -400,6 +421,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -408,17 +430,13 @@
 								"amount": "375.00"
 							},
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
 								"base": "2500.00",
 								"percent": "12%",
 								"amount": "300.00"
-							},
-							{
-								"base": "0.00",
-								"percent": "25%",
-								"amount": "0.00"
 							}
 						],
 						"amount": "675.00"

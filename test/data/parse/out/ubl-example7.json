@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "597cadb8dd59b24c64261fb818e47ae66a2e0e30989a43e186048a6f12c3e520"
+			"val": "42b411fb37cdf795ddabcbf242d0e5451a4478e3ee08e9e8f00fe890a38faa40"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "INVOICE_test_7",
 		"issue_date": "2013-03-11",
 		"currency": "SEK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",
@@ -80,6 +86,7 @@
 			{
 				"i": 1,
 				"quantity": "1",
+				"order": "1",
 				"item": {
 					"ref": "RT3000",
 					"name": "Road tax",
@@ -91,6 +98,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "outside-scope",
 						"ext": {
 							"untdid-tax-category": "O"
 						}
@@ -112,6 +120,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "outside-scope",
 						"ext": {
 							"untdid-tax-category": "O"
 						}
@@ -157,6 +166,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "outside-scope",
 								"ext": {
 									"untdid-tax-category": "O"
 								},

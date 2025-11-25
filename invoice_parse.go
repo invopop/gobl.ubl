@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"github.com/nbio/xml"
-
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
@@ -16,22 +14,23 @@ var invoiceTypeMap = map[string]cbc.Key{
 	"381": bill.InvoiceTypeCreditNote,
 	"383": bill.InvoiceTypeDebitNote,
 	"384": bill.InvoiceTypeCorrective,
-	"389": bill.InvoiceTypeStandard.With(tax.TagSelfBilled),
-	"326": bill.InvoiceTypeStandard.With(tax.TagPartial),
+	"389": bill.InvoiceTypeStandard,
+	"326": bill.InvoiceTypeStandard,
+	"261": bill.InvoiceTypeCreditNote,
 }
 
-// parseInvoice takes the provided raw XML document and attempts to build
-// a bill.Invoice. Contents may be either an Invoice or CreditNote.
-func parseInvoice(data []byte) (*bill.Invoice, error) {
-	in := new(Invoice)
-	if err := xml.Unmarshal(data, in); err != nil {
-		return nil, err
-	}
-	return goblInvoice(in)
+// InvoiceTagMap maps UBL invoice type codes to GOBL tax tags.
+var InvoiceTagMap = map[string][]cbc.Key{
+	"389": {tax.TagSelfBilled},
+	"326": {tax.TagPartial},
+	"261": {tax.TagSelfBilled},
 }
 
-func goblInvoice(in *Invoice) (*bill.Invoice, error) {
+func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 	out := &bill.Invoice{
+		Addons: tax.Addons{
+			List: o.context.Addons,
+		},
 		Code:     cbc.Code(in.ID),
 		Currency: currency.Code(in.DocumentCurrencyCode),
 		Tax: &bill.Tax{
@@ -43,10 +42,15 @@ func goblInvoice(in *Invoice) (*bill.Invoice, error) {
 		Customer: goblParty(in.AccountingCustomerParty.Party),
 	}
 
-	if in.InvoiceTypeCode != "" {
-		out.Type = typeCodeParse(in.InvoiceTypeCode)
-	} else {
-		out.Type = typeCodeParse(in.CreditNoteTypeCode)
+	typeCode := in.InvoiceTypeCode
+	if typeCode == "" {
+		typeCode = in.CreditNoteTypeCode
+	}
+	out.Type = typeCodeParse(typeCode)
+	tags := tagCodeParse(typeCode)
+
+	if len(tags) != 0 {
+		out.SetTags(tags...)
 	}
 
 	issueDate, err := parseDate(in.IssueDate)
@@ -129,4 +133,12 @@ func typeCodeParse(typeCode string) cbc.Key {
 		return val
 	}
 	return bill.InvoiceTypeOther
+}
+
+// tagCodeParse maps UBL invoice type to GOBL equivalent tax tag.
+func tagCodeParse(typeCode string) []cbc.Key {
+	if val, ok := InvoiceTagMap[typeCode]; ok {
+		return val
+	}
+	return nil
 }

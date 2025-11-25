@@ -4,19 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "24cecc00b9b010e6144fa3e8247e17622336d539a6f73629b0910a3b419f6269"
+			"val": "3c9bdaf7ae95e7dbe542fa18891a89a2eab96f4d4bf68d9b685c3f65b2c75888"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "NL",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "12115118",
 		"issue_date": "2015-01-09",
 		"currency": "EUR",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "De Koksmaat",
@@ -71,6 +77,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -92,6 +99,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -113,6 +121,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -134,6 +143,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -147,7 +157,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "666955",
-					"name": "KOFFIE BLIK 3,5KG SNELF ",
+					"name": "KOFFIE BLIK 3,5KG SNELF",
 					"price": "35.00",
 					"unit": "item"
 				},
@@ -155,6 +165,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -168,7 +179,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "664871",
-					"name": "KOFFIE 3.5 KG BLIK STAND ",
+					"name": "KOFFIE 3.5 KG BLIK STAND",
 					"price": "35.00",
 					"unit": "item"
 				},
@@ -176,6 +187,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -197,6 +209,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -210,7 +223,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "350258",
-					"name": "1 KG UL BLOKJES ",
+					"name": "1 KG UL BLOKJES",
 					"price": "1.55",
 					"unit": "item"
 				},
@@ -218,6 +231,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -231,7 +245,7 @@
 				"quantity": "3",
 				"item": {
 					"ref": "999998",
-					"name": "BLOCKNOTE A5 ",
+					"name": "BLOCKNOTE A5",
 					"price": "4.79",
 					"unit": "item"
 				},
@@ -239,6 +253,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -260,6 +275,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -281,6 +297,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -294,7 +311,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "740828",
-					"name": "TR KL PAKJES APPELSAP ",
+					"name": "TR KL PAKJES APPELSAP",
 					"price": "9.95",
 					"unit": "item"
 				},
@@ -302,6 +319,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -323,6 +341,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -336,7 +355,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "999996",
-					"name": "KRAT BIER ",
+					"name": "KRAT BIER",
 					"price": "10.80",
 					"unit": "item"
 				},
@@ -344,6 +363,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -365,6 +385,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -378,7 +399,7 @@
 				"quantity": "2",
 				"item": {
 					"ref": "102172",
-					"name": "BLEEK 3 X 750 ML ",
+					"name": "BLEEK 3 X 750 ML",
 					"price": "3.80",
 					"unit": "item"
 				},
@@ -386,6 +407,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -399,7 +421,7 @@
 				"quantity": "2",
 				"item": {
 					"ref": "999994",
-					"name": "WC PAPIER ",
+					"name": "WC PAPIER",
 					"price": "4.67",
 					"unit": "item"
 				},
@@ -407,6 +429,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -420,7 +443,7 @@
 				"quantity": "1",
 				"item": {
 					"ref": "999993",
-					"name": "BALPENNEN 50 ST BLAUW ",
+					"name": "BALPENNEN 50 ST BLAUW",
 					"price": "18.63",
 					"unit": "item"
 				},
@@ -428,6 +451,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "21%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -441,7 +465,7 @@
 				"quantity": "6",
 				"item": {
 					"ref": "999992",
-					"name": "EM FRITUURVET ",
+					"name": "EM FRITUURVET",
 					"price": "17.02",
 					"unit": "item"
 				},
@@ -449,6 +473,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -462,7 +487,7 @@
 				"quantity": "6",
 				"item": {
 					"ref": "175137",
-					"name": "FRITUUR VET 10 KG RETOUR ",
+					"name": "FRITUUR VET 10 KG RETOUR",
 					"price": "18.33",
 					"unit": "item"
 				},
@@ -470,6 +495,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "6%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -480,6 +506,15 @@
 			}
 		],
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2015-01-09",
+						"amount": "483.49",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "Deb.10202 Fact.12115118",
@@ -502,6 +537,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -510,6 +546,7 @@
 								"amount": "24.19"
 							},
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},

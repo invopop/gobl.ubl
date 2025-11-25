@@ -4,19 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "246d66e0bd621c377398ab8e8e3b069d5385856cb5e11dc7112068ed3ac8ec99"
+			"val": "74d03e436273f0998e2e4658c2d7269433a4de17f3bceb95a1dc98ab2bbadd16"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "Snippet1",
 		"issue_date": "2017-11-13",
 		"currency": "EUR",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "SupplierOfficialName Ltd",
@@ -52,8 +58,7 @@
 			"alias": "BuyerTradingName AS",
 			"tax_id": {
 				"country": "SE",
-				"code": "4598375937",
-				"scheme": "VAT"
+				"code": "4598375937"
 			},
 			"identities": [
 				{
@@ -104,6 +109,7 @@
 			{
 				"i": 1,
 				"quantity": "7",
+				"order": "123",
 				"cost": "Konteringsstreng",
 				"item": {
 					"name": "item name",
@@ -128,6 +134,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25.0%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -139,6 +146,7 @@
 			{
 				"i": 2,
 				"quantity": "-3",
+				"order": "123",
 				"item": {
 					"name": "item name 2",
 					"identities": [
@@ -162,6 +170,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25.0%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -179,7 +188,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25.0%"
+						"key": "standard",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -249,17 +262,13 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1300.00",
+								"base": "1325.00",
 								"percent": "25.0%",
-								"amount": "325.00"
-							},
-							{
-								"base": "25.00",
-								"percent": "25.0%",
-								"amount": "6.25"
+								"amount": "331.25"
 							}
 						],
 						"amount": "331.25"

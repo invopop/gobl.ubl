@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bb800fa848b1f3c8d0e529d4991b53581f133dba98f52ea4e96c594f10d67072"
+			"val": "0b6e6138747d6c08b90276fa7f8c7ab4df4cf868ab45c72e0179322e174a1da4"
 		}
 	},
 	"doc": {
@@ -87,6 +87,7 @@
 				"i": 1,
 				"quantity": "20",
 				"item": {
+					"ref": "SERV-001",
 					"name": "Development services",
 					"price": "90.00",
 					"unit": "h"
@@ -95,7 +96,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
+						"key": "standard",
+						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -119,6 +121,15 @@
 					{
 						"label": "0088",
 						"code": "2298740918237"
+					}
+				],
+				"addresses": [
+					{
+						"num": "4",
+						"street": "Christmas Street",
+						"locality": "London",
+						"code": "E1 6AN",
+						"country": "GB"
 					}
 				]
 			},

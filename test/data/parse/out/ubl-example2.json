@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "87693cfc5383989288c46e5bc0f191e0479b1add5e44a711d5c3fe3a1f40705a"
+			"val": "fc54ebebdafd5b34267227ab0fadb9fc01220ce11b296496fb90d1ca7f114ed7"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-06-30",
 		"currency": "NOK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Tax handling company AS",
@@ -86,6 +92,7 @@
 			{
 				"i": 1,
 				"quantity": "2",
+				"order": "1",
 				"cost": "BookingCode001",
 				"item": {
 					"ref": "JB007",
@@ -130,6 +137,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -146,6 +154,7 @@
 			{
 				"i": 2,
 				"quantity": "-1",
+				"order": "5",
 				"cost": "BookingCode002",
 				"item": {
 					"ref": "JB008",
@@ -173,6 +182,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "15%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -189,6 +199,7 @@
 			{
 				"i": 3,
 				"quantity": "2",
+				"order": "3",
 				"cost": "BookingCode003",
 				"item": {
 					"ref": "JB009",
@@ -216,6 +227,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "15%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -227,6 +239,7 @@
 			{
 				"i": 4,
 				"quantity": "-1",
+				"order": "2",
 				"cost": "BookingCode004",
 				"item": {
 					"ref": "JB010",
@@ -254,9 +267,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "zero",
 						"percent": "0%",
 						"ext": {
-							"untdid-tax-category": "E"
+							"untdid-tax-category": "Z"
 						}
 					}
 				],
@@ -295,6 +309,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -312,7 +327,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"ext": {
@@ -328,7 +347,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -468,6 +491,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -476,6 +500,7 @@
 								"amount": "683.38"
 							},
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -484,16 +509,12 @@
 								"amount": "0.15"
 							},
 							{
+								"key": "zero",
 								"ext": {
-									"untdid-tax-category": "E"
+									"untdid-tax-category": "Z"
 								},
 								"base": "-25.00",
 								"percent": "0%",
-								"amount": "0.00"
-							},
-							{
-								"base": "0.00",
-								"percent": "25%",
 								"amount": "0.00"
 							}
 						],

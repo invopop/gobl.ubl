@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0af011263a0595c5a45ea782ead87acd016fb88dcdb2e1700317f4a564697491"
+			"val": "4479203ddfae32d31df81a6f2ea188a37ab86386f92cd7ee197229415ec68f0e"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL108",
 		"issue_date": "2013-04-10",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "SubscriptionSeller",
@@ -92,6 +98,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -113,6 +120,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "10%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -130,7 +138,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -147,6 +159,15 @@
 			]
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "3885.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "Payref1",
@@ -170,25 +191,22 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1600.00",
+								"base": "1700.00",
 								"percent": "25%",
-								"amount": "400.00"
+								"amount": "425.00"
 							},
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
 								"base": "1600.00",
 								"percent": "10%",
 								"amount": "160.00"
-							},
-							{
-								"base": "100.00",
-								"percent": "25%",
-								"amount": "25.00"
 							}
 						],
 						"amount": "585.00"

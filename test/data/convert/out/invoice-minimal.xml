@@ -63,6 +63,9 @@
       </cac:FinancialInstitutionBranch>
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
+  <cac:PaymentTerms>
+    <cbc:Note>on receipt within 30 days</cbc:Note>
+  </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
     <cac:TaxSubtotal>

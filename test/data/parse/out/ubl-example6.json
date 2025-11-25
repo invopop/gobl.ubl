@@ -4,18 +4,24 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b8c74a82ce6ea5445dceba24332f37696bf6fc70c364a9715e4ebefbb7ade8fb"
+			"val": "f19729868177d7919f5c72f77eb6438dd535518cdd904b0a7bcd4eae435cc2c5"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "TOSL110",
 		"issue_date": "2013-04-10",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "SellerCompany",
@@ -51,6 +57,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -71,6 +78,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -91,6 +99,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "12%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -100,6 +109,17 @@
 				"total": "2500.00"
 			}
 		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "4675.00",
+						"percent": "100%"
+					}
+				]
+			}
+		},
 		"totals": {
 			"sum": "4000.00",
 			"total": "4000.00",
@@ -109,6 +129,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -117,6 +138,7 @@
 								"amount": "375.00"
 							},
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},

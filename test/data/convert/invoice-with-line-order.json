@@ -4,15 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5244f6329bdaeeb1250619e91e82434247e5dae09a19b7dd39920811a5bcd7f4"
+			"val": "40059152ae1c84685332b830209f3846f5652d11dffb1e5431ad35902705f63b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
-		"$addons": [
-			"eu-en16931-v2017"
-		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "SAMPLE",
@@ -79,7 +76,9 @@
 			{
 				"i": 1,
 				"quantity": "20",
+				"order": "123",
 				"item": {
+					"ref": "DEVSERV001",
 					"name": "Development services",
 					"identities": [
 						{
@@ -110,10 +109,7 @@
 						"cat": "VAT",
 						"key": "standard",
 						"rate": "general",
-						"percent": "19%",
-						"ext": {
-							"untdid-tax-category": "S"
-						}
+						"percent": "19%"
 					}
 				],
 				"total": "1800.00"
@@ -158,9 +154,6 @@
 						"rates": [
 							{
 								"key": "standard",
-								"ext": {
-									"untdid-tax-category": "S"
-								},
 								"base": "1800.00",
 								"percent": "19%",
 								"amount": "342.00"

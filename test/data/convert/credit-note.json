@@ -4,12 +4,15 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "aa117a1ab9cdddedfa1db21a2e922e6e1f77b649a8eb217524fac0aa8e18cc2a"
+			"val": "466f0a38277ff6eb1969cb41b0526a982b7b10db7ac80ee894f971104119106d"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "credit-note",
 		"series": "CN",
@@ -99,8 +102,12 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"rate": "standard",
-						"percent": "19%"
+						"key": "standard",
+						"rate": "general",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				],
 				"total": "1800.00"
@@ -111,7 +118,7 @@
 		},
 		"payment": {
 			"terms": {
-				"detail": "lorem ipsum"
+				"notes": "lorem ipsum"
 			}
 		},
 		"totals": {
@@ -124,6 +131,9 @@
 						"rates": [
 							{
 								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
 								"base": "1800.00",
 								"percent": "19%",
 								"amount": "342.00"

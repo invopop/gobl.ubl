@@ -30,4 +30,16 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "1234567890128", doc.InvoiceLines[0].Item.StandardItemIdentification.ID.Value)
 	})
 
+	t.Run("invoice-with-line-order.json", func(t *testing.T) {
+		doc, err := testInvoiceFrom("invoice-with-line-order.json")
+		require.NoError(t, err)
+
+		assert.NotNil(t, doc.InvoiceLines)
+		assert.Len(t, doc.InvoiceLines, 1)
+		assert.Equal(t, "1", doc.InvoiceLines[0].ID)
+		assert.NotNil(t, doc.InvoiceLines[0].OrderLineReference)
+		assert.Equal(t, "123", doc.InvoiceLines[0].OrderLineReference.LineID)
+		assert.Equal(t, "DEVSERV001", doc.InvoiceLines[0].Item.SellersItemIdentification.ID.Value)
+	})
+
 }

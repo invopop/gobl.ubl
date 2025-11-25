@@ -4,19 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c035f360c4767a124a12709dfeff911a1336a7f22f52983cbe96597a976bc2c4"
+			"val": "e1f92c44b53b481bbce13456a24258a95e8121c0ca07f0af937c9a0ba21f3465"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "BE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "POP000274-128-20210525T044541",
 		"issue_date": "2021-05-25",
 		"currency": "EUR",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Acme Corporation",
@@ -91,6 +97,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -111,6 +118,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -131,6 +139,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -151,6 +160,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -171,6 +181,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -188,7 +199,11 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"percent": "25%"
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
 					}
 				]
 			}
@@ -197,6 +212,15 @@
 			"code": "9392277012"
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2021-06-24",
+						"amount": "6740.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"detail": "Credit transfer",
@@ -221,17 +245,13 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "5367.00",
+								"base": "5392.00",
 								"percent": "25%",
-								"amount": "1341.75"
-							},
-							{
-								"base": "25.00",
-								"percent": "25%",
-								"amount": "6.25"
+								"amount": "1348.00"
 							}
 						],
 						"amount": "1348.00"

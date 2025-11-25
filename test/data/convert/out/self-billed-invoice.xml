@@ -58,6 +58,14 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:PayeeParty>
+    <cac:PostalAddress>
+      <cbc:StreetName>4 Christmas Street</cbc:StreetName>
+      <cbc:CityName>London</cbc:CityName>
+      <cbc:PostalZone>E1 6AN</cbc:PostalZone>
+      <cac:Country>
+        <cbc:IdentificationCode>GB</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
     <cac:PartyLegalEntity>
       <cbc:RegistrationName>Ebeneser Scrooge AS</cbc:RegistrationName>
     </cac:PartyLegalEntity>
@@ -98,6 +106,9 @@
     <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>
+      <cac:SellersItemIdentification>
+        <cbc:ID>SERV-001</cbc:ID>
+      </cac:SellersItemIdentification>
       <cac:ClassifiedTaxCategory>
         <cbc:ID>S</cbc:ID>
         <cbc:Percent>19</cbc:Percent>

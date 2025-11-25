@@ -9,8 +9,19 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
+func hasOrderingData(o *bill.Ordering) bool {
+	return o.Code != "" ||
+		o.Period != nil ||
+		len(o.Despatch) > 0 ||
+		len(o.Receiving) > 0 ||
+		len(o.Purchases) > 0 ||
+		len(o.Contracts) > 0 ||
+		len(o.Tender) > 0 ||
+		len(o.Identities) > 0
+}
+
 func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
-	ordering := &bill.Ordering{}
+	ordering := new(bill.Ordering)
 
 	if in.BuyerReference != "" {
 		ordering.Code = cbc.Code(in.BuyerReference)
@@ -93,9 +104,10 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 		}
 	}
 
-	if ordering.Code != "" || ordering.Period != nil || ordering.Despatch != nil || ordering.Receiving != nil || ordering.Tender != nil || ordering.Identities != nil {
+	if hasOrderingData(ordering) {
 		out.Ordering = ordering
 	}
+
 	return nil
 }
 

@@ -103,6 +103,11 @@ func TestParseInvoice(t *testing.T) {
 				inv.UUID = staticUUID
 			}
 
+			// Recalculate to ensure consistent digests
+			if err = env.Calculate(); err != nil {
+				require.NoError(t, err)
+			}
+
 			writeEnvelope(outputFilepath(outName), env)
 
 			// Extract the invoice from the envelope

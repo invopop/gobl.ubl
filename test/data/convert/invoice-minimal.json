@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "697b91a941a19344d858e8285150e7b42a21c92e1cca2c7156755dc03a1c8c35"
+			"val": "2833e56f484ebb3a9ca08a2c4ab59a2f3fadae6613808c7105c36682c4e11f3c"
 		}
 	},
 	"doc": {
@@ -79,6 +79,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
+						"key": "standard",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -89,6 +90,9 @@
 			}
 		],
 		"payment": {
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",
@@ -112,6 +116,7 @@
 						"code": "VAT",
 						"rates": [
 							{
+								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
