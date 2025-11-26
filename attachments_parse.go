@@ -8,10 +8,12 @@ import (
 
 // goblAddAttachments processes the attachment in the given reference.
 // Binary attachments are delegated to the provided options handler if available.
-func goblAddAttachments(ref Reference, o *options) (att *org.Attachment, err error) {
+func goblAddAttachments(ref Reference, o *options) (*org.Attachment, error) {
 	if ref.Attachment == nil {
-		return
+		return nil, nil
 	}
+
+	var att *org.Attachment
 
 	switch {
 	case ref.Attachment.ExternalReference != nil:
@@ -29,15 +31,14 @@ func goblAddAttachments(ref Reference, o *options) (att *org.Attachment, err err
 		}
 	case ref.Attachment.EmbeddedDocumentBinaryObject != nil:
 		if o == nil || o.binaryHandler == nil {
-			return
+			return nil, nil
 		}
 
+		var err error
 		att, err = o.binaryHandler(ref.Attachment.EmbeddedDocumentBinaryObject)
 		if err != nil {
-			return
+			return nil, err
 		}
-	default:
-		return
 	}
 
 	if att != nil {
@@ -51,5 +52,5 @@ func goblAddAttachments(ref Reference, o *options) (att *org.Attachment, err err
 		}
 	}
 
-	return
+	return att, nil
 }

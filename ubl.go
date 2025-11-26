@@ -97,7 +97,7 @@ func WithContext(c Context) Option {
 	}
 }
 
-// WithHandler sets the handler to use for attachment conversions.
+// WithBinaryHandler sets the handler to use for attachment conversions.
 func WithBinaryHandler(bhf BinaryHandlerFunc) Option {
 	return func(o *options) {
 		o.binaryHandler = bhf
