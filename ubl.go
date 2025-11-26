@@ -50,7 +50,7 @@ type Context struct {
 	Addons []cbc.Key
 }
 
-// BinaryHandler is used to convert UBL binary attachment into GOBL attachments.
+// BinaryHandlerFunc is used to convert UBL binary attachment into GOBL attachments.
 // As GOBL does not handle binary data directly, the handler is responsible
 // for converting the attachment data into a suitable format for GOBL.
 //
@@ -58,7 +58,51 @@ type Context struct {
 // and set the link as the GOBL attachment.
 //
 // Be aware that the code and description will be overwritten by the converter.
-type BinaryHandler func(att *BinaryObject) (*org.Attachment, error)
+type BinaryHandlerFunc func(att *BinaryObject) (*org.Attachment, error)
+
+// Is checks if two contexts are the same.
+func (c *Context) Is(c2 Context) bool {
+	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
+}
+
+// FindContext looks up a context by CustomizationID and optionally ProfileID.
+// Returns nil if no matching context is found.
+func FindContext(customizationID string, profileID string) *Context {
+	for _, ctx := range contexts {
+		if ctx.CustomizationID == customizationID {
+			// If profileID is specified, it must match too
+			if ctx.ProfileID != "" && ctx.ProfileID != profileID {
+				continue
+			}
+			return &ctx
+		}
+	}
+	return nil
+}
+
+type options struct {
+	context       Context
+	binaryHandler BinaryHandlerFunc
+}
+
+// Option is used to define configuration options to use during
+// conversion processes.
+type Option func(*options)
+
+// WithContext sets the context to use for the configuration
+// and business profile.
+func WithContext(c Context) Option {
+	return func(o *options) {
+		o.context = c
+	}
+}
+
+// WithHandler sets the handler to use for attachment conversions.
+func WithBinaryHandler(bhf BinaryHandlerFunc) Option {
+	return func(o *options) {
+		o.binaryHandler = bhf
+	}
+}
 
 // When adding new contexts, remember to add them to both the exported
 // variable definitions below AND the contexts slice.
@@ -86,50 +130,6 @@ var ContextXRechnung = Context{
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
 var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung}
-
-// Is checks if two contexts are the same.
-func (c *Context) Is(c2 Context) bool {
-	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
-}
-
-// FindContext looks up a context by CustomizationID and optionally ProfileID.
-// Returns nil if no matching context is found.
-func FindContext(customizationID string, profileID string) *Context {
-	for _, ctx := range contexts {
-		if ctx.CustomizationID == customizationID {
-			// If profileID is specified, it must match too
-			if ctx.ProfileID != "" && ctx.ProfileID != profileID {
-				continue
-			}
-			return &ctx
-		}
-	}
-	return nil
-}
-
-type options struct {
-	context       Context
-	binaryHandler BinaryHandler
-}
-
-// Option is used to define configuration options to use during
-// conversion processes.
-type Option func(*options)
-
-// WithContext sets the context to use for the configuration
-// and business profile.
-func WithContext(c Context) Option {
-	return func(o *options) {
-		o.context = c
-	}
-}
-
-// WithHandler sets the handler to use for attachment conversions.
-func WithBinaryHandler(bh BinaryHandler) Option {
-	return func(o *options) {
-		o.binaryHandler = bh
-	}
-}
 
 // Parse parses a raw UBL document and converts to a GOBL envelope,
 // assuming we're dealing with a known document type.
