@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fc54ebebdafd5b34267227ab0fadb9fc01220ce11b296496fb90d1ca7f114ed7"
+			"val": "24bcef443a751ab22d26b2d784025a937441113fc2503528d34acc7eb97084bb"
 		}
 	},
 	"doc": {
@@ -530,6 +530,13 @@
 		"notes": [
 			{
 				"text": "Ordered in our booth at the convention"
+			}
+		],
+		"attachments": [
+			{
+				"name": "Doc1",
+				"description": "Timesheet",
+				"url": "http://www.suppliersite.eu/sheet001.html"
 			}
 		]
 	}

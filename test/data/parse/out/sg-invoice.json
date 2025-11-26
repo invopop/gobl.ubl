@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "426e9b5d5e8f1dc1c799e8efabc849f21289a9b61db637a98420bd361681825b"
+			"val": "70399aeb762dd07496e5d74a6dcefa2f5c8c8655f8c51d2ef34ed6e8225de137"
 		}
 	},
 	"doc": {
@@ -295,6 +295,11 @@
 			"despatch": [
 				{
 					"code": "DDT123"
+				}
+			],
+			"tender": [
+				{
+					"code": "bbbbyyyy"
 				}
 			]
 		},

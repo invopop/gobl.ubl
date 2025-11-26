@@ -4,8 +4,8 @@ import "github.com/invopop/gobl/org"
 
 // Attachment represents an attached document
 type Attachment struct {
-	ExternalReference            ExternalReference `xml:"cac:ExternalReference,omitempty"`
-	EmbeddedDocumentBinaryObject BinaryObject      `xml:"cbc:EmbeddedDocumentBinaryObject"`
+	ExternalReference            *ExternalReference `xml:"cac:ExternalReference,omitempty"`
+	EmbeddedDocumentBinaryObject *BinaryObject      `xml:"cbc:EmbeddedDocumentBinaryObject,omitempty"`
 }
 
 // BinaryObject represents binary data with associated metadata
@@ -35,7 +35,7 @@ type ExternalReference struct {
 
 func (out *Invoice) addAttachments(attachments []*org.Attachment) {
 	for _, a := range attachments {
-		idValue := a.Key.String()
+		idValue := a.Code.String()
 		if idValue == "" {
 			idValue = a.Name
 		}
@@ -46,28 +46,19 @@ func (out *Invoice) addAttachments(attachments []*org.Attachment) {
 			},
 		}
 
-		if a.Description != "" {
-			ref.DocumentDescription = &a.Description
-		}
+		ref.DocumentDescription = a.Description
 
 		if a.URL != "" || a.Digest != nil || a.MIME != "" || a.Name != "" {
-			extRef := ExternalReference{}
-
-			if a.URL != "" {
-				extRef.URI = a.URL
+			extRef := &ExternalReference{
+				Description: a.Description,
+				URI:         a.URL,
+				MimeCode:    a.MIME,
+				FileName:    a.Name,
 			}
 
 			if a.Digest != nil {
 				extRef.DocumentHash = a.Digest.Value
 				extRef.HashAlgorithmMethod = string(a.Digest.Algorithm)
-			}
-
-			if a.MIME != "" {
-				extRef.MimeCode = a.MIME
-			}
-
-			if a.Name != "" {
-				extRef.FileName = a.Name
 			}
 
 			ref.Attachment = &Attachment{

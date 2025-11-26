@@ -50,12 +50,15 @@ type Context struct {
 	Addons []cbc.Key
 }
 
-// AttachmentHandler is used to convert UBL attachments into GOBL attachments.
+// BinaryHandler is used to convert UBL binary attachment into GOBL attachments.
 // As GOBL does not handle binary data directly, the handler is responsible
 // for converting the attachment data into a suitable format for GOBL.
+//
 // Our recomended approach is use this function to upload the binary to a spool
 // and set the link as the GOBL attachment.
-type AttachmentHandler func(att *Attachment) (org.Attachment, error)
+//
+// Be aware that the code and description will be overwritten by the converter.
+type BinaryHandler func(att *BinaryObject) (*org.Attachment, error)
 
 // When adding new contexts, remember to add them to both the exported
 // variable definitions below AND the contexts slice.
@@ -105,8 +108,8 @@ func FindContext(customizationID string, profileID string) *Context {
 }
 
 type options struct {
-	context           Context
-	attachmentHandler AttachmentHandler
+	context       Context
+	binaryHandler BinaryHandler
 }
 
 // Option is used to define configuration options to use during
@@ -122,9 +125,9 @@ func WithContext(c Context) Option {
 }
 
 // WithHandler sets the handler to use for attachment conversions.
-func WithAttachmentHandler(ah AttachmentHandler) Option {
+func WithBinaryHandler(bh BinaryHandler) Option {
 	return func(o *options) {
-		o.attachmentHandler = ah
+		o.binaryHandler = bh
 	}
 }
 

@@ -86,7 +86,7 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 
 	if in.AdditionalDocumentReference != nil {
 		for _, ref := range in.AdditionalDocumentReference {
-			if ref.DocumentTypeCode != nil && *ref.DocumentTypeCode == "130" {
+			if ref.DocumentTypeCode == "130" {
 				if ordering.Identities == nil {
 					ordering.Identities = make([]*org.Identity, 0)
 				}
@@ -115,18 +115,18 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 	docRef := &org.DocumentRef{
 		Code: cbc.Code(ref.ID.Value),
 	}
-	if ref.DocumentType != nil {
-		docRef.Type = cbc.Key(*ref.DocumentType)
+	if ref.DocumentType != "" {
+		docRef.Type = cbc.Key(ref.DocumentType)
 	}
-	if ref.IssueDate != nil {
-		refDate, err := parseDate(*ref.IssueDate)
+	if ref.IssueDate != "" {
+		refDate, err := parseDate(ref.IssueDate)
 		if err != nil {
 			return nil, err
 		}
 		docRef.IssueDate = &refDate
 	}
-	if ref.DocumentDescription != nil {
-		docRef.Description = *ref.DocumentDescription
+	if ref.DocumentDescription != "" {
+		docRef.Description = ref.DocumentDescription
 	}
 	if ref.ValidityPeriod != nil {
 		docRef.Period = goblPeriodDates(ref.ValidityPeriod)
@@ -136,15 +136,15 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 
 func goblPeriodDates(invoicePeriod *Period) *cal.Period {
 	period := &cal.Period{}
-	if invoicePeriod.StartDate != nil {
-		start, err := parseDate(*invoicePeriod.StartDate)
+	if invoicePeriod.StartDate != "" {
+		start, err := parseDate(invoicePeriod.StartDate)
 		if err != nil {
 			return nil
 		}
 		period.Start = start
 	}
-	if invoicePeriod.EndDate != nil {
-		end, err := parseDate(*invoicePeriod.EndDate)
+	if invoicePeriod.EndDate != "" {
+		end, err := parseDate(invoicePeriod.EndDate)
 		if err != nil {
 			return nil
 		}

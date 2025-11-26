@@ -151,6 +151,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addCharges(inv)
 	out.addTotals(inv, string(inv.Currency))
 	out.addLines(inv)
+	out.addAttachments(inv.Attachments)
 
 	if err = out.addPayment(inv.Payment); err != nil {
 		return nil, err

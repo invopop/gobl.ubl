@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c0a17f805dbe717c3d11b12faa79b0c406875b400db7ed458ced5540b24d5791"
+			"val": "00389cb7264fb6c38e9fb8352d606cfcbd19967369a56018cd5b8a7d52875561"
 		}
 	},
 	"doc": {
@@ -410,6 +410,13 @@
 		"notes": [
 			{
 				"text": "Please note we have a new phone number: 22 22 22 22"
+			}
+		],
+		"attachments": [
+			{
+				"name": "ts12345",
+				"description": "Technical specification",
+				"url": "www.techspec.no"
 			}
 		]
 	}

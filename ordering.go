@@ -8,16 +8,16 @@ import (
 
 // Period represents a time period with start and end dates
 type Period struct {
-	StartDate *string `xml:"cbc:StartDate"`
-	EndDate   *string `xml:"cbc:EndDate"`
+	StartDate string `xml:"cbc:StartDate,omitempty"`
+	EndDate   string `xml:"cbc:EndDate,omitempty"`
 }
 
 // OrderReference represents a reference to an order
 type OrderReference struct {
-	ID                string  `xml:"cbc:ID"`
-	SalesOrderID      *string `xml:"cbc:SalesOrderID"`
-	IssueDate         *string `xml:"cbc:IssueDate"`
-	CustomerReference *string `xml:"cbc:CustomerReference"`
+	ID                string `xml:"cbc:ID"`
+	SalesOrderID      string `xml:"cbc:SalesOrderID,omitempty"`
+	IssueDate         string `xml:"cbc:IssueDate,omitempty"`
+	CustomerReference string `xml:"cbc:CustomerReference,omitempty"`
 }
 
 // BillingReference represents a reference to a billing document
@@ -31,17 +31,17 @@ type BillingReference struct {
 // Reference represents a reference to a document
 type Reference struct {
 	ID                  IDType      `xml:"cbc:ID"`
-	IssueDate           *string     `xml:"cbc:IssueDate"`
-	DocumentTypeCode    *string     `xml:"cbc:DocumentTypeCode"`
-	DocumentType        *string     `xml:"cbc:DocumentType"`
-	Attachment          *Attachment `xml:"cac:Attachment"`
-	DocumentDescription *string     `xml:"cbc:DocumentDescription"`
-	ValidityPeriod      *Period     `xml:"cac:ValidityPeriod"`
+	IssueDate           string      `xml:"cbc:IssueDate,omitempty"`
+	DocumentTypeCode    string      `xml:"cbc:DocumentTypeCode,omitempty"`
+	DocumentType        string      `xml:"cbc:DocumentType,omitempty"`
+	DocumentDescription string      `xml:"cbc:DocumentDescription,omitempty"`
+	Attachment          *Attachment `xml:"cac:Attachment,omitempty"`
+	ValidityPeriod      *Period     `xml:"cac:ValidityPeriod,omitempty"`
 }
 
 // ProjectReference represents a reference to a project
 type ProjectReference struct {
-	ID *string `xml:"cbc:ID"`
+	ID string `xml:"cbc:ID,omitempty"`
 }
 
 func (out *Invoice) addPreceding(refs []*org.DocumentRef) {
@@ -54,12 +54,10 @@ func (out *Invoice) addPreceding(refs []*org.DocumentRef) {
 			ID: IDType{Value: ref.Series.Join(ref.Code).String()},
 		}
 		if ref.IssueDate != nil {
-			id := ref.IssueDate.String()
-			r.IssueDate = &id
+			r.IssueDate = ref.IssueDate.String()
 		}
 		if dt := ref.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
-			dts := dt.String()
-			r.DocumentTypeCode = &dts
+			r.DocumentTypeCode = dt.String()
 		}
 		out.BillingReference[i] = &BillingReference{
 			InvoiceDocumentReference: r,
@@ -87,12 +85,10 @@ func (out *Invoice) addOrdering(o *bill.Ordering) {
 	}
 
 	if o.Period != nil {
-		start := formatDate(o.Period.Start)
-		end := formatDate(o.Period.End)
 		out.InvoicePeriod = []Period{
 			{
-				StartDate: &start,
-				EndDate:   &end,
+				StartDate: formatDate(o.Period.Start),
+				EndDate:   formatDate(o.Period.End),
 			},
 		}
 	}
@@ -143,10 +139,9 @@ func (out *Invoice) addOrdering(o *bill.Ordering) {
 			schemeID := ref.String()
 			id.SchemeID = &schemeID
 		}
-		dtc := "130"
 		out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, Reference{
 			ID:               id,
-			DocumentTypeCode: &dtc,
+			DocumentTypeCode: "130",
 		})
 	}
 }
