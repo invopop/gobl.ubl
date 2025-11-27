@@ -13,7 +13,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func goblAddLines(in *Invoice, out *bill.Invoice) error {
+func (in *Invoice) goblAddLines(out *bill.Invoice) error {
 	items := in.InvoiceLines
 	if len(in.CreditNoteLines) > 0 {
 		items = in.CreditNoteLines

@@ -6,7 +6,7 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func goblAddDelivery(in *Invoice, out *bill.Invoice) error {
+func (in *Invoice) goblAddDelivery(out *bill.Invoice) error {
 	d := &bill.DeliveryDetails{}
 
 	// Only one delivery Location and Receiver are supported, so if more than one is passed the former will be overwritten

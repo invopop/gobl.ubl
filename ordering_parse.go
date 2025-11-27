@@ -20,7 +20,7 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Identities) > 0
 }
 
-func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
+func (in *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
 	if in.BuyerReference != "" {

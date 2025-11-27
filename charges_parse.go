@@ -11,7 +11,7 @@ import (
 )
 
 // goblAddCharges adds the invoice charges to the gobl output.
-func goblAddCharges(in *Invoice, out *bill.Invoice) error {
+func (in *Invoice) goblAddCharges(out *bill.Invoice) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 

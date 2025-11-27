@@ -8,7 +8,7 @@ import (
 
 // goblAddAttachments processes the attachment in the given reference.
 // Binary attachments are now ignored - use ExtractBinaryAttachments instead.
-func goblAddAttachments(ref Reference, o *options) (*org.Attachment, error) {
+func goblAddAttachments(ref Reference) (*org.Attachment, error) {
 	if ref.Attachment == nil {
 		return nil, nil
 	}

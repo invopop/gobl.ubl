@@ -22,7 +22,7 @@ var paymentMeansMap = map[string]cbc.Key{
 	"59": pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA),
 }
 
-func goblAddPayment(in *Invoice, out *bill.Invoice) error {
+func (in *Invoice) goblAddPayment(out *bill.Invoice) error {
 	payment := &bill.PaymentDetails{}
 
 	if in.PayeeParty != nil {

@@ -1,6 +1,7 @@
 package ubl
 
 import (
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
@@ -24,6 +25,32 @@ var InvoiceTagMap = map[string][]cbc.Key{
 	"389": {tax.TagSelfBilled},
 	"326": {tax.TagPartial},
 	"261": {tax.TagSelfBilled},
+}
+
+// Convert converts the UBL Invoice to a GOBL envelope.
+// It automatically detects the context based on CustomizationID and ProfileID.
+// Binary attachments are ignored during conversion - use ExtractBinaryAttachments
+// to retrieve them separately.
+func (in *Invoice) Convert() (*gobl.Envelope, error) {
+	o := new(options)
+
+	// Detect context from the invoice
+	ctx := FindContext(in.CustomizationID, in.ProfileID)
+	if ctx != nil {
+		o.context = *ctx
+	}
+
+	inv, err := goblInvoice(in, o)
+	if err != nil {
+		return nil, err
+	}
+
+	env := gobl.NewEnvelope()
+	if err := env.Insert(inv); err != nil {
+		return nil, err
+	}
+
+	return env, nil
 }
 
 func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
@@ -59,16 +86,16 @@ func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 	}
 	out.IssueDate = issueDate
 
-	if err := goblAddLines(in, out); err != nil {
+	if err := in.goblAddLines(out); err != nil {
 		return nil, err
 	}
-	if err := goblAddPayment(in, out); err != nil {
+	if err := in.goblAddPayment(out); err != nil {
 		return nil, err
 	}
-	if err = goblAddOrdering(in, out); err != nil {
+	if err = in.goblAddOrdering(out); err != nil {
 		return nil, err
 	}
-	if err = goblAddDelivery(in, out); err != nil {
+	if err = in.goblAddDelivery(out); err != nil {
 		return nil, err
 	}
 
@@ -119,13 +146,13 @@ func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 	}
 
 	if len(in.AllowanceCharge) > 0 {
-		if err := goblAddCharges(in, out); err != nil {
+		if err := in.goblAddCharges(out); err != nil {
 			return nil, err
 		}
 	}
 
 	for _, ref := range in.AdditionalDocumentReference {
-		att, err := goblAddAttachments(ref, o)
+		att, err := goblAddAttachments(ref)
 		if err != nil {
 			return nil, err
 		}

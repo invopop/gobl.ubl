@@ -166,8 +166,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 
 // Bytes returns the raw XML of the UBL Invoice or Credit Note including
 // the XML Header.
-func (out *Invoice) Bytes() ([]byte, error) {
-	bytes, err := xml.MarshalIndent(out, "", "  ")
+func (in *Invoice) Bytes() ([]byte, error) {
+	bytes, err := xml.MarshalIndent(in, "", "  ")
 	if err != nil {
 		return nil, err
 	}
@@ -179,32 +179,6 @@ func invoiceNumber(series cbc.Code, code cbc.Code) string {
 		return code.String()
 	}
 	return fmt.Sprintf("%s-%s", series, code)
-}
-
-// Convert converts the UBL Invoice to a GOBL envelope.
-// It automatically detects the context based on CustomizationID and ProfileID.
-// Binary attachments are ignored during conversion - use ExtractBinaryAttachments
-// to retrieve them separately.
-func (in *Invoice) Convert() (*gobl.Envelope, error) {
-	o := new(options)
-
-	// Detect context from the invoice
-	ctx := FindContext(in.CustomizationID, in.ProfileID)
-	if ctx != nil {
-		o.context = *ctx
-	}
-
-	inv, err := goblInvoice(in, o)
-	if err != nil {
-		return nil, err
-	}
-
-	env := gobl.NewEnvelope()
-	if err := env.Insert(inv); err != nil {
-		return nil, err
-	}
-
-	return env, nil
 }
 
 // ConvertInvoice is a convenience function that converts a GOBL envelope
