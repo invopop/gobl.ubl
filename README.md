@@ -113,21 +113,6 @@ func main() {
 }
 ```
 
-You can also use the helper function `IsInvoice()` to check the document type:
-
-```go
-doc, err := ubl.Parse(inData)
-if err != nil {
-    panic(err)
-}
-
-if ubl.IsInvoice(doc) {
-    inv := doc.(*ubl.Invoice)
-    env, err := inv.Convert()
-    // ...
-}
-```
-
 ## Command Line
 
 The GOBL to UBL tool includes a command-line helper. You can install it manually in your Go environment with:
