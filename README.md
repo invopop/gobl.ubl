@@ -100,10 +100,7 @@ func main() {
     }
 
     // Extract binary attachments if needed
-    attachments, err := inv.ExtractBinaryAttachments()
-    if err != nil {
-        panic(err)
-    }
+    attachments := inv.ExtractBinaryAttachments()
 
     // Marshal to JSON
     outputData, err := json.MarshalIndent(env, "", "  ")
