@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -89,7 +90,11 @@ func TestParseInvoice(t *testing.T) {
 			require.NoError(t, err)
 
 			// Convert UBL XML to GOBL
-			env, err := ubl.Parse(xmlData)
+			doc, err := ubl.Parse(xmlData)
+			require.NoError(t, err)
+			inv, ok := doc.(*ubl.Invoice)
+			require.True(t, ok, "Document should be an invoice")
+			env, err := inv.Convert()
 			require.NoError(t, err)
 
 			// Unfortunately, the sample UBL documents have lots of errors, including
@@ -170,7 +175,17 @@ func testParseInvoice(name string) (*gobl.Envelope, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ubl.Parse(data)
+
+	doc, err := ubl.Parse(data)
+	if err != nil {
+		return nil, err
+	}
+
+	inv, ok := doc.(*ubl.Invoice)
+	if !ok {
+		return nil, fmt.Errorf("document is not an invoice")
+	}
+	return inv.Convert()
 }
 
 // loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder

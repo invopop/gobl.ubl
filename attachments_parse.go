@@ -7,7 +7,7 @@ import (
 )
 
 // goblAddAttachments processes the attachment in the given reference.
-// Binary attachments are delegated to the provided options handler if available.
+// Binary attachments are now ignored - use ExtractBinaryAttachments instead.
 func goblAddAttachments(ref Reference, o *options) (*org.Attachment, error) {
 	if ref.Attachment == nil {
 		return nil, nil
@@ -30,15 +30,8 @@ func goblAddAttachments(ref Reference, o *options) (*org.Attachment, error) {
 			}
 		}
 	case ref.Attachment.EmbeddedDocumentBinaryObject != nil:
-		if o == nil || o.binaryHandler == nil {
-			return nil, nil
-		}
-
-		var err error
-		att, err = o.binaryHandler(ref.Attachment.EmbeddedDocumentBinaryObject)
-		if err != nil {
-			return nil, err
-		}
+		// Skip binary attachments - they should be extracted using ExtractBinaryAttachments
+		return nil, nil
 	}
 
 	if att != nil {
@@ -53,4 +46,30 @@ func goblAddAttachments(ref Reference, o *options) (*org.Attachment, error) {
 	}
 
 	return att, nil
+}
+
+// BinaryAttachment represents a binary attachment extracted from a UBL invoice.
+type BinaryAttachment struct {
+	ID          string
+	Description string
+	Binary      *BinaryObject
+}
+
+// ExtractBinaryAttachments extracts all binary attachments from the UBL Invoice.
+// It returns a slice of BinaryAttachment containing the ID, description, and binary data.
+// External reference attachments are not included in the result.
+func (in *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
+	var result []BinaryAttachment
+
+	for _, ref := range in.AdditionalDocumentReference {
+		if ref.Attachment != nil && ref.Attachment.EmbeddedDocumentBinaryObject != nil {
+			result = append(result, BinaryAttachment{
+				ID:          ref.ID.Value,
+				Description: ref.DocumentDescription,
+				Binary:      ref.Attachment.EmbeddedDocumentBinaryObject,
+			})
+		}
+	}
+
+	return result
 }

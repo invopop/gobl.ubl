@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
@@ -178,4 +179,44 @@ func invoiceNumber(series cbc.Code, code cbc.Code) string {
 		return code.String()
 	}
 	return fmt.Sprintf("%s-%s", series, code)
+}
+
+// Convert converts the UBL Invoice to a GOBL envelope.
+// It automatically detects the context based on CustomizationID and ProfileID.
+// Binary attachments are ignored during conversion - use ExtractBinaryAttachments
+// to retrieve them separately.
+func (in *Invoice) Convert() (*gobl.Envelope, error) {
+	o := new(options)
+
+	// Detect context from the invoice
+	ctx := FindContext(in.CustomizationID, in.ProfileID)
+	if ctx != nil {
+		o.context = *ctx
+	}
+
+	inv, err := goblInvoice(in, o)
+	if err != nil {
+		return nil, err
+	}
+
+	env := gobl.NewEnvelope()
+	if err := env.Insert(inv); err != nil {
+		return nil, err
+	}
+
+	return env, nil
+}
+
+// ConvertInvoice is a convenience function that converts a GOBL envelope
+// containing an invoice into a UBL Invoice or CreditNote document.
+func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Convert(env, opts...)
+	if err != nil {
+		return nil, err
+	}
+	inv, ok := doc.(*Invoice)
+	if !ok {
+		return nil, fmt.Errorf("expected invoice, got %T", doc)
+	}
+	return inv, nil
 }

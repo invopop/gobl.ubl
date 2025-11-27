@@ -67,27 +67,64 @@ doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
 package main
 
 import (
+    "encoding/json"
     "io"
+    "os"
 
     ubl "github.com/invopop/gobl.ubl"
-    )
+)
 
 func main() {
     // Read the UBL XML file
-	inData, err := io.ReadAll("path/to/ubl_invoice.xml")
-	if err != nil {
-		panic(err)
-	}
-
-    env, err := ubl.Parse(inData)
+    inData, err := os.ReadFile("path/to/ubl_invoice.xml")
     if err != nil {
         panic(err)
     }
 
-    outputData, err = json.MarshalIndent(env, "", "  ")
+    // Parse the UBL document
+    doc, err := ubl.Parse(inData)
     if err != nil {
         panic(err)
     }
+
+    // Type assert to the appropriate document type
+    inv, ok := doc.(*ubl.Invoice)
+    if !ok {
+        panic("expected an invoice document")
+    }
+
+    // Convert to GOBL envelope
+    env, err := inv.Convert()
+    if err != nil {
+        panic(err)
+    }
+
+    // Extract binary attachments if needed
+    attachments, err := inv.ExtractBinaryAttachments()
+    if err != nil {
+        panic(err)
+    }
+
+    // Marshal to JSON
+    outputData, err := json.MarshalIndent(env, "", "  ")
+    if err != nil {
+        panic(err)
+    }
+}
+```
+
+You can also use the helper function `IsInvoice()` to check the document type:
+
+```go
+doc, err := ubl.Parse(inData)
+if err != nil {
+    panic(err)
+}
+
+if ubl.IsInvoice(doc) {
+    inv := doc.(*ubl.Invoice)
+    env, err := inv.Convert()
+    // ...
 }
 ```
 

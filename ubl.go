@@ -12,7 +12,6 @@ import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/org"
 	nbio "github.com/nbio/xml"
 )
 
@@ -50,16 +49,6 @@ type Context struct {
 	Addons []cbc.Key
 }
 
-// BinaryHandlerFunc is used to convert UBL binary attachment into GOBL attachments.
-// As GOBL does not handle binary data directly, the handler is responsible
-// for converting the attachment data into a suitable format for GOBL.
-//
-// Our recommended approach is use this function to upload the binary to a spool
-// and set the link as the GOBL attachment.
-//
-// Be aware that the code and description will be overwritten by the converter.
-type BinaryHandlerFunc func(att *BinaryObject) (*org.Attachment, error)
-
 // Is checks if two contexts are the same.
 func (c *Context) Is(c2 Context) bool {
 	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
@@ -81,8 +70,7 @@ func FindContext(customizationID string, profileID string) *Context {
 }
 
 type options struct {
-	context       Context
-	binaryHandler BinaryHandlerFunc
+	context Context
 }
 
 // Option is used to define configuration options to use during
@@ -94,13 +82,6 @@ type Option func(*options)
 func WithContext(c Context) Option {
 	return func(o *options) {
 		o.context = c
-	}
-}
-
-// WithBinaryHandler sets the handler to use for attachment conversions.
-func WithBinaryHandler(bhf BinaryHandlerFunc) Option {
-	return func(o *options) {
-		o.binaryHandler = bhf
 	}
 }
 
@@ -131,48 +112,48 @@ var ContextXRechnung = Context{
 // When adding new contexts, remember to add them here AND as exported variables above.
 var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung}
 
-// Parse parses a raw UBL document and converts to a GOBL envelope,
-// assuming we're dealing with a known document type.
+// Parse parses a raw UBL document and returns the underlying Go struct.
+// The returned value should be type asserted to the appropriate type.
 //
-// Add a WithBinaryHandler option if you want to handle incoming attachments.
-// If no handler is provided, attachments will be ignored and left on the XML.
-func Parse(ublDoc []byte, opts ...Option) (*gobl.Envelope, error) {
-	o := new(options)
-	for _, opt := range opts {
-		opt(o)
-	}
-	ns, err := extractRootNamespace(ublDoc)
+// Supported types:
+//   - *Invoice (for both Invoice and CreditNote documents)
+//
+// Example usage:
+//
+//	doc, err := ubl.Parse(xmlData)
+//	if err != nil {
+//	    // handle error
+//	}
+//	if inv, ok := doc.(*ubl.Invoice); ok {
+//	    env, err := inv.Convert()
+//	    attachments, err := inv.ExtractBinaryAttachments()
+//	    // ...
+//	}
+func Parse(data []byte) (any, error) {
+	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err
 	}
-	env := gobl.NewEnvelope()
-	var res any
 
 	switch ns {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
 		in := new(Invoice)
-		if err := nbio.Unmarshal(ublDoc, in); err != nil {
+		if err := nbio.Unmarshal(data, in); err != nil {
 			return nil, err
 		}
+		return in, nil
 
-		ctx := FindContext(in.CustomizationID, in.ProfileID)
-		if ctx != nil {
-			o.context = *ctx
-		}
+	// Future document types can be added here
+	// case NamespaceUBLOrder:
+	//     order := new(Order)
+	//     if err := nbio.Unmarshal(data, order); err != nil {
+	//         return nil, err
+	//     }
+	//     return order, nil
 
-		if res, err = goblInvoice(in, o); err != nil {
-			return nil, err
-		}
 	default:
 		return nil, ErrUnknownDocumentType
 	}
-
-	// Whatever we get back, try inserting.
-	if err := env.Insert(res); err != nil {
-		return nil, err
-	}
-
-	return env, nil
 }
 
 // Convert takes a GOBL envelope and converts to a UBL document of one
@@ -217,20 +198,6 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
-}
-
-// ConvertInvoice is a convenience function that converts a GOBL envelope
-// containing an invoice into a UBL Invoice or CreditNote document.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
-	if err != nil {
-		return nil, err
-	}
-	inv, ok := doc.(*Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected invoice, got %T", doc)
-	}
-	return inv, nil
 }
 
 func extractRootNamespace(data []byte) (string, error) {
