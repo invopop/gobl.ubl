@@ -24,7 +24,7 @@ type InvoiceLine struct {
 	Price               *Price              `xml:"cac:Price"`
 }
 
-func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
+func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -175,9 +175,9 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 		lines = append(lines, invLine)
 	}
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {
-		out.CreditNoteLines = lines
+		ui.CreditNoteLines = lines
 	} else {
-		out.InvoiceLines = lines
+		ui.InvoiceLines = lines
 	}
 }
 

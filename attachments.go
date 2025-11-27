@@ -33,7 +33,7 @@ type ExternalReference struct {
 	Description         string `xml:"cbc:Description,omitempty"`
 }
 
-func (out *Invoice) addAttachments(attachments []*org.Attachment) {
+func (ui *Invoice) addAttachments(attachments []*org.Attachment) {
 	for _, a := range attachments {
 		idValue := a.Code.String()
 		if idValue == "" {
@@ -66,6 +66,6 @@ func (out *Invoice) addAttachments(attachments []*org.Attachment) {
 			}
 		}
 
-		out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, ref)
+		ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, ref)
 	}
 }

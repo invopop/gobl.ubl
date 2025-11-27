@@ -13,10 +13,10 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (in *Invoice) goblAddLines(out *bill.Invoice) error {
-	items := in.InvoiceLines
-	if len(in.CreditNoteLines) > 0 {
-		items = in.CreditNoteLines
+func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
+	items := ui.InvoiceLines
+	if len(ui.CreditNoteLines) > 0 {
+		items = ui.CreditNoteLines
 	}
 
 	out.Lines = make([]*bill.Line, 0, len(items))

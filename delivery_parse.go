@@ -6,12 +6,12 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (in *Invoice) goblAddDelivery(out *bill.Invoice) error {
+func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 	d := &bill.DeliveryDetails{}
 
 	// Only one delivery Location and Receiver are supported, so if more than one is passed the former will be overwritten
-	if len(in.Delivery) > 0 {
-		for _, del := range in.Delivery {
+	if len(ui.Delivery) > 0 {
+		for _, del := range ui.Delivery {
 			if del.ActualDeliveryDate != nil {
 				deliveryDate, err := parseDate(*del.ActualDeliveryDate)
 				if err != nil {
@@ -44,10 +44,10 @@ func (in *Invoice) goblAddDelivery(out *bill.Invoice) error {
 		}
 	}
 
-	if in.DeliveryTerms != nil {
+	if ui.DeliveryTerms != nil {
 		d.Identities = []*org.Identity{
 			{
-				Code: cbc.Code(in.DeliveryTerms.ID),
+				Code: cbc.Code(ui.DeliveryTerms.ID),
 			},
 		}
 	}

@@ -31,16 +31,16 @@ var InvoiceTagMap = map[string][]cbc.Key{
 // It automatically detects the context based on CustomizationID and ProfileID.
 // Binary attachments are ignored during conversion - use ExtractBinaryAttachments
 // to retrieve them separately.
-func (in *Invoice) Convert() (*gobl.Envelope, error) {
+func (ui *Invoice) Convert() (*gobl.Envelope, error) {
 	o := new(options)
 
 	// Detect context from the invoice
-	ctx := FindContext(in.CustomizationID, in.ProfileID)
+	ctx := FindContext(ui.CustomizationID, ui.ProfileID)
 	if ctx != nil {
 		o.context = *ctx
 	}
 
-	inv, err := goblInvoice(in, o)
+	inv, err := ui.goblInvoice(o)
 	if err != nil {
 		return nil, err
 	}
@@ -53,25 +53,25 @@ func (in *Invoice) Convert() (*gobl.Envelope, error) {
 	return env, nil
 }
 
-func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
+func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	out := &bill.Invoice{
 		Addons: tax.Addons{
 			List: o.context.Addons,
 		},
-		Code:     cbc.Code(in.ID),
-		Currency: currency.Code(in.DocumentCurrencyCode),
+		Code:     cbc.Code(ui.ID),
+		Currency: currency.Code(ui.DocumentCurrencyCode),
 		Tax: &bill.Tax{
 			// Always default to currency rounding for incoming invoices
 			// as this is the default for EN16931.
 			Rounding: tax.RoundingRuleCurrency,
 		},
-		Supplier: goblParty(in.AccountingSupplierParty.Party),
-		Customer: goblParty(in.AccountingCustomerParty.Party),
+		Supplier: goblParty(ui.AccountingSupplierParty.Party),
+		Customer: goblParty(ui.AccountingCustomerParty.Party),
 	}
 
-	typeCode := in.InvoiceTypeCode
+	typeCode := ui.InvoiceTypeCode
 	if typeCode == "" {
-		typeCode = in.CreditNoteTypeCode
+		typeCode = ui.CreditNoteTypeCode
 	}
 	out.Type = typeCodeParse(typeCode)
 	tags := tagCodeParse(typeCode)
@@ -80,28 +80,28 @@ func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 		out.SetTags(tags...)
 	}
 
-	issueDate, err := parseDate(in.IssueDate)
+	issueDate, err := parseDate(ui.IssueDate)
 	if err != nil {
 		return nil, err
 	}
 	out.IssueDate = issueDate
 
-	if err := in.goblAddLines(out); err != nil {
+	if err := ui.goblAddLines(out); err != nil {
 		return nil, err
 	}
-	if err := in.goblAddPayment(out); err != nil {
+	if err := ui.goblAddPayment(out); err != nil {
 		return nil, err
 	}
-	if err = in.goblAddOrdering(out); err != nil {
+	if err = ui.goblAddOrdering(out); err != nil {
 		return nil, err
 	}
-	if err = in.goblAddDelivery(out); err != nil {
+	if err = ui.goblAddDelivery(out); err != nil {
 		return nil, err
 	}
 
-	if len(in.Note) > 0 {
-		out.Notes = make([]*org.Note, 0, len(in.Note))
-		for _, note := range in.Note {
+	if len(ui.Note) > 0 {
+		out.Notes = make([]*org.Note, 0, len(ui.Note))
+		for _, note := range ui.Note {
 			n := &org.Note{
 				Text: note,
 			}
@@ -109,9 +109,9 @@ func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 		}
 	}
 
-	if len(in.BillingReference) > 0 {
-		out.Preceding = make([]*org.DocumentRef, 0, len(in.BillingReference))
-		for _, ref := range in.BillingReference {
+	if len(ui.BillingReference) > 0 {
+		out.Preceding = make([]*org.DocumentRef, 0, len(ui.BillingReference))
+		for _, ref := range ui.BillingReference {
 			var docRef *org.DocumentRef
 			var err error
 
@@ -134,7 +134,7 @@ func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 		}
 	}
 
-	if in.TaxRepresentativeParty != nil {
+	if ui.TaxRepresentativeParty != nil {
 		// Move the original seller to the ordering.seller party
 		if out.Ordering == nil {
 			out.Ordering = &bill.Ordering{}
@@ -142,16 +142,16 @@ func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 		out.Ordering.Seller = out.Supplier
 
 		// Overwrite the seller field with the tax representative
-		out.Supplier = goblParty(in.TaxRepresentativeParty)
+		out.Supplier = goblParty(ui.TaxRepresentativeParty)
 	}
 
-	if len(in.AllowanceCharge) > 0 {
-		if err := in.goblAddCharges(out); err != nil {
+	if len(ui.AllowanceCharge) > 0 {
+		if err := ui.goblAddCharges(out); err != nil {
 			return nil, err
 		}
 	}
 
-	out.Attachments = in.goblAddAttachments()
+	out.Attachments = ui.goblAddAttachments()
 
 	return out, nil
 }

@@ -44,11 +44,11 @@ type ProjectReference struct {
 	ID string `xml:"cbc:ID,omitempty"`
 }
 
-func (out *Invoice) addPreceding(refs []*org.DocumentRef) {
+func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	if len(refs) == 0 {
 		return
 	}
-	out.BillingReference = make([]*BillingReference, len(refs))
+	ui.BillingReference = make([]*BillingReference, len(refs))
 	for i, ref := range refs {
 		r := &Reference{
 			ID: IDType{Value: ref.Series.Join(ref.Code).String()},
@@ -59,33 +59,33 @@ func (out *Invoice) addPreceding(refs []*org.DocumentRef) {
 		if dt := ref.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
 			r.DocumentTypeCode = dt.String()
 		}
-		out.BillingReference[i] = &BillingReference{
+		ui.BillingReference[i] = &BillingReference{
 			InvoiceDocumentReference: r,
 		}
 	}
 }
 
-func (out *Invoice) addOrdering(o *bill.Ordering) {
+func (ui *Invoice) addOrdering(o *bill.Ordering) {
 	if o == nil {
 		return
 	}
 
 	if o.Code != "" {
-		out.BuyerReference = o.Code.String()
+		ui.BuyerReference = o.Code.String()
 	}
 
 	// If both ordering.seller and seller are present, the original seller is used
 	// as the tax representative.
 	if o.Seller != nil {
-		p := out.AccountingSupplierParty.Party
-		out.TaxRepresentativeParty = p
-		out.AccountingSupplierParty = SupplierParty{
+		p := ui.AccountingSupplierParty.Party
+		ui.TaxRepresentativeParty = p
+		ui.AccountingSupplierParty = SupplierParty{
 			Party: newParty(o.Seller),
 		}
 	}
 
 	if o.Period != nil {
-		out.InvoicePeriod = []Period{
+		ui.InvoicePeriod = []Period{
 			{
 				StartDate: formatDate(o.Period.Start),
 				EndDate:   formatDate(o.Period.End),
@@ -95,31 +95,31 @@ func (out *Invoice) addOrdering(o *bill.Ordering) {
 
 	if len(o.Purchases) > 0 {
 		purchase := o.Purchases[0]
-		out.OrderReference = &OrderReference{
+		ui.OrderReference = &OrderReference{
 			ID: purchase.Code.String(),
 		}
 	}
 
 	for _, despatch := range o.Despatch {
-		out.DespatchDocumentReference = append(out.DespatchDocumentReference, Reference{
+		ui.DespatchDocumentReference = append(ui.DespatchDocumentReference, Reference{
 			ID: IDType{Value: string(despatch.Code)},
 		})
 	}
 
 	for _, receiving := range o.Receiving {
-		out.ReceiptDocumentReference = append(out.ReceiptDocumentReference, Reference{
+		ui.ReceiptDocumentReference = append(ui.ReceiptDocumentReference, Reference{
 			ID: IDType{Value: string(receiving.Code)},
 		})
 	}
 
 	for _, contract := range o.Contracts {
-		out.ContractDocumentReference = append(out.ContractDocumentReference, Reference{
+		ui.ContractDocumentReference = append(ui.ContractDocumentReference, Reference{
 			ID: IDType{Value: string(contract.Code)},
 		})
 	}
 
 	for _, tender := range o.Tender {
-		out.OriginatorDocumentReference = append(out.OriginatorDocumentReference, Reference{
+		ui.OriginatorDocumentReference = append(ui.OriginatorDocumentReference, Reference{
 			ID: IDType{Value: string(tender.Code)},
 		})
 	}
@@ -139,7 +139,7 @@ func (out *Invoice) addOrdering(o *bill.Ordering) {
 			schemeID := ref.String()
 			id.SchemeID = &schemeID
 		}
-		out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, Reference{
+		ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, Reference{
 			ID:               id,
 			DocumentTypeCode: "130",
 		})

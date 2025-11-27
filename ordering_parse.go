@@ -20,21 +20,21 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Identities) > 0
 }
 
-func (in *Invoice) goblAddOrdering(out *bill.Invoice) error {
+func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
-	if in.BuyerReference != "" {
-		ordering.Code = cbc.Code(in.BuyerReference)
+	if ui.BuyerReference != "" {
+		ordering.Code = cbc.Code(ui.BuyerReference)
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
-	if len(in.InvoicePeriod) > 0 {
-		ordering.Period = goblPeriodDates(&in.InvoicePeriod[0])
+	if len(ui.InvoicePeriod) > 0 {
+		ordering.Period = goblPeriodDates(&ui.InvoicePeriod[0])
 	}
 
-	if in.DespatchDocumentReference != nil {
+	if ui.DespatchDocumentReference != nil {
 		ordering.Despatch = make([]*org.DocumentRef, 0)
-		for _, despatchRef := range in.DespatchDocumentReference {
+		for _, despatchRef := range ui.DespatchDocumentReference {
 			docRef, err := goblReference(&despatchRef)
 			if err != nil {
 				return err
@@ -43,9 +43,9 @@ func (in *Invoice) goblAddOrdering(out *bill.Invoice) error {
 		}
 	}
 
-	if in.ReceiptDocumentReference != nil {
+	if ui.ReceiptDocumentReference != nil {
 		ordering.Receiving = make([]*org.DocumentRef, 0)
-		for _, receiptRef := range in.ReceiptDocumentReference {
+		for _, receiptRef := range ui.ReceiptDocumentReference {
 			docRef, err := goblReference(&receiptRef)
 			if err != nil {
 				return err
@@ -54,17 +54,17 @@ func (in *Invoice) goblAddOrdering(out *bill.Invoice) error {
 		}
 	}
 
-	if in.OrderReference != nil && in.OrderReference.ID != "" {
+	if ui.OrderReference != nil && ui.OrderReference.ID != "" {
 		ordering.Purchases = []*org.DocumentRef{
 			{
-				Code: cbc.Code(in.OrderReference.ID),
+				Code: cbc.Code(ui.OrderReference.ID),
 			},
 		}
 	}
 
-	if in.ContractDocumentReference != nil {
+	if ui.ContractDocumentReference != nil {
 		ordering.Contracts = make([]*org.DocumentRef, 0)
-		for _, contractRef := range in.ContractDocumentReference {
+		for _, contractRef := range ui.ContractDocumentReference {
 			docRef, err := goblReference(&contractRef)
 			if err != nil {
 				return err
@@ -73,9 +73,9 @@ func (in *Invoice) goblAddOrdering(out *bill.Invoice) error {
 		}
 	}
 
-	if in.OriginatorDocumentReference != nil {
+	if ui.OriginatorDocumentReference != nil {
 		ordering.Tender = make([]*org.DocumentRef, 0)
-		for _, tenderRef := range in.OriginatorDocumentReference {
+		for _, tenderRef := range ui.OriginatorDocumentReference {
 			docRef, err := goblReference(&tenderRef)
 			if err != nil {
 				return err
@@ -84,8 +84,8 @@ func (in *Invoice) goblAddOrdering(out *bill.Invoice) error {
 		}
 	}
 
-	if in.AdditionalDocumentReference != nil {
-		for _, ref := range in.AdditionalDocumentReference {
+	if ui.AdditionalDocumentReference != nil {
+		for _, ref := range ui.AdditionalDocumentReference {
 			if ref.DocumentTypeCode == "130" {
 				if ordering.Identities == nil {
 					ordering.Identities = make([]*org.Identity, 0)

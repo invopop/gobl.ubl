@@ -16,17 +16,17 @@ type BinaryAttachment struct {
 // goblAddAttachments processes all attachments from the UBL Invoice and returns
 // external reference attachments only.
 // Binary attachments are skipped - use ExtractBinaryAttachments to retrieve them.
-func (in *Invoice) goblAddAttachments() []*org.Attachment {
+func (ui *Invoice) goblAddAttachments() []*org.Attachment {
 	var attachments []*org.Attachment
 
-	for _, ref := range in.AdditionalDocumentReference {
+	for _, ref := range ui.AdditionalDocumentReference {
 		if ref.Attachment == nil {
 			continue
 		}
 
 		// Only process external reference attachments
 		if ref.Attachment.ExternalReference != nil {
-			att := in.processExternalAttachment(&ref)
+			att := ui.processExternalAttachment(&ref)
 			if att != nil {
 				attachments = append(attachments, att)
 			}
@@ -38,7 +38,7 @@ func (in *Invoice) goblAddAttachments() []*org.Attachment {
 }
 
 // processExternalAttachment converts a UBL external reference attachment to GOBL format.
-func (in *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
+func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 	extRef := ref.Attachment.ExternalReference
 	if extRef == nil {
 		return nil
@@ -73,10 +73,10 @@ func (in *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 // ExtractBinaryAttachments extracts all binary attachments from the UBL Invoice.
 // It returns a slice of BinaryAttachment containing the ID, description, and binary data.
 // External reference attachments are not included in the result.
-func (in *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
+func (ui *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 	var result []BinaryAttachment
 
-	for _, ref := range in.AdditionalDocumentReference {
+	for _, ref := range ui.AdditionalDocumentReference {
 		if ref.Attachment != nil && ref.Attachment.EmbeddedDocumentBinaryObject != nil {
 			result = append(result, BinaryAttachment{
 				ID:          ref.ID.Value,
