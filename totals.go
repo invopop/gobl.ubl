@@ -55,6 +55,7 @@ func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
 		TaxInclusiveAmount:  Amount{Value: t.TotalWithTax.String(), CurrencyID: &currency},
 		PayableAmount:       &Amount{Value: t.Payable.String(), CurrencyID: &currency},
 	}
+
 	if t.Discount != nil {
 		out.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: t.Discount.String(), CurrencyID: &currency}
 	}
@@ -67,6 +68,10 @@ func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
 	if t.Advances != nil {
 		out.LegalMonetaryTotal.PrepaidAmount = &Amount{Value: t.Advances.String(), CurrencyID: &currency}
 	}
+	if t.Due != nil {
+		out.LegalMonetaryTotal.PayableAmount = &Amount{Value: t.Due.String(), CurrencyID: &currency}
+	}
+
 	out.TaxTotal = []TaxTotal{
 		{
 			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
