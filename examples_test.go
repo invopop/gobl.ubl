@@ -50,7 +50,7 @@ func TestConvertToInvoice(t *testing.T) {
 			doc, err := testInvoiceFrom(inName)
 			require.NoError(t, err)
 
-			data, err := doc.Bytes()
+			data, err := ubl.Bytes(doc)
 			require.NoError(t, err)
 
 			if *updateOut {

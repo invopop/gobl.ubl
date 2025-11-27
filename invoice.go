@@ -164,16 +164,6 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	return out, nil
 }
 
-// Bytes returns the raw XML of the UBL Invoice or Credit Note including
-// the XML Header.
-func (in *Invoice) Bytes() ([]byte, error) {
-	bytes, err := xml.MarshalIndent(in, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return append([]byte(xml.Header), bytes...), nil
-}
-
 func invoiceNumber(series cbc.Code, code cbc.Code) string {
 	if series == "" {
 		return code.String()

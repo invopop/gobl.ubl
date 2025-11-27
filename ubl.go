@@ -217,3 +217,13 @@ func extractRootNamespace(data []byte) (string, error) {
 	}
 	return "", ErrUnknownDocumentType
 }
+
+// Bytes returns the raw XML of the UBL document including
+// the XML Header.
+func Bytes(in any) ([]byte, error) {
+	bytes, err := xml.MarshalIndent(in, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append([]byte(xml.Header), bytes...), nil
+}
