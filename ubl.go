@@ -126,7 +126,7 @@ var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung}
 //	}
 //	if inv, ok := doc.(*ubl.Invoice); ok {
 //	    env, err := inv.Convert()
-//	    attachments, err := inv.ExtractBinaryAttachments()
+//	    attachments := inv.ExtractBinaryAttachments()
 //	    // ...
 //	}
 func Parse(data []byte) (any, error) {
