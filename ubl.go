@@ -54,7 +54,7 @@ type Context struct {
 // As GOBL does not handle binary data directly, the handler is responsible
 // for converting the attachment data into a suitable format for GOBL.
 //
-// Our recomended approach is use this function to upload the binary to a spool
+// Our recommended approach is use this function to upload the binary to a spool
 // and set the link as the GOBL attachment.
 //
 // Be aware that the code and description will be overwritten by the converter.
