@@ -134,7 +134,7 @@ var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung}
 // Parse parses a raw UBL document and converts to a GOBL envelope,
 // assuming we're dealing with a known document type.
 //
-// Add a WithAttachmentHandler option if you want to handle incoming attachments.
+// Add a WithBinaryHandler option if you want to handle incoming attachments.
 // If no handler is provided, attachments will be ignored and left on the XML.
 func Parse(ublDoc []byte, opts ...Option) (*gobl.Envelope, error) {
 	o := new(options)
