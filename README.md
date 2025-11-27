@@ -68,7 +68,6 @@ package main
 
 import (
     "encoding/json"
-    "io"
     "os"
 
     ubl "github.com/invopop/gobl.ubl"
