@@ -65,7 +65,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("building UBL document: %w", err)
 		}
 
-		outputData, err = doc.Bytes()
+		outputData, err = ubl.Bytes(doc)
 		if err != nil {
 			return fmt.Errorf("generating UBL xml: %w", err)
 		}
