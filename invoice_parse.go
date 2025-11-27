@@ -151,16 +151,7 @@ func goblInvoice(in *Invoice, o *options) (*bill.Invoice, error) {
 		}
 	}
 
-	for _, ref := range in.AdditionalDocumentReference {
-		att, err := goblAddAttachments(ref)
-		if err != nil {
-			return nil, err
-		}
-
-		if att != nil {
-			out.Attachments = append(out.Attachments, att)
-		}
-	}
+	out.Attachments = in.goblAddAttachments()
 
 	return out, nil
 }
