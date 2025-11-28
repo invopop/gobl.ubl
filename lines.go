@@ -139,15 +139,31 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 			if len(l.Item.Identities) > 0 {
 				for _, id := range l.Item.Identities {
+					if it.BuyersItemIdentification != nil && it.StandardItemIdentification != nil {
+						break
+					}
+
+					// Map first identity without extension to BuyersItemIdentification
 					if id.Ext == nil || id.Ext[iso.ExtKeySchemeID].String() == "" {
+						if it.BuyersItemIdentification == nil {
+							it.BuyersItemIdentification = &ItemIdentification{
+								ID: &IDType{
+									Value: id.Code.String(),
+								},
+							}
+						}
 						continue
 					}
-					s := id.Ext[iso.ExtKeySchemeID].String()
-					it.StandardItemIdentification = &ItemIdentification{
-						ID: &IDType{
-							SchemeID: &s,
-							Value:    id.Code.String(),
-						},
+
+					// Map first identity with extension to StandardItemIdentification
+					if it.StandardItemIdentification == nil {
+						s := id.Ext[iso.ExtKeySchemeID].String()
+						it.StandardItemIdentification = &ItemIdentification{
+							ID: &IDType{
+								SchemeID: &s,
+								Value:    id.Code.String(),
+							},
+						}
 					}
 				}
 			}
