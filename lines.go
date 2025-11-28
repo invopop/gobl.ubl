@@ -139,6 +139,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 			if len(l.Item.Identities) > 0 {
 				for _, id := range l.Item.Identities {
+					if it.BuyersItemIdentification != nil && it.StandardItemIdentification != nil {
+						break
+					}
+
 					// Map first identity without extension to BuyersItemIdentification
 					if id.Ext == nil || id.Ext[iso.ExtKeySchemeID].String() == "" {
 						if it.BuyersItemIdentification == nil {
