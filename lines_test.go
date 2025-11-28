@@ -40,6 +40,16 @@ func TestNewLines(t *testing.T) {
 		assert.NotNil(t, doc.InvoiceLines[0].OrderLineReference)
 		assert.Equal(t, "123", doc.InvoiceLines[0].OrderLineReference.LineID)
 		assert.Equal(t, "DEVSERV001", doc.InvoiceLines[0].Item.SellersItemIdentification.ID.Value)
+
+		// First identity with extension maps to StandardItemIdentification
+		assert.NotNil(t, doc.InvoiceLines[0].Item.StandardItemIdentification)
+		assert.Equal(t, "0088", *doc.InvoiceLines[0].Item.StandardItemIdentification.ID.SchemeID)
+		assert.Equal(t, "1234567890128", doc.InvoiceLines[0].Item.StandardItemIdentification.ID.Value)
+
+		// First identity without extension maps to BuyersItemIdentification
+		assert.NotNil(t, doc.InvoiceLines[0].Item.BuyersItemIdentification)
+		assert.Nil(t, doc.InvoiceLines[0].Item.BuyersItemIdentification.ID.SchemeID)
+		assert.Equal(t, "1234567890128", doc.InvoiceLines[0].Item.BuyersItemIdentification.ID.Value)
 	})
 
 }
