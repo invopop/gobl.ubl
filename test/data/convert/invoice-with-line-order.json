@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "40059152ae1c84685332b830209f3846f5652d11dffb1e5431ad35902705f63b"
+			"val": "cce155844f48fe697b57f0eb72e82b2bab61c5fccccda9858919d2cbd6dfc30b"
 		}
 	},
 	"doc": {
@@ -86,6 +86,12 @@
 							"ext": {
 								"iso-scheme-id": "0088"
 							}
+						},
+						{
+							"code": "1234567890128"
+						},
+						{
+							"code": "1234567890128"
 						}
 					],
 					"price": "90.00",
