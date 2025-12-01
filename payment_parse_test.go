@@ -189,3 +189,19 @@ func TestParsePaymentTerms(t *testing.T) {
 		assert.Equal(t, "100%", payment.Terms.DueDates[0].Percent.String())
 	})
 }
+
+func TestParsePaymentAdvances(t *testing.T) {
+	t.Run("totals with prepaid amount", func(t *testing.T) {
+		e, err := testParseInvoice("ubl-example2.xml")
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		payment := inv.Payment
+		require.NotNil(t, payment)
+		require.NotNil(t, payment.Advances)
+
+		assert.Equal(t, "1000.00", payment.Advances[0].Amount.String())
+	})
+}
