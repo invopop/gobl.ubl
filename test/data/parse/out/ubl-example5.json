@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d032ae20a716ce638cfdd8160d3adc1e281b18fef617a7fa7acc73de0bb13fa8"
+			"val": "35ceadef64ba027c5fa7f761a86357a4cd66b8cd02b13b7c12ab527dc247b3de"
 		}
 	},
 	"doc": {
@@ -373,6 +373,12 @@
 				],
 				"notes": "50% prepaid, 50% within one month"
 			},
+			"advances": [
+				{
+					"description": "Total Prepaid Amount",
+					"amount": "2337.50"
+				}
+			],
 			"instructions": {
 				"key": "direct-debit",
 				"ref": "Payref1",
@@ -441,7 +447,9 @@
 			},
 			"tax": "675.00",
 			"total_with_tax": "4675.00",
-			"payable": "4675.00"
+			"payable": "4675.00",
+			"advance": "2337.50",
+			"due": "2337.50"
 		},
 		"notes": [
 			{

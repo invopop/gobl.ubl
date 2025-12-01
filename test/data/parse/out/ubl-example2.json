@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fc54ebebdafd5b34267227ab0fadb9fc01220ce11b296496fb90d1ca7f114ed7"
+			"val": "9951d6ad036f6d5b149bac3674c33ba3d6fc059f0e05498fae378336b238618b"
 		}
 	},
 	"doc": {
@@ -445,6 +445,12 @@
 				],
 				"notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
 			},
+			"advances": [
+				{
+					"description": "Total Prepaid Amount",
+					"amount": "1000.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",
@@ -525,7 +531,9 @@
 			},
 			"tax": "683.53",
 			"total_with_tax": "3393.03",
-			"payable": "3393.03"
+			"payable": "3393.03",
+			"advance": "1000.00",
+			"due": "2393.03"
 		},
 		"notes": [
 			{
