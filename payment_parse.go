@@ -75,25 +75,40 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 		payment.Instructions = goblInvoiceInstructions(out, &in.PaymentMeans[0])
 	}
 
-	if len(in.PrepaidPayment) > 0 {
-		payment.Advances = make([]*pay.Advance, 0, len(in.PrepaidPayment))
-		for _, p := range in.PrepaidPayment {
-			amount, err := num.AmountFromString(p.PaidAmount.Value)
-			if err != nil {
-				return err
-			}
-			advance := &pay.Advance{
-				Amount: amount,
-			}
-			if p.ReceivedDate != nil {
-				d, err := parseDate(*p.ReceivedDate)
+	// We do not currently map this as Peppol and EN16931 do not use it.
+	/*
+		if len(in.PrepaidPayment) > 0 {
+			payment.Advances = make([]*pay.Advance, 0, len(in.PrepaidPayment))
+			for _, p := range in.PrepaidPayment {
+				amount, err := num.AmountFromString(p.PaidAmount.Value)
 				if err != nil {
 					return err
 				}
-				advance.Date = &d
+				advance := &pay.Advance{
+					Amount: amount,
+				}
+				if p.ReceivedDate != nil {
+					d, err := parseDate(*p.ReceivedDate)
+					if err != nil {
+						return err
+					}
+					advance.Date = &d
+				}
+				payment.Advances = append(payment.Advances, advance)
 			}
-			payment.Advances = append(payment.Advances, advance)
+			}
+	*/
+
+	if in.LegalMonetaryTotal.PrepaidAmount != nil {
+		totalPrepaid, err := num.AmountFromString(in.LegalMonetaryTotal.PrepaidAmount.Value)
+		if err != nil {
+			return err
 		}
+		advance := &pay.Advance{
+			Amount:      totalPrepaid,
+			Description: "Total Prepaid Amount",
+		}
+		payment.Advances = append(payment.Advances, advance)
 	}
 
 	if payment.Payee != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
