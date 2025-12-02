@@ -125,7 +125,7 @@ var ContextPeppolFranceExtended = Context{
 
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung, ContextPeppolFranceCIUS}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
 
 // Parse parses a raw UBL document and returns the underlying Go struct.
 // The returned value should be type asserted to the appropriate type.
