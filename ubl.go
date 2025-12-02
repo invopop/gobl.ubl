@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
+	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	nbio "github.com/nbio/xml"
@@ -72,9 +73,23 @@ var ContextXRechnung = Context{
 	Addons:          []cbc.Key{xrechnung.V3},
 }
 
+// ContextPeppolFranceCIUS defines the context for France UBL Invoice CIUS.
+var ContextPeppolFranceCIUS = Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
+	ProfileID:       "urn:peppol:france:billing:regulated",
+	Addons:          []cbc.Key{facturx.V1},
+}
+
+// ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
+var ContextPeppolFranceExtended = Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:extended:1.0",
+	ProfileID:       "urn:peppol:france:billing:regulated",
+	Addons:          []cbc.Key{facturx.V1},
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
 
 // Is checks if two contexts are the same.
 func (c *Context) Is(c2 Context) bool {
