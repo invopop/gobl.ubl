@@ -82,7 +82,7 @@ var ContextPeppolFranceCIUS = Context{
 
 // ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
 var ContextPeppolFranceExtended = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:extended:1.0",
+	CustomizationID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
 	ProfileID:       "urn:peppol:france:billing:regulated",
 	Addons:          []cbc.Key{facturx.V1},
 }
