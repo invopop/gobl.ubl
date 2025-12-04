@@ -3,8 +3,10 @@ package ubl
 import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 func hasOrderingData(o *bill.Ordering) bool {
@@ -18,21 +20,21 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Identities) > 0
 }
 
-func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
+func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
-	if in.BuyerReference != "" {
-		ordering.Code = cbc.Code(in.BuyerReference)
+	if ui.BuyerReference != "" {
+		ordering.Code = cbc.Code(ui.BuyerReference)
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
-	if len(in.InvoicePeriod) > 0 {
-		ordering.Period = goblPeriodDates(&in.InvoicePeriod[0])
+	if len(ui.InvoicePeriod) > 0 {
+		ordering.Period = goblPeriodDates(&ui.InvoicePeriod[0])
 	}
 
-	if in.DespatchDocumentReference != nil {
+	if ui.DespatchDocumentReference != nil {
 		ordering.Despatch = make([]*org.DocumentRef, 0)
-		for _, despatchRef := range in.DespatchDocumentReference {
+		for _, despatchRef := range ui.DespatchDocumentReference {
 			docRef, err := goblReference(&despatchRef)
 			if err != nil {
 				return err
@@ -41,9 +43,9 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 		}
 	}
 
-	if in.ReceiptDocumentReference != nil {
+	if ui.ReceiptDocumentReference != nil {
 		ordering.Receiving = make([]*org.DocumentRef, 0)
-		for _, receiptRef := range in.ReceiptDocumentReference {
+		for _, receiptRef := range ui.ReceiptDocumentReference {
 			docRef, err := goblReference(&receiptRef)
 			if err != nil {
 				return err
@@ -52,17 +54,17 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 		}
 	}
 
-	if in.OrderReference != nil && in.OrderReference.ID != "" {
+	if ui.OrderReference != nil && ui.OrderReference.ID != "" {
 		ordering.Purchases = []*org.DocumentRef{
 			{
-				Code: cbc.Code(in.OrderReference.ID),
+				Code: cbc.Code(ui.OrderReference.ID),
 			},
 		}
 	}
 
-	if in.ContractDocumentReference != nil {
+	if ui.ContractDocumentReference != nil {
 		ordering.Contracts = make([]*org.DocumentRef, 0)
-		for _, contractRef := range in.ContractDocumentReference {
+		for _, contractRef := range ui.ContractDocumentReference {
 			docRef, err := goblReference(&contractRef)
 			if err != nil {
 				return err
@@ -71,32 +73,33 @@ func goblAddOrdering(in *Invoice, out *bill.Invoice) error {
 		}
 	}
 
-	if in.AdditionalDocumentReference != nil {
-		for _, ref := range in.AdditionalDocumentReference {
-			if ref.DocumentTypeCode != nil {
-				switch *ref.DocumentTypeCode {
-				case "50":
-					if ordering.Tender == nil {
-						ordering.Tender = make([]*org.DocumentRef, 0)
-					}
-					docRef, err := goblReference(&ref)
-					if err != nil {
-						return err
-					}
-					ordering.Tender = append(ordering.Tender, docRef)
-				case "130":
-					if ordering.Identities == nil {
-						ordering.Identities = make([]*org.Identity, 0)
-					}
-					identity := &org.Identity{
-						Code: cbc.Code(ref.ID.Value),
-					}
-					if ref.ID.SchemeID != nil {
-						identity.Label = *ref.ID.SchemeID
-					}
-					ordering.Identities = append(ordering.Identities, identity)
-				}
+	if ui.OriginatorDocumentReference != nil {
+		ordering.Tender = make([]*org.DocumentRef, 0)
+		for _, tenderRef := range ui.OriginatorDocumentReference {
+			docRef, err := goblReference(&tenderRef)
+			if err != nil {
+				return err
 			}
+			ordering.Tender = append(ordering.Tender, docRef)
+		}
+	}
+
+	if ui.AdditionalDocumentReference != nil {
+		for _, ref := range ui.AdditionalDocumentReference {
+			if ref.DocumentTypeCode == "130" {
+				if ordering.Identities == nil {
+					ordering.Identities = make([]*org.Identity, 0)
+				}
+				identity := &org.Identity{
+					Code: cbc.Code(ref.ID.Value),
+				}
+				if ref.ID.SchemeID != nil {
+					// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
+					identity.Ext.Merge(tax.Extensions{untdid.ExtKeyReference: cbc.Code(*ref.ID.SchemeID)})
+				}
+				ordering.Identities = append(ordering.Identities, identity)
+			}
+
 			// Other document types not mapped to GOBL
 		}
 	}
@@ -112,18 +115,18 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 	docRef := &org.DocumentRef{
 		Code: cbc.Code(ref.ID.Value),
 	}
-	if ref.DocumentType != nil {
-		docRef.Type = cbc.Key(*ref.DocumentType)
+	if ref.DocumentType != "" {
+		docRef.Type = cbc.Key(ref.DocumentType)
 	}
-	if ref.IssueDate != nil {
-		refDate, err := parseDate(*ref.IssueDate)
+	if ref.IssueDate != "" {
+		refDate, err := parseDate(ref.IssueDate)
 		if err != nil {
 			return nil, err
 		}
 		docRef.IssueDate = &refDate
 	}
-	if ref.DocumentDescription != nil {
-		docRef.Description = *ref.DocumentDescription
+	if ref.DocumentDescription != "" {
+		docRef.Description = ref.DocumentDescription
 	}
 	if ref.ValidityPeriod != nil {
 		docRef.Period = goblPeriodDates(ref.ValidityPeriod)
@@ -133,15 +136,15 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 
 func goblPeriodDates(invoicePeriod *Period) *cal.Period {
 	period := &cal.Period{}
-	if invoicePeriod.StartDate != nil {
-		start, err := parseDate(*invoicePeriod.StartDate)
+	if invoicePeriod.StartDate != "" {
+		start, err := parseDate(invoicePeriod.StartDate)
 		if err != nil {
 			return nil
 		}
 		period.Start = start
 	}
-	if invoicePeriod.EndDate != nil {
-		end, err := parseDate(*invoicePeriod.EndDate)
+	if invoicePeriod.EndDate != "" {
+		end, err := parseDate(invoicePeriod.EndDate)
 		if err != nil {
 			return nil
 		}

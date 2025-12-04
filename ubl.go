@@ -50,6 +50,42 @@ type Context struct {
 	Addons []cbc.Key
 }
 
+// Is checks if two contexts are the same.
+func (c *Context) Is(c2 Context) bool {
+	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
+}
+
+// FindContext looks up a context by CustomizationID and optionally ProfileID.
+// Returns nil if no matching context is found.
+func FindContext(customizationID string, profileID string) *Context {
+	for _, ctx := range contexts {
+		if ctx.CustomizationID == customizationID {
+			// If profileID is specified, it must match too
+			if ctx.ProfileID != "" && ctx.ProfileID != profileID {
+				continue
+			}
+			return &ctx
+		}
+	}
+	return nil
+}
+
+type options struct {
+	context Context
+}
+
+// Option is used to define configuration options to use during
+// conversion processes.
+type Option func(*options)
+
+// WithContext sets the context to use for the configuration
+// and business profile.
+func WithContext(c Context) Option {
+	return func(o *options) {
+		o.context = c
+	}
+}
+
 // When adding new contexts, remember to add them to both the exported
 // variable definitions below AND the contexts slice.
 
@@ -91,66 +127,55 @@ var ContextPeppolFranceExtended = Context{
 // When adding new contexts, remember to add them here AND as exported variables above.
 var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
 
-// Is checks if two contexts are the same.
-func (c *Context) Is(c2 Context) bool {
-	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
-}
-
-// FindContext looks up a context by CustomizationID and optionally ProfileID.
-// Returns nil if no matching context is found.
-func FindContext(customizationID string, profileID string) *Context {
-	for _, ctx := range contexts {
-		if ctx.CustomizationID == customizationID {
-			// If profileID is specified, it must match too
-			if ctx.ProfileID != "" && ctx.ProfileID != profileID {
-				continue
-			}
-			return &ctx
-		}
-	}
-	return nil
-}
-
-// Parse parses a raw UBL document and converts to a GOBL envelope,
-// assuming we're dealing with a known document type.
-func Parse(ublDoc []byte) (*gobl.Envelope, error) {
-	ns, err := extractRootNamespace(ublDoc)
+// Parse parses a raw UBL document and returns the underlying Go struct.
+// The returned value should be type asserted to the appropriate type.
+//
+// Supported types:
+//   - *Invoice (for both Invoice and CreditNote documents)
+//
+// Example usage:
+//
+//	doc, err := ubl.Parse(xmlData)
+//	if err != nil {
+//	    // handle error
+//	}
+//	if inv, ok := doc.(*ubl.Invoice); ok {
+//	    env, err := inv.Convert()
+//	    attachments := inv.ExtractBinaryAttachments()
+//	    // ...
+//	}
+func Parse(data []byte) (any, error) {
+	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err
 	}
-	env := gobl.NewEnvelope()
-	var res any
-	o := new(options)
 
 	switch ns {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
 		in := new(Invoice)
-		if err := nbio.Unmarshal(ublDoc, in); err != nil {
+		if err := nbio.Unmarshal(data, in); err != nil {
 			return nil, err
 		}
+		return in, nil
 
-		ctx := FindContext(in.CustomizationID, in.ProfileID)
-		if ctx != nil {
-			o.context = *ctx
-		}
+	// Future document types can be added here
+	// case NamespaceUBLOrder:
+	//     order := new(Order)
+	//     if err := nbio.Unmarshal(data, order); err != nil {
+	//         return nil, err
+	//     }
+	//     return order, nil
 
-		if res, err = goblInvoice(in, o); err != nil {
-			return nil, err
-		}
 	default:
 		return nil, ErrUnknownDocumentType
 	}
-
-	// Whatever we get back, try inserting.
-	if err := env.Insert(res); err != nil {
-		return nil, err
-	}
-
-	return env, nil
 }
 
 // Convert takes a GOBL envelope and converts to a UBL document of one
 // of the supported types.
+//
+// Add a WithContext option to specify the desired UBL Guideline and Profile ID.
+// If none is provided, EN16931 will be used by default.
 func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	o := &options{
 		context: ContextEN16931,
@@ -190,20 +215,6 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	}
 }
 
-// ConvertInvoice is a convenience function that converts a GOBL envelope
-// containing an invoice into a UBL Invoice or CreditNote document.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
-	if err != nil {
-		return nil, err
-	}
-	inv, ok := doc.(*Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected invoice, got %T", doc)
-	}
-	return inv, nil
-}
-
 func extractRootNamespace(data []byte) (string, error) {
 	dc := xml.NewDecoder(bytes.NewReader(data))
 	for {
@@ -222,18 +233,12 @@ func extractRootNamespace(data []byte) (string, error) {
 	return "", ErrUnknownDocumentType
 }
 
-type options struct {
-	context Context
-}
-
-// Option is used to define configuration options to use during
-// conversion processes.
-type Option func(*options)
-
-// WithContext sets the context to use for the configuration
-// and business profile.
-func WithContext(c Context) Option {
-	return func(o *options) {
-		o.context = c
+// Bytes returns the raw XML of the UBL document including
+// the XML Header.
+func Bytes(in any) ([]byte, error) {
+	b, err := xml.MarshalIndent(in, "", "  ")
+	if err != nil {
+		return nil, err
 	}
+	return append([]byte(xml.Header), b...), nil
 }

@@ -22,17 +22,17 @@ var paymentMeansMap = map[string]cbc.Key{
 	"59": pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA),
 }
 
-func goblAddPayment(in *Invoice, out *bill.Invoice) error {
+func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 	payment := &bill.PaymentDetails{}
 
-	if in.PayeeParty != nil {
-		payment.Payee = goblParty(in.PayeeParty)
+	if ui.PayeeParty != nil {
+		payment.Payee = goblParty(ui.PayeeParty)
 	}
 
-	if len(in.PaymentTerms) > 0 {
+	if len(ui.PaymentTerms) > 0 {
 		payment.Terms = &pay.Terms{}
 		note := make([]string, 0)
-		for _, term := range in.PaymentTerms {
+		for _, term := range ui.PaymentTerms {
 			note = append(note, term.Note...)
 			if term.Amount != nil {
 				amount, err := num.AmountFromString(term.Amount.Value)
@@ -49,8 +49,8 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 		}
 	}
 
-	if in.DueDate != "" {
-		d, err := parseDate(in.DueDate)
+	if ui.DueDate != "" {
+		d, err := parseDate(ui.DueDate)
 		if err != nil {
 			return err
 		}
@@ -71,8 +71,8 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 		payment.Terms.DueDates[0].Percent = &percent
 	}
 
-	if len(in.PaymentMeans) > 0 {
-		payment.Instructions = goblInvoiceInstructions(out, &in.PaymentMeans[0])
+	if len(ui.PaymentMeans) > 0 {
+		payment.Instructions = goblInvoiceInstructions(out, &ui.PaymentMeans[0])
 	}
 
 	// We do not currently map this as Peppol and EN16931 do not use it.
@@ -99,8 +99,8 @@ func goblAddPayment(in *Invoice, out *bill.Invoice) error {
 			}
 	*/
 
-	if in.LegalMonetaryTotal.PrepaidAmount != nil {
-		totalPrepaid, err := num.AmountFromString(in.LegalMonetaryTotal.PrepaidAmount.Value)
+	if ui.LegalMonetaryTotal.PrepaidAmount != nil {
+		totalPrepaid, err := num.AmountFromString(ui.LegalMonetaryTotal.PrepaidAmount.Value)
 		if err != nil {
 			return err
 		}

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7d78e3b1544069675d64a2eb3a5e2f1c69c1486c536371989ef4e93a4b3dda51"
+			"val": "a8caf28233c2d3d738c7ed21d71c68b9864ddc2ea5b9fb64658409ffa74e3d10"
 		}
 	},
 	"doc": {
@@ -308,7 +308,6 @@
 			"code": "0150abc",
 			"identities": [
 				{
-					"label": "ABT",
 					"code": "DR35141"
 				}
 			],
@@ -419,6 +418,13 @@
 		"notes": [
 			{
 				"text": "Please note we have a new phone number: 22 22 22 22"
+			}
+		],
+		"attachments": [
+			{
+				"name": "ts12345",
+				"description": "Technical specification",
+				"url": "www.techspec.no"
 			}
 		]
 	}

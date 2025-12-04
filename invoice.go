@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
@@ -151,6 +152,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addCharges(inv)
 	out.addTotals(inv, string(inv.Currency))
 	out.addLines(inv)
+	out.addAttachments(inv.Attachments)
 
 	if err = out.addPayment(inv.Payment); err != nil {
 		return nil, err
@@ -162,19 +164,23 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	return out, nil
 }
 
-// Bytes returns the raw XML of the UBL Invoice or Credit Note including
-// the XML Header.
-func (out *Invoice) Bytes() ([]byte, error) {
-	bytes, err := xml.MarshalIndent(out, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return append([]byte(xml.Header), bytes...), nil
-}
-
 func invoiceNumber(series cbc.Code, code cbc.Code) string {
 	if series == "" {
 		return code.String()
 	}
 	return fmt.Sprintf("%s-%s", series, code)
+}
+
+// ConvertInvoice is a convenience function that converts a GOBL envelope
+// containing an invoice into a UBL Invoice or CreditNote document.
+func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Convert(env, opts...)
+	if err != nil {
+		return nil, err
+	}
+	inv, ok := doc.(*Invoice)
+	if !ok {
+		return nil, fmt.Errorf("expected invoice, got %T", doc)
+	}
+	return inv, nil
 }
