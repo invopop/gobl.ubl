@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6e1cb4334aa860c969012ed460f900f054403a9c22f3262a31365339769404e9"
+			"val": "057de6a0f5e7214599fd7d595d2076e4db0da531dc2aa3cab49032f402b62569"
 		}
 	},
 	"doc": {
@@ -542,7 +542,8 @@
 		],
 		"attachments": [
 			{
-				"name": "Doc1",
+				"code": "Doc1",
+				"name": "",
 				"description": "Timesheet",
 				"url": "http://www.suppliersite.eu/sheet001.html"
 			}

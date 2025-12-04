@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a8caf28233c2d3d738c7ed21d71c68b9864ddc2ea5b9fb64658409ffa74e3d10"
+			"val": "058b15b8c01ac44fa2a22f9c13fdab48f3a261436e74ae054f0367c5b48a4610"
 		}
 	},
 	"doc": {
@@ -422,7 +422,8 @@
 		],
 		"attachments": [
 			{
-				"name": "ts12345",
+				"code": "ts12345",
+				"name": "",
 				"description": "Technical specification",
 				"url": "www.techspec.no"
 			}

@@ -47,7 +47,6 @@ func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 	att := &org.Attachment{
 		URL:  extRef.URI,
 		MIME: extRef.MimeCode,
-		Name: extRef.FileName,
 	}
 
 	if extRef.DocumentHash != "" && extRef.HashAlgorithmMethod != "" {
