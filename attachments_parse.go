@@ -60,13 +60,6 @@ func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 	att.Code = cbc.Code(ref.ID.Value)
 	att.Description = ref.DocumentDescription
 
-	// Ensure name is set as GOBL validates this.
-	// This will still be mapped to code if converted back into UBL
-	if att.Name == "" {
-		att.Name = att.Code.String()
-		att.Code = ""
-	}
-
 	return att
 }
 
