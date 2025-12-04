@@ -4,11 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-<<<<<<< HEAD
-			"val": "70399aeb762dd07496e5d74a6dcefa2f5c8c8655f8c51d2ef34ed6e8225de137"
-=======
-			"val": "f964becff5b1eade4feea699b95019ffa349b770e00b7fccc0ee65147c4691a8"
->>>>>>> d313ac6 (Add advances from total prepaid amount)
+			"val": "9a77700ebdc95cb5b5b467276b881af2ac249479e393b7870c44ff0afb2b9681"
 		}
 	},
 	"doc": {
