@@ -26,11 +26,6 @@ var (
 	ErrUnsupportedDocumentType = fmt.Errorf("unsupported document type")
 )
 
-// Peppol Billing Profile IDs
-const (
-	PeppolBillingProfileIDDefault = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
-)
-
 // Version is the version of UBL documents that will be generated
 // by this package.
 const Version = "2.1"
@@ -45,13 +40,6 @@ type Context struct {
 	// ProfileID determines the business process context or scenario
 	// for the exchange of the document
 	ProfileID string
-	// SelfBilledCustomizationID is an optional alternative CustomizationID
-	// to use when the invoice has the self-billed tag. Only relevant for
-	// contexts that support self-billing (e.g., Peppol).
-	SelfBilledCustomizationID string
-	// SelfBilledProfileID is an optional alternative ProfileID to use
-	// when the invoice has the self-billed tag.
-	SelfBilledProfileID string
 	// Addons contains the list of Addons required for this CustomizationID
 	// and ProfileID.
 	Addons []cbc.Key
@@ -60,17 +48,12 @@ type Context struct {
 	VESIDs VESIDMapping
 }
 
-// VESIDMapping maps document types and self-billing status to their
-// corresponding VESID values.
+// VESIDMapping maps document types to their corresponding VESID values.
 type VESIDMapping struct {
-	// Invoice is the VESID for standard invoices
+	// Invoice is the VESID for invoices
 	Invoice string
-	// InvoiceSelfBilled is the VESID for self-billed invoices (optional)
-	InvoiceSelfBilled string
 	// CreditNote is the VESID for credit notes
 	CreditNote string
-	// CreditNoteSelfBilled is the VESID for self-billed credit notes (optional)
-	CreditNoteSelfBilled string
 }
 
 // When adding new contexts, remember to add them to both the exported
@@ -86,24 +69,32 @@ var ContextEN16931 = Context{
 	},
 }
 
+// ContextPeppolSelfBilled defines the Peppol self-billed context.
+var ContextPeppolSelfBilled = Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
+	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
+	Addons:          []cbc.Key{en16931.V2017},
+	VESIDs: VESIDMapping{
+		Invoice:    "eu.peppol.bis3:invoice-self-billing:2025.3",
+		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2025.3",
+	},
+}
+
 // ContextPeppol defines the default Peppol context.
 var ContextPeppol = Context{
-	CustomizationID:           "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
-	SelfBilledCustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
-	ProfileID:                 PeppolBillingProfileIDDefault,
-	Addons:                    []cbc.Key{en16931.V2017},
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
+	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0",
+	Addons:          []cbc.Key{en16931.V2017},
 	VESIDs: VESIDMapping{
-		Invoice:              "eu.peppol.bis3:invoice:2025.5",
-		InvoiceSelfBilled:    "eu.peppol.bis3:invoice-self-billing:2025.3",
-		CreditNote:           "eu.peppol.bis3:creditnote:2025.5",
-		CreditNoteSelfBilled: "eu.peppol.bis3:creditnote-self-billing:2025.3",
+		Invoice:    "eu.peppol.bis3:invoice:2025.5",
+		CreditNote: "eu.peppol.bis3:creditnote:2025.5",
 	},
 }
 
 // ContextXRechnung defines the main context to use for XRechnung UBL documents.
 var ContextXRechnung = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
-	ProfileID:       PeppolBillingProfileIDDefault,
+	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0",
 	Addons:          []cbc.Key{xrechnung.V3},
 	VESIDs: VESIDMapping{
 		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
@@ -135,77 +126,45 @@ var ContextPeppolFranceExtended = Context{
 
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
+var contexts = []Context{
+	ContextEN16931,
+	ContextPeppol,
+	ContextPeppolSelfBilled,
+	ContextXRechnung,
+	ContextPeppolFranceCIUS,
+	ContextPeppolFranceExtended,
+}
 
 // Is checks if two contexts are the same.
 func (c *Context) Is(c2 Context) bool {
 	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
 }
 
-// GetCustomizationID returns the appropriate CustomizationID based on
-// whether the invoice is self-billed or not.
-func (c *Context) GetCustomizationID(inv *bill.Invoice) string {
-	if c.SelfBilledCustomizationID != "" && inv.HasTags(tax.TagSelfBilled) {
-		return c.SelfBilledCustomizationID
-	}
-	return c.CustomizationID
-}
-
-// GetProfileID returns the appropriate ProfileID based on
-// whether the invoice is self-billed or not.
-func (c *Context) GetProfileID(inv *bill.Invoice) string {
-	if c.SelfBilledProfileID != "" && inv.HasTags(tax.TagSelfBilled) {
-		return c.SelfBilledProfileID
-	}
-	return c.ProfileID
-}
-
-// GetVESID returns the appropriate VESID based on the invoice type
-// and whether it's self-billed or not.
+// GetVESID returns the appropriate VESID based on the invoice type.
 func (c *Context) GetVESID(inv *bill.Invoice) string {
-	isSelfBilled := inv.HasTags(tax.TagSelfBilled)
-	isCreditNote := inv.Type.In(bill.InvoiceTypeCreditNote)
-
-	switch {
-	case isCreditNote && isSelfBilled && c.VESIDs.CreditNoteSelfBilled != "":
-		return c.VESIDs.CreditNoteSelfBilled
-	case isCreditNote && c.VESIDs.CreditNote != "":
+	if inv.Type.In(bill.InvoiceTypeCreditNote) {
 		return c.VESIDs.CreditNote
-	case isSelfBilled && c.VESIDs.InvoiceSelfBilled != "":
-		return c.VESIDs.InvoiceSelfBilled
-	case c.VESIDs.Invoice != "":
-		return c.VESIDs.Invoice
-	default:
-		return ""
 	}
+	return c.VESIDs.Invoice
 }
 
 // FindContext looks up a context by CustomizationID and optionally ProfileID.
-// Returns nil if no matching context is found. This method also handles
-// self-billed CustomizationIDs and ProfileIDs.
+// Returns nil if no matching context is found.
 func FindContext(customizationID string, profileID string) *Context {
 	for i := range contexts {
 		ctx := &contexts[i]
 
-		// Check if CustomizationID matches (standard or self-billed)
-		isStandard := ctx.CustomizationID == customizationID
-		isSelfBilled := ctx.SelfBilledCustomizationID == customizationID
-
-		if !isStandard && !isSelfBilled {
+		if ctx.CustomizationID != customizationID {
 			continue
 		}
 
-		// If no profileID provided or context has no profileID, it's a match
+		// If no profileID constraints, it's a match
 		if profileID == "" || ctx.ProfileID == "" {
 			return ctx
 		}
 
-		// Check ProfileID match based on which CustomizationID matched
-		if isSelfBilled && ctx.SelfBilledProfileID != "" {
-			if ctx.SelfBilledProfileID == profileID {
-				return ctx
-			}
-		} else if ctx.ProfileID == profileID {
+		// ProfileID must match
+		if ctx.ProfileID == profileID {
 			return ctx
 		}
 	}
@@ -260,22 +219,29 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		opt(o)
 	}
 
-	doc, ok := env.Extract().(*bill.Invoice)
-	if !ok {
+	doc := env.Extract()
+	switch d := doc.(type) {
+	case *bill.Invoice:
+
+		// Switch to self-billed context for Peppol invoices
+		if o.context.Is(ContextPeppol) && d.HasTags(tax.TagSelfBilled) {
+			o.context = ContextPeppolSelfBilled
+		}
+
+		// Check and add missing addons
+		if err := ensureAddons(d, o.context.Addons); err != nil {
+			return nil, err
+		}
+
+		// Removes included taxes as they are not supported in UBL
+		if err := d.RemoveIncludedTaxes(); err != nil {
+			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
+		}
+
+		return ublInvoice(d, o)
+	default:
 		return nil, ErrUnsupportedDocumentType
 	}
-
-	// Check and add missing addons
-	if err := ensureAddons(doc, o.context.Addons); err != nil {
-		return nil, err
-	}
-
-	// Removes included taxes as they are not supported in UBL
-	if err := doc.RemoveIncludedTaxes(); err != nil {
-		return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
-	}
-
-	return ublInvoice(doc, o)
 }
 
 // ensureAddons checks if the invoice has all required addons and adds missing ones

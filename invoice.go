@@ -112,8 +112,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		CCTSNamespace:           NamespaceCCTS,
 		XSINamespace:            NamespaceXSI,
 		SchemaLocation:          SchemaLocationInvoice,
-		CustomizationID:         o.context.GetCustomizationID(inv),
-		ProfileID:               o.context.GetProfileID(inv),
+		CustomizationID:         o.context.CustomizationID,
+		ProfileID:               o.context.ProfileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
