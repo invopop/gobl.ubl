@@ -4,7 +4,11 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
+<<<<<<< HEAD
 			"val": "00389cb7264fb6c38e9fb8352d606cfcbd19967369a56018cd5b8a7d52875561"
+=======
+			"val": "7d78e3b1544069675d64a2eb3a5e2f1c69c1486c536371989ef4e93a4b3dda51"
+>>>>>>> d313ac6 (Add advances from total prepaid amount)
 		}
 	},
 	"doc": {
@@ -332,6 +336,12 @@
 				],
 				"notes": "Payment within 10 days, 2% discount"
 			},
+			"advances": [
+				{
+					"description": "Total Prepaid Amount",
+					"amount": "1000.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"detail": "Credit transfer",
@@ -405,7 +415,9 @@
 			},
 			"tax": "1225.00",
 			"total_with_tax": "7125.00",
-			"payable": "7125.00"
+			"payable": "7125.00",
+			"advance": "1000.00",
+			"due": "6125.00"
 		},
 		"notes": [
 			{

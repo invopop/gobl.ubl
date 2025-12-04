@@ -4,7 +4,11 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
+<<<<<<< HEAD
 			"val": "70399aeb762dd07496e5d74a6dcefa2f5c8c8655f8c51d2ef34ed6e8225de137"
+=======
+			"val": "f964becff5b1eade4feea699b95019ffa349b770e00b7fccc0ee65147c4691a8"
+>>>>>>> d313ac6 (Add advances from total prepaid amount)
 		}
 	},
 	"doc": {
@@ -314,6 +318,12 @@
 				],
 				"notes": "For payment terms, only a note is supported by Peppol currently."
 			},
+			"advances": [
+				{
+					"description": "Total Prepaid Amount",
+					"amount": "1.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "44556677",
@@ -381,7 +391,9 @@
 			},
 			"tax": "2.03",
 			"total_with_tax": "24.57",
-			"payable": "24.57"
+			"payable": "24.57",
+			"advance": "1.00",
+			"due": "23.57"
 		},
 		"notes": [
 			{
