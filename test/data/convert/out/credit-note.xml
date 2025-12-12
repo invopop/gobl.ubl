@@ -46,11 +46,11 @@
         <cbc:CityName>München</cbc:CityName>
         <cbc:PostalZone>80939</cbc:PostalZone>
         <cac:Country>
-          <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+          <cbc:IdentificationCode>LU</cbc:IdentificationCode>
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
-        <cbc:CompanyID>DE282741168</cbc:CompanyID>
+        <cbc:CompanyID>LU282741168</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
@@ -64,7 +64,8 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:PaymentTerms>
-    <cbc:Note>lorem ipsum</cbc:Note>
+    <cbc:Amount currencyID="">2142.00</cbc:Amount>
+    <cbc:PaymentDueDate>2024-03-15</cbc:PaymentDueDate>
   </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>

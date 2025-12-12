@@ -4,15 +4,13 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "466f0a38277ff6eb1969cb41b0526a982b7b10db7ac80ee894f971104119106d"
+			"val": "32bb694b1d2950a790071c1cbff3c6a8da110e586f04f2f9adf69a6577beb5e3"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"$regime": "DE",
-		"$addons": [
-			"eu-en16931-v2017"
-		],
+		"$regime": "BE",
+		"$addons": ["eu-en16931-v2017"],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "credit-note",
 		"series": "CN",
@@ -71,7 +69,7 @@
 		"customer": {
 			"name": "Sample Consumer",
 			"tax_id": {
-				"country": "DE",
+				"country": "LU",
 				"code": "282741168"
 			},
 			"addresses": [
@@ -118,6 +116,12 @@
 		},
 		"payment": {
 			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-03-15",
+						"amount": "2142.00"
+					}
+				],
 				"notes": "lorem ipsum"
 			}
 		},
