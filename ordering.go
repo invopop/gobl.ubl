@@ -66,82 +66,88 @@ func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 }
 
 func (ui *Invoice) addOrdering(o *bill.Ordering) {
-	if o == nil {
-		return
-	}
-
-	if o.Code != "" {
-		ui.BuyerReference = o.Code.String()
-	}
-
-	// If both ordering.seller and seller are present, the original seller is used
-	// as the tax representative.
-	if o.Seller != nil {
-		p := ui.AccountingSupplierParty.Party
-		ui.TaxRepresentativeParty = p
-		ui.AccountingSupplierParty = SupplierParty{
-			Party: newParty(o.Seller),
+	if o != nil {
+		if o.Code != "" {
+			ui.BuyerReference = o.Code.String()
 		}
-	}
 
-	if o.Period != nil {
-		ui.InvoicePeriod = []Period{
-			{
-				StartDate: formatDate(o.Period.Start),
-				EndDate:   formatDate(o.Period.End),
-			},
-		}
-	}
-
-	if len(o.Purchases) > 0 {
-		purchase := o.Purchases[0]
-		ui.OrderReference = &OrderReference{
-			ID: purchase.Code.String(),
-		}
-	}
-
-	for _, despatch := range o.Despatch {
-		ui.DespatchDocumentReference = append(ui.DespatchDocumentReference, Reference{
-			ID: IDType{Value: string(despatch.Code)},
-		})
-	}
-
-	for _, receiving := range o.Receiving {
-		ui.ReceiptDocumentReference = append(ui.ReceiptDocumentReference, Reference{
-			ID: IDType{Value: string(receiving.Code)},
-		})
-	}
-
-	for _, contract := range o.Contracts {
-		ui.ContractDocumentReference = append(ui.ContractDocumentReference, Reference{
-			ID: IDType{Value: string(contract.Code)},
-		})
-	}
-
-	for _, tender := range o.Tender {
-		ui.OriginatorDocumentReference = append(ui.OriginatorDocumentReference, Reference{
-			ID: IDType{Value: string(tender.Code)},
-		})
-	}
-
-	if len(o.Identities) > 0 {
-		ioi := o.Identities[0]
-
-		for _, id := range o.Identities {
-			if id.Ext.Has(untdid.ExtKeyReference) {
-				ioi = id
-				break
+		// If both ordering.seller and seller are present, the original seller is used
+		// as the tax representative.
+		if o.Seller != nil {
+			p := ui.AccountingSupplierParty.Party
+			ui.TaxRepresentativeParty = p
+			ui.AccountingSupplierParty = SupplierParty{
+				Party: newParty(o.Seller),
 			}
 		}
 
-		id := IDType{Value: string(ioi.Code)}
-		if ref := ioi.Ext.Get(untdid.ExtKeyReference); ref != "" {
-			schemeID := ref.String()
-			id.SchemeID = &schemeID
+		if o.Period != nil {
+			ui.InvoicePeriod = []Period{
+				{
+					StartDate: formatDate(o.Period.Start),
+					EndDate:   formatDate(o.Period.End),
+				},
+			}
 		}
-		ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, Reference{
-			ID:               id,
-			DocumentTypeCode: "130",
-		})
+
+		if len(o.Purchases) > 0 {
+			purchase := o.Purchases[0]
+			ui.OrderReference = &OrderReference{
+				ID: purchase.Code.String(),
+			}
+		}
+
+		for _, despatch := range o.Despatch {
+			ui.DespatchDocumentReference = append(ui.DespatchDocumentReference, Reference{
+				ID: IDType{Value: string(despatch.Code)},
+			})
+		}
+
+		for _, receiving := range o.Receiving {
+			ui.ReceiptDocumentReference = append(ui.ReceiptDocumentReference, Reference{
+				ID: IDType{Value: string(receiving.Code)},
+			})
+		}
+
+		for _, contract := range o.Contracts {
+			ui.ContractDocumentReference = append(ui.ContractDocumentReference, Reference{
+				ID: IDType{Value: string(contract.Code)},
+			})
+		}
+
+		for _, tender := range o.Tender {
+			ui.OriginatorDocumentReference = append(ui.OriginatorDocumentReference, Reference{
+				ID: IDType{Value: string(tender.Code)},
+			})
+		}
+
+		if len(o.Identities) > 0 {
+			ioi := o.Identities[0]
+
+			for _, id := range o.Identities {
+				if id.Ext.Has(untdid.ExtKeyReference) {
+					ioi = id
+					break
+				}
+			}
+
+			id := IDType{Value: string(ioi.Code)}
+			if ref := ioi.Ext.Get(untdid.ExtKeyReference); ref != "" {
+				schemeID := ref.String()
+				id.SchemeID = &schemeID
+			}
+			ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, Reference{
+				ID:               id,
+				DocumentTypeCode: "130",
+			})
+		}
+	}
+
+	// Ensure at least one of BuyerReference or OrderReference is set: PEPPOL-EN16931-R003
+	if ui.BuyerReference == "" && (ui.OrderReference == nil || ui.OrderReference.ID == "") {
+		if ui.OrderReference == nil {
+			ui.OrderReference = &OrderReference{}
+		}
+		ui.OrderReference.ID = "NA"
 	}
 }
