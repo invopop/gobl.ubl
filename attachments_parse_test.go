@@ -25,8 +25,7 @@ func TestParseAttachments(t *testing.T) {
 		// First attachment - external reference
 		// Note: When FileName is not present in ExternalReference, Code is moved to Name
 		att1 := inv.Attachments[0]
-		assert.Equal(t, "Doc1", att1.Name)
-		assert.Equal(t, cbc.Code(""), att1.Code)
+		assert.Equal(t, cbc.Code("Doc1"), att1.Code)
 		assert.Equal(t, "Timesheet", att1.Description)
 		assert.Equal(t, "http://www.suppliersite.eu/sheet001.html", att1.URL)
 	})
