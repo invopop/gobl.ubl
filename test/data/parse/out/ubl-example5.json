@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4cd9156f45bf10b2027a8c2cc0e22be984d8d702bb0f479573f9a9e932e19eae"
+			"val": "4b96752d79ef10bbc8fc75c22eefaca2e06e5335ddbe3659ce781d4c5d91e68a"
 		}
 	},
 	"doc": {
@@ -380,7 +380,7 @@
 			},
 			"advances": [
 				{
-					"description": "Total Prepaid Amount",
+					"description": "advance",
 					"amount": "2337.50"
 				}
 			],

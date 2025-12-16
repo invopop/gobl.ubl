@@ -4,7 +4,11 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
+<<<<<<< HEAD
 			"val": "3e645c9b9f6ef6f0bad16854cbffe6947dd4bf233c51c52ae28a9379bec33bfa"
+=======
+			"val": "a8f445fbb630c2b03a63addebcce207d24d591ab26b16a7a2699050671e41f70"
+>>>>>>> creditnote-duedates
 		}
 	},
 	"doc": {
@@ -334,7 +338,7 @@
 			},
 			"advances": [
 				{
-					"description": "Total Prepaid Amount",
+					"description": "advance",
 					"amount": "1000.00"
 				}
 			],

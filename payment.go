@@ -123,7 +123,7 @@ func (ui *Invoice) addPayment(pymt *bill.PaymentDetails) error {
 
 	if pymt.Terms != nil {
 		ui.PaymentTerms = make([]PaymentTerms, 0)
-		if len(pymt.Terms.DueDates) > 1 {
+		if (len(pymt.Terms.DueDates) > 1) || (ui.CreditNoteTypeCode != "" && len(pymt.Terms.DueDates) > 0) {
 			for _, dueDate := range pymt.Terms.DueDates {
 				currency := dueDate.Currency.String()
 				term := PaymentTerms{
@@ -142,7 +142,8 @@ func (ui *Invoice) addPayment(pymt *bill.PaymentDetails) error {
 				}
 				ui.PaymentTerms = append(ui.PaymentTerms, term)
 			}
-		} else if len(pymt.Terms.DueDates) == 1 {
+			// credit notes should not have due dates by schema
+		} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
 			ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 		} else {
 			ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
