@@ -107,7 +107,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 
 		advance := &pay.Advance{
 			Amount:      totalPrepaid,
-			Description: "Total Prepaid Amount",
+			Description: "Prepaid Amount",
 		}
 		payment.Advances = append(payment.Advances, advance)
 
