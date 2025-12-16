@@ -4,13 +4,15 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "32bb694b1d2950a790071c1cbff3c6a8da110e586f04f2f9adf69a6577beb5e3"
+			"val": "c13feca890a6b6a2d2b5d20ff0809b34b1dda149f6cebe18c2c002ba77cd2de1"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "BE",
-		"$addons": ["eu-en16931-v2017"],
+		"$addons": [
+			"eu-en16931-v2017"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "credit-note",
 		"series": "CN",
@@ -102,7 +104,7 @@
 						"cat": "VAT",
 						"key": "standard",
 						"rate": "general",
-						"percent": "19%",
+						"percent": "21.0%",
 						"ext": {
 							"untdid-tax-category": "S"
 						}
@@ -139,18 +141,18 @@
 									"untdid-tax-category": "S"
 								},
 								"base": "1800.00",
-								"percent": "19%",
-								"amount": "342.00"
+								"percent": "21.0%",
+								"amount": "378.00"
 							}
 						],
-						"amount": "342.00"
+						"amount": "378.00"
 					}
 				],
-				"sum": "342.00"
+				"sum": "378.00"
 			},
-			"tax": "342.00",
-			"total_with_tax": "2142.00",
-			"payable": "2142.00"
+			"tax": "378.00",
+			"total_with_tax": "2178.00",
+			"payable": "2178.00"
 		}
 	}
 }
