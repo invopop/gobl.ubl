@@ -8,16 +8,16 @@ import (
 
 // Period represents a time period with start and end dates
 type Period struct {
-	StartDate *string `xml:"cbc:StartDate"`
-	EndDate   *string `xml:"cbc:EndDate"`
+	StartDate string `xml:"cbc:StartDate,omitempty"`
+	EndDate   string `xml:"cbc:EndDate,omitempty"`
 }
 
 // OrderReference represents a reference to an order
 type OrderReference struct {
-	ID                string  `xml:"cbc:ID"`
-	SalesOrderID      *string `xml:"cbc:SalesOrderID"`
-	IssueDate         *string `xml:"cbc:IssueDate"`
-	CustomerReference *string `xml:"cbc:CustomerReference"`
+	ID                string `xml:"cbc:ID"`
+	SalesOrderID      string `xml:"cbc:SalesOrderID,omitempty"`
+	IssueDate         string `xml:"cbc:IssueDate,omitempty"`
+	CustomerReference string `xml:"cbc:CustomerReference,omitempty"`
 }
 
 // BillingReference represents a reference to a billing document
@@ -31,135 +31,123 @@ type BillingReference struct {
 // Reference represents a reference to a document
 type Reference struct {
 	ID                  IDType      `xml:"cbc:ID"`
-	IssueDate           *string     `xml:"cbc:IssueDate"`
-	DocumentTypeCode    *string     `xml:"cbc:DocumentTypeCode"`
-	DocumentType        *string     `xml:"cbc:DocumentType"`
-	Attachment          *Attachment `xml:"cac:Attachment"`
-	DocumentDescription *string     `xml:"cbc:DocumentDescription"`
-	ValidityPeriod      *Period     `xml:"cac:ValidityPeriod"`
-}
-
-// Attachment represents an attached document
-type Attachment struct {
-	EmbeddedDocumentBinaryObject BinaryObject `xml:"cbc:EmbeddedDocumentBinaryObject"`
-}
-
-// BinaryObject represents binary data with associated metadata
-type BinaryObject struct {
-	MimeCode         *string `xml:"mimeCode,attr"`
-	Filename         *string `xml:"filename,attr"`
-	EncodingCode     *string `xml:"encodingCode,attr"`
-	CharacterSetCode *string `xml:"characterSetCode,attr"`
-	URI              *string `xml:"uri,attr"`
-	Value            string  `xml:",chardata"`
+	IssueDate           string      `xml:"cbc:IssueDate,omitempty"`
+	DocumentTypeCode    string      `xml:"cbc:DocumentTypeCode,omitempty"`
+	DocumentType        string      `xml:"cbc:DocumentType,omitempty"`
+	DocumentDescription string      `xml:"cbc:DocumentDescription,omitempty"`
+	Attachment          *Attachment `xml:"cac:Attachment,omitempty"`
+	ValidityPeriod      *Period     `xml:"cac:ValidityPeriod,omitempty"`
 }
 
 // ProjectReference represents a reference to a project
 type ProjectReference struct {
-	ID *string `xml:"cbc:ID"`
+	ID string `xml:"cbc:ID,omitempty"`
 }
 
-func (out *Invoice) addPreceding(refs []*org.DocumentRef) {
+func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	if len(refs) == 0 {
 		return
 	}
-	out.BillingReference = make([]*BillingReference, len(refs))
+	ui.BillingReference = make([]*BillingReference, len(refs))
 	for i, ref := range refs {
 		r := &Reference{
 			ID: IDType{Value: ref.Series.Join(ref.Code).String()},
 		}
 		if ref.IssueDate != nil {
-			id := ref.IssueDate.String()
-			r.IssueDate = &id
+			r.IssueDate = ref.IssueDate.String()
 		}
 		if dt := ref.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
-			dts := dt.String()
-			r.DocumentTypeCode = &dts
+			r.DocumentTypeCode = dt.String()
 		}
-		out.BillingReference[i] = &BillingReference{
+		ui.BillingReference[i] = &BillingReference{
 			InvoiceDocumentReference: r,
 		}
 	}
 }
 
-func (out *Invoice) addOrdering(o *bill.Ordering) {
+func (ui *Invoice) addOrdering(o *bill.Ordering) {
 	if o != nil {
 		if o.Code != "" {
-			out.BuyerReference = o.Code.String()
+			ui.BuyerReference = o.Code.String()
 		}
 
 		// If both ordering.seller and seller are present, the original seller is used
 		// as the tax representative.
 		if o.Seller != nil {
-			p := out.AccountingSupplierParty.Party
-			out.TaxRepresentativeParty = p
-			out.AccountingSupplierParty = SupplierParty{
+			p := ui.AccountingSupplierParty.Party
+			ui.TaxRepresentativeParty = p
+			ui.AccountingSupplierParty = SupplierParty{
 				Party: newParty(o.Seller),
 			}
 		}
 
 		if o.Period != nil {
-			start := formatDate(o.Period.Start)
-			end := formatDate(o.Period.End)
-			out.InvoicePeriod = []Period{
+			ui.InvoicePeriod = []Period{
 				{
-					StartDate: &start,
-					EndDate:   &end,
+					StartDate: formatDate(o.Period.Start),
+					EndDate:   formatDate(o.Period.End),
 				},
-			}
-		}
-
-		if len(o.Despatch) > 0 {
-			out.DespatchDocumentReference = make([]Reference, 0, len(o.Despatch))
-			for _, despatch := range o.Despatch {
-				out.DespatchDocumentReference = append(out.DespatchDocumentReference, Reference{
-					ID: IDType{Value: string(despatch.Code)},
-				})
-			}
-		}
-
-		if len(o.Receiving) > 0 {
-			out.ReceiptDocumentReference = make([]Reference, 0, len(o.Receiving))
-			for _, receiving := range o.Receiving {
-				out.ReceiptDocumentReference = append(out.ReceiptDocumentReference, Reference{
-					ID: IDType{Value: string(receiving.Code)},
-				})
-			}
-		}
-
-		if len(o.Contracts) > 0 {
-			out.ContractDocumentReference = make([]Reference, 0, len(o.Contracts))
-			for _, contract := range o.Contracts {
-				out.ContractDocumentReference = append(out.ContractDocumentReference, Reference{
-					ID: IDType{Value: string(contract.Code)},
-				})
-			}
-		}
-
-		if len(o.Tender) > 0 {
-			out.AdditionalDocumentReference = make([]Reference, 0, len(o.Tender))
-			for _, tender := range o.Tender {
-				out.AdditionalDocumentReference = append(out.AdditionalDocumentReference, Reference{
-					ID: IDType{Value: string(tender.Code)},
-				})
 			}
 		}
 
 		if len(o.Purchases) > 0 {
 			purchase := o.Purchases[0]
-			out.OrderReference = &OrderReference{
+			ui.OrderReference = &OrderReference{
 				ID: purchase.Code.String(),
 			}
+		}
+
+		for _, despatch := range o.Despatch {
+			ui.DespatchDocumentReference = append(ui.DespatchDocumentReference, Reference{
+				ID: IDType{Value: string(despatch.Code)},
+			})
+		}
+
+		for _, receiving := range o.Receiving {
+			ui.ReceiptDocumentReference = append(ui.ReceiptDocumentReference, Reference{
+				ID: IDType{Value: string(receiving.Code)},
+			})
+		}
+
+		for _, contract := range o.Contracts {
+			ui.ContractDocumentReference = append(ui.ContractDocumentReference, Reference{
+				ID: IDType{Value: string(contract.Code)},
+			})
+		}
+
+		for _, tender := range o.Tender {
+			ui.OriginatorDocumentReference = append(ui.OriginatorDocumentReference, Reference{
+				ID: IDType{Value: string(tender.Code)},
+			})
+		}
+
+		if len(o.Identities) > 0 {
+			ioi := o.Identities[0]
+
+			for _, id := range o.Identities {
+				if id.Ext.Has(untdid.ExtKeyReference) {
+					ioi = id
+					break
+				}
+			}
+
+			id := IDType{Value: string(ioi.Code)}
+			if ref := ioi.Ext.Get(untdid.ExtKeyReference); ref != "" {
+				schemeID := ref.String()
+				id.SchemeID = &schemeID
+			}
+			ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, Reference{
+				ID:               id,
+				DocumentTypeCode: "130",
+			})
 		}
 	}
 
 	// Ensure at least one of BuyerReference or OrderReference is set: PEPPOL-EN16931-R003
-	if out.BuyerReference == "" && (out.OrderReference == nil || out.OrderReference.ID == "") {
-		if out.OrderReference == nil {
-			out.OrderReference = &OrderReference{}
+	if ui.BuyerReference == "" && (ui.OrderReference == nil || ui.OrderReference.ID == "") {
+		if ui.OrderReference == nil {
+			ui.OrderReference = &OrderReference{}
 		}
-		out.OrderReference.ID = "NA"
+		ui.OrderReference.ID = "NA"
 	}
-
-	// done
 }

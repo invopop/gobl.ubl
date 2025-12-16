@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "426e9b5d5e8f1dc1c799e8efabc849f21289a9b61db637a98420bd361681825b"
+			"val": "9a77700ebdc95cb5b5b467276b881af2ac249479e393b7870c44ff0afb2b9681"
 		}
 	},
 	"doc": {
@@ -296,6 +296,11 @@
 				{
 					"code": "DDT123"
 				}
+			],
+			"tender": [
+				{
+					"code": "bbbbyyyy"
+				}
 			]
 		},
 		"payment": {
@@ -309,6 +314,12 @@
 				],
 				"notes": "For payment terms, only a note is supported by Peppol currently."
 			},
+			"advances": [
+				{
+					"description": "Total Prepaid Amount",
+					"amount": "1.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "44556677",
@@ -376,7 +387,9 @@
 			},
 			"tax": "2.03",
 			"total_with_tax": "24.57",
-			"payable": "24.57"
+			"payable": "24.57",
+			"advance": "1.00",
+			"due": "23.57"
 		},
 		"notes": [
 			{

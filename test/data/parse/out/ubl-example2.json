@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fc54ebebdafd5b34267227ab0fadb9fc01220ce11b296496fb90d1ca7f114ed7"
+			"val": "6e1cb4334aa860c969012ed460f900f054403a9c22f3262a31365339769404e9"
 		}
 	},
 	"doc": {
@@ -445,6 +445,12 @@
 				],
 				"notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
 			},
+			"advances": [
+				{
+					"description": "Total Prepaid Amount",
+					"amount": "1000.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",
@@ -525,11 +531,20 @@
 			},
 			"tax": "683.53",
 			"total_with_tax": "3393.03",
-			"payable": "3393.03"
+			"payable": "3393.03",
+			"advance": "1000.00",
+			"due": "2393.03"
 		},
 		"notes": [
 			{
 				"text": "Ordered in our booth at the convention"
+			}
+		],
+		"attachments": [
+			{
+				"name": "Doc1",
+				"description": "Timesheet",
+				"url": "http://www.suppliersite.eu/sheet001.html"
 			}
 		]
 	}
