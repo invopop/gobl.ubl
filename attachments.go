@@ -35,35 +35,35 @@ type ExternalReference struct {
 
 func (ui *Invoice) addAttachments(attachments []*org.Attachment) {
 	for _, a := range attachments {
-		idValue := a.Code.String()
-		if idValue == "" {
-			idValue = a.Name
-		}
-
 		ref := Reference{
 			ID: IDType{
-				Value: idValue,
+				Value: a.Code.String(),
 			},
 		}
 
-		ref.DocumentDescription = a.Description
+		if a.Description != "" {
+			ref.DocumentDescription = a.Description
+		}
 
-		if a.URL != "" || a.Digest != nil || a.MIME != "" || a.Name != "" {
-			extRef := &ExternalReference{
-				Description: a.Description,
-				URI:         a.URL,
-				MimeCode:    a.MIME,
-				FileName:    a.Name,
-			}
+		extRef := &ExternalReference{
+			URI: a.URL,
+		}
 
-			if a.Digest != nil {
-				extRef.DocumentHash = a.Digest.Value
-				extRef.HashAlgorithmMethod = string(a.Digest.Algorithm)
-			}
+		if a.MIME != "" {
+			extRef.MimeCode = a.MIME
+		}
 
-			ref.Attachment = &Attachment{
-				ExternalReference: extRef,
-			}
+		if a.Name != "" {
+			extRef.FileName = a.Name
+		}
+
+		if a.Digest != nil {
+			extRef.DocumentHash = a.Digest.Value
+			extRef.HashAlgorithmMethod = string(a.Digest.Algorithm)
+		}
+
+		ref.Attachment = &Attachment{
+			ExternalReference: extRef,
 		}
 
 		ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, ref)

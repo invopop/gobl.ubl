@@ -28,7 +28,6 @@
         <cbc:URI>testfile.com/test.html</cbc:URI>
         <cbc:MimeCode>application/pdf</cbc:MimeCode>
         <cbc:FileName>test</cbc:FileName>
-        <cbc:Description>test file</cbc:Description>
       </cac:ExternalReference>
     </cac:Attachment>
   </cac:AdditionalDocumentReference>
