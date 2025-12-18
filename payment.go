@@ -63,10 +63,12 @@ type PrepaidPayment struct {
 	InstructionID *string `xml:"cbc:InstructionID"`
 }
 
-func (ui *Invoice) addPayment(pymt *bill.PaymentDetails) error {
-	if pymt == nil {
+func (ui *Invoice) addPayment(inv *bill.Invoice) error {
+	if inv == nil || inv.Payment == nil {
 		return nil
 	}
+	pymt := inv.Payment
+
 	if pymt.Instructions != nil {
 		ref := pymt.Instructions.Ref.String()
 		if pymt.Instructions.Ext == nil || pymt.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
@@ -126,6 +128,9 @@ func (ui *Invoice) addPayment(pymt *bill.PaymentDetails) error {
 		if (len(pymt.Terms.DueDates) > 1) || (ui.CreditNoteTypeCode != "" && len(pymt.Terms.DueDates) > 0) {
 			for _, dueDate := range pymt.Terms.DueDates {
 				currency := dueDate.Currency.String()
+				if currency == "" {
+					currency = inv.Currency.String()
+				}
 				term := PaymentTerms{
 					Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: &currency},
 				}

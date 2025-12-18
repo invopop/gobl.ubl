@@ -64,7 +64,7 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:PaymentTerms>
-    <cbc:Amount currencyID="">2142.00</cbc:Amount>
+    <cbc:Amount currencyID="EUR">2142.00</cbc:Amount>
     <cbc:PaymentDueDate>2024-03-15</cbc:PaymentDueDate>
   </cac:PaymentTerms>
   <cac:TaxTotal>

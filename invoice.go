@@ -150,11 +150,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addPreceding(inv.Preceding)
 	out.addOrdering(inv.Ordering)
 	out.addCharges(inv)
-	out.addTotals(inv, string(inv.Currency))
+	out.addTotals(inv)
 	out.addLines(inv)
 	out.addAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv.Payment); err != nil {
+	if err = out.addPayment(inv); err != nil {
 		return nil, err
 	}
 	if d := newDelivery(inv.Delivery); d != nil {
