@@ -43,11 +43,13 @@ type MonetaryTotal struct {
 	PayableAmount         *Amount `xml:"cbc:PayableAmount,omitempty"`
 }
 
-func (ui *Invoice) addTotals(inv *bill.Invoice, currency string) {
+func (ui *Invoice) addTotals(inv *bill.Invoice) {
 	if inv == nil || inv.Totals == nil {
 		return
 	}
 	t := inv.Totals
+
+	currency := inv.Currency.String()
 
 	ui.LegalMonetaryTotal = MonetaryTotal{
 		LineExtensionAmount: Amount{Value: t.Sum.String(), CurrencyID: &currency},
