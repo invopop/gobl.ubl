@@ -25,7 +25,7 @@ type CustomerParty struct {
 // Party represents a party involved in a transaction
 type Party struct {
 	EndpointID          *EndpointID       `xml:"cbc:EndpointID"`
-	PartyIdentification *Identification   `xml:"cac:PartyIdentification"`
+	PartyIdentification []Identification  `xml:"cac:PartyIdentification"`
 	PartyName           *PartyName        `xml:"cac:PartyName"`
 	PostalAddress       *PostalAddress    `xml:"cac:PostalAddress"`
 	PartyTaxScheme      []PartyTaxScheme  `xml:"cac:PartyTaxScheme"`
@@ -193,15 +193,59 @@ func newParty(party *org.Party) *Party {
 	}
 
 	if len(party.Identities) > 0 {
+		// First pass: Handle legal scope identities
+		// First legal identity goes to PartyLegalEntity.CompanyID
+		firstLegalIdx := -1
+		for i, id := range party.Identities {
+			if id.Scope == org.IdentityScopeLegal && firstLegalIdx == -1 {
+				code := id.Code.String()
+				p.PartyLegalEntity.CompanyID = &IDType{
+					Value: code,
+				}
+				if id.Ext != nil {
+					if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
+						p.PartyLegalEntity.CompanyID.SchemeID = &s
+					}
+				}
+				firstLegalIdx = i
+				break
+			}
+		}
+
+		// Second pass: Handle tax scope identities -> PartyTaxScheme
 		for _, id := range party.Identities {
+			if id.Scope == org.IdentityScopeTax {
+				code := id.Code.String()
+				taxScheme := PartyTaxScheme{
+					CompanyID: &code,
+					TaxScheme: &TaxScheme{
+						ID: id.Type.String(),
+					},
+				}
+				p.PartyTaxScheme = append(p.PartyTaxScheme, taxScheme)
+			}
+		}
+
+		// Third pass: Handle remaining identities -> PartyIdentification array
+		// This includes non-scoped identities and additional legal identities after the first
+		for i, id := range party.Identities {
+			// Skip the first legal identity (already in CompanyID)
+			if id.Scope == org.IdentityScopeLegal && i == firstLegalIdx {
+				continue
+			}
+			// Skip tax scope identities (already in PartyTaxScheme)
+			if id.Scope == org.IdentityScopeTax {
+				continue
+			}
+			// Add to PartyIdentification array
 			if id.Ext != nil {
 				s := id.Ext[iso.ExtKeySchemeID].String()
-				p.PartyIdentification = &Identification{
+				p.PartyIdentification = append(p.PartyIdentification, Identification{
 					ID: &IDType{
 						SchemeID: &s,
 						Value:    id.Code.String(),
 					},
-				}
+				})
 			}
 		}
 	}

@@ -75,63 +75,124 @@ func goblParty(party *Party) *org.Party {
 		if p.Identities == nil {
 			p.Identities = make([]*org.Identity, 0)
 		}
-		// id := getIdentity(party.PartyLegalEntity.CompanyID)
-		p.Identities = append(p.Identities, &org.Identity{
-			Label: "CompanyID",
+		identity := &org.Identity{
 			Code:  cbc.Code(party.PartyLegalEntity.CompanyID.Value),
-		})
+			Scope: org.IdentityScopeLegal,
+		}
+		if party.PartyLegalEntity.CompanyID.SchemeID != nil {
+			identity.Ext = tax.Extensions{
+				iso.ExtKeySchemeID: cbc.Code(*party.PartyLegalEntity.CompanyID.SchemeID),
+			}
+		}
+		p.Identities = append(p.Identities, identity)
 	}
 
 	if len(party.PartyTaxScheme) > 0 {
-		// There may be more than one party tax scheme, Peppol allows two
-		// for example. We take the first valid entry that has a Tax Scheme
-		// as the source of truth, and store the rest as identities.
+		// Handle multiple party tax schemes
+		// If multiple schemes exist, look for VAT first, otherwise use first valid one
+		// Remaining schemes become identities with tax scope
+
+		validSchemes := make([]PartyTaxScheme, 0)
 		for _, pts := range party.PartyTaxScheme {
-			if pts.CompanyID == nil || *pts.CompanyID == "" {
-				continue
+			if pts.CompanyID != nil && *pts.CompanyID != "" && pts.TaxScheme != nil {
+				validSchemes = append(validSchemes, pts)
 			}
-			if pts.TaxScheme != nil && p.TaxID == nil {
-				p.TaxID = &tax.Identity{
-					Country: l10n.TaxCountryCode(party.CountryCode()),
-					Code:    cbc.Code(*pts.CompanyID),
+		}
+
+		if len(validSchemes) == 1 {
+			// Single tax scheme -> becomes TaxID
+			pts := validSchemes[0]
+			p.TaxID = &tax.Identity{
+				Country: l10n.TaxCountryCode(party.CountryCode()),
+				Code:    cbc.Code(*pts.CompanyID),
+			}
+			sc := cbc.Code(pts.TaxScheme.ID)
+			if p.TaxID.GetScheme() != sc {
+				var scheme cbc.Code
+				if pts.TaxScheme.TaxTypeCode != "" {
+					scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
+				} else {
+					scheme = cbc.Code(pts.TaxScheme.ID)
 				}
-				sc := cbc.Code(pts.TaxScheme.ID)
-				if p.TaxID.GetScheme() != sc {
-					var scheme cbc.Code
-					if pts.TaxScheme.TaxTypeCode != "" {
-						scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
-					} else {
-						scheme = cbc.Code(pts.TaxScheme.ID)
-					}
-					p.TaxID.Scheme = scheme
+				p.TaxID.Scheme = scheme
+			}
+		} else if len(validSchemes) > 1 {
+			// Multiple tax schemes: look for VAT, otherwise use first
+			vatIdx := -1
+			for i, pts := range validSchemes {
+				if pts.TaxScheme.ID == "VAT" {
+					vatIdx = i
+					break
 				}
-			} else {
-				id := &org.Identity{
+			}
+
+			// Use VAT if found, otherwise first one
+			taxIDIdx := 0
+			if vatIdx != -1 {
+				taxIDIdx = vatIdx
+			}
+
+			// Set TaxID from chosen scheme
+			pts := validSchemes[taxIDIdx]
+			p.TaxID = &tax.Identity{
+				Country: l10n.TaxCountryCode(party.CountryCode()),
+				Code:    cbc.Code(*pts.CompanyID),
+			}
+			sc := cbc.Code(pts.TaxScheme.ID)
+			if p.TaxID.GetScheme() != sc {
+				var scheme cbc.Code
+				if pts.TaxScheme.TaxTypeCode != "" {
+					scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
+				} else {
+					scheme = cbc.Code(pts.TaxScheme.ID)
+				}
+				p.TaxID.Scheme = scheme
+			}
+
+			// Rest become identities with tax scope
+			for i, pts := range validSchemes {
+				if i == taxIDIdx {
+					continue
+				}
+
+				identity := &org.Identity{
 					Country: l10n.ISOCountryCode(party.CountryCode()),
 					Code:    cbc.Code(*pts.CompanyID),
+					Scope:   org.IdentityScopeTax,
+					Type:    cbc.Code(pts.TaxScheme.ID),
 				}
+
 				if p.Identities == nil {
 					p.Identities = make([]*org.Identity, 0)
 				}
-				p.Identities = append(p.Identities, id)
+				p.Identities = append(p.Identities, identity)
+
+				// If this non-VAT scheme is becoming an identity and we don't have a TaxID yet,
+				// create an empty TaxID with just the country
+				if pts.TaxScheme.ID != "VAT" && p.TaxID == nil {
+					p.TaxID = &tax.Identity{
+						Country: l10n.TaxCountryCode(party.CountryCode()),
+					}
+				}
 			}
 		}
 	}
 
-	if party.PartyIdentification != nil &&
-		party.PartyIdentification.ID != nil &&
-		party.PartyIdentification.ID.SchemeID != nil {
-		s := *party.PartyIdentification.ID.SchemeID
-		identity := &org.Identity{
-			Ext: tax.Extensions{
-				iso.ExtKeySchemeID: cbc.Code(s),
-			},
-			Code: cbc.Code(party.PartyIdentification.ID.Value),
+	// Handle multiple PartyIdentifications
+	for _, partyID := range party.PartyIdentification {
+		if partyID.ID != nil && partyID.ID.SchemeID != nil {
+			s := *partyID.ID.SchemeID
+			identity := &org.Identity{
+				Ext: tax.Extensions{
+					iso.ExtKeySchemeID: cbc.Code(s),
+				},
+				Code: cbc.Code(partyID.ID.Value),
+			}
+			if p.Identities == nil {
+				p.Identities = make([]*org.Identity, 0)
+			}
+			p.Identities = append(p.Identities, identity)
 		}
-		if p.Identities == nil {
-			p.Identities = make([]*org.Identity, 0)
-		}
-		p.Identities = append(p.Identities, identity)
 	}
 
 	return p

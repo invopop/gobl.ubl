@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "89c2479c961625d9f220931faf51df1ace02e1e61a0843c29446bdff97cd1e4d"
+			"val": "2223b1f7c90e05c252106aa335fd4af086b8cebe7fbfa92423672b97dcccc9dc"
 		}
 	},
 	"doc": {
@@ -33,7 +33,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "17131139"
 				}
 			],
