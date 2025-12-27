@@ -102,6 +102,21 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		return nil, err
 	}
 
+	// Determine CustomizationID to use in output
+	customizationID := o.context.CustomizationID
+	if o.context.OutputCustomizationID != "" {
+		customizationID = o.context.OutputCustomizationID
+	}
+
+	// Determine ProfileID to use in output
+	// First check meta field, then fall back to context
+	profileID := o.context.ProfileID
+	if inv.Meta != nil {
+		if ublProfile, ok := inv.Meta[cbc.Key("ubl-profile")]; ok {
+			profileID = ublProfile
+		}
+	}
+
 	// Create the UBL document
 	out := &Invoice{
 		XMLName:                 xml.Name{Local: "Invoice"},
@@ -113,8 +128,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		CCTSNamespace:           NamespaceCCTS,
 		XSINamespace:            NamespaceXSI,
 		SchemaLocation:          SchemaLocationInvoice,
-		CustomizationID:         o.context.CustomizationID,
-		ProfileID:               o.context.ProfileID,
+		CustomizationID:         customizationID,
+		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
