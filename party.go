@@ -200,7 +200,7 @@ func newParty(party *org.Party) *Party {
 		// First legal identity goes to PartyLegalEntity.CompanyID
 		firstLegalIdx := -1
 		for i, id := range party.Identities {
-			if id.Scope == org.IdentityScopeLegal && firstLegalIdx == -1 {
+			if id.Scope == org.IdentityScopeLegal {
 				code := id.Code.String()
 				p.PartyLegalEntity.CompanyID = &IDType{
 					Value: code,
