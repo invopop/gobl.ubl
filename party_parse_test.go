@@ -38,7 +38,6 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, cbc.Code("123456789MVA"), seller.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
 		require.Len(t, seller.Identities, 2)
-		assert.Equal(t, "CompanyID", seller.Identities[0].Label)
 		assert.Equal(t, cbc.Code("123456789"), seller.Identities[0].Code)
 		assert.Equal(t, "0088", seller.Identities[1].Ext[iso.ExtKeySchemeID].String())
 		assert.Equal(t, cbc.Code("1238764941386"), seller.Identities[1].Code)
@@ -70,7 +69,6 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, l10n.ISOCountryCode("NO"), customer.Addresses[0].Country)
 
 		require.Len(t, customer.Identities, 2)
-		assert.Equal(t, "CompanyID", customer.Identities[0].Label)
 		assert.Equal(t, cbc.Code("987654321"), customer.Identities[0].Code)
 		assert.Equal(t, "0088", customer.Identities[1].Ext[iso.ExtKeySchemeID].String())
 		assert.Equal(t, cbc.Code("3456789012098"), customer.Identities[1].Code)
@@ -99,7 +97,6 @@ func TestParseParty(t *testing.T) {
 
 		assert.Equal(t, "antonio@SubscriptionsSeller.dk", supplier.Emails[0].Address)
 		require.Len(t, supplier.Identities, 2)
-		assert.Equal(t, "CompanyID", supplier.Identities[0].Label)
 		assert.Equal(t, cbc.Code("DK16356706"), supplier.Identities[0].Code)
 		assert.Equal(t, "0088", supplier.Identities[1].Ext[iso.ExtKeySchemeID].String())
 		assert.Equal(t, cbc.Code("1238764941386"), supplier.Identities[1].Code)

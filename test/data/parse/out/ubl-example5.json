@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f8cfb7c4c17b19c3f5c8175e65a6b6f6b73f641fa6d9b583dbd52df1d107172c"
+			"val": "f66f63d177128477531088207a124abb5ff153c7261b9910e180bdcfe097af61"
 		}
 	},
 	"doc": {
@@ -57,7 +57,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "DK16356607"
 				},
 				{
@@ -285,11 +285,13 @@
 				},
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "NL16356706"
 					},
 					{
+						"scope": "tax",
 						"country": "NL",
+						"type": "LOC",
 						"code": "NL16356706"
 					},
 					{
@@ -363,7 +365,7 @@
 				"name": "Dagobert Duck",
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "DK16356608"
 					}
 				]
