@@ -3,12 +3,12 @@ package ubl_test
 import (
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
-	ubl "github.com/invopop/gobl.ubl"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
