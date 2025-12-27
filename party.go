@@ -12,6 +12,9 @@ import (
 // SchemeIDEmail is the EAS codelist value for email
 const SchemeIDEmail = "EM"
 
+// TaxSchemeVAT is the tax scheme code for VAT
+const TaxSchemeVAT = "VAT"
+
 // SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
 	Party *Party `xml:"cac:Party"`
@@ -134,7 +137,7 @@ func newParty(party *org.Party) *Party {
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {
 			// Peppol default
-			id = "VAT"
+			id = TaxSchemeVAT
 		}
 
 		taxScheme := PartyTaxScheme{
