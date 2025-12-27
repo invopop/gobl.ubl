@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1ea02f3752f597e0cfd3f9c7c3c7f7e68aeda764db0b91c4a2b5dc74b58d7828"
+			"val": "4d378f23899e5ec9eb98985a1e1affe507895f1b3ec8d3125ad1878eedd9aae7"
 		}
 	},
 	"doc": {
@@ -47,6 +47,11 @@
 		},
 		"customer": {
 			"name": "ODIN 59",
+			"identities": [
+				{
+					"code": "10202"
+				}
+			],
 			"people": [
 				{
 					"name": {

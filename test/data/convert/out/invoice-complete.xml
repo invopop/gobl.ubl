@@ -72,6 +72,12 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:PayeeParty>
+    <cac:PartyIdentification>
+      <cbc:ID>989823401</cbc:ID>
+    </cac:PartyIdentification>
+    <cac:PartyIdentification>
+      <cbc:ID>2298740918237</cbc:ID>
+    </cac:PartyIdentification>
     <cac:PostalAddress>
       <cbc:StreetName>Paymentstreet 1</cbc:StreetName>
       <cbc:CityName>PaymentCity</cbc:CityName>

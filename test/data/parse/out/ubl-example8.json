@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2223b1f7c90e05c252106aa335fd4af086b8cebe7fbfa92423672b97dcccc9dc"
+			"val": "1e421e3f8217b3652428006eb784f67e08ec47c9944390107c3a2cff31db471c"
 		}
 	},
 	"doc": {
@@ -53,6 +53,11 @@
 		},
 		"customer": {
 			"name": "Klant",
+			"identities": [
+				{
+					"code": "1081119"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Bedrijfslaan 4",

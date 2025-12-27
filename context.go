@@ -56,7 +56,7 @@ func FindContext(customizationID string, profileID string) *Context {
 		}
 	}
 
-	// Second pass: try to match on OutputCustomizationID (for parsing)
+	// Second pass: try to match on OutputCustomizationID (for parsing where Profile may not be added))
 	for _, ctx := range contexts {
 		if ctx.OutputCustomizationID != "" && ctx.OutputCustomizationID == customizationID {
 			return &ctx

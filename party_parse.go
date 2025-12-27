@@ -209,26 +209,20 @@ func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx 
 			p.Identities = make([]*org.Identity, 0)
 		}
 		p.Identities = append(p.Identities, identity)
-
-		// If this non-VAT scheme is becoming an identity and we don't have a TaxID yet,
-		// create an empty TaxID with just the country
-		if pts.TaxScheme.ID != TaxSchemeVAT && p.TaxID == nil {
-			p.TaxID = &tax.Identity{
-				Country: l10n.TaxCountryCode(countryCode),
-			}
-		}
 	}
 }
 
 func handlePartyIdentifications(party *Party, p *org.Party) {
 	for _, partyID := range party.PartyIdentification {
-		if partyID.ID != nil && partyID.ID.SchemeID != nil {
-			s := *partyID.ID.SchemeID
+		if partyID.ID != nil {
 			identity := &org.Identity{
-				Ext: tax.Extensions{
-					iso.ExtKeySchemeID: cbc.Code(s),
-				},
 				Code: cbc.Code(partyID.ID.Value),
+			}
+			if partyID.ID.SchemeID != nil {
+				s := *partyID.ID.SchemeID
+				identity.Ext = tax.Extensions{
+					iso.ExtKeySchemeID: cbc.Code(s),
+				}
 			}
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4b5d568f9f9dca175f375d76d9460d384eff3c5a2e842890a2fd821ba0d1ec35"
+			"val": "0b9c75fd87c3e6aa99caacb2686da1d48e38fc1ad56ef33a1e36f1302bdcb1e4"
 		}
 	},
 	"doc": {
@@ -40,6 +40,9 @@
 				{
 					"scope": "legal",
 					"code": "GB983294"
+				},
+				{
+					"code": "99887766"
 				}
 			],
 			"inboxes": [

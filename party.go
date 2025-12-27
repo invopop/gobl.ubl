@@ -241,15 +241,17 @@ func newParty(party *org.Party) *Party {
 				continue
 			}
 			// Add to PartyIdentification array
-			if id.Ext != nil {
-				s := id.Ext[iso.ExtKeySchemeID].String()
-				p.PartyIdentification = append(p.PartyIdentification, Identification{
-					ID: &IDType{
-						SchemeID: &s,
-						Value:    id.Code.String(),
-					},
-				})
+			idType := &IDType{
+				Value: id.Code.String(),
 			}
+			if id.Ext != nil {
+				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
+					idType.SchemeID = &s
+				}
+			}
+			p.PartyIdentification = append(p.PartyIdentification, Identification{
+				ID: idType,
+			})
 		}
 	}
 	return p
