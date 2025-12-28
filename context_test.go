@@ -152,7 +152,7 @@ func TestContextPeppolFranceCIUS(t *testing.T) {
 		}
 		inv.Meta[cbc.Key("ubl-profile")] = "M1"
 
-		inv.SetAddons(facturx.V1)
+		inv.SetAddons(en16931.V2017)
 		require.NoError(t, inv.Calculate())
 
 		// Convert with France CIUS context
@@ -175,7 +175,7 @@ func TestContextPeppolFranceCIUS(t *testing.T) {
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
-		inv.SetAddons(facturx.V1)
+		inv.SetAddons(en16931.V2017)
 		require.NoError(t, inv.Calculate())
 
 		// Convert with France CIUS context

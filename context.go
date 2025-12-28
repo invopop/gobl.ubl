@@ -16,7 +16,7 @@ const (
 // uses a specific CustomizationID and ProfileID when generating
 // the output document.
 type Context struct {
-	// CustomizationID identifies and specific characteristics in the
+	// CustomizationID identifies specific characteristics in the
 	// document which need to be present for local differences.
 	CustomizationID string
 	// ProfileID determines the business process context or scenario
