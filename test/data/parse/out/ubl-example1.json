@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3c9bdaf7ae95e7dbe542fa18891a89a2eab96f4d4bf68d9b685c3f65b2c75888"
+			"val": "4d378f23899e5ec9eb98985a1e1affe507895f1b3ec8d3125ad1878eedd9aae7"
 		}
 	},
 	"doc": {
@@ -32,7 +32,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "57151520"
 				}
 			],
@@ -47,6 +47,11 @@
 		},
 		"customer": {
 			"name": "ODIN 59",
+			"identities": [
+				{
+					"code": "10202"
+				}
+			],
 			"people": [
 				{
 					"name": {

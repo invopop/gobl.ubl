@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "993fb0d9d13a0e3f152c24390fb5e6e9c978dc38e17993a39c7eb0f23ffdf91e"
+			"val": "89e01f70d381a2bbb5e38c2bd78abc913b1eab7fe48e898ee7173a6f2d174d08"
 		}
 	},
 	"doc": {
@@ -50,7 +50,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "987654321"
 				},
 				{
@@ -370,7 +370,7 @@
 				},
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "123456789"
 					},
 					{
@@ -424,7 +424,7 @@
 				"name": "Ebeneser Scrooge AS",
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "989823401"
 					},
 					{

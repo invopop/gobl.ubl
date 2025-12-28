@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "89c2479c961625d9f220931faf51df1ace02e1e61a0843c29446bdff97cd1e4d"
+			"val": "1e421e3f8217b3652428006eb784f67e08ec47c9944390107c3a2cff31db471c"
 		}
 	},
 	"doc": {
@@ -33,7 +33,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "17131139"
 				}
 			],
@@ -53,6 +53,11 @@
 		},
 		"customer": {
 			"name": "Klant",
+			"identities": [
+				{
+					"code": "1081119"
+				}
+			],
 			"addresses": [
 				{
 					"street": "Bedrijfslaan 4",

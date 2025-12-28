@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8b693adbe9fdea60aab01eae5d55f0b796e1e77715b7e939b435a0d992631127"
+			"val": "e7c78da86defd421814471bef78722b08834d2301f38cc86141f2ebcc72d94c0"
 		}
 	},
 	"doc": {
@@ -32,8 +32,11 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
-					"code": "123457890SC"
+					"scope": "legal",
+					"code": "123457890SC",
+					"ext": {
+						"iso-scheme-id": "0195"
+					}
 				},
 				{
 					"code": "123457890SC",
@@ -80,8 +83,11 @@
 			"alias": "Test Party",
 			"identities": [
 				{
-					"label": "CompanyID",
-					"code": "199912345A"
+					"scope": "legal",
+					"code": "199912345A",
+					"ext": {
+						"iso-scheme-id": "0195"
+					}
 				},
 				{
 					"code": "199912345A",
