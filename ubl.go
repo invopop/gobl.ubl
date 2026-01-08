@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 	nbio "github.com/nbio/xml"
 )
 
@@ -83,36 +84,58 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	for _, opt := range opts {
 		opt(o)
 	}
-	switch doc := env.Extract().(type) {
+
+	doc := env.Extract()
+	switch d := doc.(type) {
 	case *bill.Invoice:
-		// Check addons
-		missingAddons := make([]cbc.Key, 0)
-		for _, ao := range o.context.Addons {
-			if !ao.In(doc.GetAddons()...) {
-				missingAddons = append(missingAddons, ao)
-			}
+
+		// Switch to self-billed context for Peppol invoices
+		if o.context.Is(ContextPeppol) && d.HasTags(tax.TagSelfBilled) {
+			o.context = ContextPeppolSelfBilled
 		}
 
-		// only build if we have missing addons
-		if len(missingAddons) > 0 {
-			doc.SetAddons(append(doc.GetAddons(), missingAddons...)...)
-			if err := doc.Calculate(); err != nil {
-				return nil, fmt.Errorf("gobl invoice missing addon %v: %w", missingAddons, err)
-			}
-			if err := doc.Validate(); err != nil {
-				return nil, fmt.Errorf("gobl invoice missing addon %v: %w", missingAddons, err)
-			}
+		// Check and add missing addons
+		if err := ensureAddons(d, o.context.Addons); err != nil {
+			return nil, err
 		}
 
 		// Removes included taxes as they are not supported in UBL
-		if err := doc.RemoveIncludedTaxes(); err != nil {
+		if err := d.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
 		}
 
-		return ublInvoice(doc, o)
+		return ublInvoice(d, o)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
+}
+
+// ensureAddons checks if the invoice has all required addons and adds missing ones
+func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
+	if len(required) == 0 {
+		return nil
+	}
+
+	var missing []cbc.Key
+	existing := inv.GetAddons()
+	for _, addon := range required {
+		if !addon.In(existing...) {
+			missing = append(missing, addon)
+		}
+	}
+
+	if len(missing) == 0 {
+		return nil
+	}
+
+	inv.SetAddons(append(existing, missing...)...)
+	if err := inv.Calculate(); err != nil {
+		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
+	}
+	if err := inv.Validate(); err != nil {
+		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
+	}
+	return nil
 }
 
 func extractRootNamespace(data []byte) (string, error) {

@@ -4,6 +4,7 @@ import (
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/facturx"
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
 
@@ -11,6 +12,14 @@ import (
 const (
 	PeppolBillingProfileIDDefault = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
 )
+
+// VESIDMapping maps document types to their corresponding VESID values.
+type VESIDMapping struct {
+	// Invoice is the VESID for invoices
+	Invoice string
+	// CreditNote is the VESID for credit notes
+	CreditNote string
+}
 
 // Context is used to ensure that the generated UBL document
 // uses a specific CustomizationID and ProfileID when generating
@@ -30,11 +39,22 @@ type Context struct {
 	// Addons contains the list of Addons required for this CustomizationID
 	// and ProfileID.
 	Addons []cbc.Key
+	// VESIDs contains the VESID (Validation Exchange Specification ID) mappings
+	// for different document types and scenarios within this context.
+	VESIDs VESIDMapping
 }
 
 // Is checks if two contexts are the same.
 func (c *Context) Is(c2 Context) bool {
 	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
+}
+
+// GetVESID returns the appropriate VESID based on the invoice type.
+func (c *Context) GetVESID(inv *bill.Invoice) string {
+	if inv.Type.In(bill.InvoiceTypeCreditNote) {
+		return c.VESIDs.CreditNote
+	}
+	return c.VESIDs.Invoice
 }
 
 // FindContext looks up a context by CustomizationID and optionally ProfileID.
@@ -89,6 +109,10 @@ func WithContext(c Context) Option {
 var ContextEN16931 = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:          []cbc.Key{en16931.V2017},
+	VESIDs: VESIDMapping{
+		Invoice:    "eu.cen.en16931:ubl:1.3.14-2",
+		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.15",
+	},
 }
 
 // ContextPeppol defines the default Peppol context.
@@ -96,6 +120,21 @@ var ContextPeppol = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{en16931.V2017},
+	VESIDs: VESIDMapping{
+		Invoice:    "eu.peppol.bis3:invoice:2025.5",
+		CreditNote: "eu.peppol.bis3:creditnote:2025.5",
+	},
+}
+
+// ContextPeppolSelfBilled defines the Peppol self-billed context.
+var ContextPeppolSelfBilled = Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
+	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
+	Addons:          []cbc.Key{en16931.V2017},
+	VESIDs: VESIDMapping{
+		Invoice:    "eu.peppol.bis3:invoice-self-billing:2025.3",
+		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2025.3",
+	},
 }
 
 // ContextXRechnung defines the main context to use for XRechnung UBL documents.
@@ -103,6 +142,10 @@ var ContextXRechnung = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{xrechnung.V3},
+	VESIDs: VESIDMapping{
+		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
+		CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",
+	},
 }
 
 // ContextPeppolFranceCIUS defines the context for France UBL Invoice CIUS.
@@ -111,6 +154,10 @@ var ContextPeppolFranceCIUS = Context{
 	ProfileID:             "urn:peppol:france:billing:regulated",
 	OutputCustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:                []cbc.Key{en16931.V2017},
+	VESIDs: VESIDMapping{
+		Invoice:    "fr.ctc:ubl-invoice:1.2",
+		CreditNote: "fr.ctc:ubl-creditnote:1.2",
+	},
 }
 
 // ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
@@ -119,8 +166,12 @@ var ContextPeppolFranceExtended = Context{
 	ProfileID:             "urn:peppol:france:billing:regulated",
 	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Addons:                []cbc.Key{facturx.V1},
+	VESIDs: VESIDMapping{
+		Invoice:    "fr.ctc:ubl-invoice:1.2",
+		CreditNote: "fr.ctc:ubl-creditnote:1.2",
+	},
 }
 
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
