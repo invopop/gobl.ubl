@@ -17,16 +17,16 @@ type AllowanceCharge struct {
 	TaxCategory               []*TaxCategory `xml:"cac:TaxCategory"`
 }
 
-func (out *Invoice) addCharges(inv *bill.Invoice) {
+func (ui *Invoice) addCharges(inv *bill.Invoice) {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return
 	}
-	out.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
+	ui.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	for i, ch := range inv.Charges {
-		out.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency))
+		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency))
 	}
 	for i, d := range inv.Discounts {
-		out.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency))
+		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency))
 	}
 }
 

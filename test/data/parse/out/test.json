@@ -1,0 +1,197 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "39534d4a9deb1e1575c63d629124a32e8cf24c03c4b5c3c82c235ca8a5411ad1"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "test-UBL-inconnu",
+		"issue_date": "2025-12-29",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Burger Queen",
+			"tax_id": {
+				"country": "FR",
+				"code": "18000000002"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "000000002",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"code": "000000002",
+					"ext": {
+						"iso-scheme-id": "0225"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "315143296_815"
+				}
+			],
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "Invopop",
+			"tax_id": {
+				"country": "FR",
+				"code": "44391838042"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "391838042",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"code": "ES51500336R",
+					"ext": {
+						"iso-scheme-id": "0225"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "ES51500336R"
+				}
+			],
+			"addresses": [
+				{
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "28.520",
+				"item": {
+					"name": "élément inconnu",
+					"price": "2.12",
+					"unit": "kg"
+				},
+				"sum": "60.46",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "5.5%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "60.46"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Conseil en stratégie",
+					"description": "service inconnu",
+					"price": "1500.00",
+					"unit": "one"
+				},
+				"sum": "1500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1500.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-01-28",
+						"amount": "1863.79",
+						"percent": "100%"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "1560.46",
+			"total": "1560.46",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "60.46",
+								"percent": "5.5%",
+								"amount": "3.33"
+							},
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1500.00",
+								"percent": "20.0%",
+								"amount": "300.00"
+							}
+						],
+						"amount": "303.33"
+					}
+				],
+				"sum": "303.33"
+			},
+			"tax": "303.33",
+			"total_with_tax": "1863.79",
+			"payable": "1863.79"
+		},
+		"notes": [
+			{
+				"text": "#PMT#L’indemnité forfaitaire légale pour frais de recouvrement est de 40 €."
+			},
+			{
+				"text": "#PMD#À défaut de règlement à la date d’échéance, une pénalité de 10 % du net à payer TTC sera applicable immédiatement."
+			},
+			{
+				"text": "#AAB#Aucun escompte pour paiement anticipé."
+			}
+		]
+	}
+}

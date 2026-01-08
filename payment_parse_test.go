@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -25,7 +26,6 @@ func TestParsePayment(t *testing.T) {
 		require.NotNil(t, payment.Payee)
 		assert.Equal(t, "Ebeneser Scrooge AS", payment.Payee.Name)
 		require.Len(t, payment.Payee.Identities, 2)
-		assert.Equal(t, "CompanyID", payment.Payee.Identities[0].Label)
 		assert.Equal(t, cbc.Code("989823401"), payment.Payee.Identities[0].Code)
 
 		// Check Instructions
@@ -58,7 +58,6 @@ func TestParsePaymentPayee(t *testing.T) {
 		assert.Equal(t, "Ebeneser Scrooge AS", payment.Payee.Name)
 
 		require.Len(t, payment.Payee.Identities, 2)
-		assert.Equal(t, "CompanyID", payment.Payee.Identities[0].Label)
 		assert.Equal(t, cbc.Code("989823401"), payment.Payee.Identities[0].Code)
 		assert.Equal(t, "0088", payment.Payee.Identities[1].Ext[iso.ExtKeySchemeID].String())
 		assert.Equal(t, cbc.Code("2298740918237"), payment.Payee.Identities[1].Code)
@@ -76,9 +75,11 @@ func TestParsePaymentPayee(t *testing.T) {
 
 		require.NotNil(t, payment.Payee)
 		assert.Equal(t, "Dagobert Duck", payment.Payee.Name)
-		require.Len(t, payment.Payee.Identities, 1)
+		// Both PartyLegalEntity.CompanyID and PartyIdentification.ID are parsed as identities
+		require.Len(t, payment.Payee.Identities, 2)
 		assert.Equal(t, cbc.Code("DK16356608"), payment.Payee.Identities[0].Code)
-		assert.Equal(t, "CompanyID", payment.Payee.Identities[0].Label)
+		assert.Equal(t, org.IdentityScopeLegal, payment.Payee.Identities[0].Scope)
+		assert.Equal(t, cbc.Code("DK16356608"), payment.Payee.Identities[1].Code)
 	})
 }
 

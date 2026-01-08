@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "35ceadef64ba027c5fa7f761a86357a4cd66b8cd02b13b7c12ab527dc247b3de"
+			"val": "c9253a023d586a4f86f7d3f8710d19afd132777c622f566c2d200edab7b25721"
 		}
 	},
 	"doc": {
@@ -57,7 +57,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "DK16356607"
 				},
 				{
@@ -285,11 +285,13 @@
 				},
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "NL16356706"
 					},
 					{
+						"scope": "tax",
 						"country": "NL",
+						"type": "LOC",
 						"code": "NL16356706"
 					},
 					{
@@ -351,6 +353,11 @@
 				{
 					"code": "5433"
 				}
+			],
+			"tender": [
+				{
+					"code": "Lot567"
+				}
 			]
 		},
 		"payment": {
@@ -358,7 +365,10 @@
 				"name": "Dagobert Duck",
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
+						"code": "DK16356608"
+					},
+					{
 						"code": "DK16356608"
 					}
 				]
@@ -375,7 +385,7 @@
 			},
 			"advances": [
 				{
-					"description": "Total Prepaid Amount",
+					"description": "Prepaid Amount",
 					"amount": "2337.50"
 				}
 			],

@@ -11,11 +11,11 @@ import (
 )
 
 // goblAddCharges adds the invoice charges to the gobl output.
-func goblAddCharges(in *Invoice, out *bill.Invoice) error {
+func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
-	for _, allowanceCharge := range in.AllowanceCharge {
+	for _, allowanceCharge := range ui.AllowanceCharge {
 		if allowanceCharge.ChargeIndicator {
 			charge, err := goblCharge(&allowanceCharge)
 			if err != nil {

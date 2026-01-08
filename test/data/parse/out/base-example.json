@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a9d9106f5f4724bd20f5d8ce88f02f532648d1cbc94af197390a069d0b5ffbef"
+			"val": "67db51eefe9547e09325e6a87171c9b0a72d12a7b6c59b0b0ebc34a998abbb33"
 		}
 	},
 	"doc": {
@@ -33,8 +33,11 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "GB983294"
+				},
+				{
+					"code": "99887766"
 				}
 			],
 			"inboxes": [
@@ -62,8 +65,11 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
-					"code": "39937423947"
+					"scope": "legal",
+					"code": "39937423947",
+					"ext": {
+						"iso-scheme-id": "0183"
+					}
 				},
 				{
 					"code": "FR23342",

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9951d6ad036f6d5b149bac3674c33ba3d6fc059f0e05498fae378336b238618b"
+			"val": "89e01f70d381a2bbb5e38c2bd78abc913b1eab7fe48e898ee7173a6f2d174d08"
 		}
 	},
 	"doc": {
@@ -50,7 +50,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "987654321"
 				},
 				{
@@ -370,7 +370,7 @@
 				},
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "123456789"
 					},
 					{
@@ -424,7 +424,7 @@
 				"name": "Ebeneser Scrooge AS",
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "989823401"
 					},
 					{
@@ -447,7 +447,7 @@
 			},
 			"advances": [
 				{
-					"description": "Total Prepaid Amount",
+					"description": "Prepaid Amount",
 					"amount": "1000.00"
 				}
 			],
@@ -538,6 +538,13 @@
 		"notes": [
 			{
 				"text": "Ordered in our booth at the convention"
+			}
+		],
+		"attachments": [
+			{
+				"code": "Doc1",
+				"description": "Timesheet",
+				"url": "http://www.suppliersite.eu/sheet001.html"
 			}
 		]
 	}

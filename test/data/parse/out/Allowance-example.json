@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7d78e3b1544069675d64a2eb3a5e2f1c69c1486c536371989ef4e93a4b3dda51"
+			"val": "86bb6ddc65728576d282958e14e485ef591ba5b66f8345a3c54aa9760e82b8e1"
 		}
 	},
 	"doc": {
@@ -33,8 +33,11 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "GB983294"
+				},
+				{
+					"code": "99887766"
 				}
 			],
 			"inboxes": [
@@ -62,8 +65,11 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
-					"code": "39937423947"
+					"scope": "legal",
+					"code": "39937423947",
+					"ext": {
+						"iso-scheme-id": "0183"
+					}
 				},
 				{
 					"code": "4598375937",
@@ -308,7 +314,6 @@
 			"code": "0150abc",
 			"identities": [
 				{
-					"label": "ABT",
 					"code": "DR35141"
 				}
 			],
@@ -335,7 +340,7 @@
 			},
 			"advances": [
 				{
-					"description": "Total Prepaid Amount",
+					"description": "Prepaid Amount",
 					"amount": "1000.00"
 				}
 			],
@@ -419,6 +424,13 @@
 		"notes": [
 			{
 				"text": "Please note we have a new phone number: 22 22 22 22"
+			}
+		],
+		"attachments": [
+			{
+				"code": "ts12345",
+				"description": "Technical specification",
+				"url": "www.techspec.no"
 			}
 		]
 	}

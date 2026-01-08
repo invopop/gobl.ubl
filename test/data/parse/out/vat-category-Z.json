@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "201a9b54705fb307fe1204b5fd9bbea6b7896127bde833b5a228d3977acf5913"
+			"val": "14becb6e2e6a03514f80f4a23236e79a7c24d801f34dbf09dc21d9dec470eb3e"
 		}
 	},
 	"doc": {
@@ -30,6 +30,11 @@
 				"country": "GB",
 				"code": "928741974"
 			},
+			"identities": [
+				{
+					"code": "7300010000001"
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "0088",

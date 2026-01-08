@@ -8,8 +8,6 @@ import (
 	"io"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl/addons/de/xrechnung"
-	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
@@ -30,187 +28,55 @@ var (
 // by this package.
 const Version = "2.1"
 
-// Context is used to ensure that the generated UBL document
-// uses a specific CustomizationID and ProfileID when generating
-// the output document.
-type Context struct {
-	// CustomizationID identifies and specific characteristics in the
-	// document which need to be present for local differences.
-	CustomizationID string
-	// ProfileID determines the business process context or scenario
-	// for the exchange of the document
-	ProfileID string
-	// Addons contains the list of Addons required for this CustomizationID
-	// and ProfileID.
-	Addons []cbc.Key
-	// VESIDs contains the VESID (Validation Exchange Specification ID) mappings
-	// for different document types and scenarios within this context.
-	VESIDs VESIDMapping
-}
-
-// VESIDMapping maps document types to their corresponding VESID values.
-type VESIDMapping struct {
-	// Invoice is the VESID for invoices
-	Invoice string
-	// CreditNote is the VESID for credit notes
-	CreditNote string
-}
-
-// When adding new contexts, remember to add them to both the exported
-// variable definitions below AND the contexts slice.
-
-// ContextEN16931 is the default context for basic UBL documents.
-var ContextEN16931 = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017",
-	Addons:          []cbc.Key{en16931.V2017},
-	VESIDs: VESIDMapping{
-		Invoice:    "eu.cen.en16931:ubl:1.3.14-2",
-		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.15",
-	},
-}
-
-// ContextPeppolSelfBilled defines the Peppol self-billed context.
-var ContextPeppolSelfBilled = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
-	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
-	Addons:          []cbc.Key{en16931.V2017},
-	VESIDs: VESIDMapping{
-		Invoice:    "eu.peppol.bis3:invoice-self-billing:2025.3",
-		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2025.3",
-	},
-}
-
-// ContextPeppol defines the default Peppol context.
-var ContextPeppol = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
-	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0",
-	Addons:          []cbc.Key{en16931.V2017},
-	VESIDs: VESIDMapping{
-		Invoice:    "eu.peppol.bis3:invoice:2025.5",
-		CreditNote: "eu.peppol.bis3:creditnote:2025.5",
-	},
-}
-
-// ContextXRechnung defines the main context to use for XRechnung UBL documents.
-var ContextXRechnung = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
-	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0",
-	Addons:          []cbc.Key{xrechnung.V3},
-	VESIDs: VESIDMapping{
-		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
-		CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",
-	},
-}
-
-// ContextPeppolFranceCIUS defines the context for France UBL Invoice CIUS.
-var ContextPeppolFranceCIUS = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
-	ProfileID:       "urn:peppol:france:billing:regulated",
-	Addons:          []cbc.Key{en16931.V2017},
-	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:ubl-invoice:1.2",
-		CreditNote: "fr.ctc:ubl-creditnote:1.2",
-	},
-}
-
-// ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
-var ContextPeppolFranceExtended = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
-	ProfileID:       "urn:peppol:france:billing:regulated",
-	Addons:          []cbc.Key{en16931.V2017},
-	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:ubl-invoice:1.2",
-		CreditNote: "fr.ctc:ubl-creditnote:1.2",
-	},
-}
-
-// contexts is used internally for reverse lookups during parsing.
-// When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{
-	ContextEN16931,
-	ContextPeppol,
-	ContextPeppolSelfBilled,
-	ContextXRechnung,
-	ContextPeppolFranceCIUS,
-	ContextPeppolFranceExtended,
-}
-
-// Is checks if two contexts are the same.
-func (c *Context) Is(c2 Context) bool {
-	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
-}
-
-// GetVESID returns the appropriate VESID based on the invoice type.
-func (c *Context) GetVESID(inv *bill.Invoice) string {
-	if inv.Type.In(bill.InvoiceTypeCreditNote) {
-		return c.VESIDs.CreditNote
-	}
-	return c.VESIDs.Invoice
-}
-
-// FindContext looks up a context by CustomizationID and optionally ProfileID.
-// Returns nil if no matching context is found.
-func FindContext(customizationID string, profileID string) *Context {
-	for i := range contexts {
-		ctx := &contexts[i]
-
-		if ctx.CustomizationID != customizationID {
-			continue
-		}
-
-		// If no profileID constraints, it's a match
-		if profileID == "" || ctx.ProfileID == "" {
-			return ctx
-		}
-
-		// ProfileID must match
-		if ctx.ProfileID == profileID {
-			return ctx
-		}
-	}
-	return nil
-}
-
-// Parse parses a raw UBL document and converts to a GOBL envelope,
-// assuming we're dealing with a known document type.
-func Parse(ublDoc []byte) (*gobl.Envelope, error) {
-	ns, err := extractRootNamespace(ublDoc)
+// Parse parses a raw UBL document and returns the underlying Go struct.
+// The returned value should be type asserted to the appropriate type.
+//
+// Supported types:
+//   - *Invoice (for both Invoice and CreditNote documents)
+//
+// Example usage:
+//
+//	doc, err := ubl.Parse(xmlData)
+//	if err != nil {
+//	    // handle error
+//	}
+//	if inv, ok := doc.(*ubl.Invoice); ok {
+//	    env, err := inv.Convert()
+//	    attachments := inv.ExtractBinaryAttachments()
+//	    // ...
+//	}
+func Parse(data []byte) (any, error) {
+	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err
 	}
-	env := gobl.NewEnvelope()
-	var res any
-	o := new(options)
 
 	switch ns {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
 		in := new(Invoice)
-		if err := nbio.Unmarshal(ublDoc, in); err != nil {
+		if err := nbio.Unmarshal(data, in); err != nil {
 			return nil, err
 		}
+		return in, nil
 
-		ctx := FindContext(in.CustomizationID, in.ProfileID)
-		if ctx != nil {
-			o.context = *ctx
-		}
+	// Future document types can be added here
+	// case NamespaceUBLOrder:
+	//     order := new(Order)
+	//     if err := nbio.Unmarshal(data, order); err != nil {
+	//         return nil, err
+	//     }
+	//     return order, nil
 
-		if res, err = goblInvoice(in, o); err != nil {
-			return nil, err
-		}
 	default:
 		return nil, ErrUnknownDocumentType
 	}
-
-	// Whatever we get back, try inserting.
-	if err := env.Insert(res); err != nil {
-		return nil, err
-	}
-
-	return env, nil
 }
 
 // Convert takes a GOBL envelope and converts to a UBL document of one
 // of the supported types.
+//
+// Add a WithContext option to specify the desired UBL Guideline and Profile ID.
+// If none is provided, EN16931 will be used by default.
 func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	o := &options{
 		context: ContextEN16931,
@@ -272,20 +138,6 @@ func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
 	return nil
 }
 
-// ConvertInvoice is a convenience function that converts a GOBL envelope
-// containing an invoice into a UBL Invoice or CreditNote document.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
-	if err != nil {
-		return nil, err
-	}
-	inv, ok := doc.(*Invoice)
-	if !ok {
-		return nil, fmt.Errorf("expected invoice, got %T", doc)
-	}
-	return inv, nil
-}
-
 func extractRootNamespace(data []byte) (string, error) {
 	dc := xml.NewDecoder(bytes.NewReader(data))
 	for {
@@ -304,18 +156,12 @@ func extractRootNamespace(data []byte) (string, error) {
 	return "", ErrUnknownDocumentType
 }
 
-type options struct {
-	context Context
-}
-
-// Option is used to define configuration options to use during
-// conversion processes.
-type Option func(*options)
-
-// WithContext sets the context to use for the configuration
-// and business profile.
-func WithContext(c Context) Option {
-	return func(o *options) {
-		o.context = c
+// Bytes returns the raw XML of the UBL document including
+// the XML Header.
+func Bytes(in any) ([]byte, error) {
+	b, err := xml.MarshalIndent(in, "", "  ")
+	if err != nil {
+		return nil, err
 	}
+	return append([]byte(xml.Header), b...), nil
 }

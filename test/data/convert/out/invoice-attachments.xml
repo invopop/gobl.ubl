@@ -20,6 +20,17 @@
   <cac:ContractDocumentReference>
     <cbc:ID>2013-05</cbc:ID>
   </cac:ContractDocumentReference>
+  <cac:AdditionalDocumentReference>
+    <cbc:ID>doc1</cbc:ID>
+    <cbc:DocumentDescription>test file</cbc:DocumentDescription>
+    <cac:Attachment>
+      <cac:ExternalReference>
+        <cbc:URI>testfile.com/test.html</cbc:URI>
+        <cbc:MimeCode>application/pdf</cbc:MimeCode>
+        <cbc:FileName>test</cbc:FileName>
+      </cac:ExternalReference>
+    </cac:Attachment>
+  </cac:AdditionalDocumentReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="EM">inbox@example.com</cbc:EndpointID>

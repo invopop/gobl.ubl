@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4519f442cd8e9ae5ebfe0ae5927e6861e55581e88c7a37f608632870ef082e92"
+			"val": "171b7a7638e1f278d9bb4acd5f246e04dd339b4193a0ceabe06b843839419ddd"
 		}
 	},
 	"doc": {
@@ -32,7 +32,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "32081330 Amersfoort"
 				}
 			],

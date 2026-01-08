@@ -1,0 +1,126 @@
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+<CustomizationID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">urn:cen.eu:en16931:2017</CustomizationID>
+<ProfileID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">M1</ProfileID>
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">test-UBL-inconnu</ID>
+<IssueDate xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">2025-12-29</IssueDate>
+<DueDate xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">2026-01-28</DueDate>
+<InvoiceTypeCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">380</InvoiceTypeCode>
+<Note xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">#PMT#L’indemnité forfaitaire légale pour frais de recouvrement est de 40 €.</Note>
+<Note xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">#PMD#À défaut de règlement à la date d’échéance, une pénalité de 10 % du net à payer TTC sera applicable immédiatement.</Note>
+<Note xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">#AAB#Aucun escompte pour paiement anticipé.</Note>
+<DocumentCurrencyCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">EUR</DocumentCurrencyCode>
+<AccountingSupplierParty xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<Party xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<EndpointID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">315143296_815</EndpointID>
+<PartyIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">000000002</ID>
+</PartyIdentification>
+<PostalAddress xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<Country xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<IdentificationCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR</IdentificationCode>
+</Country>
+</PostalAddress>
+<PartyTaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR18000000002</CompanyID>
+<TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+</TaxScheme>
+</PartyTaxScheme>
+<PartyLegalEntity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<RegistrationName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">Burger Queen</RegistrationName>
+<CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0002">000000002</CompanyID>
+</PartyLegalEntity>
+</Party>
+</AccountingSupplierParty>
+<AccountingCustomerParty xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<Party xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<EndpointID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">ES51500336R</EndpointID>
+<PartyIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0225">ES51500336R</ID>
+</PartyIdentification>
+<PostalAddress xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<Country xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<IdentificationCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR</IdentificationCode>
+</Country>
+</PostalAddress>
+<PartyTaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FR44391838042</CompanyID>
+<TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+</TaxScheme>
+</PartyTaxScheme>
+<PartyLegalEntity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<RegistrationName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">Invopop</RegistrationName>
+<CompanyID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeID="0002">391838042</CompanyID>
+</PartyLegalEntity>
+</Party>
+</AccountingCustomerParty>
+<TaxTotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">303.33</TaxAmount>
+<TaxSubtotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<TaxableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">60.46</TaxableAmount>
+<TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">3.33</TaxAmount>
+<TaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">S</ID>
+<Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">5.5</Percent>
+<TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+</TaxScheme>
+</TaxCategory>
+</TaxSubtotal>
+<TaxSubtotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<TaxableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">1500.00</TaxableAmount>
+<TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">300.00</TaxAmount>
+<TaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">S</ID>
+<Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">20.0</Percent>
+<TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+</TaxScheme>
+</TaxCategory>
+</TaxSubtotal>
+</TaxTotal>
+<LegalMonetaryTotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<LineExtensionAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">1560.46</LineExtensionAmount>
+<TaxExclusiveAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">1560.46</TaxExclusiveAmount>
+<TaxInclusiveAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">1863.79</TaxInclusiveAmount>
+<PayableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">1863.79</PayableAmount>
+</LegalMonetaryTotal>
+<InvoiceLine xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">001</ID>
+<InvoicedQuantity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" unitCode="KGM">28.520</InvoicedQuantity>
+<LineExtensionAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">60.46</LineExtensionAmount>
+<Item xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<Name xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">élément inconnu</Name>
+<ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">S</ID>
+<Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">5.5</Percent>
+<TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+</TaxScheme>
+</ClassifiedTaxCategory>
+</Item>
+<Price xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<PriceAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">2.12</PriceAmount>
+</Price>
+</InvoiceLine>
+<InvoiceLine xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">002</ID>
+<InvoicedQuantity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" unitCode="C62">1</InvoicedQuantity>
+<LineExtensionAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">1500</LineExtensionAmount>
+<Item xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<Description xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">service inconnu</Description>
+<Name xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">Conseil en stratégie</Name>
+<ClassifiedTaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">S</ID>
+<Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">20.0</Percent>
+<TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</ID>
+</TaxScheme>
+</ClassifiedTaxCategory>
+</Item>
+<Price xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+<PriceAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="EUR">1500.0</PriceAmount>
+</Price>
+</InvoiceLine>
+</Invoice>
