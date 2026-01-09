@@ -10,7 +10,6 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/tax"
 	nbio "github.com/nbio/xml"
 )
 
@@ -88,12 +87,6 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 	doc := env.Extract()
 	switch d := doc.(type) {
 	case *bill.Invoice:
-
-		// Switch to self-billed context for Peppol invoices
-		if o.context.Is(ContextPeppol) && d.HasTags(tax.TagSelfBilled) {
-			o.context = ContextPeppolSelfBilled
-		}
-
 		// Check and add missing addons
 		if err := ensureAddons(d, o.context.Addons); err != nil {
 			return nil, err

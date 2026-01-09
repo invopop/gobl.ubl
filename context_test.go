@@ -112,54 +112,6 @@ func TestContextPeppol(t *testing.T) {
 		// ProfileID should be overridden by meta
 		assert.Equal(t, "custom-peppol-profile", ublInv.ProfileID)
 	})
-
-	t.Run("automatic switch to self-billed context when invoice has self-billed tag", func(t *testing.T) {
-		env, err := loadTestEnvelope("self-billed-invoice.json")
-		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		// Verify the invoice has the self-billed tag
-		require.True(t, inv.HasTags(cbc.Key("self-billed")), "invoice should have self-billed tag")
-
-		// Convert with Peppol context - should automatically switch to PeppolSelfBilled
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppol))
-		require.NoError(t, err)
-
-		ublInv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
-
-		// Verify that the output uses ContextPeppolSelfBilled's CustomizationID and ProfileID
-		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0", ublInv.CustomizationID,
-			"should use self-billing CustomizationID")
-		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0", ublInv.ProfileID,
-			"should use self-billing ProfileID")
-	})
-
-	t.Run("no automatic switch for non-Peppol contexts with self-billed tag", func(t *testing.T) {
-		env, err := loadTestEnvelope("self-billed-invoice.json")
-		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		// Verify the invoice has the self-billed tag
-		require.True(t, inv.HasTags(cbc.Key("self-billed")), "invoice should have self-billed tag")
-
-		// Convert with EN16931 context - should NOT switch to self-billed
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
-		require.NoError(t, err)
-
-		ublInv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
-
-		// Verify that EN16931 context is used (not self-billed)
-		assert.Equal(t, "urn:cen.eu:en16931:2017", ublInv.CustomizationID,
-			"should use EN16931 CustomizationID, not self-billing")
-		assert.Empty(t, ublInv.ProfileID,
-			"EN16931 context has no ProfileID")
-	})
 }
 
 func TestContextXRechnung(t *testing.T) {
