@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
-	"github.com/invopop/gobl/num"
 )
 
 // InvoiceLine represents a line item in an invoice and credit note
@@ -45,18 +44,17 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 			},
 		}
 
-		if l.Quantity != (num.Amount{}) {
-			iq := &Quantity{
-				Value: l.Quantity.String(),
-			}
-			if l.Item != nil && l.Item.Unit != "" {
-				iq.UnitCode = string(l.Item.Unit.UNECE())
-			}
-			if inv.Type.In(bill.InvoiceTypeCreditNote) {
-				invLine.CreditedQuantity = iq
-			} else {
-				invLine.InvoicedQuantity = iq
-			}
+		// Always set quantity (mandatory field)
+		iq := &Quantity{
+			Value: l.Quantity.String(),
+		}
+		if l.Item != nil && l.Item.Unit != "" {
+			iq.UnitCode = string(l.Item.Unit.UNECE())
+		}
+		if inv.Type.In(bill.InvoiceTypeCreditNote) {
+			invLine.CreditedQuantity = iq
+		} else {
+			invLine.InvoicedQuantity = iq
 		}
 
 		if len(l.Notes) > 0 {

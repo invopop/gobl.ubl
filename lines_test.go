@@ -52,4 +52,20 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "1234567890128", doc.InvoiceLines[0].Item.BuyersItemIdentification.ID.Value)
 	})
 
+	t.Run("invoice-zero-quantity.json", func(t *testing.T) {
+		doc, err := testInvoiceFrom("invoice-zero-quantity.json")
+		require.NoError(t, err)
+
+		assert.NotNil(t, doc.InvoiceLines)
+		assert.Len(t, doc.InvoiceLines, 1)
+		assert.Equal(t, "1", doc.InvoiceLines[0].ID)
+		assert.Equal(t, "0.00", doc.InvoiceLines[0].LineExtensionAmount.Value)
+		assert.Equal(t, "Development services", doc.InvoiceLines[0].Item.Name)
+
+		// Quantity should always be set, even when zero (mandatory field)
+		assert.NotNil(t, doc.InvoiceLines[0].InvoicedQuantity)
+		assert.Equal(t, "0", doc.InvoiceLines[0].InvoicedQuantity.Value)
+		assert.Equal(t, "HUR", doc.InvoiceLines[0].InvoicedQuantity.UnitCode)
+	})
+
 }
