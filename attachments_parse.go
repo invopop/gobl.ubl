@@ -95,13 +95,12 @@ func (ui *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 				v := whitespaceRegex.ReplaceAllString(binObj.Value, "")
 
 				decoded, err := base64.StdEncoding.DecodeString(v)
-				if err == nil {
-					data = decoded
-				}
-				// If decoding fails, we skip this attachment
 				if err != nil {
 					continue
 				}
+
+				data = decoded
+
 			}
 
 			attachment := BinaryAttachment{
