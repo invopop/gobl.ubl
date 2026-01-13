@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"encoding/base64"
+	"regexp"
 
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/dsig"
@@ -89,7 +90,11 @@ func (ui *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 			// Decode the base64 data
 			var data []byte
 			if binObj.Value != "" {
-				decoded, err := base64.StdEncoding.DecodeString(binObj.Value)
+				// Remove whitespace that may have been added by XML formatting
+				whitespaceRegex := regexp.MustCompile(`\s+`)
+				v := whitespaceRegex.ReplaceAllString(binObj.Value, "")
+
+				decoded, err := base64.StdEncoding.DecodeString(v)
 				if err == nil {
 					data = decoded
 				}
