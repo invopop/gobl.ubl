@@ -3,7 +3,7 @@ package ubl_test
 import (
 	"testing"
 
-	"github.com/invopop/gobl.ubl"
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"

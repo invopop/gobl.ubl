@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/invopop/gobl.ubl"
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
