@@ -60,7 +60,6 @@ func TestAttachments(t *testing.T) {
 				assert.NotEmpty(t, binObj.Value)
 				assert.Equal(t, "application/pdf", *binObj.MimeCode)
 				assert.Equal(t, "sample.pdf", *binObj.Filename)
-				assert.Equal(t, "Base64", *binObj.EncodingCode)
 
 				// Verify we can decode it back
 				decoded, err := base64.StdEncoding.DecodeString(binObj.Value)

@@ -90,11 +90,9 @@ func (ui *Invoice) AddBinaryAttachment(attachment BinaryAttachment) {
 
 	// Base64-encode the binary data
 	encodedData := base64.StdEncoding.EncodeToString(attachment.Data)
-	encodingCode := "Base64"
 
 	binaryObj := &BinaryObject{
-		Value:        encodedData,
-		EncodingCode: &encodingCode,
+		Value: encodedData,
 	}
 
 	if attachment.MimeCode != "" {
