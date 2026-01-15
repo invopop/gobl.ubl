@@ -1,6 +1,10 @@
 package ubl
 
-import "github.com/invopop/gobl/org"
+import (
+	"encoding/base64"
+
+	"github.com/invopop/gobl/org"
+)
 
 // Attachment represents an attached document
 type Attachment struct {
@@ -68,4 +72,48 @@ func (ui *Invoice) addAttachments(attachments []*org.Attachment) {
 
 		ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, ref)
 	}
+}
+
+// AddBinaryAttachment adds an embedded binary attachment to the UBL Invoice.
+// This is useful for including documents like PDFs directly within the UBL XML.
+// The binary data will be automatically base64-encoded.
+func (ui *Invoice) AddBinaryAttachment(attachment BinaryAttachment) {
+	ref := Reference{
+		ID: IDType{
+			Value: attachment.ID,
+		},
+	}
+
+	if attachment.Description != "" {
+		ref.DocumentDescription = attachment.Description
+	}
+
+	// Base64-encode the binary data
+	encodedData := base64.StdEncoding.EncodeToString(attachment.Data)
+
+	binaryObj := &BinaryObject{
+		Value: encodedData,
+	}
+
+	if attachment.MimeCode != "" {
+		binaryObj.MimeCode = &attachment.MimeCode
+	}
+
+	if attachment.Filename != "" {
+		binaryObj.Filename = &attachment.Filename
+	}
+
+	if attachment.CharacterSetCode != "" {
+		binaryObj.CharacterSetCode = &attachment.CharacterSetCode
+	}
+
+	if attachment.URI != "" {
+		binaryObj.URI = &attachment.URI
+	}
+
+	ref.Attachment = &Attachment{
+		EmbeddedDocumentBinaryObject: binaryObj,
+	}
+
+	ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, ref)
 }
