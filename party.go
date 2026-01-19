@@ -27,6 +27,7 @@ type CustomerParty struct {
 
 // Party represents a party involved in a transaction
 type Party struct {
+	LogoReferenceID     *string           `xml:"cbc:LogoReferenceID"`
 	EndpointID          *EndpointID       `xml:"cbc:EndpointID"`
 	PartyIdentification []Identification  `xml:"cac:PartyIdentification"`
 	PartyName           *PartyName        `xml:"cac:PartyName"`
@@ -192,6 +193,16 @@ func newParty(party *org.Party) *Party {
 	if party.Alias != "" {
 		p.PartyName = &PartyName{
 			Name: party.Alias,
+		}
+	}
+
+	if len(party.Logos) > 0 {
+		// Use the first logo with a URL
+		for _, logo := range party.Logos {
+			if logo.URL != "" {
+				p.LogoReferenceID = &logo.URL
+				break
+			}
 		}
 	}
 
