@@ -71,6 +71,14 @@ func goblParty(party *Party) *org.Party {
 		}
 	}
 
+	if party.LogoReferenceID != nil && *party.LogoReferenceID != "" {
+		p.Logos = []*org.Image{
+			{
+				URL: *party.LogoReferenceID,
+			},
+		}
+	}
+
 	handleLegalEntityIdentity(party, p)
 	handlePartyTaxSchemes(party, p)
 	handlePartyIdentifications(party, p)
