@@ -1,8 +1,6 @@
 module github.com/invopop/gobl.ubl
 
-go 1.23.0
-
-toolchain go1.23.4
+go 1.24.4
 
 require (
 	github.com/invopop/gobl v0.305.0
@@ -14,8 +12,8 @@ require (
 
 require (
 	github.com/invopop/validation v0.8.0
+	github.com/invopop/xmlctx v0.13.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
-	github.com/nbio/xml v0.0.0-20250127210239-7f9281fed8c6
 )
 
 require (

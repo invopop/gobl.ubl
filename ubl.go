@@ -10,7 +10,7 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
-	nbio "github.com/nbio/xml"
+	"github.com/invopop/xmlctx"
 )
 
 var (
@@ -53,7 +53,15 @@ func Parse(data []byte) (any, error) {
 	switch ns {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
 		in := new(Invoice)
-		if err := nbio.Unmarshal(data, in); err != nil {
+		if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(map[string]string{
+			"":     ns,
+			"cbc":  NamespaceCBC,
+			"cac":  NamespaceCAC,
+			"qdt":  NamespaceQDT,
+			"udt":  NamespaceUDT,
+			"ccts": NamespaceCCTS,
+			"xsi":  NamespaceXSI,
+		})); err != nil {
 			return nil, err
 		}
 		return in, nil
@@ -61,7 +69,15 @@ func Parse(data []byte) (any, error) {
 	// Future document types can be added here
 	// case NamespaceUBLOrder:
 	//     order := new(Order)
-	//     if err := nbio.Unmarshal(data, order); err != nil {
+	//     if err := xmlctx.Parse(data, order, xmlctx.WithNamespaces(map[string]string{
+	//         "cbc":  NamespaceCBC,
+	//         "cac":  NamespaceCAC,
+	//         "qdt":  NamespaceQDT,
+	//         "udt":  NamespaceUDT,
+	//         "ccts": NamespaceCCTS,
+	//         "xsi":  NamespaceXSI,
+	//         "ext":  "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2",
+	//     })); err != nil {
 	//         return nil, err
 	//     }
 	//     return order, nil

@@ -1,0 +1,126 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "d17bfc45406a9df37e7ff711392eaa4b0f6aeae8f07b37f1e952db32cf526d36"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "GB",
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "other",
+		"code": "CN758494",
+		"issue_date": "2005-06-25",
+		"currency": "GBP",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Consortial",
+			"tax_id": {
+				"country": "GB",
+				"code": "1752692355"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Mrs Bouquet"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Busy Street",
+					"locality": "Farthing",
+					"region": "Heremouthshire",
+					"code": "AA99 1BB",
+					"country": "GB"
+				}
+			],
+			"emails": [
+				{
+					"addr": "bouquet@fpconsortial.co.uk"
+				}
+			],
+			"telephones": [
+				{
+					"num": "0158 1233714"
+				}
+			]
+		},
+		"customer": {
+			"name": "IYT Corporation",
+			"tax_id": {
+				"country": "GB",
+				"code": "12356478",
+				"scheme": "VAT"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Mr Fred Churchill"
+					}
+				}
+			],
+			"addresses": [
+				{
+					"street": "Avon Way",
+					"locality": "Bridgtow",
+					"region": "Avon",
+					"code": "ZZ99 1ZZ",
+					"country": "GB"
+				}
+			],
+			"emails": [
+				{
+					"addr": "fred@iytcorporation.gov.uk"
+				}
+			],
+			"telephones": [
+				{
+					"num": "0127 2653214"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "100",
+				"item": {
+					"ref": "17589683",
+					"name": "beeswax",
+					"identities": [
+						{
+							"code": "6578489"
+						}
+					],
+					"description": "Acme beeswax",
+					"price": "1.00",
+					"unit": "kg"
+				},
+				"sum": "100.00",
+				"total": "100.00",
+				"notes": [
+					{
+						"text": "as agreed on phone, the invoice should have been cancelled earlier, apologies"
+					}
+				]
+			}
+		],
+		"totals": {
+			"sum": "100.00",
+			"total": "100.00",
+			"tax": "0.00",
+			"total_with_tax": "100.00",
+			"payable": "100.00"
+		},
+		"notes": [
+			{
+				"text": "sample"
+			}
+		]
+	}
+}
