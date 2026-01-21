@@ -3,12 +3,12 @@ package ubl
 import (
 	"encoding/xml"
 	"fmt"
+	"strings"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
-	// "github.com/nbio/xml"
 )
 
 // Main UBL Invoice Namespace
@@ -148,16 +148,21 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if len(inv.Notes) > 0 {
-		out.Note = make([]string, 0)
+		var noteTexts []string
 		for _, note := range inv.Notes {
 			// Skip legal notes as they are represented in exemption reasons
 			if note.Key == org.NoteKeyLegal {
 				continue
 			}
-			out.Note = append(out.Note, note.Text)
-			// Peppol only allows one note
+			noteTexts = append(noteTexts, note.Text)
+		}
+
+		if len(noteTexts) > 0 {
 			if o.context.Is(ContextPeppol) {
-				break
+				// Peppol only allows one note, so concatenate all notes
+				out.Note = []string{strings.Join(noteTexts, "\n")}
+			} else {
+				out.Note = noteTexts
 			}
 		}
 	}
