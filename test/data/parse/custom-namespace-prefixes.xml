@@ -1,0 +1,159 @@
+<CreditNote xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:ns2="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns1="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+<ns1:UBLVersionID>2.0</ns1:UBLVersionID>
+<ns1:CustomizationID>urn:oasis:names:specification:ubl:xpath:CreditNote-2.0:sbs-1.0-draft</ns1:CustomizationID>
+<ns1:ProfileID>bpid:urn:oasis:names:draft:bpss:ubl-2-sbs-credit-notification-draft</ns1:ProfileID>
+<ns1:ID>CN758494</ns1:ID>
+<ns1:CopyIndicator>false</ns1:CopyIndicator>
+<ns1:UUID>349ABBAE-DF9D-40B4-849F-94C5FF9D1AF4</ns1:UUID>
+<ns1:IssueDate>2005-06-25</ns1:IssueDate>
+<ns1:TaxPointDate>2005-06-21</ns1:TaxPointDate>
+<ns1:Note>sample</ns1:Note>
+<ns2:AccountingSupplierParty>
+<ns1:CustomerAssignedAccountID>CO001</ns1:CustomerAssignedAccountID>
+<ns2:Party>
+<ns2:PartyName>
+<ns1:Name>Consortial</ns1:Name>
+</ns2:PartyName>
+<ns2:PostalAddress>
+<ns1:StreetName>Busy Street</ns1:StreetName>
+<ns1:BuildingName>Thereabouts</ns1:BuildingName>
+<ns1:BuildingNumber>56A</ns1:BuildingNumber>
+<ns1:CityName>Farthing</ns1:CityName>
+<ns1:PostalZone>AA99 1BB</ns1:PostalZone>
+<ns1:CountrySubentity>Heremouthshire</ns1:CountrySubentity>
+<ns2:AddressLine>
+<ns1:Line>The Roundabout</ns1:Line>
+</ns2:AddressLine>
+<ns2:Country>
+<ns1:IdentificationCode>GB</ns1:IdentificationCode>
+</ns2:Country>
+</ns2:PostalAddress>
+<ns2:PartyTaxScheme>
+<ns1:RegistrationName>Farthing Purchasing Consortium</ns1:RegistrationName>
+<ns1:CompanyID>175 269 2355</ns1:CompanyID>
+<ns1:ExemptionReason>N/A</ns1:ExemptionReason>
+<ns2:TaxScheme>
+<ns1:ID>VAT</ns1:ID>
+<ns1:TaxTypeCode>VAT</ns1:TaxTypeCode>
+</ns2:TaxScheme>
+</ns2:PartyTaxScheme>
+<ns2:Contact>
+<ns1:Name>Mrs Bouquet</ns1:Name>
+<ns1:Telephone>0158 1233714</ns1:Telephone>
+<ns1:Telefax>0158 1233856</ns1:Telefax>
+<ns1:ElectronicMail>bouquet@fpconsortial.co.uk</ns1:ElectronicMail>
+</ns2:Contact>
+</ns2:Party>
+</ns2:AccountingSupplierParty>
+<ns2:AccountingCustomerParty>
+<ns1:CustomerAssignedAccountID>XFB01</ns1:CustomerAssignedAccountID>
+<ns1:SupplierAssignedAccountID>GT00978567</ns1:SupplierAssignedAccountID>
+<ns2:Party>
+<ns2:PartyName>
+<ns1:Name>IYT Corporation</ns1:Name>
+</ns2:PartyName>
+<ns2:PostalAddress>
+<ns1:StreetName>Avon Way</ns1:StreetName>
+<ns1:BuildingName>Thereabouts</ns1:BuildingName>
+<ns1:BuildingNumber>56A</ns1:BuildingNumber>
+<ns1:CityName>Bridgtow</ns1:CityName>
+<ns1:PostalZone>ZZ99 1ZZ</ns1:PostalZone>
+<ns1:CountrySubentity>Avon</ns1:CountrySubentity>
+<ns2:AddressLine>
+<ns1:Line>3rd Floor, Room 5</ns1:Line>
+</ns2:AddressLine>
+<ns2:Country>
+<ns1:IdentificationCode>GB</ns1:IdentificationCode>
+</ns2:Country>
+</ns2:PostalAddress>
+<ns2:PartyTaxScheme>
+<ns1:RegistrationName>Bridgtow District Council</ns1:RegistrationName>
+<ns1:CompanyID>12356478</ns1:CompanyID>
+<ns1:ExemptionReason>Local Authority</ns1:ExemptionReason>
+<ns2:TaxScheme>
+<ns1:ID>UK VAT</ns1:ID>
+<ns1:TaxTypeCode>VAT</ns1:TaxTypeCode>
+</ns2:TaxScheme>
+</ns2:PartyTaxScheme>
+<ns2:Contact>
+<ns1:Name>Mr Fred Churchill</ns1:Name>
+<ns1:Telephone>0127 2653214</ns1:Telephone>
+<ns1:Telefax>0127 2653215</ns1:Telefax>
+<ns1:ElectronicMail>fred@iytcorporation.gov.uk</ns1:ElectronicMail>
+</ns2:Contact>
+</ns2:Party>
+</ns2:AccountingCustomerParty>
+<ns2:TaxTotal>
+<ns1:TaxAmount currencyID="GBP">17.50</ns1:TaxAmount>
+<ns1:TaxEvidenceIndicator>true</ns1:TaxEvidenceIndicator>
+<ns2:TaxSubtotal>
+<ns1:TaxableAmount currencyID="GBP">100.00</ns1:TaxableAmount>
+<ns1:TaxAmount currencyID="GBP">17.50</ns1:TaxAmount>
+<ns2:TaxCategory>
+<ns1:ID>A</ns1:ID>
+<ns2:TaxScheme>
+<ns1:ID>UK VAT</ns1:ID>
+<ns1:TaxTypeCode>VAT</ns1:TaxTypeCode>
+</ns2:TaxScheme>
+</ns2:TaxCategory>
+</ns2:TaxSubtotal>
+</ns2:TaxTotal>
+<ns2:LegalMonetaryTotal>
+<ns1:LineExtensionAmount currencyID="GBP">100.00</ns1:LineExtensionAmount>
+<ns1:TaxExclusiveAmount currencyID="GBP">90.00</ns1:TaxExclusiveAmount>
+<ns1:PayableAmount currencyID="GBP">107.50</ns1:PayableAmount>
+</ns2:LegalMonetaryTotal>
+<ns2:CreditNoteLine>
+<ns1:ID>1</ns1:ID>
+<ns1:Note>as agreed on phone, the invoice should have been cancelled earlier, apologies</ns1:Note>
+<ns1:CreditedQuantity unitCode="KGM">100</ns1:CreditedQuantity>
+<ns1:LineExtensionAmount currencyID="GBP">100.00</ns1:LineExtensionAmount>
+<ns1:TaxPointDate>2005-06-21</ns1:TaxPointDate>
+<ns2:DiscrepancyResponse>
+<ns1:ReferenceID>A00095678</ns1:ReferenceID>
+<ns1:Description>invoice cancelation</ns1:Description>
+</ns2:DiscrepancyResponse>
+<ns2:BillingReference>
+<ns2:InvoiceDocumentReference>
+<ns1:ID>A00095678</ns1:ID>
+<ns1:UUID>849FBBCE-E081-40B4-906C-94C5FF9D1AC3</ns1:UUID>
+<ns1:IssueDate>2005-06-21</ns1:IssueDate>
+</ns2:InvoiceDocumentReference>
+</ns2:BillingReference>
+<ns2:TaxTotal>
+<ns1:TaxAmount currencyID="GBP">17.50</ns1:TaxAmount>
+<ns1:TaxEvidenceIndicator>true</ns1:TaxEvidenceIndicator>
+<ns2:TaxSubtotal>
+<ns1:TaxableAmount currencyID="GBP">100.00</ns1:TaxableAmount>
+<ns1:TaxAmount currencyID="GBP">17.50</ns1:TaxAmount>
+<ns2:TaxCategory>
+<ns1:ID>A</ns1:ID>
+<ns2:TaxScheme>
+<ns1:ID>UK VAT</ns1:ID>
+<ns1:TaxTypeCode>VAT</ns1:TaxTypeCode>
+</ns2:TaxScheme>
+</ns2:TaxCategory>
+</ns2:TaxSubtotal>
+</ns2:TaxTotal>
+<ns2:Item>
+<ns1:Description>Acme beeswax</ns1:Description>
+<ns1:Name>beeswax</ns1:Name>
+<ns2:BuyersItemIdentification>
+<ns1:ID>6578489</ns1:ID>
+</ns2:BuyersItemIdentification>
+<ns2:SellersItemIdentification>
+<ns1:ID>17589683</ns1:ID>
+</ns2:SellersItemIdentification>
+<ns2:ItemInstance>
+<ns2:LotIdentification>
+<ns1:LotNumberID>546378239</ns1:LotNumberID>
+<ns1:ExpiryDate>2010-01-01</ns1:ExpiryDate>
+</ns2:LotIdentification>
+</ns2:ItemInstance>
+</ns2:Item>
+<ns2:Price>
+<ns1:PriceAmount currencyID="GBP">1.00</ns1:PriceAmount>
+<ns1:BaseQuantity unitCode="KGM">1</ns1:BaseQuantity>
+</ns2:Price>
+</ns2:CreditNoteLine>
+</CreditNote>

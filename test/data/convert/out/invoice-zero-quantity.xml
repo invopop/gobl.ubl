@@ -70,10 +70,10 @@
     <cbc:Note>on receipt within 30 days</cbc:Note>
   </cac:PaymentTerms>
   <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
+    <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
     <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="EUR">1800.00</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
+      <cbc:TaxableAmount currencyID="EUR">0.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
       <cac:TaxCategory>
         <cbc:ID>S</cbc:ID>
         <cbc:Percent>19</cbc:Percent>
@@ -84,15 +84,15 @@
     </cac:TaxSubtotal>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">1800.00</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="EUR">2142.00</cbc:TaxInclusiveAmount>
-    <cbc:PayableAmount currencyID="EUR">2142.00</cbc:PayableAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">0.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">0.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">0.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">0.00</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
-    <cbc:InvoicedQuantity unitCode="HUR">20</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
+    <cbc:InvoicedQuantity unitCode="HUR">0</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">0.00</cbc:LineExtensionAmount>
     <cac:Item>
       <cbc:Name>Development services</cbc:Name>
       <cac:ClassifiedTaxCategory>

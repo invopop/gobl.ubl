@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c0a17f805dbe717c3d11b12faa79b0c406875b400db7ed458ced5540b24d5791"
+			"val": "86bb6ddc65728576d282958e14e485ef591ba5b66f8345a3c54aa9760e82b8e1"
 		}
 	},
 	"doc": {
@@ -33,8 +33,11 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "GB983294"
+				},
+				{
+					"code": "99887766"
 				}
 			],
 			"inboxes": [
@@ -62,8 +65,11 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
-					"code": "39937423947"
+					"scope": "legal",
+					"code": "39937423947",
+					"ext": {
+						"iso-scheme-id": "0183"
+					}
 				},
 				{
 					"code": "4598375937",
@@ -308,7 +314,6 @@
 			"code": "0150abc",
 			"identities": [
 				{
-					"label": "ABT",
 					"code": "DR35141"
 				}
 			],
@@ -333,6 +338,12 @@
 				],
 				"notes": "Payment within 10 days, 2% discount"
 			},
+			"advances": [
+				{
+					"description": "Prepaid Amount",
+					"amount": "1000.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"detail": "Credit transfer",
@@ -406,11 +417,20 @@
 			},
 			"tax": "1225.00",
 			"total_with_tax": "7125.00",
-			"payable": "7125.00"
+			"payable": "7125.00",
+			"advance": "1000.00",
+			"due": "6125.00"
 		},
 		"notes": [
 			{
 				"text": "Please note we have a new phone number: 22 22 22 22"
+			}
+		],
+		"attachments": [
+			{
+				"code": "ts12345",
+				"description": "Technical specification",
+				"url": "www.techspec.no"
 			}
 		]
 	}

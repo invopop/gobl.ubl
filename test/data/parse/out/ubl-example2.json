@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fc54ebebdafd5b34267227ab0fadb9fc01220ce11b296496fb90d1ca7f114ed7"
+			"val": "89e01f70d381a2bbb5e38c2bd78abc913b1eab7fe48e898ee7173a6f2d174d08"
 		}
 	},
 	"doc": {
@@ -50,7 +50,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "987654321"
 				},
 				{
@@ -370,7 +370,7 @@
 				},
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "123456789"
 					},
 					{
@@ -424,7 +424,7 @@
 				"name": "Ebeneser Scrooge AS",
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "989823401"
 					},
 					{
@@ -445,6 +445,12 @@
 				],
 				"notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
 			},
+			"advances": [
+				{
+					"description": "Prepaid Amount",
+					"amount": "1000.00"
+				}
+			],
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",
@@ -525,11 +531,20 @@
 			},
 			"tax": "683.53",
 			"total_with_tax": "3393.03",
-			"payable": "3393.03"
+			"payable": "3393.03",
+			"advance": "1000.00",
+			"due": "2393.03"
 		},
 		"notes": [
 			{
 				"text": "Ordered in our booth at the convention"
+			}
+		],
+		"attachments": [
+			{
+				"code": "Doc1",
+				"description": "Timesheet",
+				"url": "http://www.suppliersite.eu/sheet001.html"
 			}
 		]
 	}

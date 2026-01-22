@@ -148,7 +148,13 @@ func TestParseLines(t *testing.T) {
 		data, err := testLoadXML("Allowance-example.xml")
 		require.NoError(t, err)
 		invalidXML := strings.ReplaceAll(string(data), `<cbc:BaseAmount currencyID="EUR">1000</cbc:BaseAmount>`, `<cbc:BaseAmount currencyID="EUR">invalid-amount</cbc:BaseAmount>`)
-		_, err = ubl.Parse([]byte(invalidXML))
+		doc, err := ubl.Parse([]byte(invalidXML))
+		assert.NoError(t, err)
+
+		ui, ok := doc.(*ubl.Invoice)
+		require.True(t, ok)
+
+		_, err = ui.Convert()
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid major number")
 	})

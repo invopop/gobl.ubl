@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
-	"github.com/invopop/gobl/num"
 )
 
 // InvoiceLine represents a line item in an invoice and credit note
@@ -24,7 +23,7 @@ type InvoiceLine struct {
 	Price               *Price              `xml:"cac:Price"`
 }
 
-func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
+func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -45,18 +44,17 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 			},
 		}
 
-		if l.Quantity != (num.Amount{}) {
-			iq := &Quantity{
-				Value: l.Quantity.String(),
-			}
-			if l.Item != nil && l.Item.Unit != "" {
-				iq.UnitCode = string(l.Item.Unit.UNECE())
-			}
-			if inv.Type.In(bill.InvoiceTypeCreditNote) {
-				invLine.CreditedQuantity = iq
-			} else {
-				invLine.InvoicedQuantity = iq
-			}
+		// Always set quantity (mandatory field)
+		iq := &Quantity{
+			Value: l.Quantity.String(),
+		}
+		if l.Item != nil && l.Item.Unit != "" {
+			iq.UnitCode = string(l.Item.Unit.UNECE())
+		}
+		if inv.Type.In(bill.InvoiceTypeCreditNote) {
+			invLine.CreditedQuantity = iq
+		} else {
+			invLine.InvoicedQuantity = iq
 		}
 
 		if len(l.Notes) > 0 {
@@ -121,12 +119,12 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					it.ClassifiedTaxCategory.ID = &rate
 				}
 
+				// Set percent: required unless category is "O" (outside scope)
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
-				} else if it.ClassifiedTaxCategory.ID != nil && *it.ClassifiedTaxCategory.ID != "O" {
-					// If no percent is given, but the tax category is not "O" (outside of scope),
-					// we set it to 0 to avoid invalid UBL.
+				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
+					// Default to 0% when not outside scope
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
 				}
@@ -139,15 +137,31 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 			if len(l.Item.Identities) > 0 {
 				for _, id := range l.Item.Identities {
+					if it.BuyersItemIdentification != nil && it.StandardItemIdentification != nil {
+						break
+					}
+
+					// Map first identity without extension to BuyersItemIdentification
 					if id.Ext == nil || id.Ext[iso.ExtKeySchemeID].String() == "" {
+						if it.BuyersItemIdentification == nil {
+							it.BuyersItemIdentification = &ItemIdentification{
+								ID: &IDType{
+									Value: id.Code.String(),
+								},
+							}
+						}
 						continue
 					}
-					s := id.Ext[iso.ExtKeySchemeID].String()
-					it.StandardItemIdentification = &ItemIdentification{
-						ID: &IDType{
-							SchemeID: &s,
-							Value:    id.Code.String(),
-						},
+
+					// Map first identity with extension to StandardItemIdentification
+					if it.StandardItemIdentification == nil {
+						s := id.Ext[iso.ExtKeySchemeID].String()
+						it.StandardItemIdentification = &ItemIdentification{
+							ID: &IDType{
+								SchemeID: &s,
+								Value:    id.Code.String(),
+							},
+						}
 					}
 				}
 			}
@@ -175,9 +189,9 @@ func (out *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 		lines = append(lines, invLine)
 	}
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {
-		out.CreditNoteLines = lines
+		ui.CreditNoteLines = lines
 	} else {
-		out.InvoiceLines = lines
+		ui.InvoiceLines = lines
 	}
 }
 

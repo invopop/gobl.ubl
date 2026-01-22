@@ -43,31 +43,38 @@ type MonetaryTotal struct {
 	PayableAmount         *Amount `xml:"cbc:PayableAmount,omitempty"`
 }
 
-func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
+func (ui *Invoice) addTotals(inv *bill.Invoice) {
 	if inv == nil || inv.Totals == nil {
 		return
 	}
 	t := inv.Totals
 
-	out.LegalMonetaryTotal = MonetaryTotal{
+	currency := inv.Currency.String()
+
+	ui.LegalMonetaryTotal = MonetaryTotal{
 		LineExtensionAmount: Amount{Value: t.Sum.String(), CurrencyID: &currency},
 		TaxExclusiveAmount:  Amount{Value: t.Total.String(), CurrencyID: &currency},
 		TaxInclusiveAmount:  Amount{Value: t.TotalWithTax.String(), CurrencyID: &currency},
 		PayableAmount:       &Amount{Value: t.Payable.String(), CurrencyID: &currency},
 	}
+
 	if t.Discount != nil {
-		out.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: t.Discount.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: t.Discount.String(), CurrencyID: &currency}
 	}
 	if t.Charge != nil {
-		out.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: t.Charge.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: t.Charge.String(), CurrencyID: &currency}
 	}
 	if t.Rounding != nil {
-		out.LegalMonetaryTotal.PayableRoundingAmount = &Amount{Value: t.Rounding.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PayableRoundingAmount = &Amount{Value: t.Rounding.String(), CurrencyID: &currency}
 	}
 	if t.Advances != nil {
-		out.LegalMonetaryTotal.PrepaidAmount = &Amount{Value: t.Advances.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PrepaidAmount = &Amount{Value: t.Advances.String(), CurrencyID: &currency}
 	}
-	out.TaxTotal = []TaxTotal{
+	if t.Due != nil {
+		ui.LegalMonetaryTotal.PayableAmount = &Amount{Value: t.Due.String(), CurrencyID: &currency}
+	}
+
+	ui.TaxTotal = []TaxTotal{
 		{
 			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
 		},
@@ -82,10 +89,7 @@ func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
 					subtotal.TaxableAmount = Amount{Value: r.Base.String(), CurrencyID: &currency}
 				}
 				taxCat := TaxCategory{}
-				if r.Percent != nil {
-					p := r.Percent.StringWithoutSymbol()
-					taxCat.Percent = &p
-				}
+
 				if r.Ext != nil {
 					if r.Ext[untdid.ExtKeyTaxCategory].String() != "" {
 						k := r.Ext[untdid.ExtKeyTaxCategory].String()
@@ -95,6 +99,16 @@ func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
 						v := r.Ext[cef.ExtKeyVATEX].String()
 						taxCat.TaxExemptionReasonCode = &v
 					}
+				}
+
+				// Set percent: required unless category is "O" (outside scope)
+				if r.Percent != nil {
+					p := r.Percent.StringWithoutSymbol()
+					taxCat.Percent = &p
+				} else if taxCat.ID == nil || *taxCat.ID != "O" {
+					// Default to 0% when not outside scope
+					p := "0"
+					taxCat.Percent = &p
 				}
 
 				if inv.Notes != nil {
@@ -111,7 +125,7 @@ func (out *Invoice) addTotals(inv *bill.Invoice, currency string) {
 					taxCat.TaxScheme = &TaxScheme{ID: cat.Code.String()}
 				}
 				subtotal.TaxCategory = taxCat
-				out.TaxTotal[0].TaxSubtotal = append(out.TaxTotal[0].TaxSubtotal, subtotal)
+				ui.TaxTotal[0].TaxSubtotal = append(ui.TaxTotal[0].TaxSubtotal, subtotal)
 			}
 		}
 	}

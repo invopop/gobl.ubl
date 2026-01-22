@@ -3,7 +3,7 @@ module github.com/invopop/gobl.ubl
 go 1.24.4
 
 require (
-	github.com/invopop/gobl v0.303.0
+	github.com/invopop/gobl v0.305.0
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
@@ -13,8 +13,8 @@ require (
 require (
 	github.com/invopop/phive v0.6.0
 	github.com/invopop/validation v0.8.0
+	github.com/invopop/xmlctx v0.13.0
 	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
-	github.com/nbio/xml v0.0.0-20250127210239-7f9281fed8c6
 	google.golang.org/grpc v1.77.0
 )
 

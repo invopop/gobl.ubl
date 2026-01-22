@@ -3,11 +3,12 @@ package ubl
 import (
 	"encoding/xml"
 	"fmt"
+	"strings"
 
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
-	// "github.com/nbio/xml"
 )
 
 // Main UBL Invoice Namespace
@@ -101,6 +102,21 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		return nil, err
 	}
 
+	// Determine CustomizationID to use in output
+	customizationID := o.context.CustomizationID
+	if o.context.OutputCustomizationID != "" {
+		customizationID = o.context.OutputCustomizationID
+	}
+
+	// Determine ProfileID to use in output
+	// First check meta field, then fall back to context
+	profileID := o.context.ProfileID
+	if inv.Meta != nil {
+		if ublProfile, ok := inv.Meta[cbc.Key("ubl-profile")]; ok {
+			profileID = ublProfile
+		}
+	}
+
 	// Create the UBL document
 	out := &Invoice{
 		XMLName:                 xml.Name{Local: "Invoice"},
@@ -112,8 +128,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		CCTSNamespace:           NamespaceCCTS,
 		XSINamespace:            NamespaceXSI,
 		SchemaLocation:          SchemaLocationInvoice,
-		CustomizationID:         o.context.CustomizationID,
-		ProfileID:               o.context.ProfileID,
+		CustomizationID:         customizationID,
+		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
@@ -132,16 +148,21 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if len(inv.Notes) > 0 {
-		out.Note = make([]string, len(inv.Notes))
-		for i, note := range inv.Notes {
+		var noteTexts []string
+		for _, note := range inv.Notes {
 			// Skip legal notes as they are represented in exemption reasons
 			if note.Key == org.NoteKeyLegal {
 				continue
 			}
-			out.Note[i] = note.Text
-			// Peppol only allows one note
+			noteTexts = append(noteTexts, note.Text)
+		}
+
+		if len(noteTexts) > 0 {
 			if o.context.Is(ContextPeppol) {
-				break
+				// Peppol only allows one note, so concatenate all notes
+				out.Note = []string{strings.Join(noteTexts, "\n")}
+			} else {
+				out.Note = noteTexts
 			}
 		}
 	}
@@ -149,10 +170,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addPreceding(inv.Preceding)
 	out.addOrdering(inv.Ordering)
 	out.addCharges(inv)
-	out.addTotals(inv, string(inv.Currency))
+	out.addTotals(inv)
 	out.addLines(inv)
+	out.addAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv.Payment); err != nil {
+	if err = out.addPayment(inv); err != nil {
 		return nil, err
 	}
 	if d := newDelivery(inv.Delivery); d != nil {
@@ -162,19 +184,23 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	return out, nil
 }
 
-// Bytes returns the raw XML of the UBL Invoice or Credit Note including
-// the XML Header.
-func (out *Invoice) Bytes() ([]byte, error) {
-	bytes, err := xml.MarshalIndent(out, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return append([]byte(xml.Header), bytes...), nil
-}
-
 func invoiceNumber(series cbc.Code, code cbc.Code) string {
 	if series == "" {
 		return code.String()
 	}
 	return fmt.Sprintf("%s-%s", series, code)
+}
+
+// ConvertInvoice is a convenience function that converts a GOBL envelope
+// containing an invoice into a UBL Invoice or CreditNote document.
+func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Convert(env, opts...)
+	if err != nil {
+		return nil, err
+	}
+	inv, ok := doc.(*Invoice)
+	if !ok {
+		return nil, fmt.Errorf("expected invoice, got %T", doc)
+	}
+	return inv, nil
 }

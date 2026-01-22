@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d97fd37c47eb4e411db43f12b3c44dc80c101892ec4592c408211a2d1871d034"
+			"val": "a0fbcb666082aba5b58d2ab972e9cdf87b71ac404d50fcaf779c2b9166bbeca3"
 		}
 	},
 	"doc": {
@@ -25,6 +25,11 @@
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",
+			"identities": [
+				{
+					"code": "7300010000001"
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "0088",

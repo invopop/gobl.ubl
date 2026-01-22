@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d032ae20a716ce638cfdd8160d3adc1e281b18fef617a7fa7acc73de0bb13fa8"
+			"val": "c9253a023d586a4f86f7d3f8710d19afd132777c622f566c2d200edab7b25721"
 		}
 	},
 	"doc": {
@@ -57,7 +57,7 @@
 			},
 			"identities": [
 				{
-					"label": "CompanyID",
+					"scope": "legal",
 					"code": "DK16356607"
 				},
 				{
@@ -285,11 +285,13 @@
 				},
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
 						"code": "NL16356706"
 					},
 					{
+						"scope": "tax",
 						"country": "NL",
+						"type": "LOC",
 						"code": "NL16356706"
 					},
 					{
@@ -351,6 +353,11 @@
 				{
 					"code": "5433"
 				}
+			],
+			"tender": [
+				{
+					"code": "Lot567"
+				}
 			]
 		},
 		"payment": {
@@ -358,7 +365,10 @@
 				"name": "Dagobert Duck",
 				"identities": [
 					{
-						"label": "CompanyID",
+						"scope": "legal",
+						"code": "DK16356608"
+					},
+					{
 						"code": "DK16356608"
 					}
 				]
@@ -373,6 +383,12 @@
 				],
 				"notes": "50% prepaid, 50% within one month"
 			},
+			"advances": [
+				{
+					"description": "Prepaid Amount",
+					"amount": "2337.50"
+				}
+			],
 			"instructions": {
 				"key": "direct-debit",
 				"ref": "Payref1",
@@ -441,7 +457,9 @@
 			},
 			"tax": "675.00",
 			"total_with_tax": "4675.00",
-			"payable": "4675.00"
+			"payable": "4675.00",
+			"advance": "2337.50",
+			"due": "2337.50"
 		},
 		"notes": [
 			{
