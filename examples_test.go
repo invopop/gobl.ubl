@@ -2,6 +2,7 @@ package ubl_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -15,8 +16,11 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
+	"github.com/invopop/phive"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/lestrrat-go/libxml2"
 	"github.com/lestrrat-go/libxml2/xsd"
@@ -25,7 +29,7 @@ import (
 const (
 	xmlPattern  = "*.xml"
 	jsonPattern = "*.json"
-
+	ß
 	schemaInvoice    = "UBL-Invoice-2.1.xsd"
 	schemaCreditNote = "UBL-CreditNote-2.1.xsd"
 
@@ -36,8 +40,14 @@ const (
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
 func TestConvertToInvoice(t *testing.T) {
-	invoiceSchema := loadSchema(t, schemaInvoice)
-	creditNoteSchema := loadSchema(t, schemaCreditNote)
+	conn, err := grpc.NewClient(
+		"localhost:9090",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	require.NoError(t, err)
+	defer conn.Close()
+
+	pc := phive.NewValidationServiceClient(conn)
 
 	examples, err := getDataGlob(jsonPattern)
 	require.NoError(t, err)
@@ -56,17 +66,15 @@ func TestConvertToInvoice(t *testing.T) {
 			if *updateOut {
 				err = os.WriteFile(outputFilepath(outName), data, 0644)
 				require.NoError(t, err)
-				var schema *xsd.Schema
-				switch doc.XMLName.Local {
-				case "Invoice":
-					schema = invoiceSchema
-				case "CreditNote":
-					schema = creditNoteSchema
-				default:
-					require.Fail(t, "unknown document schema")
-				}
-				err = ValidateXML(schema, data)
+				resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+					Vesid:      "eu.peppol.bis3:invoice:2024.5",
+					XmlContent: data,
+				})
 				require.NoError(t, err)
+				results, err := json.MarshalIndent(resp.Results, "", "  ")
+				require.NoError(t, err)
+				require.True(t, resp.Success, "Generated XML should be valid: %s", string(results))
+
 			}
 
 			output, err := loadOutputFile(outName)
@@ -150,7 +158,7 @@ func testInvoiceFrom(name string) (*ubl.Invoice, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ubl.ConvertInvoice(env)
+	return ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
 }
 
 // testLoadXML provides the raw data of a test XML file
@@ -296,7 +304,7 @@ func getConversionTypePath(pattern string) string {
 	if pattern == xmlPattern {
 		return filepath.Join(getDataPath(), "parse")
 	}
-	return filepath.Join(getDataPath(), "convert")
+	return filepath.Join(getDataPath(), "convert/pepol")
 }
 
 func getTestPath() string {
