@@ -160,7 +160,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		if len(noteTexts) > 0 {
 			if o.context.Is(ContextPeppol) {
 				// Peppol only allows one note, so concatenate all notes
-				out.Note = []string{strings.Join(noteTexts, "\n")}
+				out.Note = []string{strings.Join(noteTexts, "\n\n")}
 			} else {
 				out.Note = noteTexts
 			}
