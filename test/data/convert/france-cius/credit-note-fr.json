@@ -1,0 +1,168 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "eb639c3487231d745677d6ecfa3db9d332ad5855c1cd1775bc588ac28eb42258"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "credit-note",
+		"series": "FR-CN",
+		"code": "001",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "381"
+			}
+		},
+		"supplier": {
+			"name": "Soci\u00e9t\u00e9 FR SARL",
+			"tax_id": {
+				"country": "FR",
+				"code": "FR12345678901"
+			},
+			"addresses": [
+				{
+					"num": "16",
+					"street": "10 Rue de la Paix",
+					"locality": "Paris",
+					"code": "75002",
+					"country": "FR"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9957",
+					"code": "12345678901"
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Marie",
+						"surname": "Dupont"
+					}
+				}
+			],
+			"telephones": [
+				{
+					"num": "+33142345678"
+				}
+			]
+		},
+		"customer": {
+			"name": "Client FR",
+			"tax_id": {
+				"country": "FR",
+				"code": "FR98765432109"
+			},
+			"addresses": [
+				{
+					"num": "25",
+					"street": "25 Rue Victor Hugo",
+					"locality": "Lyon",
+					"code": "69002",
+					"country": "FR"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9957",
+					"code": "98765432109"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20",
+				"item": {
+					"name": "Development services",
+					"price": "90.00",
+					"unit": "h"
+				},
+				"sum": "1800.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1800.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "0003434323213231",
+				"credit_transfer": [
+					{
+						"iban": "NO9386011117947",
+						"bic": "DNBANOKK"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "1800.00",
+			"total": "1800.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1800.00",
+								"percent": "20%",
+								"amount": "360.00"
+							}
+						],
+						"amount": "360.00"
+					}
+				],
+				"sum": "360.00"
+			},
+			"tax": "360.00",
+			"total_with_tax": "2160.00",
+			"payable": "2160.00"
+		},
+		"ordering": {
+			"code": "CN-FR-001"
+		}
+	}
+}

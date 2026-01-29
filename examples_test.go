@@ -29,7 +29,7 @@ import (
 const (
 	xmlPattern  = "*.xml"
 	jsonPattern = "*.json"
-	ß
+
 	schemaInvoice    = "UBL-Invoice-2.1.xsd"
 	schemaCreditNote = "UBL-CreditNote-2.1.xsd"
 
@@ -41,7 +41,7 @@ var updateOut = flag.Bool("update", false, "Update the example files in test/dat
 
 func TestConvertToInvoice(t *testing.T) {
 	conn, err := grpc.NewClient(
-		"localhost:9090",
+		"127.0.0.1:9091",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	require.NoError(t, err)
@@ -49,105 +49,165 @@ func TestConvertToInvoice(t *testing.T) {
 
 	pc := phive.NewValidationServiceClient(conn)
 
-	examples, err := getDataGlob(jsonPattern)
-	require.NoError(t, err)
+	// Define contexts to test
+	contexts := []struct {
+		name    string
+		context ubl.Context
+		dir     string
+	}{
+		{"EN16931", ubl.ContextEN16931, "en16931"},
+		{"Peppol", ubl.ContextPeppol, "peppol"},
+		{"PeppolSelfBilled", ubl.ContextPeppolSelfBilled, "peppol-self-billed"},
+		{"XRechnung", ubl.ContextXRechnung, "xrechnung"},
+		{"FranceCIUS", ubl.ContextPeppolFranceCIUS, "france-cius"},
+		{"FranceExtended", ubl.ContextPeppolFranceExtended, "france-extended"},
+	}
 
-	for _, example := range examples {
-		inName := filepath.Base(example)
-		outName := strings.Replace(inName, ".json", ".xml", 1)
-
-		t.Run(inName, func(t *testing.T) {
-			doc, err := testInvoiceFrom(inName)
+	for _, ctx := range contexts {
+		t.Run(ctx.name, func(t *testing.T) {
+			examples, err := filepath.Glob(filepath.Join(getConvertPath(), ctx.dir, jsonPattern))
 			require.NoError(t, err)
 
-			data, err := ubl.Bytes(doc)
-			require.NoError(t, err)
-
-			if *updateOut {
-				err = os.WriteFile(outputFilepath(outName), data, 0644)
-				require.NoError(t, err)
-				resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-					Vesid:      "eu.peppol.bis3:invoice:2024.5",
-					XmlContent: data,
-				})
-				require.NoError(t, err)
-				results, err := json.MarshalIndent(resp.Results, "", "  ")
-				require.NoError(t, err)
-				require.True(t, resp.Success, "Generated XML should be valid: %s", string(results))
-
+			if len(examples) == 0 {
+				t.Skip("No examples found for context")
 			}
 
-			output, err := loadOutputFile(outName)
-			assert.NoError(t, err)
-			assert.Equal(t, string(output), string(data), "Output should match the expected XML. Update with --update flag.")
+			for _, example := range examples {
+				inName := filepath.Base(example)
+				outName := strings.Replace(inName, ".json", ".xml", 1)
+
+				t.Run(inName, func(t *testing.T) {
+					doc, err := testInvoiceFromContext(filepath.Join(ctx.dir, inName), ctx.context)
+					require.NoError(t, err)
+
+					data, err := ubl.Bytes(doc)
+					require.NoError(t, err)
+
+					outPath := filepath.Join(getConvertPath(), ctx.dir, "out", outName)
+					if *updateOut {
+						err = os.WriteFile(outPath, data, 0644)
+						require.NoError(t, err)
+
+						// Determine VESID based on document type
+						env, err := loadTestEnvelopeFromPath(example)
+						require.NoError(t, err)
+						inv, ok := env.Extract().(*bill.Invoice)
+						require.True(t, ok, "Document should be an invoice")
+						vesid := ctx.context.GetVESID(inv)
+
+						resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
+							Vesid:      vesid,
+							XmlContent: data,
+						})
+						require.NoError(t, err)
+						results, err := json.MarshalIndent(resp.Results, "", "  ")
+						require.NoError(t, err)
+						require.True(t, resp.Success, "Generated XML should be valid for %s: %s", vesid, string(results))
+					}
+
+					output, err := os.ReadFile(outPath)
+					assert.NoError(t, err)
+					assert.Equal(t, string(output), string(data), "Output should match the expected XML. Update with --update flag.")
+				})
+			}
 		})
 	}
 }
 
 func TestParseInvoice(t *testing.T) {
-	examples, err := getDataGlob(xmlPattern)
-	require.NoError(t, err)
+	// Define contexts to test
+	contexts := []struct {
+		name string
+		dir  string
+	}{
+		{"EN16931", "en16931"},
+		{"Peppol", "peppol"},
+		{"PeppolSelfBilled", "peppol-self-billed"},
+		{"XRechnung", "xrechnung"},
+		{"FranceCIUS", "france-cius"},
+		{"FranceExtended", "france-extended"},
+	}
 
-	for _, example := range examples {
-		inName := filepath.Base(example)
-		outName := strings.Replace(inName, ".xml", ".json", 1)
-
-		t.Run(inName, func(t *testing.T) {
-			// Load XML data
-			xmlData, err := os.ReadFile(example)
+	for _, ctx := range contexts {
+		t.Run(ctx.name, func(t *testing.T) {
+			examples, err := filepath.Glob(filepath.Join(getParsePath(), ctx.dir, xmlPattern))
 			require.NoError(t, err)
 
-			// Convert UBL XML to GOBL
-			doc, err := ubl.Parse(xmlData)
-			require.NoError(t, err)
-			inv, ok := doc.(*ubl.Invoice)
-			require.True(t, ok, "Document should be an invoice")
-			env, err := inv.Convert()
-			require.NoError(t, err)
-
-			// Unfortunately, the sample UBL documents have lots of errors, including
-			// missing exchange rate data and invalid Tax ID codes. We're disabling
-			// validation here, but periodically it'd be good to re-enable and check
-			// for any major issues.
-			// require.NoError(t, env.Validate())
-
-			env.Head.UUID = staticUUID
-			if inv, ok := env.Extract().(*bill.Invoice); ok {
-				inv.UUID = staticUUID
+			if len(examples) == 0 {
+				t.Skip("No examples found for context")
 			}
 
-			// Recalculate to ensure consistent digests
-			if err = env.Calculate(); err != nil {
-				require.NoError(t, err)
+			for _, example := range examples {
+				inName := filepath.Base(example)
+				outName := strings.Replace(inName, ".xml", ".json", 1)
+
+				t.Run(inName, func(t *testing.T) {
+					// Load XML data
+					xmlData, err := os.ReadFile(example)
+					require.NoError(t, err)
+
+					// Convert UBL XML to GOBL
+					doc, err := ubl.Parse(xmlData)
+					require.NoError(t, err)
+					inv, ok := doc.(*ubl.Invoice)
+					require.True(t, ok, "Document should be an invoice")
+					env, err := inv.Convert()
+					require.NoError(t, err)
+
+					// Unfortunately, the sample UBL documents have lots of errors, including
+					// missing exchange rate data and invalid Tax ID codes. We're disabling
+					// validation here, but periodically it'd be good to re-enable and check
+					// for any major issues.
+					// require.NoError(t, env.Validate())
+
+					env.Head.UUID = staticUUID
+					if inv, ok := env.Extract().(*bill.Invoice); ok {
+						inv.UUID = staticUUID
+					}
+
+					// Recalculate to ensure consistent digests
+					if err = env.Calculate(); err != nil {
+						require.NoError(t, err)
+					}
+
+					outPath := filepath.Join(getParsePath(), ctx.dir, "out", outName)
+					if *updateOut {
+						data, err := json.MarshalIndent(env, "", "\t")
+						if err != nil {
+							require.NoError(t, err)
+						}
+						if err := os.WriteFile(outPath, data, 0644); err != nil {
+							require.NoError(t, err)
+						}
+					}
+
+					// Extract the invoice from the envelope
+					invoice, ok := env.Extract().(*bill.Invoice)
+					require.True(t, ok, "Document should be an invoice")
+
+					// Marshal only the invoice
+					data, err := json.MarshalIndent(invoice, "", "\t")
+					require.NoError(t, err)
+
+					// Load the expected output
+					output, err := os.ReadFile(outPath)
+					assert.NoError(t, err)
+
+					// Parse the expected output to extract the invoice
+					var expectedEnv gobl.Envelope
+					err = json.Unmarshal(output, &expectedEnv)
+					require.NoError(t, err)
+
+					expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
+					require.True(t, ok, "Expected document should be an invoice")
+
+					// Marshal the expected invoice
+					expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
+					require.NoError(t, err)
+
+					assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
+				})
 			}
-
-			writeEnvelope(outputFilepath(outName), env)
-
-			// Extract the invoice from the envelope
-			invoice, ok := env.Extract().(*bill.Invoice)
-			require.True(t, ok, "Document should be an invoice")
-
-			// Marshal only the invoice
-			data, err := json.MarshalIndent(invoice, "", "\t")
-			require.NoError(t, err)
-
-			// Load the expected output
-			output, err := loadOutputFile(outName)
-			assert.NoError(t, err)
-
-			// Parse the expected output to extract the invoice
-			var expectedEnv gobl.Envelope
-			err = json.Unmarshal(output, &expectedEnv)
-			require.NoError(t, err)
-
-			expectedInvoice, ok := expectedEnv.Extract().(*bill.Invoice)
-			require.True(t, ok, "Expected document should be an invoice")
-
-			// Marshal the expected invoice
-			expectedData, err := json.MarshalIndent(expectedInvoice, "", "\t")
-			require.NoError(t, err)
-
-			assert.JSONEq(t, string(expectedData), string(data), "Invoice should match the expected JSON. Update with --update flag.")
 		})
 	}
 }
@@ -159,6 +219,60 @@ func testInvoiceFrom(name string) (*ubl.Invoice, error) {
 		return nil, err
 	}
 	return ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+}
+
+// testInvoiceFromContext creates a UBL Invoice from a GOBL file with a specific context
+func testInvoiceFromContext(name string, ctx ubl.Context) (*ubl.Invoice, error) {
+	env, err := loadTestEnvelopeFromPath(filepath.Join(getConvertPath(), name))
+	if err != nil {
+		return nil, err
+	}
+	return ubl.ConvertInvoice(env, ubl.WithContext(ctx))
+}
+
+// loadTestEnvelopeFromPath loads a GOBL envelope from a specific file path
+func loadTestEnvelopeFromPath(path string) (*gobl.Envelope, error) {
+	src, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer src.Close()
+
+	buf := new(bytes.Buffer)
+	if _, err := buf.ReadFrom(src); err != nil {
+		return nil, err
+	}
+	env := new(gobl.Envelope)
+	if err := json.Unmarshal(buf.Bytes(), env); err != nil {
+		return nil, err
+	}
+
+	// Clear the IDs
+	env.Head.UUID = staticUUID
+	if inv, ok := env.Extract().(*bill.Invoice); ok {
+		inv.UUID = staticUUID
+	}
+
+	if err := env.Calculate(); err != nil {
+		panic(err)
+	}
+
+	if err := env.Validate(); err != nil {
+		panic(err)
+	}
+
+	// Make an update if requested
+	if *updateOut {
+		data, err := json.MarshalIndent(env, "", "\t")
+		if err != nil {
+			panic(err)
+		}
+		if err := os.WriteFile(path, data, 0644); err != nil {
+			panic(err)
+		}
+	}
+
+	return env, nil
 }
 
 // testLoadXML provides the raw data of a test XML file
@@ -305,6 +419,14 @@ func getConversionTypePath(pattern string) string {
 		return filepath.Join(getDataPath(), "parse")
 	}
 	return filepath.Join(getDataPath(), "convert/pepol")
+}
+
+func getConvertPath() string {
+	return filepath.Join(getDataPath(), "convert")
+}
+
+func getParsePath() string {
+	return filepath.Join(getDataPath(), "parse")
 }
 
 func getTestPath() string {
