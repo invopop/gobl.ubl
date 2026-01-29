@@ -102,7 +102,12 @@ func goblCharge(ac *AllowanceCharge) (*bill.Charge, error) {
 			if err != nil {
 				return nil, err
 			}
-			ch.Taxes[0].Percent = &p
+
+			// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
+			// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
+			if !p.IsZero() || (ac.TaxCategory[0].ID != nil && *ac.TaxCategory[0].ID == "Z") {
+				ch.Taxes[0].Percent = &p
+			}
 		}
 	}
 	return ch, nil
@@ -165,7 +170,12 @@ func goblDiscount(ac *AllowanceCharge) (*bill.Discount, error) {
 			if err != nil {
 				return nil, err
 			}
-			d.Taxes[0].Percent = &percent
+
+			// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
+			// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
+			if !percent.IsZero() || (ac.TaxCategory[0].ID != nil && *ac.TaxCategory[0].ID == "Z") {
+				d.Taxes[0].Percent = &percent
+			}
 		}
 	}
 	return d, nil

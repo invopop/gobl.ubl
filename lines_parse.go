@@ -164,6 +164,13 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line) {
 			percentStr += "%"
 		}
 		percent, _ := num.PercentageFromString(percentStr)
+
+		// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
+		// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
+		if percent.IsZero() && ctc.ID != nil && *ctc.ID != "Z" {
+			return
+		}
+
 		if line.Taxes == nil {
 			line.Taxes = make([]*tax.Combo, 1)
 			line.Taxes[0] = &tax.Combo{}
