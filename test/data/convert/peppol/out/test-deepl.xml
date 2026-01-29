@@ -14,6 +14,9 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9930">DE349242045</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>DeepL SE</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Maarweg 165</cbc:StreetName>
         <cbc:CityName>Köln</cbc:CityName>
@@ -37,6 +40,9 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9938">lu10061242</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Société Nationale des Chemins de Fer Luxembourgeois</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>16, Boulevard d&#39;Avranches</cbc:StreetName>
         <cbc:AdditionalStreetName>L-1160</cbc:AdditionalStreetName>
@@ -74,6 +80,9 @@
       </cac:Address>
     </cac:DeliveryLocation>
     <cac:DeliveryParty>
+      <cac:PartyName>
+        <cbc:Name>Société Nationale des Chemins de Fer Luxembourgeois</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>2-8 Avenue Charles de Gaulle</cbc:StreetName>
         <cbc:AdditionalStreetName>Bâtiment C</cbc:AdditionalStreetName>

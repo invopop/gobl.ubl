@@ -17,6 +17,9 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9930">de111111125</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Example Company GmbH</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Example Street 123</cbc:StreetName>
         <cbc:CityName>Example City</cbc:CityName>
@@ -44,6 +47,9 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9938">lu98765432</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Example Customer Organization</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Example Avenue 456</cbc:StreetName>
         <cbc:CityName>Example Town</cbc:CityName>
@@ -79,6 +85,9 @@
       </cac:Address>
     </cac:DeliveryLocation>
     <cac:DeliveryParty>
+      <cac:PartyName>
+        <cbc:Name>Example Customer Organization</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Example Avenue 456</cbc:StreetName>
         <cbc:CityName>Example Town</cbc:CityName>
@@ -102,8 +111,9 @@
       <cbc:TaxableAmount currencyID="EUR">59.64</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
       <cac:TaxCategory>
-        <cbc:ID>Z</cbc:ID>
+        <cbc:ID>AE</cbc:ID>
         <cbc:Percent>0</cbc:Percent>
+        <cbc:TaxExemptionReasonCode>VATEX-EU-AE</cbc:TaxExemptionReasonCode>
         <cbc:TaxExemptionReason>Reverse Charge / Umkehr der Steuerschuld.</cbc:TaxExemptionReason>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
@@ -119,13 +129,13 @@
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
-    <cbc:InvoicedQuantity unitCode="C62">1.000000</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">59.6400</cbc:LineExtensionAmount>
+    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">59.64</cbc:LineExtensionAmount>
     <cac:Item>
       <cbc:Description>Subscription 12345</cbc:Description>
       <cbc:Name>Software Subscription - Pro Plan</cbc:Name>
       <cac:ClassifiedTaxCategory>
-        <cbc:ID>Z</cbc:ID>
+        <cbc:ID>AE</cbc:ID>
         <cbc:Percent>0</cbc:Percent>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
@@ -133,7 +143,7 @@
       </cac:ClassifiedTaxCategory>
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="EUR">59.6400</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="EUR">59.64</cbc:PriceAmount>
     </cac:Price>
   </cac:InvoiceLine>
 </Invoice>

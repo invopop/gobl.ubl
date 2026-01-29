@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "eb639c3487231d745677d6ecfa3db9d332ad5855c1cd1775bc588ac28eb42258"
+			"val": "d313383d3c096edb49b5b34563503bd5b8278ae45aa21df346b1391b186c43b5"
 		}
 	},
 	"doc": {
@@ -25,11 +25,26 @@
 			}
 		},
 		"supplier": {
-			"name": "Soci\u00e9t\u00e9 FR SARL",
+			"name": "Société FR SARL",
 			"tax_id": {
 				"country": "FR",
-				"code": "FR12345678901"
+				"code": "23334175221"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "Marie",
+						"surname": "Dupont"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9957",
+					"code": "334175221"
+				}
+			],
 			"addresses": [
 				{
 					"num": "16",
@@ -44,21 +59,6 @@
 					"addr": "billing@example.com"
 				}
 			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "9957",
-					"code": "12345678901"
-				}
-			],
-			"people": [
-				{
-					"name": {
-						"given": "Marie",
-						"surname": "Dupont"
-					}
-				}
-			],
 			"telephones": [
 				{
 					"num": "+33142345678"
@@ -69,8 +69,15 @@
 			"name": "Client FR",
 			"tax_id": {
 				"country": "FR",
-				"code": "FR98765432109"
+				"code": "96552100554"
 			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9957",
+					"code": "552100554"
+				}
+			],
 			"addresses": [
 				{
 					"num": "25",
@@ -83,13 +90,6 @@
 			"emails": [
 				{
 					"addr": "email@sample.com"
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "9957",
-					"code": "98765432109"
 				}
 			]
 		},
@@ -116,6 +116,9 @@
 				"total": "1800.00"
 			}
 		],
+		"ordering": {
+			"code": "CN-FR-001"
+		},
 		"payment": {
 			"terms": {
 				"notes": "on receipt within 30 days"
@@ -160,9 +163,6 @@
 			"tax": "360.00",
 			"total_with_tax": "2160.00",
 			"payable": "2160.00"
-		},
-		"ordering": {
-			"code": "CN-FR-001"
 		}
 	}
 }

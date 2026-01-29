@@ -10,6 +10,9 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9920">B98602642</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Servicios ES S.L.</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Calle Pradillo 42 16</cbc:StreetName>
         <cbc:CityName>Madrid</cbc:CityName>
@@ -37,6 +40,9 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9930">282741168</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Sample Consumer</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Werner-Heisenberg-Allee 25</cbc:StreetName>
         <cbc:CityName>München</cbc:CityName>

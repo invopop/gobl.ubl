@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c1caff70be11ba58cc86988ebe35907b39c65c1b772fd801a9d6c7023dea1a68"
+			"val": "a3b6391313d07e3518de7a11b2e6b5e8a85d11106862e406873346137aa6daee"
 		}
 	},
 	"doc": {
@@ -12,6 +12,9 @@
 		"$regime": "DE",
 		"$addons": [
 			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"self-billed"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "credit-note",
@@ -21,7 +24,7 @@
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"untdid-document-type": "381"
+				"untdid-document-type": "261"
 			}
 		},
 		"supplier": {

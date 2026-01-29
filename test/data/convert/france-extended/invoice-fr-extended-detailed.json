@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9ce18bd938c35c5e7d53b7be0c64681e4be86fc5b5b6349e7ef6342f280f8635"
+			"val": "763f6395eb3c70192fc89549009ec745c99104c43bb2f70351f408e0fcc577f6"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "FR",
 		"$addons": [
+			"eu-en16931-v2017",
 			"fr-facturx-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -25,10 +26,10 @@
 			}
 		},
 		"supplier": {
-			"name": "Soci\u00e9t\u00e9 Exemple SARL",
+			"name": "Société Exemple SARL",
 			"tax_id": {
 				"country": "FR",
-				"code": "FR12345678901"
+				"code": "23334175221"
 			},
 			"people": [
 				{
@@ -42,7 +43,7 @@
 				{
 					"key": "peppol",
 					"scheme": "9957",
-					"code": "12345678901"
+					"code": "334175221"
 				}
 			],
 			"addresses": [
@@ -69,19 +70,19 @@
 			"name": "Client Exemple",
 			"tax_id": {
 				"country": "FR",
-				"code": "FR98765432109"
+				"code": "96552100554"
 			},
 			"inboxes": [
 				{
 					"key": "peppol",
 					"scheme": "9957",
-					"code": "98765432109"
+					"code": "552100554"
 				}
 			],
 			"addresses": [
 				{
 					"num": "25",
-					"street": "25 Avenue des Champs-\u00c9lys\u00e9es",
+					"street": "25 Avenue des Champs-Élysées",
 					"locality": "Paris",
 					"code": "75008",
 					"country": "FR"

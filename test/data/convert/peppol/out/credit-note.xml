@@ -17,6 +17,9 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9930">111111125</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Provide One GmbH</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Dietmar-Hopp-Allee 16</cbc:StreetName>
         <cbc:CityName>Walldorf</cbc:CityName>
@@ -44,6 +47,9 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9920">282741168</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Sample Consumer</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Werner-Heisenberg-Allee 25</cbc:StreetName>
         <cbc:CityName>München</cbc:CityName>

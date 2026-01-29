@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b50123ca6a727b28a967a0b39218b247a6d9653a6f756a52ab76491bd8c8cb2c"
+			"val": "2b87cc8dbb1d8785642d251ec0ec6e97b51904530f38ec9278d8a09e24cf9f8a"
 		}
 	},
 	"doc": {
@@ -102,7 +102,7 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "1.000000",
+				"quantity": "1",
 				"item": {
 					"name": "Software Subscription - Pro Plan",
 					"description": "Subscription 12345",
@@ -113,10 +113,10 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "zero",
-						"percent": "0%",
+						"key": "reverse-charge",
 						"ext": {
-							"untdid-tax-category": "Z"
+							"cef-vatex": "VATEX-EU-AE",
+							"untdid-tax-category": "AE"
 						}
 					}
 				],
@@ -181,12 +181,12 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "zero",
+								"key": "reverse-charge",
 								"ext": {
-									"untdid-tax-category": "Z"
+									"cef-vatex": "VATEX-EU-AE",
+									"untdid-tax-category": "AE"
 								},
 								"base": "59.64",
-								"percent": "0%",
 								"amount": "0.00"
 							}
 						],

@@ -4,12 +4,15 @@
   <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0</cbc:ProfileID>
   <cbc:ID>SB-CN-001</cbc:ID>
   <cbc:IssueDate>2024-05-15</cbc:IssueDate>
-  <cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>
+  <cbc:CreditNoteTypeCode>261</cbc:CreditNoteTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
   <cbc:BuyerReference>PO-2024-001</cbc:BuyerReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9930">111111125</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Provide One GmbH</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Dietmar-Hopp-Allee 16</cbc:StreetName>
         <cbc:CityName>Walldorf</cbc:CityName>
@@ -37,6 +40,9 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9930">282741168</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Sample Consumer</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Werner-Heisenberg-Allee 25</cbc:StreetName>
         <cbc:CityName>München</cbc:CityName>

@@ -23,6 +23,9 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="EM">inbox@example.com</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Provide One GmbH</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Dietmar-Hopp-Allee 16</cbc:StreetName>
         <cbc:CityName>Walldorf</cbc:CityName>
@@ -49,6 +52,9 @@
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
     <cac:Party>
+      <cac:PartyName>
+        <cbc:Name>Sample Consumer</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Werner-Heisenberg-Allee 25</cbc:StreetName>
         <cbc:CityName>München</cbc:CityName>
@@ -87,6 +93,9 @@
       </cac:Address>
     </cac:DeliveryLocation>
     <cac:DeliveryParty>
+      <cac:PartyName>
+        <cbc:Name></cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Deliverystreet 2</cbc:StreetName>
         <cbc:AdditionalStreetName>Side door</cbc:AdditionalStreetName>

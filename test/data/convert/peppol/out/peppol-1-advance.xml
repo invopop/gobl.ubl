@@ -12,6 +12,9 @@
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9920">B98602642</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Provide One S.L.</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Calle Pradillo 42</cbc:StreetName>
         <cbc:CityName>Madrid</cbc:CityName>
@@ -40,6 +43,9 @@
   <cac:AccountingCustomerParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9920">54387763P</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Sample Consumer</cbc:Name>
+      </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Avenida de la Constitución 10</cbc:StreetName>
         <cbc:CityName>Sevilla</cbc:CityName>
