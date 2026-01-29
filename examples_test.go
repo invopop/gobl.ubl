@@ -39,15 +39,22 @@ const (
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
-func TestConvertToInvoice(t *testing.T) {
-	conn, err := grpc.NewClient(
-		"127.0.0.1:9091",
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-	)
-	require.NoError(t, err)
-	defer conn.Close()
+// validate is a flag that enables Phive validation
+var validate = flag.Bool("validate", false, "Run Phive validation on generated XML")
 
-	pc := phive.NewValidationServiceClient(conn)
+func TestConvertToInvoice(t *testing.T) {
+	var pc phive.ValidationServiceClient
+
+	// Only connect to Phive if validation is requested
+	if *validate {
+		conn, err := grpc.NewClient(
+			"127.0.0.1:9091",
+			grpc.WithTransportCredentials(insecure.NewCredentials()),
+		)
+		require.NoError(t, err)
+		defer conn.Close()
+		pc = phive.NewValidationServiceClient(conn)
+	}
 
 	// Define contexts to test
 	contexts := []struct {
@@ -87,7 +94,10 @@ func TestConvertToInvoice(t *testing.T) {
 					if *updateOut {
 						err = os.WriteFile(outPath, data, 0644)
 						require.NoError(t, err)
+					}
 
+					// Run Phive validation if requested
+					if *validate {
 						// Determine VESID based on document type
 						env, err := loadTestEnvelopeFromPath(example)
 						require.NoError(t, err)
