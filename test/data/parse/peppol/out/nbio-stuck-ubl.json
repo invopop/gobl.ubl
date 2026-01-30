@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4c4f247524bceabbe4479748b774485b9344c5f9f8a2bfb29f1c98e4d9dc10f8"
+			"val": "285fb7b4f24fa01a1ccf5f2b353795e9805549bd23da4d3449d3379175961c36"
 		}
 	},
 	"doc": {
@@ -130,10 +130,9 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "zero",
-						"percent": "0.00%",
+						"key": "reverse-charge",
 						"ext": {
-							"untdid-tax-category": "Z"
+							"untdid-tax-category": "AE"
 						}
 					}
 				],
@@ -181,12 +180,11 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "zero",
+								"key": "reverse-charge",
 								"ext": {
-									"untdid-tax-category": "Z"
+									"untdid-tax-category": "AE"
 								},
 								"base": "195.00",
-								"percent": "0.00%",
 								"amount": "0.00"
 							}
 						],

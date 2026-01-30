@@ -12,7 +12,7 @@ import (
 
 func TestParseInvoiceTypes(t *testing.T) {
 	t.Run("standard invoice (380)", func(t *testing.T) {
-		e, err := testParseInvoice("base-example.xml")
+		e, err := testParseInvoice("peppol/base-example.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -23,7 +23,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("credit note (381)", func(t *testing.T) {
-		e, err := testParseInvoice("base-creditnote-correction.xml")
+		e, err := testParseInvoice("peppol/base-creditnote-correction.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -34,7 +34,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("proforma invoice (325)", func(t *testing.T) {
-		e, err := testParseInvoice("proforma-invoice.xml")
+		e, err := testParseInvoice("peppol/proforma-invoice.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -45,7 +45,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("self-billed invoice (389)", func(t *testing.T) {
-		e, err := testParseInvoice("self-billed-invoice.xml")
+		e, err := testParseInvoice("peppol/self-billed-invoice.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -56,7 +56,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("partial invoice (326)", func(t *testing.T) {
-		e, err := testParseInvoice("partial-invoice.xml")
+		e, err := testParseInvoice("peppol/partial-invoice.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -67,7 +67,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("self-billed credit note (261)", func(t *testing.T) {
-		e, err := testParseInvoice("self-billed-creditnote.xml")
+		e, err := testParseInvoice("peppol/self-billed-creditnote.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -80,7 +80,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 
 func TestParseInvoiceTags(t *testing.T) {
 	t.Run("invoice with self-billed tag", func(t *testing.T) {
-		e, err := testParseInvoice("self-billed-invoice.xml")
+		e, err := testParseInvoice("peppol/self-billed-invoice.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -90,7 +90,7 @@ func TestParseInvoiceTags(t *testing.T) {
 	})
 
 	t.Run("invoice with partial tag", func(t *testing.T) {
-		e, err := testParseInvoice("partial-invoice.xml")
+		e, err := testParseInvoice("peppol/partial-invoice.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -100,7 +100,7 @@ func TestParseInvoiceTags(t *testing.T) {
 	})
 
 	t.Run("credit note with self-billed tag", func(t *testing.T) {
-		e, err := testParseInvoice("self-billed-creditnote.xml")
+		e, err := testParseInvoice("peppol/self-billed-creditnote.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -110,7 +110,7 @@ func TestParseInvoiceTags(t *testing.T) {
 	})
 
 	t.Run("standard invoice without tags", func(t *testing.T) {
-		e, err := testParseInvoice("base-example.xml")
+		e, err := testParseInvoice("peppol/base-example.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -130,37 +130,37 @@ func TestParseInvoiceTypeAndTagCombinations(t *testing.T) {
 	}{
 		{
 			name:         "standard invoice (380)",
-			filename:     "base-example.xml",
+			filename:     "peppol/base-example.xml",
 			expectedType: string(bill.InvoiceTypeStandard),
 			expectedTags: nil,
 		},
 		{
 			name:         "credit note (381)",
-			filename:     "base-creditnote-correction.xml",
+			filename:     "peppol/base-creditnote-correction.xml",
 			expectedType: string(bill.InvoiceTypeCreditNote),
 			expectedTags: nil,
 		},
 		{
 			name:         "proforma (325)",
-			filename:     "proforma-invoice.xml",
+			filename:     "peppol/proforma-invoice.xml",
 			expectedType: string(bill.InvoiceTypeProforma),
 			expectedTags: nil,
 		},
 		{
 			name:         "self-billed standard (389)",
-			filename:     "self-billed-invoice.xml",
+			filename:     "peppol/self-billed-invoice.xml",
 			expectedType: string(bill.InvoiceTypeStandard),
 			expectedTags: []string{string(tax.TagSelfBilled)},
 		},
 		{
 			name:         "partial standard (326)",
-			filename:     "partial-invoice.xml",
+			filename:     "peppol/partial-invoice.xml",
 			expectedType: string(bill.InvoiceTypeStandard),
 			expectedTags: []string{string(tax.TagPartial)},
 		},
 		{
 			name:         "self-billed credit note (261)",
-			filename:     "self-billed-creditnote.xml",
+			filename:     "peppol/self-billed-creditnote.xml",
 			expectedType: string(bill.InvoiceTypeCreditNote),
 			expectedTags: []string{string(tax.TagSelfBilled)},
 		},

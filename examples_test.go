@@ -286,8 +286,9 @@ func loadTestEnvelopeFromPath(path string) (*gobl.Envelope, error) {
 }
 
 // testLoadXML provides the raw data of a test XML file
+// The name parameter can include subdirectories (e.g., "en16931/ubl-example2.xml")
 func testLoadXML(name string) ([]byte, error) {
-	src, err := os.Open(filepath.Join(getConversionTypePath(xmlPattern), name))
+	src, err := os.Open(filepath.Join(getParsePath(), name))
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +429,7 @@ func getConversionTypePath(pattern string) string {
 	if pattern == xmlPattern {
 		return filepath.Join(getDataPath(), "parse")
 	}
-	return filepath.Join(getDataPath(), "convert/pepol")
+	return filepath.Join(getDataPath(), "convert")
 }
 
 func getConvertPath() string {

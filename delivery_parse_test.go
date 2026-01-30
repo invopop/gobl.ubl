@@ -12,7 +12,7 @@ import (
 
 func TestParseDelivery(t *testing.T) {
 	t.Run("ubl-example4.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example4.xml")
+		e, err := testParseInvoice("en16931/ubl-example4.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -29,7 +29,7 @@ func TestParseDelivery(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example5.xml")
+		e, err := testParseInvoice("en16931/ubl-example5.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)

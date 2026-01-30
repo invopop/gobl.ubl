@@ -11,7 +11,7 @@ import (
 
 func TestParseOrdering(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -26,7 +26,7 @@ func TestParseOrdering(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example5.xml")
+		e, err := testParseInvoice("en16931/ubl-example5.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)

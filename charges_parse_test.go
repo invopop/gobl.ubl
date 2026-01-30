@@ -14,7 +14,7 @@ import (
 
 func TestParseCharges(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -49,7 +49,7 @@ func TestParseCharges(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example5.xml")
+		e, err := testParseInvoice("en16931/ubl-example5.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -86,7 +86,7 @@ func TestParseCharges(t *testing.T) {
 	})
 
 	t.Run("Allowance-example.xml", func(t *testing.T) {
-		e, err := testParseInvoice("Allowance-example.xml")
+		e, err := testParseInvoice("peppol/Allowance-example.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -134,7 +134,7 @@ func TestParseCharges(t *testing.T) {
 func TestBaseAmountErrorHandling(t *testing.T) {
 	t.Run("invalid BaseAmount", func(t *testing.T) {
 		// Take the Allowance-example.xml content and modify the BaseAmount value to be invalid
-		data, err := testLoadXML("Allowance-example.xml")
+		data, err := testLoadXML("peppol/Allowance-example.xml")
 		require.NoError(t, err)
 
 		// Replace a valid BaseAmount with an invalid one

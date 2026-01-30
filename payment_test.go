@@ -11,7 +11,7 @@ import (
 
 func TestNewPayment(t *testing.T) {
 	t.Run("self-billed-invoice", func(t *testing.T) {
-		doc, err := testInvoiceFrom("self-billed-invoice.json")
+		doc, err := testInvoiceFrom("peppol-self-billed/self-billed-invoice.json")
 		require.NoError(t, err)
 
 		// PayeeParty should have PartyName (BR-17) but not RegistrationName (UBL-CR-275)
