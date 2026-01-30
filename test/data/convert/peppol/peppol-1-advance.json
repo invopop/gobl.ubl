@@ -1,0 +1,180 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "cbe7e444810663f5912acdcb2e427cb4d1b035fe2c2653f65e0f54374fcd5522"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "ES",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "SAMPLE",
+		"code": "004",
+		"issue_date": "2024-12-04",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Provide One S.L.",
+			"tax_id": {
+				"country": "ES",
+				"code": "B98602642"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "María",
+						"surname": "García"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "B98602642"
+				}
+			],
+			"addresses": [
+				{
+					"num": "42",
+					"street": "Calle Pradillo",
+					"locality": "Madrid",
+					"region": "Madrid",
+					"code": "28002",
+					"country": "ES"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+34914567890"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"tax_id": {
+				"country": "ES",
+				"code": "54387763P"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9920",
+					"code": "54387763P"
+				}
+			],
+			"addresses": [
+				{
+					"num": "10",
+					"street": "Avenida de la Constitución",
+					"locality": "Sevilla",
+					"region": "Andalucía",
+					"code": "41001",
+					"country": "ES"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20",
+				"item": {
+					"name": "Development services",
+					"price": "90.00",
+					"unit": "h"
+				},
+				"sum": "1800.00",
+				"discounts": [
+					{
+						"reason": "Special discount",
+						"amount": "180.00"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1620.00"
+			}
+		],
+		"ordering": {
+			"code": "ORDER-2024-ADVANCE"
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-01-03",
+						"amount": "1960.20",
+						"percent": "100%"
+					}
+				]
+			},
+			"advances": [
+				{
+					"description": "advance payment",
+					"percent": "10%",
+					"amount": "196.02"
+				}
+			]
+		},
+		"totals": {
+			"sum": "1620.00",
+			"total": "1620.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1620.00",
+								"percent": "21.0%",
+								"amount": "340.20"
+							}
+						],
+						"amount": "340.20"
+					}
+				],
+				"sum": "340.20"
+			},
+			"tax": "340.20",
+			"total_with_tax": "1960.20",
+			"payable": "1960.20",
+			"advance": "196.02",
+			"due": "1764.18"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Random invoice"
+			}
+		]
+	}
+}

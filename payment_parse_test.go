@@ -13,7 +13,7 @@ import (
 
 func TestParsePayment(t *testing.T) {
 	t.Run("general example", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -45,7 +45,7 @@ func TestParsePayment(t *testing.T) {
 
 func TestParsePaymentPayee(t *testing.T) {
 	t.Run("payee with two identities", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -64,7 +64,7 @@ func TestParsePaymentPayee(t *testing.T) {
 	})
 
 	t.Run("payee with one identity", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example5.xml")
+		e, err := testParseInvoice("en16931/ubl-example5.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -85,7 +85,7 @@ func TestParsePaymentPayee(t *testing.T) {
 
 func TestParsePaymentInstructions(t *testing.T) {
 	t.Run("instructions with credit transfer", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -104,7 +104,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 	})
 
 	t.Run("instructions with direct debit", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example5.xml")
+		e, err := testParseInvoice("en16931/ubl-example5.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -122,7 +122,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 	})
 
 	t.Run("instructions with notes", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example7.xml")
+		e, err := testParseInvoice("en16931/ubl-example7.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -140,7 +140,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 	})
 
 	t.Run("instructions with only IBAN", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example8.xml")
+		e, err := testParseInvoice("en16931/ubl-example8.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -160,7 +160,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 
 func TestParsePaymentTerms(t *testing.T) {
 	t.Run("terms with notes", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -174,7 +174,7 @@ func TestParsePaymentTerms(t *testing.T) {
 	})
 
 	t.Run("only due date present", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example10.xml")
+		e, err := testParseInvoice("en16931/ubl-example10.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -193,7 +193,7 @@ func TestParsePaymentTerms(t *testing.T) {
 
 func TestParsePaymentAdvances(t *testing.T) {
 	t.Run("totals with prepaid amount", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)

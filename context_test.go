@@ -261,7 +261,7 @@ func TestContextPeppolFranceExtended(t *testing.T) {
 
 func TestContextPeppolSelfBilled(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("self-billed-invoice.json")
+		env, err := loadTestEnvelope("peppol-self-billed/self-billed-invoice.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)
@@ -324,7 +324,7 @@ func TestGetVESID(t *testing.T) {
 	})
 
 	t.Run("self-billed invoice VESID", func(t *testing.T) {
-		env, err := loadTestEnvelope("self-billed-invoice.json")
+		env, err := loadTestEnvelope("peppol-self-billed/self-billed-invoice.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)

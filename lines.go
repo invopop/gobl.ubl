@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/num"
 )
 
 // InvoiceLine represents a line item in an invoice and credit note
@@ -78,7 +79,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 		}
 
 		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy)
+			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
 		}
 
 		if l.Item != nil {
@@ -195,7 +196,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	}
 }
 
-func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string) []*AllowanceCharge {
+func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
 	for _, ch := range charges {
 		ac := &AllowanceCharge{
@@ -213,8 +214,15 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &ch.Reason
 		}
 		if ch.Percent != nil {
-			p := ch.Percent.Base().String()
+			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
+			// Add BaseAmount when percentage is provided
+			if baseSum != nil {
+				ac.BaseAmount = &Amount{
+					Value:      baseSum.String(),
+					CurrencyID: &ccy,
+				}
+			}
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}
@@ -234,8 +242,15 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &d.Reason
 		}
 		if d.Percent != nil {
-			p := d.Percent.Base().String()
+			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
+			// Add BaseAmount when percentage is provided
+			if baseSum != nil {
+				ac.BaseAmount = &Amount{
+					Value:      baseSum.String(),
+					CurrencyID: &ccy,
+				}
+			}
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}

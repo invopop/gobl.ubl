@@ -12,7 +12,7 @@ import (
 
 func TestInvoiceHeaders(t *testing.T) {
 	t.Run("document type extension", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-de-de.json")
+		env, err := loadTestEnvelope("invoice-complete.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)
@@ -36,7 +36,7 @@ func TestInvoiceHeaders(t *testing.T) {
 	})
 
 	t.Run("format date", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-de-de.json")
+		env, err := loadTestEnvelope("invoice-complete.json")
 		require.NoError(t, err)
 
 		out, err := ubl.ConvertInvoice(env)
@@ -45,7 +45,7 @@ func TestInvoiceHeaders(t *testing.T) {
 	})
 
 	t.Run("invoice number", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-de-de.json")
+		env, err := loadTestEnvelope("invoice-complete.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)

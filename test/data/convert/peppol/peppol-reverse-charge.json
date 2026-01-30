@@ -1,0 +1,210 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "2b87cc8dbb1d8785642d251ec0ec6e97b51904530f38ec9278d8a09e24cf9f8a"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"reverse-charge"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "INV-20240101-0001",
+		"issue_date": "2024-01-01",
+		"op_date": "2024-01-01",
+		"currency": "EUR",
+		"tax": {
+			"prices_include": "VAT",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Example Company GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "John",
+						"surname": "Doe"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9930",
+					"code": "de111111125"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Example Street 123",
+					"locality": "Example City",
+					"region": "Example Region",
+					"code": "12345",
+					"country": "DE"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+49621123456"
+				}
+			]
+		},
+		"customer": {
+			"name": "Example Customer Organization",
+			"tax_id": {
+				"country": "LU",
+				"code": "98765432"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "John",
+						"surname": "Doe"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9938",
+					"code": "lu98765432"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Example Avenue 456",
+					"locality": "Example Town",
+					"code": "67890",
+					"country": "LU"
+				}
+			],
+			"emails": [
+				{
+					"addr": "contact@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Software Subscription - Pro Plan",
+					"description": "Subscription 12345",
+					"price": "59.64",
+					"unit": "one"
+				},
+				"sum": "59.64",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "reverse-charge",
+						"ext": {
+							"cef-vatex": "VATEX-EU-AE",
+							"untdid-tax-category": "AE"
+						}
+					}
+				],
+				"total": "59.64"
+			}
+		],
+		"ordering": {
+			"period": {
+				"start": "2024-01-01",
+				"end": "2024-06-30"
+			},
+			"purchases": [
+				{
+					"code": "PO-2024-001"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-01-15",
+						"amount": "59.64",
+						"percent": "100%"
+					}
+				]
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"name": "Example Customer Organization",
+				"people": [
+					{
+						"name": {
+							"given": "John",
+							"surname": "Doe"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "Example Avenue 456",
+						"locality": "Example Town",
+						"code": "67890",
+						"country": "LU"
+					}
+				],
+				"emails": [
+					{
+						"addr": "contact@example.com"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "59.64",
+			"tax_included": "0.00",
+			"total": "59.64",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "reverse-charge",
+								"ext": {
+									"cef-vatex": "VATEX-EU-AE",
+									"untdid-tax-category": "AE"
+								},
+								"base": "59.64",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "59.64",
+			"payable": "59.64"
+		},
+		"notes": [
+			{
+				"key": "legal",
+				"src": "reverse-charge",
+				"text": "Reverse Charge / Umkehr der Steuerschuld."
+			}
+		]
+	}
+}

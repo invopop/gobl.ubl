@@ -1,0 +1,219 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "7627faa8af1c719e2964d18f5cb243369650376e5b12fbfeb75d0e66a3b041ea"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"reverse-charge"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "DI-20251031-2942",
+		"issue_date": "2025-11-12",
+		"op_date": "2025-10-31",
+		"currency": "EUR",
+		"tax": {
+			"prices_include": "VAT",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"uuid": "0195b30a-97df-7000-827c-057ca60342a9",
+			"name": "DeepL SE",
+			"tax_id": {
+				"country": "DE",
+				"code": "349242045"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9930",
+					"code": "DE349242045"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Maarweg 165",
+					"locality": "Köln",
+					"region": "NRW",
+					"code": "50825",
+					"country": "DE"
+				}
+			]
+		},
+		"customer": {
+			"name": "Société Nationale des Chemins de Fer Luxembourgeois",
+			"tax_id": {
+				"country": "LU",
+				"code": "10061242"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Nicolas",
+						"surname": "Rosenbaum"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9938",
+					"code": "lu10061242"
+				}
+			],
+			"addresses": [
+				{
+					"street": "16, Boulevard d'Avranches",
+					"street_extra": "L-1160",
+					"locality": "Luxembourg",
+					"code": "1653",
+					"country": "LU"
+				}
+			],
+			"emails": [
+				{
+					"addr": "Nicolas.ROSENBAUM@cfl.lu"
+				}
+			],
+			"meta": {
+				"chargebee-customer-id": "BTcYCMULPV0pHuEl"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20.000000",
+				"period": {
+					"start": "2025-08-14",
+					"end": "2026-08-14"
+				},
+				"item": {
+					"name": "DeepL Pro Advanced",
+					"description": "Subscription 198QEyULPVI6DT0E",
+					"price": "256.31",
+					"unit": "one",
+					"meta": {
+						"chargebee-date-from": "2025-08-14",
+						"chargebee-date-to": "2026-08-14"
+					}
+				},
+				"sum": "5126.20",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "reverse-charge",
+						"ext": {
+							"cef-vatex": "VATEX-EU-AE",
+							"untdid-tax-category": "AE"
+						}
+					}
+				],
+				"total": "5126.20"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "46052609"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-11-14",
+						"amount": "5126.20",
+						"percent": "100%"
+					}
+				]
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"name": "Société Nationale des Chemins de Fer Luxembourgeois",
+				"people": [
+					{
+						"name": {
+							"given": "Nicolas",
+							"surname": "Rosenbaum"
+						}
+					}
+				],
+				"addresses": [
+					{
+						"street": "2-8 Avenue Charles de Gaulle",
+						"street_extra": "Bâtiment C",
+						"locality": "Luxembourg",
+						"code": "1653",
+						"country": "LU"
+					}
+				],
+				"emails": [
+					{
+						"addr": "Nicolas.ROSENBAUM@cfl.lu"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "5126.20",
+			"tax_included": "0.00",
+			"total": "5126.20",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "reverse-charge",
+								"ext": {
+									"cef-vatex": "VATEX-EU-AE",
+									"untdid-tax-category": "AE"
+								},
+								"base": "5126.20",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "5126.20",
+			"payable": "5126.20"
+		},
+		"notes": [
+			{
+				"text": "Visit: www.deepl.com - Email: info@deepl.com - Management Board: Dr. Jaroslaw Kutylowski (CEO) - Chairman of the Supervisory Board: Florian Schweitzer - Register Court Cologne, HRB 104617- VAT ID DE349242045",
+				"meta": {
+					"chargebee-entity-id": "",
+					"chargebee-entity-type": ""
+				}
+			},
+			{
+				"key": "legal",
+				"src": "reverse-charge",
+				"text": "Reverse Charge / Umkehr der Steuerschuld."
+			}
+		],
+		"meta": {
+			"chargebee-doc-id": "DI-20251031-2942",
+			"chargebee-doc-type": "invoice",
+			"chargebee-site": "deepl"
+		}
+	}
+}

@@ -3,6 +3,7 @@ package ubl
 import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -22,15 +23,17 @@ func (ui *Invoice) addCharges(inv *bill.Invoice) {
 		return
 	}
 	ui.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
+	// Use invoice sum (before discounts) as base amount for percentage calculations
+	baseAmount := inv.Totals.Sum
 	for i, ch := range inv.Charges {
-		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency))
+		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount)
 	}
 	for i, d := range inv.Discounts {
-		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency))
+		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount)
 	}
 }
 
-func makeCharge(ch *bill.Charge, ccy string) AllowanceCharge {
+func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: true,
 		Amount: Amount{
@@ -46,8 +49,13 @@ func makeCharge(ch *bill.Charge, ccy string) AllowanceCharge {
 		c.AllowanceChargeReasonCode = &e
 	}
 	if ch.Percent != nil {
-		p := ch.Percent.Base().String()
+		p := ch.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
+		// Add BaseAmount when percentage is provided
+		c.BaseAmount = &Amount{
+			Value:      baseAmount.String(),
+			CurrencyID: &ccy,
+		}
 	}
 	if ch.Taxes != nil {
 		c.TaxCategory = makeTaxCategory(ch.Taxes)
@@ -56,7 +64,7 @@ func makeCharge(ch *bill.Charge, ccy string) AllowanceCharge {
 	return c
 }
 
-func makeDiscount(d *bill.Discount, ccy string) AllowanceCharge {
+func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: false,
 		Amount: Amount{
@@ -72,8 +80,13 @@ func makeDiscount(d *bill.Discount, ccy string) AllowanceCharge {
 		c.AllowanceChargeReasonCode = &e
 	}
 	if d.Percent != nil {
-		p := d.Percent.Base().String()
+		p := d.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
+		// Add BaseAmount when percentage is provided
+		c.BaseAmount = &Amount{
+			Value:      baseAmount.String(),
+			CurrencyID: &ccy,
+		}
 	}
 	if d.Taxes != nil {
 		c.TaxCategory = makeTaxCategory(d.Taxes)

@@ -1,0 +1,217 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "41a3c111b01636bb582721edff5804a684bc780bff3db7e54419a57cfced032c"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "MULTI",
+		"code": "001",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Provide One GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "John",
+						"surname": "Doe"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9930",
+					"code": "111111125"
+				}
+			],
+			"addresses": [
+				{
+					"num": "16",
+					"street": "Dietmar-Hopp-Allee",
+					"locality": "Walldorf",
+					"code": "69190",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+49621123456"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"tax_id": {
+				"country": "DE",
+				"code": "282741168"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9930",
+					"code": "282741168"
+				}
+			],
+			"addresses": [
+				{
+					"num": "25",
+					"street": "Werner-Heisenberg-Allee",
+					"locality": "München",
+					"code": "80939",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Software Development",
+					"price": "150.00",
+					"unit": "h"
+				},
+				"sum": "1500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1500.00"
+			},
+			{
+				"i": 2,
+				"quantity": "5",
+				"item": {
+					"name": "Code Review",
+					"price": "200.00",
+					"unit": "h"
+				},
+				"sum": "1000.00",
+				"discounts": [
+					{
+						"reason": "Early bird discount",
+						"percent": "10%",
+						"amount": "100.00"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "900.00"
+			},
+			{
+				"i": 3,
+				"quantity": "20",
+				"item": {
+					"name": "Documentation",
+					"price": "80.00",
+					"unit": "h"
+				},
+				"sum": "1600.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1600.00"
+			}
+		],
+		"ordering": {
+			"code": "PO-2024-001"
+		},
+		"payment": {
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "0003434323213231",
+				"credit_transfer": [
+					{
+						"iban": "NO9386011117947",
+						"bic": "DNBANOKK"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "4000.00",
+			"total": "4000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "4000.00",
+								"percent": "19%",
+								"amount": "760.00"
+							}
+						],
+						"amount": "760.00"
+					}
+				],
+				"sum": "760.00"
+			},
+			"tax": "760.00",
+			"total_with_tax": "4760.00",
+			"payable": "4760.00"
+		}
+	}
+}

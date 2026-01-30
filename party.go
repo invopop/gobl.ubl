@@ -124,6 +124,9 @@ func newParty(party *org.Party) *Party {
 		return nil
 	}
 	p := &Party{
+		PartyName: &PartyName{
+			Name: party.Name,
+		},
 		PostalAddress: newAddress(party.Addresses),
 		PartyLegalEntity: &PartyLegalEntity{
 			RegistrationName: &party.Name,
@@ -254,6 +257,73 @@ func newParty(party *org.Party) *Party {
 			})
 		}
 	}
+	return p
+}
+
+// newPayeeParty creates a minimal Party structure for the Payee
+// according to UBL rules which state:
+// - BR-17: The Payee name shall be provided
+// - UBL-SR-20: Payee identifier shall occur maximum once
+// - UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress
+// - UBL-CR-275: A UBL invoice should not include the PayeeParty PartyLegalEntity RegistrationName
+func newPayeeParty(party *org.Party) *Party {
+	if party == nil {
+		return nil
+	}
+	p := &Party{
+		PartyName: &PartyName{
+			Name: party.Name,
+		},
+	}
+
+	// Add only the first identity with a valid scheme as PartyIdentification (UBL-SR-20: maximum once)
+	// Prefer identities with Ext[iso.ExtKeySchemeID] or 4-digit labels (ISO 6523 ICD codes)
+	if len(party.Identities) > 0 {
+		for _, id := range party.Identities {
+			var schemeID *string
+			// First check if there's an explicit scheme in Ext
+			if id.Ext != nil {
+				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
+					schemeID = &s
+				}
+			}
+			// If no Ext scheme, check if label looks like a valid ICD code (4 digits)
+			if schemeID == nil && id.Label != "" && len(id.Label) == 4 {
+				// Assume 4-digit labels are ISO 6523 ICD codes
+				schemeID = &id.Label
+			}
+			// Only add the identity if we have a valid scheme
+			if schemeID != nil {
+				code := id.Code.String()
+				p.PartyIdentification = []Identification{
+					{ID: &IDType{
+						Value:    code,
+						SchemeID: schemeID,
+					}},
+				}
+				break
+			}
+		}
+	}
+
+	// Only add PartyLegalEntity if there's a legal identity, but without RegistrationName
+	for _, id := range party.Identities {
+		if id.Scope == org.IdentityScopeLegal {
+			code := id.Code.String()
+			p.PartyLegalEntity = &PartyLegalEntity{
+				CompanyID: &IDType{
+					Value: code,
+				},
+			}
+			if id.Ext != nil {
+				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
+					p.PartyLegalEntity.CompanyID.SchemeID = &s
+				}
+			}
+			break
+		}
+	}
+
 	return p
 }
 
