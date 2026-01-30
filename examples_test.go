@@ -30,9 +30,6 @@ const (
 	xmlPattern  = "*.xml"
 	jsonPattern = "*.json"
 
-	schemaInvoice    = "UBL-Invoice-2.1.xsd"
-	schemaCreditNote = "UBL-CreditNote-2.1.xsd"
-
 	staticUUID uuid.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 )
 
@@ -52,7 +49,7 @@ func TestConvertToInvoice(t *testing.T) {
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		require.NoError(t, err)
-		defer conn.Close()
+		defer conn.Close() //nolint:errcheck
 		pc = phive.NewValidationServiceClient(conn)
 	}
 
@@ -246,7 +243,7 @@ func loadTestEnvelopeFromPath(path string) (*gobl.Envelope, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer src.Close()
+	defer src.Close() //nolint:errcheck
 
 	buf := new(bytes.Buffer)
 	if _, err := buf.ReadFrom(src); err != nil {
@@ -355,15 +352,6 @@ func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 }
 
 // loadOutputFile returns byte data from a file in the `test/data/out` folder
-func loadOutputFile(name string) ([]byte, error) {
-	src, _ := os.Open(outputFilepath(name))
-	buf := new(bytes.Buffer)
-	if _, err := buf.ReadFrom(src); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
 func writeEnvelope(path string, env *gobl.Envelope) {
 	if !*updateOut {
 		return
@@ -375,23 +363,6 @@ func writeEnvelope(path string, env *gobl.Envelope) {
 	if err := os.WriteFile(path, data, 0644); err != nil {
 		panic(err)
 	}
-}
-
-func outputFilepath(name string) string {
-	var pattern string
-	if strings.HasSuffix(name, ".json") {
-		pattern = xmlPattern
-	} else {
-		pattern = jsonPattern
-	}
-	return filepath.Join(getOutPath(pattern), name)
-}
-
-func loadSchema(t *testing.T, name string) *xsd.Schema {
-	t.Helper()
-	schema, err := xsd.ParseFromFile(filepath.Join(getSchemaPath(), name))
-	require.NoError(t, err)
-	return schema
 }
 
 // ValidateXML validates a XML document against a XSD Schema
@@ -407,18 +378,6 @@ func ValidateXML(schema *xsd.Schema, data []byte) error {
 	}
 
 	return nil
-}
-
-func getDataGlob(pattern string) ([]string, error) {
-	return filepath.Glob(filepath.Join(getConversionTypePath(pattern), pattern))
-}
-
-func getSchemaPath() string {
-	return filepath.Join(getDataPath(), "schema", "maindoc")
-}
-
-func getOutPath(pattern string) string {
-	return filepath.Join(getConversionTypePath(pattern), "out")
 }
 
 func getDataPath() string {
