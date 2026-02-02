@@ -17,7 +17,7 @@ import (
 // Define tests for the ParseXMLLines function
 func TestParseLines(t *testing.T) {
 	t.Run("ubl-example1.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example1.xml")
+		e, err := testParseInvoice("en16931/ubl-example1.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -47,7 +47,7 @@ func TestParseLines(t *testing.T) {
 
 	// Line Charges and Discounts
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -103,7 +103,7 @@ func TestParseLines(t *testing.T) {
 
 	// Test OrderLineReference parsing
 	t.Run("partial-invoice.xml with OrderLineReference", func(t *testing.T) {
-		e, err := testParseInvoice("partial-invoice.xml")
+		e, err := testParseInvoice("peppol/partial-invoice.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -124,7 +124,7 @@ func TestParseLines(t *testing.T) {
 
 	// Test BaseQuantity logic
 	t.Run("BaseQuantity price calculation", func(t *testing.T) {
-		e, err := testParseInvoice("Allowance-example.xml")
+		e, err := testParseInvoice("peppol/Allowance-example.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -145,7 +145,7 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, "410.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (410/1=410)")
 
 		// Test the convert amount from String error handling
-		data, err := testLoadXML("Allowance-example.xml")
+		data, err := testLoadXML("peppol/Allowance-example.xml")
 		require.NoError(t, err)
 		invalidXML := strings.ReplaceAll(string(data), `<cbc:BaseAmount currencyID="EUR">1000</cbc:BaseAmount>`, `<cbc:BaseAmount currencyID="EUR">invalid-amount</cbc:BaseAmount>`)
 		doc, err := ubl.Parse([]byte(invalidXML))

@@ -158,7 +158,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newParty(pymt.Payee)
+		ui.PayeeParty = newPayeeParty(pymt.Payee)
 	}
 
 	return nil

@@ -11,10 +11,11 @@ import (
 
 func TestNewPayment(t *testing.T) {
 	t.Run("self-billed-invoice", func(t *testing.T) {
-		doc, err := testInvoiceFrom("self-billed-invoice.json")
+		doc, err := testInvoiceFrom("peppol-self-billed/self-billed-invoice.json")
 		require.NoError(t, err)
 
-		assert.Equal(t, "Ebeneser Scrooge AS", *doc.PayeeParty.PartyLegalEntity.RegistrationName)
+		// PayeeParty should have PartyName (BR-17) but not RegistrationName (UBL-CR-275)
+		assert.Equal(t, "Ebeneser Scrooge AS", doc.PayeeParty.PartyName.Name)
 		assert.Equal(t, "2013-07-20", doc.DueDate)
 
 		assert.Equal(t, "30", doc.PaymentMeans[0].PaymentMeansCode.Value)

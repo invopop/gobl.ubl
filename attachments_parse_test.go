@@ -12,7 +12,7 @@ import (
 
 func TestParseAttachments(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("ubl-example2.xml")
+		e, err := testParseInvoice("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -34,7 +34,7 @@ func TestParseAttachments(t *testing.T) {
 
 func TestExtractBinaryAttachments(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		data, err := testLoadXML("ubl-example2.xml")
+		data, err := testLoadXML("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
 		doc, err := ubl.Parse(data)

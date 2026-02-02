@@ -1,0 +1,169 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "930f1671589296f5e13e3d13527259e511323c41e28d51b4f52af1922cf85ba5"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017",
+			"fr-facturx-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "FR-EXT",
+		"code": "2024-001",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Société Exemple SARL",
+			"tax_id": {
+				"country": "FR",
+				"code": "23334175221"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "John",
+						"surname": "Doe"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9957",
+					"code": "334175221"
+				}
+			],
+			"addresses": [
+				{
+					"num": "16",
+					"street": "10 Rue de la Paix",
+					"locality": "Paris",
+					"code": "75002",
+					"country": "FR"
+				}
+			],
+			"emails": [
+				{
+					"addr": "facturation@exemple.fr"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+49621123456"
+				}
+			]
+		},
+		"customer": {
+			"name": "Client Exemple",
+			"tax_id": {
+				"country": "FR",
+				"code": "96552100554"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "9957",
+					"code": "552100554"
+				}
+			],
+			"addresses": [
+				{
+					"num": "25",
+					"street": "25 Avenue des Champs-Élysées",
+					"locality": "Paris",
+					"code": "75008",
+					"country": "FR"
+				}
+			],
+			"emails": [
+				{
+					"addr": "contact@client.fr"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20",
+				"item": {
+					"name": "Development services",
+					"price": "90.00",
+					"unit": "h"
+				},
+				"sum": "1800.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1800.00"
+			}
+		],
+		"ordering": {
+			"code": "PO-2024-001"
+		},
+		"payment": {
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "0003434323213231",
+				"credit_transfer": [
+					{
+						"iban": "NO9386011117947",
+						"bic": "DNBANOKK"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "1800.00",
+			"total": "1800.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1800.00",
+								"percent": "20%",
+								"amount": "360.00"
+							}
+						],
+						"amount": "360.00"
+					}
+				],
+				"sum": "360.00"
+			},
+			"tax": "360.00",
+			"total_with_tax": "2160.00",
+			"payable": "2160.00"
+		}
+	}
+}
