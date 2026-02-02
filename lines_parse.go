@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -21,8 +22,11 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 
 	out.Lines = make([]*bill.Line, 0, len(items))
 
+	// Build tax category map from TaxTotal
+	taxCategoryMap := ui.buildTaxCategoryMap()
+
 	for _, docLine := range items {
-		line, err := goblConvertLine(&docLine)
+		line, err := goblConvertLine(&docLine, taxCategoryMap)
 		if err != nil {
 			return err
 		}
@@ -34,7 +38,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	return nil
 }
 
-func goblConvertLine(docLine *InvoiceLine) (*bill.Line, error) {
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
 	if docLine.Price == nil {
 		// skip this line
 		return nil, nil
@@ -61,7 +65,7 @@ func goblConvertLine(docLine *InvoiceLine) (*bill.Line, error) {
 	}
 	if di := docLine.Item; di != nil {
 		goblConvertLineItem(di, line.Item)
-		goblConvertLineItemTaxes(di, line)
+		goblConvertLineItemTaxes(di, line, taxCategoryMap)
 	}
 
 	notes := make([]*org.Note, 0)
@@ -142,7 +146,7 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 	}
 }
 
-func goblConvertLineItemTaxes(di *Item, line *bill.Line) {
+func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo) {
 	ctc := di.ClassifiedTaxCategory
 	if ctc == nil || ctc.TaxScheme == nil {
 		return
@@ -156,6 +160,17 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line) {
 	if ctc.ID != nil {
 		line.Taxes[0].Ext = tax.Extensions{
 			untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
+		}
+
+		// Look up exemption code from TaxTotal if not present in line
+		if ctc.TaxExemptionReasonCode != nil {
+			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(*ctc.TaxExemptionReasonCode)
+		} else {
+			// Try to get exemption code from TaxTotal
+			key := ctc.TaxScheme.ID + ":" + *ctc.ID
+			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
+				line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+			}
 		}
 	}
 	if ctc.Percent != nil {

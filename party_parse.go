@@ -33,7 +33,8 @@ func goblParty(party *Party) *org.Party {
 	if party.PartyName != nil {
 		if p.Name == "" {
 			p.Name = party.PartyName.Name
-		} else {
+		} else if party.PartyName.Name != p.Name {
+			// Only set alias if it's different from the name
 			p.Alias = party.PartyName.Name
 		}
 	}
