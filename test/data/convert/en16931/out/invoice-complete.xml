@@ -92,24 +92,6 @@
         </cac:Country>
       </cac:Address>
     </cac:DeliveryLocation>
-    <cac:DeliveryParty>
-      <cac:PartyName>
-        <cbc:Name></cbc:Name>
-      </cac:PartyName>
-      <cac:PostalAddress>
-        <cbc:StreetName>Deliverystreet 2</cbc:StreetName>
-        <cbc:AdditionalStreetName>Side door</cbc:AdditionalStreetName>
-        <cbc:CityName>DeliveryCity</cbc:CityName>
-        <cbc:PostalZone>523427</cbc:PostalZone>
-        <cbc:CountrySubentity>RegionD</cbc:CountrySubentity>
-        <cac:Country>
-          <cbc:IdentificationCode>NO</cbc:IdentificationCode>
-        </cac:Country>
-      </cac:PostalAddress>
-      <cac:PartyLegalEntity>
-        <cbc:RegistrationName></cbc:RegistrationName>
-      </cac:PartyLegalEntity>
-    </cac:DeliveryParty>
   </cac:Delivery>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>

@@ -100,14 +100,22 @@ func makeTaxCategory(taxes tax.Set) []*TaxCategory {
 	for _, t := range taxes {
 		category := TaxCategory{}
 		category.TaxScheme = &TaxScheme{ID: t.Category.String()}
-		if t.Percent != nil {
-			p := t.Percent.StringWithoutSymbol()
-			category.Percent = &p
-		}
+
 		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
 		if e != "" {
 			category.ID = &e
 		}
+
+		// Set percent: required unless category is "O" (outside scope)
+		if t.Percent != nil {
+			p := t.Percent.StringWithoutSymbol()
+			category.Percent = &p
+		} else if category.ID == nil || *category.ID != "O" {
+			// Default to 0% when not outside scope
+			zero := "0"
+			category.Percent = &zero
+		}
+
 		set = append(set, &category)
 	}
 	return set
