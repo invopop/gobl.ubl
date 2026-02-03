@@ -273,8 +273,8 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 
 // newDeliveryParty creates a Party structure for delivery parties
 // according to UBL rules:
-// - UBL-CR-394: A UBL invoice should not include the DeliveryParty PostalAddress
-//   (it's already in DeliveryLocation)
+//   - UBL-CR-394: A UBL invoice should not include the DeliveryParty PostalAddress
+//     (it's already in DeliveryLocation)
 func newDeliveryParty(party *org.Party) *Party {
 	if party == nil {
 		return nil
