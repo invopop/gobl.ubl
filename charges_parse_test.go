@@ -6,6 +6,7 @@ import (
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
@@ -160,7 +161,7 @@ func TestParseCharges(t *testing.T) {
 		require.NotNil(t, discount1.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), discount1.Taxes[0].Category)
 		assert.Equal(t, "K", discount1.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String())
-		assert.Equal(t, "VATEX-EU-IC", discount1.Taxes[0].Ext["cef-vatex"].String())
+		assert.Equal(t, "VATEX-EU-IC", discount1.Taxes[0].Ext[cef.ExtKeyVATEX].String())
 
 		// Check the second discount (category S)
 		discount2 := discounts[1]
