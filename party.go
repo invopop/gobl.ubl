@@ -119,7 +119,7 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-func newParty(party *org.Party) *Party {
+func newParty(party *org.Party) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}

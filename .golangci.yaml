@@ -1,35 +1,22 @@
-version: "2"
-output:
-  formats:
-    text:
-      path: stdout
 linters:
   enable:
     - errname
     - goconst
     - gocyclo
+    - misspell
     - nakedret
     - revive
     - unconvert
     - unparam
     - zerologlint
-  settings:
-    staticcheck:
-      checks:
-        - all
-  exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
-formatters:
-  enable:
-    - gofmt
-    - goimports
-  exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+
+linters-settings:
+  staticcheck:
+    checks:
+      - all
+
+issues:
+  exclude-dirs:
+    - third_party
+    - builtin
+    - examples

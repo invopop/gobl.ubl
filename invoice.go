@@ -24,7 +24,7 @@ const (
 )
 
 // Invoice represents the root element of a UBL Invoice **or** Credit Note; the structures
-// between the two types are so similar, that it doesn't make much sense to seperate.
+// between the two types are so similar, that it doesn't make much sense to separate.
 type Invoice struct {
 	// Attributes
 	XMLName        xml.Name
