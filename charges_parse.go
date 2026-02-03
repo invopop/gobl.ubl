@@ -11,31 +11,6 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// taxCategoryInfo holds tax category information from TaxTotal
-type taxCategoryInfo struct {
-	exemptionReasonCode string
-}
-
-// buildTaxCategoryMap builds a map of tax category information from TaxTotal
-func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
-	categoryMap := make(map[string]*taxCategoryInfo)
-
-	for _, taxTotal := range ui.TaxTotal {
-		for _, subtotal := range taxTotal.TaxSubtotal {
-			if subtotal.TaxCategory.ID != nil && subtotal.TaxCategory.TaxScheme != nil {
-				key := subtotal.TaxCategory.TaxScheme.ID + ":" + *subtotal.TaxCategory.ID
-				info := &taxCategoryInfo{}
-				if subtotal.TaxCategory.TaxExemptionReasonCode != nil {
-					info.exemptionReasonCode = *subtotal.TaxCategory.TaxExemptionReasonCode
-				}
-				categoryMap[key] = info
-			}
-		}
-	}
-
-	return categoryMap
-}
-
 // goblAddCharges adds the invoice charges to the gobl output.
 func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	var charges []*bill.Charge
