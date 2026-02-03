@@ -35,7 +35,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 		for _, term := range ui.PaymentTerms {
 			note = append(note, term.Note...)
 			if term.Amount != nil {
-				amount, err := num.AmountFromString(term.Amount.Value)
+				amount, err := num.AmountFromString(normalizeNumericString(term.Amount.Value))
 				if err != nil {
 					return err
 				}
@@ -80,7 +80,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 		if len(in.PrepaidPayment) > 0 {
 			payment.Advances = make([]*pay.Advance, 0, len(in.PrepaidPayment))
 			for _, p := range in.PrepaidPayment {
-				amount, err := num.AmountFromString(p.PaidAmount.Value)
+				amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
 				if err != nil {
 					return err
 				}
@@ -100,7 +100,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 	*/
 
 	if ui.LegalMonetaryTotal.PrepaidAmount != nil {
-		totalPrepaid, err := num.AmountFromString(ui.LegalMonetaryTotal.PrepaidAmount.Value)
+		totalPrepaid, err := num.AmountFromString(normalizeNumericString(ui.LegalMonetaryTotal.PrepaidAmount.Value))
 		if err != nil {
 			return err
 		}

@@ -43,14 +43,14 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		// skip this line
 		return nil, nil
 	}
-	price, err := num.AmountFromString(docLine.Price.PriceAmount.Value)
+	price, err := num.AmountFromString(normalizeNumericString(docLine.Price.PriceAmount.Value))
 	if err != nil {
 		return nil, err
 	}
 
 	if docLine.Price.BaseQuantity != nil {
 		// Base quantity is the number of item units to which the price applies
-		baseQuantity, err := num.AmountFromString(docLine.Price.BaseQuantity.Value)
+		baseQuantity, err := num.AmountFromString(normalizeNumericString(docLine.Price.BaseQuantity.Value))
 		if err != nil {
 			return nil, err
 		}
@@ -75,7 +75,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		iq = docLine.CreditedQuantity
 	}
 	if iq != nil {
-		line.Quantity, err = num.AmountFromString(iq.Value)
+		line.Quantity, err = num.AmountFromString(normalizeNumericString(iq.Value))
 		if err != nil {
 			return nil, err
 		}
@@ -167,14 +167,14 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(*ctc.TaxExemptionReasonCode)
 		} else {
 			// Try to get exemption code from TaxTotal
-			key := ctc.TaxScheme.ID + ":" + *ctc.ID
+			key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}
 		}
 	}
 	if ctc.Percent != nil {
-		percentStr := *ctc.Percent
+		percentStr := normalizeNumericString(*ctc.Percent)
 		if !strings.HasSuffix(percentStr, "%") {
 			percentStr += "%"
 		}

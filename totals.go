@@ -143,7 +143,7 @@ func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 	for _, taxTotal := range ui.TaxTotal {
 		for _, subtotal := range taxTotal.TaxSubtotal {
 			if subtotal.TaxCategory.ID != nil && subtotal.TaxCategory.TaxScheme != nil {
-				key := subtotal.TaxCategory.TaxScheme.ID + ":" + *subtotal.TaxCategory.ID
+				key := buildTaxCategoryKey(subtotal.TaxCategory.TaxScheme.ID, *subtotal.TaxCategory.ID)
 				info := &taxCategoryInfo{}
 				if subtotal.TaxCategory.TaxExemptionReasonCode != nil {
 					info.exemptionReasonCode = *subtotal.TaxCategory.TaxExemptionReasonCode
