@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e7c78da86defd421814471bef78722b08834d2301f38cc86141f2ebcc72d94c0"
+			"val": "b34d6465b09df4e7c7e0a17ff8a877114a41f96256d69dadaad13d6ae36770c0"
 		}
 	},
 	"doc": {
@@ -25,7 +25,6 @@
 		},
 		"supplier": {
 			"name": "Test 0195 Identifier Storecove",
-			"alias": "Test 0195 Identifier Storecove",
 			"tax_id": {
 				"country": "SG",
 				"code": "123457890SC"
@@ -80,7 +79,6 @@
 		},
 		"customer": {
 			"name": "Test Party",
-			"alias": "Test Party",
 			"identities": [
 				{
 					"scope": "legal",
@@ -258,7 +256,10 @@
 					{
 						"cat": "GST",
 						"key": "standard",
-						"percent": "9.0%"
+						"percent": "9.0%",
+						"ext": {
+							"untdid-tax-category": "SR"
+						}
 					}
 				]
 			}
@@ -272,7 +273,10 @@
 					{
 						"cat": "GST",
 						"key": "standard",
-						"percent": "9.0%"
+						"percent": "9.0%",
+						"ext": {
+							"untdid-tax-category": "SR"
+						}
 					}
 				]
 			}
@@ -375,15 +379,9 @@
 								"ext": {
 									"untdid-tax-category": "SR"
 								},
-								"base": "12.34",
+								"base": "22.54",
 								"percent": "9.0%",
-								"amount": "1.11"
-							},
-							{
-								"key": "standard",
-								"base": "10.20",
-								"percent": "9.0%",
-								"amount": "0.92"
+								"amount": "2.03"
 							}
 						],
 						"amount": "2.03"

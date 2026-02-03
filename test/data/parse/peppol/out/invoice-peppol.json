@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e1f92c44b53b481bbce13456a24258a95e8121c0ca07f0af937c9a0ba21f3465"
+			"val": "4b46f9a01f0c0b693586695bf9bd6661b556126514db8715fc8dda4a0beb679b"
 		}
 	},
 	"doc": {
@@ -26,7 +26,6 @@
 		},
 		"supplier": {
 			"name": "Acme Corporation",
-			"alias": "Acme Corporation",
 			"tax_id": {
 				"country": "BE",
 				"code": "0000000000"
@@ -56,7 +55,6 @@
 		},
 		"customer": {
 			"name": "OpenPEPPOL AISBL Testbed Operations",
-			"alias": "OpenPEPPOL AISBL Testbed Operations",
 			"tax_id": {
 				"country": "BE",
 				"code": "0848934496"

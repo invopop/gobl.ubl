@@ -6,6 +6,7 @@ import (
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
@@ -127,6 +128,49 @@ func TestParseCharges(t *testing.T) {
 		assert.Equal(t, "Discount", lineDiscount.Reason)
 		assert.Equal(t, "101.00", lineDiscount.Amount.String())
 		assert.Nil(t, lineDiscount.Base)
+	})
+
+	t.Run("discount-taxes.xml", func(t *testing.T) {
+		e, err := testParseInvoice("discount-taxes.xml")
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		charges := inv.Charges
+		discounts := inv.Discounts
+
+		// Check if there's exactly one charge and two discounts
+		require.Len(t, charges, 1)
+		require.Len(t, discounts, 2)
+
+		// Check the charge
+		charge := charges[0]
+		assert.Equal(t, "Service charge", charge.Reason)
+		assert.Equal(t, "12.80", charge.Amount.String())
+		assert.Equal(t, "20%", charge.Percent.String())
+		require.NotNil(t, charge.Taxes)
+		assert.Equal(t, cbc.Code("VAT"), charge.Taxes[0].Category)
+		assert.Equal(t, "10%", charge.Taxes[0].Percent.String())
+		assert.Equal(t, "S", charge.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String())
+
+		// Check the first discount (category K with exemption code)
+		discount1 := discounts[0]
+		assert.Equal(t, "Discount", discount1.Reason)
+		assert.Equal(t, "6.40", discount1.Amount.String())
+		require.NotNil(t, discount1.Taxes)
+		assert.Equal(t, cbc.Code("VAT"), discount1.Taxes[0].Category)
+		assert.Equal(t, "K", discount1.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String())
+		assert.Equal(t, "VATEX-EU-IC", discount1.Taxes[0].Ext[cef.ExtKeyVATEX].String())
+
+		// Check the second discount (category S)
+		discount2 := discounts[1]
+		assert.Equal(t, "Discount", discount2.Reason)
+		assert.Equal(t, "6.40", discount2.Amount.String())
+		require.NotNil(t, discount2.Taxes)
+		assert.Equal(t, cbc.Code("VAT"), discount2.Taxes[0].Category)
+		assert.Equal(t, "10%", discount2.Taxes[0].Percent.String())
+		assert.Equal(t, "S", discount2.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String())
 	})
 
 }

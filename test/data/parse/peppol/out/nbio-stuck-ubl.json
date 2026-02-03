@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "285fb7b4f24fa01a1ccf5f2b353795e9805549bd23da4d3449d3379175961c36"
+			"val": "6ce4edf99d57bbf080e1f7f232206457af806781a5f0629937d86802b7a208bb"
 		}
 	},
 	"doc": {
@@ -26,7 +26,6 @@
 		},
 		"supplier": {
 			"name": "Example Supplier Ltd",
-			"alias": "Example Supplier Ltd",
 			"tax_id": {
 				"country": "BE",
 				"code": "0123456789"
@@ -73,7 +72,6 @@
 		},
 		"customer": {
 			"name": "Example Customer SA",
-			"alias": "Example Customer SA",
 			"tax_id": {
 				"country": "BE",
 				"code": "0987654321"

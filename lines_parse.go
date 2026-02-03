@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -21,8 +22,11 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 
 	out.Lines = make([]*bill.Line, 0, len(items))
 
+	// Build tax category map from TaxTotal
+	taxCategoryMap := ui.buildTaxCategoryMap()
+
 	for _, docLine := range items {
-		line, err := goblConvertLine(&docLine)
+		line, err := goblConvertLine(&docLine, taxCategoryMap)
 		if err != nil {
 			return err
 		}
@@ -34,19 +38,19 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	return nil
 }
 
-func goblConvertLine(docLine *InvoiceLine) (*bill.Line, error) {
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
 	if docLine.Price == nil {
 		// skip this line
 		return nil, nil
 	}
-	price, err := num.AmountFromString(docLine.Price.PriceAmount.Value)
+	price, err := num.AmountFromString(normalizeNumericString(docLine.Price.PriceAmount.Value))
 	if err != nil {
 		return nil, err
 	}
 
 	if docLine.Price.BaseQuantity != nil {
 		// Base quantity is the number of item units to which the price applies
-		baseQuantity, err := num.AmountFromString(docLine.Price.BaseQuantity.Value)
+		baseQuantity, err := num.AmountFromString(normalizeNumericString(docLine.Price.BaseQuantity.Value))
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +65,7 @@ func goblConvertLine(docLine *InvoiceLine) (*bill.Line, error) {
 	}
 	if di := docLine.Item; di != nil {
 		goblConvertLineItem(di, line.Item)
-		goblConvertLineItemTaxes(di, line)
+		goblConvertLineItemTaxes(di, line, taxCategoryMap)
 	}
 
 	notes := make([]*org.Note, 0)
@@ -71,7 +75,7 @@ func goblConvertLine(docLine *InvoiceLine) (*bill.Line, error) {
 		iq = docLine.CreditedQuantity
 	}
 	if iq != nil {
-		line.Quantity, err = num.AmountFromString(iq.Value)
+		line.Quantity, err = num.AmountFromString(normalizeNumericString(iq.Value))
 		if err != nil {
 			return nil, err
 		}
@@ -142,7 +146,7 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 	}
 }
 
-func goblConvertLineItemTaxes(di *Item, line *bill.Line) {
+func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo) {
 	ctc := di.ClassifiedTaxCategory
 	if ctc == nil || ctc.TaxScheme == nil {
 		return
@@ -157,9 +161,20 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line) {
 		line.Taxes[0].Ext = tax.Extensions{
 			untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
 		}
+
+		// Look up exemption code from TaxTotal if not present in line
+		if ctc.TaxExemptionReasonCode != nil {
+			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(*ctc.TaxExemptionReasonCode)
+		} else {
+			// Try to get exemption code from TaxTotal
+			key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID)
+			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
+				line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+			}
+		}
 	}
 	if ctc.Percent != nil {
-		percentStr := *ctc.Percent
+		percentStr := normalizeNumericString(*ctc.Percent)
 		if !strings.HasSuffix(percentStr, "%") {
 			percentStr += "%"
 		}

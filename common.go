@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -104,9 +105,10 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        *string    `xml:"cbc:ID,omitempty"`
-	Percent   *string    `xml:"cbc:Percent,omitempty"`
-	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	ID                     *string    `xml:"cbc:ID,omitempty"`
+	Percent                *string    `xml:"cbc:Percent,omitempty"`
+	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
+	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
@@ -133,4 +135,25 @@ func getTypeCode(inv *bill.Invoice) (string, error) {
 		}
 	}
 	return inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String(), nil
+}
+
+// buildTaxCategoryKey constructs a unique key for a tax category from its scheme ID and category ID
+func buildTaxCategoryKey(taxSchemeID, categoryID string) string {
+	return taxSchemeID + ":" + categoryID
+}
+
+// normalizeNumericString cleans up numeric strings to ensure they can be parsed correctly.
+// It handles:
+// - Leading/trailing whitespace (e.g., " 123.45 " -> "123.45")
+// - Numbers starting with decimal point (e.g., ".07" -> "0.07")
+func normalizeNumericString(s string) string {
+	// Trim whitespace
+	s = strings.TrimSpace(s)
+
+	// Add leading zero if string starts with decimal point
+	if strings.HasPrefix(s, ".") {
+		s = "0" + s
+	}
+
+	return s
 }
