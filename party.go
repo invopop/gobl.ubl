@@ -124,13 +124,18 @@ func newParty(party *org.Party) *Party {
 		return nil
 	}
 	p := &Party{
-		PartyName: &PartyName{
-			Name: party.Name,
-		},
 		PostalAddress: newAddress(party.Addresses),
-		PartyLegalEntity: &PartyLegalEntity{
+	}
+
+	// Only add PartyName if name is not empty
+	if party.Name != "" {
+		p.PartyName = &PartyName{
+			Name: party.Name,
+		}
+		// Only add PartyLegalEntity if name is not empty
+		p.PartyLegalEntity = &PartyLegalEntity{
 			RegistrationName: &party.Name,
-		},
+		}
 	}
 
 	contact := &Contact{}
@@ -204,6 +209,10 @@ func newParty(party *org.Party) *Party {
 		firstLegalIdx := -1
 		for i, id := range party.Identities {
 			if id.Scope == org.IdentityScopeLegal {
+				// Ensure PartyLegalEntity exists before setting CompanyID
+				if p.PartyLegalEntity == nil {
+					p.PartyLegalEntity = &PartyLegalEntity{}
+				}
 				code := id.Code.String()
 				p.PartyLegalEntity.CompanyID = &IDType{
 					Value: code,
@@ -257,6 +266,61 @@ func newParty(party *org.Party) *Party {
 			})
 		}
 	}
+	return p
+}
+
+// newDeliveryParty creates a Party structure for delivery parties
+// according to UBL rules:
+// - UBL-CR-394: A UBL invoice should not include the DeliveryParty PostalAddress
+//   (it's already in DeliveryLocation)
+func newDeliveryParty(party *org.Party) *Party {
+	if party == nil {
+		return nil
+	}
+
+	p := &Party{}
+	hasContent := false
+
+	// Only add PartyName if name is not empty
+	if party.Name != "" {
+		p.PartyName = &PartyName{
+			Name: party.Name,
+		}
+		// Only add PartyLegalEntity if name is not empty
+		p.PartyLegalEntity = &PartyLegalEntity{
+			RegistrationName: &party.Name,
+		}
+		hasContent = true
+	}
+
+	// Note: Intentionally NOT including PostalAddress per UBL-CR-394
+	// The address is already in DeliveryLocation
+
+	contact := &Contact{}
+
+	if len(party.Emails) > 0 {
+		contact.ElectronicMail = &party.Emails[0].Address
+	}
+
+	if len(party.Telephones) > 0 {
+		contact.Telephone = &party.Telephones[0].Number
+	}
+
+	if len(party.People) > 0 {
+		n := contactName(party.People[0].Name)
+		contact.Name = &n
+	}
+
+	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil {
+		p.Contact = contact
+		hasContent = true
+	}
+
+	// Return nil if party would be completely empty to avoid empty XML elements
+	if !hasContent {
+		return nil
+	}
+
 	return p
 }
 

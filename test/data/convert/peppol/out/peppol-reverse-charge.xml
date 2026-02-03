@@ -88,14 +88,6 @@
       <cac:PartyName>
         <cbc:Name>Example Customer Organization</cbc:Name>
       </cac:PartyName>
-      <cac:PostalAddress>
-        <cbc:StreetName>Example Avenue 456</cbc:StreetName>
-        <cbc:CityName>Example Town</cbc:CityName>
-        <cbc:PostalZone>67890</cbc:PostalZone>
-        <cac:Country>
-          <cbc:IdentificationCode>LU</cbc:IdentificationCode>
-        </cac:Country>
-      </cac:PostalAddress>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Example Customer Organization</cbc:RegistrationName>
       </cac:PartyLegalEntity>

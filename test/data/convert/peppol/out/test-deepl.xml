@@ -83,15 +83,6 @@
       <cac:PartyName>
         <cbc:Name>Société Nationale des Chemins de Fer Luxembourgeois</cbc:Name>
       </cac:PartyName>
-      <cac:PostalAddress>
-        <cbc:StreetName>2-8 Avenue Charles de Gaulle</cbc:StreetName>
-        <cbc:AdditionalStreetName>Bâtiment C</cbc:AdditionalStreetName>
-        <cbc:CityName>Luxembourg</cbc:CityName>
-        <cbc:PostalZone>1653</cbc:PostalZone>
-        <cac:Country>
-          <cbc:IdentificationCode>LU</cbc:IdentificationCode>
-        </cac:Country>
-      </cac:PostalAddress>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Société Nationale des Chemins de Fer Luxembourgeois</cbc:RegistrationName>
       </cac:PartyLegalEntity>

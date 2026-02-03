@@ -34,7 +34,7 @@ func newDelivery(del *bill.DeliveryDetails) *Delivery {
 	}
 
 	if del.Receiver != nil {
-		out.DeliveryParty = newParty(del.Receiver)
+		out.DeliveryParty = newDeliveryParty(del.Receiver)
 		out.DeliveryLocation =
 			&Location{
 				Address: newAddress(del.Receiver.Addresses),

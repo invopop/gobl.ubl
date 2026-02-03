@@ -1,0 +1,248 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "0260dfc8c81dbcedbd5e01956209cd805064b83c8743b6fbc2e18b2541c2c37d"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "339",
+		"issue_date": "2026-01-15",
+		"op_date": "2026-01-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"$regime": "DE",
+			"uuid": "01936308-3f83-7000-8792-31150091885b",
+			"name": "CYBERDYNE IT GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Hans",
+						"surname": "Mueller"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "9930",
+					"code": "111111125"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Am Wassermann 29",
+					"street_extra": "Ehrenfeld",
+					"locality": "Köln",
+					"region": "Nordrhein-Westfalen",
+					"code": "50829",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "juan.moliner@invopop.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Cyberdyne Systemen SPRL",
+			"tax_id": {
+				"country": "BE",
+				"code": "0819258832"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Alvaro",
+						"surname": "Olivie"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0208",
+					"code": "0819258832"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Bd du Midi 150",
+					"locality": "Bruxelles",
+					"code": "1000",
+					"country": "BE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Groupe exemple 1",
+					"price": "32.00",
+					"unit": "one"
+				},
+				"sum": "32.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "intra-community",
+						"ext": {
+							"cef-vatex": "VATEX-EU-IC",
+							"untdid-tax-category": "K"
+						}
+					}
+				],
+				"total": "32.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Groupe exemple 2",
+					"price": "32.00",
+					"unit": "one"
+				},
+				"sum": "32.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "10%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "32.00"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "une réduction",
+				"amount": "6.40",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "intra-community",
+						"ext": {
+							"cef-vatex": "VATEX-EU-IC",
+							"untdid-tax-category": "K"
+						}
+					}
+				]
+			},
+			{
+				"i": 2,
+				"reason": "une réduction",
+				"amount": "6.40",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "10%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Un frais",
+				"percent": "20%",
+				"amount": "12.80",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "10%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-03-04",
+						"amount": "67.84"
+					}
+				]
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"addresses": [
+					{
+						"country": "BE"
+					}
+				]
+			},
+			"date": "2026-02-14"
+		},
+		"totals": {
+			"sum": "64.00",
+			"discount": "12.80",
+			"charge": "12.80",
+			"total": "64.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "intra-community",
+								"ext": {
+									"cef-vatex": "VATEX-EU-IC",
+									"untdid-tax-category": "K"
+								},
+								"base": "25.60",
+								"amount": "0.00"
+							},
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "38.40",
+								"percent": "10%",
+								"amount": "3.84"
+							}
+						],
+						"amount": "3.84"
+					}
+				],
+				"sum": "3.84"
+			},
+			"tax": "3.84",
+			"total_with_tax": "67.84",
+			"payable": "67.84"
+		}
+	}
+}
