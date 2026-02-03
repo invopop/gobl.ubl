@@ -175,7 +175,9 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 
 	if len(party.People) > 0 {
 		n := contactName(party.People[0].Name)
-		contact.Name = &n
+		if n != "" {
+			contact.Name = &n
+		}
 	}
 
 	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil {
@@ -308,7 +310,9 @@ func newDeliveryParty(party *org.Party) *Party {
 
 	if len(party.People) > 0 {
 		n := contactName(party.People[0].Name)
-		contact.Name = &n
+		if n != "" {
+			contact.Name = &n
+		}
 	}
 
 	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil {

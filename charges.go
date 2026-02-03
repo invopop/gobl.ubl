@@ -106,13 +106,12 @@ func makeTaxCategory(taxes tax.Set) []*TaxCategory {
 			category.ID = &e
 		}
 
-		// Set percent field
+		// Set percent: required unless category is "O" (outside scope)
 		if t.Percent != nil {
 			p := t.Percent.StringWithoutSymbol()
 			category.Percent = &p
-		} else {
-			// For exempt categories (K, Z, E, O, AE, etc), set percent to 0
-			// when not explicitly provided, as required by EN16931
+		} else if category.ID == nil || *category.ID != "O" {
+			// Default to 0% when not outside scope
 			zero := "0"
 			category.Percent = &zero
 		}
