@@ -238,7 +238,6 @@ func TestPaymentRoundTrip(t *testing.T) {
 		assert.Equal(t, "", originalInv.Payment.Instructions.CreditTransfer[0].IBAN)
 
 		// After round-trip, the number should still be in the number field, not IBAN
-		// This test will FAIL until payment_parse.go is fixed
 		assert.Equal(t, "123456789", resultInv.Payment.Instructions.CreditTransfer[0].Number, "Account number should be preserved in Number field")
 		assert.Equal(t, "", resultInv.Payment.Instructions.CreditTransfer[0].IBAN, "IBAN should be empty when Number was used")
 	})

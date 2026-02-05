@@ -91,7 +91,6 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 		}
 
 		if pymt.Instructions.CreditTransfer != nil {
-
 			pfa := new(FinancialAccount)
 
 			if pymt.Instructions.CreditTransfer[0].IBAN != "" {
