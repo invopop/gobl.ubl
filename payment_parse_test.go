@@ -206,3 +206,40 @@ func TestParsePaymentAdvances(t *testing.T) {
 		assert.Equal(t, "1000.00", payment.Advances[0].Amount.String())
 	})
 }
+
+func TestPaymentRoundTrip(t *testing.T) {
+	t.Run("account number round trip", func(t *testing.T) {
+		// Load the test envelope with account number (not IBAN)
+		env, err := loadTestEnvelope("invoice-account-number.json")
+		require.NoError(t, err)
+
+		originalInv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		// Convert to UBL
+		doc, err := testInvoiceFrom("invoice-account-number.json")
+		require.NoError(t, err)
+
+		// Convert back to GOBL
+		resultEnv, err := doc.Convert()
+		require.NoError(t, err)
+
+		resultInv, ok := resultEnv.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		// Check that the account number is preserved (not moved to IBAN)
+		require.NotNil(t, resultInv.Payment)
+		require.NotNil(t, resultInv.Payment.Instructions)
+		require.NotNil(t, resultInv.Payment.Instructions.CreditTransfer)
+		require.Len(t, resultInv.Payment.Instructions.CreditTransfer, 1)
+
+		// The original has number, not IBAN
+		assert.Equal(t, "123456789", originalInv.Payment.Instructions.CreditTransfer[0].Number)
+		assert.Equal(t, "", originalInv.Payment.Instructions.CreditTransfer[0].IBAN)
+
+		// After round-trip, the number should still be in the number field, not IBAN
+		// This test will FAIL until payment_parse.go is fixed
+		assert.Equal(t, "123456789", resultInv.Payment.Instructions.CreditTransfer[0].Number, "Account number should be preserved in Number field")
+		assert.Equal(t, "", resultInv.Payment.Instructions.CreditTransfer[0].IBAN, "IBAN should be empty when Number was used")
+	})
+}

@@ -91,17 +91,24 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 		}
 
 		if pymt.Instructions.CreditTransfer != nil {
-			ui.PaymentMeans[0].PayeeFinancialAccount = &FinancialAccount{
-				ID: &pymt.Instructions.CreditTransfer[0].IBAN,
+
+			pfa := new(FinancialAccount)
+
+			if pymt.Instructions.CreditTransfer[0].IBAN != "" {
+				pfa.ID = &pymt.Instructions.CreditTransfer[0].IBAN
+			} else if pymt.Instructions.CreditTransfer[0].Number != "" {
+				pfa.ID = &pymt.Instructions.CreditTransfer[0].Number
 			}
 			if pymt.Instructions.CreditTransfer[0].Name != "" {
-				ui.PaymentMeans[0].PayeeFinancialAccount.Name = &pymt.Instructions.CreditTransfer[0].Name
+				pfa.Name = &pymt.Instructions.CreditTransfer[0].Name
 			}
 			if pymt.Instructions.CreditTransfer[0].BIC != "" {
-				ui.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch = &Branch{
+				pfa.FinancialInstitutionBranch = &Branch{
 					ID: &pymt.Instructions.CreditTransfer[0].BIC,
 				}
 			}
+
+			ui.PaymentMeans[0].PayeeFinancialAccount = pfa
 		}
 		if pymt.Instructions.DirectDebit != nil {
 			ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
