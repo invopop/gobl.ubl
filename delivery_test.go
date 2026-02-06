@@ -69,4 +69,70 @@ func TestNewDelivery(t *testing.T) {
 		assert.Equal(t, "NO", doc.Delivery[0].DeliveryLocation.Address.Country.IdentificationCode)
 	})
 
+	t.Run("delivery with no receiver and no date", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-without-buyers-tax-id.json")
+		require.NoError(t, err)
+
+		inv := env.Extract().(*bill.Invoice)
+
+		inv.Delivery.Receiver = nil
+		inv.Delivery.Date = nil
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		assert.Nil(t, doc.Delivery)
+	})
+
+	t.Run("nil delivery", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-without-buyers-tax-id.json")
+		require.NoError(t, err)
+
+		inv := env.Extract().(*bill.Invoice)
+
+		inv.Delivery = nil
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		assert.Nil(t, doc.Delivery)
+	})
+}
+
+func TestNewDeliveryTerms(t *testing.T) {
+	t.Run("delivery with identities", func(t *testing.T) {
+		doc, err := testInvoiceFrom("invoice-without-buyers-tax-id.json")
+		require.NoError(t, err)
+
+		assert.NotNil(t, doc.DeliveryTerms)
+		assert.Equal(t, "6754238987643", doc.DeliveryTerms.ID)
+	})
+
+	t.Run("delivery without identities", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-without-buyers-tax-id.json")
+		require.NoError(t, err)
+
+		inv := env.Extract().(*bill.Invoice)
+
+		inv.Delivery.Identities = nil
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		assert.Nil(t, doc.DeliveryTerms)
+	})
+
+	t.Run("nil delivery", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-without-buyers-tax-id.json")
+		require.NoError(t, err)
+
+		inv := env.Extract().(*bill.Invoice)
+
+		inv.Delivery = nil
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		assert.Nil(t, doc.DeliveryTerms)
+	})
 }

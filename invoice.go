@@ -181,6 +181,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.Delivery = []*Delivery{d}
 	}
 
+	out.DeliveryTerms = newDeliveryTerms(inv.Delivery)
+
 	return out, nil
 }
 

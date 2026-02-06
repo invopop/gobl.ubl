@@ -22,7 +22,7 @@ type DeliveryTerms struct {
 }
 
 func newDelivery(del *bill.DeliveryDetails) *Delivery {
-	if del == nil {
+	if del == nil || (del.Receiver == nil && del.Date == nil) {
 		return nil
 	}
 
@@ -39,10 +39,19 @@ func newDelivery(del *bill.DeliveryDetails) *Delivery {
 			&Location{
 				Address: newAddress(del.Receiver.Addresses),
 			}
-		if len(del.Identities) > 0 {
-			out.DeliveryLocation.ID = &IDType{Value: del.Identities[0].Code.String()}
-		}
 	}
 
 	return out
+}
+
+func newDeliveryTerms(del *bill.DeliveryDetails) *DeliveryTerms {
+	if del == nil {
+		return nil
+	}
+
+	if len(del.Identities) > 0 {
+		return &DeliveryTerms{ID: del.Identities[0].Code.String()}
+	}
+
+	return nil
 }
