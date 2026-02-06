@@ -25,6 +25,17 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
 	})
 
+	t.Run("credit transfer with account number", func(t *testing.T) {
+		doc, err := testInvoiceFrom("invoice-account-number.json")
+		require.NoError(t, err)
+
+		// Verify the account number was set in the UBL financial account ID
+		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
+		assert.Equal(t, "123456789", *doc.PaymentMeans[0].PayeeFinancialAccount.ID)
+		assert.Equal(t, "Test Bank Account", *doc.PaymentMeans[0].PayeeFinancialAccount.Name)
+		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
+	})
+
 	t.Run("document type extension", func(t *testing.T) {
 		env, err := loadTestEnvelope("invoice-minimal.json")
 		require.NoError(t, err)
