@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -15,7 +17,7 @@ func goblParty(party *Party) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
-		p.Name = *party.PartyLegalEntity.RegistrationName
+		p.Name = strings.ToValidUTF8(*party.PartyLegalEntity.RegistrationName, "")
 	}
 
 	if eID := party.EndpointID; eID != nil {
@@ -32,10 +34,10 @@ func goblParty(party *Party) *org.Party {
 
 	if party.PartyName != nil {
 		if p.Name == "" {
-			p.Name = party.PartyName.Name
+			p.Name = strings.ToValidUTF8(party.PartyName.Name, "")
 		} else if party.PartyName.Name != p.Name {
 			// Only set alias if it's different from the name
-			p.Alias = party.PartyName.Name
+			p.Alias = strings.ToValidUTF8(party.PartyName.Name, "")
 		}
 	}
 
@@ -43,7 +45,7 @@ func goblParty(party *Party) *org.Party {
 		p.People = []*org.Person{
 			{
 				Name: &org.Name{
-					Given: *party.Contact.Name,
+					Given: strings.ToValidUTF8(*party.Contact.Name, ""),
 				},
 			},
 		}
@@ -59,14 +61,14 @@ func goblParty(party *Party) *org.Party {
 		if party.Contact.Telephone != nil {
 			p.Telephones = []*org.Telephone{
 				{
-					Number: *party.Contact.Telephone,
+					Number: strings.ToValidUTF8(*party.Contact.Telephone, ""),
 				},
 			}
 		}
 		if party.Contact.ElectronicMail != nil {
 			p.Emails = []*org.Email{
 				{
-					Address: *party.Contact.ElectronicMail,
+					Address: strings.ToValidUTF8(*party.Contact.ElectronicMail, ""),
 				},
 			}
 		}
@@ -89,19 +91,19 @@ func parseAddress(address *PostalAddress) *org.Address {
 		addr.Country = l10n.ISOCountryCode(address.Country.IdentificationCode)
 	}
 	if address.StreetName != nil {
-		addr.Street = *address.StreetName
+		addr.Street = strings.ToValidUTF8(*address.StreetName, "")
 	}
 	if address.AdditionalStreetName != nil {
-		addr.StreetExtra = *address.AdditionalStreetName
+		addr.StreetExtra = strings.ToValidUTF8(*address.AdditionalStreetName, "")
 	}
 	if address.CityName != nil {
-		addr.Locality = *address.CityName
+		addr.Locality = strings.ToValidUTF8(*address.CityName, "")
 	}
 	if address.PostalZone != nil {
-		addr.Code = cbc.Code(*address.PostalZone)
+		addr.Code = cbc.Code(strings.ToValidUTF8(*address.PostalZone, ""))
 	}
 	if address.CountrySubentity != nil {
-		addr.Region = *address.CountrySubentity
+		addr.Region = strings.ToValidUTF8(*address.CountrySubentity, "")
 	}
 	return addr
 }

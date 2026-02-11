@@ -3,6 +3,7 @@ package ubl
 import (
 	"encoding/base64"
 	"regexp"
+	"strings"
 
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/dsig"
@@ -71,8 +72,8 @@ func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 		}
 	}
 
-	att.Code = cbc.Code(ref.ID.Value)
-	att.Description = ref.DocumentDescription
+	att.Code = cbc.Code(strings.ToValidUTF8(ref.ID.Value, ""))
+	att.Description = strings.ToValidUTF8(ref.DocumentDescription, "")
 
 	return att
 }

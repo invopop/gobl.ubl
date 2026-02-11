@@ -45,7 +45,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 			}
 		}
 		if len(note) > 0 {
-			payment.Terms.Notes = strings.Join(note, " ")
+			payment.Terms.Notes = strings.ToValidUTF8(strings.Join(note, " "), "")
 		}
 	}
 
@@ -128,7 +128,7 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	}
 
 	if paymentMeans.PaymentMeansCode.Name != nil {
-		instructions.Detail = *paymentMeans.PaymentMeansCode.Name
+		instructions.Detail = strings.ToValidUTF8(*paymentMeans.PaymentMeansCode.Name, "")
 	}
 
 	if paymentMeans.PaymentID != nil {
@@ -156,7 +156,7 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 			creditTransfer.IBAN = *account.ID
 		}
 		if account.Name != nil {
-			creditTransfer.Name = *account.Name
+			creditTransfer.Name = strings.ToValidUTF8(*account.Name, "")
 		}
 		if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
 			creditTransfer.BIC = *account.FinancialInstitutionBranch.ID
