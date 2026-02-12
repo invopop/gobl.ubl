@@ -89,7 +89,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		for _, note := range docLine.Note {
 			if note != "" {
 				notes = append(notes, &org.Note{
-					Text: strings.ToValidUTF8(note, ""),
+					Text: cleanString(note),
 				})
 			}
 		}
@@ -119,10 +119,10 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 
 func goblConvertLineItem(di *Item, item *org.Item) {
 	if di.Name != "" {
-		item.Name = strings.ToValidUTF8(di.Name, "")
+		item.Name = cleanString(di.Name)
 	}
 	if di.Description != nil {
-		item.Description = strings.ToValidUTF8(*di.Description, "")
+		item.Description = cleanString(*di.Description)
 	}
 
 	if di.OriginCountry != nil {
@@ -140,7 +140,7 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 		for _, property := range *di.AdditionalItemProperty {
 			if property.Name != "" && property.Value != "" {
 				key := formatKey(property.Name)
-				item.Meta[key] = strings.ToValidUTF8(property.Value, "")
+				item.Meta[key] = cleanString(property.Value)
 			}
 		}
 	}

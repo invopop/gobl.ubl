@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"strings"
-
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -105,7 +103,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		out.Notes = make([]*org.Note, 0, len(ui.Note))
 		for _, note := range ui.Note {
 			n := &org.Note{
-				Text: strings.ToValidUTF8(note, ""),
+				Text: cleanString(note),
 			}
 			out.Notes = append(out.Notes, n)
 		}

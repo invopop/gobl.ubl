@@ -1,0 +1,160 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "6ec4f2539268d2d60895aee1cb49b684c76614699f4639e5ad336d63059f6ee9"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "ENCODING-001",
+		"issue_date": "2024-01-15",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Test Supplier Official Name Ltd",
+			"alias": "Test Supplier Ltd.",
+			"tax_id": {
+				"country": "DE",
+				"code": "123456789"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "HRB12345"
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0088",
+					"code": "1234567890123"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Supplier Street 1",
+					"locality": "Berlin",
+					"code": "10115",
+					"country": "DE"
+				}
+			]
+		},
+		"customer": {
+			"name": "Test Buyer Official Name GmbH",
+			"alias": "Test Buyer GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "987654321"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "HRB98765"
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0088",
+					"code": "9876543210987"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Buyer Avenue 42",
+					"locality": "Munich",
+					"code": "80331",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "2",
+				"item": {
+					"name": "Test Widget XL",
+					"description": "Widget with bad encoding character",
+					"price": "50.00",
+					"unit": "one"
+				},
+				"sum": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "100.00"
+			}
+		],
+		"ordering": {
+			"code": "ENC-REF-001"
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-02-15",
+						"amount": "119.00",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"iban": "DE89370400440532013000"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "100.00",
+			"total": "100.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "100.00",
+								"percent": "19.0%",
+								"amount": "19.00"
+							}
+						],
+						"amount": "19.00"
+					}
+				],
+				"sum": "19.00"
+			},
+			"tax": "19.00",
+			"total_with_tax": "119.00",
+			"payable": "119.00"
+		}
+	}
+}
