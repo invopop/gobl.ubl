@@ -1,6 +1,7 @@
 package ubl
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -11,16 +12,22 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-var paymentMeansMap = map[string]cbc.Key{
-	"10": pay.MeansKeyCash,
-	"20": pay.MeansKeyCheque,
-	"30": pay.MeansKeyCreditTransfer,
-	"42": pay.MeansKeyDebitTransfer,
-	"48": pay.MeansKeyCard,
-	"49": pay.MeansKeyDirectDebit,
-	"58": pay.MeansKeyCreditTransfer.With(pay.MeansKeySEPA),
-	"59": pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA),
-}
+var (
+	paymentMeansMap = map[string]cbc.Key{
+		"10": pay.MeansKeyCash,
+		"20": pay.MeansKeyCheque,
+		"30": pay.MeansKeyCreditTransfer,
+		"42": pay.MeansKeyDebitTransfer,
+		"48": pay.MeansKeyCard,
+		"49": pay.MeansKeyDirectDebit,
+		"58": pay.MeansKeyCreditTransfer.With(pay.MeansKeySEPA),
+		"59": pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA),
+	}
+
+	// ibanRegex matches IBAN-like format: starts with 2+ letters followed by digits/alphanumeric
+	// Allows optional whitespace throughout (IBANs are often formatted with spaces)
+	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
+)
 
 func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 	payment := &bill.PaymentDetails{}
@@ -153,7 +160,15 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	if paymentMeans.PayeeFinancialAccount != nil {
 		account := paymentMeans.PayeeFinancialAccount
 		if account.ID != nil {
-			creditTransfer.IBAN = strings.ToValidUTF8(*account.ID, "")
+			// Determine if the ID is an IBAN or an account number
+			// IBAN format: 2 letter country code + 2 check digits + up to 30 alphanumeric characters
+			// Total length: 15-34 characters
+			id := strings.ToValidUTF8(*account.ID, "")
+			if isIBAN(id) {
+				creditTransfer.IBAN = id
+			} else {
+				creditTransfer.Number = id
+			}
 		}
 		if account.Name != nil {
 			creditTransfer.Name = strings.ToValidUTF8(*account.Name, "")
@@ -164,6 +179,15 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}
+}
+
+// isIBAN checks if a string looks like an IBAN
+// Returns true if the string starts with 2+ letters followed by alphanumeric characters
+// This covers standard IBANs (e.g., NO9386011117947 or NO93 8601 1117 947) and allows
+// some flexibility for various IBAN-like formats that may appear in UBL documents
+func isIBAN(s string) bool {
+	s = strings.ToUpper(strings.TrimSpace(s))
+	return ibanRegex.MatchString(s)
 }
 
 func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.DirectDebit {
