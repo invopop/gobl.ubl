@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"strings"
-
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -26,7 +24,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
-		ordering.Code = cbc.Code(strings.ToValidUTF8(ui.BuyerReference, ""))
+		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
@@ -128,7 +126,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.IssueDate = &refDate
 	}
 	if ref.DocumentDescription != "" {
-		docRef.Description = strings.ToValidUTF8(ref.DocumentDescription, "")
+		docRef.Description = cleanString(ref.DocumentDescription)
 	}
 	if ref.ValidityPeriod != nil {
 		docRef.Period = goblPeriodDates(ref.ValidityPeriod)

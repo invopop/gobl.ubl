@@ -8,6 +8,13 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
+// cleanString strips the Unicode replacement character (U+FFFD) which can
+// appear in badly-encoded XML documents and causes canonical JSON
+// serialization to fail.
+func cleanString(s string) string {
+	return strings.ReplaceAll(s, "\uFFFD", "")
+}
+
 // formatKey formats a string to comply with GOBL key requirements.
 func formatKey(key string) cbc.Key {
 	key = strings.ToLower(key)

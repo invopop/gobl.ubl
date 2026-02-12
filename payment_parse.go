@@ -52,7 +52,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 			}
 		}
 		if len(note) > 0 {
-			payment.Terms.Notes = strings.ToValidUTF8(strings.Join(note, " "), "")
+			payment.Terms.Notes = cleanString(strings.Join(note, " "))
 		}
 	}
 
@@ -135,7 +135,7 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	}
 
 	if paymentMeans.PaymentMeansCode.Name != nil {
-		instructions.Detail = strings.ToValidUTF8(*paymentMeans.PaymentMeansCode.Name, "")
+		instructions.Detail = cleanString(*paymentMeans.PaymentMeansCode.Name)
 	}
 
 	if paymentMeans.PaymentID != nil {
@@ -163,7 +163,7 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 			// Determine if the ID is an IBAN or an account number
 			// IBAN format: 2 letter country code + 2 check digits + up to 30 alphanumeric characters
 			// Total length: 15-34 characters
-			id := strings.ToValidUTF8(*account.ID, "")
+			id := cleanString(*account.ID)
 			if isIBAN(id) {
 				creditTransfer.IBAN = id
 			} else {
@@ -171,10 +171,10 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 			}
 		}
 		if account.Name != nil {
-			creditTransfer.Name = strings.ToValidUTF8(*account.Name, "")
+			creditTransfer.Name = cleanString(*account.Name)
 		}
 		if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-			creditTransfer.BIC = strings.ToValidUTF8(*account.FinancialInstitutionBranch.ID, "")
+			creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
 		}
 	}
 
