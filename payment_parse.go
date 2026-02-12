@@ -153,13 +153,13 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	if paymentMeans.PayeeFinancialAccount != nil {
 		account := paymentMeans.PayeeFinancialAccount
 		if account.ID != nil {
-			creditTransfer.IBAN = *account.ID
+			creditTransfer.IBAN = strings.ToValidUTF8(*account.ID, "")
 		}
 		if account.Name != nil {
 			creditTransfer.Name = strings.ToValidUTF8(*account.Name, "")
 		}
 		if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-			creditTransfer.BIC = *account.FinancialInstitutionBranch.ID
+			creditTransfer.BIC = strings.ToValidUTF8(*account.FinancialInstitutionBranch.ID, "")
 		}
 	}
 
