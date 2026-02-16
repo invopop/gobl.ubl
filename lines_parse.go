@@ -1,6 +1,7 @@
 package ubl
 
 import (
+	"math"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -54,7 +55,10 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		if err != nil {
 			return nil, err
 		}
-		price = price.Divide(baseQuantity)
+		// Calculate required precision dynamically to avoid rounding errors
+		// Formula: price_decimals + ceil(log10(base_quantity))
+		precision := calculateRequiredPrecision(price, baseQuantity)
+		price = price.RescaleUp(precision).Divide(baseQuantity)
 	}
 
 	line := &bill.Line{
@@ -115,6 +119,26 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		line.Notes = notes
 	}
 	return line, nil
+}
+
+// calculateRequiredPrecision determines the decimal precision needed when
+// dividing a price by a base quantity to avoid rounding errors.
+// Formula: price_decimals + ceil(log10(base_quantity))
+// Example: price with 2 decimals divided by 100 needs 2 + 2 = 4 decimals
+func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
+	priceExp := price.Exp()
+
+	// Convert baseQuantity to a whole number to calculate needed decimal places
+	baseQtyNormalized := baseQuantity.Rescale(0)
+	baseQtyFloat := math.Abs(float64(baseQtyNormalized.Value()))
+
+	additionalDecimals := uint32(0)
+	if baseQtyFloat > 1 {
+		// log10(100) = 2, log10(1000) = 3, etc.
+		additionalDecimals = uint32(math.Ceil(math.Log10(baseQtyFloat)))
+	}
+
+	return priceExp + additionalDecimals
 }
 
 func goblConvertLineItem(di *Item, item *org.Item) {

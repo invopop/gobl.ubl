@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1e421e3f8217b3652428006eb784f67e08ec47c9944390107c3a2cff31db471c"
+			"val": "f30bb6003cc2bf6b9b227fc4722c499132b6cb0c3b18a360b6d9e967ee69f004"
 		}
 	},
 	"doc": {
@@ -127,7 +127,7 @@
 				"quantity": "132",
 				"item": {
 					"name": "Contract transportvermogen",
-					"price": "1.27",
+					"price": "1.2700",
 					"unit": "KW",
 					"meta": {
 						"contract-transportvermogen": "132,00 kW",
@@ -181,7 +181,7 @@
 				"quantity": "1",
 				"item": {
 					"name": "Vastrecht Transportdienst",
-					"price": "36.75",
+					"price": "36.7500",
 					"unit": "mon",
 					"meta": {
 						"contract-transportvermogen": "132,00 kW",
@@ -208,7 +208,7 @@
 				"quantity": "1",
 				"item": {
 					"name": "Vastrecht Aansluitdienst",
-					"price": "56.50",
+					"price": "56.5000",
 					"unit": "mon",
 					"meta": {
 						"contract-transportvermogen": "132,00 kW",
