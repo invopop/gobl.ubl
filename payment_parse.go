@@ -142,12 +142,13 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 		instructions.Ref = cbc.Code(*paymentMeans.PaymentID)
 	}
 
-	switch instructions.Key {
-	case pay.MeansKeyCreditTransfer, pay.MeansKeyCreditTransfer.With(pay.MeansKeySEPA):
+	if paymentMeans.PayeeFinancialAccount != nil {
 		instructions.CreditTransfer = goblCreditTransfer(paymentMeans)
-	case pay.MeansKeyDirectDebit, pay.MeansKeyDirectDebit.With(pay.MeansKeySEPA):
+	}
+	if paymentMeans.PaymentMandate != nil {
 		instructions.DirectDebit = goblInvoiceDirectDebit(out, paymentMeans)
-	case pay.MeansKeyCard:
+	}
+	if paymentMeans.CardAccount != nil {
 		instructions.Card = goblCard(paymentMeans)
 	}
 
@@ -156,26 +157,21 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 
 func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	creditTransfer := &pay.CreditTransfer{}
+	account := paymentMeans.PayeeFinancialAccount
 
-	if paymentMeans.PayeeFinancialAccount != nil {
-		account := paymentMeans.PayeeFinancialAccount
-		if account.ID != nil {
-			// Determine if the ID is an IBAN or an account number
-			// IBAN format: 2 letter country code + 2 check digits + up to 30 alphanumeric characters
-			// Total length: 15-34 characters
-			id := cleanString(*account.ID)
-			if isIBAN(id) {
-				creditTransfer.IBAN = id
-			} else {
-				creditTransfer.Number = id
-			}
+	if account.ID != nil {
+		id := cleanString(*account.ID)
+		if isIBAN(id) {
+			creditTransfer.IBAN = id
+		} else {
+			creditTransfer.Number = id
 		}
-		if account.Name != nil {
-			creditTransfer.Name = cleanString(*account.Name)
-		}
-		if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-			creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
-		}
+	}
+	if account.Name != nil {
+		creditTransfer.Name = cleanString(*account.Name)
+	}
+	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
+		creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}
@@ -193,11 +189,9 @@ func isIBAN(s string) bool {
 func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.DirectDebit {
 	directDebit := &pay.DirectDebit{}
 
-	if paymentMeans.PaymentMandate != nil {
-		directDebit.Ref = paymentMeans.PaymentMandate.ID.Value
-		if paymentMeans.PaymentMandate.PayerFinancialAccount != nil && paymentMeans.PaymentMandate.PayerFinancialAccount.ID != nil {
-			directDebit.Account = *paymentMeans.PaymentMandate.PayerFinancialAccount.ID
-		}
+	directDebit.Ref = paymentMeans.PaymentMandate.ID.Value
+	if paymentMeans.PaymentMandate.PayerFinancialAccount != nil && paymentMeans.PaymentMandate.PayerFinancialAccount.ID != nil {
+		directDebit.Account = *paymentMeans.PaymentMandate.PayerFinancialAccount.ID
 	}
 	seller := out.Supplier
 	if seller != nil {
@@ -223,17 +217,15 @@ func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.
 
 func goblCard(paymentMeans *PaymentMeans) *pay.Card {
 	card := &pay.Card{}
-	if paymentMeans.CardAccount != nil {
-		if paymentMeans.CardAccount.PrimaryAccountNumberID != nil {
-			pan := *paymentMeans.CardAccount.PrimaryAccountNumberID
-			if len(pan) >= 4 {
-				pan = pan[len(pan)-4:]
-			}
-			card.Last4 = pan
+	if paymentMeans.CardAccount.PrimaryAccountNumberID != nil {
+		pan := *paymentMeans.CardAccount.PrimaryAccountNumberID
+		if len(pan) >= 4 {
+			pan = pan[len(pan)-4:]
 		}
-		if paymentMeans.CardAccount.HolderName != nil {
-			card.Holder = *paymentMeans.CardAccount.HolderName
-		}
+		card.Last4 = pan
+	}
+	if paymentMeans.CardAccount.HolderName != nil {
+		card.Holder = *paymentMeans.CardAccount.HolderName
 	}
 	return card
 }
