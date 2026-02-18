@@ -135,12 +135,12 @@ func TestParseLines(t *testing.T) {
 		assert.Len(t, lines, 3)
 
 		// Check the second line which has BaseQuantity = 2 and PriceAmount = 200
-		// Expected unit price should be 200/2 = 100 (precision: 2 + log10(2) = 3)
+		// Expected unit price should be 200/2 = 100 (precision: 2 + ceil(log10(2)) = 2 + 1 = 3)
 		line := lines[1]
 		assert.Equal(t, "100.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (200/2=100)")
 
 		// Check the first line which has BaseQuantity = 1 and PriceAmount = 410
-		// Expected unit price should be 410/1 = 410 (precision: 2 + log10(1) = 2)
+		// Expected unit price should be 410/1 = 410 (precision: 2 + ceil(log10(1)) = 2 + 0 = 2)
 		line = lines[0]
 		assert.Equal(t, "410.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (410/1=410)")
 

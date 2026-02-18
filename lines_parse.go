@@ -55,10 +55,12 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		if err != nil {
 			return nil, err
 		}
-		// Calculate required precision dynamically to avoid rounding errors
-		// Formula: price_decimals + ceil(log10(base_quantity))
-		precision := calculateRequiredPrecision(price, baseQuantity)
-		price = price.RescaleUp(precision).Divide(baseQuantity)
+		if !baseQuantity.IsZero() {
+			// Calculate required precision dynamically to avoid rounding errors
+			// Formula: price_decimals + ceil(log10(base_quantity))
+			precision := calculateRequiredPrecision(price, baseQuantity)
+			price = price.RescaleUp(precision).Divide(baseQuantity)
+		}
 	}
 
 	line := &bill.Line{
