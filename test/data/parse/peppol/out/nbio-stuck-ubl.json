@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6ce4edf99d57bbf080e1f7f232206457af806781a5f0629937d86802b7a208bb"
+			"val": "a9861bae0876dadcefd44af420da0703e0fc5ddfa16dc3eb2ce0897075be7226"
 		}
 	},
 	"doc": {
@@ -164,6 +164,11 @@
 			"instructions": {
 				"key": "debit-transfer",
 				"ref": "020250000001",
+				"credit_transfer": [
+					{
+						"iban": "BE68539007547034"
+					}
+				],
 				"ext": {
 					"untdid-payment-means": "31"
 				}
