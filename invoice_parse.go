@@ -102,10 +102,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	if len(ui.Note) > 0 {
 		out.Notes = make([]*org.Note, 0, len(ui.Note))
 		for _, note := range ui.Note {
-			n := &org.Note{
-				Text: cleanString(note),
-			}
-			out.Notes = append(out.Notes, n)
+			out.Notes = append(out.Notes, parseNote(note))
 		}
 	}
 

@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -105,10 +106,9 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID                     *string    `xml:"cbc:ID,omitempty"`
-	Percent                *string    `xml:"cbc:Percent,omitempty"`
-	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
-	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	ID        *string    `xml:"cbc:ID,omitempty"`
+	Percent   *string    `xml:"cbc:Percent,omitempty"`
+	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
@@ -137,9 +137,31 @@ func getTypeCode(inv *bill.Invoice) (string, error) {
 	return inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String(), nil
 }
 
-// buildTaxCategoryKey constructs a unique key for a tax category from its scheme ID and category ID
-func buildTaxCategoryKey(taxSchemeID, categoryID string) string {
+// buildTaxCategoryKey constructs a unique key for a tax category from its scheme ID and category ID.
+// For standard-rate "S" entries the normalized percent is also included, since a single invoice can
+// have multiple S subtotals at different rates (e.g. 10% and 20%). For all other categories (E, K,
+// AE, Z, etc.) there is at most one entry per scheme+category, so the percent is omitted to allow
+// lines and charges that omit the percent element to still match.
+// The percent is normalized so that "20", "20.0", and "20.00" all produce the same key.
+func buildTaxCategoryKey(taxSchemeID, categoryID string, percent *string) string {
+	if categoryID == "S" {
+		return taxSchemeID + ":" + categoryID + ":" + normalizeTaxPercent(percent)
+	}
 	return taxSchemeID + ":" + categoryID
+}
+
+// normalizeTaxPercent converts a percent string to a canonical form by stripping trailing zeros,
+// so that "20", "20.0", and "20.00" all map to "20".
+func normalizeTaxPercent(percent *string) string {
+	if percent == nil {
+		return ""
+	}
+	s := normalizeNumericString(*percent)
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return s
+	}
+	return strconv.FormatFloat(f, 'f', -1, 64)
 }
 
 // normalizeNumericString cleans up numeric strings to ensure they can be parsed correctly.
