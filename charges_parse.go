@@ -108,7 +108,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 			ch.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(*ac.TaxCategory[0].ID)
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID)
+			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				ch.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}
@@ -193,7 +193,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 			d.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(*ac.TaxCategory[0].ID)
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID)
+			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				d.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}

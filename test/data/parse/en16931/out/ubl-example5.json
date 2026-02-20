@@ -4,11 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c9253a023d586a4f86f7d3f8710d19afd132777c622f566c2d200edab7b25721"
+			"val": "f259bb06f96ad87968fc5cfa05bdf4f07c84a14499ffef11d1caf10345d42382"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
 		"$addons": [
 			"eu-en16931-v2017"
 		],
@@ -33,8 +34,7 @@
 			"name": "Dick Panama",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356609",
-				"scheme": "VAT"
+				"code": "16356609"
 			},
 			"addresses": [
 				{
@@ -52,8 +52,7 @@
 			"alias": "Buyco",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356607",
-				"scheme": "VAT"
+				"code": "16356607"
 			},
 			"identities": [
 				{

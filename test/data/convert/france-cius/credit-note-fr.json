@@ -4,14 +4,15 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d313383d3c096edb49b5b34563503bd5b8278ae45aa21df346b1391b186c43b5"
+			"val": "f613e38946bef87e2fa807ccb72e2108674dfac76b1f814a984eb34784d9182c"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "FR",
 		"$addons": [
-			"eu-en16931-v2017"
+			"eu-en16931-v2017",
+			"fr-ctc-flow2-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "credit-note",
@@ -19,8 +20,17 @@
 		"code": "001",
 		"issue_date": "2024-05-15",
 		"currency": "EUR",
+		"preceding": [
+			{
+				"issue_date": "2024-05-15",
+				"series": "FR-CIUS",
+				"code": "2024-001"
+			}
+		],
 		"tax": {
+			"rounding": "currency",
 			"ext": {
+				"fr-ctc-billing-mode": "S1",
 				"untdid-document-type": "381"
 			}
 		},
@@ -30,6 +40,16 @@
 				"country": "FR",
 				"code": "23334175221"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"type": "SIREN",
+					"code": "334175221",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -163,6 +183,29 @@
 			"tax": "360.00",
 			"total_with_tax": "2160.00",
 			"payable": "2160.00"
-		}
+		},
+		"notes": [
+			{
+				"key": "payment",
+				"text": "Indemnité forfaitaire de recouvrement: 40 EUR",
+				"ext": {
+					"untdid-text-subject": "PMT"
+				}
+			},
+			{
+				"key": "payment-method",
+				"text": "Pénalités selon le taux légal en vigueur",
+				"ext": {
+					"untdid-text-subject": "PMD"
+				}
+			},
+			{
+				"key": "payment-term",
+				"text": "Pas d'escompte pour paiement anticipé",
+				"ext": {
+					"untdid-text-subject": "AAB"
+				}
+			}
+		]
 	}
 }

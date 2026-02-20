@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
@@ -69,6 +70,10 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		Customer: goblParty(ui.AccountingCustomerParty.Party),
 	}
 
+	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
+		out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
+	}
+
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == "" {
 		typeCode = ui.CreditNoteTypeCode
@@ -102,10 +107,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	if len(ui.Note) > 0 {
 		out.Notes = make([]*org.Note, 0, len(ui.Note))
 		for _, note := range ui.Note {
-			n := &org.Note{
-				Text: cleanString(note),
-			}
-			out.Notes = append(out.Notes, n)
+			out.Notes = append(out.Notes, parseNote(note))
 		}
 	}
 

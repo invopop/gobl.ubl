@@ -188,16 +188,12 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 			untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
 		}
 
-		// Look up exemption code from TaxTotal if not present in line
-		if ctc.TaxExemptionReasonCode != nil {
-			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(*ctc.TaxExemptionReasonCode)
-		} else {
-			// Try to get exemption code from TaxTotal
-			key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID)
-			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-				line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
-			}
+		// Try to get exemption code from TaxTotal
+		key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID, ctc.Percent)
+		if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
+			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 		}
+
 	}
 	if ctc.Percent != nil {
 		percentStr := normalizeNumericString(*ctc.Percent)
