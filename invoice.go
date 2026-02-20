@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
@@ -110,9 +111,9 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// Determine ProfileID to use in output
 	// First check meta field, then fall back to context
 	profileID := o.context.ProfileID
-	if inv.Meta != nil {
-		if ublProfile, ok := inv.Meta[cbc.Key("ubl-profile")]; ok {
-			profileID = ublProfile
+	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
+		if profile := inv.Tax.GetExt(ctc.ExtKeyBillingMode); profile != cbc.CodeEmpty {
+			profileID = profile.String()
 		}
 	}
 
