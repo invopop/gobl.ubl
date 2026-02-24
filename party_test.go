@@ -49,8 +49,8 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "EM", doc.AccountingSupplierParty.Party.EndpointID.SchemeID)
 	})
 
-	t.Run("nemhandel-invoice-example.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("nemhandel-invoice-example.json")
+	t.Run("oioubl30-invoice-example.json", func(t *testing.T) {
+		doc, err := testInvoiceFrom("oioubl30-invoice-example.json")
 		require.NoError(t, err)
 
 		assert.Equal(t, "0088", doc.AccountingSupplierParty.Party.EndpointID.SchemeID)

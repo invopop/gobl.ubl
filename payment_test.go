@@ -51,7 +51,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("nemhandel payment mapping", func(t *testing.T) {
-		doc, err := testInvoiceFrom("nemhandel-invoice-example.json")
+		doc, err := testInvoiceFrom("oioubl30-invoice-example.json")
 		require.NoError(t, err)
 
 		require.NotEmpty(t, doc.PaymentMeans)
@@ -80,7 +80,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("OIO keeps explicit payment-channel", func(t *testing.T) {
-		env, err := loadTestEnvelope("nemhandel-invoice-example.json")
+		env, err := loadTestEnvelope("oioubl30-invoice-example.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)
@@ -108,7 +108,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("single due date without date does not panic", func(t *testing.T) {
-		env, err := loadTestEnvelope("nemhandel-invoice-example.json")
+		env, err := loadTestEnvelope("oioubl30-invoice-example.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)

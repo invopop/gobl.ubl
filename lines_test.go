@@ -75,7 +75,7 @@ func TestNewLines(t *testing.T) {
 	})
 
 	t.Run("nemhandel line tax total omitted without percent", func(t *testing.T) {
-		env, err := loadTestEnvelope("nemhandel-invoice-minimal.json")
+		env, err := loadTestEnvelope("oioubl30-invoice-minimal.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)
@@ -97,7 +97,7 @@ func TestNewLines(t *testing.T) {
 	})
 
 	t.Run("nemhandel line tax total emitted for percentage", func(t *testing.T) {
-		env, err := loadTestEnvelope("nemhandel-invoice-minimal.json")
+		env, err := loadTestEnvelope("oioubl30-invoice-minimal.json")
 		require.NoError(t, err)
 
 		inv, ok := env.Extract().(*bill.Invoice)

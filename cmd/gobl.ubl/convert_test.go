@@ -139,7 +139,7 @@ func TestConvertRunEErrors(t *testing.T) {
 }
 
 func TestConvertXMLToJSONEnvelope(t *testing.T) {
-	inPath := filepath.Join("..", "..", "test", "data", "convert", "out", "nemhandel-invoice-minimal.xml")
+	inPath := filepath.Join("..", "..", "test", "data", "convert", "out", "oioubl30-invoice-minimal.xml")
 	outPath := filepath.Join(t.TempDir(), "out.json")
 
 	cmd := root().cmd()
