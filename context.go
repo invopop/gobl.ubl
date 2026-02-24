@@ -172,6 +172,25 @@ var ContextPeppolFranceExtended = Context{
 	},
 }
 
+// ContextOIOUBL defines the context for OIOUBL (Nemhandel) UBL documents.
+var ContextOIOUBL = Context{
+	CustomizationID: "urn:fdc:oioubl.dk:trns:billing:invoice:3.0",
+	ProfileID:       "urn:fdc:oioubl.dk:bis:billing_with_response:3",
+	Addons:          []cbc.Key{en16931.V2017},
+}
+
+// ContextOIOUBL21 defines the context for legacy OIOUBL 2.1 documents.
+var ContextOIOUBL21 = Context{
+	CustomizationID: "OIOUBL-2.1",
+	ProfileID:       "urn:www.nesubl.eu:profiles:profile5:ver2.0",
+	Addons:          []cbc.Key{en16931.V2017},
+}
+
+// IsOIOUBL reports whether a context is any supported OIOUBL variant.
+func (c *Context) IsOIOUBL() bool {
+	return c.Is(ContextOIOUBL) || c.Is(ContextOIOUBL21)
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextOIOUBL, ContextOIOUBL21}

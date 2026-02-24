@@ -33,6 +33,8 @@ type Extension struct {
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
+	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
+	ListAgencyID   *string `xml:"listAgencyID,attr"`
 	ListID        *string `xml:"listID,attr"`
 	ListVersionID *string `xml:"listVersionID,attr"`
 	SchemeID      *string `xml:"schemeID,attr"`
@@ -105,7 +107,7 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID                     *string    `xml:"cbc:ID,omitempty"`
+	ID                     *IDType    `xml:"cbc:ID,omitempty"`
 	Percent                *string    `xml:"cbc:Percent,omitempty"`
 	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
 	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`

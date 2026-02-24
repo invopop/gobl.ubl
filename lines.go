@@ -20,11 +20,12 @@ type InvoiceLine struct {
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
 	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
+	TaxTotal            []TaxTotal          `xml:"cac:TaxTotal,omitempty"`
 	Item                *Item               `xml:"cac:Item"`
 	Price               *Price              `xml:"cac:Price"`
 }
 
-func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
+func (ui *Invoice) addLines(inv *bill.Invoice, o *options) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -111,20 +112,20 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 			if len(l.Taxes) > 0 && l.Taxes[0].Category != "" {
 				it.ClassifiedTaxCategory = &ClassifiedTaxCategory{
 					TaxScheme: &TaxScheme{
-						ID: l.Taxes[0].Category.String(),
+						ID: IDType{Value: l.Taxes[0].Category.String()},
 					},
 				}
 
 				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
 					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
-					it.ClassifiedTaxCategory.ID = &rate
+					it.ClassifiedTaxCategory.ID = &IDType{Value: rate}
 				}
 
 				// Set percent: required unless category is "O" (outside scope)
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
-				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
+				} else if it.ClassifiedTaxCategory.ID == nil || it.ClassifiedTaxCategory.ID.Value != "O" {
 					// Default to 0% when not outside scope
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
@@ -132,7 +133,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
 					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
-					it.ClassifiedTaxCategory.ID = &rate
+					it.ClassifiedTaxCategory.ID = &IDType{Value: rate}
 				}
 			}
 
@@ -187,6 +188,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 			}
 		}
 
+		if o.context.IsOIOUBL() {
+			invLine.TaxTotal = makeLineTaxTotals(l, ccy)
+		}
+
 		lines = append(lines, invLine)
 	}
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {
@@ -194,6 +199,62 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	} else {
 		ui.InvoiceLines = lines
 	}
+}
+
+func makeLineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
+	if line == nil || len(line.Taxes) == 0 {
+		return nil
+	}
+
+	var taxable num.Amount
+	switch {
+	case line.Total != nil:
+		taxable = *line.Total
+	case line.Sum != nil:
+		taxable = *line.Sum
+	default:
+		return nil
+	}
+
+	taxTotal := TaxTotal{
+		TaxAmount: Amount{Value: "0", CurrencyID: &ccy},
+	}
+	totalAmount := num.MakeAmount(0, taxable.Exp())
+
+	for _, tax := range line.Taxes {
+		subtotal := TaxSubtotal{
+			TaxableAmount: Amount{Value: taxable.String(), CurrencyID: &ccy},
+		}
+		taxCat := TaxCategory{}
+
+		if tax.Ext != nil && tax.Ext[untdid.ExtKeyTaxCategory].String() != "" {
+			k := tax.Ext[untdid.ExtKeyTaxCategory].String()
+			taxCat.ID = &IDType{Value: k}
+		}
+
+		if tax.Percent != nil {
+			p := tax.Percent.StringWithoutSymbol()
+			taxCat.Percent = &p
+			amount := tax.Percent.Of(taxable).Rescale(taxable.Exp())
+			subtotal.TaxAmount = Amount{Value: amount.String(), CurrencyID: &ccy}
+			totalAmount = totalAmount.Add(amount)
+		} else {
+			subtotal.TaxAmount = Amount{Value: "0", CurrencyID: &ccy}
+		}
+
+		if tax.Category != "" {
+			taxCat.TaxScheme = &TaxScheme{ID: IDType{Value: tax.Category.String()}}
+		}
+		subtotal.TaxCategory = taxCat
+		taxTotal.TaxSubtotal = append(taxTotal.TaxSubtotal, subtotal)
+	}
+
+	if totalAmount.IsZero() {
+		return nil
+	}
+	taxTotal.TaxAmount = Amount{Value: totalAmount.String(), CurrencyID: &ccy}
+
+	return []TaxTotal{taxTotal}
 }
 
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {

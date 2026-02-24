@@ -143,7 +143,7 @@ func handlePartyTaxSchemes(party *Party, p *org.Party) {
 func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 	validSchemes := make([]PartyTaxScheme, 0)
 	for _, pts := range schemes {
-		if pts.CompanyID != nil && *pts.CompanyID != "" && pts.TaxScheme != nil {
+		if pts.CompanyID != nil && pts.CompanyID.Value != "" && pts.TaxScheme != nil {
 			validSchemes = append(validSchemes, pts)
 		}
 	}
@@ -153,15 +153,15 @@ func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
 	p.TaxID = &tax.Identity{
 		Country: l10n.TaxCountryCode(countryCode),
-		Code:    cbc.Code(*pts.CompanyID),
+		Code:    cbc.Code(pts.CompanyID.Value),
 	}
-	sc := cbc.Code(pts.TaxScheme.ID)
+	sc := cbc.Code(pts.TaxScheme.ID.Value)
 	if p.TaxID.GetScheme() != sc {
 		var scheme cbc.Code
 		if pts.TaxScheme.TaxTypeCode != "" {
 			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
 		} else {
-			scheme = cbc.Code(pts.TaxScheme.ID)
+			scheme = cbc.Code(pts.TaxScheme.ID.Value)
 		}
 		p.TaxID.Scheme = scheme
 	}
@@ -186,7 +186,7 @@ func handleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, count
 
 func findVATSchemeIndex(schemes []PartyTaxScheme) int {
 	for i, pts := range schemes {
-		if pts.TaxScheme.ID == TaxSchemeVAT {
+		if pts.TaxScheme.ID.Value == TaxSchemeVAT {
 			return i
 		}
 	}
@@ -201,9 +201,9 @@ func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx 
 
 		identity := &org.Identity{
 			Country: l10n.ISOCountryCode(countryCode),
-			Code:    cbc.Code(*pts.CompanyID),
+			Code:    cbc.Code(pts.CompanyID.Value),
 			Scope:   org.IdentityScopeTax,
-			Type:    cbc.Code(pts.TaxScheme.ID),
+			Type:    cbc.Code(pts.TaxScheme.ID.Value),
 		}
 
 		if p.Identities == nil {

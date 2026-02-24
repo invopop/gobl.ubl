@@ -259,6 +259,55 @@ func TestContextPeppolFranceExtended(t *testing.T) {
 	})
 }
 
+func TestContextOIOUBL(t *testing.T) {
+	t.Run("basic conversion", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-minimal.json")
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.SetAddons(en16931.V2017)
+		require.NoError(t, inv.Calculate())
+
+		// Convert with OIOUBL (Nemhandel) context
+		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextOIOUBL))
+		require.NoError(t, err)
+
+		ublInv, ok := doc.(*ubl.Invoice)
+		require.True(t, ok)
+
+		// Verify CustomizationID and ProfileID
+		assert.Equal(t, "urn:fdc:oioubl.dk:trns:billing:invoice:3.0", ublInv.CustomizationID)
+		assert.Equal(t, "urn:fdc:oioubl.dk:bis:billing_with_response:3", ublInv.ProfileID)
+		assert.Equal(t, "2.1", ublInv.UBLVersionID)
+		assert.Equal(t, inv.UUID.String(), ublInv.UUID)
+	})
+}
+
+func TestContextOIOUBL21(t *testing.T) {
+	t.Run("basic conversion", func(t *testing.T) {
+		env, err := loadTestEnvelope("invoice-minimal.json")
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.SetAddons(en16931.V2017)
+		require.NoError(t, inv.Calculate())
+
+		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextOIOUBL21))
+		require.NoError(t, err)
+
+		ublInv, ok := doc.(*ubl.Invoice)
+		require.True(t, ok)
+		assert.Equal(t, "OIOUBL-2.1", ublInv.CustomizationID)
+		assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", ublInv.ProfileID)
+		assert.Equal(t, "2.1", ublInv.UBLVersionID)
+		assert.Equal(t, inv.UUID.String(), ublInv.UUID)
+	})
+}
+
 func TestContextPeppolSelfBilled(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
 		env, err := loadTestEnvelope("peppol-self-billed/self-billed-invoice.json")
@@ -409,6 +458,20 @@ func TestFindContext(t *testing.T) {
 		require.NotNil(t, ctx)
 		assert.Equal(t, ubl.ContextPeppolFranceExtended.CustomizationID, ctx.CustomizationID)
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ctx.OutputCustomizationID)
+	})
+
+	t.Run("find OIOUBL by CustomizationID and ProfileID", func(t *testing.T) {
+		ctx := ubl.FindContext("urn:fdc:oioubl.dk:trns:billing:invoice:3.0", "urn:fdc:oioubl.dk:bis:billing_with_response:3")
+		require.NotNil(t, ctx)
+		assert.Equal(t, ubl.ContextOIOUBL.CustomizationID, ctx.CustomizationID)
+		assert.Equal(t, ubl.ContextOIOUBL.ProfileID, ctx.ProfileID)
+	})
+
+	t.Run("find OIOUBL2.1 by CustomizationID and ProfileID", func(t *testing.T) {
+		ctx := ubl.FindContext("OIOUBL-2.1", "urn:www.nesubl.eu:profiles:profile5:ver2.0")
+		require.NotNil(t, ctx)
+		assert.Equal(t, ubl.ContextOIOUBL21.CustomizationID, ctx.CustomizationID)
+		assert.Equal(t, ubl.ContextOIOUBL21.ProfileID, ctx.ProfileID)
 	})
 
 	t.Run("unknown CustomizationID returns nil", func(t *testing.T) {

@@ -96,7 +96,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		ch.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID),
+				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID.Value),
 			},
 		}
 
@@ -105,10 +105,10 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 			if ch.Taxes[0].Ext == nil {
 				ch.Taxes[0].Ext = tax.Extensions{}
 			}
-			ch.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(*ac.TaxCategory[0].ID)
+			ch.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(ac.TaxCategory[0].ID.Value)
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID)
+			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				ch.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}
@@ -126,7 +126,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 
 			// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
 			// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
-			if !p.IsZero() || (ac.TaxCategory[0].ID != nil && *ac.TaxCategory[0].ID == "Z") {
+			if !p.IsZero() || (ac.TaxCategory[0].ID != nil && ac.TaxCategory[0].ID.Value == "Z") {
 				ch.Taxes[0].Percent = &p
 			}
 		}
@@ -181,7 +181,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		d.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID),
+				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID.Value),
 			},
 		}
 
@@ -190,10 +190,10 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 			if d.Taxes[0].Ext == nil {
 				d.Taxes[0].Ext = tax.Extensions{}
 			}
-			d.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(*ac.TaxCategory[0].ID)
+			d.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(ac.TaxCategory[0].ID.Value)
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID)
+			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				d.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}
@@ -211,7 +211,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 
 			// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
 			// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
-			if !percent.IsZero() || (ac.TaxCategory[0].ID != nil && *ac.TaxCategory[0].ID == "Z") {
+			if !percent.IsZero() || (ac.TaxCategory[0].ID != nil && ac.TaxCategory[0].ID.Value == "Z") {
 				d.Taxes[0].Percent = &percent
 			}
 		}

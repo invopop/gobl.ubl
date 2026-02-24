@@ -132,11 +132,22 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
-		AccountingCost:          "", // TODO: ordering cost
+		AccountingCost:          "",
 		InvoiceTypeCode:         tc,
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
+	}
+
+	if inv.Ordering != nil && inv.Ordering.Cost != "" {
+		out.AccountingCost = inv.Ordering.Cost.String()
+	}
+
+	if o.context.IsOIOUBL() {
+		out.UBLVersionID = Version
+		if !inv.UUID.IsZero() {
+			out.UUID = inv.UUID.String()
+		}
 	}
 
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {
@@ -171,14 +182,17 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addOrdering(inv.Ordering)
 	out.addCharges(inv)
 	out.addTotals(inv)
-	out.addLines(inv)
+	out.addLines(inv, o)
 	out.addAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv); err != nil {
+	if err = out.addPayment(inv, o); err != nil {
 		return nil, err
 	}
 	if d := newDelivery(inv.Delivery); d != nil {
 		out.Delivery = []*Delivery{d}
+	}
+	if o.context.Is(ContextOIOUBL21) {
+		applyLegacyOIOUBL21Rules(out)
 	}
 
 	return out, nil

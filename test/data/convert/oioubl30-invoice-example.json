@@ -1,0 +1,220 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "405063a079df4f45e4ea48b623b546e9c909cf9032ec8b8ec1790869235947ee"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "INV-EXAMPLE-001",
+		"issue_date": "2026-02-10",
+		"currency": "EUR",
+		"exchange_rates": [
+			{
+				"from": "EUR",
+				"to": "DKK",
+				"amount": "7.4500"
+			}
+		],
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Example Supplier ApS",
+			"alias": "Example Supplier ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "13585628"
+			},
+			"inboxes": [
+				{
+					"scheme": "GLN",
+					"code": "5790000436101"
+				}
+			],
+			"addresses": [
+				{
+					"num": "35",
+					"street": "Example Street",
+					"locality": "Copenhagen",
+					"code": "1000",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Example Buyer A/S",
+			"alias": "Example Buyer A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "88146328"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Billing"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "GLN",
+					"code": "5790000436057"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1",
+					"street": "Sample Road",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Service Fee",
+					"price": "12500.00",
+					"unit": "EA"
+				},
+				"sum": "12500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "12500.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Expenses",
+					"price": "950.00",
+					"unit": "EA"
+				},
+				"sum": "950.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "950.00"
+			},
+			{
+				"i": 3,
+				"quantity": "1",
+				"item": {
+					"name": "Platform Fee",
+					"price": "500.00",
+					"unit": "EA"
+				},
+				"sum": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "500.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "PO-EXAMPLE-001"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-02-27",
+						"amount": "17437.50",
+						"currency": "EUR"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "INV-EXAMPLE-001",
+				"credit_transfer": [
+					{
+						"iban": "GB00EXAM00000000000000",
+						"bic": "EXAMGB2L",
+						"name": "Example Bank Ltd"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				},
+				"meta": {
+					"payment-channel": "IBAN"
+				}
+			}
+		},
+		"totals": {
+			"sum": "13950.00",
+			"total": "13950.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "13950.00",
+								"percent": "25%",
+								"amount": "3487.50"
+							}
+						],
+						"amount": "3487.50"
+					}
+				],
+				"sum": "3487.50"
+			},
+			"tax": "3487.50",
+			"total_with_tax": "17437.50",
+			"payable": "17437.50"
+		},
+		"notes": [
+			{
+				"key": "general",
+				"text": "Bill ID: EX-0001\nContractor ID: CT-0459\nContractor Name: Example Person\nJob Name: Sample Role\nBill Period: 2026-01-10 - 2026-02-06\nExchanged amounts:\nConversion rate: 1 EUR = 7.4500 DKK\nSubtotal: 105,000.00 DKK, Tax: 26,250.00 DKK, Total: 131,250.00 DKK"
+			}
+		]
+	}
+}

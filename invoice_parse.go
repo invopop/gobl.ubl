@@ -68,7 +68,6 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		Supplier: goblParty(ui.AccountingSupplierParty.Party),
 		Customer: goblParty(ui.AccountingCustomerParty.Party),
 	}
-
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == "" {
 		typeCode = ui.CreditNoteTypeCode

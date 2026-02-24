@@ -172,5 +172,23 @@ func Bytes(in any) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	if inv, ok := in.(*Invoice); ok && inv.CustomizationID == ContextOIOUBL21.CustomizationID {
+		// Legacy OIOUBL 2.1 requires scheme/list attributes on these elements.
+		if inv.ProfileID != "" {
+			raw := []byte(fmt.Sprintf("<cbc:ProfileID>%s</cbc:ProfileID>", inv.ProfileID))
+			withAttrs := []byte(fmt.Sprintf("<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.4\">%s</cbc:ProfileID>", inv.ProfileID))
+			b = bytes.ReplaceAll(b, raw, withAttrs)
+		}
+		if inv.InvoiceTypeCode != "" {
+			raw := []byte(fmt.Sprintf("<cbc:InvoiceTypeCode>%s</cbc:InvoiceTypeCode>", inv.InvoiceTypeCode))
+			withAttrs := []byte(fmt.Sprintf("<cbc:InvoiceTypeCode listAgencyID=\"320\" listID=\"urn:oioubl:codelist:invoicetypecode-1.1\">%s</cbc:InvoiceTypeCode>", inv.InvoiceTypeCode))
+			b = bytes.ReplaceAll(b, raw, withAttrs)
+		}
+		if inv.CreditNoteTypeCode != "" {
+			raw := []byte(fmt.Sprintf("<cbc:CreditNoteTypeCode>%s</cbc:CreditNoteTypeCode>", inv.CreditNoteTypeCode))
+			withAttrs := []byte(fmt.Sprintf("<cbc:CreditNoteTypeCode listAgencyID=\"320\" listID=\"urn:oioubl:codelist:invoicetypecode-1.1\">%s</cbc:CreditNoteTypeCode>", inv.CreditNoteTypeCode))
+			b = bytes.ReplaceAll(b, raw, withAttrs)
+		}
+	}
 	return append([]byte(xml.Header), b...), nil
 }
