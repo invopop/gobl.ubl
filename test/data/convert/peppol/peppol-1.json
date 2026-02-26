@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d4f086c37d3dd9aa82eb4ae6bcb4e1eef993b3e589914a79f20ee46d8f0d3be7"
+			"val": "891f17fb00b588566d7034fe6ec610cb429d69c77c0d34bbc6dd46d005d2a832"
 		}
 	},
 	"doc": {
@@ -165,7 +165,10 @@
 		"notes": [
 			{
 				"key": "general",
-				"text": "Random invoice"
+				"text": "Random invoice",
+				"ext": {
+					"untdid-text-subject": "AAI"
+				}
 			}
 		]
 	}

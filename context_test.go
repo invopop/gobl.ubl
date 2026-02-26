@@ -8,7 +8,6 @@ import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,31 +37,6 @@ func TestContextEN16931(t *testing.T) {
 		assert.Empty(t, ublInv.ProfileID)
 	})
 
-	t.Run("with ubl-profile meta", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		// Add meta field
-		if inv.Meta == nil {
-			inv.Meta = cbc.Meta{}
-		}
-		inv.Meta[cbc.Key("ubl-profile")] = "custom-profile"
-
-		inv.SetAddons(en16931.V2017)
-		require.NoError(t, inv.Calculate())
-
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
-		require.NoError(t, err)
-
-		ublInv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
-
-		// ProfileID should come from meta
-		assert.Equal(t, "custom-profile", ublInv.ProfileID)
-	})
 }
 
 func TestContextPeppol(t *testing.T) {
@@ -88,30 +62,6 @@ func TestContextPeppol(t *testing.T) {
 		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", ublInv.ProfileID)
 	})
 
-	t.Run("with ubl-profile meta overrides default", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		if inv.Meta == nil {
-			inv.Meta = cbc.Meta{}
-		}
-		inv.Meta[cbc.Key("ubl-profile")] = "custom-peppol-profile"
-
-		inv.SetAddons(en16931.V2017)
-		require.NoError(t, inv.Calculate())
-
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppol))
-		require.NoError(t, err)
-
-		ublInv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
-
-		// ProfileID should be overridden by meta
-		assert.Equal(t, "custom-peppol-profile", ublInv.ProfileID)
-	})
 }
 
 func TestContextXRechnung(t *testing.T) {
@@ -139,21 +89,9 @@ func TestContextXRechnung(t *testing.T) {
 }
 
 func TestContextPeppolFranceCIUS(t *testing.T) {
-	t.Run("with ubl-profile meta", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
+	t.Run("basic conversion", func(t *testing.T) {
+		env, err := loadTestEnvelope("france-cius/invoice-fr-cius.json")
 		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		// Add the ubl-profile meta field
-		if inv.Meta == nil {
-			inv.Meta = cbc.Meta{}
-		}
-		inv.Meta[cbc.Key("ubl-profile")] = "M1"
-
-		inv.SetAddons(en16931.V2017)
-		require.NoError(t, inv.Calculate())
 
 		// Convert with France CIUS context
 		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
@@ -162,73 +100,22 @@ func TestContextPeppolFranceCIUS(t *testing.T) {
 		ublInv, ok := doc.(*ubl.Invoice)
 		require.True(t, ok)
 
-		// Verify the CustomizationID in the output is the simple EN16931 one
+		// Verify OutputCustomizationID is used in the output
 		assert.Equal(t, "urn:cen.eu:en16931:2017", ublInv.CustomizationID)
-		// Verify the ProfileID comes from the meta field
-		assert.Equal(t, "M1", ublInv.ProfileID)
-	})
-
-	t.Run("without meta field uses default", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		inv.SetAddons(en16931.V2017)
-		require.NoError(t, inv.Calculate())
-
-		// Convert with France CIUS context
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
-		require.NoError(t, err)
-
-		ublInv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
-
-		// Verify OutputCustomizationID is used
-		assert.Equal(t, "urn:cen.eu:en16931:2017", ublInv.CustomizationID)
-		// Verify the ProfileID falls back to the context default
-		assert.Equal(t, "urn:peppol:france:billing:regulated", ublInv.ProfileID)
+		// Verify ProfileID comes from the fr-ctc-billing-mode extension
+		assert.Equal(t, "S1", ublInv.ProfileID)
 	})
 
 	t.Run("external identification uses full CustomizationID", func(t *testing.T) {
 		// Verify the context itself has the full identification
 		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0", ubl.ContextPeppolFranceCIUS.CustomizationID)
-		assert.Equal(t, "urn:peppol:france:billing:regulated", ubl.ContextPeppolFranceCIUS.ProfileID)
+		assert.Empty(t, ubl.ContextPeppolFranceCIUS.ProfileID)
 		assert.Equal(t, "urn:cen.eu:en16931:2017", ubl.ContextPeppolFranceCIUS.OutputCustomizationID)
 	})
 }
 
 func TestContextPeppolFranceExtended(t *testing.T) {
-	t.Run("with ubl-profile meta", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		if inv.Meta == nil {
-			inv.Meta = cbc.Meta{}
-		}
-		inv.Meta[cbc.Key("ubl-profile")] = "M2"
-
-		inv.SetAddons(facturx.V1)
-		require.NoError(t, inv.Calculate())
-
-		// Convert with France Extended context
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
-		require.NoError(t, err)
-
-		ublInv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
-
-		// Verify OutputCustomizationID is used
-		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ublInv.CustomizationID)
-		// Verify the ProfileID comes from the meta field
-		assert.Equal(t, "M2", ublInv.ProfileID)
-	})
-
-	t.Run("without meta field uses default", func(t *testing.T) {
+	t.Run("basic conversion", func(t *testing.T) {
 		env, err := loadTestEnvelope("invoice-minimal.json")
 		require.NoError(t, err)
 
@@ -247,14 +134,14 @@ func TestContextPeppolFranceExtended(t *testing.T) {
 
 		// Verify OutputCustomizationID is used
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ublInv.CustomizationID)
-		// Verify the ProfileID falls back to the context default
-		assert.Equal(t, "urn:peppol:france:billing:regulated", ublInv.ProfileID)
+		// No billing mode extension in minimal invoice, so ProfileID is empty
+		assert.Empty(t, ublInv.ProfileID)
 	})
 
 	t.Run("external identification uses full CustomizationID", func(t *testing.T) {
 		// Verify the context itself has the full identification
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0", ubl.ContextPeppolFranceExtended.CustomizationID)
-		assert.Equal(t, "urn:peppol:france:billing:regulated", ubl.ContextPeppolFranceExtended.ProfileID)
+		assert.Empty(t, ubl.ContextPeppolFranceExtended.ProfileID)
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ubl.ContextPeppolFranceExtended.OutputCustomizationID)
 	})
 }
@@ -344,7 +231,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for France CIUS context
 		vesid := ubl.ContextPeppolFranceCIUS.GetVESID(inv)
-		assert.Equal(t, "fr.ctc:ubl-invoice:1.2", vesid)
+		assert.Equal(t, "fr.ctc:ubl-invoice:1.3", vesid)
 	})
 
 	t.Run("France Extended VESID", func(t *testing.T) {
@@ -356,7 +243,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for France Extended context
 		vesid := ubl.ContextPeppolFranceExtended.GetVESID(inv)
-		assert.Equal(t, "fr.ctc:ubl-invoice:1.2", vesid)
+		assert.Equal(t, "fr.ctc:ubl-invoice:1.3", vesid)
 	})
 }
 

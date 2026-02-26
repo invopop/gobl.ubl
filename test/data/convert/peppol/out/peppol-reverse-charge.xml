@@ -6,6 +6,7 @@
   <cbc:IssueDate>2024-01-01</cbc:IssueDate>
   <cbc:DueDate>2024-01-15</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:Note>Reverse Charge / Umkehr der Steuerschuld.</cbc:Note>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
   <cac:InvoicePeriod>
     <cbc:StartDate>2024-01-01</cbc:StartDate>
@@ -106,7 +107,6 @@
         <cbc:ID>AE</cbc:ID>
         <cbc:Percent>0</cbc:Percent>
         <cbc:TaxExemptionReasonCode>VATEX-EU-AE</cbc:TaxExemptionReasonCode>
-        <cbc:TaxExemptionReason>Reverse Charge / Umkehr der Steuerschuld.</cbc:TaxExemptionReason>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
