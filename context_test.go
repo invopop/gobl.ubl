@@ -231,7 +231,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for France CIUS context
 		vesid := ubl.ContextPeppolFranceCIUS.GetVESID(inv)
-		assert.Equal(t, "fr.ctc:ubl-invoice:1.2", vesid)
+		assert.Equal(t, "fr.ctc:ubl-invoice:1.3", vesid)
 	})
 
 	t.Run("France Extended VESID", func(t *testing.T) {
@@ -243,7 +243,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for France Extended context
 		vesid := ubl.ContextPeppolFranceExtended.GetVESID(inv)
-		assert.Equal(t, "fr.ctc:ubl-invoice:1.2", vesid)
+		assert.Equal(t, "fr.ctc:ubl-invoice:1.3", vesid)
 	})
 }
 

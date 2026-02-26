@@ -155,8 +155,8 @@ var ContextPeppolFranceCIUS = Context{
 	OutputCustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:                []cbc.Key{ctc.Flow2V1},
 	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:ubl-invoice:1.2",
-		CreditNote: "fr.ctc:ubl-creditnote:1.2",
+		Invoice:    "fr.ctc:ubl-invoice:1.3",
+		CreditNote: "fr.ctc:ubl-creditnote:1.3",
 	},
 }
 
@@ -166,8 +166,8 @@ var ContextPeppolFranceExtended = Context{
 	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Addons:                []cbc.Key{facturx.V1},
 	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:ubl-invoice:1.2",
-		CreditNote: "fr.ctc:ubl-creditnote:1.2",
+		Invoice:    "fr.ctc:ubl-invoice:1.3",
+		CreditNote: "fr.ctc:ubl-creditnote:1.3",
 	},
 }
 
