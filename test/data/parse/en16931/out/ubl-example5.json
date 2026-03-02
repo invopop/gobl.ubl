@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f259bb06f96ad87968fc5cfa05bdf4f07c84a14499ffef11d1caf10345d42382"
+			"val": "a4b995392eee3eff7634fb9616d21873d0490686387c06fcf5f14952b4f58f8f"
 		}
 	},
 	"doc": {
@@ -103,6 +103,9 @@
 			{
 				"i": 1,
 				"quantity": "1000",
+				"identifier": {
+					"code": "Object2"
+				},
 				"order": "1",
 				"cost": "ACC7654",
 				"item": {
@@ -174,6 +177,9 @@
 			{
 				"i": 2,
 				"quantity": "100",
+				"identifier": {
+					"code": "Object2"
+				},
 				"order": "2",
 				"cost": "ACC7654",
 				"item": {
@@ -333,6 +339,11 @@
 					}
 				]
 			},
+			"projects": [
+				{
+					"code": "Project345"
+				}
+			],
 			"contracts": [
 				{
 					"code": "2013-05"
@@ -341,6 +352,11 @@
 			"purchases": [
 				{
 					"code": "PO4711"
+				}
+			],
+			"sales": [
+				{
+					"code": "123"
 				}
 			],
 			"receiving": [
@@ -402,6 +418,7 @@
 		},
 		"delivery": {
 			"receiver": {
+				"name": "Logistic service Ltd",
 				"addresses": [
 					{
 						"street": "Deliverystreet",

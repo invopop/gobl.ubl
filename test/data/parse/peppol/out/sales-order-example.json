@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1cf91e12cbb1e3ce7bdb7288ae2ece26d14513cee3eec9f5465e0f0543d504f4"
+			"val": "08b7db78d63cbb1b8f4ce1b258fc4f04362277ed0fca5c737cd16b02c45f87a4"
 		}
 	},
 	"doc": {
@@ -209,6 +209,11 @@
 				{
 					"code": "NA"
 				}
+			],
+			"sales": [
+				{
+					"code": "123456"
+				}
 			]
 		},
 		"payment": {
@@ -240,6 +245,7 @@
 		},
 		"delivery": {
 			"receiver": {
+				"name": "Delivery party Name",
 				"addresses": [
 					{
 						"street": "Delivery street 2",

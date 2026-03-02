@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "dac6782696f1234ad8d1d170f5ceb36e633c268a5a77e6b0f53cbf03e4b6f151"
+			"val": "0167291ebc58d9611a72d1f7a1238f6a449a0258d3cc8cdd9c90c7b79215d228"
 		}
 	},
 	"doc": {
@@ -155,6 +155,12 @@
 			{
 				"i": 2,
 				"quantity": "30.0000",
+				"identifier": {
+					"code": "TARIF_2022",
+					"ext": {
+						"untdid-reference": "AFG"
+					}
+				},
 				"order": "4",
 				"cost": "BUY_ACC_REF1",
 				"item": {
@@ -451,6 +457,11 @@
 				"start": "2025-01-01",
 				"end": "2025-01-31"
 			},
+			"projects": [
+				{
+					"code": "PROJET_2547"
+				}
+			],
 			"contracts": [
 				{
 					"code": "CT2018120802"
@@ -459,6 +470,11 @@
 			"purchases": [
 				{
 					"code": "PO201925478"
+				}
+			],
+			"sales": [
+				{
+					"code": "BON VENTE REF 2547"
 				}
 			],
 			"receiving": [
@@ -516,6 +532,7 @@
 		},
 		"delivery": {
 			"receiver": {
+				"name": "NOM LIVRé",
 				"addresses": [
 					{
 						"street": "ADRESSE LIVRAISON LIGNE 1",
