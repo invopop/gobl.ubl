@@ -32,13 +32,14 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 				d.Identities = []*org.Identity{id}
 			}
 			if del.DeliveryParty != nil {
-				d.Receiver = goblParty(del.DeliveryParty)
+				d.Receiver = goblDeliveryParty(del.DeliveryParty)
 			}
 			if del.DeliveryLocation != nil && del.DeliveryLocation.Address != nil {
-				d.Receiver = &org.Party{
-					Addresses: []*org.Address{
-						parseAddress(del.DeliveryLocation.Address),
-					},
+				if d.Receiver == nil {
+					d.Receiver = new(org.Party)
+				}
+				d.Receiver.Addresses = []*org.Address{
+					parseAddress(del.DeliveryLocation.Address),
 				}
 			}
 		}
