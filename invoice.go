@@ -147,6 +147,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.CreditNoteTypeCode = tc
 	}
 
+	// BT-7: VAT point date
+	if inv.ValueDate != nil {
+		out.TaxPointDate = formatDate(*inv.ValueDate)
+	}
+
 	if len(inv.Notes) > 0 {
 		var noteTexts []string
 		for _, note := range inv.Notes {

@@ -91,6 +91,15 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 	out.IssueDate = issueDate
 
+	// BT-7: VAT point date
+	if ui.TaxPointDate != "" {
+		vd, err := parseDate(ui.TaxPointDate)
+		if err != nil {
+			return nil, err
+		}
+		out.ValueDate = &vd
+	}
+
 	if err := ui.goblAddLines(out); err != nil {
 		return nil, err
 	}
