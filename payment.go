@@ -167,5 +167,22 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 		ui.PayeeParty = newPayeeParty(pymt.Payee)
 	}
 
+	// BT-90: Bank assigned creditor identifier
+	// In UBL this lives as a SEPA PartyIdentification on the payee (or seller)
+	if pymt.Instructions != nil && pymt.Instructions.DirectDebit != nil && pymt.Instructions.DirectDebit.Creditor != "" {
+		sepaID := "SEPA"
+		id := Identification{
+			ID: &IDType{
+				Value:    pymt.Instructions.DirectDebit.Creditor,
+				SchemeID: &sepaID,
+			},
+		}
+		if ui.PayeeParty != nil {
+			ui.PayeeParty.PartyIdentification = append(ui.PayeeParty.PartyIdentification, id)
+		} else {
+			ui.AccountingSupplierParty.Party.PartyIdentification = append(ui.AccountingSupplierParty.Party.PartyIdentification, id)
+		}
+	}
+
 	return nil
 }
