@@ -11,18 +11,18 @@ import (
 
 // InvoiceLine represents a line item in an invoice and credit note
 type InvoiceLine struct {
-	ID                  string               `xml:"cbc:ID"`
-	Note                []string             `xml:"cbc:Note"`
-	InvoicedQuantity    *Quantity            `xml:"cbc:InvoicedQuantity,omitempty"` // or CreditNoteQuantity
-	CreditedQuantity    *Quantity            `xml:"cbc:CreditedQuantity,omitempty"`
-	LineExtensionAmount Amount               `xml:"cbc:LineExtensionAmount"`
-	AccountingCost      *string              `xml:"cbc:AccountingCost"`
-	InvoicePeriod       *Period              `xml:"cac:InvoicePeriod"`
-	OrderLineReference  *OrderLineReference  `xml:"cac:OrderLineReference"`
-	DocumentReference   *LineDocReference    `xml:"cac:DocumentReference,omitempty"`
-	AllowanceCharge     []*AllowanceCharge   `xml:"cac:AllowanceCharge"`
-	Item                *Item                `xml:"cac:Item"`
-	Price               *Price               `xml:"cac:Price"`
+	ID                  string              `xml:"cbc:ID"`
+	Note                []string            `xml:"cbc:Note"`
+	InvoicedQuantity    *Quantity           `xml:"cbc:InvoicedQuantity,omitempty"` // or CreditNoteQuantity
+	CreditedQuantity    *Quantity           `xml:"cbc:CreditedQuantity,omitempty"`
+	LineExtensionAmount Amount              `xml:"cbc:LineExtensionAmount"`
+	AccountingCost      *string             `xml:"cbc:AccountingCost"`
+	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
+	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
+	DocumentReference   *LineDocReference   `xml:"cac:DocumentReference,omitempty"`
+	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
+	Item                *Item               `xml:"cac:Item"`
+	Price               *Price              `xml:"cac:Price"`
 }
 
 // LineDocReference defines a document reference at line level (BT-128)

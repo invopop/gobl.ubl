@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/pay"
 	"github.com/invopop/validation"
 )
 
@@ -63,6 +64,8 @@ type PrepaidPayment struct {
 	InstructionID *string `xml:"cbc:InstructionID"`
 }
 
+const sepaSchemeID = "SEPA"
+
 func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
@@ -70,97 +73,13 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		ref := pymt.Instructions.Ref.String()
-		if pymt.Instructions.Ext == nil || pymt.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
-			return validation.Errors{
-				"instructions": validation.Errors{
-					"ext": validation.Errors{
-						untdid.ExtKeyPaymentMeans.String(): errors.New("required"),
-					},
-				},
-			}
-		}
-		ui.PaymentMeans = []PaymentMeans{
-			{
-				PaymentMeansCode: IDType{Value: pymt.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
-			},
-		}
-
-		if ref != "" {
-			ui.PaymentMeans[0].PaymentID = &ref
-		}
-
-		if pymt.Instructions.CreditTransfer != nil {
-			pfa := new(FinancialAccount)
-
-			if pymt.Instructions.CreditTransfer[0].IBAN != "" {
-				pfa.ID = &pymt.Instructions.CreditTransfer[0].IBAN
-			} else if pymt.Instructions.CreditTransfer[0].Number != "" {
-				pfa.ID = &pymt.Instructions.CreditTransfer[0].Number
-			}
-			if pymt.Instructions.CreditTransfer[0].Name != "" {
-				pfa.Name = &pymt.Instructions.CreditTransfer[0].Name
-			}
-			if pymt.Instructions.CreditTransfer[0].BIC != "" {
-				pfa.FinancialInstitutionBranch = &Branch{
-					ID: &pymt.Instructions.CreditTransfer[0].BIC,
-				}
-			}
-
-			ui.PaymentMeans[0].PayeeFinancialAccount = pfa
-		}
-		if pymt.Instructions.DirectDebit != nil {
-			ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
-				ID: IDType{Value: pymt.Instructions.DirectDebit.Ref},
-			}
-			if pymt.Instructions.DirectDebit.Account != "" {
-				ui.PaymentMeans[0].PayerFinancialAccount = &FinancialAccount{
-					ID: &pymt.Instructions.DirectDebit.Account,
-				}
-			}
-		}
-		if pymt.Instructions.Card != nil {
-			ui.PaymentMeans[0].CardAccount = &CardAccount{
-				PrimaryAccountNumberID: &pymt.Instructions.Card.Last4,
-			}
-			if pymt.Instructions.Card.Holder != "" {
-				ui.PaymentMeans[0].CardAccount.HolderName = &pymt.Instructions.Card.Holder
-			}
+		if err := ui.addPaymentInstructions(pymt.Instructions); err != nil {
+			return err
 		}
 	}
 
 	if pymt.Terms != nil {
-		ui.PaymentTerms = make([]PaymentTerms, 0)
-		if (len(pymt.Terms.DueDates) > 1) || (ui.CreditNoteTypeCode != "" && len(pymt.Terms.DueDates) > 0) {
-			for _, dueDate := range pymt.Terms.DueDates {
-				currency := dueDate.Currency.String()
-				if currency == "" {
-					currency = inv.Currency.String()
-				}
-				term := PaymentTerms{
-					Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: &currency},
-				}
-				if dueDate.Date != nil {
-					d := formatDate(*dueDate.Date)
-					term.PaymentDueDate = &d
-				}
-				if dueDate.Percent != nil {
-					p := dueDate.Percent.String()
-					term.PaymentPercent = &p
-				}
-				if dueDate.Notes != "" {
-					term.Note = []string{dueDate.Notes}
-				}
-				ui.PaymentTerms = append(ui.PaymentTerms, term)
-			}
-			// credit notes should not have due dates by schema
-		} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
-			ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
-		} else {
-			ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
-				Note: []string{pymt.Terms.Notes},
-			})
-		}
+		ui.addPaymentTerms(inv, pymt)
 	}
 
 	if pymt.Payee != nil {
@@ -170,7 +89,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	// BT-90: Bank assigned creditor identifier
 	// In UBL this lives as a SEPA PartyIdentification on the payee (or seller)
 	if pymt.Instructions != nil && pymt.Instructions.DirectDebit != nil && pymt.Instructions.DirectDebit.Creditor != "" {
-		sepaID := "SEPA"
+		sepaID := sepaSchemeID
 		id := Identification{
 			ID: &IDType{
 				Value:    pymt.Instructions.DirectDebit.Creditor,
@@ -185,4 +104,98 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	}
 
 	return nil
+}
+
+func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
+	if instr.Ext == nil || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
+		return validation.Errors{
+			"instructions": validation.Errors{
+				"ext": validation.Errors{
+					untdid.ExtKeyPaymentMeans.String(): errors.New("required"),
+				},
+			},
+		}
+	}
+	ui.PaymentMeans = []PaymentMeans{
+		{
+			PaymentMeansCode: IDType{Value: instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
+		},
+	}
+	if ref := instr.Ref.String(); ref != "" {
+		ui.PaymentMeans[0].PaymentID = &ref
+	}
+	if instr.Detail != "" {
+		ui.PaymentMeans[0].PaymentMeansCode.Name = &instr.Detail
+	}
+	if len(instr.CreditTransfer) > 0 {
+		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0])
+	}
+	if instr.DirectDebit != nil {
+		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
+			ID: IDType{Value: instr.DirectDebit.Ref},
+		}
+		if instr.DirectDebit.Account != "" {
+			ui.PaymentMeans[0].PayerFinancialAccount = &FinancialAccount{
+				ID: &instr.DirectDebit.Account,
+			}
+		}
+	}
+	if instr.Card != nil {
+		ui.PaymentMeans[0].CardAccount = &CardAccount{
+			PrimaryAccountNumberID: &instr.Card.Last4,
+		}
+		if instr.Card.Holder != "" {
+			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
+		}
+	}
+	return nil
+}
+
+func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
+	pfa := new(FinancialAccount)
+	if ct.IBAN != "" {
+		pfa.ID = &ct.IBAN
+	} else if ct.Number != "" {
+		pfa.ID = &ct.Number
+	}
+	if ct.Name != "" {
+		pfa.Name = &ct.Name
+	}
+	if ct.BIC != "" {
+		pfa.FinancialInstitutionBranch = &Branch{ID: &ct.BIC}
+	}
+	return pfa
+}
+
+func (ui *Invoice) addPaymentTerms(inv *bill.Invoice, pymt *bill.PaymentDetails) {
+	ui.PaymentTerms = make([]PaymentTerms, 0)
+	if (len(pymt.Terms.DueDates) > 1) || (ui.CreditNoteTypeCode != "" && len(pymt.Terms.DueDates) > 0) {
+		for _, dueDate := range pymt.Terms.DueDates {
+			currency := dueDate.Currency.String()
+			if currency == "" {
+				currency = inv.Currency.String()
+			}
+			term := PaymentTerms{
+				Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: &currency},
+			}
+			if dueDate.Date != nil {
+				d := formatDate(*dueDate.Date)
+				term.PaymentDueDate = &d
+			}
+			if dueDate.Percent != nil {
+				p := dueDate.Percent.String()
+				term.PaymentPercent = &p
+			}
+			if dueDate.Notes != "" {
+				term.Note = []string{dueDate.Notes}
+			}
+			ui.PaymentTerms = append(ui.PaymentTerms, term)
+		}
+	} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
+		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
+	} else {
+		ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
+			Note: []string{pymt.Terms.Notes},
+		})
+	}
 }
