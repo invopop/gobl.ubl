@@ -106,6 +106,18 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		line.Cost = cbc.Code(*docLine.AccountingCost)
 	}
 
+	// BT-128: Invoice line object identifier
+	if docLine.DocumentReference != nil && docLine.DocumentReference.ID.Value != "" {
+		line.Identifier = &org.Identity{
+			Code: cbc.Code(docLine.DocumentReference.ID.Value),
+		}
+		if docLine.DocumentReference.ID.SchemeID != nil {
+			line.Identifier.Ext = tax.Extensions{
+				untdid.ExtKeyReference: cbc.Code(*docLine.DocumentReference.ID.SchemeID),
+			}
+		}
+	}
+
 	if docLine.OrderLineReference != nil && docLine.OrderLineReference.LineID != "" {
 		line.Order = cbc.Code(docLine.OrderLineReference.LineID)
 	}

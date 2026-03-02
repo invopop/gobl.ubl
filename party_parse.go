@@ -79,6 +79,30 @@ func goblParty(party *Party) *org.Party {
 	return p
 }
 
+// goblDeliveryParty creates a GOBL party with only the BTs available
+// for the delivery party (BT-70 name). Address is handled separately
+// via DeliveryLocation.
+func goblDeliveryParty(party *Party) *org.Party {
+	if party == nil {
+		return nil
+	}
+	p := &org.Party{}
+
+	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
+		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
+	}
+	if party.PartyName != nil {
+		if p.Name == "" {
+			p.Name = cleanString(party.PartyName.Name)
+		}
+	}
+
+	if p.Name == "" {
+		return nil
+	}
+	return p
+}
+
 func parseAddress(address *PostalAddress) *org.Address {
 	if address == nil {
 		return nil
