@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 )
 
 // TaxTotal represents a tax total
@@ -97,6 +98,16 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 					if r.Ext[cef.ExtKeyVATEX].String() != "" {
 						v := r.Ext[cef.ExtKeyVATEX].String()
 						taxCat.TaxExemptionReasonCode = &v
+					}
+				}
+
+				if inv.Notes != nil {
+					for _, n := range inv.Notes {
+						if n.Key == org.NoteKeyLegal {
+							reason := n.Text
+							taxCat.TaxExemptionReason = &reason
+							break
+						}
 					}
 				}
 

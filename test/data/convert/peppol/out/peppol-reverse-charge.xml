@@ -107,6 +107,7 @@
         <cbc:ID>AE</cbc:ID>
         <cbc:Percent>0</cbc:Percent>
         <cbc:TaxExemptionReasonCode>VATEX-EU-AE</cbc:TaxExemptionReasonCode>
+        <cbc:TaxExemptionReason>Reverse Charge / Umkehr der Steuerschuld.</cbc:TaxExemptionReason>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
