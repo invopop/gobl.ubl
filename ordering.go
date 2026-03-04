@@ -100,6 +100,7 @@ func (ui *Invoice) addOrdering(o *bill.Ordering) {
 		// BT-14: Sales order reference
 		if len(o.Sales) > 0 {
 			if ui.OrderReference == nil {
+				// TODO: once we have a Peppol addon this should be delegated there
 				ui.OrderReference = &OrderReference{
 					ID: "NA",
 				}

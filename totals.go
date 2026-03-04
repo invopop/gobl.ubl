@@ -102,9 +102,9 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 					}
 				}
 
-				if inv.Notes != nil && inv.Tags.HasTags(tax.TagReverseCharge) {
+				if inv.Notes != nil {
 					for _, n := range inv.Notes {
-						if n.Key == org.NoteKeyLegal {
+						if n.Key == org.NoteKeyLegal && inv.Tags.HasTags(tax.TagReverseCharge) {
 							reason := n.Text
 							taxCat.TaxExemptionReason = &reason
 							break
