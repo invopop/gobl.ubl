@@ -133,4 +133,24 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, "99100100100", supplier.Inboxes[0].Code.String())
 
 	})
+
+	t.Run("invoice-with-logos.xml", func(t *testing.T) {
+		e, err := testParseInvoice("invoice-with-logos.xml")
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		// Verify supplier logo is parsed
+		supplier := inv.Supplier
+		require.NotNil(t, supplier)
+		require.Len(t, supplier.Logos, 1)
+		assert.Equal(t, "https://www.supplier.com/logo.png", supplier.Logos[0].URL)
+
+		// Verify customer logo is parsed
+		customer := inv.Customer
+		require.NotNil(t, customer)
+		require.Len(t, customer.Logos, 1)
+		assert.Equal(t, "https://www.customer.com/brand.svg", customer.Logos[0].URL)
+	})
 }
