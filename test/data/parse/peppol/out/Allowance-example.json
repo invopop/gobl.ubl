@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f3642b9f691a2550df4f5813bac010834eb8cc2e46a603a982409cd23e2e4778"
+			"val": "a2f608f8f4475c8c5fae8613e3d86fc2f81c18345a64c14f4be6f33fb6df7cd4"
 		}
 	},
 	"doc": {
@@ -17,6 +17,7 @@
 		"type": "standard",
 		"code": "Snippet1",
 		"issue_date": "2017-11-13",
+		"value_date": "2017-12-01",
 		"currency": "EUR",
 		"tax": {
 			"rounding": "currency",
@@ -361,6 +362,7 @@
 		},
 		"delivery": {
 			"receiver": {
+				"name": "Delivery party Name",
 				"addresses": [
 					{
 						"street": "Delivery street 2",

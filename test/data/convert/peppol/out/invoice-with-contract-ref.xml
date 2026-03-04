@@ -10,6 +10,9 @@
   <cac:ContractDocumentReference>
     <cbc:ID>CONTRACT-2024-001</cbc:ID>
   </cac:ContractDocumentReference>
+  <cac:ProjectReference>
+    <cbc:ID>PROJECT-DEV-123</cbc:ID>
+  </cac:ProjectReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cbc:EndpointID schemeID="9930">111111125</cbc:EndpointID>

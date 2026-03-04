@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d17bfc45406a9df37e7ff711392eaa4b0f6aeae8f07b37f1e952db32cf526d36"
+			"val": "66ff3d4a0eb25f9317848628369db511f788dfb72039bc9b9acaa1119bf84825"
 		}
 	},
 	"doc": {
@@ -14,6 +14,7 @@
 		"type": "other",
 		"code": "CN758494",
 		"issue_date": "2005-06-25",
+		"value_date": "2005-06-21",
 		"currency": "GBP",
 		"tax": {
 			"rounding": "currency"

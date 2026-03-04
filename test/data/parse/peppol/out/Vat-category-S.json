@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4a42f15be22fb252c2958ced14dba68e23e3da0049846d07cf5ac4513fef7b65"
+			"val": "0a5e130d9aaa708e64affa0cfa4393da18dd82c03f082afcb49352d7a04d7758"
 		}
 	},
 	"doc": {
@@ -300,6 +300,7 @@
 		},
 		"delivery": {
 			"receiver": {
+				"name": "Delivery party Name",
 				"addresses": [
 					{
 						"street": "Delivery street 2",
