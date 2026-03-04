@@ -9,6 +9,8 @@ import (
 	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 // Main UBL Invoice Namespace
@@ -155,6 +157,10 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	if len(inv.Notes) > 0 {
 		var noteTexts []string
 		for _, note := range inv.Notes {
+			if note.Key == org.NoteKeyLegal && inv.Tags.HasTags(tax.TagReverseCharge) {
+				continue // skip legal note when reverse charge, as it should be included in tax category instead
+			}
+
 			if text := formatNote(note); text != "" {
 				noteTexts = append(noteTexts, text)
 			}

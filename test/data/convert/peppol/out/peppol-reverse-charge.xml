@@ -6,7 +6,6 @@
   <cbc:IssueDate>2024-01-01</cbc:IssueDate>
   <cbc:DueDate>2024-01-15</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
-  <cbc:Note>Reverse Charge / Umkehr der Steuerschuld.</cbc:Note>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
   <cac:InvoicePeriod>
     <cbc:StartDate>2024-01-01</cbc:StartDate>
