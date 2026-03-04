@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 // TaxTotal represents a tax total
@@ -101,7 +102,7 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 					}
 				}
 
-				if inv.Notes != nil {
+				if inv.Notes != nil && inv.Tags.HasTags(tax.TagReverseCharge) {
 					for _, n := range inv.Notes {
 						if n.Key == org.NoteKeyLegal {
 							reason := n.Text
