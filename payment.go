@@ -131,28 +131,32 @@ func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
 		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0])
 	}
 	if instr.DirectDebit != nil {
-		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
-			ID: IDType{Value: instr.DirectDebit.Ref},
+		mandate := &PaymentMandate{}
+		if instr.DirectDebit.Ref != "" {
+			mandate.ID = IDType{Value: instr.DirectDebit.Ref}
 		}
 		if instr.DirectDebit.Account != "" {
-			ui.PaymentMeans[0].PayerFinancialAccount = &FinancialAccount{
+			mandate.PayerFinancialAccount = &FinancialAccount{
 				ID: &instr.DirectDebit.Account,
 			}
 		}
+		ui.PaymentMeans[0].PaymentMandate = mandate
 	}
 	if instr.Card != nil {
-		ui.PaymentMeans[0].CardAccount = &CardAccount{
-			PrimaryAccountNumberID: &instr.Card.Last4,
+		card := &CardAccount{}
+		if instr.Card.Last4 != "" {
+			card.PrimaryAccountNumberID = &instr.Card.Last4
 		}
 		if instr.Card.Holder != "" {
-			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
+			card.HolderName = &instr.Card.Holder
 		}
+		ui.PaymentMeans[0].CardAccount = card
 	}
 	return nil
 }
 
 func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
-	pfa := new(FinancialAccount)
+	pfa := &FinancialAccount{}
 	if ct.IBAN != "" {
 		pfa.ID = &ct.IBAN
 	} else if ct.Number != "" {
@@ -163,6 +167,9 @@ func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 	}
 	if ct.BIC != "" {
 		pfa.FinancialInstitutionBranch = &Branch{ID: &ct.BIC}
+	}
+	if pfa.ID == nil && pfa.Name == nil && pfa.FinancialInstitutionBranch == nil {
+		return nil
 	}
 	return pfa
 }
@@ -193,7 +200,7 @@ func (ui *Invoice) addPaymentTerms(inv *bill.Invoice, pymt *bill.PaymentDetails)
 		}
 	} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
-	} else {
+	} else if pymt.Terms.Notes != "" {
 		ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
 			Note: []string{pymt.Terms.Notes},
 		})
