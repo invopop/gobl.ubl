@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/validation"
 )
@@ -12,6 +13,8 @@ import (
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
+	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate,omitempty"`
+	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote"`
 	PaymentID             *string           `xml:"cbc:PaymentID"`
@@ -44,8 +47,14 @@ type FinancialAccount struct {
 
 // Branch represents a branch of a financial institution
 type Branch struct {
-	ID   *string `xml:"cbc:ID"`
-	Name *string `xml:"cbc:Name"`
+	ID                   *string               `xml:"cbc:ID"`
+	Name                 *string               `xml:"cbc:Name"`
+	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
+}
+
+// FinancialInstitution represents a financial institution.
+type FinancialInstitution struct {
+	ID *string `xml:"cbc:ID"`
 }
 
 // PaymentTerms represents the terms of payment
@@ -66,14 +75,14 @@ type PrepaidPayment struct {
 
 const sepaSchemeID = "SEPA"
 
-func (ui *Invoice) addPayment(inv *bill.Invoice) error {
+func (ui *Invoice) addPayment(inv *bill.Invoice, o *options) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
 	}
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		if err := ui.addPaymentInstructions(pymt.Instructions); err != nil {
+		if err := ui.addPaymentInstructions(pymt.Instructions, o); err != nil {
 			return err
 		}
 	}
@@ -106,7 +115,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	return nil
 }
 
-func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
+func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions, o *options) error {
 	if instr.Ext == nil || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
 			"instructions": validation.Errors{
@@ -116,10 +125,19 @@ func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
 			},
 		}
 	}
+	paymentMeansCode := instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()
+	if o != nil && o.context.IsOIOUBL() && paymentMeansCode == "30" {
+		paymentMeansCode = "31"
+	}
 	ui.PaymentMeans = []PaymentMeans{
 		{
-			PaymentMeansCode: IDType{Value: instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
+			PaymentMeansCode: IDType{Value: paymentMeansCode},
 		},
+	}
+	if instr.Meta != nil {
+		if channel, ok := instr.Meta[cbc.Key("payment-channel")]; ok && channel != "" {
+			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: channel}
+		}
 	}
 	if ref := instr.Ref.String(); ref != "" {
 		ui.PaymentMeans[0].PaymentID = &ref
@@ -128,7 +146,10 @@ func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
 		ui.PaymentMeans[0].PaymentMeansCode.Name = &instr.Detail
 	}
 	if len(instr.CreditTransfer) > 0 {
-		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0])
+		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0], o, paymentMeansCode)
+		if o != nil && o.context.IsOIOUBL() && paymentMeansCode == "31" && ui.PaymentMeans[0].PaymentChannelCode == nil {
+			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: "IBAN"}
+		}
 	}
 	if instr.DirectDebit != nil {
 		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
@@ -151,7 +172,7 @@ func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
 	return nil
 }
 
-func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
+func newCreditTransferAccount(ct *pay.CreditTransfer, o *options, paymentMeansCode string) *FinancialAccount {
 	pfa := new(FinancialAccount)
 	if ct.IBAN != "" {
 		pfa.ID = &ct.IBAN
@@ -162,7 +183,13 @@ func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 		pfa.Name = &ct.Name
 	}
 	if ct.BIC != "" {
-		pfa.FinancialInstitutionBranch = &Branch{ID: &ct.BIC}
+		branch := &Branch{ID: &ct.BIC}
+		if o != nil && o.context.IsOIOUBL() && paymentMeansCode == "31" {
+			branch.FinancialInstitution = &FinancialInstitution{
+				ID: &ct.BIC,
+			}
+		}
+		pfa.FinancialInstitutionBranch = branch
 	}
 	return pfa
 }
@@ -192,7 +219,9 @@ func (ui *Invoice) addPaymentTerms(inv *bill.Invoice, pymt *bill.PaymentDetails)
 			ui.PaymentTerms = append(ui.PaymentTerms, term)
 		}
 	} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
-		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
+		if pymt.Terms.DueDates[0].Date != nil {
+			ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
+		}
 	} else {
 		ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
 			Note: []string{pymt.Terms.Notes},
