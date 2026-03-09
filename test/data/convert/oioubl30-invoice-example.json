@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "405063a079df4f45e4ea48b623b546e9c909cf9032ec8b8ec1790869235947ee"
+			"val": "053b9626f0c738a94f438165a88ad5fab8cb488888cb5f71a51e78afd0fcaba5"
 		}
 	},
 	"doc": {
@@ -213,7 +213,10 @@
 		"notes": [
 			{
 				"key": "general",
-				"text": "Bill ID: EX-0001\nContractor ID: CT-0459\nContractor Name: Example Person\nJob Name: Sample Role\nBill Period: 2026-01-10 - 2026-02-06\nExchanged amounts:\nConversion rate: 1 EUR = 7.4500 DKK\nSubtotal: 105,000.00 DKK, Tax: 26,250.00 DKK, Total: 131,250.00 DKK"
+				"text": "Bill ID: EX-0001\nContractor ID: CT-0459\nContractor Name: Example Person\nJob Name: Sample Role\nBill Period: 2026-01-10 - 2026-02-06\nExchanged amounts:\nConversion rate: 1 EUR = 7.4500 DKK\nSubtotal: 105,000.00 DKK, Tax: 26,250.00 DKK, Total: 131,250.00 DKK",
+				"ext": {
+					"untdid-text-subject": "AAI"
+				}
 			}
 		]
 	}

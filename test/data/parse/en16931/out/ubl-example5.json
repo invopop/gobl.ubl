@@ -4,11 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c9253a023d586a4f86f7d3f8710d19afd132777c622f566c2d200edab7b25721"
+			"val": "a4b995392eee3eff7634fb9616d21873d0490686387c06fcf5f14952b4f58f8f"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
 		"$addons": [
 			"eu-en16931-v2017"
 		],
@@ -33,8 +34,7 @@
 			"name": "Dick Panama",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356609",
-				"scheme": "VAT"
+				"code": "16356609"
 			},
 			"addresses": [
 				{
@@ -52,8 +52,7 @@
 			"alias": "Buyco",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356607",
-				"scheme": "VAT"
+				"code": "16356607"
 			},
 			"identities": [
 				{
@@ -104,6 +103,9 @@
 			{
 				"i": 1,
 				"quantity": "1000",
+				"identifier": {
+					"code": "Object2"
+				},
 				"order": "1",
 				"cost": "ACC7654",
 				"item": {
@@ -175,6 +177,9 @@
 			{
 				"i": 2,
 				"quantity": "100",
+				"identifier": {
+					"code": "Object2"
+				},
 				"order": "2",
 				"cost": "ACC7654",
 				"item": {
@@ -334,6 +339,11 @@
 					}
 				]
 			},
+			"projects": [
+				{
+					"code": "Project345"
+				}
+			],
 			"contracts": [
 				{
 					"code": "2013-05"
@@ -342,6 +352,11 @@
 			"purchases": [
 				{
 					"code": "PO4711"
+				}
+			],
+			"sales": [
+				{
+					"code": "123"
 				}
 			],
 			"receiving": [
@@ -403,6 +418,7 @@
 		},
 		"delivery": {
 			"receiver": {
+				"name": "Logistic service Ltd",
 				"addresses": [
 					{
 						"street": "Deliverystreet",

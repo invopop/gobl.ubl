@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "dd472741eefbd47a79855a293f277f4bfa89acd4ba7c757f4741dfcc06435212"
+			"val": "f722009c82d155a2aa4c28da71fe9662310359eed759888bb9e370a4646775cc"
 		}
 	},
 	"doc": {
@@ -17,6 +17,7 @@
 		"type": "standard",
 		"code": "1100512149",
 		"issue_date": "2014-11-10",
+		"value_date": "2013-06-30",
 		"currency": "EUR",
 		"tax": {
 			"rounding": "currency",

@@ -1,0 +1,998 @@
+---
+key: "ubl-invoice"
+name: "EN16931-1 to UBL 2.1 Invoice Mapping"
+description: |-
+  Mappings of EN16931 Business terms and rules to UBL 2.1 Invoice XPaths
+  as defined by CEN/TS 16931-3-2:2017.
+
+terms:
+  - id: BT-1
+    name: "Invoice number"
+    paths:
+      - /Invoice/cbc:ID
+
+  - id: BT-2
+    name: "Invoice issue date"
+    paths:
+      - /Invoice/cbc:IssueDate
+
+  - id: BT-3
+    name: "Invoice type code"
+    paths:
+      - /Invoice/cbc:InvoiceTypeCode
+
+  - id: BT-5
+    name: "Invoice currency code"
+    paths:
+      - /Invoice/cbc:DocumentCurrencyCode
+
+  - id: BT-6
+    name: "Tax currency code"
+    paths:
+      - /Invoice/cbc:TaxCurrencyCode
+
+  - id: BT-7
+    name: "Tax point date"
+    paths:
+      - /Invoice/cbc:TaxPointDate
+
+  - id: BT-8
+    name: "Invoice period description code"
+    paths:
+      - /Invoice/cac:InvoicePeriod/cbc:DescriptionCode
+
+  - id: BT-9
+    name: "Payment due date"
+    paths:
+      - /Invoice/cbc:DueDate
+
+  - id: BT-10
+    name: "Buyer reference"
+    paths:
+      - /Invoice/cbc:BuyerReference
+
+  - id: BT-11
+    name: "Project reference"
+    paths:
+      - /Invoice/cac:ProjectReference/cbc:ID
+
+  - id: BT-12
+    name: "Contract reference"
+    paths:
+      - /Invoice/cac:ContractDocumentReference/cbc:ID
+
+  - id: BT-13
+    name: "Purchase order reference"
+    paths:
+      - /Invoice/cac:OrderReference/cbc:ID
+
+  - id: BT-14
+    name: "Sales order reference"
+    paths:
+      - /Invoice/cac:OrderReference/cbc:SalesOrderID
+
+  - id: BT-15
+    name: "Receipt reference"
+    paths:
+      - /Invoice/cac:ReceiptDocumentReference/cbc:ID
+
+  - id: BT-16
+    name: "Despatch advice reference"
+    paths:
+      - /Invoice/cac:DespatchDocumentReference/cbc:ID
+
+  - id: BT-17
+    name: "Originating document reference"
+    paths:
+      - /Invoice/cac:OriginatorDocumentReference/cbc:ID
+
+  - id: BT-18
+    name: "Additional document reference"
+    paths:
+      - /Invoice/cac:AdditionalDocumentReference/cbc:ID
+
+  - id: BT-18-1
+    name: "Additional document reference scheme identifier"
+    paths:
+      - /Invoice/cac:AdditionalDocumentReference/cbc:ID/@schemeID
+
+  - id: BT-19
+    name: "Accounting cost code"
+    paths:
+      - /Invoice/cbc:AccountingCost
+
+  - id: BT-20
+    name: "Payment terms"
+    paths:
+      - /Invoice/cac:PaymentTerms/cbc:Note
+
+  - id: BG-1
+    name: "Invoice note"
+    terms:
+      - id: BT-21
+        name: "Invoice note subject code"
+        paths:
+          - /Invoice/cbc:Note/@subjectCode
+
+      - id: BT-22
+        name: "Invoice note"
+        paths:
+          - /Invoice/cbc:Note
+
+  - id: BG-2
+    name: "Process control"
+    terms:
+      - id: BT-23
+        name: "Business process type identifier"
+        paths:
+          - /Invoice/cbc:ProfileID
+
+      - id: BT-24
+        name: "Specification identifier"
+        paths:
+          - /Invoice/cbc:CustomizationID
+
+  - id: BG-3
+    name: "Preceding invoice reference"
+    terms:
+      - id: BT-25
+        name: "Preceding invoice number"
+        paths:
+          - /Invoice/cac:BillingReference/cac:InvoiceDocumentReference/cbc:ID
+
+      - id: BT-26
+        name: "Preceding invoice issue date"
+        paths:
+          - /Invoice/cac:BillingReference/cac:InvoiceDocumentReference/cbc:IssueDate
+
+  - id: BG-4
+    name: "Seller"
+    terms:
+      - id: BT-27
+        name: "Seller name"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName
+
+      - id: BT-28
+        name: "Seller trading name"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name
+
+      - id: BT-29
+        name: "Seller identifier"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID
+
+      - id: BT-29-1
+        name: "Seller identifier scheme identifier"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID
+
+      - id: BT-30
+        name: "Seller legal registration identifier"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID
+
+      - id: BT-30-1
+        name: "Seller legal registration identifier scheme identifier"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID/@schemeID
+
+      - id: BT-31
+        name: "Seller VAT identifier"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID
+
+      - id: BT-32
+        name: "Seller tax registration identifier"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID
+
+      - id: BT-33
+        name: "Seller legal entity type"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyLegalForm
+
+      - id: BT-34
+        name: "Seller electronic address"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cbc:EndpointID
+
+      - id: BT-34-1
+        name: "Seller electronic address scheme identifier"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cbc:EndpointID/@schemeID
+
+  - id: BG-5
+    name: "Seller postal address"
+    terms:
+      - id: BT-35
+        name: "Seller address line 1"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:StreetName
+
+      - id: BT-36
+        name: "Seller address line 2"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:AdditionalStreetName
+
+      - id: BT-162
+        name: "Seller address line 3"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cac:AddressLine/cbc:Line
+
+      - id: BT-37
+        name: "Seller city"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CityName
+
+      - id: BT-38
+        name: "Seller post code"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:PostalZone
+
+      - id: BT-39
+        name: "Seller country subdivision"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cbc:CountrySubentity
+
+      - id: BT-40
+        name: "Seller country code"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:PostalAddress/cac:Country/cbc:IdentificationCode
+
+  - id: BG-6
+    name: "Seller contact"
+    terms:
+      - id: BT-41
+        name: "Seller contact point"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:Name
+
+      - id: BT-42
+        name: "Seller contact telephone number"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:Telephone
+
+      - id: BT-43
+        name: "Seller contact email address"
+        paths:
+          - /Invoice/cac:AccountingSupplierParty/cac:Party/cac:Contact/cbc:ElectronicMail
+
+  - id: BG-7
+    name: "Buyer"
+    terms:
+      - id: BT-44
+        name: "Buyer name"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:RegistrationName
+
+      - id: BT-45
+        name: "Buyer trading name"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyName/cbc:Name
+
+      - id: BT-46
+        name: "Buyer identifier"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID
+
+      - id: BT-46-1
+        name: "Buyer identifier scheme identifier"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyIdentification/cbc:ID/@schemeID
+
+      - id: BT-47
+        name: "Buyer legal registration identifier"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID
+
+      - id: BT-47-1
+        name: "Buyer legal registration identifier scheme identifier"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyLegalEntity/cbc:CompanyID/@schemeID
+
+      - id: BT-48
+        name: "Buyer VAT identifier"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PartyTaxScheme/cbc:CompanyID
+
+      - id: BT-49
+        name: "Buyer electronic address"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cbc:EndpointID
+
+      - id: BT-49-1
+        name: "Buyer electronic address scheme identifier"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cbc:EndpointID/@schemeID
+
+  - id: BG-8
+    name: "Buyer postal address"
+    terms:
+      - id: BT-50
+        name: "Buyer address line 1"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:StreetName
+
+      - id: BT-51
+        name: "Buyer address line 2"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:AdditionalStreetName
+
+      - id: BT-163
+        name: "Buyer address line 3"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cac:AddressLine/cbc:Line
+
+      - id: BT-52
+        name: "Buyer city"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:CityName
+
+      - id: BT-53
+        name: "Buyer post code"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:PostalZone
+
+      - id: BT-54
+        name: "Buyer country subdivision"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cbc:CountrySubentity
+
+      - id: BT-55
+        name: "Buyer country code"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:PostalAddress/cac:Country/cbc:IdentificationCode
+
+  - id: BG-9
+    name: "Buyer contact"
+    terms:
+      - id: BT-56
+        name: "Buyer contact point"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:Name
+
+      - id: BT-57
+        name: "Buyer contact telephone number"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:Telephone
+
+      - id: BT-58
+        name: "Buyer contact email address"
+        paths:
+          - /Invoice/cac:AccountingCustomerParty/cac:Party/cac:Contact/cbc:ElectronicMail
+
+  - id: BG-10
+    name: "Payee"
+    terms:
+      - id: BT-59
+        name: "Payee name"
+        paths:
+          - /Invoice/cac:PayeeParty/cac:PartyName/cbc:Name
+
+      - id: BT-60
+        name: "Payee identifier"
+        paths:
+          - /Invoice/cac:PayeeParty/cac:PartyIdentification/cbc:ID
+
+      - id: BT-60-1
+        name: "Payee identifier scheme identifier"
+        paths:
+          - /Invoice/cac:PayeeParty/cac:PartyIdentification/cbc:ID/@schemeID
+
+      - id: BT-61
+        name: "Payee legal registration identifier"
+        paths:
+          - /Invoice/cac:PayeeParty/cac:PartyLegalEntity/cbc:CompanyID
+
+      - id: BT-61-1
+        name: "Payee legal registration identifier scheme identifier"
+        paths:
+          - /Invoice/cac:PayeeParty/cac:PartyLegalEntity/cbc:CompanyID/@schemeID
+
+  - id: BG-11
+    name: "Seller tax representative"
+    terms:
+      - id: BT-62
+        name: "Seller tax representative name"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PartyName/cbc:Name
+
+      - id: BT-63
+        name: "Seller tax representative VAT identifier"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PartyTaxScheme/cbc:CompanyID
+
+  - id: BG-12
+    name: "Seller tax representative postal address"
+    terms:
+      - id: BT-64
+        name: "Seller tax representative address line 1"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:StreetName
+
+      - id: BT-65
+        name: "Seller tax representative address line 2"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:AdditionalStreetName
+
+      - id: BT-164
+        name: "Seller tax representative address line 3"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cac:AddressLine/cbc:Line
+
+      - id: BT-66
+        name: "Seller tax representative city"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:CityName
+
+      - id: BT-67
+        name: "Seller tax representative post code"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:PostalZone
+
+      - id: BT-68
+        name: "Seller tax representative country subdivision"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cbc:CountrySubentity
+
+      - id: BT-69
+        name: "Seller tax representative country code"
+        paths:
+          - /Invoice/cac:TaxRepresentativeParty/cac:PostalAddress/cac:Country/cbc:IdentificationCode
+
+  - id: BG-13
+    name: "Delivery information"
+    terms:
+      - id: BT-70
+        name: "Deliver to party name"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryParty/cac:PartyName/cbc:Name
+
+      - id: BT-71
+        name: "Delivery location identifier"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cbc:ID
+
+      - id: BT-71-1
+        name: "Delivery location identifier scheme identifier"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cbc:ID/@schemeID
+
+      - id: BT-72
+        name: "Actual delivery date"
+        paths:
+          - /Invoice/cac:Delivery/cbc:ActualDeliveryDate
+
+  - id: BG-14
+    name: "Invoicing period"
+    terms:
+      - id: BT-73
+        name: "Invoicing period start date"
+        paths:
+          - /Invoice/cac:InvoicePeriod/cbc:StartDate
+
+      - id: BT-74
+        name: "Invoicing period end date"
+        paths:
+          - /Invoice/cac:InvoicePeriod/cbc:EndDate
+
+  - id: BG-15
+    name: "Deliver to address"
+    terms:
+      - id: BT-75
+        name: "Deliver to address line 1"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:StreetName
+
+      - id: BT-76
+        name: "Deliver to address line 2"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:AdditionalStreetName
+
+      - id: BT-165
+        name: "Deliver to address line 3"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cac:AddressLine/cbc:Line
+
+      - id: BT-77
+        name: "Deliver to city"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:CityName
+
+      - id: BT-78
+        name: "Deliver to post code"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:PostalZone
+
+      - id: BT-79
+        name: "Deliver to country subdivision"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cbc:CountrySubentity
+
+      - id: BT-80
+        name: "Deliver to country code"
+        paths:
+          - /Invoice/cac:Delivery/cac:DeliveryLocation/cac:Address/cac:Country/cbc:IdentificationCode
+
+  - id: BG-16
+    name: "Payment instructions"
+    terms:
+      - id: BT-81
+        name: "Payment means type code"
+        paths:
+          - /Invoice/cac:PaymentMeans/cbc:PaymentMeansCode
+
+      - id: BT-82
+        name: "Payment means type code name"
+        paths:
+          - /Invoice/cac:PaymentMeans/cbc:PaymentMeansCode/@name
+
+      - id: BT-83
+        name: "Payment means identifier"
+        paths:
+          - /Invoice/cac:PaymentMeans/cbc:PaymentID
+
+  - id: BG-17
+    name: "Credit transfer"
+    terms:
+      - id: BT-84
+        name: "Payment account identifier"
+        paths:
+          - /Invoice/cac:PaymentMeans/cac:PayeeFinancialAccount/cbc:ID
+
+      - id: BT-85
+        name: "Payment account name"
+        paths:
+          - /Invoice/cac:PaymentMeans/cac:PayeeFinancialAccount/cbc:Name
+
+      - id: BT-86
+        name: "Bank branch code"
+        paths:
+          - /Invoice/cac:PaymentMeans/cac:PayeeFinancialAccount/cac:FinancialInstitutionBranch/cbc:ID
+
+  - id: BG-18
+    name: "Payment card information"
+    terms:
+      - id: BT-87
+        name: "Payment card primary account number"
+        paths:
+          - /Invoice/cac:PaymentMeans/cac:CardAccount/cbc:PrimaryAccountNumberID
+
+      - id: BT-88
+        name: "Payment card holder name"
+        paths:
+          - /Invoice/cac:PaymentMeans/cac:CardAccount/cbc:HolderName
+
+  - id: BG-19
+    name: "Direct debit"
+    terms:
+      - id: BT-89
+        name: "Mandate reference identifier"
+        paths:
+          - /Invoice/cac:PaymentMeans/cac:PaymentMandate/cbc:ID
+
+      - id: BT-90
+        name: "Bank assigned creditor identifier"
+        paths:
+          - /Invoice/cac:PaymentMeans/cac:PaymentMandate/cac:PayerFinancialAccount/cbc:ID
+
+  - id: BG-20
+    name: "Document level allowances"
+    terms:
+      - id: BT-92
+        name: "Document level allowance amount"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:Amount
+
+      - id: BT-93
+        name: "Document level allowance base amount"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:BaseAmount
+
+      - id: BT-94
+        name: "Document level allowance percentage"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:MultiplierFactorNumeric
+
+      - id: BT-95
+        name: "Document level allowance VAT category code"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cac:TaxCategory/cbc:ID
+
+      - id: BT-96
+        name: "Document level allowance VAT rate"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cac:TaxCategory/cbc:Percent
+
+      - id: BT-97
+        name: "Document level allowance reason"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:AllowanceChargeReason
+
+      - id: BT-98
+        name: "Document level allowance reason code"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode
+
+  - id: BG-21
+    name: "Document level charges"
+    terms:
+      - id: BT-99
+        name: "Document level charge amount"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:Amount
+
+      - id: BT-100
+        name: "Document level charge base amount"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:BaseAmount
+
+      - id: BT-101
+        name: "Document level charge percentage"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:MultiplierFactorNumeric
+
+      - id: BT-102
+        name: "Document level charge VAT category code"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cac:TaxCategory/cbc:ID
+
+      - id: BT-103
+        name: "Document level charge VAT rate"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cac:TaxCategory/cbc:Percent
+
+      - id: BT-104
+        name: "Document level charge reason"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:AllowanceChargeReason
+
+      - id: BT-105
+        name: "Document level charge reason code"
+        paths:
+          - /Invoice/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode
+
+  - id: BG-22
+    name: "Document totals"
+    terms:
+      - id: BT-106
+        name: "Sum of invoice line net amounts"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:LineExtensionAmount
+
+      - id: BT-107
+        name: "Sum of allowances on document level"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:AllowanceTotalAmount
+
+      - id: BT-108
+        name: "Sum of charges on document level"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:ChargeTotalAmount
+
+      - id: BT-109
+        name: "Invoice total amount without VAT"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:TaxExclusiveAmount
+
+      - id: BT-110
+        name: "Invoice total VAT amount"
+        paths:
+          - /Invoice/cac:TaxTotal/cbc:TaxAmount
+
+      - id: BT-111
+        name: "Invoice total VAT amount in accounting currency"
+        paths:
+          - /Invoice/cac:TaxTotal/cbc:TaxAmount
+
+      - id: BT-112
+        name: "Invoice total amount with VAT"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:TaxInclusiveAmount
+
+      - id: BT-113
+        name: "Prepaid amount"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:PrepaidAmount
+
+      - id: BT-114
+        name: "Rounding amount"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:PayableRoundingAmount
+
+      - id: BT-115
+        name: "Invoice total amount due"
+        paths:
+          - /Invoice/cac:LegalMonetaryTotal/cbc:PayableAmount
+
+  - id: BG-23
+    name: "VAT breakdown"
+    terms:
+      - id: BT-116
+        name: "VAT category taxable amount"
+        paths:
+          - /Invoice/cac:TaxTotal/cac:TaxSubtotal/cbc:TaxableAmount
+
+      - id: BT-117
+        name: "VAT category tax amount"
+        paths:
+          - /Invoice/cac:TaxTotal/cac:TaxSubtotal/cbc:TaxAmount
+
+      - id: BT-118
+        name: "VAT category code"
+        paths:
+          - /Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:ID
+
+      - id: BT-119
+        name: "VAT category rate"
+        paths:
+          - /Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:Percent
+
+      - id: BT-120
+        name: "VAT exemption reason"
+        paths:
+          - /Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:TaxExemptionReason
+
+      - id: BT-121
+        name: "VAT exemption reason code"
+        paths:
+          - /Invoice/cac:TaxTotal/cac:TaxSubtotal/cac:TaxCategory/cbc:TaxExemptionReasonCode
+
+  - id: BG-24
+    name: "Additional supporting documents"
+    terms:
+      - id: BT-122
+        name: "Supporting document reference"
+        paths:
+          - /Invoice/cac:AdditionalDocumentReference/cbc:ID
+
+      - id: BT-123
+        name: "Supporting document description"
+        paths:
+          - /Invoice/cac:AdditionalDocumentReference/cbc:DocumentDescription
+
+      - id: BT-124
+        name: "Supporting document URL"
+        paths:
+          - /Invoice/cac:AdditionalDocumentReference/cac:Attachment/cac:ExternalReference/cbc:URI
+
+      - id: BT-125
+        name: "Attached document"
+        paths:
+          - /Invoice/cac:AdditionalDocumentReference/cac:Attachment/cbc:EmbeddedDocumentBinaryObject
+
+      - id: BT-125-1
+        name: "Attached document Mime code"
+        paths:
+          - /Invoice/cac:AdditionalDocumentReference/cac:Attachment/cbc:EmbeddedDocumentBinaryObject/@mimeCode
+
+      - id: BT-125-2
+        name: "Attached document filename"
+        paths:
+          - /Invoice/cac:AdditionalDocumentReference/cac:Attachment/cbc:EmbeddedDocumentBinaryObject/@filename
+
+  - id: BG-25
+    name: "Invoice line"
+    terms:
+      - id: BT-126
+        name: "Invoice line identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cbc:ID
+
+      - id: BT-127
+        name: "Invoice line note"
+        paths:
+          - /Invoice/cac:InvoiceLine/cbc:Note
+
+      - id: BT-128
+        name: "Referenced purchase order line identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:DocumentReference/cbc:ID
+
+      - id: BT-128-1
+        name: "Referenced purchase order line identifier scheme identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:DocumentReference/cbc:ID/@schemeID
+
+      - id: BT-129
+        name: "Invoiced quantity"
+        paths:
+          - /Invoice/cac:InvoiceLine/cbc:InvoicedQuantity
+
+      - id: BT-130
+        name: "Invoiced quantity unit of measure code"
+        paths:
+          - /Invoice/cac:InvoiceLine/cbc:InvoicedQuantity/@unitCode
+
+      - id: BT-131
+        name: "Invoice line net amount"
+        paths:
+          - /Invoice/cac:InvoiceLine/cbc:LineExtensionAmount
+
+      - id: BT-132
+        name: "Referenced purchase order line reference"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:OrderLineReference/cbc:LineID
+
+      - id: BT-133
+        name: "Invoice line accounting cost"
+        paths:
+          - /Invoice/cac:InvoiceLine/cbc:AccountingCost
+
+  - id: BG-26
+    name: "Invoice line period"
+    terms:
+      - id: BT-134
+        name: "Invoice line period start date"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:InvoicePeriod/cbc:StartDate
+
+      - id: BT-135
+        name: "Invoice line period end date"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:InvoicePeriod/cbc:EndDate
+
+  - id: BG-27
+    name: "Invoice line allowances"
+    terms:
+      - id: BT-136
+        name: "Invoice line allowance amount"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:Amount
+
+      - id: BT-137
+        name: "Invoice line allowance base amount"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:BaseAmount
+
+      - id: BT-138
+        name: "Invoice line allowance percentage"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:MultiplierFactorNumeric
+
+      - id: BT-139
+        name: "Invoice line allowance reason"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:AllowanceChargeReason
+
+      - id: BT-140
+        name: "Invoice line allowance reason code"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode
+
+  - id: BG-28
+    name: "Invoice line charges"
+    terms:
+      - id: BT-141
+        name: "Invoice line charge amount"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:Amount
+
+      - id: BT-142
+        name: "Invoice line charge base amount"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:BaseAmount
+
+      - id: BT-143
+        name: "Invoice line charge percentage"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:MultiplierFactorNumeric
+
+      - id: BT-144
+        name: "Invoice line charge reason"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:AllowanceChargeReason
+
+      - id: BT-145
+        name: "Invoice line charge reason code"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:AllowanceCharge/cbc:AllowanceChargeReasonCode
+
+  - id: BG-29
+    name: "Price details"
+    terms:
+      - id: BT-146
+        name: "Item net price"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Price/cbc:PriceAmount
+
+      - id: BT-147
+        name: "Item price discount"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Price/cac:AllowanceCharge/cbc:Amount
+
+      - id: BT-148
+        name: "Item gross price"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Price/cac:AllowanceCharge/cbc:BaseAmount
+
+      - id: BT-149
+        name: "Item price base quantity"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Price/cbc:BaseQuantity
+
+      - id: BT-150
+        name: "Item price base quantity unit of measure code"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Price/cbc:BaseQuantity/@unitCode
+
+  - id: BG-30
+    name: "Line VAT information"
+    terms:
+      - id: BT-151
+        name: "Invoice line VAT category code"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:ID
+
+      - id: BT-152
+        name: "Invoice line VAT rate"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:ClassifiedTaxCategory/cbc:Percent
+
+  - id: BG-31
+    name: "Item information"
+    terms:
+      - id: BT-153
+        name: "Item name"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cbc:Name
+
+      - id: BT-154
+        name: "Item description"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cbc:Description
+
+      - id: BT-155
+        name: "Item Seller's identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:SellersItemIdentification/cbc:ID
+
+      - id: BT-156
+        name: "Item Buyer's identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:BuyersItemIdentification/cbc:ID
+
+      - id: BT-157
+        name: "Item standard identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:StandardItemIdentification/cbc:ID
+
+      - id: BT-157-1
+        name: "Item standard identifier scheme identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:StandardItemIdentification/cbc:ID/@schemeID
+
+      - id: BT-158
+        name: "Item classification code"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode
+
+      - id: BT-158-1
+        name: "Item classification code list identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode/@listID
+
+      - id: BT-158-2
+        name: "Item classification code list version identifier"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:CommodityClassification/cbc:ItemClassificationCode/@listVersionID
+
+      - id: BT-159
+        name: "Item country of origin"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:OriginCountry/cbc:IdentificationCode
+
+  - id: BG-32
+    name: "Item attributes"
+    terms:
+      - id: BT-160
+        name: "Item attribute name"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:AdditionalItemProperty/cbc:Name
+
+      - id: BT-161
+        name: "Item attribute value"
+        paths:
+          - /Invoice/cac:InvoiceLine/cac:Item/cac:AdditionalItemProperty/cbc:Value

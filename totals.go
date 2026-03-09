@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 // TaxTotal represents a tax total
@@ -101,6 +102,16 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 					}
 				}
 
+				if inv.Notes != nil {
+					for _, n := range inv.Notes {
+						if n.Key == org.NoteKeyLegal && inv.HasTags(tax.TagReverseCharge) {
+							reason := n.Text
+							taxCat.TaxExemptionReason = &reason
+							break
+						}
+					}
+				}
+
 				// Set percent: required unless category is "O" (outside scope)
 				if r.Percent != nil {
 					p := r.Percent.StringWithoutSymbol()
@@ -109,16 +120,6 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 					// Default to 0% when not outside scope
 					p := "0"
 					taxCat.Percent = &p
-				}
-
-				if inv.Notes != nil {
-					for _, n := range inv.Notes {
-						if n.Key == org.NoteKeyLegal {
-							reason := n.Text
-							taxCat.TaxExemptionReason = &reason
-							break
-						}
-					}
 				}
 
 				if cat.Code != cbc.CodeEmpty {
@@ -136,14 +137,14 @@ type taxCategoryInfo struct {
 	exemptionReasonCode string
 }
 
-// buildTaxCategoryMap builds a map of tax category information from TaxTotal
+// buildTaxCategoryMap builds a map of tax category information from TaxTotal.
 func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 	categoryMap := make(map[string]*taxCategoryInfo)
 
 	for _, taxTotal := range ui.TaxTotal {
 		for _, subtotal := range taxTotal.TaxSubtotal {
 			if subtotal.TaxCategory.ID != nil && subtotal.TaxCategory.TaxScheme != nil {
-				key := buildTaxCategoryKey(subtotal.TaxCategory.TaxScheme.ID.Value, subtotal.TaxCategory.ID.Value)
+				key := buildTaxCategoryKey(subtotal.TaxCategory.TaxScheme.ID.Value, subtotal.TaxCategory.ID.Value, subtotal.TaxCategory.Percent)
 				info := &taxCategoryInfo{}
 				if subtotal.TaxCategory.TaxExemptionReasonCode != nil {
 					info.exemptionReasonCode = *subtotal.TaxCategory.TaxExemptionReasonCode

@@ -15,6 +15,8 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Despatch) > 0 ||
 		len(o.Receiving) > 0 ||
 		len(o.Purchases) > 0 ||
+		len(o.Sales) > 0 ||
+		len(o.Projects) > 0 ||
 		len(o.Contracts) > 0 ||
 		len(o.Tender) > 0 ||
 		len(o.Identities) > 0
@@ -59,6 +61,21 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 			{
 				Code: cbc.Code(ui.OrderReference.ID),
 			},
+		}
+		// BT-14: Sales order reference
+		if ui.OrderReference.SalesOrderID != "" {
+			ordering.Sales = []*org.DocumentRef{
+				{Code: cbc.Code(ui.OrderReference.SalesOrderID)},
+			}
+		}
+	}
+
+	// BT-11: Project reference
+	for _, proj := range ui.ProjectReference {
+		if proj.ID != "" {
+			ordering.Projects = append(ordering.Projects, &org.DocumentRef{
+				Code: cbc.Code(proj.ID),
+			})
 		}
 	}
 

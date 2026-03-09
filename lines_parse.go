@@ -106,6 +106,18 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		line.Cost = cbc.Code(*docLine.AccountingCost)
 	}
 
+	// BT-128: Invoice line object identifier
+	if docLine.DocumentReference != nil && docLine.DocumentReference.ID.Value != "" {
+		line.Identifier = &org.Identity{
+			Code: cbc.Code(docLine.DocumentReference.ID.Value),
+		}
+		if docLine.DocumentReference.ID.SchemeID != nil {
+			line.Identifier.Ext = tax.Extensions{
+				untdid.ExtKeyReference: cbc.Code(*docLine.DocumentReference.ID.SchemeID),
+			}
+		}
+	}
+
 	if docLine.OrderLineReference != nil && docLine.OrderLineReference.LineID != "" {
 		line.Order = cbc.Code(docLine.OrderLineReference.LineID)
 	}
@@ -192,12 +204,12 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 		if ctc.TaxExemptionReasonCode != nil {
 			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(*ctc.TaxExemptionReasonCode)
 		} else {
-			// Try to get exemption code from TaxTotal
-			key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value)
+			key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value, ctc.Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
 			}
 		}
+
 	}
 	if ctc.Percent != nil {
 		percentStr := normalizeNumericString(*ctc.Percent)

@@ -4,11 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f411fc05a2f8d38ae253ed5b41d561df4be9b49e7af5355b4a221d81c8e48150"
+			"val": "50d4aa3a9e0cad86c0396a44879d4785c52d13d855be9060170820d2a1217927"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
 		"$addons": [
 			"eu-en16931-v2017"
 		],
@@ -27,8 +28,7 @@
 			"name": "SubscriptionSeller",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356706",
-				"scheme": "VAT"
+				"code": "16356706"
 			},
 			"identities": [
 				{
@@ -60,8 +60,7 @@
 			"name": "Buyercompany ltd",
 			"tax_id": {
 				"country": "DK",
-				"code": "NO987654321MVA",
-				"scheme": "VAT"
+				"code": "NO987654321MVA"
 			},
 			"identities": [
 				{

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4f1a1400fa31e750efcbc49a3a4e3c82dc3af4792abe2796255bc4a939f39422"
+			"val": "0962c241ba687750d93f58aa2aaf6750c9c2e925dcdf9ba972e5167fddffefc6"
 		}
 	},
 	"doc": {
@@ -14,6 +14,7 @@
 		"type": "standard",
 		"code": "2025-08-28T14:18:51-4c42b50f",
 		"issue_date": "2025-08-28",
+		"value_date": "2025-08-28",
 		"currency": "SGD",
 		"preceding": [
 			{
@@ -131,6 +132,9 @@
 			{
 				"i": 1,
 				"quantity": "63.992",
+				"identifier": {
+					"code": "AAAAAAAA"
+				},
 				"order": "1",
 				"cost": "23089",
 				"item": {
@@ -190,6 +194,9 @@
 			{
 				"i": 2,
 				"quantity": "12.888",
+				"identifier": {
+					"code": "AAAAAAAA"
+				},
 				"order": "1",
 				"cost": "23089",
 				"item": {
@@ -297,6 +304,11 @@
 					"code": "buyer reference or purchase order reference is recommended"
 				}
 			],
+			"sales": [
+				{
+					"code": "R06788111"
+				}
+			],
 			"receiving": [
 				{
 					"code": "aaaaxxxx"
@@ -345,6 +357,7 @@
 		},
 		"delivery": {
 			"receiver": {
+				"name": "Delivered To Name",
 				"addresses": [
 					{
 						"street": "line1",

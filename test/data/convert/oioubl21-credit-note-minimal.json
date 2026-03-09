@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7a3439bca6ef97fed6a8b96c4509be988e278eab82dfbede62983e8ed32befac"
+			"val": "12f88b8015de6c087f439892dda80c5cbc593dcea5da6d9cc3f25042ed041200"
 		}
 	},
 	"doc": {
@@ -18,7 +18,7 @@
 		"series": "CN",
 		"code": "001",
 		"issue_date": "2024-05-15",
-		"currency": "EUR",
+		"currency": "DKK",
 		"preceding": [
 			{
 				"issue_date": "2024-05-01",
@@ -39,7 +39,7 @@
 			"alias": "Provide One GmbH",
 			"tax_id": {
 				"country": "DK",
-				"code": "16356706"
+				"code": "10150817"
 			},
 			"inboxes": [
 				{
@@ -67,7 +67,7 @@
 			"alias": "Sample Consumer",
 			"tax_id": {
 				"country": "DK",
-				"code": "12345678"
+				"code": "29190925"
 			},
 			"inboxes": [
 				{

@@ -19,10 +19,17 @@ type InvoiceLine struct {
 	AccountingCost      *string             `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
+	DocumentReference   *LineDocReference   `xml:"cac:DocumentReference,omitempty"`
 	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
 	TaxTotal            []TaxTotal          `xml:"cac:TaxTotal,omitempty"`
 	Item                *Item               `xml:"cac:Item"`
 	Price               *Price              `xml:"cac:Price"`
+}
+
+// LineDocReference defines a document reference at line level (BT-128)
+type LineDocReference struct {
+	ID               IDType  `xml:"cbc:ID"`
+	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
 func (ui *Invoice) addLines(inv *bill.Invoice, o *options) { //nolint:gocyclo
@@ -71,6 +78,20 @@ func (ui *Invoice) addLines(inv *bill.Invoice, o *options) { //nolint:gocyclo
 			if len(notes) > 0 {
 				invLine.Note = notes
 			}
+		}
+
+		// BT-128: Invoice line object identifier
+		if l.Identifier != nil {
+			typeCode := "130"
+			ref := &LineDocReference{
+				ID:               IDType{Value: l.Identifier.Code.String()},
+				DocumentTypeCode: &typeCode,
+			}
+			if l.Identifier.Ext.Has(untdid.ExtKeyReference) {
+				s := l.Identifier.Ext[untdid.ExtKeyReference].String()
+				ref.ID.SchemeID = &s
+			}
+			invLine.DocumentReference = ref
 		}
 
 		if l.Order != "" {
@@ -139,6 +160,21 @@ func (ui *Invoice) addLines(inv *bill.Invoice, o *options) { //nolint:gocyclo
 
 			if len(l.Item.Identities) > 0 {
 				for _, id := range l.Item.Identities {
+					// BT-158/159: Item classification (Label holds the listID)
+					if id.Label != "" && !id.Ext.Has(iso.ExtKeySchemeID) {
+						listID := id.Label
+						if it.CommodityClassification == nil {
+							it.CommodityClassification = &[]CommodityClassification{}
+						}
+						*it.CommodityClassification = append(*it.CommodityClassification, CommodityClassification{
+							ItemClassificationCode: &IDType{
+								Value:  id.Code.String(),
+								ListID: &listID,
+							},
+						})
+						continue
+					}
+
 					if it.BuyersItemIdentification != nil && it.StandardItemIdentification != nil {
 						break
 					}
