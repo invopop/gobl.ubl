@@ -136,7 +136,6 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
-		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
@@ -146,6 +145,17 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// PEPPOL-EN16931-R005
 	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency {
 		out.TaxCurrencyCode = string(taxCurrency)
+	}
+
+	if inv.Ordering != nil && inv.Ordering.Cost != "" {
+		out.AccountingCost = inv.Ordering.Cost.String()
+	}
+
+	if o.context.Is(ContextOIOUBL21) {
+		out.UBLVersionID = Version
+		if !inv.UUID.IsZero() {
+			out.UUID = inv.UUID.String()
+		}
 	}
 
 	docType := inv.Type
@@ -208,6 +218,9 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 	if d := newDelivery(inv.Delivery, o.context); d != nil {
 		out.Delivery = []*Delivery{d}
+	}
+	if o.context.Is(ContextOIOUBL21) {
+		applyLegacyOIOUBL21Rules(out)
 	}
 
 	return out, nil

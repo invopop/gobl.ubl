@@ -24,7 +24,7 @@ func TestNewTotals(t *testing.T) {
 		assert.Equal(t, "1764.18", doc.LegalMonetaryTotal.PayableAmount.Value)
 
 		assert.Equal(t, "340.20", doc.TaxTotal[0].TaxAmount.Value)
-		assert.Equal(t, "VAT", doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.ID)
+		assert.Equal(t, "VAT", doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.ID.Value)
 		assert.Equal(t, "21.0", *doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent)
 	})
 

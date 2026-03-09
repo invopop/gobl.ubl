@@ -3,6 +3,7 @@ package ubl
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
@@ -38,8 +39,9 @@ type Party struct {
 
 // EndpointID represents an endpoint identifier
 type EndpointID struct {
-	SchemeID string `xml:"schemeID,attr"`
-	Value    string `xml:",chardata"`
+	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
+	SchemeID       string  `xml:"schemeID,attr"`
+	Value          string  `xml:",chardata"`
 }
 
 // Identification represents an identification
@@ -54,7 +56,9 @@ type PartyName struct {
 
 // PostalAddress represents a postal address
 type PostalAddress struct {
+	AddressFormatCode    *IDType             `xml:"cbc:AddressFormatCode"`
 	StreetName           *string             `xml:"cbc:StreetName"`
+	BuildingNumber       *string             `xml:"cbc:BuildingNumber"`
 	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
 	BuildingNumber       *string             `xml:"cbc:BuildingNumber,omitempty"`
 	PlotIdentification   *string             `xml:"cbc:PlotIdentification,omitempty"`
@@ -87,14 +91,15 @@ type Country struct {
 
 // PartyTaxScheme represents a party's tax scheme
 type PartyTaxScheme struct {
-	CompanyID *string    `xml:"cbc:CompanyID"`
+	CompanyID *IDType    `xml:"cbc:CompanyID"`
 	TaxScheme *TaxScheme `xml:"cac:TaxScheme"`
 }
 
 // TaxScheme represents a tax scheme
 type TaxScheme struct {
-	ID          string `xml:"cbc:ID"`
-	TaxTypeCode string `xml:"cbc:TaxTypeCode,omitempty"`
+	ID          IDType  `xml:"cbc:ID"`
+	Name        *string `xml:"cbc:Name"`
+	TaxTypeCode string  `xml:"cbc:TaxTypeCode,omitempty"`
 }
 
 // PartyLegalEntity represents the legal entity of a party
@@ -106,6 +111,7 @@ type PartyLegalEntity struct {
 
 // Contact represents contact information
 type Contact struct {
+	ID             *string `xml:"cbc:ID"`
 	Name           *string `xml:"cbc:Name"`
 	Telephone      *string `xml:"cbc:Telephone"`
 	ElectronicMail *string `xml:"cbc:ElectronicMail"`
@@ -154,10 +160,18 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			id = TaxSchemeVAT
 		}
 
+		companyID := &IDType{
+			Value: code,
+		}
+		if string(tID.Country) == "DK" {
+			s := "0198"
+			companyID.SchemeID = &s
+		}
+
 		taxScheme := PartyTaxScheme{
-			CompanyID: &code,
+			CompanyID: companyID,
 			TaxScheme: &TaxScheme{
-				ID: id.String(),
+				ID: IDType{Value: id.String()},
 			},
 		}
 
@@ -199,7 +213,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			}
 		} else if ib.Scheme != "" {
 			p.EndpointID = &EndpointID{
-				SchemeID: ib.Scheme.String(),
+				SchemeID: normalizeEndpointScheme(ib.Scheme.String()),
 				Value:    ib.Code.String(),
 			}
 		}
@@ -237,10 +251,16 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		for _, id := range party.Identities {
 			if id.Scope == org.IdentityScopeTax {
 				code := id.Code.String()
+				companyID := &IDType{Value: code}
+				if id.Ext != nil {
+					if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
+						companyID.SchemeID = &s
+					}
+				}
 				taxScheme := PartyTaxScheme{
-					CompanyID: &code,
+					CompanyID: companyID,
 					TaxScheme: &TaxScheme{
-						ID: id.Type.String(),
+						ID: IDType{Value: id.Type.String()},
 					},
 				}
 				p.PartyTaxScheme = append(p.PartyTaxScheme, taxScheme)
@@ -274,6 +294,14 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			p.PartyIdentification = append(p.PartyIdentification, Identification{
 				ID: idType,
 			})
+		}
+	}
+
+	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID == nil && party.TaxID != nil && string(party.TaxID.Country) == "DK" {
+		s := "0184"
+		p.PartyLegalEntity.CompanyID = &IDType{
+			SchemeID: &s,
+			Value:    party.TaxID.Code.String(),
 		}
 	}
 	return p
@@ -397,6 +425,15 @@ func newPayeeParty(party *org.Party) *Party {
 	}
 
 	return p
+}
+
+func normalizeEndpointScheme(s string) string {
+	switch strings.ToUpper(s) {
+	case "GLN":
+		return "0088"
+	default:
+		return s
+	}
 }
 
 func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {

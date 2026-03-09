@@ -1,0 +1,165 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "7a3439bca6ef97fed6a8b96c4509be988e278eab82dfbede62983e8ed32befac"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "credit-note",
+		"series": "CN",
+		"code": "001",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"preceding": [
+			{
+				"issue_date": "2024-05-01",
+				"series": "SAMPLE",
+				"code": "001",
+				"ext": {
+					"untdid-document-type": "380"
+				}
+			}
+		],
+		"tax": {
+			"ext": {
+				"untdid-document-type": "381"
+			}
+		},
+		"supplier": {
+			"name": "Provide One GmbH",
+			"alias": "Provide One GmbH",
+			"tax_id": {
+				"country": "DK",
+				"code": "16356706"
+			},
+			"inboxes": [
+				{
+					"scheme": "GLN",
+					"code": "5790000436101"
+				}
+			],
+			"addresses": [
+				{
+					"num": "16",
+					"street": "Dietmar-Hopp-Allee",
+					"locality": "Walldorf",
+					"code": "69190",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"alias": "Sample Consumer",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345678"
+			},
+			"inboxes": [
+				{
+					"scheme": "GLN",
+					"code": "5790000436057"
+				}
+			],
+			"addresses": [
+				{
+					"num": "25",
+					"street": "Werner-Heisenberg-Allee",
+					"locality": "München",
+					"code": "80939",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20",
+				"item": {
+					"name": "Development services",
+					"price": "90.00",
+					"unit": "h"
+				},
+				"sum": "1800.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1800.00"
+			}
+		],
+		"ordering": {
+			"cost": "5050"
+		},
+		"payment": {
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "0003434323213231",
+				"credit_transfer": [
+					{
+						"iban": "NO9386011117947",
+						"bic": "DNBANOKK"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "1800.00",
+			"total": "1800.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1800.00",
+								"percent": "19%",
+								"amount": "342.00"
+							}
+						],
+						"amount": "342.00"
+					}
+				],
+				"sum": "342.00"
+			},
+			"tax": "342.00",
+			"total_with_tax": "2142.00",
+			"payable": "2142.00"
+		}
+	}
+}

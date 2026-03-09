@@ -18,7 +18,7 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "1800.00", doc.InvoiceLines[0].LineExtensionAmount.Value)
 		assert.Equal(t, "Development services", doc.InvoiceLines[0].Item.Name)
 		assert.Equal(t, "HUR", doc.InvoiceLines[0].InvoicedQuantity.UnitCode)
-		assert.Equal(t, "VAT", doc.InvoiceLines[0].Item.ClassifiedTaxCategory.TaxScheme.ID)
+		assert.Equal(t, "VAT", doc.InvoiceLines[0].Item.ClassifiedTaxCategory.TaxScheme.ID.Value)
 		assert.Equal(t, "19", *doc.InvoiceLines[0].Item.ClassifiedTaxCategory.Percent)
 		assert.True(t, doc.InvoiceLines[0].AllowanceCharge[0].ChargeIndicator)
 		assert.Equal(t, "Testing", *doc.InvoiceLines[0].AllowanceCharge[0].AllowanceChargeReason)

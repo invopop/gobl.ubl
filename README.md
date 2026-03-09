@@ -128,6 +128,19 @@ For example:
 gobl.ubl convert ./test/data/invoice-sample.json
 ```
 
+You can also specify a conversion context, for example to generate OIOUBL (Nemhandel)
+invoices:
+
+```bash
+gobl.ubl convert --context nemhandel ./test/data/invoice-sample.json
+```
+
+If you need a specific ProfileID, override it explicitly:
+
+```bash
+gobl.ubl convert --context nemhandel --profile-id "urn:fdc:oioubl.dk:bis:billing_with_response:3" ./test/data/invoice-sample.json
+```
+
 ## Testing
 
 ### testify
@@ -136,6 +149,24 @@ The library uses testify for testing. To run the tests, you can use the followin
 
 ```bash
 go test ./...
+```
+
+### OIOUBL 2.1 schematron validation
+
+There is an integration test that validates generated OIOUBL 2.1 XML with Saxon and the
+legacy schematron file. It runs automatically when dependencies are available and skips
+cleanly otherwise.
+
+```bash
+go test ./... -run TestOIOUBL21Schematron
+```
+
+By default, the test looks for the schematron at:
+`../OIOUBL Schematron/OIOUBL_Invoice_Schematron.xsl` (relative to this module root).
+Override with:
+
+```bash
+OIOUBL21_SCHEMATRON_XSL="/absolute/path/to/OIOUBL_Invoice_Schematron.xsl" go test ./... -run TestOIOUBL21Schematron
 ```
 
 ## Considerations

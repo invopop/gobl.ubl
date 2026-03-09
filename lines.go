@@ -155,28 +155,26 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			if len(l.Taxes) > 0 && l.Taxes[0].Category != "" {
 				it.ClassifiedTaxCategory = &ClassifiedTaxCategory{
 					TaxScheme: &TaxScheme{
-						ID: l.Taxes[0].Category.String(),
+						ID: IDType{Value: l.Taxes[0].Category.String()},
 					},
 				}
 
 				if s := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); s != "" {
-					rate := s
-					it.ClassifiedTaxCategory.ID = &rate
+					it.ClassifiedTaxCategory.ID = &IDType{Value: s}
 				}
 
 				// Set percent: required unless category is "O" (outside scope)
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
-				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
+				} else if it.ClassifiedTaxCategory.ID == nil || it.ClassifiedTaxCategory.ID.Value != "O" {
 					// Default to 0% when not outside scope
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
 				}
 
 				if s := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); s != "" {
-					rate := s
-					it.ClassifiedTaxCategory.ID = &rate
+					it.ClassifiedTaxCategory.ID = &IDType{Value: s}
 				}
 			}
 
@@ -246,6 +244,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			}
 		}
 
+		if context.Is(ContextOIOUBL21) {
+			invLine.TaxTotal = makeLineTaxTotals(l, ccy)
+		}
+
 		lines = append(lines, invLine)
 	}
 	if invoiceType.In(bill.InvoiceTypeCreditNote) {
@@ -263,6 +265,61 @@ func rescaleToCurrency(a num.Amount, ccy string) string {
 		return def.Rescale(a).String()
 	}
 	return a.String()
+}
+
+func makeLineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
+	if line == nil || len(line.Taxes) == 0 {
+		return nil
+	}
+
+	var taxable num.Amount
+	switch {
+	case line.Total != nil:
+		taxable = *line.Total
+	case line.Sum != nil:
+		taxable = *line.Sum
+	default:
+		return nil
+	}
+
+	taxTotal := TaxTotal{
+		TaxAmount: Amount{Value: "0", CurrencyID: &ccy},
+	}
+	totalAmount := num.MakeAmount(0, taxable.Exp())
+
+	for _, t := range line.Taxes {
+		subtotal := TaxSubtotal{
+			TaxableAmount: Amount{Value: taxable.String(), CurrencyID: &ccy},
+		}
+		taxCat := TaxCategory{}
+
+		if k := t.Ext.Get(untdid.ExtKeyTaxCategory).String(); k != "" {
+			taxCat.ID = &IDType{Value: k}
+		}
+
+		if t.Percent != nil {
+			p := t.Percent.StringWithoutSymbol()
+			taxCat.Percent = &p
+			amount := t.Percent.Of(taxable).Rescale(taxable.Exp())
+			subtotal.TaxAmount = Amount{Value: amount.String(), CurrencyID: &ccy}
+			totalAmount = totalAmount.Add(amount)
+		} else {
+			subtotal.TaxAmount = Amount{Value: "0", CurrencyID: &ccy}
+		}
+
+		if t.Category != "" {
+			taxCat.TaxScheme = &TaxScheme{ID: IDType{Value: t.Category.String()}}
+		}
+		subtotal.TaxCategory = taxCat
+		taxTotal.TaxSubtotal = append(taxTotal.TaxSubtotal, subtotal)
+	}
+
+	if totalAmount.IsZero() {
+		return nil
+	}
+	taxTotal.TaxAmount = Amount{Value: totalAmount.String(), CurrencyID: &ccy}
+
+	return []TaxTotal{taxTotal}
 }
 
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {

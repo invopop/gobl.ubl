@@ -1,0 +1,154 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "eacc9132215ea54c092dd79a7960a6251065fe1396482aaf0e70b6fad89fb2ae"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "SAMPLE",
+		"code": "001",
+		"issue_date": "2024-05-15",
+		"currency": "DKK",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Worksome Aps",
+			"tax_id": {
+				"country": "DK",
+				"code": "37990485"
+			},
+			"addresses": [
+				{
+					"street": "Dampfærgevej 7-9",
+					"locality": "København Ø",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Lego System A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "47458714"
+			},
+			"addresses": [
+				{
+					"street": "Aastvej 1",
+					"locality": "Billund",
+					"code": "7190",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Booking Fee (Fixed Rate)",
+					"price": "31676.00",
+					"unit": "one"
+				},
+				"sum": "31676.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "31676.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Worksome service fee",
+					"price": "1267.04",
+					"unit": "one"
+				},
+				"sum": "1267.04",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1267.04"
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-06-15",
+						"amount": "41178.80",
+						"currency": "DKK"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "SAMPLE-001",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK",
+						"name": "Danske Bank"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "32943.04",
+			"total": "32943.04",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "32943.04",
+								"percent": "25%",
+								"amount": "8235.76"
+							}
+						],
+						"amount": "8235.76"
+					}
+				],
+				"sum": "8235.76"
+			},
+			"tax": "8235.76",
+			"total_with_tax": "41178.80",
+			"payable": "41178.80"
+		}
+	}
+}

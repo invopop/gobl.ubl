@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl/addons/de/xrechnung"
+	"github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
@@ -220,6 +221,14 @@ var ContextZATCA = Context{
 	},
 }
 
+// ContextOIOUBL21 defines the context for OIOUBL 2.1 documents on the Danish
+// NemHandel network.
+var ContextOIOUBL21 = Context{
+	CustomizationID: "OIOUBL-2.1",
+	ProfileID:       "urn:www.nesubl.eu:profiles:profile5:ver2.0",
+	Addons:          []cbc.Key{oioubl.V2_1},
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextOIOUBL21}

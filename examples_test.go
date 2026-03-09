@@ -66,6 +66,7 @@ func TestConvertToInvoice(t *testing.T) {
 		{"FranceCIUS", ubl.ContextPeppolFranceCIUS, "france-cius"},
 		{"FranceExtended", ubl.ContextPeppolFranceExtended, "france-extended"},
 		{"ZATCA", ubl.ContextZATCA, "zatca"},
+		{"OIOUBL21", ubl.ContextOIOUBL21, "oioubl21"},
 	}
 
 	for _, ctx := range contexts {
@@ -135,6 +136,7 @@ func TestParseInvoice(t *testing.T) {
 		{"FranceCIUS", "france-cius"},
 		{"FranceExtended", "france-extended"},
 		{"ZATCA", "zatca"},
+		{"OIOUBL21", "oioubl21"},
 	}
 
 	for _, ctx := range contexts {
@@ -227,7 +229,16 @@ func testInvoiceFrom(name string) (*ubl.Invoice, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+	var opts []ubl.Option
+	switch {
+	case strings.HasPrefix(name, "oioubl21-"), strings.HasPrefix(name, "nemhandel21-"), strings.HasPrefix(name, "oioubl-2.1-"):
+		opts = append(opts, ubl.WithContext(ubl.ContextOIOUBL21))
+	case strings.HasPrefix(name, "oioubl30-"), strings.HasPrefix(name, "nemhandel-"), strings.HasPrefix(name, "oioubl-"):
+		opts = append(opts, ubl.WithContext(ubl.ContextOIOUBL))
+	default:
+		opts = append(opts, ubl.WithContext(ubl.ContextPeppol))
+	}
+	return ubl.ConvertInvoice(env, opts...)
 }
 
 // testInvoiceFromContext creates a UBL Invoice from a GOBL file with a specific context
