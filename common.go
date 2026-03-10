@@ -34,12 +34,14 @@ type Extension struct {
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
-	ListID        *string `xml:"listID,attr"`
-	ListVersionID *string `xml:"listVersionID,attr"`
-	SchemeID      *string `xml:"schemeID,attr"`
-	SchemeName    *string `xml:"schemeName,attr"`
-	Name          *string `xml:"name,attr"`
-	Value         string  `xml:",chardata"`
+	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
+	ListAgencyID   *string `xml:"listAgencyID,attr"`
+	ListID         *string `xml:"listID,attr"`
+	ListVersionID  *string `xml:"listVersionID,attr"`
+	SchemeID       *string `xml:"schemeID,attr"`
+	SchemeName     *string `xml:"schemeName,attr"`
+	Name           *string `xml:"name,attr"`
+	Value          string  `xml:",chardata"`
 }
 
 // ExchangeRate represents an exchange rate
@@ -106,9 +108,10 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        *string    `xml:"cbc:ID,omitempty"`
-	Percent   *string    `xml:"cbc:Percent,omitempty"`
-	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	ID                     *IDType    `xml:"cbc:ID,omitempty"`
+	Percent                *string    `xml:"cbc:Percent,omitempty"`
+	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
+	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
