@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0167291ebc58d9611a72d1f7a1238f6a449a0258d3cc8cdd9c90c7b79215d228"
+			"val": "953f0c7b36381b1b2496fc9def230de80be2213984f741435f2a0eda7728ce11"
 		}
 	},
 	"doc": {
@@ -131,6 +131,10 @@
 			{
 				"i": 1,
 				"quantity": "1.0000",
+				"period": {
+					"start": "2025-01-01",
+					"end": "2025-01-31"
+				},
 				"order": "1",
 				"cost": "BUY_ACC_REF",
 				"item": {
@@ -160,6 +164,10 @@
 					"ext": {
 						"untdid-reference": "AFG"
 					}
+				},
+				"period": {
+					"start": "2025-01-01",
+					"end": "2025-01-31"
 				},
 				"order": "4",
 				"cost": "BUY_ACC_REF1",
@@ -227,6 +235,10 @@
 			{
 				"i": 3,
 				"quantity": "1.0000",
+				"period": {
+					"start": "2025-01-01",
+					"end": "2025-01-31"
+				},
 				"order": "3",
 				"cost": "BUY_ACC_REF2",
 				"item": {
@@ -267,6 +279,10 @@
 			{
 				"i": 4,
 				"quantity": "2.0000",
+				"period": {
+					"start": "2025-01-01",
+					"end": "2025-01-31"
+				},
 				"order": "2",
 				"cost": "BUY_ACC_REF3",
 				"item": {

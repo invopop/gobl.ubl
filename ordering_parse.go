@@ -152,6 +152,9 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 }
 
 func goblPeriodDates(invoicePeriod *Period) *cal.Period {
+	if invoicePeriod.StartDate == "" && invoicePeriod.EndDate == "" {
+		return nil
+	}
 	period := &cal.Period{}
 	if invoicePeriod.StartDate != "" {
 		start, err := parseDate(invoicePeriod.StartDate)

@@ -118,6 +118,10 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		}
 	}
 
+	if docLine.InvoicePeriod != nil {
+		line.Period = goblPeriodDates(docLine.InvoicePeriod)
+	}
+
 	if docLine.OrderLineReference != nil && docLine.OrderLineReference.LineID != "" {
 		line.Order = cbc.Code(docLine.OrderLineReference.LineID)
 	}
