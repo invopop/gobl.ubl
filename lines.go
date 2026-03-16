@@ -93,6 +93,13 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 			invLine.DocumentReference = ref
 		}
 
+		if l.Period != nil {
+			invLine.InvoicePeriod = &Period{
+				StartDate: formatDate(l.Period.Start),
+				EndDate:   formatDate(l.Period.End),
+			}
+		}
+
 		if l.Order != "" {
 			invLine.OrderLineReference = &OrderLineReference{
 				LineID: l.Order.String(),

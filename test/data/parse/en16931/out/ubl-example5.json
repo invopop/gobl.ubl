@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a4b995392eee3eff7634fb9616d21873d0490686387c06fcf5f14952b4f58f8f"
+			"val": "8585c31233dc56f58f584c7f89f365224cd790a25289242569be17dcd3719b30"
 		}
 	},
 	"doc": {
@@ -106,6 +106,10 @@
 				"identifier": {
 					"code": "Object2"
 				},
+				"period": {
+					"start": "2013-03-10",
+					"end": "2013-04-10"
+				},
 				"order": "1",
 				"cost": "ACC7654",
 				"item": {
@@ -179,6 +183,10 @@
 				"quantity": "100",
 				"identifier": {
 					"code": "Object2"
+				},
+				"period": {
+					"start": "2013-03-10",
+					"end": "2013-04-10"
 				},
 				"order": "2",
 				"cost": "ACC7654",

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0a5e130d9aaa708e64affa0cfa4393da18dd82c03f082afcb49352d7a04d7758"
+			"val": "443a92b49a6d800f948b6961cf2552a17d108ab61e6d2f0a16aa459cf6693839"
 		}
 	},
 	"doc": {
@@ -118,6 +118,10 @@
 			{
 				"i": 1,
 				"quantity": "10",
+				"period": {
+					"start": "2017-12-01",
+					"end": "2017-12-05"
+				},
 				"order": "123",
 				"cost": "Konteringsstreng",
 				"item": {

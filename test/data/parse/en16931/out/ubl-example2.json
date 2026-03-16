@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "67c94ef4b14c449532ffba16247e49e0cb23b760802374a4c248093df1aa6b70"
+			"val": "f48926eeabe066d7f2326a11be69986d39d075a3f37c0ee6038c96b785874cbd"
 		}
 	},
 	"doc": {
@@ -92,6 +92,10 @@
 			{
 				"i": 1,
 				"quantity": "2",
+				"period": {
+					"start": "2013-06-01",
+					"end": "2013-06-30"
+				},
 				"order": "1",
 				"cost": "BookingCode001",
 				"item": {

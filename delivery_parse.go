@@ -20,7 +20,11 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 				d.Date = &deliveryDate
 			}
 			if del.EstimatedDeliveryPeriod != nil {
-				d.Period = goblPeriodDates(del.EstimatedDeliveryPeriod)
+				p, err := goblPeriodDates(del.EstimatedDeliveryPeriod)
+				if err != nil {
+					return err
+				}
+				d.Period = p
 			}
 			if del.DeliveryLocation != nil && del.DeliveryLocation.ID != nil {
 				id := &org.Identity{

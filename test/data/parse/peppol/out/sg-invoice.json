@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0962c241ba687750d93f58aa2aaf6750c9c2e925dcdf9ba972e5167fddffefc6"
+			"val": "6c0bf1379936f36a011b8c9273f7b8c101b588fdcd1da6b815485dc6fa8c353b"
 		}
 	},
 	"doc": {
@@ -135,6 +135,10 @@
 				"identifier": {
 					"code": "AAAAAAAA"
 				},
+				"period": {
+					"start": "2025-07-29",
+					"end": "2025-08-28"
+				},
 				"order": "1",
 				"cost": "23089",
 				"item": {
@@ -196,6 +200,10 @@
 				"quantity": "12.888",
 				"identifier": {
 					"code": "AAAAAAAA"
+				},
+				"period": {
+					"start": "2025-07-29",
+					"end": "2025-08-28"
 				},
 				"order": "1",
 				"cost": "23089",
