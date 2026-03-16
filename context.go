@@ -14,6 +14,12 @@ const (
 	PeppolBillingProfileIDDefault = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
 )
 
+// Peppol France Process IDs
+const (
+	PeppolFranceProcessIDRegulated    = "urn:peppol:france:billing:regulated"
+	PeppolFranceProcessIDNonRegulated = "urn:peppol:france:billing:non-regulated"
+)
+
 // VESIDMapping maps document types to their corresponding VESID values.
 type VESIDMapping struct {
 	// Invoice is the VESID for invoices
@@ -30,7 +36,9 @@ type Context struct {
 	// document which need to be present for local differences.
 	CustomizationID string
 	// ProfileID determines the business process context or scenario
-	// for the exchange of the document
+	// for the exchange of the document. For contexts like French CIUS/Extended,
+	// this is the Peppol process ID used in the SBDH, while the UBL XML ProfileID
+	// is overridden by the billing mode from the GOBL invoice.
 	ProfileID string
 	// OutputCustomizationID optionally specifies a different CustomizationID
 	// to use in the actual generated UBL XML document. If empty, CustomizationID
@@ -152,6 +160,7 @@ var ContextXRechnung = Context{
 // ContextPeppolFranceCIUS defines the context for France UBL Invoice CIUS.
 var ContextPeppolFranceCIUS = Context{
 	CustomizationID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
+	ProfileID:             PeppolFranceProcessIDRegulated,
 	OutputCustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:                []cbc.Key{ctc.Flow2V1},
 	VESIDs: VESIDMapping{
@@ -163,6 +172,7 @@ var ContextPeppolFranceCIUS = Context{
 // ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
 var ContextPeppolFranceExtended = Context{
 	CustomizationID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
+	ProfileID:             PeppolFranceProcessIDRegulated,
 	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Addons:                []cbc.Key{facturx.V1},
 	VESIDs: VESIDMapping{
