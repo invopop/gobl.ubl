@@ -31,7 +31,11 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(ui.InvoicePeriod) > 0 {
-		ordering.Period = goblPeriodDates(&ui.InvoicePeriod[0])
+		p, err := goblPeriodDates(&ui.InvoicePeriod[0])
+		if err != nil {
+			return err
+		}
+		ordering.Period = p
 	}
 
 	if ui.DespatchDocumentReference != nil {
@@ -146,29 +150,33 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.Description = cleanString(ref.DocumentDescription)
 	}
 	if ref.ValidityPeriod != nil {
-		docRef.Period = goblPeriodDates(ref.ValidityPeriod)
+		p, err := goblPeriodDates(ref.ValidityPeriod)
+		if err != nil {
+			return nil, err
+		}
+		docRef.Period = p
 	}
 	return docRef, nil
 }
 
-func goblPeriodDates(invoicePeriod *Period) *cal.Period {
+func goblPeriodDates(invoicePeriod *Period) (*cal.Period, error) {
 	if invoicePeriod.StartDate == "" && invoicePeriod.EndDate == "" {
-		return nil
+		return nil, nil
 	}
 	period := &cal.Period{}
 	if invoicePeriod.StartDate != "" {
 		start, err := parseDate(invoicePeriod.StartDate)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		period.Start = start
 	}
 	if invoicePeriod.EndDate != "" {
 		end, err := parseDate(invoicePeriod.EndDate)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 		period.End = end
 	}
-	return period
+	return period, nil
 }
