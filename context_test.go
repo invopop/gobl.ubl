@@ -109,7 +109,7 @@ func TestContextPeppolFranceCIUS(t *testing.T) {
 	t.Run("external identification uses full CustomizationID", func(t *testing.T) {
 		// Verify the context itself has the full identification
 		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0", ubl.ContextPeppolFranceCIUS.CustomizationID)
-		assert.Empty(t, ubl.ContextPeppolFranceCIUS.ProfileID)
+		assert.Equal(t, "urn:peppol:france:billing:regulated", ubl.ContextPeppolFranceCIUS.ProfileID)
 		assert.Equal(t, "urn:cen.eu:en16931:2017", ubl.ContextPeppolFranceCIUS.OutputCustomizationID)
 	})
 }
@@ -134,14 +134,14 @@ func TestContextPeppolFranceExtended(t *testing.T) {
 
 		// Verify OutputCustomizationID is used
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ublInv.CustomizationID)
-		// No billing mode extension in minimal invoice, so ProfileID is empty
-		assert.Empty(t, ublInv.ProfileID)
+		// No billing mode extension in minimal invoice, so ProfileID falls back to context's Peppol process ID
+		assert.Equal(t, "urn:peppol:france:billing:regulated", ublInv.ProfileID)
 	})
 
 	t.Run("external identification uses full CustomizationID", func(t *testing.T) {
 		// Verify the context itself has the full identification
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0", ubl.ContextPeppolFranceExtended.CustomizationID)
-		assert.Empty(t, ubl.ContextPeppolFranceExtended.ProfileID)
+		assert.Equal(t, "urn:peppol:france:billing:regulated", ubl.ContextPeppolFranceExtended.ProfileID)
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ubl.ContextPeppolFranceExtended.OutputCustomizationID)
 	})
 }
