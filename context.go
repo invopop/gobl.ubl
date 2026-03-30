@@ -70,11 +70,11 @@ func (c *Context) GetVESID(inv *bill.Invoice) string {
 // Returns nil if no matching context is found.
 //
 // The lookup logic works as follows:
-// 1. If the ProfileID is a French billing mode code, checks for a context whose
-//    OutputCustomizationID matches (France CIUS documents use EN16931's
-//    CustomizationID in the XML but can be identified by their billing mode ProfileID)
-// 2. Tries to match on the full CustomizationID (for external identification)
-// 3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
+//  1. If the ProfileID is a French billing mode code, checks for a context whose
+//     OutputCustomizationID matches (France CIUS documents use EN16931's
+//     CustomizationID in the XML but can be identified by their billing mode ProfileID)
+//  2. Tries to match on the full CustomizationID (for external identification)
+//  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
 func FindContext(customizationID string, profileID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// CustomizationID as EN16931 but can be identified by their ProfileID
