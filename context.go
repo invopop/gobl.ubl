@@ -70,10 +70,23 @@ func (c *Context) GetVESID(inv *bill.Invoice) string {
 // Returns nil if no matching context is found.
 //
 // The lookup logic works as follows:
-// 1. First tries to match on the full CustomizationID (for external identification)
-// 2. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
-// 3. For contexts with a ProfileID, checks if it matches (if provided)
+// 1. If the ProfileID is a French billing mode code, checks for a context whose
+//    OutputCustomizationID matches (France CIUS documents use EN16931's
+//    CustomizationID in the XML but can be identified by their billing mode ProfileID)
+// 2. Tries to match on the full CustomizationID (for external identification)
+// 3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
 func FindContext(customizationID string, profileID string) *Context {
+	// French billing mode check: France CIUS documents use the same
+	// CustomizationID as EN16931 but can be identified by their ProfileID
+	// containing a billing mode code (e.g., "B1", "S1", "M4").
+	if isFrenchBillingMode(profileID) {
+		for _, ctx := range contexts {
+			if ctx.OutputCustomizationID == customizationID {
+				return &ctx
+			}
+		}
+	}
+
 	// First pass: try to match on full CustomizationID
 	for _, ctx := range contexts {
 		if ctx.CustomizationID == customizationID {
@@ -85,7 +98,7 @@ func FindContext(customizationID string, profileID string) *Context {
 		}
 	}
 
-	// Second pass: try to match on OutputCustomizationID (for parsing where Profile may not be added))
+	// Second pass: try to match on OutputCustomizationID (for parsing incoming documents)
 	for _, ctx := range contexts {
 		if ctx.OutputCustomizationID != "" && ctx.OutputCustomizationID == customizationID {
 			return &ctx
@@ -93,6 +106,20 @@ func FindContext(customizationID string, profileID string) *Context {
 	}
 
 	return nil
+}
+
+// isFrenchBillingMode checks if the given profileID matches a known French
+// billing mode code pattern (e.g., "S1", "B1", "M4"). These codes consist of
+// a letter (B for goods, S for services, M for mixed) followed by a digit.
+func isFrenchBillingMode(profileID string) bool {
+	if len(profileID) != 2 {
+		return false
+	}
+	switch profileID[0] {
+	case 'B', 'S', 'M':
+		return profileID[1] >= '0' && profileID[1] <= '9'
+	}
+	return false
 }
 
 type options struct {

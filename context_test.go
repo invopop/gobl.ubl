@@ -281,13 +281,32 @@ func TestFindContext(t *testing.T) {
 		assert.Equal(t, ubl.ContextXRechnung.CustomizationID, ctx.CustomizationID)
 	})
 
-	t.Run("find France CIUS by OutputCustomizationID", func(t *testing.T) {
-		// Simulates parsing a French document with OutputCustomizationID
+	t.Run("find EN16931 when no ProfileID provided", func(t *testing.T) {
 		ctx := ubl.FindContext("urn:cen.eu:en16931:2017", "")
 		require.NotNil(t, ctx)
-		// Could match either EN16931 or France CIUS since both could use this CustomizationID
-		// EN16931 is returned first since it has no OutputCustomizationID
 		assert.Equal(t, ubl.ContextEN16931.CustomizationID, ctx.CustomizationID)
+	})
+
+	t.Run("find EN16931 with non-billing-mode ProfileID", func(t *testing.T) {
+		// EN16931 documents may have arbitrary ProfileIDs that are not French billing modes
+		ctx := ubl.FindContext("urn:cen.eu:en16931:2017", "Invoicing on purchase order")
+		require.NotNil(t, ctx)
+		assert.Equal(t, ubl.ContextEN16931.CustomizationID, ctx.CustomizationID)
+	})
+
+	t.Run("find France CIUS by billing mode ProfileID", func(t *testing.T) {
+		// France CIUS documents use EN16931 CustomizationID but have a billing mode as ProfileID
+		ctx := ubl.FindContext("urn:cen.eu:en16931:2017", "B1")
+		require.NotNil(t, ctx)
+		assert.Equal(t, ubl.ContextPeppolFranceCIUS.CustomizationID, ctx.CustomizationID)
+
+		ctx = ubl.FindContext("urn:cen.eu:en16931:2017", "S1")
+		require.NotNil(t, ctx)
+		assert.Equal(t, ubl.ContextPeppolFranceCIUS.CustomizationID, ctx.CustomizationID)
+
+		ctx = ubl.FindContext("urn:cen.eu:en16931:2017", "M4")
+		require.NotNil(t, ctx)
+		assert.Equal(t, ubl.ContextPeppolFranceCIUS.CustomizationID, ctx.CustomizationID)
 	})
 
 	t.Run("find France Extended by OutputCustomizationID", func(t *testing.T) {
