@@ -3,6 +3,9 @@ package ubl_test
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -50,5 +53,36 @@ func TestNewTotals(t *testing.T) {
 		assert.Equal(t, "VATEX-EU-AE", *tc.TaxExemptionReasonCode)
 		require.NotNil(t, tc.TaxExemptionReason)
 		assert.Equal(t, "Reverse Charge / Umkehr der Steuerschuld.", *tc.TaxExemptionReason)
+	})
+}
+
+func TestParseTaxNotes(t *testing.T) {
+	t.Run("reverse_charge", func(t *testing.T) {
+		env, err := testParseInvoice("peppol/nbio-stuck-ubl.xml")
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		require.NotNil(t, inv.Tax)
+		require.Len(t, inv.Tax.Notes, 1)
+
+		note := inv.Tax.Notes[0]
+		assert.Equal(t, cbc.Code("VAT"), note.Category)
+		assert.Equal(t, cbc.Key("reverse-charge"), note.Key)
+		assert.Equal(t, "Reverse charge Article 20", note.Text)
+		assert.Equal(t, cbc.Code("AE"), note.Ext.Get(untdid.ExtKeyTaxCategory))
+	})
+
+	t.Run("standard_no_tax_notes", func(t *testing.T) {
+		env, err := testParseInvoice("peppol/base-example.xml")
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		if inv.Tax != nil {
+			assert.Empty(t, inv.Tax.Notes)
+		}
 	})
 }
