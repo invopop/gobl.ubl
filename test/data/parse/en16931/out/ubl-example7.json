@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "002e9ae788587c86397be7bcf756ea3fe4c12ab1c787e7619ec8d93acdb3d670"
+			"val": "7105bd91c95c222145f2bb83d7bb14c7fbaf3ffe203288a247df4362e258848a"
 		}
 	},
 	"doc": {
@@ -21,7 +21,17 @@
 			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "outside-scope",
+					"text": "Tax",
+					"ext": {
+						"untdid-tax-category": "O"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "The Sellercompany Incorporated",

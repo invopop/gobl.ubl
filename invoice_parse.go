@@ -164,6 +164,8 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 
 	out.Attachments = ui.goblAddAttachments()
 
+	ui.goblAddTaxNotes(out)
+
 	return out, nil
 }
 
