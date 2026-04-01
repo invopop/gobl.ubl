@@ -71,7 +71,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 
 	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
+		out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
 	}
 
 	typeCode := ui.InvoiceTypeCode
@@ -163,6 +163,8 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 
 	out.Attachments = ui.goblAddAttachments()
+
+	ui.goblAddTaxNotes(out)
 
 	return out, nil
 }

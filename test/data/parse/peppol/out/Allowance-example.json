@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2cc190e138cf22f62547bf57307bf8850354dcf40fe0dbe3143e3fbb863cbc51"
+			"val": "64614703a146409f8e5391c604c9cd9f4ea120957b306ab4660c0ece08d4c7f8"
 		}
 	},
 	"doc": {
@@ -23,7 +23,17 @@
 			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "exempt",
+					"text": "Reason for tax exempt",
+					"ext": {
+						"untdid-tax-category": "E"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "SupplierOfficialName Ltd",

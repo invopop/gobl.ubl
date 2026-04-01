@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f48926eeabe066d7f2326a11be69986d39d075a3f37c0ee6038c96b785874cbd"
+			"val": "3055733b139f3b5f04a6f73429b787989c81c448d66347bc1ebfe2e88d472ce7"
 		}
 	},
 	"doc": {
@@ -21,7 +21,17 @@
 			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "exempt",
+					"text": "Exempt New Means of Transport",
+					"ext": {
+						"untdid-tax-category": "E"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "Tax handling company AS",

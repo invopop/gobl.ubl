@@ -4,14 +4,15 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "953f0c7b36381b1b2496fc9def230de80be2213984f741435f2a0eda7728ce11"
+			"val": "04893e1b450b748c0b7e4578fbe94af9f1593e860a03ebad4d0d174e2a4a7874"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "FR",
 		"$addons": [
-			"eu-en16931-v2017"
+			"eu-en16931-v2017",
+			"fr-ctc-flow2-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
@@ -21,8 +22,27 @@
 		"tax": {
 			"rounding": "currency",
 			"ext": {
+				"fr-ctc-billing-mode": "B1",
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "exempt",
+					"text": "REMBOURSEMENT",
+					"ext": {
+						"untdid-tax-category": "E"
+					}
+				},
+				{
+					"cat": "VAT",
+					"key": "intra-community",
+					"text": "LIVRAISON INTRACOMMUNAUTAIRE",
+					"ext": {
+						"untdid-tax-category": "K"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "LE VENDEUR",
@@ -55,6 +75,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "324872211"
 				}
@@ -103,6 +124,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "439368049"
 				}
