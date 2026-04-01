@@ -24,4 +24,31 @@ func TestNewTotals(t *testing.T) {
 		assert.Equal(t, "VAT", doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.TaxScheme.ID)
 		assert.Equal(t, "21.0", *doc.TaxTotal[0].TaxSubtotal[0].TaxCategory.Percent)
 	})
+
+	t.Run("standard_invoice_no_exemption_reason", func(t *testing.T) {
+		doc, err := testInvoiceFrom("peppol/invoice-minimal.json")
+		require.NoError(t, err)
+
+		require.Len(t, doc.TaxTotal, 1)
+		require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
+		tc := doc.TaxTotal[0].TaxSubtotal[0].TaxCategory
+		assert.Nil(t, tc.TaxExemptionReasonCode)
+		assert.Nil(t, tc.TaxExemptionReason)
+	})
+
+	t.Run("reverse_charge_exemption_from_tax_notes", func(t *testing.T) {
+		doc, err := testInvoiceFrom("peppol/peppol-reverse-charge.json")
+		require.NoError(t, err)
+
+		require.Len(t, doc.TaxTotal, 1)
+		require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
+		tc := doc.TaxTotal[0].TaxSubtotal[0].TaxCategory
+
+		assert.Equal(t, "AE", *tc.ID)
+		assert.Equal(t, "0", *tc.Percent)
+		require.NotNil(t, tc.TaxExemptionReasonCode)
+		assert.Equal(t, "VATEX-EU-AE", *tc.TaxExemptionReasonCode)
+		require.NotNil(t, tc.TaxExemptionReason)
+		assert.Equal(t, "Reverse Charge / Umkehr der Steuerschuld.", *tc.TaxExemptionReason)
+	})
 }

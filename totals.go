@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -102,13 +101,9 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 					}
 				}
 
-				if inv.Notes != nil {
-					for _, n := range inv.Notes {
-						if n.Key == org.NoteKeyLegal && inv.HasTags(tax.TagReverseCharge) {
-							reason := n.Text
-							taxCat.TaxExemptionReason = &reason
-							break
-						}
+				if inv.Tax != nil {
+					if note := findTaxNote(inv.Tax.Notes, cat.Code, r); note != nil {
+						taxCat.TaxExemptionReason = &note.Text
 					}
 				}
 
@@ -157,4 +152,18 @@ func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 	}
 
 	return categoryMap
+}
+
+// findTaxNote finds a tax note that matches the given category code and rate total
+// by comparing category, key, and the UNTDID tax category extension.
+func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
+	for _, n := range notes {
+		if n.Category != catCode {
+			continue
+		}
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+			return n
+		}
+	}
+	return nil
 }

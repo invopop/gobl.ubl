@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2b87cc8dbb1d8785642d251ec0ec6e97b51904530f38ec9278d8a09e24cf9f8a"
+			"val": "a50348ac95d71d8980f2a925230e7da9bf16e51c17356c6a6484d53bef15ed4a"
 		}
 	},
 	"doc": {
@@ -26,7 +26,17 @@
 			"prices_include": "VAT",
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "reverse-charge",
+					"text": "Reverse Charge / Umkehr der Steuerschuld.",
+					"ext": {
+						"untdid-tax-category": "AE"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "Example Company GmbH",
@@ -202,8 +212,10 @@
 		"notes": [
 			{
 				"key": "legal",
-				"src": "reverse-charge",
-				"text": "Reverse Charge / Umkehr der Steuerschuld."
+				"text": "Reverse Charge / Umkehr der Steuerschuld.",
+				"ext": {
+					"untdid-text-subject": "ABL"
+				}
 			}
 		]
 	}
