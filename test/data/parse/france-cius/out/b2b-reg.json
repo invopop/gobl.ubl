@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a6dcf85ba7a47d639f88506d820a846d68dff9ed47e0c4fc479c90ca1f3eae13"
+			"val": "04893e1b450b748c0b7e4578fbe94af9f1593e860a03ebad4d0d174e2a4a7874"
 		}
 	},
 	"doc": {
@@ -24,7 +24,25 @@
 			"ext": {
 				"fr-ctc-billing-mode": "B1",
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "exempt",
+					"text": "REMBOURSEMENT",
+					"ext": {
+						"untdid-tax-category": "E"
+					}
+				},
+				{
+					"cat": "VAT",
+					"key": "intra-community",
+					"text": "LIVRAISON INTRACOMMUNAUTAIRE",
+					"ext": {
+						"untdid-tax-category": "K"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "LE VENDEUR",

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "403121dc350b96a068d77d6b5bfa329bb5148c6cb21583241185c275971597da"
+			"val": "2c12a5fb0ae6183d8d1943bc13ab4280ef57a02a992ed08ae54f6e510f285f95"
 		}
 	},
 	"doc": {
@@ -23,7 +23,17 @@
 			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
-			}
+			},
+			"notes": [
+				{
+					"cat": "VAT",
+					"key": "reverse-charge",
+					"text": "Reverse charge Article 20",
+					"ext": {
+						"untdid-tax-category": "AE"
+					}
+				}
+			]
 		},
 		"supplier": {
 			"name": "Example Supplier Ltd",

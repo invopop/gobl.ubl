@@ -154,14 +154,33 @@ func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 	return categoryMap
 }
 
+// goblAddTaxNotes extracts tax notes from UBL TaxTotal subtotals and adds them
+// to the invoice's Tax.Notes.
+func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
+	for _, tt := range ui.TaxTotal {
+		for _, st := range tt.TaxSubtotal {
+			tc := st.TaxCategory
+			if tc.TaxExemptionReason == nil || tc.ID == nil || tc.TaxScheme == nil {
+				continue
+			}
+			note := &tax.Note{
+				Category: cbc.Code(tc.TaxScheme.ID),
+				Text:     *tc.TaxExemptionReason,
+				Ext:      tax.Extensions{untdid.ExtKeyTaxCategory: cbc.Code(*tc.ID)},
+			}
+			inv.Tax = inv.Tax.MergeNotes(note)
+		}
+	}
+}
+
 // findTaxNote finds a tax note that matches the given category code and rate total
-// by comparing category, key, and the UNTDID tax category extension.
+// by comparing category and the UNTDID tax category extension.
 func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
 	for _, n := range notes {
 		if n.Category != catCode {
 			continue
 		}
-		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != "" && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != cbc.CodeEmpty && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
 			return n
 		}
 	}
