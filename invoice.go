@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 )
 
 // Main UBL Invoice Namespace
@@ -172,6 +173,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 
 	out.addPreceding(inv.Preceding)
 	out.addOrdering(inv.Ordering)
+	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
 	out.addTotals(inv)
 	out.addLines(inv)
@@ -185,6 +187,35 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	return out, nil
+}
+
+// taxPointCodeMap maps GOBL tax point keys to UNTDID 2005 codes for UBL.
+var taxPointCodeMap = map[cbc.Key]string{
+	tax.PointIssue:    "3",
+	tax.PointDelivery: "35",
+	tax.PointPayment:  "432",
+}
+
+// taxPointKeyMap is the reverse mapping from UNTDID 2005 codes to GOBL tax point keys.
+var taxPointKeyMap = map[string]cbc.Key{
+	"3":   tax.PointIssue,
+	"35":  tax.PointDelivery,
+	"432": tax.PointPayment,
+}
+
+// addTaxPoint maps the GOBL tax point key (BT-8) to the UBL InvoicePeriod DescriptionCode.
+func (ui *Invoice) addTaxPoint(t *bill.Tax) {
+	if t == nil || t.Point == cbc.KeyEmpty {
+		return
+	}
+	code, ok := taxPointCodeMap[t.Point]
+	if !ok {
+		return
+	}
+	if len(ui.InvoicePeriod) == 0 {
+		ui.InvoicePeriod = []Period{{}}
+	}
+	ui.InvoicePeriod[0].DescriptionCode = code
 }
 
 func invoiceNumber(series cbc.Code, code cbc.Code) string {

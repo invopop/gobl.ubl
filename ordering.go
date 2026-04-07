@@ -8,8 +8,9 @@ import (
 
 // Period represents a time period with start and end dates
 type Period struct {
-	StartDate string `xml:"cbc:StartDate,omitempty"`
-	EndDate   string `xml:"cbc:EndDate,omitempty"`
+	StartDate       string `xml:"cbc:StartDate,omitempty"`
+	EndDate         string `xml:"cbc:EndDate,omitempty"`
+	DescriptionCode string `xml:"cbc:DescriptionCode,omitempty"`
 }
 
 // OrderReference represents a reference to an order
