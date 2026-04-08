@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3055733b139f3b5f04a6f73429b787989c81c448d66347bc1ebfe2e88d472ce7"
+			"val": "f4615111b131781059f37d184159812d4514dcd8244e4be34ddde6f866005ca9"
 		}
 	},
 	"doc": {
@@ -19,6 +19,7 @@
 		"currency": "NOK",
 		"tax": {
 			"rounding": "currency",
+			"point": "issue",
 			"ext": {
 				"untdid-document-type": "380"
 			},

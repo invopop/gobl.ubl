@@ -36,6 +36,16 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 			return err
 		}
 		ordering.Period = p
+
+		// BT-8: VAT point date code
+		if code := ui.InvoicePeriod[0].DescriptionCode; code != "" {
+			if key, ok := taxPointKeyMap[code]; ok {
+				if out.Tax == nil {
+					out.Tax = new(bill.Tax)
+				}
+				out.Tax.Point = key
+			}
+		}
 	}
 
 	if ui.DespatchDocumentReference != nil {

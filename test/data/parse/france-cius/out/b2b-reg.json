@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "04893e1b450b748c0b7e4578fbe94af9f1593e860a03ebad4d0d174e2a4a7874"
+			"val": "2a6d7aa966ac20b853ef9f45cfa65a62e0b8cb6c45c53b646c8774a19ad7245b"
 		}
 	},
 	"doc": {
@@ -21,6 +21,7 @@
 		"currency": "EUR",
 		"tax": {
 			"rounding": "currency",
+			"point": "issue",
 			"ext": {
 				"fr-ctc-billing-mode": "B1",
 				"untdid-document-type": "380"
