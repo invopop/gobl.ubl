@@ -199,18 +199,22 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 
 	line.Taxes = tax.Set{
 		{
-			Category: cbc.Code(ctc.TaxScheme.ID),
+			Category: cbc.Code(ctc.TaxScheme.ID.Value),
 		},
 	}
 	if ctc.ID != nil {
 		line.Taxes[0].Ext = tax.Extensions{
-			untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
+			untdid.ExtKeyTaxCategory: cbc.Code(ctc.ID.Value),
 		}
 
-		// Try to get exemption code from TaxTotal
-		key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID, ctc.Percent)
-		if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+		if ctc.TaxExemptionReasonCode != nil {
+			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(*ctc.TaxExemptionReasonCode)
+		} else {
+			// Try to get exemption code from TaxTotal
+			key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value, ctc.Percent)
+			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
+				line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+			}
 		}
 
 	}
@@ -223,7 +227,7 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 
 		// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
 		// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
-		if percent.IsZero() && ctc.ID != nil && *ctc.ID != "Z" {
+		if percent.IsZero() && ctc.ID != nil && ctc.ID.Value != "Z" {
 			return
 		}
 

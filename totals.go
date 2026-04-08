@@ -24,7 +24,7 @@ type TaxSubtotal struct {
 
 // TaxCategory represents a tax category
 type TaxCategory struct {
-	ID                     *string    `xml:"cbc:ID,omitempty"`
+	ID                     *IDType    `xml:"cbc:ID,omitempty"`
 	Percent                *string    `xml:"cbc:Percent,omitempty"`
 	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
 	TaxExemptionReason     *string    `xml:"cbc:TaxExemptionReason,omitempty"`
@@ -92,8 +92,8 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 
 				if r.Ext != nil {
 					if r.Ext[untdid.ExtKeyTaxCategory].String() != "" {
-						k := r.Ext[untdid.ExtKeyTaxCategory].String()
-						taxCat.ID = &k
+					k := r.Ext[untdid.ExtKeyTaxCategory].String()
+					taxCat.ID = &IDType{Value: k}
 					}
 					if r.Ext[cef.ExtKeyVATEX].String() != "" {
 						v := r.Ext[cef.ExtKeyVATEX].String()
@@ -111,14 +111,14 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 				if r.Percent != nil {
 					p := r.Percent.StringWithoutSymbol()
 					taxCat.Percent = &p
-				} else if taxCat.ID == nil || *taxCat.ID != "O" {
+				} else if taxCat.ID == nil || taxCat.ID.Value != "O" {
 					// Default to 0% when not outside scope
 					p := "0"
 					taxCat.Percent = &p
 				}
 
 				if cat.Code != cbc.CodeEmpty {
-					taxCat.TaxScheme = &TaxScheme{ID: cat.Code.String()}
+					taxCat.TaxScheme = &TaxScheme{ID: IDType{Value: cat.Code.String()}}
 				}
 				subtotal.TaxCategory = taxCat
 				ui.TaxTotal[0].TaxSubtotal = append(ui.TaxTotal[0].TaxSubtotal, subtotal)
@@ -139,9 +139,7 @@ func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 	for _, taxTotal := range ui.TaxTotal {
 		for _, subtotal := range taxTotal.TaxSubtotal {
 			if subtotal.TaxCategory.ID != nil && subtotal.TaxCategory.TaxScheme != nil {
-				schemeID := subtotal.TaxCategory.TaxScheme.ID
-				categoryID := *subtotal.TaxCategory.ID
-				key := buildTaxCategoryKey(schemeID, categoryID, subtotal.TaxCategory.Percent)
+				key := buildTaxCategoryKey(subtotal.TaxCategory.TaxScheme.ID.Value, subtotal.TaxCategory.ID.Value, subtotal.TaxCategory.Percent)
 				info := &taxCategoryInfo{}
 				if subtotal.TaxCategory.TaxExemptionReasonCode != nil {
 					info.exemptionReasonCode = *subtotal.TaxCategory.TaxExemptionReasonCode
