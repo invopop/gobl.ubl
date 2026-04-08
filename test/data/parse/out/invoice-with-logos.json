@@ -1,0 +1,120 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "cb092bbb589ff691f13fde341c5c5d43e9ebd755ffd4d807018d03400af15f92"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "INVOICE-001",
+		"issue_date": "2024-02-13",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Supplier Company GmbH",
+			"alias": "Supplier Company",
+			"tax_id": {
+				"country": "DE",
+				"code": "123456789"
+			},
+			"addresses": [
+				{
+					"street": "Main Street 1",
+					"locality": "Berlin",
+					"code": "10115",
+					"country": "DE"
+				}
+			],
+			"logos": [
+				{
+					"url": "https://www.supplier.com/logo.png"
+				}
+			]
+		},
+		"customer": {
+			"name": "Customer Inc",
+			"alias": "Customer Inc",
+			"tax_id": {
+				"country": "DE",
+				"code": "987654321"
+			},
+			"addresses": [
+				{
+					"street": "Oak Avenue 42",
+					"locality": "Munich",
+					"code": "80331",
+					"country": "DE"
+				}
+			],
+			"logos": [
+				{
+					"url": "https://www.customer.com/brand.svg"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Consulting Services",
+					"price": "10.00",
+					"unit": "h"
+				},
+				"sum": "100.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "100.00"
+			}
+		],
+		"totals": {
+			"sum": "100.00",
+			"total": "100.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "100.00",
+								"percent": "19%",
+								"amount": "19.00"
+							}
+						],
+						"amount": "19.00"
+					}
+				],
+				"sum": "19.00"
+			},
+			"tax": "19.00",
+			"total_with_tax": "119.00",
+			"payable": "119.00"
+		}
+	}
+}
