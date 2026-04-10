@@ -76,6 +76,9 @@
     <cbc:Amount currencyID="EUR">2142.00</cbc:Amount>
     <cbc:PaymentDueDate>2024-03-15</cbc:PaymentDueDate>
   </cac:PaymentTerms>
+  <cac:PaymentTerms>
+    <cbc:Note>lorem ipsum</cbc:Note>
+  </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">378.00</cbc:TaxAmount>
     <cac:TaxSubtotal>

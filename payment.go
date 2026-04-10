@@ -193,7 +193,9 @@ func (ui *Invoice) addPaymentTerms(inv *bill.Invoice, pymt *bill.PaymentDetails)
 		}
 	} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
-	} else {
+	}
+
+	if pymt.Terms.Notes != "" {
 		ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
 			Note: []string{pymt.Terms.Notes},
 		})
