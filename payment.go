@@ -50,10 +50,7 @@ type Branch struct {
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	Note           []string `xml:"cbc:Note"`
-	Amount         *Amount  `xml:"cbc:Amount"`
-	PaymentPercent *string  `xml:"cbc:PaymentPercent"`
-	PaymentDueDate *string  `xml:"cbc:PaymentDueDate"`
+	Note string `xml:"cbc:Note"`
 }
 
 // PrepaidPayment represents a prepaid payment
@@ -79,7 +76,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	}
 
 	if pymt.Terms != nil {
-		ui.addPaymentTerms(inv, pymt)
+		ui.addPaymentTerms(pymt)
 	}
 
 	if pymt.Payee != nil {
@@ -167,37 +164,18 @@ func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 	return pfa
 }
 
-func (ui *Invoice) addPaymentTerms(inv *bill.Invoice, pymt *bill.PaymentDetails) {
-	ui.PaymentTerms = make([]PaymentTerms, 0)
-	if (len(pymt.Terms.DueDates) > 1) || (ui.CreditNoteTypeCode != "" && len(pymt.Terms.DueDates) > 0) {
-		for _, dueDate := range pymt.Terms.DueDates {
-			currency := dueDate.Currency.String()
-			if currency == "" {
-				currency = inv.Currency.String()
-			}
-			term := PaymentTerms{
-				Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: &currency},
-			}
-			if dueDate.Date != nil {
-				d := formatDate(*dueDate.Date)
-				term.PaymentDueDate = &d
-			}
-			if dueDate.Percent != nil {
-				p := dueDate.Percent.String()
-				term.PaymentPercent = &p
-			}
-			if dueDate.Notes != "" {
-				term.Note = []string{dueDate.Notes}
-			}
-			ui.PaymentTerms = append(ui.PaymentTerms, term)
+func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
+	if pymt.Terms.Notes != "" {
+		ui.PaymentTerms = &PaymentTerms{
+			Note: pymt.Terms.Notes,
 		}
-	} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
+	}
+
+	// Only one due date allowed under EN 16931
+	if len(pymt.Terms.DueDates) > 0 && ui.CreditNoteTypeCode == "" {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 	}
 
-	if pymt.Terms.Notes != "" {
-		ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
-			Note: []string{pymt.Terms.Notes},
-		})
-	}
+	// TODO: under PEPPOL BIS, credit notes do have an optional PaymentDueDates field.
+	// Future implementations may need to cover this.
 }

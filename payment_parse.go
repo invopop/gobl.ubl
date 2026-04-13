@@ -36,23 +36,9 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 		payment.Payee = goblParty(ui.PayeeParty)
 	}
 
-	if len(ui.PaymentTerms) > 0 {
-		payment.Terms = &pay.Terms{}
-		note := make([]string, 0)
-		for _, term := range ui.PaymentTerms {
-			note = append(note, term.Note...)
-			if term.Amount != nil {
-				amount, err := num.AmountFromString(normalizeNumericString(term.Amount.Value))
-				if err != nil {
-					return err
-				}
-				payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
-					Amount: amount,
-				})
-			}
-		}
-		if len(note) > 0 {
-			payment.Terms.Notes = cleanString(strings.Join(note, " "))
+	if ui.PaymentTerms != nil {
+		payment.Terms = &pay.Terms{
+			Notes: cleanString(ui.PaymentTerms.Note),
 		}
 	}
 

@@ -4,6 +4,7 @@
   <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
   <cbc:ID>SAMPLE-001</cbc:ID>
   <cbc:IssueDate>2022-02-01</cbc:IssueDate>
+  <cbc:DueDate>2022-02-01</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>USD</cbc:DocumentCurrencyCode>
   <cbc:BuyerReference>12345</cbc:BuyerReference>
@@ -33,6 +34,7 @@
       <cac:Contact>
         <cbc:Name>John Doe</cbc:Name>
         <cbc:Telephone>+49100200300</cbc:Telephone>
+        <cbc:ElectronicMail>email@sample.com</cbc:ElectronicMail>
       </cac:Contact>
     </cac:Party>
   </cac:AccountingSupplierParty>
@@ -72,16 +74,6 @@
       <cbc:Name>Random Bank Co.</cbc:Name>
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
-  <cac:PaymentTerms>
-    <cbc:Note>First payment</cbc:Note>
-    <cbc:Amount currencyID="USD">100.00</cbc:Amount>
-    <cbc:PaymentDueDate>2022-02-01</cbc:PaymentDueDate>
-  </cac:PaymentTerms>
-  <cac:PaymentTerms>
-    <cbc:Note>Second and last payment</cbc:Note>
-    <cbc:Amount currencyID="USD">50.00</cbc:Amount>
-    <cbc:PaymentDueDate>2022-02-09</cbc:PaymentDueDate>
-  </cac:PaymentTerms>
   <cac:PaymentTerms>
     <cbc:Note>Please pay within 10 days</cbc:Note>
   </cac:PaymentTerms>

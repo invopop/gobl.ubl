@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "dcdb66415c7b1a6c2aa6f2d21f139af734166bf5137885b19126f4f0d7401be1"
+			"val": "c07f905e25237061940b5ff941c7abff6bdd08dba82808bf80b2243e7fbc3675"
 		}
 	},
 	"doc": {
@@ -63,6 +63,11 @@
 					"locality": "Walldorf",
 					"code": "69190",
 					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
 				}
 			],
 			"telephones": [
