@@ -42,8 +42,16 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 		}
 	}
 
-	if ui.DueDate != "" {
-		d, err := parseDate(ui.DueDate)
+	var dueDate string
+	if ui.CreditNoteTypeCode == "" && ui.DueDate != "" {
+		dueDate = ui.DueDate
+	}
+	if ui.CreditNoteTypeCode != "" && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
+		dueDate = *ui.PaymentMeans[0].PaymentDueDate
+	}
+
+	if dueDate != "" {
+		d, err := parseDate(dueDate)
 		if err != nil {
 			return err
 		}

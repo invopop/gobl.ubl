@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "524d7440523c8d96d5e59fe9755c1749e4ae54b33350ff85a9eb3b8932284b91"
+			"val": "f62c75efa044da7a139acd099d6f7e3d337bc776d1c347c8b31cf1d21d39f9f7"
 		}
 	},
 	"doc": {
@@ -121,6 +121,12 @@
 		},
 		"payment": {
 			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-06-14",
+						"amount": "2142.00"
+					}
+				],
 				"notes": "on receipt within 30 days"
 			},
 			"instructions": {

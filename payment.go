@@ -12,6 +12,7 @@ import (
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
+	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote"`
 	PaymentID             *string           `xml:"cbc:PaymentID"`
@@ -70,7 +71,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		if err := ui.addPaymentInstructions(pymt.Instructions); err != nil {
+		if err := ui.addPaymentInstructions(pymt); err != nil {
 			return err
 		}
 	}
@@ -103,7 +104,8 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	return nil
 }
 
-func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
+func (ui *Invoice) addPaymentInstructions(pymt *bill.PaymentDetails) error {
+	instr := pymt.Instructions
 	if instr.Ext == nil || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
 			"instructions": validation.Errors{
@@ -145,6 +147,10 @@ func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
 			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
 		}
 	}
+	if ui.CreditNoteTypeCode != "" && pymt.Terms != nil && len(pymt.Terms.DueDates) > 0 {
+		formattedDate := formatDate(*pymt.Terms.DueDates[0].Date)
+		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
+	}
 	return nil
 }
 
@@ -172,10 +178,7 @@ func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
 	}
 
 	// Only one due date allowed under EN 16931
-	if len(pymt.Terms.DueDates) > 0 && ui.CreditNoteTypeCode == "" {
+	if ui.CreditNoteTypeCode == "" && len(pymt.Terms.DueDates) > 0 {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 	}
-
-	// TODO: under PEPPOL BIS, credit notes do have an optional PaymentDueDates field.
-	// Future implementations may need to cover this.
 }

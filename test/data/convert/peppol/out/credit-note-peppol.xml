@@ -67,6 +67,7 @@
   </cac:AccountingCustomerParty>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
+    <cbc:PaymentDueDate>2024-06-14</cbc:PaymentDueDate>
     <cbc:PaymentID>0003434323213231</cbc:PaymentID>
     <cac:PayeeFinancialAccount>
       <cbc:ID>NO9386011117947</cbc:ID>
