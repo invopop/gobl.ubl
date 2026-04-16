@@ -55,6 +55,13 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 			line.Price.AllowanceCharge.ChargeIndicator = false
 		}
 	}
+
+	// BR-KSA-EN16931-09
+	if out.TaxCurrencyCode != "" {
+		out.TaxTotal = append(out.TaxTotal, TaxTotal{
+			TaxAmount: out.TaxTotal[0].TaxAmount,
+		})
+	}
 }
 
 func stripVATCountryPrefix(p *Party) {
