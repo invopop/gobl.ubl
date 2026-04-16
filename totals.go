@@ -5,14 +5,16 @@ import (
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	cur "github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
 )
 
 // TaxTotal represents a tax total
 type TaxTotal struct {
-	TaxAmount   Amount        `xml:"cbc:TaxAmount"`
-	TaxSubtotal []TaxSubtotal `xml:"cac:TaxSubtotal"`
+	TaxAmount      Amount        `xml:"cbc:TaxAmount"`
+	RoundingAmount *Amount       `xml:"cbc:RoundingAmount,omitempty"`
+	TaxSubtotal    []TaxSubtotal `xml:"cac:TaxSubtotal"`
 }
 
 // TaxSubtotal represents a tax subtotal
@@ -50,6 +52,7 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 	t := inv.Totals
 
 	currency := inv.Currency.String()
+	rCurrency := inv.RegimeDef().Currency.String()
 
 	ui.LegalMonetaryTotal = MonetaryTotal{
 		LineExtensionAmount: Amount{Value: t.Sum.String(), CurrencyID: &currency},
@@ -79,6 +82,21 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
 		},
 	}
+
+	// BT-111
+	if inv.Currency.String() != rCurrency {
+		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().Currency); rate != nil {
+			taxInAccCurrency := rate.Convert(t.Tax)
+			accTaxTotal := TaxTotal{
+				TaxAmount: Amount{
+					Value:      taxInAccCurrency.String(),
+					CurrencyID: &rCurrency,
+				},
+			}
+			ui.TaxTotal = append(ui.TaxTotal, accTaxTotal)
+		}
+	}
+
 	if t.Taxes != nil && len(t.Taxes.Categories) > 0 {
 		for _, cat := range t.Taxes.Categories {
 			for _, r := range cat.Rates {

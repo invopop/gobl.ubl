@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
+	"github.com/invopop/gobl/addons/sa/zatca"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
@@ -208,6 +209,13 @@ var ContextPeppolFranceExtended = Context{
 	},
 }
 
+// ContextZATCA defines the context for Saudi Arabia ZATCA Phase 2 e-invoicing.
+var ContextZATCA = Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:zatca.gov.sa:e-invoicing:1.0",
+	ProfileID:       "reporting:1.0", // BT-23
+	Addons:          []cbc.Key{zatca.V1},
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA}

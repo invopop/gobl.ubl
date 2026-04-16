@@ -16,6 +16,7 @@ const (
 	NamespaceCAC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
 	NamespaceQDT  = "urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2"
 	NamespaceUDT  = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
+	NamespaceEXT  = "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
 	NamespaceCCTS = "urn:un:unece:uncefact:documentation:2"
 	NamespaceXSI  = "http://www.w3.org/2001/XMLSchema-instance"
 )

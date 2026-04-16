@@ -23,7 +23,7 @@ func TestInvoiceHeaders(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "380", out.InvoiceTypeCode)
+		assert.Equal(t, "380", out.InvoiceTypeCode.Value)
 
 		inv.Tax = nil
 		_, err = ubl.ConvertInvoice(env)

@@ -36,6 +36,7 @@ type Invoice struct {
 	CCTSNamespace  string `xml:"xmlns:ccts,attr"`
 	UBLNamespace   string `xml:"xmlns,attr"`
 	XSINamespace   string `xml:"xmlns:xsi,attr"`
+	EXTNamespace   string `xml:"xmlns:ext,attr"`
 	SchemaLocation string `xml:"xsi:schemaLocation,attr"`
 
 	UBLExtensions      *Extensions `xml:"ext:UBLExtensions,omitempty"`
@@ -50,8 +51,8 @@ type Invoice struct {
 	IssueTime          string      `xml:"cbc:IssueTime,omitempty"`
 	DueDate            string      `xml:"cbc:DueDate,omitempty"`
 
-	InvoiceTypeCode    string `xml:"cbc:InvoiceTypeCode,omitempty"`
-	CreditNoteTypeCode string `xml:"cbc:CreditNoteTypeCode,omitempty"`
+	InvoiceTypeCode    *IDType `xml:"cbc:InvoiceTypeCode,omitempty"`
+	CreditNoteTypeCode string  `xml:"cbc:CreditNoteTypeCode,omitempty"`
 
 	Note                           []string            `xml:"cbc:Note,omitempty"`
 	TaxPointDate                   string              `xml:"cbc:TaxPointDate,omitempty"`
@@ -128,14 +129,16 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		UBLNamespace:            NamespaceUBLInvoice,
 		CCTSNamespace:           NamespaceCCTS,
 		XSINamespace:            NamespaceXSI,
+		EXTNamespace:            NamespaceEXT,
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
 		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
-		InvoiceTypeCode:         tc,
+		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
+		TaxCurrencyCode:         string(inv.RegimeDef().Currency),
 		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
 	}
@@ -144,7 +147,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.XMLName = xml.Name{Local: "CreditNote"}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
-		out.InvoiceTypeCode = ""
+		out.InvoiceTypeCode = nil
 		out.CreditNoteTypeCode = tc
 	}
 
@@ -172,11 +175,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	out.addPreceding(inv.Preceding)
-	out.addOrdering(inv.Ordering)
+	out.addOrdering(inv.Ordering, o.context)
 	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
 	out.addTotals(inv)
-	out.addLines(inv)
+	out.addLines(inv, o.context)
 	out.addAttachments(inv.Attachments)
 
 	if err = out.addPayment(inv); err != nil {
@@ -184,6 +187,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 	if d := newDelivery(inv.Delivery); d != nil {
 		out.Delivery = []*Delivery{d}
+	}
+
+	// Apply ZATCA context-specific modifications
+	if o.context.Is(ContextZATCA) {
+		applyZATCA(out, inv)
 	}
 
 	return out, nil

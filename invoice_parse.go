@@ -16,6 +16,7 @@ var invoiceTypeMap = map[string]cbc.Key{
 	"381": bill.InvoiceTypeCreditNote,
 	"383": bill.InvoiceTypeDebitNote,
 	"384": bill.InvoiceTypeCorrective,
+	"388": bill.InvoiceTypeStandard,
 	"389": bill.InvoiceTypeStandard,
 	"326": bill.InvoiceTypeStandard,
 	"261": bill.InvoiceTypeCreditNote,
@@ -74,8 +75,10 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
 	}
 
-	typeCode := ui.InvoiceTypeCode
-	if typeCode == "" {
+	var typeCode string
+	if ui.InvoiceTypeCode != nil {
+		typeCode = ui.InvoiceTypeCode.Value
+	} else {
 		typeCode = ui.CreditNoteTypeCode
 	}
 	out.Type = typeCodeParse(typeCode)

@@ -5,6 +5,7 @@ import "github.com/invopop/gobl/bill"
 // Delivery represents delivery information
 type Delivery struct {
 	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
+	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
 	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
 	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
@@ -31,6 +32,11 @@ func newDelivery(del *bill.DeliveryDetails) *Delivery {
 	if del.Date != nil {
 		date := formatDate(*del.Date)
 		out.ActualDeliveryDate = &date
+	}
+
+	if del.Period != nil {
+		end := formatDate(del.Period.End)
+		out.LatestDeliveryDate = &end
 	}
 
 	if del.Receiver != nil {

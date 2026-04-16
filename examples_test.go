@@ -65,6 +65,7 @@ func TestConvertToInvoice(t *testing.T) {
 		{"XRechnung", ubl.ContextXRechnung, "xrechnung"},
 		{"FranceCIUS", ubl.ContextPeppolFranceCIUS, "france-cius"},
 		{"FranceExtended", ubl.ContextPeppolFranceExtended, "france-extended"},
+		{"ZATCA", ubl.ContextZATCA, "zatca"},
 	}
 
 	for _, ctx := range contexts {

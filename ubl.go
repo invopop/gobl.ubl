@@ -61,6 +61,7 @@ func Parse(data []byte) (any, error) {
 			"udt":  NamespaceUDT,
 			"ccts": NamespaceCCTS,
 			"xsi":  NamespaceXSI,
+			"ext":  NamespaceEXT,
 		})); err != nil {
 			return nil, err
 		}
@@ -139,9 +140,6 @@ func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
 
 	inv.SetAddons(append(existing, missing...)...)
 	if err := inv.Calculate(); err != nil {
-		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
-	}
-	if err := inv.Validate(); err != nil {
 		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
 	}
 	return nil

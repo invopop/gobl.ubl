@@ -32,6 +32,7 @@ type BillingReference struct {
 // Reference represents a reference to a document
 type Reference struct {
 	ID                  IDType      `xml:"cbc:ID"`
+	UUID                string      `xml:"cbc:UUID,omitempty"`
 	IssueDate           string      `xml:"cbc:IssueDate,omitempty"`
 	DocumentTypeCode    string      `xml:"cbc:DocumentTypeCode,omitempty"`
 	DocumentType        string      `xml:"cbc:DocumentType,omitempty"`
@@ -66,7 +67,7 @@ func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	}
 }
 
-func (ui *Invoice) addOrdering(o *bill.Ordering) {
+func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 	if o != nil {
 		if o.Code != "" {
 			ui.BuyerReference = o.Code.String()
@@ -99,14 +100,17 @@ func (ui *Invoice) addOrdering(o *bill.Ordering) {
 		}
 
 		// BT-14: Sales order reference
-		if len(o.Sales) > 0 {
-			if ui.OrderReference == nil {
-				// TODO: once we have a Peppol addon this should be delegated there
-				ui.OrderReference = &OrderReference{
-					ID: "NA",
+		// Does not apply to zatca
+		if !context.Is(ContextZATCA) {
+			if len(o.Sales) > 0 {
+				if ui.OrderReference == nil {
+					// TODO: once we have a Peppol addon this should be delegated there
+					ui.OrderReference = &OrderReference{
+						ID: "NA",
+					}
 				}
+				ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 			}
-			ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 		}
 
 		// BT-11: Project reference
@@ -162,11 +166,14 @@ func (ui *Invoice) addOrdering(o *bill.Ordering) {
 		}
 	}
 
-	// Ensure at least one of BuyerReference or OrderReference is set: PEPPOL-EN16931-R003
-	if ui.BuyerReference == "" && (ui.OrderReference == nil || ui.OrderReference.ID == "") {
-		if ui.OrderReference == nil {
-			ui.OrderReference = &OrderReference{}
+	// BT-13: Ensure at least one of BuyerReference or OrderReference is set: PEPPOL-EN16931-R003
+	// Optional to ZATCA
+	if !context.Is(ContextZATCA) {
+		if ui.BuyerReference == "" && (ui.OrderReference == nil || ui.OrderReference.ID == "") {
+			if ui.OrderReference == nil {
+				ui.OrderReference = &OrderReference{}
+			}
+			ui.OrderReference.ID = "NA"
 		}
-		ui.OrderReference.ID = "NA"
 	}
 }

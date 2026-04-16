@@ -56,6 +56,9 @@ type PartyName struct {
 type PostalAddress struct {
 	StreetName           *string             `xml:"cbc:StreetName"`
 	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
+	BuildingNumber       *string             `xml:"cbc:BuildingNumber,omitempty"`
+	PlotIdentification   *string             `xml:"cbc:PlotIdentification,omitempty"`
+	CitySubdivisionName  *string             `xml:"cbc:CitySubdivisionName,omitempty"`
 	CityName             *string             `xml:"cbc:CityName"`
 	PostalZone           *string             `xml:"cbc:PostalZone"`
 	CountrySubentity     *string             `xml:"cbc:CountrySubentity"`
@@ -262,6 +265,12 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
 					idType.SchemeID = &s
 				}
+			} else {
+				// ZATCA has very specific identities that do not
+				// require an ISO extension and are only described with type
+				if t := id.Type.String(); t != "" {
+					idType.SchemeID = &t
+				}
 			}
 			p.PartyIdentification = append(p.PartyIdentification, Identification{
 				ID: idType,
@@ -425,6 +434,14 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 	if a.Code != cbc.CodeEmpty {
 		code := a.Code.String()
 		addr.PostalZone = &code
+	}
+
+	if a.Number != "" {
+		addr.BuildingNumber = &a.Number
+	}
+
+	if a.Block != "" {
+		addr.PlotIdentification = &a.Block
 	}
 
 	if a.Country != "" {
