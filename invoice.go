@@ -83,7 +83,7 @@ type Invoice struct {
 	Delivery                       []*Delivery         `xml:"cac:Delivery,omitempty"`
 	DeliveryTerms                  *DeliveryTerms      `xml:"cac:DeliveryTerms,omitempty"`
 	PaymentMeans                   []PaymentMeans      `xml:"cac:PaymentMeans,omitempty"`
-	PaymentTerms                   []PaymentTerms      `xml:"cac:PaymentTerms,omitempty"`
+	PaymentTerms                   *PaymentTerms       `xml:"cac:PaymentTerms,omitempty"`
 	PrepaidPayment                 []PrepaidPayment    `xml:"cac:PrepaidPayment,omitempty"`
 	AllowanceCharge                []AllowanceCharge   `xml:"cac:AllowanceCharge,omitempty"`
 	TaxExchangeRate                *ExchangeRate       `xml:"cac:TaxExchangeRate,omitempty"`

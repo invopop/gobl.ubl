@@ -12,6 +12,7 @@ import (
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
+	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote"`
 	PaymentID             *string           `xml:"cbc:PaymentID"`
@@ -50,10 +51,7 @@ type Branch struct {
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	Note           []string `xml:"cbc:Note"`
-	Amount         *Amount  `xml:"cbc:Amount"`
-	PaymentPercent *string  `xml:"cbc:PaymentPercent"`
-	PaymentDueDate *string  `xml:"cbc:PaymentDueDate"`
+	Note string `xml:"cbc:Note"`
 }
 
 // PrepaidPayment represents a prepaid payment
@@ -73,13 +71,13 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		if err := ui.addPaymentInstructions(pymt.Instructions); err != nil {
+		if err := ui.addPaymentInstructions(pymt); err != nil {
 			return err
 		}
 	}
 
 	if pymt.Terms != nil {
-		ui.addPaymentTerms(inv, pymt)
+		ui.addPaymentTerms(pymt)
 	}
 
 	if pymt.Payee != nil {
@@ -106,7 +104,8 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	return nil
 }
 
-func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
+func (ui *Invoice) addPaymentInstructions(pymt *bill.PaymentDetails) error {
+	instr := pymt.Instructions
 	if instr.Ext == nil || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
 			"instructions": validation.Errors{
@@ -148,6 +147,10 @@ func (ui *Invoice) addPaymentInstructions(instr *pay.Instructions) error {
 			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
 		}
 	}
+	if ui.CreditNoteTypeCode != "" && pymt.Terms != nil && len(pymt.Terms.DueDates) > 0 {
+		formattedDate := formatDate(*pymt.Terms.DueDates[0].Date)
+		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
+	}
 	return nil
 }
 
@@ -167,35 +170,15 @@ func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 	return pfa
 }
 
-func (ui *Invoice) addPaymentTerms(inv *bill.Invoice, pymt *bill.PaymentDetails) {
-	ui.PaymentTerms = make([]PaymentTerms, 0)
-	if (len(pymt.Terms.DueDates) > 1) || (ui.CreditNoteTypeCode != "" && len(pymt.Terms.DueDates) > 0) {
-		for _, dueDate := range pymt.Terms.DueDates {
-			currency := dueDate.Currency.String()
-			if currency == "" {
-				currency = inv.Currency.String()
-			}
-			term := PaymentTerms{
-				Amount: &Amount{Value: dueDate.Amount.String(), CurrencyID: &currency},
-			}
-			if dueDate.Date != nil {
-				d := formatDate(*dueDate.Date)
-				term.PaymentDueDate = &d
-			}
-			if dueDate.Percent != nil {
-				p := dueDate.Percent.String()
-				term.PaymentPercent = &p
-			}
-			if dueDate.Notes != "" {
-				term.Note = []string{dueDate.Notes}
-			}
-			ui.PaymentTerms = append(ui.PaymentTerms, term)
+func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
+	if pymt.Terms.Notes != "" {
+		ui.PaymentTerms = &PaymentTerms{
+			Note: pymt.Terms.Notes,
 		}
-	} else if len(pymt.Terms.DueDates) == 1 && ui.CreditNoteTypeCode == "" {
+	}
+
+	// Only one due date allowed under EN 16931
+	if ui.CreditNoteTypeCode == "" && len(pymt.Terms.DueDates) > 0 {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
-	} else {
-		ui.PaymentTerms = append(ui.PaymentTerms, PaymentTerms{
-			Note: []string{pymt.Terms.Notes},
-		})
 	}
 }
