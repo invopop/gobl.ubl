@@ -4,11 +4,38 @@ import (
 	"github.com/invopop/gobl/addons/sa/zatca"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/xmldsig"
 )
 
 var (
 	MimeCodeTextPlain string = "text/plain"
 )
+
+// ZATCA UBL signature constants (from ZATCA KSA-15 spec).
+const (
+	signatureInformationID = "urn:oasis:names:specification:ubl:signature:1"
+	referenceSignatureID   = "urn:oasis:names:specification:ubl:signature:Invoice"
+	signatureMethod        = "urn:oasis:names:specification:ubl:dsig:enveloped:xades"
+
+	namespaceSIG = "urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2"
+	namespaceSAC = "urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2"
+	namespaceSBC = "urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2"
+)
+
+// UBLDocumentSignatures contains the signature information block.
+type ZATCAUBLDocumentSignatures struct {
+	SIGNamespace         string                `xml:"xmlns:sig,attr"`
+	SACNamespace         string                `xml:"xmlns:sac,attr"`
+	SBCNamespace         string                `xml:"xmlns:sbc,attr"`
+	SignatureInformation *SignatureInformation `xml:"sac:SignatureInformation"`
+}
+
+// SignatureInformation holds the IDs and the ds:Signature.
+type SignatureInformation struct {
+	ID                    string             `xml:"cbc:ID"`
+	ReferencedSignatureID string             `xml:"sbc:ReferencedSignatureID"`
+	Signature             *xmldsig.Signature `xml:"ds:Signature"`
+}
 
 // applyZATCA applies ZATCA-specific fields to a UBL invoice.
 func applyZATCA(out *Invoice, inv *bill.Invoice) {
@@ -122,9 +149,57 @@ func (inv *Invoice) SetQRCode(value string) {
 	})
 }
 
+// SetSignature sets the Signature as an UBLExtension
+func (inv *Invoice) SetSignature(sig *xmldsig.Signature) {
+	extURI := signatureMethod
+	inv.UBLExtensions = &Extensions{
+		UBLExtension: []UBLExtension{
+			{
+				ExtensionURI: &extURI,
+				ExtensionContent: &ExtensionContent{
+					ZATCAUBLDocumentSignatures: &ZATCAUBLDocumentSignatures{
+						SIGNamespace: namespaceSIG,
+						SACNamespace: namespaceSAC,
+						SBCNamespace: namespaceSBC,
+						SignatureInformation: &SignatureInformation{
+							ID:                    signatureInformationID,
+							ReferencedSignatureID: referenceSignatureID,
+							Signature:             sig,
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Add the cac:Signature reference
+	sm := signatureMethod
+	inv.Signature = append(inv.Signature, Signature{
+		ID:              referenceSignatureID,
+		SignatureMethod: &sm,
+	})
+}
+
 func formatTime(t cal.Time) string {
 	if t.IsZero() {
 		return ""
 	}
 	return t.String()
+}
+
+// InvoiceHash returns the document digest from the embedded ds:Signature,
+// which is the SHA-256 hash of the filtered + canonicalized invoice XML.
+// Returns an empty string if the signature is not set.
+func (inv *Invoice) InvoiceHash() string {
+	if inv.UBLExtensions == nil ||
+		len(inv.UBLExtensions.UBLExtension) == 0 ||
+		inv.UBLExtensions.UBLExtension[0].ExtensionContent == nil ||
+		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures == nil ||
+		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation == nil ||
+		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature == nil ||
+		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature.SignedInfo == nil ||
+		len(inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature.SignedInfo.Reference) == 0 {
+		return ""
+	}
+	return inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature.SignedInfo.Reference[0].DigestValue
 }

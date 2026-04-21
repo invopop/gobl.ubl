@@ -21,16 +21,21 @@ const (
 	NamespaceXSI  = "http://www.w3.org/2001/XMLSchema-instance"
 )
 
-// Extensions represents UBL extensions
+// Extensions wraps a list of UBL extensions.
 type Extensions struct {
-	Extension []Extension `xml:"ext:Extension"`
+	UBLExtension []UBLExtension `xml:"ext:UBLExtension"`
 }
 
-// Extension represents a single UBL extension
-type Extension struct {
-	ID               string  `xml:"cbc:ID"`
-	ExtensionURI     *string `xml:"cbc:ExtensionURI"`
-	ExtensionContent *string `xml:"ext:ExtensionContent"`
+// UBLExtension represents a single UBL extension.
+type UBLExtension struct {
+	ExtensionURI     *string           `xml:"ext:ExtensionURI"`
+	ExtensionContent *ExtensionContent `xml:"ext:ExtensionContent"`
+}
+
+// ExtensionContent wraps the content of a UBL extension.
+type ExtensionContent struct {
+	// ZATCA specific extension content
+	ZATCAUBLDocumentSignatures *ZATCAUBLDocumentSignatures `xml:"sig:UBLDocumentSignatures"`
 }
 
 // IDType represents an ID with optional scheme attributes
