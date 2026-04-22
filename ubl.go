@@ -141,10 +141,10 @@ func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 
 	inv.SetAddons(append(existing, missing...)...)
 	if err := env.Calculate(); err != nil {
-		return fmt.Errorf("calculating invoice with missing addons %v: %w", missing, err)
+		return err
 	}
 	if err := env.Validate(); err != nil {
-		return fmt.Errorf("validating invoice with missing addons %v: %w", missing, err)
+		return err
 	}
 	return nil
 }
