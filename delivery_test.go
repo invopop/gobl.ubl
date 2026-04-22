@@ -11,8 +11,7 @@ import (
 
 func TestNewDelivery(t *testing.T) {
 	t.Run("invoice-without-buyers-tax-id.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-without-buyers-tax-id.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-without-buyers-tax-id.json")
 
 		assert.NotNil(t, doc.Delivery)
 		assert.Len(t, doc.Delivery, 1)
@@ -29,8 +28,7 @@ func TestNewDelivery(t *testing.T) {
 	})
 
 	t.Run("delivery with no receiver", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-without-buyers-tax-id.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-without-buyers-tax-id.json")
 
 		inv := env.Extract().(*bill.Invoice)
 
@@ -46,8 +44,7 @@ func TestNewDelivery(t *testing.T) {
 	})
 
 	t.Run("delivery with no date", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-without-buyers-tax-id.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-without-buyers-tax-id.json")
 
 		inv := env.Extract().(*bill.Invoice)
 

@@ -15,8 +15,7 @@ import (
 
 func TestParseCharges(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -50,8 +49,7 @@ func TestParseCharges(t *testing.T) {
 	})
 
 	t.Run("ubl-example5.xml", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example5.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example5.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -87,8 +85,7 @@ func TestParseCharges(t *testing.T) {
 	})
 
 	t.Run("Allowance-example.xml", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/Allowance-example.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/Allowance-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -131,8 +128,7 @@ func TestParseCharges(t *testing.T) {
 	})
 
 	t.Run("discount-taxes.xml", func(t *testing.T) {
-		e, err := testParseInvoice("discount-taxes.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "discount-taxes.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)

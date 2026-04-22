@@ -14,8 +14,7 @@ import (
 
 func TestContextEN16931(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -41,8 +40,7 @@ func TestContextEN16931(t *testing.T) {
 
 func TestContextPeppol(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -66,8 +64,7 @@ func TestContextPeppol(t *testing.T) {
 
 func TestContextXRechnung(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -90,8 +87,7 @@ func TestContextXRechnung(t *testing.T) {
 
 func TestContextPeppolFranceCIUS(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("france-cius/invoice-fr-cius.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "france-cius/invoice-fr-cius.json")
 
 		// Convert with France CIUS context
 		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
@@ -116,8 +112,7 @@ func TestContextPeppolFranceCIUS(t *testing.T) {
 
 func TestContextPeppolFranceExtended(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -148,8 +143,7 @@ func TestContextPeppolFranceExtended(t *testing.T) {
 
 func TestContextPeppolSelfBilled(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("peppol-self-billed/self-billed-invoice.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "peppol-self-billed/self-billed-invoice.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -172,8 +166,7 @@ func TestContextPeppolSelfBilled(t *testing.T) {
 
 func TestGetVESID(t *testing.T) {
 	t.Run("invoice VESID for standard invoice", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -192,8 +185,7 @@ func TestGetVESID(t *testing.T) {
 	})
 
 	t.Run("credit note VESID for credit note", func(t *testing.T) {
-		env, err := loadTestEnvelope("credit-note.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "credit-note.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -211,8 +203,7 @@ func TestGetVESID(t *testing.T) {
 	})
 
 	t.Run("self-billed invoice VESID", func(t *testing.T) {
-		env, err := loadTestEnvelope("peppol-self-billed/self-billed-invoice.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "peppol-self-billed/self-billed-invoice.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -223,8 +214,7 @@ func TestGetVESID(t *testing.T) {
 	})
 
 	t.Run("France CIUS VESID", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -235,8 +225,7 @@ func TestGetVESID(t *testing.T) {
 	})
 
 	t.Run("France Extended VESID", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)

@@ -13,8 +13,7 @@ import (
 
 func TestInvoiceHeaders(t *testing.T) {
 	t.Run("document type extension", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-complete.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-complete.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
@@ -37,8 +36,7 @@ func TestInvoiceHeaders(t *testing.T) {
 	})
 
 	t.Run("format date", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-complete.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-complete.json")
 
 		out, err := ubl.ConvertInvoice(env)
 		require.NoError(t, err)
@@ -46,8 +44,7 @@ func TestInvoiceHeaders(t *testing.T) {
 	})
 
 	t.Run("tax point conversion", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-complete.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-complete.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -104,8 +101,7 @@ func TestInvoiceHeaders(t *testing.T) {
 
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
-				env, err := loadTestEnvelope("invoice-complete.json")
-				require.NoError(t, err)
+				env := loadTestEnvelope(t, "invoice-complete.json")
 
 				inv, ok := env.Extract().(*bill.Invoice)
 				require.True(t, ok)
@@ -127,8 +123,7 @@ func TestInvoiceHeaders(t *testing.T) {
 	})
 
 	t.Run("invoice number", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-complete.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-complete.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)

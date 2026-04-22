@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -219,13 +218,16 @@ func TestParseInvoice(t *testing.T) {
 	}
 }
 
-// testInvoiceFrom creates a UBL Invoice from a GOBL file in the `test/data` folder
-func testInvoiceFrom(name string) (*ubl.Invoice, error) {
-	env, err := loadTestEnvelope(name)
-	if err != nil {
-		return nil, err
-	}
-	return ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+// testInvoiceFrom creates a UBL Invoice from a GOBL file in the `test/data` folder,
+// failing the test on any error.
+func testInvoiceFrom(t *testing.T, name string) *ubl.Invoice {
+	t.Helper()
+
+	env := loadTestEnvelope(t, name)
+
+	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+	require.NoError(t, err)
+	return doc
 }
 
 // testInvoiceFromContext creates a UBL Invoice from a GOBL file with a specific context
@@ -298,38 +300,39 @@ func testLoadXML(name string) ([]byte, error) {
 	return io.ReadAll(src)
 }
 
-// testParseInvoice takes the provided file and converts to a
-// GOBL
-func testParseInvoice(name string) (*gobl.Envelope, error) {
+// parseXMLInvoice takes the provided file and converts to a
+// GOBL Envelope, failing the test on any error.
+func parseXMLInvoice(t *testing.T, name string) *gobl.Envelope {
+	t.Helper()
+
 	data, err := testLoadXML(name)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
 	doc, err := ubl.Parse(data)
-	if err != nil {
-		return nil, err
-	}
+	require.NoError(t, err)
 
 	inv, ok := doc.(*ubl.Invoice)
-	if !ok {
-		return nil, fmt.Errorf("document is not an invoice")
-	}
-	return inv.Convert()
+	require.True(t, ok, "document is not an invoice")
+
+	env, err := inv.Convert()
+	require.NoError(t, err)
+	return env
 }
 
-// loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder
-func loadTestEnvelope(name string) (*gobl.Envelope, error) {
+// loadTestEnvelope returns a GOBL Envelope from a file in the `test/data` folder,
+// failing the test on any error.
+func loadTestEnvelope(t *testing.T, name string) *gobl.Envelope {
+	t.Helper()
+
 	path := filepath.Join(getConversionTypePath(jsonPattern), name)
-	src, _ := os.Open(path)
+	src, err := os.Open(path)
+	require.NoError(t, err)
 	buf := new(bytes.Buffer)
-	if _, err := buf.ReadFrom(src); err != nil {
-		return nil, err
-	}
+	_, err = buf.ReadFrom(src)
+	require.NoError(t, err)
+
 	env := new(gobl.Envelope)
-	if err := json.Unmarshal(buf.Bytes(), env); err != nil {
-		return nil, err
-	}
+	require.NoError(t, json.Unmarshal(buf.Bytes(), env))
 
 	// Clear the IDs
 	env.Head.UUID = staticUUID
@@ -337,18 +340,13 @@ func loadTestEnvelope(name string) (*gobl.Envelope, error) {
 		inv.UUID = staticUUID
 	}
 
-	if err := env.Calculate(); err != nil {
-		panic(err)
-	}
-
-	if err := env.Validate(); err != nil {
-		panic(err)
-	}
+	require.NoError(t, env.Calculate())
+	require.NoError(t, env.Validate())
 
 	// Make an update if requested
 	writeEnvelope(path, env)
 
-	return env, nil
+	return env
 }
 
 // loadOutputFile returns byte data from a file in the `test/data/out` folder

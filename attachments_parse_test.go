@@ -12,8 +12,7 @@ import (
 
 func TestParseAttachments(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
