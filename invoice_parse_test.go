@@ -12,8 +12,7 @@ import (
 
 func TestParseInvoiceTypes(t *testing.T) {
 	t.Run("standard invoice (380)", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/base-example.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/base-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -23,8 +22,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("credit note (381)", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/base-creditnote-correction.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/base-creditnote-correction.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -34,8 +32,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("proforma invoice (325)", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/proforma-invoice.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/proforma-invoice.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -45,8 +42,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("self-billed invoice (389)", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/self-billed-invoice.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/self-billed-invoice.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -56,8 +52,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("partial invoice (326)", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/partial-invoice.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/partial-invoice.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -67,8 +62,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 	})
 
 	t.Run("self-billed credit note (261)", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/self-billed-creditnote.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/self-billed-creditnote.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -80,8 +74,7 @@ func TestParseInvoiceTypes(t *testing.T) {
 
 func TestParseInvoiceTags(t *testing.T) {
 	t.Run("invoice with self-billed tag", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/self-billed-invoice.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/self-billed-invoice.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -90,8 +83,7 @@ func TestParseInvoiceTags(t *testing.T) {
 	})
 
 	t.Run("invoice with partial tag", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/partial-invoice.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/partial-invoice.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -100,8 +92,7 @@ func TestParseInvoiceTags(t *testing.T) {
 	})
 
 	t.Run("credit note with self-billed tag", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/self-billed-creditnote.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/self-billed-creditnote.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -110,8 +101,7 @@ func TestParseInvoiceTags(t *testing.T) {
 	})
 
 	t.Run("standard invoice without tags", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/base-example.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/base-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -168,8 +158,7 @@ func TestParseInvoiceTypeAndTagCombinations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e, err := testParseInvoice(tt.filename)
-			require.NoError(t, err)
+			e := parseXMLInvoice(t, tt.filename)
 
 			inv, ok := e.Extract().(*bill.Invoice)
 			require.True(t, ok)

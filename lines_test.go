@@ -4,13 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestNewLines(t *testing.T) {
 	t.Run("invoice-without-buyers-tax-id.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-without-buyers-tax-id.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-without-buyers-tax-id.json")
 
 		assert.NotNil(t, doc.InvoiceLines)
 		assert.Len(t, doc.InvoiceLines, 1)
@@ -31,8 +29,7 @@ func TestNewLines(t *testing.T) {
 	})
 
 	t.Run("invoice-with-line-order.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-with-line-order.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-with-line-order.json")
 
 		assert.NotNil(t, doc.InvoiceLines)
 		assert.Len(t, doc.InvoiceLines, 1)
@@ -53,8 +50,7 @@ func TestNewLines(t *testing.T) {
 	})
 
 	t.Run("invoice-zero-quantity.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-zero-quantity.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-zero-quantity.json")
 
 		assert.NotNil(t, doc.InvoiceLines)
 		assert.Len(t, doc.InvoiceLines, 1)
