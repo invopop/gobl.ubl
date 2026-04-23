@@ -170,5 +170,9 @@ func Bytes(in any) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Go's xml.Marshal encodes single quotes as &#39,
+	// this is a quick fix
+	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
 	return append([]byte(xml.Header), b...), nil
 }

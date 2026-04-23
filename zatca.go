@@ -39,6 +39,7 @@ type SignatureInformation struct {
 
 // applyZATCA applies ZATCA-specific fields to a UBL invoice.
 func applyZATCA(out *Invoice, inv *bill.Invoice) {
+	out.SchemaLocation = ""
 
 	// KSA-1
 	out.UUID = string(inv.UUID)
