@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"encoding/xml"
+
 	"github.com/invopop/gobl/addons/sa/zatca"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
@@ -54,14 +56,42 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 		}
 	}
 
-	// KSA-05 fix for credit notes
+	// ZATCA treats all documents as invoices
 	if out.CreditNoteTypeCode != "" {
+		// BR-KSA-05
 		if invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String(); invType != "" {
 			out.InvoiceTypeCode = &IDType{
 				Value: out.CreditNoteTypeCode,
 				Name:  &invType,
 			}
 		}
+
+		// BR-22
+		if len(out.CreditNoteLines) > 0 {
+			out.InvoiceLines = []InvoiceLine{}
+			for _, line := range out.CreditNoteLines {
+				out.InvoiceLines = append(out.InvoiceLines, InvoiceLine{
+					ID:                  line.ID,
+					Note:                line.Note,
+					InvoicedQuantity:    line.CreditedQuantity,
+					LineExtensionAmount: line.LineExtensionAmount,
+					AccountingCost:      line.AccountingCost,
+					InvoicePeriod:       line.InvoicePeriod,
+					OrderLineReference:  line.OrderLineReference,
+					DocumentReference:   line.DocumentReference,
+					AllowanceCharge:     line.AllowanceCharge,
+					TaxTotal:            line.TaxTotal,
+					Item:                line.Item,
+					Price:               line.Price,
+				})
+			}
+			out.CreditNoteLines = []InvoiceLine{}
+		}
+
+		out.XMLName = xml.Name{Local: "Invoice"}
+		out.UBLNamespace = NamespaceUBLInvoice
+		out.SchemaLocation = SchemaLocationInvoice
+
 		out.CreditNoteTypeCode = ""
 	}
 
