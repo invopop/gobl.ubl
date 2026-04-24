@@ -112,9 +112,9 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 			Code: cbc.Code(docLine.DocumentReference.ID.Value),
 		}
 		if docLine.DocumentReference.ID.SchemeID != nil {
-			line.Identifier.Ext = tax.Extensions{
+			line.Identifier.Ext = tax.ExtensionsOf(tax.ExtMap{
 				untdid.ExtKeyReference: cbc.Code(*docLine.DocumentReference.ID.SchemeID),
-			}
+			})
 		}
 	}
 
@@ -203,14 +203,12 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 		},
 	}
 	if ctc.ID != nil {
-		line.Taxes[0].Ext = tax.Extensions{
-			untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
-		}
+		line.Taxes[0].Ext = line.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(*ctc.ID))
 
 		// Try to get exemption code from TaxTotal
 		key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID, ctc.Percent)
 		if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-			line.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 		}
 
 	}
@@ -250,9 +248,9 @@ func goblItemIdentities(di *Item) []*org.Identity {
 		di.StandardItemIdentification.ID.SchemeID != nil {
 		s := *di.StandardItemIdentification.ID.SchemeID
 		id := &org.Identity{
-			Ext: tax.Extensions{
+			Ext: tax.ExtensionsOf(tax.ExtMap{
 				iso.ExtKeySchemeID: cbc.Code(s),
-			},
+			}),
 			Code: cbc.Code(di.StandardItemIdentification.ID.Value),
 		}
 
