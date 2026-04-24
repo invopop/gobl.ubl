@@ -54,6 +54,17 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 		}
 	}
 
+	// KSA-05 fix for credit notes
+	if out.CreditNoteTypeCode != "" {
+		if invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String(); invType != "" {
+			out.InvoiceTypeCode = &IDType{
+				Value: out.CreditNoteTypeCode,
+				Name:  &invType,
+			}
+		}
+		out.CreditNoteTypeCode = ""
+	}
+
 	// KSA-3: Assume district is mapped to StreetExtra in gobl
 	moveStreetExtraToDistrict(out.AccountingSupplierParty.Party)
 	moveStreetExtraToDistrict(out.AccountingCustomerParty.Party)
@@ -85,7 +96,7 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 	}
 
 	// BR-KSA-EN16931-09
-	if out.TaxCurrencyCode != "" {
+	if out.TaxCurrencyCode != "" && out.DocumentCurrencyCode == out.TaxCurrencyCode {
 		out.TaxTotal = append(out.TaxTotal, TaxTotal{
 			TaxAmount: out.TaxTotal[0].TaxAmount,
 		})
