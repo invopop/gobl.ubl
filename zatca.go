@@ -58,6 +58,10 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 
 	// ZATCA treats all documents as invoices
 	if out.CreditNoteTypeCode != "" {
+		out.XMLName = xml.Name{Local: "Invoice"}
+		out.UBLNamespace = NamespaceUBLInvoice
+		out.SchemaLocation = SchemaLocationInvoice
+
 		// BR-KSA-05
 		if invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String(); invType != "" {
 			out.InvoiceTypeCode = &IDType{
@@ -87,10 +91,6 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 			}
 			out.CreditNoteLines = []InvoiceLine{}
 		}
-
-		out.XMLName = xml.Name{Local: "Invoice"}
-		out.UBLNamespace = NamespaceUBLInvoice
-		out.SchemaLocation = SchemaLocationInvoice
 
 		out.CreditNoteTypeCode = ""
 	}

@@ -214,6 +214,10 @@ var ContextZATCA = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:zatca.gov.sa:e-invoicing:1.0",
 	ProfileID:       "reporting:1.0", // BT-23
 	Addons:          []cbc.Key{zatca.V1},
+	VESIDs: VESIDMapping{
+		Invoice:    "sa.zatca:ubl-invoice:2.3.8",
+		CreditNote: "sa.zatca:ubl-invoice:2.3.8",
+	},
 }
 
 // contexts is used internally for reverse lookups during parsing.
