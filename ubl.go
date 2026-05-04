@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/rules"
 	"github.com/invopop/xmlctx"
 )
 
@@ -141,8 +142,8 @@ func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
 	if err := inv.Calculate(); err != nil {
 		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
 	}
-	if err := inv.Validate(); err != nil {
-		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
+	if faults := rules.Validate(inv); faults != nil {
+		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, faults)
 	}
 	return nil
 }

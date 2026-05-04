@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "64614703a146409f8e5391c604c9cd9f4ea120957b306ab4660c0ece08d4c7f8"
+			"val": "86873182021e8f2797ddc692696410cb40932b9ad72317fc1c5b87c4c50bf61f"
 		}
 	},
 	"doc": {
@@ -332,7 +332,10 @@
 			"code": "0150abc",
 			"identities": [
 				{
-					"code": "DR35141"
+					"code": "DR35141",
+					"ext": {
+						"untdid-reference": "ABT"
+					}
 				}
 			],
 			"period": {
