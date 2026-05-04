@@ -2,7 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl/addons/fr/ctc/flow2"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
@@ -71,7 +71,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 
 	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
+		out.Tax.Ext = out.Tax.Ext.Set(flow2.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
 	}
 
 	typeCode := ui.InvoiceTypeCode

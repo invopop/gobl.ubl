@@ -62,9 +62,9 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 		ch.Amount = a
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		ch.Ext = tax.Extensions{
+		ch.Ext = tax.ExtensionsOf(tax.ExtMap{
 			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
-		}
+		})
 	}
 	if ac.BaseAmount != nil {
 		b, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
@@ -102,15 +102,12 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 
 		// Add tax category ID to extensions
 		if ac.TaxCategory[0].ID != nil {
-			if ch.Taxes[0].Ext == nil {
-				ch.Taxes[0].Ext = tax.Extensions{}
-			}
-			ch.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(*ac.TaxCategory[0].ID)
+			ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(*ac.TaxCategory[0].ID))
 
 			// Look up exemption code from TaxTotal
 			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-				ch.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+				ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
 		}
 
@@ -147,9 +144,9 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		d.Amount = a
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		d.Ext = tax.Extensions{
+		d.Ext = tax.ExtensionsOf(tax.ExtMap{
 			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
-		}
+		})
 	}
 	if ac.BaseAmount != nil {
 		b, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
@@ -187,15 +184,12 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 
 		// Add tax category ID to extensions
 		if ac.TaxCategory[0].ID != nil {
-			if d.Taxes[0].Ext == nil {
-				d.Taxes[0].Ext = tax.Extensions{}
-			}
-			d.Taxes[0].Ext[untdid.ExtKeyTaxCategory] = cbc.Code(*ac.TaxCategory[0].ID)
+			d.Taxes[0].Ext = d.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(*ac.TaxCategory[0].ID))
 
 			// Look up exemption code from TaxTotal
 			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-				d.Taxes[0].Ext[cef.ExtKeyVATEX] = cbc.Code(info.exemptionReasonCode)
+				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
 		}
 
@@ -228,9 +222,9 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		Amount: amount,
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		ch.Ext = tax.Extensions{
+		ch.Ext = tax.ExtensionsOf(tax.ExtMap{
 			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
-		}
+		})
 	}
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
@@ -267,9 +261,9 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		Amount: a,
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		d.Ext = tax.Extensions{
+		d.Ext = tax.ExtensionsOf(tax.ExtMap{
 			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
-		}
+		})
 	}
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
