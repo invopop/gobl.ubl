@@ -241,11 +241,23 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
+	// BR-DEC-24 / UBL-DT-01: line allowance and charge amounts (BT-136/BT-141)
+	// and their base amounts must be expressed with at most 2 fractional digits.
+	// GOBL keeps higher precision internally — notably after RemoveIncludedTaxes
+	// strips VAT from prices_include invoices — so round here at the boundary.
+	var base *Amount
+	if baseSum != nil {
+		bs := baseSum.Rescale(2).String()
+		base = &Amount{
+			Value:      bs,
+			CurrencyID: &ccy,
+		}
+	}
 	for _, ch := range charges {
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
 			Amount: Amount{
-				Value:      ch.Amount.String(),
+				Value:      ch.Amount.Rescale(2).String(),
 				CurrencyID: &ccy,
 			},
 		}
@@ -259,12 +271,8 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if ch.Percent != nil {
 			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			// Add BaseAmount when percentage is provided
-			if baseSum != nil {
-				ac.BaseAmount = &Amount{
-					Value:      baseSum.String(),
-					CurrencyID: &ccy,
-				}
+			if base != nil {
+				ac.BaseAmount = base
 			}
 		}
 		allowanceCharges = append(allowanceCharges, ac)
@@ -273,7 +281,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
 			Amount: Amount{
-				Value:      d.Amount.String(),
+				Value:      d.Amount.Rescale(2).String(),
 				CurrencyID: &ccy,
 			},
 		}
@@ -287,12 +295,8 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if d.Percent != nil {
 			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			// Add BaseAmount when percentage is provided
-			if baseSum != nil {
-				ac.BaseAmount = &Amount{
-					Value:      baseSum.String(),
-					CurrencyID: &ccy,
-				}
+			if base != nil {
+				ac.BaseAmount = base
 			}
 		}
 		allowanceCharges = append(allowanceCharges, ac)

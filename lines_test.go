@@ -68,4 +68,27 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "HUR", doc.InvoiceLines[0].InvoicedQuantity.UnitCode)
 	})
 
+	// BR-DEC-24 / UBL-DT-01: when prices_include=VAT, RemoveIncludedTaxes
+	// leaves discount amounts with extra precision (1.76 / 1.21 = 1.4545).
+	// The converter must round line allowance amounts to 2 decimals to satisfy
+	// EN16931 / Peppol BIS 3.0, even though the item net price (BT-146) is
+	// allowed to keep its higher precision.
+	t.Run("invoice-prices-include-vat.json", func(t *testing.T) {
+		doc, err := testInvoiceFrom("invoice-prices-include-vat.json")
+		require.NoError(t, err)
+
+		require.Len(t, doc.InvoiceLines, 2)
+
+		l1 := doc.InvoiceLines[0]
+		require.Len(t, l1.AllowanceCharge, 1)
+		assert.False(t, l1.AllowanceCharge[0].ChargeIndicator)
+		assert.Equal(t, "1.45", l1.AllowanceCharge[0].Amount.Value)
+		assert.Equal(t, "8.1818", l1.Price.PriceAmount.Value)
+
+		l2 := doc.InvoiceLines[1]
+		require.Len(t, l2.AllowanceCharge, 1)
+		assert.Equal(t, "11.02", l2.AllowanceCharge[0].Amount.Value)
+		assert.Equal(t, "61.9008", l2.Price.PriceAmount.Value)
+	})
+
 }
