@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 )
 
@@ -239,17 +240,26 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	}
 }
 
+// rescaleToCurrency rounds the amount to the natural precision of the given
+// currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
+// existing precision if the currency code is unknown.
+func rescaleToCurrency(a num.Amount, ccy string) string {
+	if def := currency.Code(ccy).Def(); def != nil {
+		return def.Rescale(a).String()
+	}
+	return a.String()
+}
+
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
 	// BR-DEC-24 / UBL-DT-01: line allowance and charge amounts (BT-136/BT-141)
-	// and their base amounts must be expressed with at most 2 fractional digits.
+	// and their base amounts must match the currency's natural precision.
 	// GOBL keeps higher precision internally — notably after RemoveIncludedTaxes
 	// strips VAT from prices_include invoices — so round here at the boundary.
 	var base *Amount
 	if baseSum != nil {
-		bs := baseSum.Rescale(2).String()
 		base = &Amount{
-			Value:      bs,
+			Value:      rescaleToCurrency(*baseSum, ccy),
 			CurrencyID: &ccy,
 		}
 	}
@@ -257,7 +267,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
 			Amount: Amount{
-				Value:      ch.Amount.Rescale(2).String(),
+				Value:      rescaleToCurrency(ch.Amount, ccy),
 				CurrencyID: &ccy,
 			},
 		}
@@ -281,7 +291,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
 			Amount: Amount{
-				Value:      d.Amount.Rescale(2).String(),
+				Value:      rescaleToCurrency(d.Amount, ccy),
 				CurrencyID: &ccy,
 			},
 		}
