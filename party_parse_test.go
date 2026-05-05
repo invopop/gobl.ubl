@@ -14,8 +14,7 @@ import (
 // Define tests for the ParseParty function
 func TestParseParty(t *testing.T) {
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -79,8 +78,7 @@ func TestParseParty(t *testing.T) {
 	})
 
 	t.Run("ubl-example3.xml", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example3.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example3.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -113,8 +111,7 @@ func TestParseParty(t *testing.T) {
 	})
 
 	t.Run("invoice-peppol.xml", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/invoice-peppol.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/invoice-peppol.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)

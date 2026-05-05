@@ -100,29 +100,32 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		opt(o)
 	}
 
-	doc := env.Extract()
-	switch d := doc.(type) {
-	case *bill.Invoice:
-		// Check and add missing addons
-		if err := ensureAddons(d, o.context.Addons); err != nil {
-			return nil, err
-		}
+	// Check and add missing addons
+	if err := ensureAddons(env, o.context.Addons); err != nil {
+		return nil, err
+	}
 
+	switch doc := env.Extract().(type) {
+	case *bill.Invoice:
 		// Removes included taxes as they are not supported in UBL
-		if err := d.RemoveIncludedTaxes(); err != nil {
+		if err := doc.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
 		}
-
-		return ublInvoice(d, o)
+		return ublInvoice(doc, o)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
 }
 
 // ensureAddons checks if the invoice has all required addons and adds missing ones
-func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
+func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 	if len(required) == 0 {
 		return nil
+	}
+
+	inv, ok := env.Extract().(*bill.Invoice)
+	if !ok {
+		return fmt.Errorf("expected bill.Invoice, got %T", env.Extract())
 	}
 
 	var missing []cbc.Key
@@ -132,17 +135,16 @@ func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
 			missing = append(missing, addon)
 		}
 	}
-
 	if len(missing) == 0 {
 		return nil
 	}
 
 	inv.SetAddons(append(existing, missing...)...)
-	if err := inv.Calculate(); err != nil {
-		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
+	if err := env.Calculate(); err != nil {
+		return err
 	}
-	if err := inv.Validate(); err != nil {
-		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
+	if err := env.Validate(); err != nil {
+		return err
 	}
 	return nil
 }

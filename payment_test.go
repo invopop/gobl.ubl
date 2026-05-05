@@ -6,13 +6,11 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestNewPayment(t *testing.T) {
 	t.Run("self-billed-invoice", func(t *testing.T) {
-		doc, err := testInvoiceFrom("peppol-self-billed/self-billed-invoice.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "peppol-self-billed/self-billed-invoice.json")
 
 		// PayeeParty should have PartyName (BR-17) but not RegistrationName (UBL-CR-275)
 		assert.Equal(t, "Ebeneser Scrooge AS", doc.PayeeParty.PartyName.Name)
@@ -26,8 +24,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("credit transfer with account number", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-account-number.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-account-number.json")
 
 		// Verify the account number was set in the UBL financial account ID
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
@@ -37,15 +34,14 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("document type extension", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 
 		inv.Payment.Instructions.Ext = nil
 
-		_, err = ubl.ConvertInvoice(env)
+		_, err := ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 }

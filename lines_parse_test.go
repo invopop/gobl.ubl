@@ -17,8 +17,7 @@ import (
 // Define tests for the ParseXMLLines function
 func TestParseLines(t *testing.T) {
 	t.Run("ubl-example1.xml", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example1.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example1.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -47,8 +46,7 @@ func TestParseLines(t *testing.T) {
 
 	// Line Charges and Discounts
 	t.Run("ubl-example2.xml", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -103,8 +101,7 @@ func TestParseLines(t *testing.T) {
 
 	// Test OrderLineReference parsing
 	t.Run("partial-invoice.xml with OrderLineReference", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/partial-invoice.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/partial-invoice.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -124,8 +121,7 @@ func TestParseLines(t *testing.T) {
 
 	// Test BaseQuantity logic
 	t.Run("BaseQuantity price calculation", func(t *testing.T) {
-		e, err := testParseInvoice("peppol/Allowance-example.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "peppol/Allowance-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)

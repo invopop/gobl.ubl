@@ -11,8 +11,7 @@ import (
 
 func TestAttachments(t *testing.T) {
 	t.Run("invoice-attachments.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-attachments.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-attachments.json")
 
 		require.Len(t, doc.AdditionalDocumentReference, 1)
 
@@ -30,8 +29,7 @@ func TestAttachments(t *testing.T) {
 	})
 
 	t.Run("add binary attachment", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-minimal.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-minimal.json")
 
 		// Sample binary data (e.g., a simple text file for testing)
 		sampleData := []byte("This is a test document content")
@@ -72,8 +70,7 @@ func TestAttachments(t *testing.T) {
 	})
 
 	t.Run("extract binary attachment roundtrip", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-minimal.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-minimal.json")
 
 		// Create and add a binary attachment
 		originalData := []byte("Test PDF content with special chars: üöä")
