@@ -82,7 +82,7 @@ func TestParseLines(t *testing.T) {
 
 		assert.Len(t, line.Item.Identities, 3)
 		assert.Equal(t, cbc.Code("1234567890128"), line.Item.Identities[0].Code)
-		assert.Equal(t, "0088", line.Item.Identities[0].Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "0088", line.Item.Identities[0].Ext.Get(iso.ExtKeySchemeID).String())
 		assert.Equal(t, cbc.Code("12344321"), line.Item.Identities[1].Code)
 		assert.Equal(t, "ZZZ", line.Item.Identities[1].Label)
 		assert.Equal(t, cbc.Code("65434568"), line.Item.Identities[2].Code)
