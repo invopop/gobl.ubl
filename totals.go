@@ -90,15 +90,11 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 				}
 				taxCat := TaxCategory{}
 
-				if r.Ext != nil {
-					if r.Ext[untdid.ExtKeyTaxCategory].String() != "" {
-						k := r.Ext[untdid.ExtKeyTaxCategory].String()
-						taxCat.ID = &k
-					}
-					if r.Ext[cef.ExtKeyVATEX].String() != "" {
-						v := r.Ext[cef.ExtKeyVATEX].String()
-						taxCat.TaxExemptionReasonCode = &v
-					}
+				if k := r.Ext.Get(untdid.ExtKeyTaxCategory).String(); k != "" {
+					taxCat.ID = &k
+				}
+				if v := r.Ext.Get(cef.ExtKeyVATEX).String(); v != "" {
+					taxCat.TaxExemptionReasonCode = &v
 				}
 
 				if inv.Tax != nil {
@@ -166,7 +162,7 @@ func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
 			note := &tax.Note{
 				Category: cbc.Code(tc.TaxScheme.ID),
 				Text:     cleanString(*tc.TaxExemptionReason),
-				Ext:      tax.Extensions{untdid.ExtKeyTaxCategory: cbc.Code(*tc.ID)},
+				Ext:      tax.ExtensionsOf(tax.ExtMap{untdid.ExtKeyTaxCategory: cbc.Code(*tc.ID)}),
 			}
 			inv.Tax = inv.Tax.MergeNotes(note)
 		}
