@@ -129,7 +129,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
 		Key: goblPaymentMeansCode(paymentMeans.PaymentMeansCode.Value),
-		Ext: tax.ExtensionsOf(tax.ExtMap{
+		Ext: tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyPaymentMeans: cbc.Code(paymentMeans.PaymentMeansCode.Value),
 		}),
 	}

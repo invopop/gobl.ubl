@@ -62,7 +62,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 		ch.Amount = a
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		ch.Ext = tax.ExtensionsOf(tax.ExtMap{
+		ch.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
 		})
 	}
@@ -144,7 +144,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		d.Amount = a
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		d.Ext = tax.ExtensionsOf(tax.ExtMap{
+		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
 		})
 	}
@@ -222,7 +222,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		Amount: amount,
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		ch.Ext = tax.ExtensionsOf(tax.ExtMap{
+		ch.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
 		})
 	}
@@ -261,7 +261,7 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		Amount: a,
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		d.Ext = tax.ExtensionsOf(tax.ExtMap{
+		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
 		})
 	}

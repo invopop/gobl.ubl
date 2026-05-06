@@ -228,20 +228,3 @@ func formatTime(t cal.Time) string {
 	}
 	return t.String()
 }
-
-// InvoiceHash returns the document digest from the embedded ds:Signature,
-// which is the SHA-256 hash of the filtered + canonicalized invoice XML.
-// Returns an empty string if the signature is not set.
-func (inv *Invoice) InvoiceHash() string {
-	if inv.UBLExtensions == nil ||
-		len(inv.UBLExtensions.UBLExtension) == 0 ||
-		inv.UBLExtensions.UBLExtension[0].ExtensionContent == nil ||
-		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures == nil ||
-		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation == nil ||
-		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature == nil ||
-		inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature.SignedInfo == nil ||
-		len(inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature.SignedInfo.Reference) == 0 {
-		return ""
-	}
-	return inv.UBLExtensions.UBLExtension[0].ExtensionContent.ZATCAUBLDocumentSignatures.SignatureInformation.Signature.SignedInfo.Reference[0].DigestValue
-}

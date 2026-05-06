@@ -50,7 +50,7 @@ func parseNote(text string) *org.Note {
 	text = cleanString(text)
 	if m := noteCodePattern.FindStringSubmatch(text); m != nil {
 		return &org.Note{
-			Ext:  tax.ExtensionsOf(tax.ExtMap{untdid.ExtKeyTextSubject: cbc.Code(m[1])}),
+			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(m[1])}),
 			Text: m[2],
 		}
 	}

@@ -112,7 +112,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 			Code: cbc.Code(docLine.DocumentReference.ID.Value),
 		}
 		if docLine.DocumentReference.ID.SchemeID != nil {
-			line.Identifier.Ext = tax.ExtensionsOf(tax.ExtMap{
+			line.Identifier.Ext = tax.ExtensionsOf(cbc.CodeMap{
 				untdid.ExtKeyReference: cbc.Code(*docLine.DocumentReference.ID.SchemeID),
 			})
 		}
@@ -248,7 +248,7 @@ func goblItemIdentities(di *Item) []*org.Identity {
 		di.StandardItemIdentification.ID.SchemeID != nil {
 		s := *di.StandardItemIdentification.ID.SchemeID
 		id := &org.Identity{
-			Ext: tax.ExtensionsOf(tax.ExtMap{
+			Ext: tax.ExtensionsOf(cbc.CodeMap{
 				iso.ExtKeySchemeID: cbc.Code(s),
 			}),
 			Code: cbc.Code(di.StandardItemIdentification.ID.Value),

@@ -36,7 +36,9 @@ func newDelivery(del *bill.DeliveryDetails) *Delivery {
 
 	if del.Period != nil {
 		end := formatDate(del.Period.End)
+		start := formatDate(del.Period.Start)
 		out.LatestDeliveryDate = &end
+		out.ActualDeliveryDate = &start
 	}
 
 	if del.Receiver != nil {

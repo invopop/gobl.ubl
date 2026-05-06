@@ -143,7 +143,7 @@ func handleLegalEntityIdentity(party *Party, p *org.Party) {
 		Scope: org.IdentityScopeLegal,
 	}
 	if party.PartyLegalEntity.CompanyID.SchemeID != nil {
-		identity.Ext = tax.ExtensionsOf(tax.ExtMap{
+		identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			iso.ExtKeySchemeID: cbc.Code(*party.PartyLegalEntity.CompanyID.SchemeID),
 		})
 	}
@@ -245,7 +245,7 @@ func handlePartyIdentifications(party *Party, p *org.Party) {
 			}
 			if partyID.ID.SchemeID != nil {
 				s := *partyID.ID.SchemeID
-				identity.Ext = tax.ExtensionsOf(tax.ExtMap{
+				identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
 					iso.ExtKeySchemeID: cbc.Code(s),
 				})
 			}
