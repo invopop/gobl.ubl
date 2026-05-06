@@ -107,7 +107,6 @@
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
     <cbc:InvoicedQuantity unitCode="HUR">5</cbc:InvoicedQuantity>
-    <cbc:CreditedQuantity unitCode="HUR">5</cbc:CreditedQuantity>
     <cbc:LineExtensionAmount currencyID="SAR">450.00</cbc:LineExtensionAmount>
     <cac:TaxTotal>
       <cbc:TaxAmount currencyID="SAR">67.50</cbc:TaxAmount>
