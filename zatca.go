@@ -47,6 +47,9 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 	// KSA-25
 	out.IssueTime = inv.IssueTime.String()
 
+	// BR-KSA-68
+	out.TaxCurrencyCode = string(inv.RegimeDef().Currency)
+
 	// KSA-2
 	if out.InvoiceTypeCode != nil {
 		if invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String(); invType != "" {
@@ -68,13 +71,23 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 			}
 		}
 
-		// BR-22
 		if len(out.CreditNoteLines) > 0 {
 			out.InvoiceLines = []InvoiceLine{}
 			for _, line := range out.CreditNoteLines {
-				invoiceLine := line
-				invoiceLine.InvoicedQuantity = line.CreditedQuantity
-				out.InvoiceLines = append(out.InvoiceLines, invoiceLine)
+				out.InvoiceLines = append(out.InvoiceLines, InvoiceLine{
+					ID:                  line.ID,
+					Note:                line.Note,
+					InvoicedQuantity:    line.CreditedQuantity,
+					LineExtensionAmount: line.LineExtensionAmount,
+					AccountingCost:      line.AccountingCost,
+					InvoicePeriod:       line.InvoicePeriod,
+					OrderLineReference:  line.OrderLineReference,
+					DocumentReference:   line.DocumentReference,
+					AllowanceCharge:     line.AllowanceCharge,
+					TaxTotal:            line.TaxTotal,
+					Item:                line.Item,
+					Price:               line.Price,
+				})
 			}
 			out.CreditNoteLines = []InvoiceLine{}
 		}

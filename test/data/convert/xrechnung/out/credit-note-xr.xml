@@ -6,7 +6,6 @@
   <cbc:IssueDate>2024-05-15</cbc:IssueDate>
   <cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
   <cbc:BuyerReference>CN-REF-001</cbc:BuyerReference>
   <cac:BillingReference>
     <cac:InvoiceDocumentReference>

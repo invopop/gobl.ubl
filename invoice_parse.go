@@ -1,9 +1,12 @@
 package ubl
 
 import (
+	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl/addons/sa/zatca"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
@@ -67,12 +70,16 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 			// as this is the default for EN16931.
 			Rounding: tax.RoundingRuleCurrency,
 		},
-		Supplier: goblParty(ui.AccountingSupplierParty.Party),
-		Customer: goblParty(ui.AccountingCustomerParty.Party),
+		Supplier: goblParty(ui.AccountingSupplierParty.Party, o),
+		Customer: goblParty(ui.AccountingCustomerParty.Party, o),
 	}
 
 	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
 		out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
+	}
+
+	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {
+		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceTypeTransactions, cbc.Code(*ui.InvoiceTypeCode.Name))
 	}
 
 	var typeCode string
@@ -94,6 +101,15 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 	out.IssueDate = issueDate
 
+	if ui.IssueTime != "" {
+		ct, err := civil.ParseTime(ui.IssueTime)
+		if err != nil {
+			return nil, err
+		}
+		t := cal.Time{Time: ct}
+		out.IssueTime = &t
+	}
+
 	// BT-7: VAT point date
 	if ui.TaxPointDate != "" {
 		vd, err := parseDate(ui.TaxPointDate)
@@ -103,10 +119,18 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		out.ValueDate = &vd
 	}
 
+	if ui.TaxCurrencyCode != "" && ui.DocumentCurrencyCode != ui.TaxCurrencyCode {
+		out.ExchangeRates = goblExchangeRates(
+			currency.Code(ui.DocumentCurrencyCode),
+			currency.Code(ui.TaxCurrencyCode),
+			ui.TaxTotal,
+		)
+	}
+
 	if err := ui.goblAddLines(out); err != nil {
 		return nil, err
 	}
-	if err := ui.goblAddPayment(out); err != nil {
+	if err := ui.goblAddPayment(out, o); err != nil {
 		return nil, err
 	}
 	if err = ui.goblAddOrdering(out); err != nil {
@@ -148,6 +172,17 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		}
 	}
 
+	// BR-KSA-17: In ZATCA, preceding document reasons are stored
+	// in PaymentMeans InstructionNote.
+	if o.context.Is(ContextZATCA) && len(out.Preceding) > 0 && len(ui.PaymentMeans) > 0 {
+		notes := ui.PaymentMeans[0].InstructionNote
+		for i, note := range notes {
+			if i < len(out.Preceding) {
+				out.Preceding[i].Reason = note
+			}
+		}
+	}
+
 	if ui.TaxRepresentativeParty != nil {
 		// Move the original seller to the ordering.seller party
 		if out.Ordering == nil {
@@ -156,7 +191,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		out.Ordering.Seller = out.Supplier
 
 		// Overwrite the seller field with the tax representative
-		out.Supplier = goblParty(ui.TaxRepresentativeParty)
+		out.Supplier = goblParty(ui.TaxRepresentativeParty, o)
 	}
 
 	if len(ui.AllowanceCharge) > 0 {

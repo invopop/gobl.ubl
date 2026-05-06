@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0a7db5e557a6612d46bb3859ca273cf558524631fa365b1a2be03e2d0ea0aad8"
+			"val": "c11a2df74c83de8b200d7c9a5399ed149fa1668850bc286fecdc5de4572dca65"
 		}
 	},
 	"doc": {
@@ -17,12 +17,13 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "SAMPLE-001",
-		"issue_date": "2026-05-06",
-		"issue_time": "14:02:07",
+		"issue_date": "2022-02-01",
+		"issue_time": "12:00:00",
 		"currency": "SAR",
 		"tax": {
 			"rounding": "currency",
 			"ext": {
+				"sa-zatca-invoice-type": "0200000",
 				"untdid-document-type": "388"
 			}
 		},
@@ -34,15 +35,15 @@
 			},
 			"identities": [
 				{
-					"code": "1234567890",
-					"ext": {
-						"iso-scheme-id": "MLS"
-					}
+					"type": "MLS",
+					"code": "1234567890"
 				}
 			],
 			"addresses": [
 				{
+					"num": "1234",
 					"street": "King Fahd Road 1234",
+					"street_extra": "Al Olaya",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "12345",
@@ -54,7 +55,9 @@
 			"name": "Sample Consumer LLC",
 			"addresses": [
 				{
+					"num": "5678",
 					"street": "Olaya Street 5678",
+					"street_extra": "Al Malaz",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "54321",
@@ -97,7 +100,11 @@
 			}
 		},
 		"delivery": {
-			"date": "2022-02-01"
+			"date": "2022-02-01",
+			"period": {
+				"start": "2022-02-01",
+				"end": "2022-02-28"
+			}
 		},
 		"totals": {
 			"sum": "1800.00",

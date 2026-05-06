@@ -45,7 +45,7 @@ func TestConvertToInvoice(t *testing.T) {
 	// Only connect to Phive if validation is requested
 	if *validate {
 		conn, err := grpc.NewClient(
-			"127.0.0.1:9091",
+			"127.0.0.1:9090",
 			grpc.WithTransportCredentials(insecure.NewCredentials()),
 		)
 		require.NoError(t, err)

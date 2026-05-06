@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f1a9d87507bb089dcce15f791ab8683e99515d7dd1d717929c5af8b489ff0b13"
+			"val": "548648315fb3e9a351105300d1b4014c0e0c27e989c99e322bd4938bad16febe"
 		}
 	},
 	"doc": {
@@ -15,26 +15,23 @@
 			"sa-zatca-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "credit-note",
-		"code": "CN-CN-001",
-		"issue_date": "2022-03-01",
-		"issue_time": "10:00:00",
-		"currency": "SAR",
-		"preceding": [
+		"type": "standard",
+		"code": "SAMPLE-001",
+		"issue_date": "2022-02-01",
+		"issue_time": "12:00:00",
+		"currency": "USD",
+		"exchange_rates": [
 			{
-				"issue_date": "2022-02-01",
-				"code": "SAMPLE-001",
-				"reason": "Return of development services",
-				"ext": {
-					"untdid-document-type": "388"
-				}
+				"from": "USD",
+				"to": "SAR",
+				"amount": "3.75"
 			}
 		],
 		"tax": {
 			"rounding": "currency",
 			"ext": {
 				"sa-zatca-invoice-type": "0100000",
-				"untdid-document-type": "381"
+				"untdid-document-type": "388"
 			}
 		},
 		"supplier": {
@@ -84,13 +81,13 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "5",
+				"quantity": "20",
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
 					"unit": "h"
 				},
-				"sum": "450.00",
+				"sum": "1800.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -101,12 +98,12 @@
 						}
 					}
 				],
-				"total": "450.00"
+				"total": "1800.00"
 			}
 		],
 		"payment": {
 			"terms": {
-				"notes": "Refund within 14 days"
+				"notes": "Payment due within 30 days"
 			},
 			"instructions": {
 				"key": "credit-transfer",
@@ -123,8 +120,8 @@
 			}
 		},
 		"totals": {
-			"sum": "450.00",
-			"total": "450.00",
+			"sum": "1800.00",
+			"total": "1800.00",
 			"taxes": {
 				"categories": [
 					{
@@ -135,19 +132,19 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "450.00",
+								"base": "1800.00",
 								"percent": "15.0%",
-								"amount": "67.50"
+								"amount": "270.00"
 							}
 						],
-						"amount": "67.50"
+						"amount": "270.00"
 					}
 				],
-				"sum": "67.50"
+				"sum": "270.00"
 			},
-			"tax": "67.50",
-			"total_with_tax": "517.50",
-			"payable": "517.50"
+			"tax": "270.00",
+			"total_with_tax": "2070.00",
+			"payable": "2070.00"
 		}
 	}
 }

@@ -5,7 +5,6 @@
   <cbc:IssueDate>2024-05-15</cbc:IssueDate>
   <cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
   <cac:OrderReference>
     <cbc:ID>NA</cbc:ID>
   </cac:OrderReference>

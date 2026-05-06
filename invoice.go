@@ -138,9 +138,13 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		TaxCurrencyCode:         string(inv.RegimeDef().Currency),
 		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
+	}
+
+	// PEPPOL-EN16931-R005
+	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency {
+		out.TaxCurrencyCode = string(taxCurrency)
 	}
 
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {

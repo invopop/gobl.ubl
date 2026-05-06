@@ -8,7 +8,6 @@
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:Note>#AAI#Random invoice</cbc:Note>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
   <cbc:BuyerReference>ORDER-2024-004</cbc:BuyerReference>
   <cac:AccountingSupplierParty>
     <cac:Party>

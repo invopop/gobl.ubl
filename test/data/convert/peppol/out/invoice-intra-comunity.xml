@@ -7,7 +7,6 @@
   <cbc:DueDate>2026-03-04</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
   <cac:OrderReference>
     <cbc:ID>NA</cbc:ID>
   </cac:OrderReference>

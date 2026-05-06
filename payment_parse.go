@@ -29,11 +29,11 @@ var (
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
 )
 
-func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
+func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	payment := &bill.PaymentDetails{}
 
 	if ui.PayeeParty != nil {
-		payment.Payee = goblParty(ui.PayeeParty)
+		payment.Payee = goblParty(ui.PayeeParty, o)
 	}
 
 	if ui.PaymentTerms != nil {

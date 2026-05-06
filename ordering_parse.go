@@ -155,6 +155,9 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		}
 		docRef.IssueDate = &refDate
 	}
+	if ref.DocumentTypeCode != "" {
+		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.DocumentTypeCode))
+	}
 	if ref.DocumentDescription != "" {
 		docRef.Description = cleanString(ref.DocumentDescription)
 	}

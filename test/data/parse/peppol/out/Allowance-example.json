@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "86873182021e8f2797ddc692696410cb40932b9ad72317fc1c5b87c4c50bf61f"
+			"val": "21af8297969d61908fcbcf7639447953fc1600ddc9275967d39602cd3b9e62d5"
 		}
 	},
 	"doc": {
@@ -19,6 +19,13 @@
 		"issue_date": "2017-11-13",
 		"value_date": "2017-12-01",
 		"currency": "EUR",
+		"exchange_rates": [
+			{
+				"from": "EUR",
+				"to": "SEK",
+				"amount": "7.61"
+			}
+		],
 		"tax": {
 			"rounding": "currency",
 			"ext": {

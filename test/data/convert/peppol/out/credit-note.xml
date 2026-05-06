@@ -6,7 +6,6 @@
   <cbc:IssueDate>2024-02-14</cbc:IssueDate>
   <cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
   <cbc:BuyerReference>XR-2024-4</cbc:BuyerReference>
   <cac:BillingReference>
     <cac:InvoiceDocumentReference>

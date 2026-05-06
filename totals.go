@@ -200,3 +200,30 @@ func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.
 	}
 	return nil
 }
+
+// goblExchangeRates derives the exchange rate from two TaxTotal blocks
+// when DocumentCurrencyCode differs from TaxCurrencyCode.
+func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) []*cur.ExchangeRate {
+	if len(taxTotals) < 2 {
+		return nil
+	}
+
+	docAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[0].TaxAmount.Value))
+	if err != nil || docAmount.IsZero() {
+		return nil
+	}
+	taxAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[1].TaxAmount.Value))
+	if err != nil {
+		return nil
+	}
+
+	rate := taxAmount.Divide(docAmount)
+
+	return []*cur.ExchangeRate{
+		{
+			From:   docCurrency,
+			To:     taxCurrency,
+			Amount: rate,
+		},
+	}
+}

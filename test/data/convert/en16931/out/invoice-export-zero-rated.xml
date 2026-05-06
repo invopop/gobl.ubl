@@ -5,7 +5,6 @@
   <cbc:IssueDate>2024-05-15</cbc:IssueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cbc:TaxCurrencyCode>EUR</cbc:TaxCurrencyCode>
   <cac:OrderReference>
     <cbc:ID>NA</cbc:ID>
   </cac:OrderReference>

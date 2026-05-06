@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e019d981cef5608acc430d134d2862672378ceb7cca42fc92aa01b3d2f7ac3ec"
+			"val": "61b8c578081f0cdf75f95436b0d3c6da4a460bcb95134605e4d417d475a3cb0c"
 		}
 	},
 	"doc": {
@@ -17,18 +17,23 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "debit-note",
 		"code": "DN-DN-001",
-		"issue_date": "2026-05-06",
-		"issue_time": "14:02:07",
+		"issue_date": "2022-03-01",
+		"issue_time": "10:00:00",
 		"currency": "SAR",
 		"preceding": [
 			{
 				"issue_date": "2022-02-01",
-				"code": "SAMPLE-001"
+				"code": "SAMPLE-001",
+				"reason": "Price adjustment for development services",
+				"ext": {
+					"untdid-document-type": "388"
+				}
 			}
 		],
 		"tax": {
 			"rounding": "currency",
 			"ext": {
+				"sa-zatca-invoice-type": "0200000",
 				"untdid-document-type": "383"
 			}
 		},
@@ -40,15 +45,15 @@
 			},
 			"identities": [
 				{
-					"code": "1234567890",
-					"ext": {
-						"iso-scheme-id": "MLS"
-					}
+					"type": "MLS",
+					"code": "1234567890"
 				}
 			],
 			"addresses": [
 				{
+					"num": "1234",
 					"street": "King Fahd Road 1234",
+					"street_extra": "Al Olaya",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "12345",
@@ -60,7 +65,9 @@
 			"name": "Sample Consumer LLC",
 			"addresses": [
 				{
+					"num": "5678",
 					"street": "Olaya Street 5678",
+					"street_extra": "Al Malaz",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "54321",
@@ -103,7 +110,11 @@
 			}
 		},
 		"delivery": {
-			"date": "2022-02-01"
+			"date": "2022-02-01",
+			"period": {
+				"start": "2022-02-01",
+				"end": "2022-02-28"
+			}
 		},
 		"totals": {
 			"sum": "450.00",
