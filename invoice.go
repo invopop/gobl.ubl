@@ -39,7 +39,7 @@ type Invoice struct {
 	EXTNamespace   string `xml:"xmlns:ext,attr"`
 	SchemaLocation string `xml:"xsi:schemaLocation,attr,omitempty"`
 
-	UBLExtensions      *Extensions `xml:"ext:UBLExtensions,omitempty"`
+	Extensions         *Extensions `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID       string      `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID    string      `xml:"cbc:CustomizationID,omitempty"`
 	ProfileID          string      `xml:"cbc:ProfileID,omitempty"`

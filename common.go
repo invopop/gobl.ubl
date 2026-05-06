@@ -23,11 +23,11 @@ const (
 
 // Extensions wraps a list of UBL extensions.
 type Extensions struct {
-	UBLExtension []UBLExtension `xml:"ext:UBLExtension"`
+	Extension []Extension `xml:"ext:UBLExtension"`
 }
 
-// UBLExtension represents a single UBL extension.
-type UBLExtension struct {
+// Extension represents a single UBL extension.
+type Extension struct {
 	ExtensionURI     *string           `xml:"ext:ExtensionURI"`
 	ExtensionContent *ExtensionContent `xml:"ext:ExtensionContent"`
 }

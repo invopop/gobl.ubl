@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	MimeCodeTextPlain string = "text/plain"
+	mimeCodeTextPlain = "text/plain"
 )
 
 // ZATCA UBL signature constants.
@@ -23,7 +23,7 @@ const (
 	namespaceSBC = "urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2"
 )
 
-// UBLDocumentSignatures contains the signature information block.
+// ZATCAUBLDocumentSignatures contains the signature information block.
 type ZATCAUBLDocumentSignatures struct {
 	SIGNamespace         string                `xml:"xmlns:sig,attr"`
 	SACNamespace         string                `xml:"xmlns:sac,attr"`
@@ -156,20 +156,20 @@ func moveStreetExtraToDistrict(p *Party) {
 }
 
 // SetICV sets the Invoice Counter Value as an AdditionalDocumentReference
-func (inv *Invoice) SetICV(value string) {
-	inv.AdditionalDocumentReference = append(inv.AdditionalDocumentReference, Reference{
+func (ui *Invoice) SetICV(value string) {
+	ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, Reference{
 		ID:   IDType{Value: "ICV"},
 		UUID: value,
 	})
 }
 
 // SetPIH sets the Previous Invoice Hash as an AdditionalDocumentReference
-func (inv *Invoice) SetPIH(value string) {
-	inv.AdditionalDocumentReference = append(inv.AdditionalDocumentReference, Reference{
+func (ui *Invoice) SetPIH(value string) {
+	ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, Reference{
 		ID: IDType{Value: "PIH"},
 		Attachment: &Attachment{
 			EmbeddedDocumentBinaryObject: &BinaryObject{
-				MimeCode: &MimeCodeTextPlain,
+				MimeCode: &mimeCodeTextPlain,
 				Value:    value,
 			},
 		},
@@ -177,12 +177,12 @@ func (inv *Invoice) SetPIH(value string) {
 }
 
 // SetQRCode sets the QR code as an AdditionalDocumentReference
-func (inv *Invoice) SetQRCode(value string) {
-	inv.AdditionalDocumentReference = append(inv.AdditionalDocumentReference, Reference{
+func (ui *Invoice) SetQRCode(value string) {
+	ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, Reference{
 		ID: IDType{Value: "QR"},
 		Attachment: &Attachment{
 			EmbeddedDocumentBinaryObject: &BinaryObject{
-				MimeCode: &MimeCodeTextPlain,
+				MimeCode: &mimeCodeTextPlain,
 				Value:    value,
 			},
 		},
@@ -190,10 +190,10 @@ func (inv *Invoice) SetQRCode(value string) {
 }
 
 // SetSignature sets the Signature as an UBLExtension
-func (inv *Invoice) SetSignature(sig *xmldsig.Signature) {
+func (ui *Invoice) SetSignature(sig *xmldsig.Signature) {
 	extURI := signatureMethod
-	inv.UBLExtensions = &Extensions{
-		UBLExtension: []UBLExtension{
+	ui.Extensions = &Extensions{
+		Extension: []Extension{
 			{
 				ExtensionURI: &extURI,
 				ExtensionContent: &ExtensionContent{
@@ -214,7 +214,7 @@ func (inv *Invoice) SetSignature(sig *xmldsig.Signature) {
 
 	// Add the cac:Signature reference
 	sm := signatureMethod
-	inv.Signature = append(inv.Signature, Signature{
+	ui.Signature = append(ui.Signature, Signature{
 		ID:              referenceSignatureID,
 		SignatureMethod: &sm,
 	})
