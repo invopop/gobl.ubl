@@ -1,0 +1,167 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "00"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "BE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "SAMPLE",
+		"code": "0001",
+		"issue_date": "2024-01-15",
+		"op_date": "2024-01-15",
+		"currency": "EUR",
+		"tax": {
+			"prices_include": "VAT",
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Acme Mobility BV",
+			"tax_id": {
+				"country": "BE",
+				"code": "0123456749"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0208",
+					"code": "0123456749"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Sample Street 10",
+					"locality": "Brussels",
+					"code": "1000",
+					"country": "BE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@acme.example"
+				}
+			]
+		},
+		"customer": {
+			"name": "Jane Sample",
+			"tax_id": {
+				"country": "BE",
+				"code": "0987654394"
+			},
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0208",
+					"code": "0987654394"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Example Lane 148",
+					"locality": "Ghent",
+					"code": "9000",
+					"country": "BE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "jane@sample.example"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"period": {
+					"start": "2024-01-15",
+					"end": "2024-02-15"
+				},
+				"item": {
+					"name": "Theft Coverage Subscription",
+					"currency": "EUR",
+					"price": "9.90",
+					"unit": "one"
+				},
+				"discounts": [
+					{
+						"reason": "Loyalty credits",
+						"amount": "1.76"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"period": {
+					"start": "2024-01-15",
+					"end": "2024-02-15"
+				},
+				"item": {
+					"name": "Power Plus Subscription",
+					"currency": "EUR",
+					"price": "74.90",
+					"unit": "one"
+				},
+				"discounts": [
+					{
+						"reason": "Loyalty credits",
+						"amount": "13.34"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "21.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			}
+		],
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-02-15",
+						"amount": "69.70",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "direct-debit",
+				"detail": "SEPA Direct Debit",
+				"ext": {
+					"untdid-payment-means": "49"
+				}
+			}
+		}
+	}
+}

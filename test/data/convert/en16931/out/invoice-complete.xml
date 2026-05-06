@@ -104,6 +104,9 @@
       </cac:FinancialInstitutionBranch>
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
+  <cac:PaymentTerms>
+    <cbc:Note>2 % discount if paid within 2 days&#xA;            Penalty percentage 10% from due date</cbc:Note>
+  </cac:PaymentTerms>
   <cac:AllowanceCharge>
     <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
     <cbc:AllowanceChargeReason>Freight</cbc:AllowanceChargeReason>

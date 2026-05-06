@@ -179,8 +179,8 @@ func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
 			}
 			note := &tax.Note{
 				Category: cbc.Code(tc.TaxScheme.ID),
-				Text:     *tc.TaxExemptionReason,
-				Ext:      tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTaxCategory: cbc.Code(*tc.ID)}),
+				Text:     cleanString(*tc.TaxExemptionReason),
+				Ext:      tax.Extensions{untdid.ExtKeyTaxCategory: cbc.Code(*tc.ID)},
 			}
 			inv.Tax = inv.Tax.MergeNotes(note)
 		}
