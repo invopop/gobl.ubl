@@ -4,32 +4,25 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4b0b878be0c16ee51dbabfd89c8c4f14f88ea911d0553c6d137e7ce6b2869217"
+			"val": "7c6eadb2a6e8b0ef68191e1a006d3c7e8994a3670a330f74a96cd8c960a8863d"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "SA",
 		"$addons": [
+			"eu-en16931-v2017",
 			"sa-zatca-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "SAMPLE-001",
-		"issue_date": "2022-02-01",
-		"issue_time": "12:00:00",
-		"currency": "USD",
-		"exchange_rates": [
-			{
-				"from": "USD",
-				"to": "SAR",
-				"amount": "3.75"
-			}
-		],
+		"issue_date": "2026-05-06",
+		"issue_time": "14:02:07",
+		"currency": "SAR",
 		"tax": {
 			"rounding": "currency",
 			"ext": {
-				"sa-zatca-invoice-type": "0100000",
 				"untdid-document-type": "388"
 			}
 		},
@@ -41,15 +34,15 @@
 			},
 			"identities": [
 				{
-					"type": "CRN",
-					"code": "1234567890"
+					"code": "1234567890",
+					"ext": {
+						"iso-scheme-id": "CRN"
+					}
 				}
 			],
 			"addresses": [
 				{
-					"num": "1234",
-					"street": "King Fahd Road",
-					"street_extra": "Al Olaya",
+					"street": "King Fahd Road 1234",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "12345",
@@ -61,15 +54,15 @@
 			"name": "Sample Consumer LLC",
 			"identities": [
 				{
-					"type": "TIN",
-					"code": "123456789012345"
+					"code": "123456789012345",
+					"ext": {
+						"iso-scheme-id": "TIN"
+					}
 				}
 			],
 			"addresses": [
 				{
-					"num": "5678",
-					"street": "Olaya Street",
-					"street_extra": "Al Malaz",
+					"street": "Olaya Street 5678",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "54321",
@@ -91,7 +84,6 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"rate": "general",
 						"percent": "15.0%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -113,11 +105,7 @@
 			}
 		},
 		"delivery": {
-			"date": "2022-02-01",
-			"period": {
-				"start": "2022-02-01",
-				"end": "2022-02-28"
-			}
+			"date": "2022-02-01"
 		},
 		"totals": {
 			"sum": "1800.00",

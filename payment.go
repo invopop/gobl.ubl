@@ -106,7 +106,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 
 func (ui *Invoice) addPaymentInstructions(pymt *bill.PaymentDetails) error {
 	instr := pymt.Instructions
-	if instr.Ext == nil || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
+	if instr.Ext.IsZero() || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
 			"instructions": validation.Errors{
 				"ext": validation.Errors{

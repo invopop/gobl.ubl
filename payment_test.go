@@ -44,7 +44,7 @@ func TestNewPayment(t *testing.T) {
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 
-		inv.Payment.Instructions.Ext = tax.Extensions{}
+		inv.Payment.Instructions.Ext = tax.MakeExtensions()
 
 		_, err = ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")

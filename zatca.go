@@ -5,7 +5,6 @@ import (
 
 	"github.com/invopop/gobl/addons/sa/zatca"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cal"
 	"github.com/invopop/xmldsig"
 )
 
@@ -13,7 +12,7 @@ var (
 	MimeCodeTextPlain string = "text/plain"
 )
 
-// ZATCA UBL signature constants (from ZATCA KSA-15 spec).
+// ZATCA UBL signature constants.
 const (
 	signatureInformationID = "urn:oasis:names:specification:ubl:signature:1"
 	referenceSignatureID   = "urn:oasis:names:specification:ubl:signature:Invoice"
@@ -39,7 +38,6 @@ type SignatureInformation struct {
 	Signature             *xmldsig.Signature `xml:"ds:Signature"`
 }
 
-// applyZATCA applies ZATCA-specific fields to a UBL invoice.
 func applyZATCA(out *Invoice, inv *bill.Invoice) {
 	out.SchemaLocation = ""
 
@@ -47,7 +45,7 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 	out.UUID = string(inv.UUID)
 
 	// KSA-25
-	out.IssueTime = formatTime(*inv.IssueTime)
+	out.IssueTime = inv.IssueTime.String()
 
 	// KSA-2
 	if out.InvoiceTypeCode != nil {
@@ -74,20 +72,9 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 		if len(out.CreditNoteLines) > 0 {
 			out.InvoiceLines = []InvoiceLine{}
 			for _, line := range out.CreditNoteLines {
-				out.InvoiceLines = append(out.InvoiceLines, InvoiceLine{
-					ID:                  line.ID,
-					Note:                line.Note,
-					InvoicedQuantity:    line.CreditedQuantity,
-					LineExtensionAmount: line.LineExtensionAmount,
-					AccountingCost:      line.AccountingCost,
-					InvoicePeriod:       line.InvoicePeriod,
-					OrderLineReference:  line.OrderLineReference,
-					DocumentReference:   line.DocumentReference,
-					AllowanceCharge:     line.AllowanceCharge,
-					TaxTotal:            line.TaxTotal,
-					Item:                line.Item,
-					Price:               line.Price,
-				})
+				invoiceLine := line
+				invoiceLine.InvoicedQuantity = line.CreditedQuantity
+				out.InvoiceLines = append(out.InvoiceLines, invoiceLine)
 			}
 			out.CreditNoteLines = []InvoiceLine{}
 		}
@@ -95,7 +82,7 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 		out.CreditNoteTypeCode = ""
 	}
 
-	// KSA-3: Assume district is mapped to StreetExtra in gobl
+	// KSA-3: District is mapped to StreetExtra in gobl
 	moveStreetExtraToDistrict(out.AccountingSupplierParty.Party)
 	moveStreetExtraToDistrict(out.AccountingCustomerParty.Party)
 
@@ -114,9 +101,7 @@ func applyZATCA(out *Invoice, inv *bill.Invoice) {
 	}
 
 	// At the price level (cac:Price/cac:AllowanceCharge), the ChargeIndicator
-	// must always be false. This structure represents the discount applied to
-	// the gross price (BT-148) to derive the net price (BT-146), as per
-	// BR-KSA-EN16931-07: Net price = Gross price - Allowance amount (BT-147).
+	// must always be false.
 	// Charges at the price level are not used in the ZATCA e-invoicing model;
 	// surcharges should be applied at the line level instead.
 	for _, line := range out.InvoiceLines {
@@ -220,11 +205,4 @@ func (inv *Invoice) SetSignature(sig *xmldsig.Signature) {
 		ID:              referenceSignatureID,
 		SignatureMethod: &sm,
 	})
-}
-
-func formatTime(t cal.Time) string {
-	if t.IsZero() {
-		return ""
-	}
-	return t.String()
 }

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "50e48a8d1e468f6229c3e6fc70e992a1facc1d4a0257fabe9c5b2319f68705ba"
+			"val": "b50a053e433891f62f846a0a9bb84f3cc583214710194d8b907c045c97caa6ee"
 		}
 	},
 	"doc": {
@@ -15,16 +15,27 @@
 			"sa-zatca-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "standard",
-		"code": "SAMPLE-001",
-		"issue_date": "2022-02-01",
-		"issue_time": "12:00:00",
+		"type": "debit-note",
+		"series": "DN",
+		"code": "DN-001",
+		"issue_date": "2022-03-01",
+		"issue_time": "10:00:00",
 		"currency": "SAR",
+		"preceding": [
+			{
+				"issue_date": "2022-02-01",
+				"code": "SAMPLE-001",
+				"reason": "Price adjustment for development services",
+				"ext": {
+					"untdid-document-type": "388"
+				}
+			}
+		],
 		"tax": {
 			"rounding": "currency",
 			"ext": {
 				"sa-zatca-invoice-type": "0100000",
-				"untdid-document-type": "388"
+				"untdid-document-type": "383"
 			}
 		},
 		"supplier": {
@@ -74,13 +85,13 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "20",
+				"quantity": "5",
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
 					"unit": "h"
 				},
-				"sum": "1800.00",
+				"sum": "450.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -92,7 +103,7 @@
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "450.00"
 			}
 		],
 		"payment": {
@@ -107,15 +118,15 @@
 			}
 		},
 		"delivery": {
-			"date": "2022-02-01",
+			"date": "2022-03-01",
 			"period": {
 				"start": "2022-02-01",
 				"end": "2022-02-28"
 			}
 		},
 		"totals": {
-			"sum": "1800.00",
-			"total": "1800.00",
+			"sum": "450.00",
+			"total": "450.00",
 			"taxes": {
 				"categories": [
 					{
@@ -126,19 +137,19 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1800.00",
+								"base": "450.00",
 								"percent": "15.0%",
-								"amount": "270.00"
+								"amount": "67.50"
 							}
 						],
-						"amount": "270.00"
+						"amount": "67.50"
 					}
 				],
-				"sum": "270.00"
+				"sum": "67.50"
 			},
-			"tax": "270.00",
-			"total_with_tax": "2070.00",
-			"payable": "2070.00"
+			"tax": "67.50",
+			"total_with_tax": "517.50",
+			"payable": "517.50"
 		}
 	}
 }

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "50e48a8d1e468f6229c3e6fc70e992a1facc1d4a0257fabe9c5b2319f68705ba"
+			"val": "012fd422ced82cb62aeee89ee34b128d0bc52a73c842589287c3a3a7857454db"
 		}
 	},
 	"doc": {
@@ -15,16 +15,21 @@
 			"sa-zatca-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "standard",
-		"code": "SAMPLE-001",
-		"issue_date": "2022-02-01",
-		"issue_time": "12:00:00",
+		"type": "debit-note",
+		"code": "DN-DN-001",
+		"issue_date": "2026-05-06",
+		"issue_time": "14:02:07",
 		"currency": "SAR",
+		"preceding": [
+			{
+				"issue_date": "2022-02-01",
+				"code": "SAMPLE-001"
+			}
+		],
 		"tax": {
 			"rounding": "currency",
 			"ext": {
-				"sa-zatca-invoice-type": "0100000",
-				"untdid-document-type": "388"
+				"untdid-document-type": "383"
 			}
 		},
 		"supplier": {
@@ -35,15 +40,15 @@
 			},
 			"identities": [
 				{
-					"type": "CRN",
-					"code": "1234567890"
+					"code": "1234567890",
+					"ext": {
+						"iso-scheme-id": "CRN"
+					}
 				}
 			],
 			"addresses": [
 				{
-					"num": "1234",
-					"street": "King Fahd Road",
-					"street_extra": "Al Olaya",
+					"street": "King Fahd Road 1234",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "12345",
@@ -55,15 +60,15 @@
 			"name": "Sample Consumer LLC",
 			"identities": [
 				{
-					"type": "TIN",
-					"code": "123456789012345"
+					"code": "123456789012345",
+					"ext": {
+						"iso-scheme-id": "TIN"
+					}
 				}
 			],
 			"addresses": [
 				{
-					"num": "5678",
-					"street": "Olaya Street",
-					"street_extra": "Al Malaz",
+					"street": "Olaya Street 5678",
 					"locality": "Riyadh",
 					"region": "Riyadh",
 					"code": "54321",
@@ -74,25 +79,24 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "20",
+				"quantity": "5",
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
 					"unit": "h"
 				},
-				"sum": "1800.00",
+				"sum": "450.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"rate": "general",
 						"percent": "15.0%",
 						"ext": {
 							"untdid-tax-category": "S"
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "450.00"
 			}
 		],
 		"payment": {
@@ -107,15 +111,11 @@
 			}
 		},
 		"delivery": {
-			"date": "2022-02-01",
-			"period": {
-				"start": "2022-02-01",
-				"end": "2022-02-28"
-			}
+			"date": "2022-02-01"
 		},
 		"totals": {
-			"sum": "1800.00",
-			"total": "1800.00",
+			"sum": "450.00",
+			"total": "450.00",
 			"taxes": {
 				"categories": [
 					{
@@ -126,19 +126,19 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1800.00",
+								"base": "450.00",
 								"percent": "15.0%",
-								"amount": "270.00"
+								"amount": "67.50"
 							}
 						],
-						"amount": "270.00"
+						"amount": "67.50"
 					}
 				],
-				"sum": "270.00"
+				"sum": "67.50"
 			},
-			"tax": "270.00",
-			"total_with_tax": "2070.00",
-			"payable": "2070.00"
+			"tax": "67.50",
+			"total_with_tax": "517.50",
+			"payable": "517.50"
 		}
 	}
 }

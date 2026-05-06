@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "00"
+			"val": "06a1a3e3bdb88ece64366a13972a01ad7ec91efa931c8f4a120ab95f64f068b3"
 		}
 	},
 	"doc": {
@@ -95,6 +95,7 @@
 					"price": "9.90",
 					"unit": "one"
 				},
+				"sum": "9.90",
 				"discounts": [
 					{
 						"reason": "Loyalty credits",
@@ -111,7 +112,8 @@
 							"untdid-tax-category": "S"
 						}
 					}
-				]
+				],
+				"total": "8.14"
 			},
 			{
 				"i": 2,
@@ -126,6 +128,7 @@
 					"price": "74.90",
 					"unit": "one"
 				},
+				"sum": "74.90",
 				"discounts": [
 					{
 						"reason": "Loyalty credits",
@@ -142,7 +145,8 @@
 							"untdid-tax-category": "S"
 						}
 					}
-				]
+				],
+				"total": "61.56"
 			}
 		],
 		"payment": {
@@ -162,6 +166,34 @@
 					"untdid-payment-means": "49"
 				}
 			}
+		},
+		"totals": {
+			"sum": "69.70",
+			"tax_included": "12.10",
+			"total": "57.60",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "57.61",
+								"percent": "21.0%",
+								"amount": "12.10"
+							}
+						],
+						"amount": "12.10"
+					}
+				],
+				"sum": "12.10"
+			},
+			"tax": "12.10",
+			"total_with_tax": "69.70",
+			"payable": "69.70"
 		}
 	}
 }

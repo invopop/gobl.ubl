@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3fe59ebbe35fa198f521943ac905a858876c4c0e47b1b70f4a21f284ccb49704"
+			"val": "af83f3bc59b590861315082d50201ea165264c5a2a53ffa1867333a4e025c5a6"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "SA",
 		"$addons": [
+			"eu-en16931-v2017",
 			"sa-zatca-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -32,6 +33,12 @@
 				"country": "SA",
 				"code": "312345678912343"
 			},
+			"identities": [
+				{
+					"type": "MLS",
+					"code": "1234567890"
+				}
+			],
 			"addresses": [
 				{
 					"num": "1234",
