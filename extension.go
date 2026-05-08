@@ -13,14 +13,14 @@ type Extension struct {
 
 // ExtensionContent wraps the content of a UBL extension.
 type ExtensionContent struct {
-	UBLDocumentSignatures *UBLDocumentSignatures `xml:"sig:UBLDocumentSignatures"`
+	UBLDocumentSignatures *DocumentSignatures `xml:"sig:UBLDocumentSignatures"`
 }
 
 // NewExtension creates a new extension
 func NewExtension() *Extension {
 	return &Extension{
 		ExtensionContent: &ExtensionContent{
-			UBLDocumentSignatures: &UBLDocumentSignatures{},
+			UBLDocumentSignatures: &DocumentSignatures{},
 		},
 	}
 }

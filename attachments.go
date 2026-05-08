@@ -37,6 +37,9 @@ type ExternalReference struct {
 	Description         string `xml:"cbc:Description,omitempty"`
 }
 
+// AddAttachments adds an attachment to the UBL Invoice.
+// This is useful for including documents like
+// invoice counter values or URLs
 func (ui *Invoice) AddAttachments(attachments []*org.Attachment) {
 	for _, a := range attachments {
 		ref := Reference{

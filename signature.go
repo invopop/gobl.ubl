@@ -9,8 +9,8 @@ const (
 	SignatureMethod        = "urn:oasis:names:specification:ubl:dsig:enveloped:xades"
 )
 
-// UBLDocumentSignatures contains the signature information block.
-type UBLDocumentSignatures struct {
+// DocumentSignatures contains the signature information block.
+type DocumentSignatures struct {
 	SIGNamespace         string                `xml:"xmlns:sig,attr"`
 	SACNamespace         string                `xml:"xmlns:sac,attr"`
 	SBCNamespace         string                `xml:"xmlns:sbc,attr"`
