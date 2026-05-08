@@ -122,12 +122,12 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-func newParty(party *org.Party) *Party { //nolint:gocyclo
+func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}
 	p := &Party{
-		PostalAddress: newAddress(party.Addresses),
+		PostalAddress: newAddress(party.Addresses, ctx),
 	}
 
 	// Only add PartyName if name is not empty
@@ -145,6 +145,9 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 
 	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
 		code := party.TaxID.String()
+		if ctx.Is(ContextZATCA) {
+			code = code[2:]
+		}
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {
 			// Peppol default
@@ -396,7 +399,7 @@ func newPayeeParty(party *org.Party) *Party {
 	return p
 }
 
-func newAddress(addresses []*org.Address) *PostalAddress {
+func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
@@ -428,10 +431,6 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 		addr.PostalZone = &code
 	}
 
-	if a.Number != "" {
-		addr.BuildingNumber = &a.Number
-	}
-
 	if a.Block != "" {
 		addr.PlotIdentification = &a.Block
 	}
@@ -447,6 +446,14 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 			LatitudeDegreesMeasure:  &lat,
 			LongitudeDegreesMeasure: &lon,
 		}
+	}
+
+	if ctx.Is(ContextZATCA) {
+		l := a.LineTwo()
+		addr.CitySubdivisionName = &l
+		addr.AdditionalStreetName = nil
+
+		addr.BuildingNumber = &a.Number
 	}
 
 	return addr

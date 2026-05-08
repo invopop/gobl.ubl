@@ -37,7 +37,7 @@ type ExternalReference struct {
 	Description         string `xml:"cbc:Description,omitempty"`
 }
 
-func (ui *Invoice) addAttachments(attachments []*org.Attachment) {
+func (ui *Invoice) AddAttachments(attachments []*org.Attachment) {
 	for _, a := range attachments {
 		ref := Reference{
 			ID: IDType{
@@ -49,25 +49,31 @@ func (ui *Invoice) addAttachments(attachments []*org.Attachment) {
 			ref.DocumentDescription = a.Description
 		}
 
-		extRef := &ExternalReference{
-			URI: a.URL,
+		if uuid := string(a.UUID); uuid != "" {
+			ref.UUID = uuid
 		}
 
-		if a.MIME != "" {
-			extRef.MimeCode = a.MIME
-		}
+		if a.URL != "" {
+			extRef := &ExternalReference{
+				URI: a.URL,
+			}
 
-		if a.Name != "" {
-			extRef.FileName = a.Name
-		}
+			if a.MIME != "" {
+				extRef.MimeCode = a.MIME
+			}
 
-		if a.Digest != nil {
-			extRef.DocumentHash = a.Digest.Value
-			extRef.HashAlgorithmMethod = string(a.Digest.Algorithm)
-		}
+			if a.Name != "" {
+				extRef.FileName = a.Name
+			}
 
-		ref.Attachment = &Attachment{
-			ExternalReference: extRef,
+			if a.Digest != nil {
+				extRef.DocumentHash = a.Digest.Value
+				extRef.HashAlgorithmMethod = string(a.Digest.Algorithm)
+			}
+
+			ref.Attachment = &Attachment{
+				ExternalReference: extRef,
+			}
 		}
 
 		ui.AdditionalDocumentReference = append(ui.AdditionalDocumentReference, ref)

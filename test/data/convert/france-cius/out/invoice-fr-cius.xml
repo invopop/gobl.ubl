@@ -18,7 +18,6 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>16 10 Rue de la Paix</cbc:StreetName>
-        <cbc:BuildingNumber>16</cbc:BuildingNumber>
         <cbc:CityName>Paris</cbc:CityName>
         <cbc:PostalZone>75002</cbc:PostalZone>
         <cac:Country>
@@ -50,7 +49,6 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>25 25 Avenue des Champs-Élysées</cbc:StreetName>
-        <cbc:BuildingNumber>25</cbc:BuildingNumber>
         <cbc:CityName>Paris</cbc:CityName>
         <cbc:PostalZone>75008</cbc:PostalZone>
         <cac:Country>

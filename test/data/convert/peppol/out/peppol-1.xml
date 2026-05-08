@@ -17,7 +17,6 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Calle Pradillo 42</cbc:StreetName>
-        <cbc:BuildingNumber>42</cbc:BuildingNumber>
         <cbc:CityName>Madrid</cbc:CityName>
         <cbc:PostalZone>28002</cbc:PostalZone>
         <cbc:CountrySubentity>Madrid</cbc:CountrySubentity>
@@ -49,7 +48,6 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Avenida de la Constitución 10</cbc:StreetName>
-        <cbc:BuildingNumber>10</cbc:BuildingNumber>
         <cbc:CityName>Sevilla</cbc:CityName>
         <cbc:PostalZone>41001</cbc:PostalZone>
         <cbc:CountrySubentity>Andalucía</cbc:CountrySubentity>

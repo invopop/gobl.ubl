@@ -45,7 +45,7 @@ type MonetaryTotal struct {
 	PayableAmount         *Amount `xml:"cbc:PayableAmount,omitempty"`
 }
 
-func (ui *Invoice) addTotals(inv *bill.Invoice) {
+func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 	if inv == nil || inv.Totals == nil {
 		return
 	}
@@ -95,6 +95,11 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 			}
 			ui.TaxTotal = append(ui.TaxTotal, accTaxTotal)
 		}
+	} else if ctx.Is(ContextZATCA) {
+		// BR-KSA-EN16931-09
+		ui.TaxTotal = append(ui.TaxTotal, TaxTotal{
+			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
+		})
 	}
 
 	if t.Taxes != nil && len(t.Taxes.Categories) > 0 {

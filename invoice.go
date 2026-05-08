@@ -7,6 +7,7 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl/addons/sa/zatca"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
@@ -138,13 +139,27 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
-		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
+		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
+		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
 	}
 
 	// PEPPOL-EN16931-R005
 	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency {
 		out.TaxCurrencyCode = string(taxCurrency)
+	}
+
+	if o.context.Is(ContextZATCA) {
+		// BR-KSA-03
+		out.UUID = string(inv.UUID)
+		// BR-KSA-70
+		out.IssueTime = inv.IssueTime.String()
+		// BR-KSA-70
+		out.TaxCurrencyCode = string(inv.RegimeDef().Currency)
+		// BR-KSA-06
+		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String()
+		out.InvoiceTypeCode.Name = &invType
+		// ZATCA treats all documents as invoices
+		inv.Type = bill.InvoiceTypeStandard
 	}
 
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {
@@ -182,20 +197,15 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addOrdering(inv.Ordering, o.context)
 	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
-	out.addTotals(inv)
+	out.addTotals(inv, o.context)
 	out.addLines(inv, o.context)
-	out.addAttachments(inv.Attachments)
+	out.AddAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv); err != nil {
+	if err = out.addPayment(inv, o.context); err != nil {
 		return nil, err
 	}
-	if d := newDelivery(inv.Delivery); d != nil {
+	if d := newDelivery(inv.Delivery, o.context); d != nil {
 		out.Delivery = []*Delivery{d}
-	}
-
-	// Apply ZATCA context-specific modifications
-	if o.context.Is(ContextZATCA) {
-		applyZATCA(out, inv)
 	}
 
 	return out, nil

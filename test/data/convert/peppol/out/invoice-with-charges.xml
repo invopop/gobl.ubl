@@ -15,7 +15,6 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Dietmar-Hopp-Allee 16</cbc:StreetName>
-        <cbc:BuildingNumber>16</cbc:BuildingNumber>
         <cbc:CityName>Walldorf</cbc:CityName>
         <cbc:PostalZone>69190</cbc:PostalZone>
         <cac:Country>
@@ -46,7 +45,6 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:StreetName>Werner-Heisenberg-Allee 25</cbc:StreetName>
-        <cbc:BuildingNumber>25</cbc:BuildingNumber>
         <cbc:CityName>München</cbc:CityName>
         <cbc:PostalZone>80939</cbc:PostalZone>
         <cac:Country>

@@ -18,25 +18,11 @@ const (
 	NamespaceUDT  = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
 	NamespaceEXT  = "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
 	NamespaceCCTS = "urn:un:unece:uncefact:documentation:2"
+	NamespaceSIG  = "urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2"
+	NamespaceSAC  = "urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2"
+	NamespaceSBC  = "urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2"
 	NamespaceXSI  = "http://www.w3.org/2001/XMLSchema-instance"
 )
-
-// Extensions wraps a list of UBL extensions.
-type Extensions struct {
-	Extension []Extension `xml:"ext:UBLExtension"`
-}
-
-// Extension represents a single UBL extension.
-type Extension struct {
-	ExtensionURI     *string           `xml:"ext:ExtensionURI"`
-	ExtensionContent *ExtensionContent `xml:"ext:ExtensionContent"`
-}
-
-// ExtensionContent wraps the content of a UBL extension.
-type ExtensionContent struct {
-	// ZATCA specific extension content
-	ZATCAUBLDocumentSignatures *ZATCAUBLDocumentSignatures `xml:"sig:UBLDocumentSignatures"`
-}
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
