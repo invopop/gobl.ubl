@@ -149,6 +149,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if o.context.Is(ContextZATCA) {
+		out.SchemaLocation = ""
 		// BR-KSA-03
 		out.UUID = string(inv.UUID)
 		// BR-KSA-70
