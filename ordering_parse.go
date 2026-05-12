@@ -3,8 +3,10 @@ package ubl
 import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 func hasOrderingData(o *bill.Ordering) bool {
@@ -122,9 +124,11 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 				identity := &org.Identity{
 					Code: cbc.Code(ref.ID.Value),
 				}
-				// SchemeID is intentionally not mapped — this is very EN specific
-				// and we currently do not provide a way to identify by context
-				// how we should handle each case.
+				if ref.ID.SchemeID != nil {
+					identity.Ext = identity.Ext.Merge(tax.ExtensionsOf(tax.ExtMap{
+						untdid.ExtKeyReference: cbc.Code(*ref.ID.SchemeID),
+					}))
+				}
 				ordering.Identities = append(ordering.Identities, identity)
 			}
 

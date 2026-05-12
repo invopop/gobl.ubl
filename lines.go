@@ -143,8 +143,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					},
 				}
 
-				if l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String() != "" {
-					rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String()
+				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
 					it.ClassifiedTaxCategory.ID = &rate
 				}
 
@@ -156,11 +155,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					// Default to 0% when not outside scope
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
-				}
-
-				if l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String() != "" {
-					rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String()
-					it.ClassifiedTaxCategory.ID = &rate
 				}
 			}
 
