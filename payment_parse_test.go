@@ -59,7 +59,7 @@ func TestParsePaymentPayee(t *testing.T) {
 
 		require.Len(t, payment.Payee.Identities, 2)
 		assert.Equal(t, cbc.Code("989823401"), payment.Payee.Identities[0].Code)
-		assert.Equal(t, "0088", payment.Payee.Identities[1].Ext[iso.ExtKeySchemeID].String())
+		assert.Equal(t, "0088", payment.Payee.Identities[1].Ext.Get(iso.ExtKeySchemeID).String())
 		assert.Equal(t, cbc.Code("2298740918237"), payment.Payee.Identities[1].Code)
 	})
 

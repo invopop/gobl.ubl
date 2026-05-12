@@ -125,8 +125,9 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 					Code: cbc.Code(ref.ID.Value),
 				}
 				if ref.ID.SchemeID != nil {
-					// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
-					identity.Ext.Merge(tax.Extensions{untdid.ExtKeyReference: cbc.Code(*ref.ID.SchemeID)})
+					identity.Ext = identity.Ext.Merge(tax.ExtensionsOf(tax.ExtMap{
+						untdid.ExtKeyReference: cbc.Code(*ref.ID.SchemeID),
+					}))
 				}
 				ordering.Identities = append(ordering.Identities, identity)
 			}
