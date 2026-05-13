@@ -79,13 +79,13 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	// We do not currently map this as Peppol and EN16931 do not use it.
 	/*
 		if len(in.PrepaidPayment) > 0 {
-			payment.Advances = make([]*pay.Advance, 0, len(in.PrepaidPayment))
+			payment.Advances = make([]*pay.Record, 0, len(in.PrepaidPayment))
 			for _, p := range in.PrepaidPayment {
 				amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
 				if err != nil {
 					return err
 				}
-				advance := &pay.Advance{
+				advance := &pay.Record{
 					Amount: amount,
 				}
 				if p.ReceivedDate != nil {
@@ -106,7 +106,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 			return err
 		}
 
-		advance := &pay.Advance{
+		advance := &pay.Record{
 			Amount:      totalPrepaid,
 			Description: "Prepaid Amount",
 		}
