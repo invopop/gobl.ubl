@@ -39,6 +39,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 	}
 
 	var lines []InvoiceLine
+	invoiceType := ui.getInvoiceTypeBasedOnXMLName()
 
 	for _, l := range inv.Lines {
 		ccy := l.Item.Currency.String()
@@ -61,7 +62,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		if l.Item != nil && l.Item.Unit != "" {
 			iq.UnitCode = string(l.Item.Unit.UNECE())
 		}
-		if inv.Type.In(bill.InvoiceTypeCreditNote) {
+		if invoiceType.In(bill.InvoiceTypeCreditNote) {
 			invLine.CreditedQuantity = iq
 		} else {
 			invLine.InvoicedQuantity = iq
@@ -246,7 +247,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 
 		lines = append(lines, invLine)
 	}
-	if inv.Type.In(bill.InvoiceTypeCreditNote) {
+	if invoiceType.In(bill.InvoiceTypeCreditNote) {
 		ui.CreditNoteLines = lines
 	} else {
 		ui.InvoiceLines = lines

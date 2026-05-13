@@ -148,6 +148,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.TaxCurrencyCode = string(taxCurrency)
 	}
 
+	docType := inv.Type
 	if o.context.Is(ContextZATCA) {
 		out.SchemaLocation = ""
 		// BR-KSA-03
@@ -160,10 +161,10 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String()
 		out.InvoiceTypeCode.Name = &invType
 		// ZATCA treats all documents as invoices
-		inv.Type = bill.InvoiceTypeStandard
+		docType = bill.InvoiceTypeStandard
 	}
 
-	if inv.Type.In(bill.InvoiceTypeCreditNote) {
+	if docType.In(bill.InvoiceTypeCreditNote) {
 		out.XMLName = xml.Name{Local: "CreditNote"}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
@@ -260,4 +261,16 @@ func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 		return nil, fmt.Errorf("expected invoice, got %T", doc)
 	}
 	return inv, nil
+}
+
+// Some countries don't differentiate between Invoice and notes
+// treating all the same. This helper returns the invoice type
+// based on XML name instead of gobl's invoice type key
+func (ui *Invoice) getInvoiceTypeBasedOnXMLName() cbc.Key {
+	switch ui.XMLName.Local {
+	case "CreditNote":
+		return bill.InvoiceTypeCreditNote
+	default:
+		return bill.InvoiceTypeStandard
+	}
 }
