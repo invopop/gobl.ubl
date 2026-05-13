@@ -176,3 +176,14 @@ func Bytes(in any) ([]byte, error) {
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
 	return append([]byte(xml.Header), b...), nil
 }
+
+// BytesCompact returns the raw XML of the UBL document without
+// indentation, including the XML Header.
+func BytesCompact(in any) ([]byte, error) {
+	b, err := xml.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
+	return append([]byte(xml.Header), b...), nil
+}
