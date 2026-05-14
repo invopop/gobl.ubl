@@ -34,6 +34,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/invopop/gobl v0.402.1-0.20260506101137-fe24ad098afc h1:3+afDsQVumwcOZFg6lBbcnmorFn1NIAUl8bgjNfxW+w=
 github.com/invopop/gobl v0.402.1-0.20260506101137-fe24ad098afc/go.mod h1:6jYbcNFgUcBXIsS3PIeZc99rrMLBaGzPsFEg7y2DyrQ=
+github.com/invopop/gobl v0.403.1-0.20260514080559-652a479eb819 h1:Oae58LfslZNIWwphN+Z1QHoY5PuO1A5cUpFknbj8XNg=
+github.com/invopop/gobl v0.403.1-0.20260514080559-652a479eb819/go.mod h1:6jYbcNFgUcBXIsS3PIeZc99rrMLBaGzPsFEg7y2DyrQ=
 github.com/invopop/jsonschema v0.14.0 h1:MHQqLhvpNUZfw+hM3AZDYK7jxO8FZoQeQM77g8iyZjg=
 github.com/invopop/jsonschema v0.14.0/go.mod h1:ygm6C2EaVNMBDPpaPlnOA2pFAxBnxGjFlMZABxm9n2I=
 github.com/invopop/phive v0.6.0 h1:wtk5+ieD/muViF6SJXGGVA/vYPzed9NoaCl63TjmWU4=
