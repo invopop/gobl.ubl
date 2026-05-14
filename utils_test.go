@@ -56,7 +56,7 @@ func TestTypeCodeParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := typeCodeParse(tt.input)
+			result := typeCodeParse(&IDType{Value: tt.input}, Context{})
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}
@@ -79,7 +79,7 @@ func TestTagCodeParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tagCodeParse(tt.input)
+			result := tagCodeParse(&IDType{Value: tt.input}, Context{})
 			assert.Equal(t, tt.expected, result)
 		})
 	}

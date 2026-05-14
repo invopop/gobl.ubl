@@ -5,6 +5,7 @@ import "github.com/invopop/gobl/bill"
 // Delivery represents delivery information
 type Delivery struct {
 	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
+	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
 	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
 	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
@@ -21,7 +22,7 @@ type DeliveryTerms struct {
 	ID string `xml:"cbc:ID"`
 }
 
-func newDelivery(del *bill.DeliveryDetails) *Delivery {
+func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	if del == nil {
 		return nil
 	}
@@ -33,11 +34,18 @@ func newDelivery(del *bill.DeliveryDetails) *Delivery {
 		out.ActualDeliveryDate = &date
 	}
 
+	if del.Period != nil {
+		end := formatDate(del.Period.End)
+		start := formatDate(del.Period.Start)
+		out.LatestDeliveryDate = &end
+		out.ActualDeliveryDate = &start
+	}
+
 	if del.Receiver != nil {
 		out.DeliveryParty = newDeliveryParty(del.Receiver)
 		out.DeliveryLocation =
 			&Location{
-				Address: newAddress(del.Receiver.Addresses),
+				Address: newAddress(del.Receiver.Addresses, ctx),
 			}
 		if len(del.Identities) > 0 {
 			out.DeliveryLocation.ID = &IDType{Value: del.Identities[0].Code.String()}

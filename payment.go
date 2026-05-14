@@ -14,7 +14,7 @@ type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
 	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
-	InstructionNote       []string          `xml:"cbc:InstructionNote"`
+	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
 	PaymentID             *string           `xml:"cbc:PaymentID"`
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
@@ -64,14 +64,14 @@ type PrepaidPayment struct {
 
 const sepaSchemeID = "SEPA"
 
-func (ui *Invoice) addPayment(inv *bill.Invoice) error {
+func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
 	}
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		if err := ui.addPaymentInstructions(pymt); err != nil {
+		if err := ui.addPaymentInstructions(inv, ctx); err != nil {
 			return err
 		}
 	}
@@ -104,12 +104,12 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	return nil
 }
 
-func (ui *Invoice) addPaymentInstructions(pymt *bill.PaymentDetails) error {
-	instr := pymt.Instructions
-	if instr.Ext == nil || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
+func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error {
+	instr := inv.Payment.Instructions
+	if instr.Ext.IsZero() || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
 			"instructions": validation.Errors{
-				"ext": validation.Errors{
+				extFieldKey: validation.Errors{
 					untdid.ExtKeyPaymentMeans.String(): errors.New("required"),
 				},
 			},
@@ -147,9 +147,16 @@ func (ui *Invoice) addPaymentInstructions(pymt *bill.PaymentDetails) error {
 			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
 		}
 	}
-	if ui.CreditNoteTypeCode != "" && pymt.Terms != nil && len(pymt.Terms.DueDates) > 0 {
-		formattedDate := formatDate(*pymt.Terms.DueDates[0].Date)
+	if ui.CreditNoteTypeCode != nil && inv.Payment.Terms != nil && len(inv.Payment.Terms.DueDates) > 0 {
+		formattedDate := formatDate(*inv.Payment.Terms.DueDates[0].Date)
 		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
+	}
+	// BR-KSA-17: Debit and credit note must contain the
+	// reason for this invoice type issuing.
+	if inv.Preceding != nil && ctx.Is(ContextZATCA) {
+		for _, ref := range inv.Preceding {
+			ui.PaymentMeans[0].InstructionNote = append(ui.PaymentMeans[0].InstructionNote, ref.Reason)
+		}
 	}
 	return nil
 }
@@ -178,7 +185,7 @@ func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
 	}
 
 	// Only one due date allowed under EN 16931
-	if ui.CreditNoteTypeCode == "" && len(pymt.Terms.DueDates) > 0 {
+	if ui.CreditNoteTypeCode == nil && len(pymt.Terms.DueDates) > 0 {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 	}
 }

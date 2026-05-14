@@ -61,6 +61,7 @@ func Parse(data []byte) (any, error) {
 			"udt":  NamespaceUDT,
 			"ccts": NamespaceCCTS,
 			"xsi":  NamespaceXSI,
+			"ext":  NamespaceEXT,
 		})); err != nil {
 			return nil, err
 		}
@@ -141,9 +142,6 @@ func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
 	if err := inv.Calculate(); err != nil {
 		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
 	}
-	if err := inv.Validate(); err != nil {
-		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
-	}
 	return nil
 }
 
@@ -172,5 +170,20 @@ func Bytes(in any) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Go's xml.Marshal encodes single quotes as &#39,
+	// this is a quick fix
+	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
+	return append([]byte(xml.Header), b...), nil
+}
+
+// BytesCompact returns the raw XML of the UBL document without
+// indentation, including the XML Header.
+func BytesCompact(in any) ([]byte, error) {
+	b, err := xml.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
 	return append([]byte(xml.Header), b...), nil
 }

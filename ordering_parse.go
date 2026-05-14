@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/tax"
 )
 
 func hasOrderingData(o *bill.Ordering) bool {
@@ -126,7 +125,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 				}
 				if ref.ID.SchemeID != nil {
 					// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
-					identity.Ext.Merge(tax.Extensions{untdid.ExtKeyReference: cbc.Code(*ref.ID.SchemeID)})
+					identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(*ref.ID.SchemeID))
 				}
 				ordering.Identities = append(ordering.Identities, identity)
 			}
@@ -155,6 +154,9 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 			return nil, err
 		}
 		docRef.IssueDate = &refDate
+	}
+	if ref.DocumentTypeCode != "" {
+		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.DocumentTypeCode))
 	}
 	if ref.DocumentDescription != "" {
 		docRef.Description = cleanString(ref.DocumentDescription)

@@ -29,11 +29,11 @@ var (
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
 )
 
-func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
+func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	payment := &bill.PaymentDetails{}
 
 	if ui.PayeeParty != nil {
-		payment.Payee = goblParty(ui.PayeeParty)
+		payment.Payee = goblParty(ui.PayeeParty, o)
 	}
 
 	if ui.PaymentTerms != nil {
@@ -43,10 +43,10 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 	}
 
 	var dueDate string
-	if ui.CreditNoteTypeCode == "" && ui.DueDate != "" {
+	if ui.CreditNoteTypeCode == nil && ui.DueDate != "" {
 		dueDate = ui.DueDate
 	}
-	if ui.CreditNoteTypeCode != "" && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
+	if ui.CreditNoteTypeCode != nil && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
 		dueDate = *ui.PaymentMeans[0].PaymentDueDate
 	}
 
@@ -79,13 +79,13 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 	// We do not currently map this as Peppol and EN16931 do not use it.
 	/*
 		if len(in.PrepaidPayment) > 0 {
-			payment.Advances = make([]*pay.Advance, 0, len(in.PrepaidPayment))
+			payment.Advances = make([]*pay.Record, 0, len(in.PrepaidPayment))
 			for _, p := range in.PrepaidPayment {
 				amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
 				if err != nil {
 					return err
 				}
-				advance := &pay.Advance{
+				advance := &pay.Record{
 					Amount: amount,
 				}
 				if p.ReceivedDate != nil {
@@ -106,7 +106,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 			return err
 		}
 
-		advance := &pay.Advance{
+		advance := &pay.Record{
 			Amount:      totalPrepaid,
 			Description: "Prepaid Amount",
 		}
@@ -123,9 +123,9 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
 		Key: goblPaymentMeansCode(paymentMeans.PaymentMeansCode.Value),
-		Ext: tax.Extensions{
+		Ext: tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyPaymentMeans: cbc.Code(paymentMeans.PaymentMeansCode.Value),
-		},
+		}),
 	}
 
 	if paymentMeans.PaymentMeansCode.Name != nil {

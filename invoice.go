@@ -7,6 +7,7 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl/addons/sa/zatca"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
@@ -36,9 +37,10 @@ type Invoice struct {
 	CCTSNamespace  string `xml:"xmlns:ccts,attr"`
 	UBLNamespace   string `xml:"xmlns,attr"`
 	XSINamespace   string `xml:"xmlns:xsi,attr"`
-	SchemaLocation string `xml:"xsi:schemaLocation,attr"`
+	EXTNamespace   string `xml:"xmlns:ext,attr"`
+	SchemaLocation string `xml:"xsi:schemaLocation,attr,omitempty"`
 
-	UBLExtensions      *Extensions `xml:"ext:UBLExtensions,omitempty"`
+	Extensions         *Extensions `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID       string      `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID    string      `xml:"cbc:CustomizationID,omitempty"`
 	ProfileID          string      `xml:"cbc:ProfileID,omitempty"`
@@ -50,8 +52,8 @@ type Invoice struct {
 	IssueTime          string      `xml:"cbc:IssueTime,omitempty"`
 	DueDate            string      `xml:"cbc:DueDate,omitempty"`
 
-	InvoiceTypeCode    string `xml:"cbc:InvoiceTypeCode,omitempty"`
-	CreditNoteTypeCode string `xml:"cbc:CreditNoteTypeCode,omitempty"`
+	InvoiceTypeCode    *IDType `xml:"cbc:InvoiceTypeCode,omitempty"`
+	CreditNoteTypeCode *IDType `xml:"cbc:CreditNoteTypeCode,omitempty"`
 
 	Note                           []string            `xml:"cbc:Note,omitempty"`
 	TaxPointDate                   string              `xml:"cbc:TaxPointDate,omitempty"`
@@ -128,24 +130,46 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		UBLNamespace:            NamespaceUBLInvoice,
 		CCTSNamespace:           NamespaceCCTS,
 		XSINamespace:            NamespaceXSI,
+		EXTNamespace:            NamespaceEXT,
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
 		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
-		InvoiceTypeCode:         tc,
+		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
-		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
+		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
+		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
 	}
 
-	if inv.Type.In(bill.InvoiceTypeCreditNote) {
+	// PEPPOL-EN16931-R005
+	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency {
+		out.TaxCurrencyCode = string(taxCurrency)
+	}
+
+	docType := inv.Type
+	if o.context.Is(ContextZATCA) {
+		out.SchemaLocation = ""
+		// BR-KSA-03
+		out.UUID = string(inv.UUID)
+		// BR-KSA-70
+		out.IssueTime = inv.IssueTime.String()
+		// BR-KSA-70
+		out.TaxCurrencyCode = string(inv.RegimeDef().Currency)
+		// BR-KSA-06
+		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String()
+		out.InvoiceTypeCode.Name = &invType
+		// ZATCA treats all documents as invoices
+		docType = bill.InvoiceTypeStandard
+	}
+
+	if docType.In(bill.InvoiceTypeCreditNote) {
 		out.XMLName = xml.Name{Local: "CreditNote"}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
-		out.InvoiceTypeCode = ""
-		out.CreditNoteTypeCode = tc
+		out.InvoiceTypeCode = nil
+		out.CreditNoteTypeCode = &IDType{Value: tc}
 	}
 
 	// BT-7: VAT point date
@@ -172,17 +196,17 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	out.addPreceding(inv.Preceding)
-	out.addOrdering(inv.Ordering)
+	out.addOrdering(inv.Ordering, o.context)
 	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
-	out.addTotals(inv)
-	out.addLines(inv)
-	out.addAttachments(inv.Attachments)
+	out.addTotals(inv, o.context)
+	out.addLines(inv, o.context)
+	out.AddAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv); err != nil {
+	if err = out.addPayment(inv, o.context); err != nil {
 		return nil, err
 	}
-	if d := newDelivery(inv.Delivery); d != nil {
+	if d := newDelivery(inv.Delivery, o.context); d != nil {
 		out.Delivery = []*Delivery{d}
 	}
 
@@ -237,4 +261,16 @@ func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 		return nil, fmt.Errorf("expected invoice, got %T", doc)
 	}
 	return inv, nil
+}
+
+// Some countries don't differentiate between Invoice and notes
+// treating all the same. This helper returns the invoice type
+// based on XML name instead of gobl's invoice type key
+func (ui *Invoice) getInvoiceTypeBasedOnXMLName() cbc.Key {
+	switch ui.XMLName.Local {
+	case "CreditNote":
+		return bill.InvoiceTypeCreditNote
+	default:
+		return bill.InvoiceTypeStandard
+	}
 }

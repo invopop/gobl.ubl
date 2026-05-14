@@ -10,27 +10,23 @@ import (
 	"github.com/invopop/validation"
 )
 
+// extFieldKey is the JSON path segment for the `ext` field on GOBL structs,
+// used when constructing validation.Errors trees.
+const extFieldKey = "ext"
+
 // UBL schema constants
 const (
 	NamespaceCBC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
 	NamespaceCAC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"
 	NamespaceQDT  = "urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2"
 	NamespaceUDT  = "urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2"
+	NamespaceEXT  = "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
 	NamespaceCCTS = "urn:un:unece:uncefact:documentation:2"
+	NamespaceSIG  = "urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2"
+	NamespaceSAC  = "urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2"
+	NamespaceSBC  = "urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2"
 	NamespaceXSI  = "http://www.w3.org/2001/XMLSchema-instance"
 )
-
-// Extensions represents UBL extensions
-type Extensions struct {
-	Extension []Extension `xml:"ext:Extension"`
-}
-
-// Extension represents a single UBL extension
-type Extension struct {
-	ID               string  `xml:"cbc:ID"`
-	ExtensionURI     *string `xml:"cbc:ExtensionURI"`
-	ExtensionContent *string `xml:"ext:ExtensionContent"`
-}
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
@@ -125,10 +121,10 @@ type Price struct {
 }
 
 func getTypeCode(inv *bill.Invoice) (string, error) {
-	if inv.Tax == nil || inv.Tax.Ext == nil || inv.Tax.Ext[untdid.ExtKeyDocumentType].String() == "" {
+	if inv.Tax == nil || inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String() == "" {
 		return "", validation.Errors{
 			"tax": validation.Errors{
-				"ext": validation.Errors{
+				extFieldKey: validation.Errors{
 					untdid.ExtKeyDocumentType.String(): errors.New("required"),
 				},
 			},

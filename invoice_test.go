@@ -23,14 +23,14 @@ func TestInvoiceHeaders(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.NoError(t, err)
-		assert.Equal(t, "380", out.InvoiceTypeCode)
+		assert.Equal(t, "380", out.InvoiceTypeCode.Value)
 
 		inv.Tax = nil
 		_, err = ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "tax: (ext: (untdid-document-type: required.).).")
 
 		inv.Tax = &bill.Tax{
-			Ext: tax.Extensions{},
+			Ext: tax.MakeExtensions(),
 		}
 		_, err = ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "ext: (untdid-document-type: required.).")

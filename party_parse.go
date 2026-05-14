@@ -8,7 +8,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func goblParty(party *Party) *org.Party {
+func goblParty(party *Party, o *options) *org.Party {
 	if party == nil {
 		return nil
 	}
@@ -74,7 +74,7 @@ func goblParty(party *Party) *org.Party {
 
 	handleLegalEntityIdentity(party, p)
 	handlePartyTaxSchemes(party, p)
-	handlePartyIdentifications(party, p)
+	handlePartyIdentifications(party, p, o)
 
 	return p
 }
@@ -127,6 +127,14 @@ func parseAddress(address *PostalAddress) *org.Address {
 	if address.CountrySubentity != nil {
 		addr.Region = cleanString(*address.CountrySubentity)
 	}
+	if address.BuildingNumber != nil {
+		addr.Number = cleanString(*address.BuildingNumber)
+	}
+	// CitySubdivisionName is used by ZATCA to represent the district,
+	// which maps to StreetExtra in GOBL.
+	if address.CitySubdivisionName != nil && addr.StreetExtra == "" {
+		addr.StreetExtra = cleanString(*address.CitySubdivisionName)
+	}
 	return addr
 }
 
@@ -143,9 +151,9 @@ func handleLegalEntityIdentity(party *Party, p *org.Party) {
 		Scope: org.IdentityScopeLegal,
 	}
 	if party.PartyLegalEntity.CompanyID.SchemeID != nil {
-		identity.Ext = tax.Extensions{
+		identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
 			iso.ExtKeySchemeID: cbc.Code(*party.PartyLegalEntity.CompanyID.SchemeID),
-		}
+		})
 	}
 	p.Identities = append(p.Identities, identity)
 }
@@ -237,7 +245,7 @@ func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx 
 	}
 }
 
-func handlePartyIdentifications(party *Party, p *org.Party) {
+func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
 	for _, partyID := range party.PartyIdentification {
 		if partyID.ID != nil {
 			identity := &org.Identity{
@@ -245,8 +253,12 @@ func handlePartyIdentifications(party *Party, p *org.Party) {
 			}
 			if partyID.ID.SchemeID != nil {
 				s := *partyID.ID.SchemeID
-				identity.Ext = tax.Extensions{
-					iso.ExtKeySchemeID: cbc.Code(s),
+				if o.context.Is(ContextZATCA) {
+					identity.Type = cbc.Code(s)
+				} else {
+					identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
+						iso.ExtKeySchemeID: cbc.Code(s),
+					})
 				}
 			}
 			if p.Identities == nil {

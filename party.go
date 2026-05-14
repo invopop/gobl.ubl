@@ -56,6 +56,9 @@ type PartyName struct {
 type PostalAddress struct {
 	StreetName           *string             `xml:"cbc:StreetName"`
 	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
+	BuildingNumber       *string             `xml:"cbc:BuildingNumber,omitempty"`
+	PlotIdentification   *string             `xml:"cbc:PlotIdentification,omitempty"`
+	CitySubdivisionName  *string             `xml:"cbc:CitySubdivisionName,omitempty"`
 	CityName             *string             `xml:"cbc:CityName"`
 	PostalZone           *string             `xml:"cbc:PostalZone"`
 	CountrySubentity     *string             `xml:"cbc:CountrySubentity"`
@@ -119,12 +122,12 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-func newParty(party *org.Party) *Party { //nolint:gocyclo
+func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}
 	p := &Party{
-		PostalAddress: newAddress(party.Addresses),
+		PostalAddress: newAddress(party.Addresses, ctx),
 	}
 
 	// Only add PartyName if name is not empty
@@ -142,6 +145,9 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 
 	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
 		code := party.TaxID.String()
+		if ctx.Is(ContextZATCA) {
+			code = code[2:]
+		}
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {
 			// Peppol default
@@ -219,10 +225,8 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 				p.PartyLegalEntity.CompanyID = &IDType{
 					Value: code,
 				}
-				if id.Ext != nil {
-					if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-						p.PartyLegalEntity.CompanyID.SchemeID = &s
-					}
+				if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+					p.PartyLegalEntity.CompanyID.SchemeID = &s
 				}
 				firstLegalIdx = i
 				break
@@ -258,9 +262,13 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 			idType := &IDType{
 				Value: id.Code.String(),
 			}
-			if id.Ext != nil {
-				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-					idType.SchemeID = &s
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				idType.SchemeID = &s
+			} else if id.Ext.IsZero() {
+				// ZATCA has very specific identities that do not
+				// require an ISO extension and are only described with type
+				if t := id.Type.String(); t != "" {
+					idType.SchemeID = &t
 				}
 			}
 			p.PartyIdentification = append(p.PartyIdentification, Identification{
@@ -350,10 +358,8 @@ func newPayeeParty(party *org.Party) *Party {
 		for _, id := range party.Identities {
 			var schemeID *string
 			// First check if there's an explicit scheme in Ext
-			if id.Ext != nil {
-				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-					schemeID = &s
-				}
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				schemeID = &s
 			}
 			// If no Ext scheme, check if label looks like a valid ICD code (4 digits)
 			if schemeID == nil && id.Label != "" && len(id.Label) == 4 {
@@ -383,10 +389,8 @@ func newPayeeParty(party *org.Party) *Party {
 					Value: code,
 				},
 			}
-			if id.Ext != nil {
-				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-					p.PartyLegalEntity.CompanyID.SchemeID = &s
-				}
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				p.PartyLegalEntity.CompanyID.SchemeID = &s
 			}
 			break
 		}
@@ -395,7 +399,7 @@ func newPayeeParty(party *org.Party) *Party {
 	return p
 }
 
-func newAddress(addresses []*org.Address) *PostalAddress {
+func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
@@ -427,6 +431,10 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 		addr.PostalZone = &code
 	}
 
+	if a.Block != "" {
+		addr.PlotIdentification = &a.Block
+	}
+
 	if a.Country != "" {
 		addr.Country = &Country{IdentificationCode: string(a.Country)}
 	}
@@ -438,6 +446,14 @@ func newAddress(addresses []*org.Address) *PostalAddress {
 			LatitudeDegreesMeasure:  &lat,
 			LongitudeDegreesMeasure: &lon,
 		}
+	}
+
+	if ctx.Is(ContextZATCA) {
+		l := a.LineTwo()
+		addr.CitySubdivisionName = &l
+		addr.AdditionalStreetName = nil
+
+		addr.BuildingNumber = &a.Number
 	}
 
 	return addr
