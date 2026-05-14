@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"strings"
+
 	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/addons/fr/ctc"
@@ -82,14 +84,14 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceTypeTransactions, cbc.Code(*ui.InvoiceTypeCode.Name))
 	}
 
-	var typeCode string
+	var typeCode *IDType
 	if ui.InvoiceTypeCode != nil {
-		typeCode = ui.InvoiceTypeCode.Value
+		typeCode = ui.InvoiceTypeCode
 	} else {
 		typeCode = ui.CreditNoteTypeCode
 	}
-	out.Type = typeCodeParse(typeCode)
-	tags := tagCodeParse(typeCode)
+	out.Type = typeCodeParse(typeCode, o.context)
+	tags := tagCodeParse(typeCode, o.context)
 
 	if len(tags) != 0 {
 		out.SetTags(tags...)
@@ -209,17 +211,50 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 
 // typeCodeParse maps UBL invoice type to GOBL equivalent.
 // Source: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
-func typeCodeParse(typeCode string) cbc.Key {
-	if val, ok := invoiceTypeMap[typeCode]; ok {
+func typeCodeParse(typeCode *IDType, ctx Context) cbc.Key {
+	if typeCode == nil {
+		return bill.InvoiceTypeOther
+	}
+	if ctx.Is(ContextZATCA) && typeCode.Name != nil {
+		code := *typeCode.Name
+		if len(code) < 7 || code[0] != '0' || code[2] != '0' || code[3] != '0' || code[6] != '0' {
+			return bill.InvoiceTypeOther
+		}
+	}
+
+	if val, ok := invoiceTypeMap[typeCode.Value]; ok {
 		return val
 	}
 	return bill.InvoiceTypeOther
 }
 
 // tagCodeParse maps UBL invoice type to GOBL equivalent tax tag.
-func tagCodeParse(typeCode string) []cbc.Key {
-	if val, ok := InvoiceTagMap[typeCode]; ok {
-		return val
+func tagCodeParse(typeCode *IDType, ctx Context) []cbc.Key {
+	var tags []cbc.Key
+	if typeCode == nil {
+		return tags
 	}
-	return nil
+
+	if ctx.Is(ContextZATCA) && typeCode.Name != nil {
+		transactionTypeCode := *typeCode.Name
+		if len(transactionTypeCode) < 7 || transactionTypeCode[0] != '0' {
+			return tags
+		}
+
+		if strings.HasPrefix(transactionTypeCode, "02") {
+			tags = append(tags, tax.TagSimplified)
+		}
+
+		if transactionTypeCode[4] == '1' {
+			tags = append(tags, tax.TagExport)
+		}
+
+		if transactionTypeCode[5] == '1' {
+			tags = append(tags, zatca.TagSummary)
+		}
+
+	} else {
+		tags = InvoiceTagMap[typeCode.Value]
+	}
+	return tags
 }

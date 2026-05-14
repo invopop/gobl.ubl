@@ -3,22 +3,12 @@
   <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:zatca.gov.sa:e-invoicing:1.0</cbc:CustomizationID>
   <cbc:ProfileID>reporting:1.0</cbc:ProfileID>
   <cbc:ID>SAMPLE-001</cbc:ID>
-  <cbc:UUID>3aea7b56-59d8-4beb-90bd-f8f280d852a0</cbc:UUID>
+  <cbc:UUID>0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2</cbc:UUID>
   <cbc:IssueDate>2022-02-01</cbc:IssueDate>
   <cbc:IssueTime>12:00:00</cbc:IssueTime>
   <cbc:InvoiceTypeCode name="0100000">388</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>
   <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>
-  <cac:AdditionalDocumentReference>
-    <cbc:ID>ICV</cbc:ID>
-    <cbc:UUID>1</cbc:UUID>
-  </cac:AdditionalDocumentReference>
-  <cac:AdditionalDocumentReference>
-    <cbc:ID>PIH</cbc:ID>
-    <cac:Attachment>
-      <cbc:EmbeddedDocumentBinaryObject mimeCode="text/plain">NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==</cbc:EmbeddedDocumentBinaryObject>
-    </cac:Attachment>
-  </cac:AdditionalDocumentReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PartyIdentification>

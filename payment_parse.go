@@ -43,10 +43,10 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	}
 
 	var dueDate string
-	if ui.CreditNoteTypeCode == "" && ui.DueDate != "" {
+	if ui.CreditNoteTypeCode == nil && ui.DueDate != "" {
 		dueDate = ui.DueDate
 	}
-	if ui.CreditNoteTypeCode != "" && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
+	if ui.CreditNoteTypeCode != nil && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
 		dueDate = *ui.PaymentMeans[0].PaymentDueDate
 	}
 

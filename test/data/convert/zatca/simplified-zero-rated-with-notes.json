@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "584d4e2fdbdf87ca282b266f2e6007de5868333aacc905b68c00286abf68641f"
+			"val": "608be04177cd15aa3f2cc5845cb56d4373697815c2c61fc6e16f8c434ba62ce7"
 		}
 	},
 	"doc": {
@@ -33,7 +33,7 @@
 				{
 					"cat": "VAT",
 					"key": "zero",
-					"text": "Medicines and medical equipment",
+					"text": "Medicines",
 					"ext": {
 						"untdid-tax-category": "Z"
 					}
@@ -55,7 +55,7 @@
 			"addresses": [
 				{
 					"num": "2322",
-					"street": "الامير سلطان | Prince Sultan 2322",
+					"street": "الامير سلطان | Prince Sultan",
 					"street_extra": "المربع | Al-Murabba",
 					"locality": "الرياض | Riyadh",
 					"code": "23333",
@@ -99,6 +99,7 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
+						"rate": "general",
 						"percent": "15.0%",
 						"ext": {
 							"untdid-tax-category": "S"

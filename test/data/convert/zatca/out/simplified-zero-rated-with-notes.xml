@@ -54,7 +54,7 @@
         <cbc:ID>Z</cbc:ID>
         <cbc:Percent>0</cbc:Percent>
         <cbc:TaxExemptionReasonCode>VATEX-SA-35</cbc:TaxExemptionReasonCode>
-        <cbc:TaxExemptionReason>Medicines and medical equipment</cbc:TaxExemptionReason>
+        <cbc:TaxExemptionReason>Medicines</cbc:TaxExemptionReason>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>

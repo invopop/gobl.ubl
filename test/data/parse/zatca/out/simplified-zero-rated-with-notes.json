@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "584d4e2fdbdf87ca282b266f2e6007de5868333aacc905b68c00286abf68641f"
+			"val": "caa191038edb2f7c41398e22bbfcd952c22ed64d55752f7fadc11f19b408eebe"
 		}
 	},
 	"doc": {
@@ -33,7 +33,7 @@
 				{
 					"cat": "VAT",
 					"key": "zero",
-					"text": "Medicines and medical equipment",
+					"text": "Medicines",
 					"ext": {
 						"untdid-tax-category": "Z"
 					}

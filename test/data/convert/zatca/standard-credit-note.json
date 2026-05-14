@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1cc0333e1184b519f0928a72ad0bbc878b0f9177c616a248270d34b51a91418b"
+			"val": "eba07d5d0ea947b76db0780c3ce57b7f667850a631a7e721320a276f821c1820"
 		}
 	},
 	"doc": {
@@ -25,10 +25,7 @@
 			{
 				"issue_date": "2022-02-01",
 				"code": "SAMPLE-001",
-				"reason": "Return of development services",
-				"ext": {
-					"untdid-document-type": "388"
-				}
+				"reason": "Return of development services"
 			}
 		],
 		"tax": {

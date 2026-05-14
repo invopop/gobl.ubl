@@ -147,7 +147,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
 		}
 	}
-	if ui.CreditNoteTypeCode != "" && inv.Payment.Terms != nil && len(inv.Payment.Terms.DueDates) > 0 {
+	if ui.CreditNoteTypeCode != nil && inv.Payment.Terms != nil && len(inv.Payment.Terms.DueDates) > 0 {
 		formattedDate := formatDate(*inv.Payment.Terms.DueDates[0].Date)
 		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
 	}
@@ -183,7 +183,7 @@ func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
 	}
 
 	// Only one due date allowed under EN 16931
-	if ui.CreditNoteTypeCode == "" && len(pymt.Terms.DueDates) > 0 {
+	if ui.CreditNoteTypeCode == nil && len(pymt.Terms.DueDates) > 0 {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 	}
 }

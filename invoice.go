@@ -53,7 +53,7 @@ type Invoice struct {
 	DueDate            string      `xml:"cbc:DueDate,omitempty"`
 
 	InvoiceTypeCode    *IDType `xml:"cbc:InvoiceTypeCode,omitempty"`
-	CreditNoteTypeCode string  `xml:"cbc:CreditNoteTypeCode,omitempty"`
+	CreditNoteTypeCode *IDType `xml:"cbc:CreditNoteTypeCode,omitempty"`
 
 	Note                           []string            `xml:"cbc:Note,omitempty"`
 	TaxPointDate                   string              `xml:"cbc:TaxPointDate,omitempty"`
@@ -169,7 +169,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
 		out.InvoiceTypeCode = nil
-		out.CreditNoteTypeCode = tc
+		out.CreditNoteTypeCode = &IDType{Value: tc}
 	}
 
 	// BT-7: VAT point date

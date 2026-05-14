@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "61b8c578081f0cdf75f95436b0d3c6da4a460bcb95134605e4d417d475a3cb0c"
+			"val": "5d3dd9635723ebca9fc7b0a530b8ebb6baea3a4bbabb9fa79857cf60c89812b3"
 		}
 	},
 	"doc": {
@@ -13,6 +13,9 @@
 		"$addons": [
 			"eu-en16931-v2017",
 			"sa-zatca-v1"
+		],
+		"$tags": [
+			"simplified"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "debit-note",
@@ -24,10 +27,7 @@
 			{
 				"issue_date": "2022-02-01",
 				"code": "SAMPLE-001",
-				"reason": "Price adjustment for development services",
-				"ext": {
-					"untdid-document-type": "388"
-				}
+				"reason": "Price adjustment for development services"
 			}
 		],
 		"tax": {
