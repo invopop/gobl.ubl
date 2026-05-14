@@ -11,6 +11,9 @@
   <cbc:Note>#ACD#Customer returned 5 hours of consultancy and the office equipment delivered on 28 Jan.</cbc:Note>
   <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>
   <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>
+  <cac:OrderReference>
+    <cbc:ID>NA</cbc:ID>
+  </cac:OrderReference>
   <cac:BillingReference>
     <cac:InvoiceDocumentReference>
       <cbc:ID>INV-SAMPLE-001</cbc:ID>

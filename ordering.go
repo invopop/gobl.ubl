@@ -167,13 +167,10 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 	}
 
 	// BT-13: Ensure at least one of BuyerReference or OrderReference is set: PEPPOL-EN16931-R003
-	// Optional to ZATCA
-	if !context.Is(ContextZATCA) {
-		if ui.BuyerReference == "" && (ui.OrderReference == nil || ui.OrderReference.ID == "") {
-			if ui.OrderReference == nil {
-				ui.OrderReference = &OrderReference{}
-			}
-			ui.OrderReference.ID = "NA"
+	if ui.BuyerReference == "" && (ui.OrderReference == nil || ui.OrderReference.ID == "") {
+		if ui.OrderReference == nil {
+			ui.OrderReference = &OrderReference{}
 		}
+		ui.OrderReference.ID = "NA"
 	}
 }

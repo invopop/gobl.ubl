@@ -10,6 +10,10 @@ import (
 	"github.com/invopop/validation"
 )
 
+// extFieldKey is the JSON path segment for the `ext` field on GOBL structs,
+// used when constructing validation.Errors trees.
+const extFieldKey = "ext"
+
 // UBL schema constants
 const (
 	NamespaceCBC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
@@ -120,7 +124,7 @@ func getTypeCode(inv *bill.Invoice) (string, error) {
 	if inv.Tax == nil || inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String() == "" {
 		return "", validation.Errors{
 			"tax": validation.Errors{
-				"ext": validation.Errors{
+				extFieldKey: validation.Errors{
 					untdid.ExtKeyDocumentType.String(): errors.New("required"),
 				},
 			},

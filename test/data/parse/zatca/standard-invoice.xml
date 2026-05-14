@@ -9,6 +9,9 @@
   <cbc:InvoiceTypeCode name="0100000">388</cbc:InvoiceTypeCode>
   <cbc:DocumentCurrencyCode>SAR</cbc:DocumentCurrencyCode>
   <cbc:TaxCurrencyCode>SAR</cbc:TaxCurrencyCode>
+  <cac:OrderReference>
+    <cbc:ID>PO-2024-001</cbc:ID>
+  </cac:OrderReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
       <cac:PartyIdentification>

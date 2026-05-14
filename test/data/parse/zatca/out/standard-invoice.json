@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bf89e8866c2f66a268ee66f4a75994c8603f4e16fb9eb149db2a9f00b98d3de6"
+			"val": "fd6c10ef5fee27ea8e595eebad54d299e4b44fcc70cbae565a255de06adc85f6"
 		}
 	},
 	"doc": {
@@ -94,6 +94,13 @@
 				"total": "1800.00"
 			}
 		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "PO-2024-001"
+				}
+			]
+		},
 		"payment": {
 			"terms": {
 				"notes": "Payment due within 30 days"
