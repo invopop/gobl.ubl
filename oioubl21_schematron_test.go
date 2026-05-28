@@ -17,8 +17,8 @@ func TestOIOUBL21Schematron(t *testing.T) {
 	requireSaxonAndSchematron(t, oioubl21CreditNoteSchematronPath())
 
 	fixtures := []string{
-		"oioubl21-invoice-minimal.json",
-		"oioubl21-credit-note-minimal.json",
+		"oioubl21/invoice-minimal.json",
+		"oioubl21/credit-note-minimal.json",
 	}
 	for _, fixture := range fixtures {
 		t.Run(fixture, func(t *testing.T) {
@@ -35,7 +35,7 @@ func TestOIOUBL21Schematron(t *testing.T) {
 
 func TestOIOUBL21SchematronNegativeInvoiceEndpoint(t *testing.T) {
 	requireSaxonAndSchematron(t, oioubl21InvoiceSchematronPath())
-	xmlData := renderOIOUBL21Fixture(t, "oioubl21-invoice-minimal.json")
+	xmlData := renderOIOUBL21Fixture(t, "oioubl21/invoice-minimal.json")
 	bad := strings.Replace(
 		string(xmlData),
 		`<cbc:EndpointID schemeID="GLN">5790000436101</cbc:EndpointID>`,
@@ -48,7 +48,7 @@ func TestOIOUBL21SchematronNegativeInvoiceEndpoint(t *testing.T) {
 
 func TestOIOUBL21SchematronNegativeCreditNoteEndpoint(t *testing.T) {
 	requireSaxonAndSchematron(t, oioubl21CreditNoteSchematronPath())
-	xmlData := renderOIOUBL21Fixture(t, "oioubl21-credit-note-minimal.json")
+	xmlData := renderOIOUBL21Fixture(t, "oioubl21/credit-note-minimal.json")
 	bad := strings.Replace(
 		string(xmlData),
 		`<cbc:EndpointID schemeID="GLN">5790000436057</cbc:EndpointID>`,

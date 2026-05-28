@@ -50,7 +50,7 @@ func TestNewParty(t *testing.T) {
 	})
 
 	t.Run("oioubl21 bare party fallbacks", func(t *testing.T) {
-		doc, err := testInvoiceFrom("oioubl21-invoice-bare.json")
+		doc, err := testInvoiceFrom("oioubl21/invoice-bare.json")
 		require.NoError(t, err)
 
 		supplier := doc.AccountingSupplierParty.Party

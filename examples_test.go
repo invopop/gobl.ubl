@@ -231,7 +231,7 @@ func testInvoiceFrom(name string) (*ubl.Invoice, error) {
 	}
 	var opts []ubl.Option
 	switch {
-	case strings.HasPrefix(name, "oioubl21-"), strings.HasPrefix(name, "nemhandel21-"), strings.HasPrefix(name, "oioubl-2.1-"):
+	case strings.HasPrefix(name, "oioubl21/"):
 		opts = append(opts, ubl.WithContext(ubl.ContextOIOUBL21))
 	default:
 		opts = append(opts, ubl.WithContext(ubl.ContextPeppol))
