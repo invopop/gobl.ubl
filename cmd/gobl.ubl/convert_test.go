@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
-	ubl "github.com/invopop/gobl.ubl"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -2,6 +2,11 @@ package ubl
 
 import "strings"
 
+const (
+	oioubl21PaymentChannelIBAN       = "IBAN"
+	oioubl21TaxCategoryStandardRated = "StandardRated"
+)
+
 func applyLegacyOIOUBL21Rules(out *Invoice) {
 	if out == nil {
 		return
@@ -13,11 +18,11 @@ func applyLegacyOIOUBL21Rules(out *Invoice) {
 	for i := range out.PaymentMeans {
 		pm := &out.PaymentMeans[i]
 		if pm.PaymentChannelCode == nil {
-			pm.PaymentChannelCode = &IDType{Value: "IBAN"}
+			pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
 		}
 		listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
 		pm.PaymentChannelCode.ListID = &listID
-		if pm.PaymentChannelCode.Value == "IBAN" && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
+		if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
 			pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
 		}
 		if out.DueDate != "" && pm.PaymentDueDate == nil {
@@ -101,9 +106,9 @@ func applyLegacyOIOUBL21Party(p *Party) {
 		listID := "urn:oioubl:codelist:addressformatcode-1.1"
 		listAgencyID := "320"
 		p.PostalAddress.AddressFormatCode = &IDType{
-			ListID:      &listID,
+			ListID:       &listID,
 			ListAgencyID: &listAgencyID,
-			Value:       "StructuredDK",
+			Value:        "StructuredDK",
 		}
 	}
 	// F-LIB035: StructuredDK addresses require either BuildingNumber
@@ -161,7 +166,7 @@ func applyLegacyOIOUBL21TaxCategory(tc *TaxCategory) {
 		return
 	}
 	if tc.ID == nil {
-		tc.ID = &IDType{Value: "StandardRated"}
+		tc.ID = &IDType{Value: oioubl21TaxCategoryStandardRated}
 	}
 	tc.ID.Value = legacyTaxCategoryCode(tc.ID.Value)
 	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
@@ -176,7 +181,7 @@ func applyLegacyOIOUBL21ClassifiedTaxCategory(tc *ClassifiedTaxCategory) {
 		return
 	}
 	if tc.ID == nil {
-		tc.ID = &IDType{Value: "StandardRated"}
+		tc.ID = &IDType{Value: oioubl21TaxCategoryStandardRated}
 	}
 	tc.ID.Value = legacyTaxCategoryCode(tc.ID.Value)
 	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
@@ -204,14 +209,14 @@ func applyLegacyOIOUBL21TaxScheme(ts *TaxScheme) {
 func legacyTaxCategoryCode(in string) string {
 	switch in {
 	case "S", "Standard", "standard":
-		return "StandardRated"
+		return oioubl21TaxCategoryStandardRated
 	case "Z", "Zero", "zero":
 		return "ZeroRated"
 	case "AE", "ReverseCharge":
 		return "ReverseCharge"
 	default:
 		if in == "" {
-			return "StandardRated"
+			return oioubl21TaxCategoryStandardRated
 		}
 		return in
 	}

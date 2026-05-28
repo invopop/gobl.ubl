@@ -146,7 +146,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if len(instr.CreditTransfer) > 0 {
 		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0], ctx, paymentMeansCode)
 		if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "31" && ui.PaymentMeans[0].PaymentChannelCode == nil {
-			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: "IBAN"}
+			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
 		}
 	}
 	if instr.DirectDebit != nil {
