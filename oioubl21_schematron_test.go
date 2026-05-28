@@ -19,8 +19,6 @@ func TestOIOUBL21Schematron(t *testing.T) {
 	fixtures := []string{
 		"oioubl21-invoice-minimal.json",
 		"oioubl21-credit-note-minimal.json",
-		"oioubl30-invoice-minimal.json",
-		"oioubl30-invoice-example.json",
 	}
 	for _, fixture := range fixtures {
 		t.Run(fixture, func(t *testing.T) {

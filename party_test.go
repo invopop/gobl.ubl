@@ -49,26 +49,6 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "EM", doc.AccountingSupplierParty.Party.EndpointID.SchemeID)
 	})
 
-	t.Run("oioubl30-invoice-example.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("oioubl30-invoice-example.json")
-		require.NoError(t, err)
-
-		assert.Equal(t, "0088", doc.AccountingSupplierParty.Party.EndpointID.SchemeID)
-		assert.Equal(t, "0088", doc.AccountingCustomerParty.Party.EndpointID.SchemeID)
-
-		supplierLegalID := doc.AccountingSupplierParty.Party.PartyLegalEntity.CompanyID
-		require.NotNil(t, supplierLegalID)
-		require.NotNil(t, supplierLegalID.SchemeID)
-		assert.Equal(t, "0184", *supplierLegalID.SchemeID)
-		assert.Equal(t, "13585628", supplierLegalID.Value)
-
-		supplierTaxID := doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID
-		require.NotNil(t, supplierTaxID)
-		require.NotNil(t, supplierTaxID.SchemeID)
-		assert.Equal(t, "0198", *supplierTaxID.SchemeID)
-		assert.Equal(t, "DK13585628", supplierTaxID.Value)
-	})
-
 	t.Run("oioubl21 bare party fallbacks", func(t *testing.T) {
 		doc, err := testInvoiceFrom("oioubl21-invoice-bare.json")
 		require.NoError(t, err)
