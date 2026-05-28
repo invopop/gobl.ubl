@@ -29,17 +29,16 @@ func applyLegacyOIOUBL21Rules(out *Invoice) {
 		out.DueDate = ""
 	}
 
-	// Legacy validator expects this relationship in the 2.1 profile.
+	// F-INV127: OIOUBL 2.1 defines TaxExclusiveAmount as the sum of
+	// TaxTotal/TaxSubtotal/TaxAmount (i.e. the tax amount itself), not
+	// the pre-tax subtotal as in generic UBL.
 	if len(out.TaxTotal) > 0 {
 		out.LegalMonetaryTotal.TaxExclusiveAmount = out.TaxTotal[0].TaxAmount
 	}
-	if out.LegalMonetaryTotal.PayableAmount != nil && len(out.PaymentTerms) > 0 && out.PaymentTerms[0].Amount == nil {
-		out.PaymentTerms[0].Amount = out.LegalMonetaryTotal.PayableAmount
-	}
-	if out.CreditNoteTypeCode != "" {
+	if out.CreditNoteTypeCode != nil {
 		for i := range out.BillingReference {
 			if ref := out.BillingReference[i]; ref != nil && ref.InvoiceDocumentReference != nil {
-				// Legacy OIOUBL 2.1 credit-note schematron rejects DocumentTypeCode here.
+				// OIOUBL 2.1 credit-note schematron rejects DocumentTypeCode here.
 				ref.InvoiceDocumentReference.DocumentTypeCode = ""
 			}
 		}
@@ -107,6 +106,10 @@ func applyLegacyOIOUBL21Party(p *Party) {
 			Value:       "StructuredDK",
 		}
 	}
+	// F-LIB035: StructuredDK addresses require either BuildingNumber
+	// or Postbox. GOBL doesn't model BuildingNumber separately, so we
+	// best-effort extract the trailing token of StreetName, falling
+	// back to a placeholder when nothing usable is present.
 	if p.PostalAddress != nil && p.PostalAddress.BuildingNumber == nil {
 		if p.PostalAddress.StreetName != nil {
 			parts := strings.Fields(*p.PostalAddress.StreetName)
@@ -140,6 +143,10 @@ func applyLegacyOIOUBL21Party(p *Party) {
 			p.PartyLegalEntity.CompanyID.Value = "DK" + p.PartyLegalEntity.CompanyID.Value
 		}
 	}
+	// F-INV051: AccountingCustomerParty/Contact/ID must contain a
+	// value. The dk-oioubl-v2-1 addon enforces customer.People at the
+	// GOBL stage (F-INV046), so this fallback only fires for paths
+	// that bypass the addon.
 	if p.Contact == nil {
 		p.Contact = &Contact{}
 	}
