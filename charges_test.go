@@ -4,13 +4,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestNewCharges(t *testing.T) {
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-complete.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-complete.json")
 
 		assert.Len(t, doc.AllowanceCharge, 2)
 

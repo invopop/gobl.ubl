@@ -219,10 +219,8 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 				p.PartyLegalEntity.CompanyID = &IDType{
 					Value: code,
 				}
-				if id.Ext != nil {
-					if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-						p.PartyLegalEntity.CompanyID.SchemeID = &s
-					}
+				if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+					p.PartyLegalEntity.CompanyID.SchemeID = &s
 				}
 				firstLegalIdx = i
 				break
@@ -258,10 +256,8 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 			idType := &IDType{
 				Value: id.Code.String(),
 			}
-			if id.Ext != nil {
-				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-					idType.SchemeID = &s
-				}
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				idType.SchemeID = &s
 			}
 			p.PartyIdentification = append(p.PartyIdentification, Identification{
 				ID: idType,
@@ -350,10 +346,8 @@ func newPayeeParty(party *org.Party) *Party {
 		for _, id := range party.Identities {
 			var schemeID *string
 			// First check if there's an explicit scheme in Ext
-			if id.Ext != nil {
-				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-					schemeID = &s
-				}
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				schemeID = &s
 			}
 			// If no Ext scheme, check if label looks like a valid ICD code (4 digits)
 			if schemeID == nil && id.Label != "" && len(id.Label) == 4 {
@@ -383,10 +377,8 @@ func newPayeeParty(party *org.Party) *Party {
 					Value: code,
 				},
 			}
-			if id.Ext != nil {
-				if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-					p.PartyLegalEntity.CompanyID.SchemeID = &s
-				}
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				p.PartyLegalEntity.CompanyID.SchemeID = &s
 			}
 			break
 		}
