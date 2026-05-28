@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewLines(t *testing.T) {
@@ -70,8 +71,7 @@ func TestNewLines(t *testing.T) {
 	// EN16931 / Peppol BIS 3.0, even though the item net price (BT-146) is
 	// allowed to keep its higher precision.
 	t.Run("invoice-prices-include-vat.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-prices-include-vat.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-prices-include-vat.json")
 
 		require.Len(t, doc.InvoiceLines, 2)
 

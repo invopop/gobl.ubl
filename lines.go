@@ -87,8 +87,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 				ID:               IDType{Value: l.Identifier.Code.String()},
 				DocumentTypeCode: &typeCode,
 			}
-			if l.Identifier.Ext.Has(untdid.ExtKeyReference) {
-				s := l.Identifier.Ext[untdid.ExtKeyReference].String()
+			if s := l.Identifier.Ext.Get(untdid.ExtKeyReference).String(); s != "" {
 				ref.ID.SchemeID = &s
 			}
 			invLine.DocumentReference = ref
@@ -144,8 +143,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					},
 				}
 
-				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
-					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
+				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
 					it.ClassifiedTaxCategory.ID = &rate
 				}
 
@@ -159,8 +157,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					it.ClassifiedTaxCategory.Percent = &p
 				}
 
-				if l.Taxes[0].Ext != nil && l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String() != "" {
-					rate := l.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String()
+				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
 					it.ClassifiedTaxCategory.ID = &rate
 				}
 			}
@@ -187,7 +184,8 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 					}
 
 					// Map first identity without extension to BuyersItemIdentification
-					if id.Ext == nil || id.Ext[iso.ExtKeySchemeID].String() == "" {
+					s := id.Ext.Get(iso.ExtKeySchemeID).String()
+					if s == "" {
 						if it.BuyersItemIdentification == nil {
 							it.BuyersItemIdentification = &ItemIdentification{
 								ID: &IDType{
@@ -200,7 +198,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 					// Map first identity with extension to StandardItemIdentification
 					if it.StandardItemIdentification == nil {
-						s := id.Ext[iso.ExtKeySchemeID].String()
 						it.StandardItemIdentification = &ItemIdentification{
 							ID: &IDType{
 								SchemeID: &s,
@@ -271,8 +268,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 				CurrencyID: &ccy,
 			},
 		}
-		if ch.Ext != nil && ch.Ext[untdid.ExtKeyCharge].String() != "" {
-			e := ch.Ext[untdid.ExtKeyCharge].String()
+		if e := ch.Ext.Get(untdid.ExtKeyCharge).String(); e != "" {
 			ac.AllowanceChargeReasonCode = &e
 		}
 		if ch.Reason != "" {
@@ -295,8 +291,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 				CurrencyID: &ccy,
 			},
 		}
-		if d.Ext != nil && d.Ext[untdid.ExtKeyAllowance].String() != "" {
-			e := d.Ext[untdid.ExtKeyAllowance].String()
+		if e := d.Ext.Get(untdid.ExtKeyAllowance).String(); e != "" {
 			ac.AllowanceChargeReasonCode = &e
 		}
 		if d.Reason != "" {

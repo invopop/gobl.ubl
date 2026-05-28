@@ -39,7 +39,7 @@ func TestParseCharges(t *testing.T) {
 		// Check the values of the discount
 		discount := discounts[0]
 		assert.Equal(t, "Promotion discount", discount.Reason)
-		assert.Equal(t, "88", discount.Ext[untdid.ExtKeyAllowance].String())
+		assert.Equal(t, "88", discount.Ext.Get(untdid.ExtKeyAllowance).String())
 		assert.Equal(t, "100.00", discount.Amount.String())
 
 		// Check the tax category of the discount
@@ -64,7 +64,7 @@ func TestParseCharges(t *testing.T) {
 		// Check the values of the charge
 		charge := charges[0]
 		assert.Equal(t, "Packaging", charge.Reason)
-		assert.Equal(t, "ABL", charge.Ext[untdid.ExtKeyCharge].String())
+		assert.Equal(t, "ABL", charge.Ext.Get(untdid.ExtKeyCharge).String())
 		assert.Equal(t, "150.00", charge.Amount.String())
 
 		// Check the tax category of the charge
@@ -75,7 +75,7 @@ func TestParseCharges(t *testing.T) {
 		// Check the values of the discount
 		discount := discounts[0]
 		assert.Equal(t, "Loyal customer", discount.Reason)
-		assert.Equal(t, "100", discount.Ext[untdid.ExtKeyAllowance].String())
+		assert.Equal(t, "100", discount.Ext.Get(untdid.ExtKeyAllowance).String())
 		assert.Equal(t, "150.00", discount.Amount.String())
 
 		// Check the tax category of the discount
@@ -148,7 +148,7 @@ func TestParseCharges(t *testing.T) {
 		require.NotNil(t, charge.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), charge.Taxes[0].Category)
 		assert.Equal(t, "10%", charge.Taxes[0].Percent.String())
-		assert.Equal(t, "S", charge.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String())
+		assert.Equal(t, "S", charge.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String())
 
 		// Check the first discount (category K with exemption code)
 		discount1 := discounts[0]
@@ -156,8 +156,8 @@ func TestParseCharges(t *testing.T) {
 		assert.Equal(t, "6.40", discount1.Amount.String())
 		require.NotNil(t, discount1.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), discount1.Taxes[0].Category)
-		assert.Equal(t, "K", discount1.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String())
-		assert.Equal(t, "VATEX-EU-IC", discount1.Taxes[0].Ext[cef.ExtKeyVATEX].String())
+		assert.Equal(t, "K", discount1.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String())
+		assert.Equal(t, "VATEX-EU-IC", discount1.Taxes[0].Ext.Get(cef.ExtKeyVATEX).String())
 
 		// Check the second discount (category S)
 		discount2 := discounts[1]
@@ -166,7 +166,7 @@ func TestParseCharges(t *testing.T) {
 		require.NotNil(t, discount2.Taxes)
 		assert.Equal(t, cbc.Code("VAT"), discount2.Taxes[0].Category)
 		assert.Equal(t, "10%", discount2.Taxes[0].Percent.String())
-		assert.Equal(t, "S", discount2.Taxes[0].Ext[untdid.ExtKeyTaxCategory].String())
+		assert.Equal(t, "S", discount2.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String())
 	})
 
 }
