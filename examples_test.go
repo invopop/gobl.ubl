@@ -21,9 +21,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-
-	"github.com/lestrrat-go/libxml2"
-	"github.com/lestrrat-go/libxml2/xsd"
 )
 
 const (
@@ -374,21 +371,6 @@ func writeEnvelope(path string, env *gobl.Envelope) {
 	if err := os.WriteFile(path, data, 0644); err != nil {
 		panic(err)
 	}
-}
-
-// ValidateXML validates a XML document against a XSD Schema
-func ValidateXML(schema *xsd.Schema, data []byte) error {
-	xmlDoc, err := libxml2.Parse(data)
-	if err != nil {
-		return err
-	}
-
-	err = schema.Validate(xmlDoc)
-	if err != nil {
-		return err.(xsd.SchemaValidationError).Errors()[0]
-	}
-
-	return nil
 }
 
 func getDataPath() string {
