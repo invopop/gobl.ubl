@@ -131,9 +131,7 @@ func (c *convertOpts) buildOptions() ([]ubl.Option, error) {
 			ctx = ubl.ContextPeppolFranceCIUS
 		case "peppol-france-extended", "france-extended", "fr-extended":
 			ctx = ubl.ContextPeppolFranceExtended
-		case "nemhandel", "oioubl":
-			ctx = ubl.ContextOIOUBL
-		case "nemhandel-2.1", "oioubl-2.1", "oioubl21":
+		case "nemhandel", "nemhandel-2.1", "oioubl", "oioubl-2.1", "oioubl21":
 			ctx = ubl.ContextOIOUBL21
 		default:
 			return nil, fmt.Errorf("unknown context %q", c.contextName)

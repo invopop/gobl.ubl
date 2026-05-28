@@ -27,10 +27,10 @@ func TestConvertBuildOptionsNemhandel(t *testing.T) {
 
 	doc, err := ubl.ConvertInvoice(env, opts...)
 	require.NoError(t, err)
-	assert.Equal(t, "urn:fdc:oioubl.dk:trns:billing:invoice:3.0", doc.CustomizationID)
-	assert.Equal(t, "urn:fdc:oioubl.dk:bis:billing_with_response:3", doc.ProfileID)
+	assert.Equal(t, "OIOUBL-2.1", doc.CustomizationID)
+	assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", doc.ProfileID)
 	assert.Equal(t, "2.1", doc.UBLVersionID)
-	assert.Empty(t, doc.UUID)
+	assert.NotEmpty(t, doc.UUID)
 }
 
 func TestConvertBuildOptionsProfileOverride(t *testing.T) {
@@ -79,7 +79,7 @@ func TestConvertBuildOptionsContextAliases(t *testing.T) {
 		{name: "xrechnung alias", context: "xrechnung", convertible: false},
 		{name: "france cius alias", context: "fr-cius", convertible: false},
 		{name: "france extended alias", context: "fr-extended", convertible: false},
-		{name: "oioubl alias", context: "oioubl", convertible: true, expected: ubl.ContextOIOUBL},
+		{name: "oioubl alias", context: "oioubl", convertible: true, expected: ubl.ContextOIOUBL21},
 		{name: "oioubl 2.1 alias", context: "oioubl-2.1", convertible: true, expected: ubl.ContextOIOUBL21},
 		{name: "mixed case alias", context: "PePpOl-SeLf", convertible: true, expected: ubl.ContextPeppolSelfBilled},
 	}
@@ -139,7 +139,7 @@ func TestConvertRunEErrors(t *testing.T) {
 }
 
 func TestConvertXMLToJSONEnvelope(t *testing.T) {
-	inPath := filepath.Join("..", "..", "test", "data", "convert", "out", "oioubl30-invoice-minimal.xml")
+	inPath := filepath.Join("..", "..", "test", "data", "convert", "peppol", "out", "invoice-minimal.xml")
 	outPath := filepath.Join(t.TempDir(), "out.json")
 
 	cmd := root().cmd()
@@ -160,7 +160,7 @@ func TestConvertXMLToJSONEnvelope(t *testing.T) {
 }
 
 func TestConvertJSONToXMLWithOIOUBL21Context(t *testing.T) {
-	inPath := filepath.Join("..", "..", "test", "data", "convert", "oioubl21-invoice-minimal.json")
+	inPath := filepath.Join("..", "..", "test", "data", "convert", "oioubl21", "invoice-minimal.json")
 	outPath := filepath.Join(t.TempDir(), "out.xml")
 
 	cmd := root().cmd()
@@ -176,7 +176,7 @@ func TestConvertJSONToXMLWithOIOUBL21Context(t *testing.T) {
 }
 
 func TestConvertOIOUBL21BarePartyFallbacks(t *testing.T) {
-	inPath := filepath.Join("..", "..", "test", "data", "convert", "oioubl21-invoice-bare.json")
+	inPath := filepath.Join("..", "..", "test", "data", "convert", "oioubl21", "invoice-bare.json")
 	outPath := filepath.Join(t.TempDir(), "out.xml")
 
 	cmd := root().cmd()
@@ -200,7 +200,7 @@ func TestConvertOIOUBL21BarePartyFallbacks(t *testing.T) {
 }
 
 func TestConvertCreditNoteToXMLWithOIOUBL21Context(t *testing.T) {
-	inPath := filepath.Join("..", "..", "test", "data", "convert", "oioubl21-credit-note-minimal.json")
+	inPath := filepath.Join("..", "..", "test", "data", "convert", "oioubl21", "credit-note-minimal.json")
 	outPath := filepath.Join(t.TempDir(), "out.xml")
 
 	cmd := root().cmd()

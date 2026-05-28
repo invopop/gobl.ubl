@@ -58,7 +58,6 @@ type PartyName struct {
 type PostalAddress struct {
 	AddressFormatCode    *IDType             `xml:"cbc:AddressFormatCode"`
 	StreetName           *string             `xml:"cbc:StreetName"`
-	BuildingNumber       *string             `xml:"cbc:BuildingNumber"`
 	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
 	BuildingNumber       *string             `xml:"cbc:BuildingNumber,omitempty"`
 	PlotIdentification   *string             `xml:"cbc:PlotIdentification,omitempty"`
@@ -252,10 +251,8 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			if id.Scope == org.IdentityScopeTax {
 				code := id.Code.String()
 				companyID := &IDType{Value: code}
-				if id.Ext != nil {
-					if s := id.Ext[iso.ExtKeySchemeID].String(); s != "" {
-						companyID.SchemeID = &s
-					}
+				if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+					companyID.SchemeID = &s
 				}
 				taxScheme := PartyTaxScheme{
 					CompanyID: companyID,
