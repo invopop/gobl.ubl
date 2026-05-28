@@ -47,7 +47,7 @@ func TestNewTotals(t *testing.T) {
 		require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
 		tc := doc.TaxTotal[0].TaxSubtotal[0].TaxCategory
 
-		assert.Equal(t, "AE", *tc.ID)
+		assert.Equal(t, "AE", tc.ID.Value)
 		assert.Equal(t, "0", *tc.Percent)
 		require.NotNil(t, tc.TaxExemptionReasonCode)
 		assert.Equal(t, "VATEX-EU-AE", *tc.TaxExemptionReasonCode)

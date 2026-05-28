@@ -93,23 +93,23 @@ func TestNewParty(t *testing.T) {
 			{
 				Scope: org.IdentityScopeLegal,
 				Code:  cbc.Code("99887766"),
-				Ext: tax.Extensions{
+				Ext: tax.ExtensionsOf(cbc.CodeMap{
 					iso.ExtKeySchemeID: cbc.Code("0184"),
-				},
+				}),
 			},
 			{
 				Scope: org.IdentityScopeTax,
 				Type:  cbc.Code("VAT"),
 				Code:  cbc.Code("DK99887766"),
-				Ext: tax.Extensions{
+				Ext: tax.ExtensionsOf(cbc.CodeMap{
 					iso.ExtKeySchemeID: cbc.Code("0198"),
-				},
+				}),
 			},
 			{
 				Code: cbc.Code("1234567890128"),
-				Ext: tax.Extensions{
+				Ext: tax.ExtensionsOf(cbc.CodeMap{
 					iso.ExtKeySchemeID: cbc.Code("0088"),
-				},
+				}),
 			},
 		}
 

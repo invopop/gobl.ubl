@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CreditNote xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2" xmlns:udt="urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd">
+<CreditNote xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2" xmlns:udt="urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd">
   <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
   <cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>
   <cbc:ProfileID schemeAgencyID="320" schemeID="urn:oioubl:id:profileid-1.4">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>
@@ -8,6 +8,7 @@
   <cbc:IssueDate>2024-05-15</cbc:IssueDate>
   <cbc:CreditNoteTypeCode listAgencyID="320" listID="urn:oioubl:codelist:invoicetypecode-1.1">381</cbc:CreditNoteTypeCode>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:TaxCurrencyCode>DKK</cbc:TaxCurrencyCode>
   <cbc:AccountingCost>5050</cbc:AccountingCost>
   <cac:OrderReference>
     <cbc:ID>NA</cbc:ID>
@@ -35,7 +36,7 @@
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
-        <cbc:CompanyID schemeID="DK:SE">DK16356706</cbc:CompanyID>
+        <cbc:CompanyID schemeID="DK:SE">DK37990485</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
           <cbc:Name>Moms</cbc:Name>
@@ -43,7 +44,7 @@
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Provide One GmbH</cbc:RegistrationName>
-        <cbc:CompanyID schemeID="DK:CVR">DK16356706</cbc:CompanyID>
+        <cbc:CompanyID schemeID="DK:CVR">DK37990485</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:ID>1</cbc:ID>
@@ -68,7 +69,7 @@
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
-        <cbc:CompanyID schemeID="DK:SE">DK12345678</cbc:CompanyID>
+        <cbc:CompanyID schemeID="DK:SE">DK47458714</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
           <cbc:Name>Moms</cbc:Name>
@@ -76,7 +77,7 @@
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Sample Consumer</cbc:RegistrationName>
-        <cbc:CompanyID schemeID="DK:CVR">DK12345678</cbc:CompanyID>
+        <cbc:CompanyID schemeID="DK:CVR">DK47458714</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:ID>1</cbc:ID>
@@ -99,7 +100,6 @@
   </cac:PaymentMeans>
   <cac:PaymentTerms>
     <cbc:Note>on receipt within 30 days</cbc:Note>
-    <cbc:Amount currencyID="EUR">2142.00</cbc:Amount>
   </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
