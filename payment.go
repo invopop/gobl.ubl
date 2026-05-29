@@ -212,7 +212,7 @@ func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
 	}
 
 	// Only one due date allowed under EN 16931
-	if ui.CreditNoteTypeCode == nil && len(pymt.Terms.DueDates) > 0 {
+	if ui.CreditNoteTypeCode == nil && len(pymt.Terms.DueDates) > 0 && pymt.Terms.DueDates[0].Date != nil {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 	}
 }
