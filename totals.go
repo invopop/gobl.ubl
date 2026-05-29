@@ -221,10 +221,11 @@ func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.
 	return nil
 }
 
-// goblExchangeRates derives the exchange rate from two TaxTotal blocks
-// when DocumentCurrencyCode differs from TaxCurrencyCode.
+// goblExchangeRates derives the exchange rate between DocumentCurrencyCode and
+// TaxCurrencyCode. EN16931/Peppol carry the accounting-currency tax in a second
+// TaxTotal; OIOUBL carries it per subtotal as TransactionCurrencyTaxAmount.
 func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) []*cur.ExchangeRate {
-	if len(taxTotals) < 2 {
+	if len(taxTotals) == 0 {
 		return nil
 	}
 
@@ -232,8 +233,9 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 	if err != nil || docAmount.IsZero() {
 		return nil
 	}
-	taxAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[1].TaxAmount.Value))
-	if err != nil {
+
+	taxAmount, ok := taxCurrencyTaxAmount(taxTotals)
+	if !ok {
 		return nil
 	}
 
@@ -246,4 +248,35 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 			Amount: rate,
 		},
 	}
+}
+
+// taxCurrencyTaxAmount returns the total tax expressed in the tax currency,
+// reading a second TaxTotal block (EN16931/Peppol) or, failing that, summing
+// the per-subtotal TransactionCurrencyTaxAmount of the first TaxTotal (OIOUBL).
+func taxCurrencyTaxAmount(taxTotals []TaxTotal) (num.Amount, bool) {
+	if len(taxTotals) >= 2 {
+		a, err := num.AmountFromString(normalizeNumericString(taxTotals[1].TaxAmount.Value))
+		if err != nil {
+			return num.Amount{}, false
+		}
+		return a, true
+	}
+
+	var total num.Amount
+	found := false
+	for _, st := range taxTotals[0].TaxSubtotal {
+		if st.TransactionCurrencyTaxAmount == nil {
+			continue
+		}
+		a, err := num.AmountFromString(normalizeNumericString(st.TransactionCurrencyTaxAmount.Value))
+		if err != nil {
+			return num.Amount{}, false
+		}
+		if found {
+			total = total.Add(a)
+		} else {
+			total, found = a, true
+		}
+	}
+	return total, found
 }
