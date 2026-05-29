@@ -59,7 +59,8 @@ type FinancialInstitution struct {
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	Note string `xml:"cbc:Note"`
+	Note   string  `xml:"cbc:Note,omitempty"`
+	Amount *Amount `xml:"cbc:Amount,omitempty"`
 }
 
 // PrepaidPayment represents a prepaid payment

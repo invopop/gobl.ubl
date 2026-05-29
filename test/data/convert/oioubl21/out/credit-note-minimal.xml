@@ -100,6 +100,7 @@
   </cac:PaymentMeans>
   <cac:PaymentTerms>
     <cbc:Note>on receipt within 30 days</cbc:Note>
+    <cbc:Amount currencyID="EUR">2142.00</cbc:Amount>
   </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>

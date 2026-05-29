@@ -37,6 +37,13 @@ func applyOIOUBL21Rules(out *Invoice) {
 		out.DueDate = ""
 	}
 
+	if out.PaymentTerms != nil && out.PaymentTerms.Amount == nil {
+		out.PaymentTerms.Amount = &Amount{
+			Value:      out.LegalMonetaryTotal.PayableAmount.Value,
+			CurrencyID: out.LegalMonetaryTotal.PayableAmount.CurrencyID,
+		}
+	}
+
 	// F-INV127: OIOUBL 2.1 defines TaxExclusiveAmount as the sum of
 	// TaxTotal/TaxSubtotal/TaxAmount (i.e. the tax amount itself), not
 	// the pre-tax subtotal as in generic UBL.
