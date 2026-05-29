@@ -177,18 +177,8 @@ func Bytes(in any) ([]byte, error) {
 
 	if inv, ok := in.(*Invoice); ok && inv.CustomizationID == ContextOIOUBL21.CustomizationID {
 		if inv.ProfileID != "" {
-			raw := []byte(fmt.Sprintf("<cbc:ProfileID>%s</cbc:ProfileID>", inv.ProfileID))
-			withAttrs := []byte(fmt.Sprintf("<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.4\">%s</cbc:ProfileID>", inv.ProfileID))
-			b = bytes.ReplaceAll(b, raw, withAttrs)
-		}
-		if inv.InvoiceTypeCode != nil && inv.InvoiceTypeCode.Value != "" {
-			raw := []byte(fmt.Sprintf("<cbc:InvoiceTypeCode>%s</cbc:InvoiceTypeCode>", inv.InvoiceTypeCode.Value))
-			withAttrs := []byte(fmt.Sprintf("<cbc:InvoiceTypeCode listAgencyID=\"320\" listID=\"urn:oioubl:codelist:invoicetypecode-1.1\">%s</cbc:InvoiceTypeCode>", inv.InvoiceTypeCode.Value))
-			b = bytes.ReplaceAll(b, raw, withAttrs)
-		}
-		if inv.CreditNoteTypeCode != nil && inv.CreditNoteTypeCode.Value != "" {
-			raw := []byte(fmt.Sprintf("<cbc:CreditNoteTypeCode>%s</cbc:CreditNoteTypeCode>", inv.CreditNoteTypeCode.Value))
-			withAttrs := []byte(fmt.Sprintf("<cbc:CreditNoteTypeCode listAgencyID=\"320\" listID=\"urn:oioubl:codelist:invoicetypecode-1.1\">%s</cbc:CreditNoteTypeCode>", inv.CreditNoteTypeCode.Value))
+			raw := fmt.Appendf(nil, "<cbc:ProfileID>%s</cbc:ProfileID>", inv.ProfileID)
+			withAttrs := fmt.Appendf(nil, "<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.4\">%s</cbc:ProfileID>", inv.ProfileID)
 			b = bytes.ReplaceAll(b, raw, withAttrs)
 		}
 	}

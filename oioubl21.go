@@ -12,6 +12,9 @@ func applyOIOUBL21Rules(out *Invoice) {
 		return
 	}
 
+	applyOIOUBL21TypeCode(out.InvoiceTypeCode)
+	applyOIOUBL21TypeCode(out.CreditNoteTypeCode)
+
 	applyOIOUBL21Party(out.AccountingSupplierParty.Party)
 	applyOIOUBL21Party(out.AccountingCustomerParty.Party)
 
@@ -74,6 +77,16 @@ func applyOIOUBL21Rules(out *Invoice) {
 			}
 		}
 	}
+}
+
+func applyOIOUBL21TypeCode(t *IDType) {
+	if t == nil {
+		return
+	}
+	listID := "urn:oioubl:codelist:invoicetypecode-1.1"
+	listAgencyID := "320"
+	t.ListID = &listID
+	t.ListAgencyID = &listAgencyID
 }
 
 func applyOIOUBL21Party(p *Party) {
