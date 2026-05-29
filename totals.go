@@ -19,9 +19,10 @@ type TaxTotal struct {
 
 // TaxSubtotal represents a tax subtotal
 type TaxSubtotal struct {
-	TaxableAmount Amount      `xml:"cbc:TaxableAmount,omitempty"`
-	TaxAmount     Amount      `xml:"cbc:TaxAmount"`
-	TaxCategory   TaxCategory `xml:"cac:TaxCategory"`
+	TaxableAmount                Amount      `xml:"cbc:TaxableAmount,omitempty"`
+	TaxAmount                    Amount      `xml:"cbc:TaxAmount"`
+	TransactionCurrencyTaxAmount *Amount     `xml:"cbc:TransactionCurrencyTaxAmount,omitempty"`
+	TaxCategory                  TaxCategory `xml:"cac:TaxCategory"`
 }
 
 // TaxCategory represents a tax category
@@ -83,23 +84,30 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 		},
 	}
 
-	// BT-111
-	if inv.Currency.String() != rCurrency {
-		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().Currency); rate != nil {
-			taxInAccCurrency := rate.Convert(t.Tax)
-			accTaxTotal := TaxTotal{
-				TaxAmount: Amount{
-					Value:      taxInAccCurrency.String(),
-					CurrencyID: &rCurrency,
-				},
+	var accRate *cur.ExchangeRate
+	if inv.Currency != inv.RegimeDef().Currency {
+		accRate = cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().Currency)
+	}
+
+	// OIOUBL states the accounting-currency tax per subtotal (see below) rather
+	// than in a second TaxTotal, so its accounting total is built there instead.
+	if !ctx.Is(ContextOIOUBL21) {
+		// BT-111
+		if inv.Currency.String() != rCurrency {
+			if accRate != nil {
+				ui.TaxTotal = append(ui.TaxTotal, TaxTotal{
+					TaxAmount: Amount{
+						Value:      accRate.Convert(t.Tax).String(),
+						CurrencyID: &rCurrency,
+					},
+				})
 			}
-			ui.TaxTotal = append(ui.TaxTotal, accTaxTotal)
+		} else if ctx.Is(ContextZATCA) {
+			// BR-KSA-EN16931-09
+			ui.TaxTotal = append(ui.TaxTotal, TaxTotal{
+				TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
+			})
 		}
-	} else if ctx.Is(ContextZATCA) {
-		// BR-KSA-EN16931-09
-		ui.TaxTotal = append(ui.TaxTotal, TaxTotal{
-			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
-		})
 	}
 
 	if t.Taxes != nil && len(t.Taxes.Categories) > 0 {
@@ -110,6 +118,15 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 				}
 				if r.Base != (num.Amount{}) {
 					subtotal.TaxableAmount = Amount{Value: r.Base.String(), CurrencyID: &currency}
+				}
+				// F-INV018 / F-CRN013: when DocumentCurrencyCode differs from the
+				// tax currency, OIOUBL carries the tax in the tax currency here.
+				// F-INV339 fixes its currencyID to the TaxCurrencyCode.
+				if ctx.Is(ContextOIOUBL21) && accRate != nil {
+					subtotal.TransactionCurrencyTaxAmount = &Amount{
+						Value:      accRate.Convert(r.Amount).String(),
+						CurrencyID: &rCurrency,
+					}
 				}
 				taxCat := TaxCategory{}
 

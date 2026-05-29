@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9f05c5facfcfb85fba6b7a38e20a873487d55e27b81d1968bb96904dc1b3e3ac"
+			"val": "f6638305e54645463f4133871632cc42f21d0ddbc3416cea079e813eeb011d99"
 		}
 	},
 	"doc": {
@@ -19,6 +19,13 @@
 		"code": "001",
 		"issue_date": "2024-05-15",
 		"currency": "EUR",
+		"exchange_rates": [
+			{
+				"from": "EUR",
+				"to": "DKK",
+				"amount": "7.46"
+			}
+		],
 		"preceding": [
 			{
 				"issue_date": "2024-05-01",

@@ -101,6 +101,7 @@
     <cac:TaxSubtotal>
       <cbc:TaxableAmount currencyID="EUR">1800.00</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
+      <cbc:TransactionCurrencyTaxAmount currencyID="DKK">2551.32</cbc:TransactionCurrencyTaxAmount>
       <cac:TaxCategory>
         <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">StandardRated</cbc:ID>
         <cbc:Percent>19</cbc:Percent>
