@@ -43,7 +43,7 @@ type Invoice struct {
 	Extensions         *Extensions `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID       string      `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID    string      `xml:"cbc:CustomizationID,omitempty"`
-	ProfileID          string      `xml:"cbc:ProfileID,omitempty"`
+	ProfileID          *IDType     `xml:"cbc:ProfileID,omitempty"`
 	ProfileExecutionID string      `xml:"cbc:ProfileExecutionID,omitempty"`
 	ID                 string      `xml:"cbc:ID"`
 	CopyIndicator      bool        `xml:"cbc:CopyIndicator,omitempty"`
@@ -133,7 +133,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		EXTNamespace:            NamespaceEXT,
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
-		ProfileID:               profileID,
+		ProfileID:               newProfileID(profileID),
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		InvoiceTypeCode:         &IDType{Value: tc},
@@ -155,6 +155,12 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.UBLVersionID = Version
 		if !inv.UUID.IsZero() {
 			out.UUID = inv.UUID.String()
+		}
+		if out.ProfileID != nil {
+			schemeID := "urn:oioubl:id:profileid-1.4"
+			schemeAgencyID := "320"
+			out.ProfileID.SchemeID = &schemeID
+			out.ProfileID.SchemeAgencyID = &schemeAgencyID
 		}
 	}
 
@@ -260,6 +266,20 @@ func invoiceNumber(series cbc.Code, code cbc.Code) string {
 		return code.String()
 	}
 	return fmt.Sprintf("%s-%s", series, code)
+}
+
+func newProfileID(profileID string) *IDType {
+	if profileID == "" {
+		return nil
+	}
+	return &IDType{Value: profileID}
+}
+
+func profileIDValue(id *IDType) string {
+	if id == nil {
+		return ""
+	}
+	return id.Value
 }
 
 // ConvertInvoice is a convenience function that converts a GOBL envelope

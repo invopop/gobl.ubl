@@ -59,7 +59,7 @@ func TestContextPeppol(t *testing.T) {
 
 		// Verify CustomizationID and ProfileID
 		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0", ublInv.CustomizationID)
-		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", ublInv.ProfileID)
+		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", ublInv.ProfileID.Value)
 	})
 
 }
@@ -84,7 +84,7 @@ func TestContextXRechnung(t *testing.T) {
 
 		// Verify CustomizationID and ProfileID
 		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0", ublInv.CustomizationID)
-		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", ublInv.ProfileID)
+		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0", ublInv.ProfileID.Value)
 	})
 }
 
@@ -103,7 +103,7 @@ func TestContextPeppolFranceCIUS(t *testing.T) {
 		// Verify OutputCustomizationID is used in the output
 		assert.Equal(t, "urn:cen.eu:en16931:2017", ublInv.CustomizationID)
 		// Verify ProfileID comes from the fr-ctc-billing-mode extension
-		assert.Equal(t, "S1", ublInv.ProfileID)
+		assert.Equal(t, "S1", ublInv.ProfileID.Value)
 	})
 
 	t.Run("external identification uses full CustomizationID", func(t *testing.T) {
@@ -135,7 +135,7 @@ func TestContextPeppolFranceExtended(t *testing.T) {
 		// Verify OutputCustomizationID is used
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ublInv.CustomizationID)
 		// No billing mode extension in minimal invoice, so ProfileID falls back to context's Peppol process ID
-		assert.Equal(t, "urn:peppol:france:billing:regulated", ublInv.ProfileID)
+		assert.Equal(t, "urn:peppol:france:billing:regulated", ublInv.ProfileID.Value)
 	})
 
 	t.Run("external identification uses full CustomizationID", func(t *testing.T) {
@@ -166,7 +166,7 @@ func TestContextPeppolSelfBilled(t *testing.T) {
 
 		// Verify CustomizationID and ProfileID
 		assert.Equal(t, "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0", ublInv.CustomizationID)
-		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0", ublInv.ProfileID)
+		assert.Equal(t, "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0", ublInv.ProfileID.Value)
 	})
 }
 

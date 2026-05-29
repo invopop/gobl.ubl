@@ -56,6 +56,30 @@ func TestNewTotals(t *testing.T) {
 	})
 }
 
+func TestOIOUBL21DualCurrencyTotals(t *testing.T) {
+	doc, err := testInvoiceFrom("oioubl21/invoice-minimal.json")
+	require.NoError(t, err)
+
+	// OIOUBL carries the accounting-currency tax inside the single TaxTotal,
+	// not as a second TaxTotal block (F-INV018 / F-CRN013).
+	require.Len(t, doc.TaxTotal, 1)
+	require.NotNil(t, doc.TaxTotal[0].TaxAmount.CurrencyID)
+	assert.Equal(t, "EUR", *doc.TaxTotal[0].TaxAmount.CurrencyID)
+
+	require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
+	tcta := doc.TaxTotal[0].TaxSubtotal[0].TransactionCurrencyTaxAmount
+	require.NotNil(t, tcta)
+	assert.Equal(t, "2551.32", tcta.Value)
+	require.NotNil(t, tcta.CurrencyID)
+	// F-INV339: the amount's currencyID equals the TaxCurrencyCode (DKK).
+	assert.Equal(t, "DKK", *tcta.CurrencyID)
+
+	// ProfileID carries OIOUBL scheme attributes natively (no post-serialize hack).
+	require.NotNil(t, doc.ProfileID)
+	require.NotNil(t, doc.ProfileID.SchemeID)
+	assert.Equal(t, "urn:oioubl:id:profileid-1.4", *doc.ProfileID.SchemeID)
+}
+
 func TestParseTaxNotes(t *testing.T) {
 	t.Run("reverse_charge", func(t *testing.T) {
 		env, err := testParseInvoice("peppol/nbio-stuck-ubl.xml")

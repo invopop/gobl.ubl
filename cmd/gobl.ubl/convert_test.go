@@ -28,7 +28,7 @@ func TestConvertBuildOptionsNemhandel(t *testing.T) {
 	doc, err := ubl.ConvertInvoice(env, opts...)
 	require.NoError(t, err)
 	assert.Equal(t, "OIOUBL-2.1", doc.CustomizationID)
-	assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", doc.ProfileID)
+	assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", doc.ProfileID.Value)
 	assert.Equal(t, "2.1", doc.UBLVersionID)
 	assert.NotEmpty(t, doc.UUID)
 }
@@ -46,7 +46,7 @@ func TestConvertBuildOptionsProfileOverride(t *testing.T) {
 
 	doc, err := ubl.ConvertInvoice(env, opts...)
 	require.NoError(t, err)
-	assert.Equal(t, "custom-profile", doc.ProfileID)
+	assert.Equal(t, "custom-profile", doc.ProfileID.Value)
 }
 
 func TestConvertBuildOptionsOIOUBL21(t *testing.T) {
@@ -58,7 +58,7 @@ func TestConvertBuildOptionsOIOUBL21(t *testing.T) {
 	doc, err := ubl.ConvertInvoice(env, opts...)
 	require.NoError(t, err)
 	assert.Equal(t, "OIOUBL-2.1", doc.CustomizationID)
-	assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", doc.ProfileID)
+	assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", doc.ProfileID.Value)
 }
 
 func TestConvertBuildOptionsUnknownContext(t *testing.T) {
@@ -97,7 +97,11 @@ func TestConvertBuildOptionsContextAliases(t *testing.T) {
 			doc, err := ubl.ConvertInvoice(env, opts...)
 			require.NoError(t, err)
 			assert.Equal(t, tt.expected.CustomizationID, doc.CustomizationID)
-			assert.Equal(t, tt.expected.ProfileID, doc.ProfileID)
+			gotProfileID := ""
+			if doc.ProfileID != nil {
+				gotProfileID = doc.ProfileID.Value
+			}
+			assert.Equal(t, tt.expected.ProfileID, gotProfileID)
 		})
 	}
 }

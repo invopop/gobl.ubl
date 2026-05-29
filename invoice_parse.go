@@ -42,7 +42,7 @@ func (ui *Invoice) Convert() (*gobl.Envelope, error) {
 	o := new(options)
 
 	// Detect context from the invoice
-	ctx := FindContext(ui.CustomizationID, ui.ProfileID)
+	ctx := FindContext(ui.CustomizationID, profileIDValue(ui.ProfileID))
 	if ctx != nil {
 		o.context = *ctx
 	}
@@ -120,7 +120,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 // applyContextTaxExtensions sets tax extensions that depend on the active context.
 func (ui *Invoice) applyContextTaxExtensions(out *bill.Invoice, o *options) {
 	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
+		out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(profileIDValue(ui.ProfileID)))
 	}
 
 	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {

@@ -175,14 +175,6 @@ func Bytes(in any) ([]byte, error) {
 	// this is a quick fix
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
 
-	if inv, ok := in.(*Invoice); ok && inv.CustomizationID == ContextOIOUBL21.CustomizationID {
-		if inv.ProfileID != "" {
-			raw := fmt.Appendf(nil, "<cbc:ProfileID>%s</cbc:ProfileID>", inv.ProfileID)
-			withAttrs := fmt.Appendf(nil, "<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.4\">%s</cbc:ProfileID>", inv.ProfileID)
-			b = bytes.ReplaceAll(b, raw, withAttrs)
-		}
-	}
-
 	return append([]byte(xml.Header), b...), nil
 }
 
