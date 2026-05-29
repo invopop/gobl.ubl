@@ -220,7 +220,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.Delivery = []*Delivery{d}
 	}
 	if o.context.Is(ContextOIOUBL21) {
-		applyLegacyOIOUBL21Rules(out)
+		applyOIOUBL21Rules(out)
 	}
 
 	return out, nil

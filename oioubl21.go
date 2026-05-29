@@ -7,13 +7,13 @@ const (
 	oioubl21TaxCategoryStandardRated = "StandardRated"
 )
 
-func applyLegacyOIOUBL21Rules(out *Invoice) {
+func applyOIOUBL21Rules(out *Invoice) {
 	if out == nil {
 		return
 	}
 
-	applyLegacyOIOUBL21Party(out.AccountingSupplierParty.Party)
-	applyLegacyOIOUBL21Party(out.AccountingCustomerParty.Party)
+	applyOIOUBL21Party(out.AccountingSupplierParty.Party)
+	applyOIOUBL21Party(out.AccountingCustomerParty.Party)
 
 	for i := range out.PaymentMeans {
 		pm := &out.PaymentMeans[i]
@@ -51,32 +51,32 @@ func applyLegacyOIOUBL21Rules(out *Invoice) {
 
 	for i := range out.TaxTotal {
 		for j := range out.TaxTotal[i].TaxSubtotal {
-			applyLegacyOIOUBL21TaxCategory(&out.TaxTotal[i].TaxSubtotal[j].TaxCategory)
+			applyOIOUBL21TaxCategory(&out.TaxTotal[i].TaxSubtotal[j].TaxCategory)
 		}
 	}
 	for i := range out.InvoiceLines {
 		if line := &out.InvoiceLines[i]; line.Item != nil && line.Item.ClassifiedTaxCategory != nil {
-			applyLegacyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
+			applyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
 		}
 		for j := range out.InvoiceLines[i].TaxTotal {
 			for k := range out.InvoiceLines[i].TaxTotal[j].TaxSubtotal {
-				applyLegacyOIOUBL21TaxCategory(&out.InvoiceLines[i].TaxTotal[j].TaxSubtotal[k].TaxCategory)
+				applyOIOUBL21TaxCategory(&out.InvoiceLines[i].TaxTotal[j].TaxSubtotal[k].TaxCategory)
 			}
 		}
 	}
 	for i := range out.CreditNoteLines {
 		if line := &out.CreditNoteLines[i]; line.Item != nil && line.Item.ClassifiedTaxCategory != nil {
-			applyLegacyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
+			applyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
 		}
 		for j := range out.CreditNoteLines[i].TaxTotal {
 			for k := range out.CreditNoteLines[i].TaxTotal[j].TaxSubtotal {
-				applyLegacyOIOUBL21TaxCategory(&out.CreditNoteLines[i].TaxTotal[j].TaxSubtotal[k].TaxCategory)
+				applyOIOUBL21TaxCategory(&out.CreditNoteLines[i].TaxTotal[j].TaxSubtotal[k].TaxCategory)
 			}
 		}
 	}
 }
 
-func applyLegacyOIOUBL21Party(p *Party) {
+func applyOIOUBL21Party(p *Party) {
 	if p == nil {
 		return
 	}
@@ -138,7 +138,7 @@ func applyLegacyOIOUBL21Party(p *Party) {
 					pts.CompanyID.Value = "DK" + pts.CompanyID.Value
 				}
 			}
-			applyLegacyOIOUBL21TaxScheme(pts.TaxScheme)
+			applyOIOUBL21TaxScheme(pts.TaxScheme)
 		}
 	}
 	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID != nil {
@@ -161,37 +161,37 @@ func applyLegacyOIOUBL21Party(p *Party) {
 	}
 }
 
-func applyLegacyOIOUBL21TaxCategory(tc *TaxCategory) {
+func applyOIOUBL21TaxCategory(tc *TaxCategory) {
 	if tc == nil {
 		return
 	}
 	if tc.ID == nil {
 		tc.ID = &IDType{Value: oioubl21TaxCategoryStandardRated}
 	}
-	tc.ID.Value = legacyTaxCategoryCode(tc.ID.Value)
+	tc.ID.Value = oioubl21TaxCategoryCode(tc.ID.Value)
 	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
 	schemeAgencyID := "320"
 	tc.ID.SchemeID = &schemeID
 	tc.ID.SchemeAgencyID = &schemeAgencyID
-	applyLegacyOIOUBL21TaxScheme(tc.TaxScheme)
+	applyOIOUBL21TaxScheme(tc.TaxScheme)
 }
 
-func applyLegacyOIOUBL21ClassifiedTaxCategory(tc *ClassifiedTaxCategory) {
+func applyOIOUBL21ClassifiedTaxCategory(tc *ClassifiedTaxCategory) {
 	if tc == nil {
 		return
 	}
 	if tc.ID == nil {
 		tc.ID = &IDType{Value: oioubl21TaxCategoryStandardRated}
 	}
-	tc.ID.Value = legacyTaxCategoryCode(tc.ID.Value)
+	tc.ID.Value = oioubl21TaxCategoryCode(tc.ID.Value)
 	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
 	schemeAgencyID := "320"
 	tc.ID.SchemeID = &schemeID
 	tc.ID.SchemeAgencyID = &schemeAgencyID
-	applyLegacyOIOUBL21TaxScheme(tc.TaxScheme)
+	applyOIOUBL21TaxScheme(tc.TaxScheme)
 }
 
-func applyLegacyOIOUBL21TaxScheme(ts *TaxScheme) {
+func applyOIOUBL21TaxScheme(ts *TaxScheme) {
 	if ts == nil {
 		return
 	}
@@ -206,7 +206,7 @@ func applyLegacyOIOUBL21TaxScheme(ts *TaxScheme) {
 	ts.Name = &name
 }
 
-func legacyTaxCategoryCode(in string) string {
+func oioubl21TaxCategoryCode(in string) string {
 	switch in {
 	case "S", "Standard", "standard":
 		return oioubl21TaxCategoryStandardRated
