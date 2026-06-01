@@ -1,0 +1,183 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "28bfa1a20a9d3121e56cd8634b085ad72bfe2f53a488a8c878e87213162dbcef"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "FINAL-005",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Jens Hansen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen 12",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK76543216",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Mette Sørensen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade 45",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Konsulentpakke Q2",
+					"price": "20000.00",
+					"unit": "one"
+				},
+				"sum": "20000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "20000.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "Restbeløb netto 30 dage"
+			},
+			"advances": [
+				{
+					"date": "2026-04-15",
+					"amount": "12500.00"
+				}
+			],
+			"instructions": {
+				"key": "any",
+				"ref": "TEST-005",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "20000.00",
+			"total": "20000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "20000.00",
+								"percent": "25%",
+								"amount": "5000.00"
+							}
+						],
+						"amount": "5000.00"
+					}
+				],
+				"sum": "5000.00"
+			},
+			"tax": "5000.00",
+			"total_with_tax": "25000.00",
+			"payable": "25000.00",
+			"advance": "12500.00",
+			"due": "12500.00"
+		}
+	}
+}

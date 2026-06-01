@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"strconv"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -46,6 +48,91 @@ type MonetaryTotal struct {
 	PayableAmount         *Amount `xml:"cbc:PayableAmount,omitempty"`
 }
 
+// addOIOUBL21MonetaryTotal rebuilds LegalMonetaryTotal for OIOUBL 2.1, whose
+// line LineExtensionAmount is gross (Price×Qty, F-INV348). The document
+// LineExtensionAmount becomes the gross line sum, and line-level
+// allowances/charges fold into the document Allowance/ChargeTotalAmount
+// (F-INV129/F-INV130). Reconciles: gross − allowances + charges = net base.
+func (ui *Invoice) addOIOUBL21MonetaryTotal(inv *bill.Invoice, ctx Context, currency string) {
+	t := inv.Totals
+	exp := t.Sum.Exp()
+	grossSum := num.MakeAmount(0, exp)
+	lineDiscounts := num.MakeAmount(0, exp)
+	lineCharges := num.MakeAmount(0, exp)
+	for _, l := range inv.Lines {
+		if l.Sum != nil {
+			grossSum = grossSum.Add(roundToCurrency(*l.Sum, currency))
+		}
+		for _, d := range l.Discounts {
+			lineDiscounts = lineDiscounts.Add(d.Amount)
+		}
+		for _, c := range l.Charges {
+			lineCharges = lineCharges.Add(c.Amount)
+		}
+		// Promote line allowances/charges to document-level AllowanceCharge
+		// so they sum to Allowance/ChargeTotalAmount (F-INV129/F-INV130).
+		for _, ac := range makeLineCharges(l.Charges, l.Discounts, currency, l.Sum, ctx, l.Taxes) {
+			ui.AllowanceCharge = append(ui.AllowanceCharge, *ac)
+		}
+	}
+	ui.LegalMonetaryTotal.LineExtensionAmount = Amount{Value: grossSum.String(), CurrencyID: &currency}
+	allow := lineDiscounts
+	if t.Discount != nil {
+		allow = allow.Add(*t.Discount)
+	}
+	if !allow.IsZero() {
+		ui.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: allow.String(), CurrencyID: &currency}
+	}
+	chg := lineCharges
+	if t.Charge != nil {
+		chg = chg.Add(*t.Charge)
+	}
+	if !chg.IsZero() {
+		ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: chg.String(), CurrencyID: &currency}
+	}
+	// OIOUBL rounds per line then sums (F-INV128/F-INV133); GOBL end-rounds,
+	// which can differ by a cent on fractional quantities. Recompute the
+	// inclusive/payable totals from the rounded components so they reconcile.
+	incl := grossSum.Add(t.Tax).Add(chg).Subtract(allow)
+	if t.Rounding != nil {
+		incl = incl.Add(*t.Rounding)
+	}
+	ui.LegalMonetaryTotal.TaxInclusiveAmount = Amount{Value: incl.String(), CurrencyID: &currency}
+	pay := incl
+	if t.Advances != nil {
+		pay = pay.Subtract(*t.Advances)
+	}
+	ui.LegalMonetaryTotal.PayableAmount = &Amount{Value: pay.String(), CurrencyID: &currency}
+}
+
+// addOIOUBL21PrepaidPayments emits a cac:PrepaidPayment per GOBL advance. OIOUBL
+// requires the PaidAmount elements to sum to LegalMonetaryTotal/PrepaidAmount
+// (F-INV131); Peppol and EN 16931 carry the prepaid amount in the total only,
+// so this is OIOUBL-specific.
+func (ui *Invoice) addOIOUBL21PrepaidPayments(inv *bill.Invoice, currency string) {
+	if inv.Payment == nil {
+		return
+	}
+	for i, adv := range inv.Payment.Advances {
+		if adv == nil {
+			continue
+		}
+		pp := PrepaidPayment{
+			ID:         strconv.Itoa(i + 1),
+			PaidAmount: &Amount{Value: adv.Amount.String(), CurrencyID: &currency},
+		}
+		if adv.Date != nil {
+			d := formatDate(*adv.Date)
+			pp.ReceivedDate = &d
+		}
+		if adv.Ref != "" {
+			ref := adv.Ref
+			pp.InstructionID = &ref
+		}
+		ui.PrepaidPayment = append(ui.PrepaidPayment, pp)
+	}
+}
+
 func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 	if inv == nil || inv.Totals == nil {
 		return
@@ -69,59 +156,9 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 		ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: t.Charge.String(), CurrencyID: &currency}
 	}
 
-	// OIOUBL F-INV348: line LineExtensionAmount is gross (Price×Qty), so the
-	// document LineExtensionAmount is the gross line sum and line-level
-	// allowances/charges fold into the document Allowance/ChargeTotalAmount.
-	// Reconciles: gross − allowances + charges = t.Total (net taxable base).
 	if ctx.Is(ContextOIOUBL21) {
-		exp := t.Sum.Exp()
-		grossSum := num.MakeAmount(0, exp)
-		lineDiscounts := num.MakeAmount(0, exp)
-		lineCharges := num.MakeAmount(0, exp)
-		for _, l := range inv.Lines {
-			if l.Sum != nil {
-				grossSum = grossSum.Add(roundToCurrency(*l.Sum, currency))
-			}
-			for _, d := range l.Discounts {
-				lineDiscounts = lineDiscounts.Add(d.Amount)
-			}
-			for _, c := range l.Charges {
-				lineCharges = lineCharges.Add(c.Amount)
-			}
-			// Promote line allowances/charges to document-level AllowanceCharge
-			// so they sum to Allowance/ChargeTotalAmount (F-INV129/F-INV130).
-			for _, ac := range makeLineCharges(l.Charges, l.Discounts, currency, l.Sum, ctx, l.Taxes) {
-				ui.AllowanceCharge = append(ui.AllowanceCharge, *ac)
-			}
-		}
-		ui.LegalMonetaryTotal.LineExtensionAmount = Amount{Value: grossSum.String(), CurrencyID: &currency}
-		allow := lineDiscounts
-		if t.Discount != nil {
-			allow = allow.Add(*t.Discount)
-		}
-		if !allow.IsZero() {
-			ui.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: allow.String(), CurrencyID: &currency}
-		}
-		chg := lineCharges
-		if t.Charge != nil {
-			chg = chg.Add(*t.Charge)
-		}
-		if !chg.IsZero() {
-			ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: chg.String(), CurrencyID: &currency}
-		}
-		// OIOUBL rounds per line then sums (F-INV128/F-INV133); GOBL end-rounds,
-		// which can differ by a cent on fractional quantities. Recompute the
-		// inclusive/payable totals from the rounded components so they reconcile.
-		incl := grossSum.Add(t.Tax).Add(chg).Subtract(allow)
-		if t.Rounding != nil {
-			incl = incl.Add(*t.Rounding)
-		}
-		ui.LegalMonetaryTotal.TaxInclusiveAmount = Amount{Value: incl.String(), CurrencyID: &currency}
-		pay := incl
-		if t.Advances != nil {
-			pay = pay.Subtract(*t.Advances)
-		}
-		ui.LegalMonetaryTotal.PayableAmount = &Amount{Value: pay.String(), CurrencyID: &currency}
+		ui.addOIOUBL21MonetaryTotal(inv, ctx, currency)
+		ui.addOIOUBL21PrepaidPayments(inv, currency)
 	}
 	if t.Rounding != nil {
 		ui.LegalMonetaryTotal.PayableRoundingAmount = &Amount{Value: t.Rounding.String(), CurrencyID: &currency}

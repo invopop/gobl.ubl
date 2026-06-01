@@ -76,42 +76,43 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 		payment.Instructions = goblInvoiceInstructions(out, &ui.PaymentMeans[0])
 	}
 
-	// We do not currently map this as Peppol and EN16931 do not use it.
-	/*
-		if len(in.PrepaidPayment) > 0 {
-			payment.Advances = make([]*pay.Record, 0, len(in.PrepaidPayment))
-			for _, p := range in.PrepaidPayment {
-				amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
+	// OIOUBL records each advance as a cac:PrepaidPayment with its own
+	// PaidAmount/ReceivedDate (F-INV131), so reconstruct them individually.
+	// Peppol and EN 16931 only carry the total PrepaidAmount, so for those a
+	// single advance is recovered from that total.
+	switch {
+	case o.context.Is(ContextOIOUBL21) && len(ui.PrepaidPayment) > 0:
+		payment.Advances = make([]*pay.Record, 0, len(ui.PrepaidPayment))
+		for _, p := range ui.PrepaidPayment {
+			if p.PaidAmount == nil {
+				continue
+			}
+			amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
+			if err != nil {
+				return err
+			}
+			advance := &pay.Record{Amount: amount}
+			if p.ReceivedDate != nil {
+				d, err := parseDate(*p.ReceivedDate)
 				if err != nil {
 					return err
 				}
-				advance := &pay.Record{
-					Amount: amount,
-				}
-				if p.ReceivedDate != nil {
-					d, err := parseDate(*p.ReceivedDate)
-					if err != nil {
-						return err
-					}
-					advance.Date = &d
-				}
-				payment.Advances = append(payment.Advances, advance)
+				advance.Date = &d
 			}
+			if p.InstructionID != nil {
+				advance.Ref = *p.InstructionID
 			}
-	*/
-
-	if ui.LegalMonetaryTotal.PrepaidAmount != nil {
+			payment.Advances = append(payment.Advances, advance)
+		}
+	case ui.LegalMonetaryTotal.PrepaidAmount != nil:
 		totalPrepaid, err := num.AmountFromString(normalizeNumericString(ui.LegalMonetaryTotal.PrepaidAmount.Value))
 		if err != nil {
 			return err
 		}
-
-		advance := &pay.Record{
+		payment.Advances = append(payment.Advances, &pay.Record{
 			Amount:      totalPrepaid,
 			Description: "Prepaid Amount",
-		}
-		payment.Advances = append(payment.Advances, advance)
-
+		})
 	}
 
 	if payment.Payee != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
