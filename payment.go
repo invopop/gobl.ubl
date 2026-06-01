@@ -21,7 +21,13 @@ type PaymentMeans struct {
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
+	CreditAccount         *CreditAccount    `xml:"cac:CreditAccount"`
 	PaymentMandate        *PaymentMandate   `xml:"cac:PaymentMandate"`
+}
+
+// CreditAccount carries the OIOUBL FIK creditor account (cbc:AccountID).
+type CreditAccount struct {
+	AccountID string `xml:"cbc:AccountID"`
 }
 
 // PaymentMandate represents a payment mandate
@@ -141,13 +147,33 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if ref := instr.Ref.String(); ref != "" {
 		ui.PaymentMeans[0].PaymentID = &ref
 	}
+	// OIOUBL Giro (50) / FIK (93): cbc:PaymentID is the dk-oioubl-payment-id
+	// "kortart" (overriding instr.Ref, which is the Peppol mapping), and the
+	// PaymentChannelCode is DK:GIRO / DK:FIK (F-LIB155/F-LIB277). The FIK
+	// creditor account flows through the credit-transfer Number below (F-LIB305).
+	if ctx.Is(ContextOIOUBL21) && (paymentMeansCode == "50" || paymentMeansCode == "93") {
+		if kortart := instr.Ext.Get(cbc.Key("dk-oioubl-payment-id")).String(); kortart != "" {
+			ui.PaymentMeans[0].PaymentID = &kortart
+		}
+		channel := "DK:GIRO"
+		if paymentMeansCode == "93" {
+			channel = "DK:FIK"
+		}
+		ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: channel}
+	}
 	if instr.Detail != "" {
 		ui.PaymentMeans[0].PaymentMeansCode.Name = &instr.Detail
 	}
 	if len(instr.CreditTransfer) > 0 {
-		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0], ctx, paymentMeansCode)
-		if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "31" && ui.PaymentMeans[0].PaymentChannelCode == nil {
-			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
+		if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "93" {
+			// FIK creditor account lives in cac:CreditAccount/cbc:AccountID
+			// (8 chars, F-LIB305), not PayeeFinancialAccount.
+			ui.PaymentMeans[0].CreditAccount = &CreditAccount{AccountID: instr.CreditTransfer[0].Number}
+		} else {
+			ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0], ctx, paymentMeansCode)
+			if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "31" && ui.PaymentMeans[0].PaymentChannelCode == nil {
+				ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
+			}
 		}
 	}
 	if instr.DirectDebit != nil {

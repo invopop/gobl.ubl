@@ -80,7 +80,7 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 		lineCharges := num.MakeAmount(0, exp)
 		for _, l := range inv.Lines {
 			if l.Sum != nil {
-				grossSum = grossSum.Add(*l.Sum)
+				grossSum = grossSum.Add(roundToCurrency(*l.Sum, currency))
 			}
 			for _, d := range l.Discounts {
 				lineDiscounts = lineDiscounts.Add(d.Amount)
@@ -109,6 +109,19 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 		if !chg.IsZero() {
 			ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: chg.String(), CurrencyID: &currency}
 		}
+		// OIOUBL rounds per line then sums (F-INV128/F-INV133); GOBL end-rounds,
+		// which can differ by a cent on fractional quantities. Recompute the
+		// inclusive/payable totals from the rounded components so they reconcile.
+		incl := grossSum.Add(t.Tax).Add(chg).Subtract(allow)
+		if t.Rounding != nil {
+			incl = incl.Add(*t.Rounding)
+		}
+		ui.LegalMonetaryTotal.TaxInclusiveAmount = Amount{Value: incl.String(), CurrencyID: &currency}
+		pay := incl
+		if t.Advances != nil {
+			pay = pay.Subtract(*t.Advances)
+		}
+		ui.LegalMonetaryTotal.PayableAmount = &Amount{Value: pay.String(), CurrencyID: &currency}
 	}
 	if t.Rounding != nil {
 		ui.LegalMonetaryTotal.PayableRoundingAmount = &Amount{Value: t.Rounding.String(), CurrencyID: &currency}
@@ -116,7 +129,7 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 	if t.Advances != nil {
 		ui.LegalMonetaryTotal.PrepaidAmount = &Amount{Value: t.Advances.String(), CurrencyID: &currency}
 	}
-	if t.Due != nil {
+	if t.Due != nil && !ctx.Is(ContextOIOUBL21) {
 		ui.LegalMonetaryTotal.PayableAmount = &Amount{Value: t.Due.String(), CurrencyID: &currency}
 	}
 

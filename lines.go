@@ -52,7 +52,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 
 			LineExtensionAmount: Amount{
 				CurrencyID: &ccy,
-				Value:      lineExtensionValue(l, context),
+				Value:      lineExtensionValue(l, context, ccy),
 			},
 		}
 
@@ -264,19 +264,24 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 // rescaleToCurrency rounds the amount to the natural precision of the given
 // currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
 // existing precision if the currency code is unknown.
-func rescaleToCurrency(a num.Amount, ccy string) string {
+func roundToCurrency(a num.Amount, ccy string) num.Amount {
 	if def := currency.Code(ccy).Def(); def != nil {
-		return def.Rescale(a).String()
+		return def.Rescale(a)
 	}
-	return a.String()
+	return a
+}
+
+func rescaleToCurrency(a num.Amount, ccy string) string {
+	return roundToCurrency(a, ccy).String()
 }
 
 // lineExtensionValue renders the line LineExtensionAmount. OIOUBL F-INV348
 // requires the gross Price×Qty (line allowances are carried separately and
 // netted at the document level); other profiles use the net line total.
-func lineExtensionValue(l *bill.Line, ctx Context) string {
+func lineExtensionValue(l *bill.Line, ctx Context, ccy string) string {
 	if ctx.Is(ContextOIOUBL21) && l.Sum != nil {
-		return l.Sum.String()
+		// gross, rounded to currency precision (l.Sum is the raw qty×price)
+		return rescaleToCurrency(*l.Sum, ccy)
 	}
 	return l.Total.String()
 }
@@ -289,10 +294,11 @@ func makeLineTaxTotals(line *bill.Line, ccy string, ctx Context) []TaxTotal {
 	var taxable num.Amount
 	switch {
 	case ctx.Is(ContextOIOUBL21) && line.Sum != nil:
-		// OIOUBL line TaxableAmount is gross (Price×Qty); the discount is
-		// subtracted once at the document level (F-LIB402 sums gross line
-		// taxable amounts then adjusts for the document AllowanceCharge).
-		taxable = *line.Sum
+		// OIOUBL line TaxableAmount is gross (Price×Qty), rounded to currency
+		// precision (l.Sum is the raw product); the discount is subtracted once
+		// at the document level (F-LIB402 sums gross line taxable amounts then
+		// adjusts for the document AllowanceCharge).
+		taxable = roundToCurrency(*line.Sum, ccy)
 	case line.Total != nil:
 		taxable = *line.Total
 	case line.Sum != nil:
