@@ -18,7 +18,7 @@ type AllowanceCharge struct {
 	TaxCategory               []*TaxCategory `xml:"cac:TaxCategory"`
 }
 
-func (ui *Invoice) addCharges(inv *bill.Invoice) {
+func (ui *Invoice) addCharges(inv *bill.Invoice, ctx Context) {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return
 	}
@@ -26,14 +26,24 @@ func (ui *Invoice) addCharges(inv *bill.Invoice) {
 	// Use invoice sum (before discounts) as base amount for percentage calculations
 	baseAmount := inv.Totals.Sum
 	for i, ch := range inv.Charges {
-		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount, ctx)
 	}
 	for i, d := range inv.Discounts {
-		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount, ctx)
 	}
 }
 
-func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCharge {
+// allowanceMultiplier renders MultiplierFactorNumeric. OIOUBL F-LIB228 requires
+// the decimal factor (Amount = BaseAmount × factor); other profiles keep the
+// percent number, matching their existing output.
+func allowanceMultiplier(pct *num.Percentage, ctx Context) string {
+	if ctx.Is(ContextOIOUBL21) {
+		return pct.Base().String()
+	}
+	return pct.StringWithoutSymbol()
+}
+
+func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, ctx Context) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: true,
 		Amount: Amount{
@@ -49,7 +59,7 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 		c.AllowanceChargeReasonCode = &e
 	}
 	if ch.Percent != nil {
-		p := ch.Percent.StringWithoutSymbol()
+		p := allowanceMultiplier(ch.Percent, ctx)
 		c.MultiplierFactorNumeric = &p
 		// Add BaseAmount when percentage is provided
 		c.BaseAmount = &Amount{
@@ -64,7 +74,7 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 	return c
 }
 
-func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) AllowanceCharge {
+func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, ctx Context) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: false,
 		Amount: Amount{
@@ -80,7 +90,7 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) Allowance
 		c.AllowanceChargeReasonCode = &e
 	}
 	if d.Percent != nil {
-		p := d.Percent.StringWithoutSymbol()
+		p := allowanceMultiplier(d.Percent, ctx)
 		c.MultiplierFactorNumeric = &p
 		// Add BaseAmount when percentage is provided
 		c.BaseAmount = &Amount{

@@ -214,7 +214,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addPreceding(inv.Preceding)
 	out.addOrdering(inv.Ordering, o.context)
 	out.addTaxPoint(inv.Tax)
-	out.addCharges(inv)
+	out.addCharges(inv, o.context)
 	out.addTotals(inv, o.context)
 	out.addLines(inv, o.context)
 	out.AddAttachments(inv.Attachments)

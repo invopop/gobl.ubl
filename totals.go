@@ -68,6 +68,48 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 	if t.Charge != nil {
 		ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: t.Charge.String(), CurrencyID: &currency}
 	}
+
+	// OIOUBL F-INV348: line LineExtensionAmount is gross (Price×Qty), so the
+	// document LineExtensionAmount is the gross line sum and line-level
+	// allowances/charges fold into the document Allowance/ChargeTotalAmount.
+	// Reconciles: gross − allowances + charges = t.Total (net taxable base).
+	if ctx.Is(ContextOIOUBL21) {
+		exp := t.Sum.Exp()
+		grossSum := num.MakeAmount(0, exp)
+		lineDiscounts := num.MakeAmount(0, exp)
+		lineCharges := num.MakeAmount(0, exp)
+		for _, l := range inv.Lines {
+			if l.Sum != nil {
+				grossSum = grossSum.Add(*l.Sum)
+			}
+			for _, d := range l.Discounts {
+				lineDiscounts = lineDiscounts.Add(d.Amount)
+			}
+			for _, c := range l.Charges {
+				lineCharges = lineCharges.Add(c.Amount)
+			}
+			// Promote line allowances/charges to document-level AllowanceCharge
+			// so they sum to Allowance/ChargeTotalAmount (F-INV129/F-INV130).
+			for _, ac := range makeLineCharges(l.Charges, l.Discounts, currency, l.Sum, ctx, l.Taxes) {
+				ui.AllowanceCharge = append(ui.AllowanceCharge, *ac)
+			}
+		}
+		ui.LegalMonetaryTotal.LineExtensionAmount = Amount{Value: grossSum.String(), CurrencyID: &currency}
+		allow := lineDiscounts
+		if t.Discount != nil {
+			allow = allow.Add(*t.Discount)
+		}
+		if !allow.IsZero() {
+			ui.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: allow.String(), CurrencyID: &currency}
+		}
+		chg := lineCharges
+		if t.Charge != nil {
+			chg = chg.Add(*t.Charge)
+		}
+		if !chg.IsZero() {
+			ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: chg.String(), CurrencyID: &currency}
+		}
+	}
 	if t.Rounding != nil {
 		ui.LegalMonetaryTotal.PayableRoundingAmount = &Amount{Value: t.Rounding.String(), CurrencyID: &currency}
 	}

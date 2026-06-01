@@ -92,6 +92,30 @@ func applyOIOUBL21Rules(out *Invoice) {
 			}
 		}
 	}
+
+	// AllowanceCharge TaxCategory must carry the OIOUBL codes + schemeID/agency
+	// like the line/total categories above, or it keeps the raw GOBL values
+	// (cbc:ID "S", TaxScheme "VAT") and fails F-LIB066/F-LIB075. Covers the
+	// document level and both line types.
+	for i := range out.AllowanceCharge {
+		for _, tc := range out.AllowanceCharge[i].TaxCategory {
+			applyOIOUBL21TaxCategory(tc)
+		}
+	}
+	for i := range out.InvoiceLines {
+		for _, ac := range out.InvoiceLines[i].AllowanceCharge {
+			for _, tc := range ac.TaxCategory {
+				applyOIOUBL21TaxCategory(tc)
+			}
+		}
+	}
+	for i := range out.CreditNoteLines {
+		for _, ac := range out.CreditNoteLines[i].AllowanceCharge {
+			for _, tc := range ac.TaxCategory {
+				applyOIOUBL21TaxCategory(tc)
+			}
+		}
+	}
 }
 
 func applyOIOUBL21TypeCode(t *IDType) {
@@ -256,6 +280,12 @@ func oioubl21TaxCategoryCode(in string) string {
 		return oioubl21TaxCategoryZeroRated
 	case "AE", "ReverseCharge":
 		return oioubl21TaxCategoryReverseCharge
+	case "E", "Exempt", "exempt":
+		// OIOUBL 2.1 (taxcategoryid-1.1) has no exempt category — its named
+		// values are StandardRated/ZeroRated/ReverseCharge/Excise. VAT-exempt
+		// lines map to ZeroRated (both = no VAT charged); the exempt-vs-zero
+		// distinction is not representable in OIOUBL 2.1.
+		return oioubl21TaxCategoryZeroRated
 	default:
 		if in == "" {
 			return oioubl21TaxCategoryStandardRated

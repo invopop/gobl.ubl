@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/tax"
 )
 
 // InvoiceLine represents a line item in an invoice and credit note
@@ -51,7 +52,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 
 			LineExtensionAmount: Amount{
 				CurrencyID: &ccy,
-				Value:      l.Total.String(),
+				Value:      lineExtensionValue(l, context),
 			},
 		}
 
@@ -109,8 +110,11 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			}
 		}
 
-		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
+		// OIOUBL reconciles allowances/charges at the DOCUMENT level
+		// (F-INV126/128/129 sum document-level AllowanceCharge, not line-level),
+		// so for OIOUBL they're promoted in addTotals instead of set on the line.
+		if (len(l.Charges) > 0 || len(l.Discounts) > 0) && !context.Is(ContextOIOUBL21) {
+			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum, context, l.Taxes)
 		}
 
 		// Line VAT amount (KSA-11) is mandatory for tax
@@ -245,7 +249,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		}
 
 		if context.Is(ContextOIOUBL21) {
-			invLine.TaxTotal = makeLineTaxTotals(l, ccy)
+			invLine.TaxTotal = makeLineTaxTotals(l, ccy, context)
 		}
 
 		lines = append(lines, invLine)
@@ -267,13 +271,28 @@ func rescaleToCurrency(a num.Amount, ccy string) string {
 	return a.String()
 }
 
-func makeLineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
+// lineExtensionValue renders the line LineExtensionAmount. OIOUBL F-INV348
+// requires the gross Price×Qty (line allowances are carried separately and
+// netted at the document level); other profiles use the net line total.
+func lineExtensionValue(l *bill.Line, ctx Context) string {
+	if ctx.Is(ContextOIOUBL21) && l.Sum != nil {
+		return l.Sum.String()
+	}
+	return l.Total.String()
+}
+
+func makeLineTaxTotals(line *bill.Line, ccy string, ctx Context) []TaxTotal {
 	if line == nil || len(line.Taxes) == 0 {
 		return nil
 	}
 
 	var taxable num.Amount
 	switch {
+	case ctx.Is(ContextOIOUBL21) && line.Sum != nil:
+		// OIOUBL line TaxableAmount is gross (Price×Qty); the discount is
+		// subtracted once at the document level (F-LIB402 sums gross line
+		// taxable amounts then adjusts for the document AllowanceCharge).
+		taxable = *line.Sum
 	case line.Total != nil:
 		taxable = *line.Total
 	case line.Sum != nil:
@@ -304,7 +323,9 @@ func makeLineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 			subtotal.TaxAmount = Amount{Value: amount.String(), CurrencyID: &ccy}
 			totalAmount = totalAmount.Add(amount)
 		} else {
-			subtotal.TaxAmount = Amount{Value: "0", CurrencyID: &ccy}
+			// No percent (e.g. exempt): still emit at currency precision
+			// ("0.00"), or OIOUBL F-LIB263 rejects a bare "0".
+			subtotal.TaxAmount = Amount{Value: num.MakeAmount(0, taxable.Exp()).String(), CurrencyID: &ccy}
 		}
 
 		if t.Category != "" {
@@ -314,7 +335,9 @@ func makeLineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 		taxTotal.TaxSubtotal = append(taxTotal.TaxSubtotal, subtotal)
 	}
 
-	if totalAmount.IsZero() {
+	// OIOUBL requires a line TaxTotal even for 0% lines (F-INV138 / F-LIB404);
+	// other profiles omit it when the line tax amount is zero.
+	if totalAmount.IsZero() && !ctx.Is(ContextOIOUBL21) {
 		return nil
 	}
 	taxTotal.TaxAmount = Amount{Value: totalAmount.String(), CurrencyID: &ccy}
@@ -322,7 +345,7 @@ func makeLineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 	return []TaxTotal{taxTotal}
 }
 
-func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
+func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount, ctx Context, taxes tax.Set) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
 	// BR-DEC-24 / UBL-DT-01: line allowance and charge amounts (BT-136/BT-141)
 	// and their base amounts must match the currency's natural precision.
@@ -351,11 +374,14 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &ch.Reason
 		}
 		if ch.Percent != nil {
-			p := ch.Percent.StringWithoutSymbol()
+			p := allowanceMultiplier(ch.Percent, ctx)
 			ac.MultiplierFactorNumeric = &p
 			if base != nil {
 				ac.BaseAmount = base
 			}
+		}
+		if ctx.Is(ContextOIOUBL21) {
+			ac.TaxCategory = makeTaxCategory(taxes) // F-LIB226: line allowance needs a TaxCategory
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}
@@ -375,11 +401,14 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &d.Reason
 		}
 		if d.Percent != nil {
-			p := d.Percent.StringWithoutSymbol()
+			p := allowanceMultiplier(d.Percent, ctx)
 			ac.MultiplierFactorNumeric = &p
 			if base != nil {
 				ac.BaseAmount = base
 			}
+		}
+		if ctx.Is(ContextOIOUBL21) {
+			ac.TaxCategory = makeTaxCategory(taxes) // F-LIB226: line allowance needs a TaxCategory
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}
