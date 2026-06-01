@@ -9,6 +9,7 @@ import (
 const (
 	oioubl21PaymentChannelIBAN       = "IBAN"
 	oioubl21TaxSchemeVATCode         = "63"
+	oioubl21SchemeDKCVR              = "DK:CVR"
 	oioubl21TaxCategoryStandardRated = "StandardRated"
 	oioubl21TaxCategoryZeroRated     = "ZeroRated"
 	oioubl21TaxCategoryReverseCharge = "ReverseCharge"
@@ -103,12 +104,26 @@ func applyOIOUBL21TypeCode(t *IDType) {
 	t.ListAgencyID = &listAgencyID
 }
 
+// oioubl21EndpointSchemes maps the ISO 6523 ICDs that Peppol-style endpoints
+// use to the symbolic OIOUBL EndpointID schemeID codelist (F-LIB179).
+var oioubl21EndpointSchemes = map[string]string{
+	"0088": "GLN",
+	"0184": oioubl21SchemeDKCVR,
+	"0198": "DK:SE",
+}
+
 func applyOIOUBL21Party(p *Party) {
 	if p == nil {
 		return
 	}
-	if p.EndpointID != nil && p.EndpointID.SchemeID == "0088" {
-		p.EndpointID.SchemeID = "GLN"
+	if p.EndpointID != nil {
+		if mapped, ok := oioubl21EndpointSchemes[p.EndpointID.SchemeID]; ok {
+			p.EndpointID.SchemeID = mapped
+		}
+		// OIOUBL CVR endpoints must carry the DK-prefixed form (F-LIB180).
+		if p.EndpointID.SchemeID == oioubl21SchemeDKCVR && !strings.HasPrefix(p.EndpointID.Value, "DK") {
+			p.EndpointID.Value = "DK" + p.EndpointID.Value
+		}
 	}
 	if p.EndpointID == nil {
 		if len(p.PartyTaxScheme) > 0 && p.PartyTaxScheme[0].CompanyID != nil {
@@ -117,7 +132,7 @@ func applyOIOUBL21Party(p *Party) {
 				val = "DK" + val
 			}
 			p.EndpointID = &EndpointID{
-				SchemeID: "DK:CVR",
+				SchemeID: oioubl21SchemeDKCVR,
 				Value:    val,
 			}
 		}
@@ -169,7 +184,7 @@ func applyOIOUBL21Party(p *Party) {
 		}
 	}
 	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID != nil {
-		scheme := "DK:CVR"
+		scheme := oioubl21SchemeDKCVR
 		p.PartyLegalEntity.CompanyID.SchemeID = &scheme
 		if !strings.HasPrefix(p.PartyLegalEntity.CompanyID.Value, "DK") {
 			p.PartyLegalEntity.CompanyID.Value = "DK" + p.PartyLegalEntity.CompanyID.Value
