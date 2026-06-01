@@ -1,10 +1,17 @@
 package ubl
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/invopop/gobl/cbc"
+)
 
 const (
 	oioubl21PaymentChannelIBAN       = "IBAN"
+	oioubl21TaxSchemeVATCode         = "63"
 	oioubl21TaxCategoryStandardRated = "StandardRated"
+	oioubl21TaxCategoryZeroRated     = "ZeroRated"
+	oioubl21TaxCategoryReverseCharge = "ReverseCharge"
 )
 
 func applyOIOUBL21Rules(out *Invoice) {
@@ -220,7 +227,7 @@ func applyOIOUBL21TaxScheme(ts *TaxScheme) {
 	ts.ID = IDType{
 		SchemeID:       &schemeID,
 		SchemeAgencyID: &schemeAgencyID,
-		Value:          "63",
+		Value:          oioubl21TaxSchemeVATCode,
 	}
 	name := "Moms"
 	ts.Name = &name
@@ -231,13 +238,39 @@ func oioubl21TaxCategoryCode(in string) string {
 	case "S", "Standard", "standard":
 		return oioubl21TaxCategoryStandardRated
 	case "Z", "Zero", "zero":
-		return "ZeroRated"
+		return oioubl21TaxCategoryZeroRated
 	case "AE", "ReverseCharge":
-		return "ReverseCharge"
+		return oioubl21TaxCategoryReverseCharge
 	default:
 		if in == "" {
 			return oioubl21TaxCategoryStandardRated
 		}
 		return in
+	}
+}
+
+// goblTaxSchemeCategory maps an OIOUBL TaxScheme ID back to the GOBL tax
+// category code. OIOUBL identifies VAT as "63" (Moms); other UBL profiles
+// already carry the GOBL "VAT" code, so the value passes through unchanged.
+func goblTaxSchemeCategory(schemeID string) cbc.Code {
+	if schemeID == oioubl21TaxSchemeVATCode {
+		return cbc.Code(TaxSchemeVAT)
+	}
+	return cbc.Code(schemeID)
+}
+
+// goblTaxCategoryCode maps an OIOUBL TaxCategory ID back to the UNTDID 5305
+// code GOBL expects (the inverse of oioubl21TaxCategoryCode). Values from
+// other profiles, which already use the UNTDID codes, pass through unchanged.
+func goblTaxCategoryCode(id string) cbc.Code {
+	switch id {
+	case oioubl21TaxCategoryStandardRated:
+		return "S"
+	case oioubl21TaxCategoryZeroRated:
+		return "Z"
+	case oioubl21TaxCategoryReverseCharge:
+		return "AE"
+	default:
+		return cbc.Code(id)
 	}
 }

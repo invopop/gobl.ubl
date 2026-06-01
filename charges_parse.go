@@ -96,13 +96,13 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		ch.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID.Value),
+				Category: goblTaxSchemeCategory(ac.TaxCategory[0].TaxScheme.ID.Value),
 			},
 		}
 
 		// Add tax category ID to extensions
 		if ac.TaxCategory[0].ID != nil {
-			ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ac.TaxCategory[0].ID.Value))
+			ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, goblTaxCategoryCode(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
 			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
@@ -178,13 +178,13 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		d.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID.Value),
+				Category: goblTaxSchemeCategory(ac.TaxCategory[0].TaxScheme.ID.Value),
 			},
 		}
 
 		// Add tax category ID to extensions
 		if ac.TaxCategory[0].ID != nil {
-			d.Taxes[0].Ext = d.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ac.TaxCategory[0].ID.Value))
+			d.Taxes[0].Ext = d.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, goblTaxCategoryCode(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
 			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)

@@ -199,11 +199,11 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 
 	line.Taxes = tax.Set{
 		{
-			Category: cbc.Code(ctc.TaxScheme.ID.Value),
+			Category: goblTaxSchemeCategory(ctc.TaxScheme.ID.Value),
 		},
 	}
 	if ctc.ID != nil {
-		line.Taxes[0].Ext = line.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ctc.ID.Value))
+		line.Taxes[0].Ext = line.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, goblTaxCategoryCode(ctc.ID.Value))
 
 		if ctc.TaxExemptionReasonCode != nil {
 			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(*ctc.TaxExemptionReasonCode))

@@ -187,13 +187,13 @@ func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
 		Country: l10n.TaxCountryCode(countryCode),
 		Code:    cbc.Code(pts.CompanyID.Value),
 	}
-	sc := cbc.Code(pts.TaxScheme.ID.Value)
+	sc := goblTaxSchemeCategory(pts.TaxScheme.ID.Value)
 	if p.TaxID.GetScheme() != sc {
 		var scheme cbc.Code
 		if pts.TaxScheme.TaxTypeCode != "" {
 			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
 		} else {
-			scheme = cbc.Code(pts.TaxScheme.ID.Value)
+			scheme = sc
 		}
 		p.TaxID.Scheme = scheme
 	}
@@ -218,7 +218,7 @@ func handleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, count
 
 func findVATSchemeIndex(schemes []PartyTaxScheme) int {
 	for i, pts := range schemes {
-		if pts.TaxScheme.ID.Value == TaxSchemeVAT {
+		if goblTaxSchemeCategory(pts.TaxScheme.ID.Value) == cbc.Code(TaxSchemeVAT) {
 			return i
 		}
 	}
@@ -235,7 +235,7 @@ func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx 
 			Country: l10n.ISOCountryCode(countryCode),
 			Code:    cbc.Code(pts.CompanyID.Value),
 			Scope:   org.IdentityScopeTax,
-			Type:    cbc.Code(pts.TaxScheme.ID.Value),
+			Type:    goblTaxSchemeCategory(pts.TaxScheme.ID.Value),
 		}
 
 		if p.Identities == nil {
