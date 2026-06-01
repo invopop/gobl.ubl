@@ -28,13 +28,18 @@ func applyOIOUBL21Rules(out *Invoice) {
 
 	for i := range out.PaymentMeans {
 		pm := &out.PaymentMeans[i]
-		if pm.PaymentChannelCode == nil {
+		// Default the channel to IBAN for credit transfers. Direct debit (49)
+		// is left without a channel: GOBL's DirectDebit carries no BIC, and
+		// declaring IBAN would require a FinancialInstitution/ID (F-LIB295).
+		if pm.PaymentChannelCode == nil && pm.PaymentMeansCode.Value != "49" {
 			pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
 		}
-		listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
-		pm.PaymentChannelCode.ListID = &listID
-		if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
-			pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
+		if pm.PaymentChannelCode != nil {
+			listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
+			pm.PaymentChannelCode.ListID = &listID
+			if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
+				pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
+			}
 		}
 		if out.DueDate != "" && pm.PaymentDueDate == nil {
 			d := out.DueDate
