@@ -26,29 +26,7 @@ func applyOIOUBL21Rules(out *Invoice) {
 	applyOIOUBL21Party(out.AccountingSupplierParty.Party)
 	applyOIOUBL21Party(out.AccountingCustomerParty.Party)
 
-	for i := range out.PaymentMeans {
-		pm := &out.PaymentMeans[i]
-		// Default the channel to IBAN for credit transfers. Direct debit (49)
-		// is left without a channel: GOBL's DirectDebit carries no BIC, and
-		// declaring IBAN would require a FinancialInstitution/ID (F-LIB295).
-		if pm.PaymentChannelCode == nil && pm.PaymentMeansCode.Value != "49" {
-			pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
-		}
-		if pm.PaymentChannelCode != nil {
-			listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
-			pm.PaymentChannelCode.ListID = &listID
-			if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
-				pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
-			}
-		}
-		if out.DueDate != "" && pm.PaymentDueDate == nil {
-			d := out.DueDate
-			pm.PaymentDueDate = &d
-		}
-	}
-	if len(out.PaymentMeans) > 0 && out.DueDate != "" {
-		out.DueDate = ""
-	}
+	applyOIOUBL21PaymentMeans(out)
 
 	if out.PaymentTerms != nil && out.PaymentTerms.Amount == nil {
 		out.PaymentTerms.Amount = &Amount{
@@ -72,50 +50,70 @@ func applyOIOUBL21Rules(out *Invoice) {
 		}
 	}
 
+	applyOIOUBL21TaxCategories(out)
+}
+
+// applyOIOUBL21PaymentMeans defaults the OIOUBL payment channel and per-means
+// due date. Direct debit (49) is left without a channel: GOBL's DirectDebit
+// carries no BIC, and declaring IBAN would require a FinancialInstitution/ID
+// (F-LIB295).
+func applyOIOUBL21PaymentMeans(out *Invoice) {
+	for i := range out.PaymentMeans {
+		pm := &out.PaymentMeans[i]
+		if pm.PaymentChannelCode == nil && pm.PaymentMeansCode.Value != "49" {
+			pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
+		}
+		if pm.PaymentChannelCode != nil {
+			listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
+			pm.PaymentChannelCode.ListID = &listID
+			if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
+				pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
+			}
+		}
+		if out.DueDate != "" && pm.PaymentDueDate == nil {
+			d := out.DueDate
+			pm.PaymentDueDate = &d
+		}
+	}
+	if len(out.PaymentMeans) > 0 && out.DueDate != "" {
+		out.DueDate = ""
+	}
+}
+
+// applyOIOUBL21TaxCategories maps every TaxCategory and ClassifiedTaxCategory on
+// the document totals, lines and allowance/charges to the OIOUBL codes. Without
+// it they keep the raw GOBL values (cbc:ID "S", TaxScheme "VAT") and fail
+// F-LIB066/F-LIB075.
+func applyOIOUBL21TaxCategories(out *Invoice) {
 	for i := range out.TaxTotal {
 		for j := range out.TaxTotal[i].TaxSubtotal {
 			applyOIOUBL21TaxCategory(&out.TaxTotal[i].TaxSubtotal[j].TaxCategory)
 		}
 	}
-	for i := range out.InvoiceLines {
-		if line := &out.InvoiceLines[i]; line.Item != nil && line.Item.ClassifiedTaxCategory != nil {
-			applyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
-		}
-		for j := range out.InvoiceLines[i].TaxTotal {
-			for k := range out.InvoiceLines[i].TaxTotal[j].TaxSubtotal {
-				applyOIOUBL21TaxCategory(&out.InvoiceLines[i].TaxTotal[j].TaxSubtotal[k].TaxCategory)
-			}
-		}
-	}
-	for i := range out.CreditNoteLines {
-		if line := &out.CreditNoteLines[i]; line.Item != nil && line.Item.ClassifiedTaxCategory != nil {
-			applyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
-		}
-		for j := range out.CreditNoteLines[i].TaxTotal {
-			for k := range out.CreditNoteLines[i].TaxTotal[j].TaxSubtotal {
-				applyOIOUBL21TaxCategory(&out.CreditNoteLines[i].TaxTotal[j].TaxSubtotal[k].TaxCategory)
-			}
-		}
-	}
-
-	// AllowanceCharge TaxCategory must carry the OIOUBL codes + schemeID/agency
-	// like the line/total categories above, or it keeps the raw GOBL values
-	// (cbc:ID "S", TaxScheme "VAT") and fails F-LIB066/F-LIB075. Covers the
-	// document level and both line types.
 	for i := range out.AllowanceCharge {
 		for _, tc := range out.AllowanceCharge[i].TaxCategory {
 			applyOIOUBL21TaxCategory(tc)
 		}
 	}
-	for i := range out.InvoiceLines {
-		for _, ac := range out.InvoiceLines[i].AllowanceCharge {
-			for _, tc := range ac.TaxCategory {
-				applyOIOUBL21TaxCategory(tc)
+	applyOIOUBL21LineTaxCategories(out.InvoiceLines)
+	applyOIOUBL21LineTaxCategories(out.CreditNoteLines)
+}
+
+// applyOIOUBL21LineTaxCategories maps the tax categories on a set of lines: the
+// item classified category, the line-level subtotals, and any promoted
+// allowance/charges. Invoice and credit-note lines share the InvoiceLine type.
+func applyOIOUBL21LineTaxCategories(lines []InvoiceLine) {
+	for i := range lines {
+		line := &lines[i]
+		if line.Item != nil && line.Item.ClassifiedTaxCategory != nil {
+			applyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
+		}
+		for j := range line.TaxTotal {
+			for k := range line.TaxTotal[j].TaxSubtotal {
+				applyOIOUBL21TaxCategory(&line.TaxTotal[j].TaxSubtotal[k].TaxCategory)
 			}
 		}
-	}
-	for i := range out.CreditNoteLines {
-		for _, ac := range out.CreditNoteLines[i].AllowanceCharge {
+		for _, ac := range line.AllowanceCharge {
 			for _, tc := range ac.TaxCategory {
 				applyOIOUBL21TaxCategory(tc)
 			}
