@@ -167,9 +167,13 @@ var ContextPeppolSelfBilled = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
 	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
 	Addons:          []cbc.Key{en16931.V2017},
+	// The Peppol self-billing rule sets are versioned independently from the
+	// regular invoice/credit-note ones. phive-rules keeps only a rolling window
+	// of releases, so the older ":2025.3" sets were dropped in phive-rules 4.3.x;
+	// ":2026.3" is the oldest still published and validates the same documents.
 	VESIDs: VESIDMapping{
-		Invoice:    "eu.peppol.bis3:invoice-self-billing:2025.3",
-		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2025.3",
+		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.3",
+		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.3",
 	},
 }
 

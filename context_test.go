@@ -210,7 +210,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for PeppolSelfBilled context
 		vesid := ubl.ContextPeppolSelfBilled.GetVESID(inv)
-		assert.Equal(t, "eu.peppol.bis3:invoice-self-billing:2025.3", vesid)
+		assert.Equal(t, "eu.peppol.bis3:invoice-self-billing:2026.3", vesid)
 	})
 
 	t.Run("France CIUS VESID", func(t *testing.T) {
