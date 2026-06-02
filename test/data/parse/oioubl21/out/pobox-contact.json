@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "19b7f21e6b0d747e0a22980c63b3bb20f6fcb77faa4c29a42f7e233e2c7f698b"
+			"val": "122fceb3bcd3eae7ed3b627454c3fa7e6ac9ece8971b6a1b693000c894c95736"
 		}
 	},
 	"doc": {
@@ -15,29 +15,22 @@
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"code": "SAMPLE-001",
-		"issue_date": "2024-05-15",
-		"currency": "EUR",
-		"exchange_rates": [
-			{
-				"from": "EUR",
-				"to": "DKK",
-				"amount": "7.46"
-			}
-		],
+		"code": "POBOX-001",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
 		"tax": {
 			"rounding": "currency"
 		},
 		"supplier": {
-			"name": "Provide One GmbH",
+			"name": "Eksempel Software ApS",
 			"tax_id": {
 				"country": "DK",
-				"code": "37990485"
+				"code": "12345674"
 			},
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "DK37990485",
+					"code": "DK12345674",
 					"ext": {
 						"iso-scheme-id": "DK:CVR"
 					}
@@ -45,45 +38,47 @@
 			],
 			"people": [
 				{
-					"name": null,
+					"name": {
+						"given": "Jens Hansen"
+					},
 					"identities": [
 						{
-							"code": "1"
+							"code": "EMP-1001"
 						}
 					]
 				}
 			],
 			"inboxes": [
 				{
-					"scheme": "GLN",
-					"code": "5790000436101"
+					"scheme": "DK:CVR",
+					"code": "DK12345674"
 				}
 			],
 			"addresses": [
 				{
-					"num": "16",
-					"street": "Dietmar-Hopp-Allee 16",
-					"locality": "Walldorf",
-					"code": "69190",
+					"po_box": "2500",
+					"street": "Postboksvej",
+					"locality": "København",
+					"code": "1790",
 					"country": "DK"
 				}
 			],
 			"emails": [
 				{
-					"addr": "billing@example.com"
+					"addr": "billing@eksempel-software.dk"
 				}
 			]
 		},
 		"customer": {
-			"name": "Sample Consumer",
+			"name": "Modtager Handel A/S",
 			"tax_id": {
 				"country": "DK",
-				"code": "47458714"
+				"code": "76543216"
 			},
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "DK47458714",
+					"code": "DK76543216",
 					"ext": {
 						"iso-scheme-id": "DK:CVR"
 					}
@@ -91,56 +86,58 @@
 			],
 			"people": [
 				{
-					"name": null,
+					"name": {
+						"given": "Mette Sørensen"
+					},
 					"identities": [
 						{
-							"code": "1"
+							"code": "EMP-4471"
 						}
 					]
 				}
 			],
 			"inboxes": [
 				{
-					"scheme": "GLN",
-					"code": "5790000436057"
+					"scheme": "DK:CVR",
+					"code": "DK76543216"
 				}
 			],
 			"addresses": [
 				{
-					"num": "25",
-					"street": "Werner-Heisenberg-Allee 25",
-					"locality": "München",
-					"code": "80939",
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
 					"country": "DK"
 				}
 			],
 			"emails": [
 				{
-					"addr": "email@sample.com"
+					"addr": "ap@modtager-handel.dk"
 				}
 			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "20",
+				"quantity": "10",
 				"item": {
-					"name": "Development services",
-					"price": "90.00",
+					"name": "Udvikling timer",
+					"price": "1000.00",
 					"unit": "h"
 				},
-				"sum": "1800.00",
+				"sum": "10000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19%",
+						"percent": "25%",
 						"ext": {
 							"untdid-tax-category": "S"
 						}
 					}
 				],
-				"total": "1800.00"
+				"total": "10000.00"
 			}
 		],
 		"ordering": {
@@ -152,14 +149,14 @@
 		},
 		"payment": {
 			"terms": {
-				"notes": "on receipt within 30 days"
+				"notes": "Netto 30 dage"
 			},
 			"instructions": {
 				"key": "any",
-				"ref": "0003434323213231",
+				"ref": "TEST-001",
 				"credit_transfer": [
 					{
-						"iban": "NO9386011117947"
+						"iban": "DK5000400440116243"
 					}
 				],
 				"ext": {
@@ -168,8 +165,8 @@
 			}
 		},
 		"totals": {
-			"sum": "1800.00",
-			"total": "1800.00",
+			"sum": "10000.00",
+			"total": "10000.00",
 			"taxes": {
 				"categories": [
 					{
@@ -180,19 +177,19 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "1800.00",
-								"percent": "19%",
-								"amount": "342.00"
+								"base": "10000.00",
+								"percent": "25%",
+								"amount": "2500.00"
 							}
 						],
-						"amount": "342.00"
+						"amount": "2500.00"
 					}
 				],
-				"sum": "342.00"
+				"sum": "2500.00"
 			},
-			"tax": "342.00",
-			"total_with_tax": "2142.00",
-			"payable": "2142.00"
+			"tax": "2500.00",
+			"total_with_tax": "12500.00",
+			"payable": "12500.00"
 		}
 	}
 }

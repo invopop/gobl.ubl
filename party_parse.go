@@ -39,13 +39,23 @@ func goblParty(party *Party, o *options) *org.Party {
 		}
 	}
 
-	if party.Contact != nil && party.Contact.Name != nil {
-		p.People = []*org.Person{
-			{
-				Name: &org.Name{
-					Given: cleanString(*party.Contact.Name),
-				},
-			},
+	if c := party.Contact; c != nil {
+		person := new(org.Person)
+		if c.Name != nil {
+			person.Name = &org.Name{
+				Given: cleanString(*c.Name),
+			}
+		}
+		// OIOUBL carries the contact reference in cac:Contact/cbc:ID; restore it
+		// to the person's identities so the round-trip stays lossless (the
+		// outbound side sources Contact/ID from person.Identities for F-INV051).
+		if c.ID != nil && o.context.Is(ContextOIOUBL21) {
+			if code := cleanString(*c.ID); code != "" {
+				person.Identities = []*org.Identity{{Code: cbc.Code(code)}}
+			}
+		}
+		if person.Name != nil || len(person.Identities) > 0 {
+			p.People = []*org.Person{person}
 		}
 	}
 
@@ -129,6 +139,9 @@ func parseAddress(address *PostalAddress) *org.Address {
 	}
 	if address.BuildingNumber != nil {
 		addr.Number = cleanString(*address.BuildingNumber)
+	}
+	if address.Postbox != nil {
+		addr.PostOfficeBox = cleanString(*address.Postbox)
 	}
 	// CitySubdivisionName is used by ZATCA to represent the district,
 	// which maps to StreetExtra in GOBL.
