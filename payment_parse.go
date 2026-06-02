@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -147,7 +148,38 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 		instructions.Card = goblCard(paymentMeans)
 	}
 
+	goblOIOUBLGiroFIK(instructions, paymentMeans)
+
 	return instructions
+}
+
+// goblOIOUBLGiroFIK reverses the OIOUBL Giro/FIK mapping: cbc:PaymentID is the
+// kortart (-> dk-oioubl-payment-id extension), cbc:InstructionID is the numeric
+// payment number (-> instr.Ref), and the FIK creditor account lives in
+// cac:CreditAccount/cbc:AccountID rather than PayeeFinancialAccount.
+func goblOIOUBLGiroFIK(instr *pay.Instructions, paymentMeans *PaymentMeans) {
+	if paymentMeans.PaymentChannelCode == nil {
+		return
+	}
+	switch paymentMeans.PaymentChannelCode.Value {
+	case oioubl21PaymentChannelGiro, oioubl21PaymentChannelFIK:
+	default:
+		return
+	}
+
+	instr.Key = pay.MeansKeyOther
+	if paymentMeans.PaymentID != nil {
+		instr.Ext = instr.Ext.Set(oioubl.ExtKeyPaymentID, cbc.Code(*paymentMeans.PaymentID))
+	}
+	// The generic path put the kortart in Ref; the real payment number, if any,
+	// is the InstructionID of the structured card types.
+	instr.Ref = ""
+	if paymentMeans.InstructionID != nil {
+		instr.Ref = cbc.Code(cleanString(*paymentMeans.InstructionID))
+	}
+	if paymentMeans.CreditAccount != nil && paymentMeans.CreditAccount.AccountID != "" {
+		instr.CreditTransfer = []*pay.CreditTransfer{{Number: paymentMeans.CreditAccount.AccountID}}
+	}
 }
 
 func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {

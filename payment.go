@@ -3,6 +3,7 @@ package ubl
 import (
 	"errors"
 
+	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -198,14 +199,37 @@ func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMe
 	if paymentMeansCode != "50" && paymentMeansCode != "93" {
 		return
 	}
-	if kortart := instr.Ext.Get(cbc.Key("dk-oioubl-payment-id")).String(); kortart != "" {
-		pm.PaymentID = &kortart
+	kortart := instr.Ext.Get(oioubl.ExtKeyPaymentID).String()
+	if kortart == "" {
+		return
 	}
-	channel := "DK:GIRO"
+	pm.PaymentID = &kortart
+	// The structured Giro (04/15) and FIK (71/75) card types carry the numeric
+	// payment number in cbc:InstructionID (F-LIB145/153); the simple types
+	// (01/73) must not (F-LIB148/F-LIB275). The number comes from instr.Ref,
+	// which the kortart has just overridden as the PaymentID.
+	pm.InstructionID = nil
+	if oioubl21KortartHasInstructionID(kortart) {
+		if ref := instr.Ref.String(); ref != "" {
+			pm.InstructionID = &ref
+		}
+	}
+	channel := oioubl21PaymentChannelGiro
 	if paymentMeansCode == "93" {
-		channel = "DK:FIK"
+		channel = oioubl21PaymentChannelFIK
 	}
 	pm.PaymentChannelCode = &IDType{Value: channel}
+}
+
+// oioubl21KortartHasInstructionID reports whether an OIOUBL Giro/FIK kortart
+// requires a cbc:InstructionID payment number (F-LIB145 Giro 04/15, F-LIB153
+// FIK 71/75). The simple kortart (Giro 01, FIK 73) carry only the PaymentID.
+func oioubl21KortartHasInstructionID(kortart string) bool {
+	switch kortart {
+	case "04", "15", "71", "75":
+		return true
+	}
+	return false
 }
 
 // addCreditTransferAccount wires the credit-transfer account onto the payment

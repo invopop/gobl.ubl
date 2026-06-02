@@ -8,6 +8,8 @@ import (
 
 const (
 	oioubl21PaymentChannelIBAN       = "IBAN"
+	oioubl21PaymentChannelGiro       = "DK:GIRO"
+	oioubl21PaymentChannelFIK        = "DK:FIK"
 	oioubl21TaxSchemeVATCode         = "63"
 	oioubl21SchemeDKCVR              = "DK:CVR"
 	oioubl21TaxCategoryStandardRated = "StandardRated"
