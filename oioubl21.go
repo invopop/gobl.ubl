@@ -246,10 +246,10 @@ func oioubl21TaxCategoryCode(in string) string {
 	case "AE", "ReverseCharge":
 		return oioubl21TaxCategoryReverseCharge
 	case "E", "Exempt", "exempt":
-		// OIOUBL 2.1 (taxcategoryid-1.1) has no exempt category — its named
-		// values are StandardRated/ZeroRated/ReverseCharge/Excise. VAT-exempt
-		// lines map to ZeroRated (both = no VAT charged); the exempt-vs-zero
-		// distinction is not representable in OIOUBL 2.1.
+		// OIOUBL has no generic exempt category: neither taxcategoryid-1.1 nor
+		// -1.4 defines a plain "exempt" value (1.4 only adds the specific
+		// EN 16931 letters B/M/L/K/O/G and the Danish momskoder). VAT-exempt
+		// lines therefore map to ZeroRated, as both represent no VAT charged.
 		return oioubl21TaxCategoryZeroRated
 	default:
 		if in == "" {
