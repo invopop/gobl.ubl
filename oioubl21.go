@@ -5,7 +5,6 @@ import (
 
 	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/catalogues/untdid"
-	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -256,30 +255,4 @@ func applyOIOUBL21TaxScheme(ts *TaxScheme) {
 	}
 	name := "Moms"
 	ts.Name = &name
-}
-
-// goblTaxSchemeCategory maps an OIOUBL TaxScheme ID back to the GOBL tax
-// category code. OIOUBL identifies VAT as "63" (Moms); other UBL profiles
-// already carry the GOBL "VAT" code, so the value passes through unchanged.
-func goblTaxSchemeCategory(schemeID string) cbc.Code {
-	if schemeID == oioubl21TaxSchemeVATCode {
-		return cbc.Code(TaxSchemeVAT)
-	}
-	return cbc.Code(schemeID)
-}
-
-// goblTaxCategoryCode maps an OIOUBL TaxCategory ID back to the UNTDID 5305
-// code GOBL expects (the inverse of the addon's category mapping). Values from
-// other profiles, which already use the UNTDID codes, pass through unchanged.
-func goblTaxCategoryCode(id string) cbc.Code {
-	switch id {
-	case oioubl21TaxCategoryStandardRated:
-		return "S"
-	case oioubl21TaxCategoryZeroRated:
-		return "Z"
-	case oioubl21TaxCategoryReverseCharge:
-		return "AE"
-	default:
-		return cbc.Code(id)
-	}
 }
