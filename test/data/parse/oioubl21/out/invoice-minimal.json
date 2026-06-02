@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "19b7f21e6b0d747e0a22980c63b3bb20f6fcb77faa4c29a42f7e233e2c7f698b"
+			"val": "393781c3cc605b3c7da8a6462d8cd050607c1ca8a5ca81dd9f2cf676ffb67d8e"
 		}
 	},
 	"doc": {
@@ -136,6 +136,7 @@
 						"key": "standard",
 						"percent": "19%",
 						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
 							"untdid-tax-category": "S"
 						}
 					}
@@ -163,6 +164,7 @@
 					}
 				],
 				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
 					"untdid-payment-means": "31"
 				}
 			}
@@ -178,6 +180,7 @@
 							{
 								"key": "standard",
 								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
 									"untdid-tax-category": "S"
 								},
 								"base": "1800.00",
