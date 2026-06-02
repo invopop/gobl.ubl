@@ -53,6 +53,25 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	return nil
 }
 
+// goblAllowancePercent parses an AllowanceCharge MultiplierFactorNumeric into a
+// GOBL percentage, or returns nil when none is present. OIOUBL stores the
+// decimal factor (0.05 = 5%), which PercentageFromString reads directly; other
+// profiles store the percent number (5), which needs the % suffix.
+func goblAllowancePercent(ac *AllowanceCharge, oioubl bool) (*num.Percentage, error) {
+	if ac.MultiplierFactorNumeric == nil {
+		return nil, nil
+	}
+	multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
+	if !oioubl && !strings.HasSuffix(multiplier, "%") {
+		multiplier += "%"
+	}
+	p, err := num.PercentageFromString(multiplier)
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
 func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo, oioubl bool) (*bill.Charge, error) {
 	ch := &bill.Charge{}
 	if ac.AllowanceChargeReason != nil {
@@ -77,19 +96,12 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo,
 		}
 		ch.Base = &b
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
-		// reads directly; other profiles store the percent number (5), which needs
-		// the % suffix.
-		if !oioubl && !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		p, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		ch.Percent = &p
+	pct, err := goblAllowancePercent(ac, oioubl)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		ch.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
@@ -162,19 +174,12 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		}
 		d.Base = &b
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
-		// reads directly; other profiles store the percent number (5), which needs
-		// the % suffix.
-		if !oioubl && !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		p, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
+	pct, err := goblAllowancePercent(ac, oioubl)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		d.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
@@ -239,19 +244,12 @@ func goblLineCharge(ac *AllowanceCharge, oioubl bool) (*bill.LineCharge, error) 
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
-		// reads directly; other profiles store the percent number (5), which needs
-		// the % suffix.
-		if !oioubl && !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		percent, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		ch.Percent = &percent
+	pct, err := goblAllowancePercent(ac, oioubl)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		ch.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
@@ -281,19 +279,12 @@ func goblLineDiscount(ac *AllowanceCharge, oioubl bool) (*bill.LineDiscount, err
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
-		// reads directly; other profiles store the percent number (5), which needs
-		// the % suffix.
-		if !oioubl && !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		p, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
+	pct, err := goblAllowancePercent(ac, oioubl)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		d.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
