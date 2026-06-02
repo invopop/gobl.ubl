@@ -180,23 +180,6 @@ func applyOIOUBL21Party(p *Party) {
 			Value:        "StructuredDK",
 		}
 	}
-	// F-LIB035: StructuredDK addresses require either BuildingNumber
-	// or Postbox. GOBL doesn't model BuildingNumber separately, so we
-	// best-effort extract the trailing token of StreetName, falling
-	// back to a placeholder when nothing usable is present.
-	if p.PostalAddress != nil && p.PostalAddress.BuildingNumber == nil {
-		if p.PostalAddress.StreetName != nil {
-			parts := strings.Fields(*p.PostalAddress.StreetName)
-			if n := len(parts); n > 0 {
-				bn := parts[n-1]
-				p.PostalAddress.BuildingNumber = &bn
-			}
-		}
-		if p.PostalAddress.BuildingNumber == nil {
-			fallback := "1"
-			p.PostalAddress.BuildingNumber = &fallback
-		}
-	}
 	if p.PartyTaxScheme != nil {
 		for i := range p.PartyTaxScheme {
 			pts := &p.PartyTaxScheme[i]

@@ -19,7 +19,7 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-        <cbc:StreetName>Dampfærgevej 7-9</cbc:StreetName>
+        <cbc:StreetName>Dampfærgevej</cbc:StreetName>
         <cbc:BuildingNumber>7-9</cbc:BuildingNumber>
         <cbc:CityName>København Ø</cbc:CityName>
         <cbc:PostalZone>2100</cbc:PostalZone>
@@ -51,7 +51,7 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-        <cbc:StreetName>Aastvej 1</cbc:StreetName>
+        <cbc:StreetName>Aastvej</cbc:StreetName>
         <cbc:BuildingNumber>1</cbc:BuildingNumber>
         <cbc:CityName>Billund</cbc:CityName>
         <cbc:PostalZone>7190</cbc:PostalZone>

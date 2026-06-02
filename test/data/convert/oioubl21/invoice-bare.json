@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "eacc9132215ea54c092dd79a7960a6251065fe1396482aaf0e70b6fad89fb2ae"
+			"val": "03b5374d7a6920ba7aa6bc0fa70ad087e5ff2dc00f6ac2695dff2df815b781cd"
 		}
 	},
 	"doc": {
@@ -32,7 +32,8 @@
 			},
 			"addresses": [
 				{
-					"street": "Dampfærgevej 7-9",
+					"num": "7-9",
+					"street": "Dampfærgevej",
 					"locality": "København Ø",
 					"code": "2100",
 					"country": "DK"
@@ -47,7 +48,8 @@
 			},
 			"addresses": [
 				{
-					"street": "Aastvej 1",
+					"num": "1",
+					"street": "Aastvej",
 					"locality": "Billund",
 					"code": "7190",
 					"country": "DK"

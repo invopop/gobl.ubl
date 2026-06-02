@@ -57,6 +57,7 @@ type PartyName struct {
 // PostalAddress represents a postal address
 type PostalAddress struct {
 	AddressFormatCode    *IDType             `xml:"cbc:AddressFormatCode"`
+	Postbox              *string             `xml:"cbc:Postbox,omitempty"`
 	StreetName           *string             `xml:"cbc:StreetName"`
 	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
 	BuildingNumber       *string             `xml:"cbc:BuildingNumber,omitempty"`
@@ -197,9 +198,17 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		if n != "" {
 			contact.Name = &n
 		}
+		// OIOUBL requires cac:Contact/cbc:ID (F-INV051); source it from the
+		// person's identity when present rather than fabricating one.
+		if ctx.Is(ContextOIOUBL21) {
+			if ids := party.People[0].Identities; len(ids) > 0 && ids[0].Code != "" {
+				code := ids[0].Code.String()
+				contact.ID = &code
+			}
+		}
 	}
 
-	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil {
+	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil || contact.ID != nil {
 		p.Contact = contact
 	}
 
@@ -442,7 +451,19 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 
 	addr := &PostalAddress{}
 
-	if a.Street != "" {
+	if ctx.Is(ContextOIOUBL21) {
+		// OIOUBL StructuredDK keeps the street number and PO box in their own
+		// elements (F-LIB035) rather than folding them into StreetName.
+		if a.Street != "" {
+			addr.StreetName = &a.Street
+		}
+		if a.Number != "" {
+			addr.BuildingNumber = &a.Number
+		}
+		if a.PostOfficeBox != "" {
+			addr.Postbox = &a.PostOfficeBox
+		}
+	} else if a.Street != "" {
 		l := a.LineOne()
 		addr.StreetName = &l
 	}

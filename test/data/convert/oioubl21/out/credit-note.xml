@@ -25,7 +25,7 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-        <cbc:StreetName>Kongevejen 12</cbc:StreetName>
+        <cbc:StreetName>Kongevejen</cbc:StreetName>
         <cbc:BuildingNumber>12</cbc:BuildingNumber>
         <cbc:CityName>København</cbc:CityName>
         <cbc:PostalZone>2100</cbc:PostalZone>
@@ -58,7 +58,7 @@
       </cac:PartyName>
       <cac:PostalAddress>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
-        <cbc:StreetName>Vestergade 45</cbc:StreetName>
+        <cbc:StreetName>Vestergade</cbc:StreetName>
         <cbc:BuildingNumber>45</cbc:BuildingNumber>
         <cbc:CityName>Aarhus</cbc:CityName>
         <cbc:PostalZone>8000</cbc:PostalZone>

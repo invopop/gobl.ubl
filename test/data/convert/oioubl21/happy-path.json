@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "88b070128eed55f7d3e48839a8ef9c3261319fb54415be92ddac890133ca8be2"
+			"val": "aaf6d7a0ef5f3479aedbf835300be25400fe3b12a9de81bde76014a74b446fbb"
 		}
 	},
 	"doc": {
@@ -71,7 +71,13 @@
 					"name": {
 						"given": "Mette",
 						"surname": "Sørensen"
-					}
+					},
+					"identities": [
+						{
+							"label": "Employee",
+							"code": "EMP-4471"
+						}
+					]
 				}
 			],
 			"inboxes": [
