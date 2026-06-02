@@ -17,7 +17,11 @@ const (
 	oioubl21TaxCategoryReverseCharge = "ReverseCharge"
 )
 
-func applyOIOUBL21Rules(out *Invoice) {
+// applyOIOUBL21 post-processes an assembled UBL document into OIOUBL 2.1 form:
+// scheme/codelist attributes, party identifiers, payment means and the
+// OIOUBL-specific total adjustments. These are serialization transforms, not
+// validations — OIOUBL validation lives entirely in the dk-oioubl GOBL addon.
+func applyOIOUBL21(out *Invoice) {
 	if out == nil {
 		return
 	}
