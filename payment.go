@@ -204,12 +204,13 @@ func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMe
 		return
 	}
 	pm.PaymentID = &kortart
-	// The structured Giro (04/15) and FIK (71/75) card types carry the numeric
-	// payment number in cbc:InstructionID (F-LIB145/153); the simple types
-	// (01/73) must not (F-LIB148/F-LIB275). The number comes from instr.Ref,
-	// which the kortart has just overridden as the PaymentID.
+	// The payment number is carried in cbc:InstructionID, sourced from instr.Ref
+	// (which the kortart has just overridden as the PaymentID). Every Giro/FIK
+	// card type may carry it except FIK 73, where it is forbidden (F-LIB275);
+	// the structured types (Giro 04/15, FIK 71/75) additionally require it
+	// (F-LIB145/F-LIB153, enforced by the addon).
 	pm.InstructionID = nil
-	if oioubl21KortartHasInstructionID(kortart) {
+	if oioubl21KortartAllowsInstructionID(kortart) {
 		if ref := instr.Ref.String(); ref != "" {
 			pm.InstructionID = &ref
 		}
@@ -221,12 +222,13 @@ func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMe
 	pm.PaymentChannelCode = &IDType{Value: channel}
 }
 
-// oioubl21KortartHasInstructionID reports whether an OIOUBL Giro/FIK kortart
-// requires a cbc:InstructionID payment number (F-LIB145 Giro 04/15, F-LIB153
-// FIK 71/75). The simple kortart (Giro 01, FIK 73) carry only the PaymentID.
-func oioubl21KortartHasInstructionID(kortart string) bool {
+// oioubl21KortartAllowsInstructionID reports whether an OIOUBL Giro/FIK kortart
+// may carry a cbc:InstructionID payment number. All of them may except FIK 73,
+// which forbids it (F-LIB275); Giro 01 is optional, the structured types
+// (04/15/71/75) require it.
+func oioubl21KortartAllowsInstructionID(kortart string) bool {
 	switch kortart {
-	case "04", "15", "71", "75":
+	case "01", "04", "15", "71", "75":
 		return true
 	}
 	return false
