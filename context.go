@@ -28,6 +28,8 @@ type VESIDMapping struct {
 	Invoice string
 	// CreditNote is the VESID for credit notes
 	CreditNote string
+	// ApplicationResponse is the VESID for application responses
+	ApplicationResponse string
 }
 
 // Context is used to ensure that the generated UBL document
@@ -228,8 +230,9 @@ var ContextOIOUBL21 = Context{
 	ProfileID:       "urn:www.nesubl.eu:profiles:profile5:ver2.0",
 	Addons:          []cbc.Key{oioubl.V2_1},
 	VESIDs: VESIDMapping{
-		Invoice:    "dk.oioubl:invoice:1.17.2",
-		CreditNote: "dk.oioubl:credit-note:1.17.2",
+		Invoice:             "dk.oioubl:invoice:1.17.2",
+		CreditNote:          "dk.oioubl:credit-note:1.17.2",
+		ApplicationResponse: "dk.oioubl:application-response:1.17.2",
 	},
 }
 

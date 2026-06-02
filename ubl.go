@@ -32,6 +32,7 @@ const Version = "2.1"
 //
 // Supported types:
 //   - *Invoice (for both Invoice and CreditNote documents)
+//   - *ApplicationResponse (for OIOUBL invoice responses)
 //
 // Example usage:
 //
@@ -66,6 +67,17 @@ func Parse(data []byte) (any, error) {
 			return nil, err
 		}
 		return in, nil
+
+	case NamespaceUBLApplicationResponse:
+		ar := new(ApplicationResponse)
+		if err := xmlctx.Unmarshal(data, ar, xmlctx.WithNamespaces(map[string]string{
+			"":    ns,
+			"cbc": NamespaceCBC,
+			"cac": NamespaceCAC,
+		})); err != nil {
+			return nil, err
+		}
+		return ar, nil
 
 	// Future document types can be added here
 	// case NamespaceUBLOrder:
@@ -115,19 +127,32 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		}
 
 		return ublInvoice(d, o)
+	case *bill.Status:
+		if err := ensureAddons(d, o.context.Addons); err != nil {
+			return nil, err
+		}
+		return ublApplicationResponse(d, o)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
 }
 
-// ensureAddons checks if the invoice has all required addons and adds missing ones
-func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
+// addonsDocument is implemented by the GOBL document types that carry addons
+// and can recalculate themselves once an addon is added.
+type addonsDocument interface {
+	GetAddons() []cbc.Key
+	SetAddons(...cbc.Key)
+	Calculate() error
+}
+
+// ensureAddons checks if the document has all required addons and adds missing ones
+func ensureAddons(doc addonsDocument, required []cbc.Key) error {
 	if len(required) == 0 {
 		return nil
 	}
 
 	var missing []cbc.Key
-	existing := inv.GetAddons()
+	existing := doc.GetAddons()
 	for _, addon := range required {
 		if !addon.In(existing...) {
 			missing = append(missing, addon)
@@ -138,9 +163,9 @@ func ensureAddons(inv *bill.Invoice, required []cbc.Key) error {
 		return nil
 	}
 
-	inv.SetAddons(append(existing, missing...)...)
-	if err := inv.Calculate(); err != nil {
-		return fmt.Errorf("gobl invoice missing addon %v: %w", missing, err)
+	doc.SetAddons(append(existing, missing...)...)
+	if err := doc.Calculate(); err != nil {
+		return fmt.Errorf("gobl document missing addon %v: %w", missing, err)
 	}
 	return nil
 }
