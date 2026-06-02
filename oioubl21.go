@@ -21,14 +21,19 @@ func oioubl21TaxCategoryID(ext tax.Extensions) string {
 }
 
 const (
-	oioubl21PaymentChannelIBAN       = "IBAN"
-	oioubl21PaymentChannelGiro       = "DK:GIRO"
-	oioubl21PaymentChannelFIK        = "DK:FIK"
-	oioubl21TaxSchemeVATCode         = "63"
-	oioubl21SchemeDKCVR              = "DK:CVR"
-	oioubl21TaxCategoryStandardRated = "StandardRated"
-	oioubl21TaxCategoryZeroRated     = "ZeroRated"
-	oioubl21TaxCategoryReverseCharge = "ReverseCharge"
+	// These OIOUBL wire values equal the dk-oioubl addon's extension values by
+	// construction (the converter writes the extension straight to the XML and
+	// reads it back on parse), so they are sourced from the addon to avoid drift.
+	oioubl21PaymentChannelIBAN       = string(oioubl.ExtValuePaymentChannelIBAN)
+	oioubl21PaymentChannelGiro       = string(oioubl.ExtValuePaymentChannelGiro)
+	oioubl21PaymentChannelFIK        = string(oioubl.ExtValuePaymentChannelFIK)
+	oioubl21TaxCategoryStandardRated = string(oioubl.ExtValueTaxCategoryStandardRated)
+	oioubl21TaxCategoryZeroRated     = string(oioubl.ExtValueTaxCategoryZeroRated)
+	oioubl21TaxCategoryReverseCharge = string(oioubl.ExtValueTaxCategoryReverseCharge)
+
+	// Serialization-only values with no addon counterpart.
+	oioubl21TaxSchemeVATCode = "63"     // taxschemeid-1.2 VAT (Moms)
+	oioubl21SchemeDKCVR      = "DK:CVR" // party endpoint scheme
 )
 
 // applyOIOUBL21 post-processes an assembled UBL document into OIOUBL 2.1 form:
