@@ -19,9 +19,13 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	// Build tax category map from TaxTotal
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
+	// OIOUBL emits MultiplierFactorNumeric as the decimal factor (0.05 for 5%)
+	// rather than the percent number (5) used by other profiles.
+	oioubl := ui.CustomizationID == ContextOIOUBL21.CustomizationID
+
 	for _, allowanceCharge := range ui.AllowanceCharge {
 		if allowanceCharge.ChargeIndicator {
-			charge, err := goblCharge(&allowanceCharge, taxCategoryMap)
+			charge, err := goblCharge(&allowanceCharge, taxCategoryMap, oioubl)
 			if err != nil {
 				return err
 			}
@@ -30,7 +34,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 			}
 			charges = append(charges, charge)
 		} else {
-			discount, err := goblDiscount(&allowanceCharge, taxCategoryMap)
+			discount, err := goblDiscount(&allowanceCharge, taxCategoryMap, oioubl)
 			if err != nil {
 				return err
 			}
@@ -49,7 +53,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	return nil
 }
 
-func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Charge, error) {
+func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo, oioubl bool) (*bill.Charge, error) {
 	ch := &bill.Charge{}
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
@@ -75,7 +79,10 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 	}
 	if ac.MultiplierFactorNumeric != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
+		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
+		// reads directly; other profiles store the percent number (5), which needs
+		// the % suffix.
+		if !oioubl && !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
 		p, err := num.PercentageFromString(multiplier)
@@ -131,7 +138,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 	return ch, nil
 }
 
-func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Discount, error) {
+func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo, oioubl bool) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
@@ -157,7 +164,10 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 	}
 	if ac.MultiplierFactorNumeric != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
+		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
+		// reads directly; other profiles store the percent number (5), which needs
+		// the % suffix.
+		if !oioubl && !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
 		p, err := num.PercentageFromString(multiplier)
@@ -213,7 +223,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 	return d, nil
 }
 
-func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
+func goblLineCharge(ac *AllowanceCharge, oioubl bool) (*bill.LineCharge, error) {
 	amount, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
 	if err != nil {
 		return nil, err
@@ -231,7 +241,10 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	}
 	if ac.MultiplierFactorNumeric != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
+		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
+		// reads directly; other profiles store the percent number (5), which needs
+		// the % suffix.
+		if !oioubl && !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
 		percent, err := num.PercentageFromString(multiplier)
@@ -252,7 +265,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	return ch, nil
 }
 
-func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
+func goblLineDiscount(ac *AllowanceCharge, oioubl bool) (*bill.LineDiscount, error) {
 	a, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
 	if err != nil {
 		return nil, err
@@ -270,7 +283,10 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 	}
 	if ac.MultiplierFactorNumeric != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
+		// OIOUBL stores the decimal factor (0.05 = 5%), which PercentageFromString
+		// reads directly; other profiles store the percent number (5), which needs
+		// the % suffix.
+		if !oioubl && !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
 		p, err := num.PercentageFromString(multiplier)

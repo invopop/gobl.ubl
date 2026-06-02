@@ -1,0 +1,190 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "19240a548436d69440c1b19e9ed5cf4c626ad8fdd30643588ce128c70b1fd83f"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "FINAL-001",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Jens Hansen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@eksempel-software.dk"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK76543216",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Mette Sørensen"
+					},
+					"identities": [
+						{
+							"code": "EMP-4471"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "ap@modtager-handel.dk"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Udvikling timer",
+					"price": "1000.00",
+					"unit": "h"
+				},
+				"sum": "10000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10000.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "Netto 30 dage"
+			},
+			"instructions": {
+				"key": "any",
+				"ref": "TEST-001",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "10000.00",
+			"total": "10000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "10000.00",
+								"percent": "25%",
+								"amount": "2500.00"
+							}
+						],
+						"amount": "2500.00"
+					}
+				],
+				"sum": "2500.00"
+			},
+			"tax": "2500.00",
+			"total_with_tax": "12500.00",
+			"payable": "12500.00"
+		}
+	}
+}

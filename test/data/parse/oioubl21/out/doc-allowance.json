@@ -1,0 +1,200 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "f09759b31889f3a792fdab54c9c9c927c63813e824b40e884fc51f4da263a73e"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "FINAL-DA01",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Jens Hansen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK76543216",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Mette Sørensen"
+					},
+					"identities": [
+						{
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Konsulent timer",
+					"price": "1000.00",
+					"unit": "h"
+				},
+				"sum": "10000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10000.00"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Loyalitetsrabat",
+				"base": "10000.00",
+				"percent": "5%",
+				"amount": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "Netto 30 dage"
+			},
+			"instructions": {
+				"key": "any",
+				"ref": "TEST-006",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "10000.00",
+			"discount": "500.00",
+			"total": "9500.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "9500.00",
+								"percent": "25%",
+								"amount": "2375.00"
+							}
+						],
+						"amount": "2375.00"
+					}
+				],
+				"sum": "2375.00"
+			},
+			"tax": "2375.00",
+			"total_with_tax": "11875.00",
+			"payable": "11875.00"
+		}
+	}
+}

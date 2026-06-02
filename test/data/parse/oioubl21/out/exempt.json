@@ -1,0 +1,180 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "026a6429c6e88eb4df81d56cf12b6a0e73e1e34b78a08a9f8a7c2cb6a15a7e0e"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "FINAL-EX01",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Jens Hansen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK76543216",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Mette Sørensen"
+					},
+					"identities": [
+						{
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Momsfritaget ydelse",
+					"price": "8000.00",
+					"unit": "one"
+				},
+				"sum": "8000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"ext": {
+							"cef-vatex": "VATEX-EU-132",
+							"untdid-tax-category": "Z"
+						}
+					}
+				],
+				"total": "8000.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "Netto 30 dage"
+			},
+			"instructions": {
+				"key": "any",
+				"ref": "TEST-006",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "8000.00",
+			"total": "8000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"cef-vatex": "VATEX-EU-132",
+									"untdid-tax-category": "Z"
+								},
+								"base": "8000.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "8000.00",
+			"payable": "8000.00"
+		}
+	}
+}

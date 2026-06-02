@@ -1,0 +1,192 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "a6b2b6783d4bb8b6f582cd674f6b016b411aa822db2d987b4f7eb22eaef470de"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "SAMPLE-001",
+		"issue_date": "2024-05-15",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency"
+		},
+		"supplier": {
+			"name": "Worksome Aps",
+			"tax_id": {
+				"country": "DK",
+				"code": "37990485"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK37990485",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK37990485"
+				}
+			],
+			"addresses": [
+				{
+					"num": "7-9",
+					"street": "Dampfærgevej",
+					"locality": "København Ø",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Lego System A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "47458714"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK47458714",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Kontakt Ansvarlig"
+					},
+					"identities": [
+						{
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DK:CVR",
+					"code": "DK47458714"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1",
+					"street": "Aastvej",
+					"locality": "Billund",
+					"code": "7190",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Booking Fee (Fixed Rate)",
+					"price": "31676.00",
+					"unit": "one"
+				},
+				"sum": "31676.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "31676.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Worksome service fee",
+					"price": "1267.04",
+					"unit": "one"
+				},
+				"sum": "1267.04",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1267.04"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"instructions": {
+				"key": "any",
+				"ref": "SAMPLE-001",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243",
+						"name": "Danske Bank"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "32943.04",
+			"total": "32943.04",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "32943.04",
+								"percent": "25%",
+								"amount": "8235.76"
+							}
+						],
+						"amount": "8235.76"
+					}
+				],
+				"sum": "8235.76"
+			},
+			"tax": "8235.76",
+			"total_with_tax": "41178.80",
+			"payable": "41178.80"
+		}
+	}
+}
