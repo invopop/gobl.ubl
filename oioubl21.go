@@ -192,18 +192,25 @@ func applyOIOUBL21Party(p *Party) {
 	}
 }
 
+// oioubl21CategoryID normalizes a tax-category cbc:ID to the OIOUBL
+// taxcategoryid-1.1 codelist, defaulting an absent category to StandardRated.
+func oioubl21CategoryID(id *IDType) *IDType {
+	if id == nil {
+		id = &IDType{Value: oioubl21TaxCategoryStandardRated}
+	}
+	id.Value = oioubl21TaxCategoryCode(id.Value)
+	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
+	schemeAgencyID := "320"
+	id.SchemeID = &schemeID
+	id.SchemeAgencyID = &schemeAgencyID
+	return id
+}
+
 func applyOIOUBL21TaxCategory(tc *TaxCategory) {
 	if tc == nil {
 		return
 	}
-	if tc.ID == nil {
-		tc.ID = &IDType{Value: oioubl21TaxCategoryStandardRated}
-	}
-	tc.ID.Value = oioubl21TaxCategoryCode(tc.ID.Value)
-	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
-	schemeAgencyID := "320"
-	tc.ID.SchemeID = &schemeID
-	tc.ID.SchemeAgencyID = &schemeAgencyID
+	tc.ID = oioubl21CategoryID(tc.ID)
 	applyOIOUBL21TaxScheme(tc.TaxScheme)
 }
 
@@ -211,14 +218,7 @@ func applyOIOUBL21ClassifiedTaxCategory(tc *ClassifiedTaxCategory) {
 	if tc == nil {
 		return
 	}
-	if tc.ID == nil {
-		tc.ID = &IDType{Value: oioubl21TaxCategoryStandardRated}
-	}
-	tc.ID.Value = oioubl21TaxCategoryCode(tc.ID.Value)
-	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
-	schemeAgencyID := "320"
-	tc.ID.SchemeID = &schemeID
-	tc.ID.SchemeAgencyID = &schemeAgencyID
+	tc.ID = oioubl21CategoryID(tc.ID)
 	applyOIOUBL21TaxScheme(tc.TaxScheme)
 }
 
