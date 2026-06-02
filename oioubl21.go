@@ -152,18 +152,6 @@ func applyOIOUBL21Party(p *Party) {
 			p.EndpointID.Value = "DK" + p.EndpointID.Value
 		}
 	}
-	if p.EndpointID == nil {
-		if len(p.PartyTaxScheme) > 0 && p.PartyTaxScheme[0].CompanyID != nil {
-			val := p.PartyTaxScheme[0].CompanyID.Value
-			if !strings.HasPrefix(val, "DK") {
-				val = "DK" + val
-			}
-			p.EndpointID = &EndpointID{
-				SchemeID: oioubl21SchemeDKCVR,
-				Value:    val,
-			}
-		}
-	}
 	if p.PartyName == nil && len(p.PartyIdentification) == 0 {
 		if p.PartyLegalEntity != nil && p.PartyLegalEntity.RegistrationName != nil {
 			p.PartyName = &PartyName{
@@ -199,17 +187,6 @@ func applyOIOUBL21Party(p *Party) {
 		if !strings.HasPrefix(p.PartyLegalEntity.CompanyID.Value, "DK") {
 			p.PartyLegalEntity.CompanyID.Value = "DK" + p.PartyLegalEntity.CompanyID.Value
 		}
-	}
-	// F-INV051: AccountingCustomerParty/Contact/ID must contain a
-	// value. The dk-oioubl-v2-1 addon enforces customer.People at the
-	// GOBL stage (F-INV046), so this fallback only fires for paths
-	// that bypass the addon.
-	if p.Contact == nil {
-		p.Contact = &Contact{}
-	}
-	if p.Contact.ID == nil {
-		id := "1"
-		p.Contact.ID = &id
 	}
 }
 

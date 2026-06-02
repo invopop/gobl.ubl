@@ -179,7 +179,7 @@ func TestConvertJSONToXMLWithOIOUBL21Context(t *testing.T) {
 	assert.Contains(t, xml, "<cbc:InvoiceTypeCode listAgencyID=\"320\" listID=\"urn:oioubl:codelist:invoicetypecode-1.1\">380</cbc:InvoiceTypeCode>")
 }
 
-func TestConvertOIOUBL21BarePartyFallbacks(t *testing.T) {
+func TestConvertOIOUBL21Party(t *testing.T) {
 	inPath := filepath.Join("..", "..", "test", "data", "convert", "oioubl21", "invoice-bare.json")
 	outPath := filepath.Join(t.TempDir(), "out.xml")
 
@@ -191,16 +191,16 @@ func TestConvertOIOUBL21BarePartyFallbacks(t *testing.T) {
 	require.NoError(t, err)
 	xml := string(data)
 
-	// EndpointID should fall back to CVR number when no inboxes are present
+	// EndpointID is sourced from the party inbox (no CVR fallback).
 	assert.Contains(t, xml, `<cbc:EndpointID schemeID="DK:CVR">DK37990485</cbc:EndpointID>`)
 	assert.Contains(t, xml, `<cbc:EndpointID schemeID="DK:CVR">DK47458714</cbc:EndpointID>`)
 
-	// PartyName should fall back to RegistrationName when no alias is present
+	// PartyName falls back to RegistrationName when no alias is present.
 	assert.Contains(t, xml, "<cac:PartyName>\n        <cbc:Name>Worksome Aps</cbc:Name>")
 	assert.Contains(t, xml, "<cac:PartyName>\n        <cbc:Name>Lego System A/S</cbc:Name>")
 
-	// Contact must always be present with a default ID
-	assert.Contains(t, xml, "<cac:Contact>\n        <cbc:ID>1</cbc:ID>\n      </cac:Contact>")
+	// Contact/ID is sourced from the person identity, not a fabricated value.
+	assert.Contains(t, xml, "<cbc:ID>C-001</cbc:ID>")
 }
 
 func TestConvertCreditNoteToXMLWithOIOUBL21Context(t *testing.T) {

@@ -38,9 +38,6 @@
         <cbc:RegistrationName>Worksome Aps</cbc:RegistrationName>
         <cbc:CompanyID schemeID="DK:CVR">DK37990485</cbc:CompanyID>
       </cac:PartyLegalEntity>
-      <cac:Contact>
-        <cbc:ID>1</cbc:ID>
-      </cac:Contact>
     </cac:Party>
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
@@ -71,7 +68,8 @@
         <cbc:CompanyID schemeID="DK:CVR">DK47458714</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
-        <cbc:ID>1</cbc:ID>
+        <cbc:ID>C-001</cbc:ID>
+        <cbc:Name>Kontakt Ansvarlig</cbc:Name>
       </cac:Contact>
     </cac:Party>
   </cac:AccountingCustomerParty>

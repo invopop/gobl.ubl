@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f6638305e54645463f4133871632cc42f21d0ddbc3416cea079e813eeb011d99"
+			"val": "885661fc45674cd9eab8e70fe7492202738131390fe9b091eea338bc205eead2"
 		}
 	},
 	"doc": {
@@ -76,6 +76,20 @@
 				"country": "DK",
 				"code": "47458714"
 			},
+			"people": [
+				{
+					"name": {
+						"given": "Kontakt",
+						"surname": "Ansvarlig"
+					},
+					"identities": [
+						{
+							"label": "Contact",
+							"code": "C-001"
+						}
+					]
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "GLN",

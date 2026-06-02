@@ -49,14 +49,14 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "EM", doc.AccountingSupplierParty.Party.EndpointID.SchemeID)
 	})
 
-	t.Run("oioubl21 bare party fallbacks", func(t *testing.T) {
+	t.Run("oioubl21 party uses real data without fallbacks", func(t *testing.T) {
 		doc, err := testInvoiceFrom("oioubl21/invoice-bare.json")
 		require.NoError(t, err)
 
 		supplier := doc.AccountingSupplierParty.Party
 		customer := doc.AccountingCustomerParty.Party
 
-		// EndpointID falls back to CVR from PartyTaxScheme
+		// EndpointID is sourced from the party inbox (no CVR fallback).
 		require.NotNil(t, supplier.EndpointID)
 		assert.Equal(t, "DK:CVR", supplier.EndpointID.SchemeID)
 		assert.Equal(t, "DK37990485", supplier.EndpointID.Value)
@@ -65,21 +65,21 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "DK:CVR", customer.EndpointID.SchemeID)
 		assert.Equal(t, "DK47458714", customer.EndpointID.Value)
 
-		// PartyName falls back to RegistrationName
+		// PartyName falls back to RegistrationName when no alias is present.
 		require.NotNil(t, supplier.PartyName)
 		assert.Equal(t, "Worksome Aps", supplier.PartyName.Name)
 
 		require.NotNil(t, customer.PartyName)
 		assert.Equal(t, "Lego System A/S", customer.PartyName.Name)
 
-		// Contact is always present with default ID
-		require.NotNil(t, supplier.Contact)
-		require.NotNil(t, supplier.Contact.ID)
-		assert.Equal(t, "1", *supplier.Contact.ID)
-
+		// Contact/ID is sourced from the customer's person identity, not fabricated.
 		require.NotNil(t, customer.Contact)
 		require.NotNil(t, customer.Contact.ID)
-		assert.Equal(t, "1", *customer.Contact.ID)
+		assert.Equal(t, "C-001", *customer.Contact.ID)
+
+		// The supplier has no contact person, so no Contact is emitted; OIOUBL
+		// does not require a supplier Contact.
+		assert.Nil(t, supplier.Contact)
 	})
 
 	t.Run("identity scopes map to legal and tax identifiers", func(t *testing.T) {

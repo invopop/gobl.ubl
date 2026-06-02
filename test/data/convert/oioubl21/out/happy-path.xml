@@ -39,7 +39,6 @@
         <cbc:CompanyID schemeID="DK:CVR">DK12345674</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
-        <cbc:ID>1</cbc:ID>
         <cbc:Name>Jens Hansen</cbc:Name>
         <cbc:ElectronicMail>billing@eksempel-software.dk</cbc:ElectronicMail>
       </cac:Contact>

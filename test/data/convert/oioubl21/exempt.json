@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9453e28363129d09b00ebf00005ea822e4079fe6d1f4e1009a6eae484da4b4c4"
+			"val": "b02b28d873ebdbbf64e7d8cfbc35ab61b3b1423b23d4f952fe2824eb8f601c06"
 		}
 	},
 	"doc": {
@@ -66,7 +66,13 @@
 					"name": {
 						"given": "Mette",
 						"surname": "Sørensen"
-					}
+					},
+					"identities": [
+						{
+							"label": "Contact",
+							"code": "C-001"
+						}
+					]
 				}
 			],
 			"inboxes": [

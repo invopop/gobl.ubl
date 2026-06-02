@@ -47,7 +47,6 @@
         <cbc:CompanyID schemeID="DK:CVR">DK37990485</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
-        <cbc:ID>1</cbc:ID>
         <cbc:ElectronicMail>billing@example.com</cbc:ElectronicMail>
       </cac:Contact>
     </cac:Party>
@@ -80,7 +79,8 @@
         <cbc:CompanyID schemeID="DK:CVR">DK47458714</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
-        <cbc:ID>1</cbc:ID>
+        <cbc:ID>C-001</cbc:ID>
+        <cbc:Name>Kontakt Ansvarlig</cbc:Name>
         <cbc:ElectronicMail>email@sample.com</cbc:ElectronicMail>
       </cac:Contact>
     </cac:Party>

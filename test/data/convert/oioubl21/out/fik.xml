@@ -39,7 +39,6 @@
         <cbc:CompanyID schemeID="DK:CVR">DK12345674</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
-        <cbc:ID>1</cbc:ID>
         <cbc:Name>Jens Hansen</cbc:Name>
       </cac:Contact>
     </cac:Party>
@@ -72,7 +71,7 @@
         <cbc:CompanyID schemeID="DK:CVR">DK76543216</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
-        <cbc:ID>1</cbc:ID>
+        <cbc:ID>C-001</cbc:ID>
         <cbc:Name>Mette Sørensen</cbc:Name>
       </cac:Contact>
     </cac:Party>
