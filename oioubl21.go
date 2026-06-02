@@ -73,16 +73,13 @@ func applyOIOUBL21(out *Invoice) {
 	applyOIOUBL21TaxCategories(out)
 }
 
-// applyOIOUBL21PaymentMeans defaults the OIOUBL payment channel and per-means
-// due date. Direct debit (49) is left without a channel: GOBL's DirectDebit
-// carries no BIC, and declaring IBAN would require a FinancialInstitution/ID
-// (F-LIB295).
+// applyOIOUBL21PaymentMeans stamps the paymentchannelcode-1.1 list ID, defaults
+// the per-means due date and strips a redundant FinancialInstitutionBranch from
+// IBAN accounts (F-LIB295). The channel value itself is set from the
+// dk-oioubl-payment-channel extension when the payment means is built.
 func applyOIOUBL21PaymentMeans(out *Invoice) {
 	for i := range out.PaymentMeans {
 		pm := &out.PaymentMeans[i]
-		if pm.PaymentChannelCode == nil && pm.PaymentMeansCode.Value != "49" {
-			pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
-		}
 		if pm.PaymentChannelCode != nil {
 			listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
 			pm.PaymentChannelCode.ListID = &listID

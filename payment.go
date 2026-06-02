@@ -148,11 +148,15 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if ref := instr.Ref.String(); ref != "" {
 		ui.PaymentMeans[0].PaymentID = &ref
 	}
-	// OIOUBL Giro (50) / FIK (93): cbc:PaymentID is the dk-oioubl-payment-id
-	// "kortart" (overriding instr.Ref, which is the Peppol mapping), and the
-	// PaymentChannelCode is DK:GIRO / DK:FIK (F-LIB155/F-LIB277). The FIK
-	// creditor account flows through the credit-transfer Number below (F-LIB305).
+	// OIOUBL PaymentChannelCode (IBAN / DK:GIRO / DK:FIK, F-LIB155/F-LIB277) is
+	// precomputed by the dk-oioubl addon in the dk-oioubl-payment-channel
+	// extension. cbc:PaymentID is the dk-oioubl-payment-id "kortart" (overriding
+	// instr.Ref, the Peppol mapping); the FIK creditor account flows through the
+	// credit-transfer Number below (F-LIB305).
 	if ctx.Is(ContextOIOUBL21) {
+		if ch := instr.Ext.Get(oioubl.ExtKeyPaymentChannel).String(); ch != "" && ui.PaymentMeans[0].PaymentChannelCode == nil {
+			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: ch}
+		}
 		applyOIOUBL21PaymentID(&ui.PaymentMeans[0], instr, paymentMeansCode)
 	}
 	if instr.Detail != "" {
@@ -193,8 +197,8 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 
 // applyOIOUBL21PaymentID sets the OIOUBL Giro (50) / FIK (93) cbc:PaymentID from
 // the dk-oioubl-payment-id "kortart" (overriding instr.Ref, which is the Peppol
-// mapping) and the PaymentChannelCode DK:GIRO / DK:FIK (F-LIB155/F-LIB277). The
-// FIK creditor account flows through the credit-transfer Number (F-LIB305).
+// mapping). The FIK creditor account flows through the credit-transfer Number
+// (F-LIB305).
 func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMeansCode string) {
 	if paymentMeansCode != "50" && paymentMeansCode != "93" {
 		return
@@ -215,11 +219,6 @@ func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMe
 			pm.InstructionID = &ref
 		}
 	}
-	channel := oioubl21PaymentChannelGiro
-	if paymentMeansCode == "93" {
-		channel = oioubl21PaymentChannelFIK
-	}
-	pm.PaymentChannelCode = &IDType{Value: channel}
 }
 
 // oioubl21KortartAllowsInstructionID reports whether an OIOUBL Giro/FIK kortart
@@ -248,9 +247,6 @@ func (ui *Invoice) addCreditTransferAccount(instr *pay.Instructions, ctx Context
 		return
 	}
 	pm.PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0], ctx, paymentMeansCode)
-	if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "31" && pm.PaymentChannelCode == nil {
-		pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
-	}
 }
 
 func newCreditTransferAccount(ct *pay.CreditTransfer, ctx Context, paymentMeansCode string) *FinancialAccount {
