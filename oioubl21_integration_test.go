@@ -31,7 +31,12 @@ func TestOIOUBL21AddonIntegration(t *testing.T) {
 	}
 
 	contact := func() []*org.Person {
-		return []*org.Person{{Name: &org.Name{Given: "Anders", Surname: "Jensen"}}}
+		// F-INV051 (addon rule 20) requires the customer contact to carry an
+		// identity code, which the converter emits as cac:Contact/cbc:ID.
+		return []*org.Person{{
+			Name:       &org.Name{Given: "Anders", Surname: "Jensen"},
+			Identities: []*org.Identity{{Code: "EMP-7781"}},
+		}}
 	}
 
 	t.Run("valid OIOUBL invoice passes en16931 + dk-oioubl-v2-1 and converts", func(t *testing.T) {
