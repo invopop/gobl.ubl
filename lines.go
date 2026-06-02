@@ -163,7 +163,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 					},
 				}
 
-				if s := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); s != "" {
+				if s := oioubl21TaxCategoryID(l.Taxes[0].Ext); s != "" {
 					it.ClassifiedTaxCategory.ID = &IDType{Value: s}
 				}
 
@@ -177,7 +177,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 					it.ClassifiedTaxCategory.Percent = &p
 				}
 
-				if s := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); s != "" {
+				if s := oioubl21TaxCategoryID(l.Taxes[0].Ext); s != "" {
 					it.ClassifiedTaxCategory.ID = &IDType{Value: s}
 				}
 			}
@@ -318,7 +318,7 @@ func makeLineTaxTotals(line *bill.Line, ccy string, ctx Context) []TaxTotal {
 		}
 		taxCat := TaxCategory{}
 
-		if k := t.Ext.Get(untdid.ExtKeyTaxCategory).String(); k != "" {
+		if k := oioubl21TaxCategoryID(t.Ext); k != "" {
 			taxCat.ID = &IDType{Value: k}
 		}
 

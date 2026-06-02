@@ -3,8 +3,22 @@ package ubl
 import (
 	"strings"
 
+	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/tax"
 )
+
+// oioubl21TaxCategoryID returns the value to emit as cac:TaxCategory/cbc:ID. The
+// dk-oioubl addon precomputes the OIOUBL taxcategoryid-1.1 code (StandardRated,
+// …) in the dk-oioubl-tax-category extension; other profiles fall back to the
+// UNTDID category, which they use directly.
+func oioubl21TaxCategoryID(ext tax.Extensions) string {
+	if c := ext.Get(oioubl.ExtKeyTaxCategory); c != "" {
+		return c.String()
+	}
+	return ext.Get(untdid.ExtKeyTaxCategory).String()
+}
 
 const (
 	oioubl21PaymentChannelIBAN       = "IBAN"
@@ -196,13 +210,14 @@ func applyOIOUBL21Party(p *Party) {
 	}
 }
 
-// oioubl21CategoryID normalizes a tax-category cbc:ID to the OIOUBL
-// taxcategoryid-1.1 codelist, defaulting an absent category to StandardRated.
+// oioubl21CategoryID stamps the taxcategoryid-1.1 codelist attributes onto a
+// tax-category cbc:ID, defaulting an absent category to StandardRated. The code
+// itself is set at build time from the dk-oioubl-tax-category extension (see
+// oioubl21TaxCategoryID).
 func oioubl21CategoryID(id *IDType) *IDType {
 	if id == nil {
 		id = &IDType{Value: oioubl21TaxCategoryStandardRated}
 	}
-	id.Value = oioubl21TaxCategoryCode(id.Value)
 	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
 	schemeAgencyID := "320"
 	id.SchemeID = &schemeID
@@ -241,28 +256,6 @@ func applyOIOUBL21TaxScheme(ts *TaxScheme) {
 	ts.Name = &name
 }
 
-func oioubl21TaxCategoryCode(in string) string {
-	switch in {
-	case "S", "Standard", "standard":
-		return oioubl21TaxCategoryStandardRated
-	case "Z", "Zero", "zero":
-		return oioubl21TaxCategoryZeroRated
-	case "AE", "ReverseCharge":
-		return oioubl21TaxCategoryReverseCharge
-	case "E", "Exempt", "exempt":
-		// OIOUBL has no generic exempt category: neither taxcategoryid-1.1 nor
-		// -1.4 defines a plain "exempt" value (1.4 only adds the specific
-		// EN 16931 letters B/M/L/K/O/G and the Danish momskoder). VAT-exempt
-		// lines therefore map to ZeroRated, as both represent no VAT charged.
-		return oioubl21TaxCategoryZeroRated
-	default:
-		if in == "" {
-			return oioubl21TaxCategoryStandardRated
-		}
-		return in
-	}
-}
-
 // goblTaxSchemeCategory maps an OIOUBL TaxScheme ID back to the GOBL tax
 // category code. OIOUBL identifies VAT as "63" (Moms); other UBL profiles
 // already carry the GOBL "VAT" code, so the value passes through unchanged.
@@ -274,7 +267,7 @@ func goblTaxSchemeCategory(schemeID string) cbc.Code {
 }
 
 // goblTaxCategoryCode maps an OIOUBL TaxCategory ID back to the UNTDID 5305
-// code GOBL expects (the inverse of oioubl21TaxCategoryCode). Values from
+// code GOBL expects (the inverse of the addon's category mapping). Values from
 // other profiles, which already use the UNTDID codes, pass through unchanged.
 func goblTaxCategoryCode(id string) cbc.Code {
 	switch id {

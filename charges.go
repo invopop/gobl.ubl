@@ -111,7 +111,7 @@ func makeTaxCategory(taxes tax.Set) []*TaxCategory {
 		category := TaxCategory{}
 		category.TaxScheme = &TaxScheme{ID: IDType{Value: t.Category.String()}}
 
-		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
+		e := oioubl21TaxCategoryID(t.Ext)
 		if e != "" {
 			category.ID = &IDType{Value: e}
 		}

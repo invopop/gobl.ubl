@@ -222,7 +222,7 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 				}
 				taxCat := TaxCategory{}
 
-				if k := r.Ext.Get(untdid.ExtKeyTaxCategory).String(); k != "" {
+				if k := oioubl21TaxCategoryID(r.Ext); k != "" {
 					taxCat.ID = &IDType{Value: k}
 				}
 				if v := r.Ext.Get(cef.ExtKeyVATEX).String(); v != "" {
