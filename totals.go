@@ -3,6 +3,7 @@ package ubl
 import (
 	"strconv"
 
+	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -371,4 +372,90 @@ func taxCurrencyTaxAmount(taxTotals []TaxTotal) (num.Amount, bool) {
 		}
 	}
 	return total, found
+}
+
+// OIOUBL taxcategoryid-1.1 wire values (sourced from the dk-oioubl addon) and
+// the serialization-only taxschemeid-1.2 VAT (Moms) code.
+const (
+	oioubl21TaxCategoryStandardRated = string(oioubl.ExtValueTaxCategoryStandardRated)
+	oioubl21TaxCategoryZeroRated     = string(oioubl.ExtValueTaxCategoryZeroRated)
+	oioubl21TaxCategoryReverseCharge = string(oioubl.ExtValueTaxCategoryReverseCharge)
+
+	oioubl21TaxSchemeVATCode = "63" // taxschemeid-1.2 VAT (Moms)
+)
+
+// oioubl21TaxCategoryID returns the value to emit as cac:TaxCategory/cbc:ID. The
+// dk-oioubl addon (required by ContextOIOUBL21) precomputes the OIOUBL
+// taxcategoryid-1.1 code in the dk-oioubl-tax-category extension; other profiles
+// fall back to the UNTDID category, which they use directly.
+func oioubl21TaxCategoryID(ext tax.Extensions) string {
+	if c := ext.Get(oioubl.ExtKeyTaxCategory); c != "" {
+		return c.String()
+	}
+	return ext.Get(untdid.ExtKeyTaxCategory).String()
+}
+
+// applyOIOUBL21Totals stamps the taxcategoryid attributes on the document-level
+// tax subtotals and allowance/charges, and re-interprets TaxExclusiveAmount as
+// the total tax amount (F-INV127), not the pre-tax sum as in generic UBL. It
+// runs after the whole document is assembled because the document allowance set
+// is only complete once promoted line allowances have been added.
+func (ui *Invoice) applyOIOUBL21Totals() {
+	for i := range ui.TaxTotal {
+		for j := range ui.TaxTotal[i].TaxSubtotal {
+			applyOIOUBL21TaxCategory(&ui.TaxTotal[i].TaxSubtotal[j].TaxCategory)
+		}
+	}
+	for i := range ui.AllowanceCharge {
+		for _, tc := range ui.AllowanceCharge[i].TaxCategory {
+			applyOIOUBL21TaxCategory(tc)
+		}
+	}
+	if len(ui.TaxTotal) > 0 {
+		ui.LegalMonetaryTotal.TaxExclusiveAmount = ui.TaxTotal[0].TaxAmount
+	}
+}
+
+// oioubl21CategoryID stamps the taxcategoryid-1.1 codelist attributes onto a
+// tax-category cbc:ID, defaulting an absent category to StandardRated.
+func oioubl21CategoryID(id *IDType) *IDType {
+	if id == nil {
+		id = &IDType{Value: oioubl21TaxCategoryStandardRated}
+	}
+	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
+	schemeAgencyID := "320"
+	id.SchemeID = &schemeID
+	id.SchemeAgencyID = &schemeAgencyID
+	return id
+}
+
+func applyOIOUBL21TaxCategory(tc *TaxCategory) {
+	if tc == nil {
+		return
+	}
+	tc.ID = oioubl21CategoryID(tc.ID)
+	applyOIOUBL21TaxScheme(tc.TaxScheme)
+}
+
+func applyOIOUBL21ClassifiedTaxCategory(tc *ClassifiedTaxCategory) {
+	if tc == nil {
+		return
+	}
+	tc.ID = oioubl21CategoryID(tc.ID)
+	applyOIOUBL21TaxScheme(tc.TaxScheme)
+}
+
+func applyOIOUBL21TaxScheme(ts *TaxScheme) {
+	if ts == nil {
+		return
+	}
+	schemeID := "urn:oioubl:id:taxschemeid-1.2"
+	schemeAgencyID := "320"
+	ts.ID = IDType{
+		SchemeID:       &schemeID,
+		SchemeAgencyID: &schemeAgencyID,
+		Value:          oioubl21TaxSchemeVATCode,
+	}
+	name := "Moms"
+	ts.Name = &name
 }

@@ -259,6 +259,33 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 	} else {
 		ui.InvoiceLines = lines
 	}
+
+	if context.Is(ContextOIOUBL21) {
+		applyOIOUBL21LineTaxCategories(ui.InvoiceLines)
+		applyOIOUBL21LineTaxCategories(ui.CreditNoteLines)
+	}
+}
+
+// applyOIOUBL21LineTaxCategories maps the tax categories on a set of lines: the
+// item classified category, the line-level subtotals, and any promoted
+// allowance/charges. Invoice and credit-note lines share the InvoiceLine type.
+func applyOIOUBL21LineTaxCategories(lines []InvoiceLine) {
+	for i := range lines {
+		line := &lines[i]
+		if line.Item != nil && line.Item.ClassifiedTaxCategory != nil {
+			applyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
+		}
+		for j := range line.TaxTotal {
+			for k := range line.TaxTotal[j].TaxSubtotal {
+				applyOIOUBL21TaxCategory(&line.TaxTotal[j].TaxSubtotal[k].TaxCategory)
+			}
+		}
+		for _, ac := range line.AllowanceCharge {
+			for _, tc := range ac.TaxCategory {
+				applyOIOUBL21TaxCategory(tc)
+			}
+		}
+	}
 }
 
 // rescaleToCurrency rounds the amount to the natural precision of the given

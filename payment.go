@@ -117,7 +117,51 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 		}
 	}
 
+	if ctx.Is(ContextOIOUBL21) {
+		applyOIOUBL21PaymentMeans(ui)
+		// F-INV134: the payment terms carry the payable amount in OIOUBL.
+		if ui.PaymentTerms != nil && ui.PaymentTerms.Amount == nil {
+			ui.PaymentTerms.Amount = &Amount{
+				Value:      ui.LegalMonetaryTotal.PayableAmount.Value,
+				CurrencyID: ui.LegalMonetaryTotal.PayableAmount.CurrencyID,
+			}
+		}
+	}
+
 	return nil
+}
+
+// OIOUBL paymentchannelcode-1.1 wire values. Sourced from the dk-oioubl addon
+// because the converter writes the extension straight to the XML and reads it
+// back on parse, so the wire values match the extension values by construction.
+const (
+	oioubl21PaymentChannelIBAN = string(oioubl.ExtValuePaymentChannelIBAN)
+	oioubl21PaymentChannelGiro = string(oioubl.ExtValuePaymentChannelGiro)
+	oioubl21PaymentChannelFIK  = string(oioubl.ExtValuePaymentChannelFIK)
+)
+
+// applyOIOUBL21PaymentMeans stamps the paymentchannelcode-1.1 list ID, defaults
+// the per-means due date and strips a redundant FinancialInstitutionBranch from
+// IBAN accounts (F-LIB295). The channel value itself is set from the
+// dk-oioubl-payment-channel extension when the payment means is built.
+func applyOIOUBL21PaymentMeans(out *Invoice) {
+	for i := range out.PaymentMeans {
+		pm := &out.PaymentMeans[i]
+		if pm.PaymentChannelCode != nil {
+			listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
+			pm.PaymentChannelCode.ListID = &listID
+			if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
+				pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
+			}
+		}
+		if out.DueDate != "" && pm.PaymentDueDate == nil {
+			d := out.DueDate
+			pm.PaymentDueDate = &d
+		}
+	}
+	if len(out.PaymentMeans) > 0 && out.DueDate != "" {
+		out.DueDate = ""
+	}
 }
 
 func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error {

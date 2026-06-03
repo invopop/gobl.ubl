@@ -530,3 +530,68 @@ func contactName(n *org.Name) string {
 
 	return fmt.Sprintf("%s %s", given, surname)
 }
+
+// oioubl21SchemeDKCVR is the OIOUBL symbolic scheme for a Danish CVR number.
+const oioubl21SchemeDKCVR = "DK:CVR"
+
+// oioubl21EndpointSchemes maps the ISO 6523 ICDs that Peppol-style endpoints
+// use to the symbolic OIOUBL EndpointID schemeID codelist (F-LIB179).
+var oioubl21EndpointSchemes = map[string]string{
+	"0088": "GLN",
+	"0184": oioubl21SchemeDKCVR,
+	"0198": "DK:SE",
+}
+
+// applyOIOUBL21Party rewrites an assembled party into OIOUBL 2.1 form: symbolic
+// endpoint scheme + DK-prefixed CVR (F-LIB179/F-LIB180), a fallback PartyName,
+// the StructuredDK address format, and the DK:SE/DK:CVR company-ID schemes.
+func applyOIOUBL21Party(p *Party) {
+	if p == nil {
+		return
+	}
+	if p.EndpointID != nil {
+		if mapped, ok := oioubl21EndpointSchemes[p.EndpointID.SchemeID]; ok {
+			p.EndpointID.SchemeID = mapped
+		}
+		// OIOUBL CVR endpoints must carry the DK-prefixed form (F-LIB180).
+		if p.EndpointID.SchemeID == oioubl21SchemeDKCVR && !strings.HasPrefix(p.EndpointID.Value, "DK") {
+			p.EndpointID.Value = "DK" + p.EndpointID.Value
+		}
+	}
+	if p.PartyName == nil && len(p.PartyIdentification) == 0 {
+		if p.PartyLegalEntity != nil && p.PartyLegalEntity.RegistrationName != nil {
+			p.PartyName = &PartyName{
+				Name: *p.PartyLegalEntity.RegistrationName,
+			}
+		}
+	}
+	if p.PostalAddress != nil && p.PostalAddress.AddressFormatCode == nil {
+		listID := "urn:oioubl:codelist:addressformatcode-1.1"
+		listAgencyID := "320"
+		p.PostalAddress.AddressFormatCode = &IDType{
+			ListID:       &listID,
+			ListAgencyID: &listAgencyID,
+			Value:        "StructuredDK",
+		}
+	}
+	if p.PartyTaxScheme != nil {
+		for i := range p.PartyTaxScheme {
+			pts := &p.PartyTaxScheme[i]
+			if pts.CompanyID != nil {
+				scheme := "DK:SE"
+				pts.CompanyID.SchemeID = &scheme
+				if !strings.HasPrefix(pts.CompanyID.Value, "DK") {
+					pts.CompanyID.Value = "DK" + pts.CompanyID.Value
+				}
+			}
+			applyOIOUBL21TaxScheme(pts.TaxScheme)
+		}
+	}
+	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID != nil {
+		scheme := oioubl21SchemeDKCVR
+		p.PartyLegalEntity.CompanyID.SchemeID = &scheme
+		if !strings.HasPrefix(p.PartyLegalEntity.CompanyID.Value, "DK") {
+			p.PartyLegalEntity.CompanyID.Value = "DK" + p.PartyLegalEntity.CompanyID.Value
+		}
+	}
+}

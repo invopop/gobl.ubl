@@ -226,7 +226,12 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.Delivery = []*Delivery{d}
 	}
 	if o.context.Is(ContextOIOUBL21) {
-		applyOIOUBL21(out)
+		applyOIOUBL21TypeCode(out.InvoiceTypeCode)
+		applyOIOUBL21TypeCode(out.CreditNoteTypeCode)
+		applyOIOUBL21Party(out.AccountingSupplierParty.Party)
+		applyOIOUBL21Party(out.AccountingCustomerParty.Party)
+		out.applyOIOUBL21CreditNoteRef()
+		out.applyOIOUBL21Totals()
 	}
 
 	return out, nil
@@ -305,5 +310,28 @@ func (ui *Invoice) getInvoiceTypeBasedOnXMLName() cbc.Key {
 		return bill.InvoiceTypeCreditNote
 	default:
 		return bill.InvoiceTypeStandard
+	}
+}
+
+func applyOIOUBL21TypeCode(t *IDType) {
+	if t == nil {
+		return
+	}
+	listID := "urn:oioubl:codelist:invoicetypecode-1.1"
+	listAgencyID := "320"
+	t.ListID = &listID
+	t.ListAgencyID = &listAgencyID
+}
+
+// applyOIOUBL21CreditNoteRef drops the DocumentTypeCode from billing references
+// on credit notes; the OIOUBL credit-note schematron rejects it there.
+func (ui *Invoice) applyOIOUBL21CreditNoteRef() {
+	if ui.CreditNoteTypeCode == nil {
+		return
+	}
+	for i := range ui.BillingReference {
+		if ref := ui.BillingReference[i]; ref != nil && ref.InvoiceDocumentReference != nil {
+			ref.InvoiceDocumentReference.DocumentTypeCode = ""
+		}
 	}
 }
