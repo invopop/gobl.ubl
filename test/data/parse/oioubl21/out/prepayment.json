@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ef779d83dd0275b2e3c5e0a53e86dbe5a5eb0f241deb710f67d54d70a34bde73"
+			"val": "1e8b37c1ed67b1e63803c1b337f5dfd577ceb242e4d714a14b124b28c3a28434"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -19,7 +20,10 @@
 		"issue_date": "2026-05-29",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Eksempel Software ApS",
@@ -149,7 +153,7 @@
 				}
 			],
 			"instructions": {
-				"key": "any",
+				"key": "other",
 				"ref": "TEST-005",
 				"credit_transfer": [
 					{

@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ed3372d947bc429fbcdd4c35a1466e1678845b507b80aecd2996dc1a9111ca71"
+			"val": "2a1dbe8f7d5f7d6b61d23f98ea4d99a5fa61e52bf6ed76c5d110bb57ea5d1869"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -32,7 +33,10 @@
 			}
 		],
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "381"
+			}
 		},
 		"supplier": {
 			"name": "Provide One GmbH",
@@ -154,7 +158,7 @@
 				"notes": "on receipt within 30 days"
 			},
 			"instructions": {
-				"key": "any",
+				"key": "other",
 				"ref": "0003434323213231",
 				"credit_transfer": [
 					{

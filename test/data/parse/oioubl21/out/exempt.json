@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e8a1246bc56bce5ea8a1bac287bcd02e3f88a8015acc69620e6071ced6bfc869"
+			"val": "a13c39097259548a295e474e1a165ce5be434fda12f11132f34f43cd6f6d8c99"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -19,7 +20,10 @@
 		"issue_date": "2026-05-29",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Eksempel Software ApS",
@@ -115,7 +119,8 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard",
+						"key": "zero",
+						"percent": "0%",
 						"ext": {
 							"cef-vatex": "VATEX-EU-132",
 							"dk-oioubl-tax-category": "ZeroRated",
@@ -138,7 +143,7 @@
 				"notes": "Netto 30 dage"
 			},
 			"instructions": {
-				"key": "any",
+				"key": "other",
 				"ref": "TEST-006",
 				"credit_transfer": [
 					{
@@ -160,13 +165,14 @@
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
+								"key": "zero",
 								"ext": {
 									"cef-vatex": "VATEX-EU-132",
 									"dk-oioubl-tax-category": "ZeroRated",
 									"untdid-tax-category": "Z"
 								},
 								"base": "8000.00",
+								"percent": "0%",
 								"amount": "0.00"
 							}
 						],

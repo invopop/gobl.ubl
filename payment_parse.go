@@ -148,20 +148,27 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 		instructions.Card = goblCard(paymentMeans)
 	}
 
-	goblOIOUBLGiroFIK(instructions, paymentMeans)
+	goblOIOUBLPaymentChannel(instructions, paymentMeans)
 
 	return instructions
 }
 
-// goblOIOUBLGiroFIK reverses the OIOUBL Giro/FIK mapping: cbc:PaymentID is the
-// kortart (-> dk-oioubl-payment-id extension), cbc:InstructionID is the numeric
-// payment number (-> instr.Ref), and the FIK creditor account lives in
-// cac:CreditAccount/cbc:AccountID rather than PayeeFinancialAccount.
-func goblOIOUBLGiroFIK(instr *pay.Instructions, paymentMeans *PaymentMeans) {
+// goblOIOUBLPaymentChannel reverses the OIOUBL payment-channel handling. The
+// channel marks an OIOUBL document, so the instruction is pinned to the
+// MeansKeyOther key: this keeps the explicit OIOUBL payment-means code read from
+// the document (cbc:PaymentMeansCode) intact, since EN 16931 normalization would
+// otherwise re-derive the code from the GOBL key. For the Giro/FIK channels it
+// additionally reverses the kortart (cbc:PaymentID -> dk-oioubl-payment-id), the
+// payment number (cbc:InstructionID -> instr.Ref) and the FIK creditor account
+// (cac:CreditAccount/cbc:AccountID rather than PayeeFinancialAccount).
+func goblOIOUBLPaymentChannel(instr *pay.Instructions, paymentMeans *PaymentMeans) {
 	if paymentMeans.PaymentChannelCode == nil {
 		return
 	}
 	switch paymentMeans.PaymentChannelCode.Value {
+	case oioubl21PaymentChannelIBAN:
+		instr.Key = pay.MeansKeyOther
+		return
 	case oioubl21PaymentChannelGiro, oioubl21PaymentChannelFIK:
 	default:
 		return

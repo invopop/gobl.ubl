@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b3b68d838a4f5bbbe5426d6a908e2e3e0c6a35bbd953b0eca20c2f6b52b0f622"
+			"val": "58da6371be52b7ce7a2d2460823f0f48b48755fdf4ce0b80d63cfce25650a0dc"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -19,7 +20,10 @@
 		"issue_date": "2024-05-15",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
 		},
 		"supplier": {
 			"name": "Worksome Aps",
@@ -150,7 +154,7 @@
 		},
 		"payment": {
 			"instructions": {
-				"key": "any",
+				"key": "other",
 				"ref": "SAMPLE-001",
 				"credit_transfer": [
 					{

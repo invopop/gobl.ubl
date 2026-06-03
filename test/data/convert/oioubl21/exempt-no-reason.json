@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2f21df56acbe1c2edcb8e440021aedbe1b395c763029d7f03f48f9d8ae1e6a43"
+			"val": "240a7817dc582370afaf0a770404653c116fe7a6c32a4c84bdd77ae57ef19405"
 		}
 	},
 	"doc": {
@@ -16,11 +16,11 @@
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"code": "FINAL-FIK71",
+		"series": "FINAL",
+		"code": "EXNR01",
 		"issue_date": "2026-05-29",
 		"currency": "DKK",
 		"tax": {
-			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -31,26 +31,18 @@
 				"country": "DK",
 				"code": "12345674"
 			},
-			"identities": [
-				{
-					"scope": "legal",
-					"code": "DK12345674",
-					"ext": {
-						"iso-scheme-id": "DK:CVR"
-					}
-				}
-			],
 			"people": [
 				{
 					"name": {
-						"given": "Jens Hansen"
+						"given": "Jens",
+						"surname": "Hansen"
 					}
 				}
 			],
 			"inboxes": [
 				{
-					"scheme": "DK:CVR",
-					"code": "DK12345674"
+					"scheme": "0184",
+					"code": "12345674"
 				}
 			],
 			"addresses": [
@@ -69,22 +61,15 @@
 				"country": "DK",
 				"code": "76543216"
 			},
-			"identities": [
-				{
-					"scope": "legal",
-					"code": "DK76543216",
-					"ext": {
-						"iso-scheme-id": "DK:CVR"
-					}
-				}
-			],
 			"people": [
 				{
 					"name": {
-						"given": "Mette Sørensen"
+						"given": "Mette",
+						"surname": "Sørensen"
 					},
 					"identities": [
 						{
+							"label": "Contact",
 							"code": "C-001"
 						}
 					]
@@ -92,8 +77,8 @@
 			],
 			"inboxes": [
 				{
-					"scheme": "DK:CVR",
-					"code": "DK76543216"
+					"scheme": "0184",
+					"code": "76543216"
 				}
 			],
 			"addresses": [
@@ -109,81 +94,71 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "2",
+				"quantity": "1",
 				"item": {
-					"name": "Konsulent timer",
-					"price": "1000.00",
-					"unit": "h"
+					"name": "Momsfritaget ydelse",
+					"price": "8000.00",
+					"unit": "one"
 				},
-				"sum": "2000.00",
+				"sum": "8000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard",
-						"percent": "25%",
+						"key": "exempt",
 						"ext": {
-							"dk-oioubl-tax-category": "StandardRated",
-							"untdid-tax-category": "S"
+							"dk-oioubl-tax-category": "ZeroRated",
+							"untdid-tax-category": "E"
 						}
 					}
 				],
-				"total": "2000.00"
+				"total": "8000.00"
 			}
 		],
-		"ordering": {
-			"purchases": [
-				{
-					"code": "NA"
-				}
-			]
-		},
 		"payment": {
 			"terms": {
 				"notes": "Netto 30 dage"
 			},
 			"instructions": {
-				"key": "other",
-				"detail": "FIK indbetaling",
-				"ref": "000000000012345",
+				"key": "credit-transfer",
+				"ref": "TEST-006",
 				"credit_transfer": [
 					{
-						"number": "12345678"
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK"
 					}
 				],
 				"ext": {
-					"dk-oioubl-payment-channel": "DK:FIK",
-					"dk-oioubl-payment-id": "71",
-					"untdid-payment-means": "93"
+					"dk-oioubl-payment-channel": "IBAN",
+					"untdid-payment-means": "30"
 				}
 			}
 		},
 		"totals": {
-			"sum": "2000.00",
-			"total": "2000.00",
+			"sum": "8000.00",
+			"total": "8000.00",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
+								"key": "exempt",
 								"ext": {
-									"dk-oioubl-tax-category": "StandardRated",
-									"untdid-tax-category": "S"
+									"dk-oioubl-tax-category": "ZeroRated",
+									"untdid-tax-category": "E"
 								},
-								"base": "2000.00",
-								"percent": "25%",
-								"amount": "500.00"
+								"base": "8000.00",
+								"amount": "0.00"
 							}
 						],
-						"amount": "500.00"
+						"amount": "0.00"
 					}
 				],
-				"sum": "500.00"
+				"sum": "0.00"
 			},
-			"tax": "500.00",
-			"total_with_tax": "2500.00",
-			"payable": "2500.00"
+			"tax": "0.00",
+			"total_with_tax": "8000.00",
+			"payable": "8000.00"
 		}
 	}
 }

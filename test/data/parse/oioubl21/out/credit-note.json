@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "933bb4c81be6013c52693dea7f568ebe362b6e5ff4160c584d1d723cc8a69d9c"
+			"val": "3f2aa3c6467f38bca313971e3e6e7158d43a4342f9c9b48ea08f4c90a2d427ce"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -25,7 +26,10 @@
 			}
 		],
 		"tax": {
-			"rounding": "currency"
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "381"
+			}
 		},
 		"supplier": {
 			"name": "Eksempel Software ApS",
@@ -144,7 +148,7 @@
 				"notes": "Modregnes på næste faktura"
 			},
 			"instructions": {
-				"key": "any",
+				"key": "other",
 				"ref": "TEST-CN-003",
 				"credit_transfer": [
 					{
