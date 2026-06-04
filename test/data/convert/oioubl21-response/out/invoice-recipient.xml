@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationResponse xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2">
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>
+  <cbc:ProfileID schemeAgencyID="320" schemeID="urn:oioubl:id:profileid-1.4">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>
+  <cbc:ID>RESP-005</cbc:ID>
+  <cbc:UUID>0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2</cbc:UUID>
+  <cbc:IssueDate>2026-05-29</cbc:IssueDate>
+  <cac:SenderParty>
+    <cbc:EndpointID schemeID="DK:CVR">DK76543216</cbc:EndpointID>
+    <cac:PartyName>
+      <cbc:Name>Modtager Handel A/S</cbc:Name>
+    </cac:PartyName>
+    <cac:PostalAddress>
+      <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
+      <cbc:StreetName>Vestergade</cbc:StreetName>
+      <cbc:BuildingNumber>45</cbc:BuildingNumber>
+      <cbc:CityName>Aarhus</cbc:CityName>
+      <cbc:PostalZone>8000</cbc:PostalZone>
+      <cac:Country>
+        <cbc:IdentificationCode>DK</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
+    <cac:PartyTaxScheme>
+      <cbc:CompanyID schemeID="DK:SE">DK76543216</cbc:CompanyID>
+      <cac:TaxScheme>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
+        <cbc:Name>Moms</cbc:Name>
+      </cac:TaxScheme>
+    </cac:PartyTaxScheme>
+    <cac:PartyLegalEntity>
+      <cbc:RegistrationName>Modtager Handel A/S</cbc:RegistrationName>
+      <cbc:CompanyID schemeID="DK:CVR">DK76543216</cbc:CompanyID>
+    </cac:PartyLegalEntity>
+  </cac:SenderParty>
+  <cac:ReceiverParty>
+    <cbc:EndpointID schemeID="DK:CVR">DK88146328</cbc:EndpointID>
+    <cac:PartyName>
+      <cbc:Name>Forsendelses Hub A/S</cbc:Name>
+    </cac:PartyName>
+    <cac:PostalAddress>
+      <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
+      <cbc:StreetName>Havnegade</cbc:StreetName>
+      <cbc:BuildingNumber>3</cbc:BuildingNumber>
+      <cbc:CityName>Odense</cbc:CityName>
+      <cbc:PostalZone>5000</cbc:PostalZone>
+      <cac:Country>
+        <cbc:IdentificationCode>DK</cbc:IdentificationCode>
+      </cac:Country>
+    </cac:PostalAddress>
+    <cac:PartyTaxScheme>
+      <cbc:CompanyID schemeID="DK:SE">DK88146328</cbc:CompanyID>
+      <cac:TaxScheme>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
+        <cbc:Name>Moms</cbc:Name>
+      </cac:TaxScheme>
+    </cac:PartyTaxScheme>
+    <cac:PartyLegalEntity>
+      <cbc:RegistrationName>Forsendelses Hub A/S</cbc:RegistrationName>
+      <cbc:CompanyID schemeID="DK:CVR">DK88146328</cbc:CompanyID>
+    </cac:PartyLegalEntity>
+  </cac:ReceiverParty>
+  <cac:DocumentResponse>
+    <cac:Response>
+      <cbc:ReferenceID>1</cbc:ReferenceID>
+      <cbc:ResponseCode listAgencyID="320" listID="urn:oioubl:codelist:responsecode-1.1">BusinessReject</cbc:ResponseCode>
+      <cbc:Description>Modtaget via forsendelses-hub; afvist grundet manglende rabat</cbc:Description>
+    </cac:Response>
+    <cac:DocumentReference>
+      <cbc:ID>FINAL-005</cbc:ID>
+      <cbc:IssueDate>2026-05-29</cbc:IssueDate>
+      <cbc:DocumentTypeCode listAgencyID="320" listID="urn:oioubl:codelist:responsedocumenttypecode-1.1">Invoice</cbc:DocumentTypeCode>
+    </cac:DocumentReference>
+  </cac:DocumentResponse>
+</ApplicationResponse>

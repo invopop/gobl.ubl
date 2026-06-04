@@ -1,0 +1,99 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "def2ff716675851f044c108596985004394cf74ea23ce8312377485073a99f70"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$regime": "DK",
+		"$addons": [
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2026-05-29",
+		"code": "RESP-005",
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"recipient": {
+			"name": "Forsendelses Hub A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "88146328"
+			},
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "88146328"
+				}
+			],
+			"addresses": [
+				{
+					"num": "3",
+					"street": "Havnegade",
+					"locality": "Odense",
+					"code": "5000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "rejected",
+				"doc": {
+					"issue_date": "2026-05-29",
+					"series": "FINAL",
+					"code": "005"
+				},
+				"description": "Modtaget via forsendelses-hub; afvist grundet manglende rabat"
+			}
+		]
+	}
+}
