@@ -5,6 +5,7 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOIOUBLResponseDocType(t *testing.T) {
@@ -32,4 +33,81 @@ func TestOIOUBLResponseCodeSymmetry(t *testing.T) {
 func TestOIOUBLResponseUnsupportedEvent(t *testing.T) {
 	_, ok := oioublResponseCodes[bill.StatusEventPaid]
 	assert.False(t, ok, "paid event is not representable in OIOUBL ApplicationResponse")
+}
+
+// The status-line parser handles ApplicationResponses that arrive from the
+// NemHandel network, so the partial and malformed shapes below must degrade
+// gracefully rather than panic.
+
+func TestGoblStatusLineNilDocumentResponse(t *testing.T) {
+	line, err := (&ApplicationResponse{}).goblStatusLine()
+	require.NoError(t, err)
+	assert.NotNil(t, line)
+	assert.Empty(t, line.Key)
+	assert.Nil(t, line.Doc)
+}
+
+func TestGoblStatusLineResponseCodes(t *testing.T) {
+	for code, want := range goblResponseEvents {
+		ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
+			Response: &Response{
+				ResponseCode: &IDType{Value: code},
+				Description:  []string{"a reason"},
+			},
+		}}
+		line, err := ar.goblStatusLine()
+		require.NoError(t, err)
+		assert.Equal(t, want, line.Key, "code %q", code)
+		assert.Equal(t, "a reason", line.Description)
+	}
+}
+
+func TestGoblStatusLineUnknownCode(t *testing.T) {
+	ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
+		Response: &Response{ResponseCode: &IDType{Value: "NotAKnownCode"}},
+	}}
+	line, err := ar.goblStatusLine()
+	require.NoError(t, err)
+	assert.Empty(t, line.Key, "an unknown response code maps to an empty key, never a panic")
+}
+
+func TestGoblStatusLineDocumentReference(t *testing.T) {
+	ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
+		DocumentReference: &ResponseDocumentReference{
+			ID:               "INV-1",
+			UUID:             "5d3a2c8e-1f6b-4f7a-9c1d-2b3e4f5a6b7c",
+			IssueDate:        "2024-02-03",
+			DocumentTypeCode: &IDType{Value: responseDocTypeCreditNote},
+		},
+	}}
+	line, err := ar.goblStatusLine()
+	require.NoError(t, err)
+	require.NotNil(t, line.Doc)
+	assert.Equal(t, "INV-1", line.Doc.Code.String())
+	assert.Equal(t, bill.InvoiceTypeCreditNote, line.Doc.Type)
+	require.NotNil(t, line.Doc.IssueDate)
+}
+
+func TestGoblStatusLineBadReferenceDate(t *testing.T) {
+	ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
+		DocumentReference: &ResponseDocumentReference{ID: "INV-1", IssueDate: "03/02/2024"},
+	}}
+	_, err := ar.goblStatusLine()
+	assert.Error(t, err, "a malformed reference date is reported, not silently dropped")
+}
+
+func TestGoblStatusIssueTimeAndErrors(t *testing.T) {
+	o := new(options)
+	o.context = ContextOIOUBL21
+
+	st, err := (&ApplicationResponse{ID: "R1", IssueDate: "2024-02-03", IssueTime: "10:30:00"}).goblStatus(o)
+	require.NoError(t, err)
+	require.NotNil(t, st.IssueTime)
+	assert.Equal(t, bill.StatusTypeResponse, st.Type)
+
+	_, err = (&ApplicationResponse{ID: "R1", IssueDate: "nope"}).goblStatus(o)
+	assert.Error(t, err, "a malformed issue date is reported")
+
+	_, err = (&ApplicationResponse{ID: "R1", IssueDate: "2024-02-03", IssueTime: "99:99"}).goblStatus(o)
+	assert.Error(t, err, "a malformed issue time is reported")
 }
