@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl/addons/fr/ctc"
+	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
@@ -113,7 +113,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// First check meta field, then fall back to context
 	profileID := o.context.ProfileID
 	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		if profile := inv.Tax.GetExt(ctc.ExtKeyBillingMode); profile != cbc.CodeEmpty {
+		if profile := inv.Tax.GetExt(dgfip.ExtKeyBillingMode); profile != cbc.CodeEmpty {
 			profileID = profile.String()
 		}
 	}

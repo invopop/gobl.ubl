@@ -18,7 +18,7 @@
   </cac:BillingReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
-      <cbc:EndpointID schemeID="9957">334175221</cbc:EndpointID>
+      <cbc:EndpointID schemeID="0225">334175221</cbc:EndpointID>
       <cac:PartyName>
         <cbc:Name>Société FR SARL</cbc:Name>
       </cac:PartyName>
@@ -49,7 +49,7 @@
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
     <cac:Party>
-      <cbc:EndpointID schemeID="9957">552100554</cbc:EndpointID>
+      <cbc:EndpointID schemeID="0225">552100554</cbc:EndpointID>
       <cac:PartyName>
         <cbc:Name>Client FR</cbc:Name>
       </cac:PartyName>
@@ -69,6 +69,7 @@
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Client FR</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="0002">552100554</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:ElectronicMail>email@sample.com</cbc:ElectronicMail>

@@ -12,7 +12,7 @@
   <cbc:BuyerReference>PO-2024-001</cbc:BuyerReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
-      <cbc:EndpointID schemeID="9957">334175221</cbc:EndpointID>
+      <cbc:EndpointID schemeID="0225">334175221</cbc:EndpointID>
       <cac:PartyName>
         <cbc:Name>Société Exemple SARL</cbc:Name>
       </cac:PartyName>
@@ -43,7 +43,7 @@
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
     <cac:Party>
-      <cbc:EndpointID schemeID="9957">552100554</cbc:EndpointID>
+      <cbc:EndpointID schemeID="0225">552100554</cbc:EndpointID>
       <cac:PartyName>
         <cbc:Name>Client Exemple</cbc:Name>
       </cac:PartyName>
@@ -63,6 +63,7 @@
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
         <cbc:RegistrationName>Client Exemple</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="0002">552100554</cbc:CompanyID>
       </cac:PartyLegalEntity>
       <cac:Contact>
         <cbc:ElectronicMail>contact@client.fr</cbc:ElectronicMail>

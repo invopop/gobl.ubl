@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "763f6395eb3c70192fc89549009ec745c99104c43bb2f70351f408e0fcc577f6"
+			"val": "2d48a1c0c3cf23c593c81cabba685522bde5740740874efe3a0e201f7d91f4a2"
 		}
 	},
 	"doc": {
@@ -41,8 +41,7 @@
 			],
 			"inboxes": [
 				{
-					"key": "peppol",
-					"scheme": "9957",
+					"scheme": "0225",
 					"code": "334175221"
 				}
 			],
@@ -74,8 +73,7 @@
 			},
 			"inboxes": [
 				{
-					"key": "peppol",
-					"scheme": "9957",
+					"scheme": "0225",
 					"code": "552100554"
 				}
 			],

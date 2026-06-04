@@ -1,9 +1,9 @@
 package ubl
 
 import (
+	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
-	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -193,7 +193,7 @@ var ContextPeppolFranceCIUS = Context{
 	CustomizationID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	ProfileID:             PeppolFranceProcessIDRegulated,
 	OutputCustomizationID: "urn:cen.eu:en16931:2017",
-	Addons:                []cbc.Key{ctc.Flow2V1},
+	Addons:                []cbc.Key{flow2.V1},
 	VESIDs: VESIDMapping{
 		Invoice:    "fr.ctc:ubl-invoice:1.3",
 		CreditNote: "fr.ctc:ubl-creditnote:1.3",

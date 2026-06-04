@@ -17,6 +17,8 @@ require (
 	google.golang.org/grpc v1.77.0
 )
 
+require github.com/kr/text v0.2.0 // indirect
+
 require (
 	cloud.google.com/go v0.118.0 // indirect
 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
@@ -28,9 +30,9 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/invopop/gobl.fr.ctc v0.0.0
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
 	github.com/magefile/mage v1.15.0 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -46,3 +48,7 @@ require (
 )
 
 // replace github.com/invopop/gobl => ../gobl
+
+replace github.com/invopop/gobl => ../gobl
+
+replace github.com/invopop/gobl.fr.ctc => ../gobl.fr.ctc
