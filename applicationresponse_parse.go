@@ -145,20 +145,20 @@ func applyPeppolStatusLine(line *bill.StatusLine, dr *DocumentResponse) {
 		}
 		switch listID {
 		case peppolStatusReasonListID:
-			if k := keyForCode(peppolStatusReasonCodes, s.StatusReasonCode.Value); k != "" {
-				line.Reasons = append(line.Reasons, &bill.Reason{
-					Key:         k,
-					Description: desc,
-				})
+			if key := keyForCode(peppolStatusReasonCodes, s.StatusReasonCode.Value); key != "" {
+				line.Reasons = append(line.Reasons, &bill.Reason{Key: key, Description: desc})
 			}
 		case peppolStatusActionListID:
-			if k := keyForCode(peppolStatusActionCodes, s.StatusReasonCode.Value); k != "" {
-				line.Actions = append(line.Actions, &bill.Action{
-					Key:         k,
-					Description: desc,
-				})
+			if key := keyForCode(peppolStatusActionCodes, s.StatusReasonCode.Value); key != "" {
+				line.Actions = append(line.Actions, &bill.Action{Key: key, Description: desc})
 			}
 		}
+	}
+
+	// Map the mandatory DocumentTypeCode back to the referenced document type.
+	if ref := dr.DocumentReference; ref != nil && line.Doc != nil &&
+		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == documentTypeCodeCreditNote {
+		line.Doc.Type = bill.InvoiceTypeCreditNote
 	}
 }
 

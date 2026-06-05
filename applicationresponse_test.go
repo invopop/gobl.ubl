@@ -103,6 +103,8 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 	assert.Equal(t, "RESP-1", ar.ID)
 	assert.Equal(t, ubl.Version, ar.UBLVersionID)
 	assert.Equal(t, []string{"Processed automatically"}, ar.Note)
+	// EN16931 has no ProfileID, so the element is omitted rather than emitted empty.
+	assert.Nil(t, ar.ProfileID)
 
 	// Customer maps to SenderParty, Supplier to ReceiverParty.
 	require.NotNil(t, ar.SenderParty)
@@ -115,7 +117,7 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 	require.Len(t, ar.DocumentResponse, 1)
 	dr := ar.DocumentResponse[0]
 	require.NotNil(t, dr.Response)
-	assert.Equal(t, "1", dr.Response.ReferenceID)
+	assert.Empty(t, dr.Response.ReferenceID)
 	assert.Equal(t, []string{"All good"}, dr.Response.Description)
 	assert.Equal(t, "2026-05-28", dr.Response.EffectiveDate)
 	require.NotNil(t, dr.DocumentReference)
@@ -233,9 +235,14 @@ func TestConvertPeppolInvoiceResponse(t *testing.T) {
 	assert.Equal(t, "urn:fdc:peppol.eu:poacc:bis:invoice_response:3", ar.ProfileID.Value)
 
 	require.Len(t, ar.DocumentResponse, 1)
-	resp := ar.DocumentResponse[0].Response
+	dr := ar.DocumentResponse[0]
+	resp := dr.Response
 	require.NotNil(t, resp.ResponseCode)
 	assert.Equal(t, "RE", resp.ResponseCode.Value)
+
+	// ReferenceID and Description are not part of the Peppol Response.
+	assert.Empty(t, resp.ReferenceID)
+	assert.Empty(t, resp.Description)
 
 	require.Len(t, resp.Status, 2)
 	require.NotNil(t, resp.Status[0].StatusReasonCode.ListID)
@@ -245,6 +252,12 @@ func TestConvertPeppolInvoiceResponse(t *testing.T) {
 	assert.Equal(t, "OPStatusAction", *resp.Status[1].StatusReasonCode.ListID)
 	assert.Equal(t, "NIN", resp.Status[1].StatusReasonCode.Value)
 	assert.Equal(t, []string{"please reissue"}, resp.Status[1].StatusReason)
+
+	// DocumentTypeCode is mandatory in T111 (UNCL1001; 380 for an invoice).
+	require.NotNil(t, dr.DocumentReference.DocumentTypeCode)
+	require.NotNil(t, dr.DocumentReference.DocumentTypeCode.ListID)
+	assert.Equal(t, "UNCL1001", *dr.DocumentReference.DocumentTypeCode.ListID)
+	assert.Equal(t, "380", dr.DocumentReference.DocumentTypeCode.Value)
 }
 
 func TestConvertPeppolInvoiceResponseErrorMapsToRejected(t *testing.T) {
@@ -516,6 +529,7 @@ func TestPeppolStatusActionRoundTrip(t *testing.T) {
 func TestPeppolInvoiceResponseRoundTripFull(t *testing.T) {
 	st := basePeppolStatus()
 	st.Lines[0].Key = bill.StatusEventRejected
+	st.Lines[0].Doc.Type = bill.InvoiceTypeCreditNote
 	st.Lines[0].Reasons = []*bill.Reason{{Key: bill.ReasonKeyPrices, Description: "price off"}}
 	st.Lines[0].Actions = []*bill.Action{{Key: bill.ActionKeyReissue, Description: "redo"}}
 
@@ -524,6 +538,9 @@ func TestPeppolInvoiceResponseRoundTripFull(t *testing.T) {
 	require.Len(t, out.Lines, 1)
 	l := out.Lines[0]
 	assert.Equal(t, bill.StatusEventRejected, l.Key)
+	// The credit-note document type round-trips via DocumentTypeCode 381.
+	require.NotNil(t, l.Doc)
+	assert.Equal(t, bill.InvoiceTypeCreditNote, l.Doc.Type)
 	require.Len(t, l.Reasons, 1)
 	assert.Equal(t, bill.ReasonKeyPrices, l.Reasons[0].Key)
 	assert.Equal(t, "price off", l.Reasons[0].Description)
