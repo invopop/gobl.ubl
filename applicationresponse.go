@@ -31,9 +31,9 @@ type ApplicationResponse struct {
 
 	Note []string `xml:"cbc:Note,omitempty"`
 
-	SenderParty      *Party            `xml:"cac:SenderParty"`
-	ReceiverParty    *Party            `xml:"cac:ReceiverParty"`
-	DocumentResponse *DocumentResponse `xml:"cac:DocumentResponse"`
+	SenderParty      *Party              `xml:"cac:SenderParty"`
+	ReceiverParty    *Party              `xml:"cac:ReceiverParty"`
+	DocumentResponse []*DocumentResponse `xml:"cac:DocumentResponse"`
 }
 
 // DocumentResponse couples a response with the document it concerns. It is
@@ -75,10 +75,11 @@ type ResponseDocumentReference struct {
 // its code-list attributes, the document-type code, profile identifiers and any
 // regional party formatting) are stamped afterwards by the matching context.
 func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, error) {
-	if len(st.Lines) != 1 {
-		return nil, fmt.Errorf("ApplicationResponse requires a single document response, got %d", len(st.Lines))
+	// Generic UBL allows one DocumentResponse per status line (cac:DocumentResponse
+	// is [0..*]); the Peppol Invoice Response is constrained to one per message.
+	if o.context.Is(ContextPeppolInvoiceResponse) && len(st.Lines) != 1 {
+		return nil, fmt.Errorf("peppol invoice response supports a single document response, got %d", len(st.Lines))
 	}
-	line := st.Lines[0]
 
 	// SenderParty is who sends the response, ReceiverParty who receives it. The
 	// base supplier/customer roles flip with the status type (a response travels
@@ -121,34 +122,38 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		}
 	}
 
-	out.DocumentResponse = &DocumentResponse{
-		Response: &Response{
-			ReferenceID: strconv.Itoa(responseReferenceID(line.Index)),
-		},
-	}
-	if desc := responseDescription(line); desc != "" {
-		out.DocumentResponse.Response.Description = []string{desc}
-	}
-	if line.Date != nil {
-		out.DocumentResponse.Response.EffectiveDate = formatDate(*line.Date)
-	}
-	if line.Doc != nil {
-		ref := &ResponseDocumentReference{
-			ID: invoiceNumber(line.Doc.Series, line.Doc.Code),
+	for _, line := range st.Lines {
+		dr := &DocumentResponse{
+			Response: &Response{
+				ReferenceID: strconv.Itoa(responseReferenceID(line.Index)),
+			},
 		}
-		if !line.Doc.UUID.IsZero() {
-			ref.UUID = line.Doc.UUID.String()
+		if desc := responseDescription(line); desc != "" {
+			dr.Response.Description = []string{desc}
 		}
-		if line.Doc.IssueDate != nil {
-			ref.IssueDate = formatDate(*line.Doc.IssueDate)
+		if line.Date != nil {
+			dr.Response.EffectiveDate = formatDate(*line.Date)
 		}
-		out.DocumentResponse.DocumentReference = ref
-	}
+		if line.Doc != nil {
+			ref := &ResponseDocumentReference{
+				ID: invoiceNumber(line.Doc.Series, line.Doc.Code),
+			}
+			if !line.Doc.UUID.IsZero() {
+				ref.UUID = line.Doc.UUID.String()
+			}
+			if line.Doc.IssueDate != nil {
+				ref.IssueDate = formatDate(*line.Doc.IssueDate)
+			}
+			dr.DocumentReference = ref
+		}
 
-	if o.context.Is(ContextPeppolInvoiceResponse) {
-		if err := applyPeppolApplicationResponse(out, line); err != nil {
-			return nil, err
+		if o.context.Is(ContextPeppolInvoiceResponse) {
+			if err := applyPeppolDocumentResponse(dr, line); err != nil {
+				return nil, err
+			}
 		}
+
+		out.DocumentResponse = append(out.DocumentResponse, dr)
 	}
 
 	return out, nil
@@ -243,15 +248,15 @@ var peppolStatusActionCodes = map[cbc.Key]string{
 	bill.ActionKeyOther:         "OTH",
 }
 
-// applyPeppolApplicationResponse stamps the Peppol Invoice Response specifics:
-// the UNCL4343 response code, and one cac:Status per reason and action carrying
-// the OPStatusReason / OPStatusAction coded clarification.
-func applyPeppolApplicationResponse(out *ApplicationResponse, line *bill.StatusLine) error {
+// applyPeppolDocumentResponse stamps the Peppol Invoice Response specifics onto
+// a single DocumentResponse: the UNCL4343 response code, and one cac:Status per
+// reason and action carrying the OPStatusReason / OPStatusAction clarification.
+func applyPeppolDocumentResponse(dr *DocumentResponse, line *bill.StatusLine) error {
 	code, ok := peppolResponseCodes[line.Key]
 	if !ok {
 		return fmt.Errorf("peppol invoice response does not support status event %q", line.Key)
 	}
-	resp := out.DocumentResponse.Response
+	resp := dr.Response
 	resp.ResponseCode = &IDType{Value: code}
 	for _, r := range line.Reasons {
 		if r == nil {

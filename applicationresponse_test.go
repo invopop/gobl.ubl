@@ -111,18 +111,65 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 	require.NotNil(t, ar.ReceiverParty.PartyName)
 	assert.Equal(t, "Seller Co", ar.ReceiverParty.PartyName.Name)
 
-	require.NotNil(t, ar.DocumentResponse)
-	require.NotNil(t, ar.DocumentResponse.Response)
-	assert.Equal(t, "1", ar.DocumentResponse.Response.ReferenceID)
-	assert.Equal(t, []string{"All good"}, ar.DocumentResponse.Response.Description)
-	assert.Equal(t, "2026-05-28", ar.DocumentResponse.Response.EffectiveDate)
-	require.NotNil(t, ar.DocumentResponse.DocumentReference)
-	assert.Equal(t, "INV-42", ar.DocumentResponse.DocumentReference.ID)
+	require.Len(t, ar.DocumentResponse, 1)
+	dr := ar.DocumentResponse[0]
+	require.NotNil(t, dr.Response)
+	assert.Equal(t, "1", dr.Response.ReferenceID)
+	assert.Equal(t, []string{"All good"}, dr.Response.Description)
+	assert.Equal(t, "2026-05-28", dr.Response.EffectiveDate)
+	require.NotNil(t, dr.DocumentReference)
+	assert.Equal(t, "INV-42", dr.DocumentReference.ID)
 
 	// The response code and document-type code are profile-specific and are not
 	// stamped by the generic conversion.
-	assert.Nil(t, ar.DocumentResponse.Response.ResponseCode)
-	assert.Nil(t, ar.DocumentResponse.DocumentReference.DocumentTypeCode)
+	assert.Nil(t, dr.Response.ResponseCode)
+	assert.Nil(t, dr.DocumentReference.DocumentTypeCode)
+}
+
+func TestConvertApplicationResponseFansOutLines(t *testing.T) {
+	st := &bill.Status{
+		Type:      bill.StatusTypeResponse,
+		Code:      "RESP-MULTI",
+		IssueDate: cal.MakeDate(2026, 5, 29),
+		Supplier:  &org.Party{Name: "Seller Co"},
+		Customer:  &org.Party{Name: "Buyer Co"},
+		Lines: []*bill.StatusLine{
+			{Index: 1, Doc: &org.DocumentRef{Code: "INV-1"}},
+			{Index: 2, Doc: &org.DocumentRef{Code: "INV-2"}},
+		},
+	}
+	env, err := gobl.Envelop(st)
+	require.NoError(t, err)
+
+	// Generic UBL fans every line into its own DocumentResponse in one response.
+	doc, err := ubl.Convert(env)
+	require.NoError(t, err)
+	ar, ok := doc.(*ubl.ApplicationResponse)
+	require.True(t, ok)
+
+	require.Len(t, ar.DocumentResponse, 2)
+	assert.Equal(t, "INV-1", ar.DocumentResponse[0].DocumentReference.ID)
+	assert.Equal(t, "INV-2", ar.DocumentResponse[1].DocumentReference.ID)
+}
+
+func TestConvertPeppolInvoiceResponseRejectsMultipleLines(t *testing.T) {
+	st := &bill.Status{
+		Type:      bill.StatusTypeResponse,
+		Code:      "RESP-MULTI",
+		IssueDate: cal.MakeDate(2026, 5, 29),
+		Supplier:  &org.Party{Name: "Seller Co"},
+		Customer:  &org.Party{Name: "Buyer Co"},
+		Lines: []*bill.StatusLine{
+			{Index: 1, Key: bill.StatusEventAccepted, Doc: &org.DocumentRef{Code: "INV-1"}},
+			{Index: 2, Key: bill.StatusEventAccepted, Doc: &org.DocumentRef{Code: "INV-2"}},
+		},
+	}
+	env, err := gobl.Envelop(st)
+	require.NoError(t, err)
+
+	// Peppol allows only one DocumentResponse per message.
+	_, err = ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	require.Error(t, err)
 }
 
 func TestConvertApplicationResponseUpdateFlipsDirection(t *testing.T) {
@@ -184,7 +231,8 @@ func TestConvertPeppolInvoiceResponse(t *testing.T) {
 	require.NotNil(t, ar.ProfileID)
 	assert.Equal(t, "urn:fdc:peppol.eu:poacc:bis:invoice_response:3", ar.ProfileID.Value)
 
-	resp := ar.DocumentResponse.Response
+	require.Len(t, ar.DocumentResponse, 1)
+	resp := ar.DocumentResponse[0].Response
 	require.NotNil(t, resp.ResponseCode)
 	assert.Equal(t, "RE", resp.ResponseCode.Value)
 
@@ -223,8 +271,9 @@ func TestConvertPeppolInvoiceResponseErrorMapsToRejected(t *testing.T) {
 	require.True(t, ok)
 
 	// A technical error has no Invoice Response code, so it falls back to RE.
-	require.NotNil(t, ar.DocumentResponse.Response.ResponseCode)
-	assert.Equal(t, "RE", ar.DocumentResponse.Response.ResponseCode.Value)
+	require.Len(t, ar.DocumentResponse, 1)
+	require.NotNil(t, ar.DocumentResponse[0].Response.ResponseCode)
+	assert.Equal(t, "RE", ar.DocumentResponse[0].Response.ResponseCode.Value)
 }
 
 func TestConvertPeppolInvoiceResponseRequiresClarification(t *testing.T) {
