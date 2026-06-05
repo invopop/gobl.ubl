@@ -12,44 +12,9 @@ import (
 // NamespaceUBLApplicationResponse is the UBL 2.1 ApplicationResponse root namespace.
 const NamespaceUBLApplicationResponse = "urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
 
-// OIOUBL ApplicationResponse code list identifiers and the technical-response
-// profile that the schematron couples with the TechnicalAccept response code.
-const (
-	responseCodeListID       = "urn:oioubl:codelist:responsecode-1.1"
-	responseDocTypeListID    = "urn:oioubl:codelist:responsedocumenttypecode-1.1"
-	oioublProfileSchemeID    = "urn:oioubl:id:profileid-1.4"
-	oioublProfileTechnicalID = "Procurement-TecRes-1.0"
-	oioublCodeListAgencyID   = "320"
-)
-
-// OIOUBL responsecode-1.1 values accepted by the ApplicationResponse schematron
-// (F-APR018).
-const (
-	responseCodeBusinessAccept  = "BusinessAccept"
-	responseCodeBusinessReject  = "BusinessReject"
-	responseCodeTechnicalAccept = "TechnicalAccept"
-	responseCodeTechnicalReject = "TechnicalReject"
-	responseCodeProfileReject   = "ProfileReject"
-)
-
-// OIOUBL responsedocumenttypecode-1.1 values for the referenced document.
-const (
-	responseDocTypeInvoice    = "Invoice"
-	responseDocTypeCreditNote = "CreditNote"
-)
-
-// oioublResponseCodes maps GOBL status events to the OIOUBL responsecode-1.1
-// values accepted by the ApplicationResponse schematron (F-APR018).
-var oioublResponseCodes = map[cbc.Key]string{
-	bill.StatusEventAccepted:     responseCodeBusinessAccept,
-	bill.StatusEventRejected:     responseCodeBusinessReject,
-	bill.StatusEventAcknowledged: responseCodeTechnicalAccept,
-	bill.StatusEventError:        responseCodeTechnicalReject,
-}
-
-// ApplicationResponse represents a UBL 2.1 ApplicationResponse document. On the
-// Danish NemHandel network it is used to return a business response (accept or
-// reject) for a previously received document such as an invoice.
+// ApplicationResponse represents a UBL 2.1 ApplicationResponse document, used to
+// return a response (accept or reject) for a previously received document such
+// as an invoice.
 type ApplicationResponse struct {
 	XMLName      xml.Name
 	CACNamespace string `xml:"xmlns:cac,attr"`
@@ -69,8 +34,9 @@ type ApplicationResponse struct {
 	DocumentResponse *DocumentResponse `xml:"cac:DocumentResponse"`
 }
 
-// DocumentResponse couples a response with the document it concerns. OIOUBL
-// allows at most one of each (F-APR051/F-APR054).
+// DocumentResponse couples a response with the document it concerns. It is
+// modelled as a single response since that is all the supported profiles need
+// (OIOUBL allows at most one of each, F-APR051/F-APR054).
 type DocumentResponse struct {
 	Response          *Response                  `xml:"cac:Response"`
 	DocumentReference *ResponseDocumentReference `xml:"cac:DocumentReference"`
@@ -161,6 +127,68 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 	return out, nil
 }
 
+// responseReferenceID returns a 1-based reference for the Response, as the
+// schematron requires a non-empty ReferenceID (F-APR016).
+func responseReferenceID(index int) int {
+	if index < 1 {
+		return 1
+	}
+	return index
+}
+
+// responseDescription prefers the line description and falls back to the first
+// reason's description.
+func responseDescription(line *bill.StatusLine) string {
+	if line.Description != "" {
+		return line.Description
+	}
+	for _, r := range line.Reasons {
+		if r != nil && r.Description != "" {
+			return r.Description
+		}
+	}
+	return ""
+}
+
+// OIOUBL 2.1 ApplicationResponse specifics follow.
+
+// OIOUBL ApplicationResponse code list identifiers and the technical-response
+// profile that the schematron couples with the TechnicalAccept response code.
+const (
+	responseCodeListID       = "urn:oioubl:codelist:responsecode-1.1"
+	responseDocTypeListID    = "urn:oioubl:codelist:responsedocumenttypecode-1.1"
+	oioublProfileSchemeID    = "urn:oioubl:id:profileid-1.4"
+	oioublProfileTechnicalID = "Procurement-TecRes-1.0"
+	oioublCodeListAgencyID   = "320"
+)
+
+// OIOUBL responsecode-1.1 values accepted by the ApplicationResponse schematron.
+// F-APR018 allows five of the six codelist values: ProfileAccept exists in the
+// codelist but the schematron explicitly rejects it, so it is intentionally
+// absent here.
+const (
+	responseCodeBusinessAccept  = "BusinessAccept"
+	responseCodeBusinessReject  = "BusinessReject"
+	responseCodeTechnicalAccept = "TechnicalAccept"
+	responseCodeTechnicalReject = "TechnicalReject"
+	responseCodeProfileReject   = "ProfileReject"
+)
+
+// OIOUBL responsedocumenttypecode-1.1 values for the referenced document.
+const (
+	responseDocTypeInvoice    = "Invoice"
+	responseDocTypeCreditNote = "CreditNote"
+)
+
+// oioublResponseCodes maps GOBL status events to the OIOUBL responsecode-1.1
+// values accepted by the ApplicationResponse schematron (F-APR018).
+var oioublResponseCodes = map[cbc.Key]string{
+	bill.StatusEventAccepted:     responseCodeBusinessAccept,
+	bill.StatusEventRejected:     responseCodeBusinessReject,
+	bill.StatusEventAcknowledged: responseCodeTechnicalAccept,
+	bill.StatusEventError:        responseCodeTechnicalReject,
+}
+
 // applyOIOUBL21ApplicationResponse stamps the OIOUBL 2.1 specifics onto a
 // generic UBL ApplicationResponse: the responsecode-1.1 value and its code-list
 // attributes, the document-type code list, the technical-response profile
@@ -201,29 +229,6 @@ func applyOIOUBL21ApplicationResponse(out *ApplicationResponse, line *bill.Statu
 	}
 
 	return nil
-}
-
-// responseReferenceID returns a 1-based reference for the Response, as the
-// schematron requires a non-empty ReferenceID (F-APR016).
-func responseReferenceID(index int) int {
-	if index < 1 {
-		return 1
-	}
-	return index
-}
-
-// responseDescription prefers the line description and falls back to the first
-// reason's description.
-func responseDescription(line *bill.StatusLine) string {
-	if line.Description != "" {
-		return line.Description
-	}
-	for _, r := range line.Reasons {
-		if r != nil && r.Description != "" {
-			return r.Description
-		}
-	}
-	return ""
 }
 
 // oioublResponseDocType maps a referenced GOBL document type to the OIOUBL

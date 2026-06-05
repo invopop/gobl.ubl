@@ -12,16 +12,6 @@ import (
 	"github.com/invopop/gobl/uuid"
 )
 
-// goblResponseEvents reverses oioublResponseCodes, mapping an OIOUBL
-// responsecode-1.1 value back to a GOBL status event.
-var goblResponseEvents = map[string]cbc.Key{
-	responseCodeBusinessAccept:  bill.StatusEventAccepted,
-	responseCodeBusinessReject:  bill.StatusEventRejected,
-	responseCodeTechnicalAccept: bill.StatusEventAcknowledged,
-	responseCodeTechnicalReject: bill.StatusEventError,
-	responseCodeProfileReject:   bill.StatusEventError,
-}
-
 // Convert turns a parsed UBL ApplicationResponse into a GOBL envelope wrapping a
 // bill.Status.
 func (ar *ApplicationResponse) Convert() (*gobl.Envelope, error) {
@@ -110,6 +100,16 @@ func (ar *ApplicationResponse) goblStatusLine(o *options) (*bill.StatusLine, err
 	}
 
 	return line, nil
+}
+
+// goblResponseEvents reverses oioublResponseCodes, mapping an OIOUBL
+// responsecode-1.1 value back to a GOBL status event.
+var goblResponseEvents = map[string]cbc.Key{
+	responseCodeBusinessAccept:  bill.StatusEventAccepted,
+	responseCodeBusinessReject:  bill.StatusEventRejected,
+	responseCodeTechnicalAccept: bill.StatusEventAcknowledged,
+	responseCodeTechnicalReject: bill.StatusEventError,
+	responseCodeProfileReject:   bill.StatusEventError,
 }
 
 // applyOIOUBL21StatusLine maps the OIOUBL 2.1 code-list values on a parsed
