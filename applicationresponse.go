@@ -3,7 +3,6 @@ package ubl
 import (
 	"encoding/xml"
 	"fmt"
-	"strconv"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -47,7 +46,7 @@ type DocumentResponse struct {
 // ResponseCode value and its code-list attributes are profile-specific and are
 // stamped by the matching context.
 type Response struct {
-	ReferenceID   string    `xml:"cbc:ReferenceID"`
+	ReferenceID   string    `xml:"cbc:ReferenceID,omitempty"`
 	ResponseCode  *IDType   `xml:"cbc:ResponseCode"`
 	Description   []string  `xml:"cbc:Description,omitempty"`
 	EffectiveDate string    `xml:"cbc:EffectiveDate,omitempty"`
@@ -62,7 +61,8 @@ type Status struct {
 }
 
 // ResponseDocumentReference identifies the document being responded to. The
-// DocumentTypeCode is profile-specific and is stamped by the matching context.
+// DocumentTypeCode is profile-specific (drawn from a profile's code list) and is
+// stamped by the matching context; the generic mapping leaves it unset.
 type ResponseDocumentReference struct {
 	ID               string  `xml:"cbc:ID"`
 	UUID             string  `xml:"cbc:UUID,omitempty"`
@@ -122,13 +122,13 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 	}
 
 	for _, line := range st.Lines {
-		dr := &DocumentResponse{
-			Response: &Response{
-				ReferenceID: strconv.Itoa(responseReferenceID(line.Index)),
-			},
-		}
-		if desc := responseDescription(line); desc != "" {
-			dr.Response.Description = []string{desc}
+		dr := &DocumentResponse{Response: &Response{}}
+		// ReferenceID and Description are valid generic UBL but are not part of the
+		// Peppol Invoice Response Response, so they are only emitted off-profile.
+		if !o.context.Is(ContextPeppolInvoiceResponse) {
+			if desc := responseDescription(line); desc != "" {
+				dr.Response.Description = []string{desc}
+			}
 		}
 		if line.Date != nil {
 			dr.Response.EffectiveDate = formatDate(*line.Date)
@@ -158,15 +158,6 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 	return out, nil
 }
 
-// responseReferenceID returns a 1-based reference for the Response, as the
-// UBL ApplicationResponse requires a non-empty ReferenceID.
-func responseReferenceID(index int) int {
-	if index < 1 {
-		return 1
-	}
-	return index
-}
-
 // responseDescription prefers the line description and falls back to the first
 // reason's description.
 func responseDescription(line *bill.StatusLine) string {
@@ -187,6 +178,14 @@ func responseDescription(line *bill.StatusLine) string {
 const (
 	peppolStatusReasonListID = "OPStatusReason"
 	peppolStatusActionListID = "OPStatusAction"
+)
+
+// Peppol Invoice Response document-type codes (UNCL1001) for the referenced
+// document; DocumentTypeCode is mandatory under T111.
+const (
+	documentTypeCodeListID     = "UNCL1001"
+	documentTypeCodeInvoice    = "380"
+	documentTypeCodeCreditNote = "381"
 )
 
 // peppolResponseCodes maps GOBL status events to the Peppol Invoice Response
@@ -280,6 +279,19 @@ func applyPeppolDocumentResponse(dr *DocumentResponse, line *bill.StatusLine) er
 	if peppolClarificationCodes[code] && len(resp.Status) == 0 {
 		return fmt.Errorf("peppol invoice response with status %q requires a reason or action clarification", code)
 	}
+
+	// The Peppol Invoice Response requires a DocumentReference with a mandatory
+	// DocumentTypeCode (UNCL1001: 380 invoice, 381 credit note).
+	if dr.DocumentReference == nil {
+		return fmt.Errorf("peppol invoice response requires a referenced document")
+	}
+	docType := documentTypeCodeInvoice
+	if line.Doc != nil && line.Doc.Type == bill.InvoiceTypeCreditNote {
+		docType = documentTypeCodeCreditNote
+	}
+	listID := documentTypeCodeListID
+	dr.DocumentReference.DocumentTypeCode = &IDType{ListID: &listID, Value: docType}
+
 	return nil
 }
 
