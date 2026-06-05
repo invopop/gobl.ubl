@@ -145,15 +145,19 @@ func applyPeppolStatusLine(line *bill.StatusLine, dr *DocumentResponse) {
 		}
 		switch listID {
 		case peppolStatusReasonListID:
-			line.Reasons = append(line.Reasons, &bill.Reason{
-				Key:         keyForCode(peppolStatusReasonCodes, s.StatusReasonCode.Value),
-				Description: desc,
-			})
+			if k := keyForCode(peppolStatusReasonCodes, s.StatusReasonCode.Value); k != "" {
+				line.Reasons = append(line.Reasons, &bill.Reason{
+					Key:         k,
+					Description: desc,
+				})
+			}
 		case peppolStatusActionListID:
-			line.Actions = append(line.Actions, &bill.Action{
-				Key:         keyForCode(peppolStatusActionCodes, s.StatusReasonCode.Value),
-				Description: desc,
-			})
+			if k := keyForCode(peppolStatusActionCodes, s.StatusReasonCode.Value); k != "" {
+				line.Actions = append(line.Actions, &bill.Action{
+					Key:         k,
+					Description: desc,
+				})
+			}
 		}
 	}
 }
