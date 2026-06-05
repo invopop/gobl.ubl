@@ -63,7 +63,7 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 		out.Notes = append(out.Notes, &org.Note{Text: n})
 	}
 
-	line, err := ar.goblStatusLine()
+	line, err := ar.goblStatusLine(o)
 	if err != nil {
 		return nil, err
 	}
@@ -73,9 +73,9 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 }
 
 // goblStatusLine maps the generic parts of a UBL DocumentResponse. The response
-// code and the document-type code are profile-specific and are mapped back by
+// code and the status clarifications are profile-specific and are mapped back by
 // the matching context.
-func (ar *ApplicationResponse) goblStatusLine() (*bill.StatusLine, error) {
+func (ar *ApplicationResponse) goblStatusLine(o *options) (*bill.StatusLine, error) {
 	line := new(bill.StatusLine)
 	dr := ar.DocumentResponse
 	if dr == nil {
@@ -112,5 +112,58 @@ func (ar *ApplicationResponse) goblStatusLine() (*bill.StatusLine, error) {
 		line.Doc = doc
 	}
 
+	if o.context.Is(ContextPeppolInvoiceResponse) {
+		applyPeppolStatusLine(line, dr)
+	}
+
 	return line, nil
+}
+
+// applyPeppolStatusLine maps the Peppol Invoice Response codes back to GOBL: the
+// UNCL4343 response code to a status event, and each OPStatusReason /
+// OPStatusAction cac:Status clarification to a reason or action.
+func applyPeppolStatusLine(line *bill.StatusLine, dr *DocumentResponse) {
+	r := dr.Response
+	if r == nil {
+		return
+	}
+	if r.ResponseCode != nil {
+		line.Key = peppolResponseEvents[r.ResponseCode.Value]
+	}
+	for _, s := range r.Status {
+		if s == nil || s.StatusReasonCode == nil {
+			continue
+		}
+		listID := ""
+		if s.StatusReasonCode.ListID != nil {
+			listID = *s.StatusReasonCode.ListID
+		}
+		desc := ""
+		if len(s.StatusReason) > 0 {
+			desc = s.StatusReason[0]
+		}
+		switch listID {
+		case peppolStatusReasonListID:
+			line.Reasons = append(line.Reasons, &bill.Reason{
+				Key:         keyForCode(peppolStatusReasonCodes, s.StatusReasonCode.Value),
+				Description: desc,
+			})
+		case peppolStatusActionListID:
+			line.Actions = append(line.Actions, &bill.Action{
+				Key:         keyForCode(peppolStatusActionCodes, s.StatusReasonCode.Value),
+				Description: desc,
+			})
+		}
+	}
+}
+
+// keyForCode returns the GOBL key mapped to the given code in m, or empty if
+// none matches.
+func keyForCode(m map[cbc.Key]string, code string) cbc.Key {
+	for k, v := range m {
+		if v == code {
+			return k
+		}
+	}
+	return ""
 }
