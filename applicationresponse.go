@@ -101,11 +101,13 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		UBLNamespace:    NamespaceUBLApplicationResponse,
 		UBLVersionID:    Version,
 		CustomizationID: o.context.CustomizationID,
-		ProfileID:       &IDType{Value: o.context.ProfileID},
 		ID:              invoiceNumber(st.Series, st.Code),
 		IssueDate:       formatDate(st.IssueDate),
 		SenderParty:     newParty(sender),
 		ReceiverParty:   newParty(receiver),
+	}
+	if o.context.ProfileID != "" {
+		out.ProfileID = &IDType{Value: o.context.ProfileID}
 	}
 	if !st.UUID.IsZero() {
 		out.UUID = st.UUID.String()
