@@ -66,6 +66,17 @@ func Parse(data []byte) (any, error) {
 		}
 		return in, nil
 
+	case NamespaceUBLApplicationResponse:
+		ar := new(ApplicationResponse)
+		if err := xmlctx.Unmarshal(data, ar, xmlctx.WithNamespaces(map[string]string{
+			"":    ns,
+			"cbc": NamespaceCBC,
+			"cac": NamespaceCAC,
+		})); err != nil {
+			return nil, err
+		}
+		return ar, nil
+
 	// Future document types can be added here
 	// case NamespaceUBLOrder:
 	//     order := new(Order)
@@ -100,18 +111,19 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		opt(o)
 	}
 
-	// Check and add missing addons
-	if err := ensureAddons(env, o.context.Addons); err != nil {
-		return nil, err
-	}
-
 	switch doc := env.Extract().(type) {
 	case *bill.Invoice:
+		// Check and add missing addons
+		if err := ensureAddons(env, o.context.Addons); err != nil {
+			return nil, err
+		}
 		// Removes included taxes as they are not supported in UBL
 		if err := doc.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
 		}
 		return ublInvoice(doc, o)
+	case *bill.Status:
+		return ublApplicationResponse(doc, o)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}

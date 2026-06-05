@@ -165,15 +165,14 @@ func TestConvertUnsupportedDocumentType(t *testing.T) {
 	assert.ErrorIs(t, err, ubl.ErrUnsupportedDocumentType)
 }
 
-func TestConvertRejectsNonInvoiceWhenAddonsRequired(t *testing.T) {
-	// When the context declares required addons, ensureAddons must
-	// fail fast on a non-invoice payload rather than reaching the type switch.
+func TestConvertRejectsUnsupportedDocument(t *testing.T) {
+	// A document type with no UBL mapping is rejected as unsupported.
 	env, err := gobl.Envelop(&note.Message{Content: "hello"})
 	require.NoError(t, err)
 
 	_, err = ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "expected bill.Invoice")
+	assert.ErrorIs(t, err, ubl.ErrUnsupportedDocumentType)
 }
 
 func TestBytes(t *testing.T) {
