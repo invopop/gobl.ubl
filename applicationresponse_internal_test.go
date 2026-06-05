@@ -40,7 +40,8 @@ func TestOIOUBLResponseUnsupportedEvent(t *testing.T) {
 // gracefully rather than panic.
 
 func TestGoblStatusLineNilDocumentResponse(t *testing.T) {
-	line, err := (&ApplicationResponse{}).goblStatusLine()
+	o := &options{context: ContextOIOUBL21}
+	line, err := (&ApplicationResponse{}).goblStatusLine(o)
 	require.NoError(t, err)
 	assert.NotNil(t, line)
 	assert.Empty(t, line.Key)
@@ -48,6 +49,7 @@ func TestGoblStatusLineNilDocumentResponse(t *testing.T) {
 }
 
 func TestGoblStatusLineResponseCodes(t *testing.T) {
+	o := &options{context: ContextOIOUBL21}
 	for code, want := range goblResponseEvents {
 		ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
 			Response: &Response{
@@ -55,7 +57,7 @@ func TestGoblStatusLineResponseCodes(t *testing.T) {
 				Description:  []string{"a reason"},
 			},
 		}}
-		line, err := ar.goblStatusLine()
+		line, err := ar.goblStatusLine(o)
 		require.NoError(t, err)
 		assert.Equal(t, want, line.Key, "code %q", code)
 		assert.Equal(t, "a reason", line.Description)
@@ -63,15 +65,17 @@ func TestGoblStatusLineResponseCodes(t *testing.T) {
 }
 
 func TestGoblStatusLineUnknownCode(t *testing.T) {
+	o := &options{context: ContextOIOUBL21}
 	ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
 		Response: &Response{ResponseCode: &IDType{Value: "NotAKnownCode"}},
 	}}
-	line, err := ar.goblStatusLine()
+	line, err := ar.goblStatusLine(o)
 	require.NoError(t, err)
 	assert.Empty(t, line.Key, "an unknown response code maps to an empty key, never a panic")
 }
 
 func TestGoblStatusLineDocumentReference(t *testing.T) {
+	o := &options{context: ContextOIOUBL21}
 	ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
 		DocumentReference: &ResponseDocumentReference{
 			ID:               "INV-1",
@@ -80,7 +84,7 @@ func TestGoblStatusLineDocumentReference(t *testing.T) {
 			DocumentTypeCode: &IDType{Value: responseDocTypeCreditNote},
 		},
 	}}
-	line, err := ar.goblStatusLine()
+	line, err := ar.goblStatusLine(o)
 	require.NoError(t, err)
 	require.NotNil(t, line.Doc)
 	assert.Equal(t, "INV-1", line.Doc.Code.String())
@@ -89,10 +93,11 @@ func TestGoblStatusLineDocumentReference(t *testing.T) {
 }
 
 func TestGoblStatusLineBadReferenceDate(t *testing.T) {
+	o := &options{context: ContextOIOUBL21}
 	ar := &ApplicationResponse{DocumentResponse: &DocumentResponse{
 		DocumentReference: &ResponseDocumentReference{ID: "INV-1", IssueDate: "03/02/2024"},
 	}}
-	_, err := ar.goblStatusLine()
+	_, err := ar.goblStatusLine(o)
 	assert.Error(t, err, "a malformed reference date is reported, not silently dropped")
 }
 

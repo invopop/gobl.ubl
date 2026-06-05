@@ -92,25 +92,10 @@ type ResponseDocumentReference struct {
 }
 
 func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, error) {
-	if !o.context.Is(ContextOIOUBL21) {
-		return nil, fmt.Errorf("%w: ApplicationResponse", ErrUnsupportedDocumentType)
-	}
 	if len(st.Lines) != 1 {
-		return nil, fmt.Errorf("OIOUBL ApplicationResponse requires a single document response, got %d", len(st.Lines))
+		return nil, fmt.Errorf("ApplicationResponse requires a single document response, got %d", len(st.Lines))
 	}
 	line := st.Lines[0]
-
-	code, ok := oioublResponseCodes[line.Key]
-	if !ok {
-		return nil, fmt.Errorf("OIOUBL ApplicationResponse does not support status event %q", line.Key)
-	}
-
-	// F-APR057/F-APR058 bind the TechnicalAccept response code to the
-	// technical-response profile; everything else rides the billing profile.
-	profileID := o.context.ProfileID
-	if code == responseCodeTechnicalAccept {
-		profileID = oioublProfileTechnicalID
-	}
 
 	// The response travels from the responder (customer, or an intermediary
 	// issuer) to the originating party (supplier, or its recipient).
@@ -123,8 +108,6 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		receiver = st.Recipient
 	}
 
-	schemeID := oioublProfileSchemeID
-	agencyID := oioublCodeListAgencyID
 	out := &ApplicationResponse{
 		XMLName:         xml.Name{Local: "ApplicationResponse"},
 		CACNamespace:    NamespaceCAC,
@@ -132,18 +115,12 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		UBLNamespace:    NamespaceUBLApplicationResponse,
 		UBLVersionID:    Version,
 		CustomizationID: o.context.CustomizationID,
-		ProfileID: &IDType{
-			SchemeAgencyID: &agencyID,
-			SchemeID:       &schemeID,
-			Value:          profileID,
-		},
-		ID:            invoiceNumber(st.Series, st.Code),
-		IssueDate:     formatDate(st.IssueDate),
-		SenderParty:   newParty(sender, o.context),
-		ReceiverParty: newParty(receiver, o.context),
+		ProfileID:       &IDType{Value: o.context.ProfileID},
+		ID:              invoiceNumber(st.Series, st.Code),
+		IssueDate:       formatDate(st.IssueDate),
+		SenderParty:     newParty(sender, o.context),
+		ReceiverParty:   newParty(receiver, o.context),
 	}
-	applyOIOUBL21Party(out.SenderParty)
-	applyOIOUBL21Party(out.ReceiverParty)
 	if !st.UUID.IsZero() {
 		out.UUID = st.UUID.String()
 	}
@@ -151,29 +128,17 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		out.IssueTime = st.IssueTime.String()
 	}
 
-	codeListID := responseCodeListID
 	out.DocumentResponse = &DocumentResponse{
 		Response: &Response{
 			ReferenceID: strconv.Itoa(responseReferenceID(line.Index)),
-			ResponseCode: &IDType{
-				ListAgencyID: &agencyID,
-				ListID:       &codeListID,
-				Value:        code,
-			},
 		},
 	}
 	if desc := responseDescription(line); desc != "" {
 		out.DocumentResponse.Response.Description = []string{desc}
 	}
 	if line.Doc != nil {
-		docTypeListID := responseDocTypeListID
 		ref := &ResponseDocumentReference{
 			ID: invoiceNumber(line.Doc.Series, line.Doc.Code),
-			DocumentTypeCode: &IDType{
-				ListAgencyID: &agencyID,
-				ListID:       &docTypeListID,
-				Value:        oioublResponseDocType(line.Doc.Type),
-			},
 		}
 		if !line.Doc.UUID.IsZero() {
 			ref.UUID = line.Doc.UUID.String()
@@ -184,7 +149,58 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		out.DocumentResponse.DocumentReference = ref
 	}
 
+	switch {
+	case o.context.Is(ContextOIOUBL21):
+		if err := applyOIOUBL21ApplicationResponse(out, line); err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("%w: ApplicationResponse", ErrUnsupportedDocumentType)
+	}
+
 	return out, nil
+}
+
+// applyOIOUBL21ApplicationResponse stamps the OIOUBL 2.1 specifics onto a
+// generic UBL ApplicationResponse: the responsecode-1.1 value and its code-list
+// attributes, the document-type code list, the technical-response profile
+// coupling, and the Danish party formatting.
+func applyOIOUBL21ApplicationResponse(out *ApplicationResponse, line *bill.StatusLine) error {
+	code, ok := oioublResponseCodes[line.Key]
+	if !ok {
+		return fmt.Errorf("OIOUBL ApplicationResponse does not support status event %q", line.Key)
+	}
+
+	agencyID := oioublCodeListAgencyID
+	schemeID := oioublProfileSchemeID
+	out.ProfileID.SchemeAgencyID = &agencyID
+	out.ProfileID.SchemeID = &schemeID
+	// F-APR057/F-APR058 bind the TechnicalAccept response code to the
+	// technical-response profile; everything else rides the billing profile.
+	if code == responseCodeTechnicalAccept {
+		out.ProfileID.Value = oioublProfileTechnicalID
+	}
+
+	applyOIOUBL21Party(out.SenderParty)
+	applyOIOUBL21Party(out.ReceiverParty)
+
+	codeListID := responseCodeListID
+	out.DocumentResponse.Response.ResponseCode = &IDType{
+		ListAgencyID: &agencyID,
+		ListID:       &codeListID,
+		Value:        code,
+	}
+
+	if ref := out.DocumentResponse.DocumentReference; ref != nil {
+		docTypeListID := responseDocTypeListID
+		ref.DocumentTypeCode = &IDType{
+			ListAgencyID: &agencyID,
+			ListID:       &docTypeListID,
+			Value:        oioublResponseDocType(line.Doc.Type),
+		}
+	}
+
+	return nil
 }
 
 // responseReferenceID returns a 1-based reference for the Response, as the

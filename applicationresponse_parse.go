@@ -67,7 +67,7 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 		out.IssueTime = &cal.Time{Time: ct}
 	}
 
-	line, err := ar.goblStatusLine()
+	line, err := ar.goblStatusLine(o)
 	if err != nil {
 		return nil, err
 	}
@@ -76,20 +76,15 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	return out, nil
 }
 
-func (ar *ApplicationResponse) goblStatusLine() (*bill.StatusLine, error) {
+func (ar *ApplicationResponse) goblStatusLine(o *options) (*bill.StatusLine, error) {
 	line := new(bill.StatusLine)
 	dr := ar.DocumentResponse
 	if dr == nil {
 		return line, nil
 	}
 
-	if r := dr.Response; r != nil {
-		if r.ResponseCode != nil {
-			line.Key = goblResponseEvents[r.ResponseCode.Value]
-		}
-		if len(r.Description) > 0 {
-			line.Description = r.Description[0]
-		}
+	if r := dr.Response; r != nil && len(r.Description) > 0 {
+		line.Description = r.Description[0]
 	}
 
 	if ref := dr.DocumentReference; ref != nil {
@@ -106,11 +101,26 @@ func (ar *ApplicationResponse) goblStatusLine() (*bill.StatusLine, error) {
 			}
 			doc.IssueDate = &d
 		}
-		if ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == responseDocTypeCreditNote {
-			doc.Type = bill.InvoiceTypeCreditNote
-		}
 		line.Doc = doc
 	}
 
+	switch {
+	case o.context.Is(ContextOIOUBL21):
+		applyOIOUBL21StatusLine(line, dr)
+	}
+
 	return line, nil
+}
+
+// applyOIOUBL21StatusLine maps the OIOUBL 2.1 code-list values on a parsed
+// ApplicationResponse back to GOBL: the responsecode-1.1 response code to a
+// status event, and the responsedocumenttypecode-1.1 value to a document type.
+func applyOIOUBL21StatusLine(line *bill.StatusLine, dr *DocumentResponse) {
+	if r := dr.Response; r != nil && r.ResponseCode != nil {
+		line.Key = goblResponseEvents[r.ResponseCode.Value]
+	}
+	if ref := dr.DocumentReference; ref != nil && line.Doc != nil &&
+		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == responseDocTypeCreditNote {
+		line.Doc.Type = bill.InvoiceTypeCreditNote
+	}
 }
