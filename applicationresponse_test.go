@@ -7,6 +7,7 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -399,4 +400,169 @@ func TestParsePeppolInvoiceResponse(t *testing.T) {
 	require.Len(t, st.Lines[0].Actions, 1)
 	assert.Equal(t, bill.ActionKeyReissue, st.Lines[0].Actions[0].Key)
 	assert.Equal(t, "please reissue", st.Lines[0].Actions[0].Description)
+}
+
+// basePeppolStatus returns a minimal valid response status with a single line.
+func basePeppolStatus() *bill.Status {
+	return &bill.Status{
+		Type:      bill.StatusTypeResponse,
+		Code:      "RESP-RT",
+		IssueDate: cal.MakeDate(2026, 5, 29),
+		Supplier:  &org.Party{Name: "Seller Co"},
+		Customer:  &org.Party{Name: "Buyer Co"},
+		Lines:     []*bill.StatusLine{{Index: 1, Doc: &org.DocumentRef{Code: "INV-RT"}}},
+	}
+}
+
+// peppolRoundTrip converts a status to a Peppol Invoice Response, serialises it,
+// parses it back, and returns the resulting status.
+func peppolRoundTrip(t *testing.T, st *bill.Status) *bill.Status {
+	t.Helper()
+	env, err := gobl.Envelop(st)
+	require.NoError(t, err)
+	doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	require.NoError(t, err)
+	data, err := ubl.Bytes(doc)
+	require.NoError(t, err)
+	parsed, err := ubl.Parse(data)
+	require.NoError(t, err)
+	ar, ok := parsed.(*ubl.ApplicationResponse)
+	require.True(t, ok)
+	env2, err := ar.Convert()
+	require.NoError(t, err)
+	out, ok := env2.Extract().(*bill.Status)
+	require.True(t, ok)
+	return out
+}
+
+func TestPeppolResponseCodeRoundTrip(t *testing.T) {
+	// Every status event with a Peppol Invoice Response code must round-trip.
+	events := []cbc.Key{
+		bill.StatusEventAcknowledged,
+		bill.StatusEventProcessing,
+		bill.StatusEventQuerying,
+		bill.StatusEventRejected,
+		bill.StatusEventAccepted,
+		bill.StatusEventPaid,
+	}
+	for _, ev := range events {
+		t.Run(ev.String(), func(t *testing.T) {
+			st := basePeppolStatus()
+			st.Lines[0].Key = ev
+			// UQ/RE require a clarification; harmless for the others.
+			st.Lines[0].Reasons = []*bill.Reason{{Key: bill.ReasonKeyOther, Description: "x"}}
+			out := peppolRoundTrip(t, st)
+			require.Len(t, out.Lines, 1)
+			assert.Equal(t, ev, out.Lines[0].Key)
+		})
+	}
+}
+
+func TestPeppolStatusReasonRoundTrip(t *testing.T) {
+	// Every reason key must round-trip through its OPStatusReason code.
+	reasons := []cbc.Key{
+		bill.ReasonKeyNone,
+		bill.ReasonKeyReferences,
+		bill.ReasonKeyLegal,
+		bill.ReasonKeyUnknownReceiver,
+		bill.ReasonKeyQuality,
+		bill.ReasonKeyDelivery,
+		bill.ReasonKeyPrices,
+		bill.ReasonKeyQuantity,
+		bill.ReasonKeyItems,
+		bill.ReasonKeyPaymentTerms,
+		bill.ReasonKeyNotRecognized,
+		bill.ReasonKeyFinanceTerms,
+		bill.ReasonKeyPartial,
+		bill.ReasonKeyOther,
+	}
+	for _, rk := range reasons {
+		t.Run(rk.String(), func(t *testing.T) {
+			st := basePeppolStatus()
+			st.Lines[0].Key = bill.StatusEventRejected
+			st.Lines[0].Reasons = []*bill.Reason{{Key: rk, Description: "d"}}
+			out := peppolRoundTrip(t, st)
+			require.Len(t, out.Lines, 1)
+			require.Len(t, out.Lines[0].Reasons, 1)
+			assert.Equal(t, rk, out.Lines[0].Reasons[0].Key)
+		})
+	}
+}
+
+func TestPeppolStatusActionRoundTrip(t *testing.T) {
+	// Every action key must round-trip through its OPStatusAction code.
+	actions := []cbc.Key{
+		bill.ActionKeyNone,
+		bill.ActionKeyProvide,
+		bill.ActionKeyReissue,
+		bill.ActionKeyCreditFull,
+		bill.ActionKeyCreditPartial,
+		bill.ActionKeyCreditAmount,
+		bill.ActionKeyOther,
+	}
+	for _, ak := range actions {
+		t.Run(ak.String(), func(t *testing.T) {
+			st := basePeppolStatus()
+			st.Lines[0].Key = bill.StatusEventRejected
+			st.Lines[0].Actions = []*bill.Action{{Key: ak, Description: "d"}}
+			out := peppolRoundTrip(t, st)
+			require.Len(t, out.Lines, 1)
+			require.Len(t, out.Lines[0].Actions, 1)
+			assert.Equal(t, ak, out.Lines[0].Actions[0].Key)
+		})
+	}
+}
+
+func TestPeppolInvoiceResponseRoundTripFull(t *testing.T) {
+	st := basePeppolStatus()
+	st.Lines[0].Key = bill.StatusEventRejected
+	st.Lines[0].Reasons = []*bill.Reason{{Key: bill.ReasonKeyPrices, Description: "price off"}}
+	st.Lines[0].Actions = []*bill.Action{{Key: bill.ActionKeyReissue, Description: "redo"}}
+
+	out := peppolRoundTrip(t, st)
+
+	require.Len(t, out.Lines, 1)
+	l := out.Lines[0]
+	assert.Equal(t, bill.StatusEventRejected, l.Key)
+	require.Len(t, l.Reasons, 1)
+	assert.Equal(t, bill.ReasonKeyPrices, l.Reasons[0].Key)
+	assert.Equal(t, "price off", l.Reasons[0].Description)
+	require.Len(t, l.Actions, 1)
+	assert.Equal(t, bill.ActionKeyReissue, l.Actions[0].Key)
+	assert.Equal(t, "redo", l.Actions[0].Description)
+}
+
+const sampleGenericMultiResponse = `<?xml version="1.0" encoding="UTF-8"?>
+<ApplicationResponse xmlns="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:ID>RESP-MULTI</cbc:ID>
+  <cbc:IssueDate>2026-05-29</cbc:IssueDate>
+  <cac:SenderParty><cac:PartyName><cbc:Name>Buyer Co</cbc:Name></cac:PartyName></cac:SenderParty>
+  <cac:ReceiverParty><cac:PartyName><cbc:Name>Seller Co</cbc:Name></cac:PartyName></cac:ReceiverParty>
+  <cac:DocumentResponse>
+    <cac:Response><cbc:ReferenceID>1</cbc:ReferenceID></cac:Response>
+    <cac:DocumentReference><cbc:ID>INV-1</cbc:ID></cac:DocumentReference>
+  </cac:DocumentResponse>
+  <cac:DocumentResponse>
+    <cac:Response><cbc:ReferenceID>2</cbc:ReferenceID></cac:Response>
+    <cac:DocumentReference><cbc:ID>INV-2</cbc:ID></cac:DocumentReference>
+  </cac:DocumentResponse>
+</ApplicationResponse>`
+
+func TestParseApplicationResponseFansOutLines(t *testing.T) {
+	doc, err := ubl.Parse([]byte(sampleGenericMultiResponse))
+	require.NoError(t, err)
+	ar, ok := doc.(*ubl.ApplicationResponse)
+	require.True(t, ok)
+
+	env, err := ar.Convert()
+	require.NoError(t, err)
+	st, ok := env.Extract().(*bill.Status)
+	require.True(t, ok)
+
+	// Each DocumentResponse maps back to its own status line.
+	require.Len(t, st.Lines, 2)
+	require.NotNil(t, st.Lines[0].Doc)
+	assert.Equal(t, "INV-1", st.Lines[0].Doc.Code.String())
+	require.NotNil(t, st.Lines[1].Doc)
+	assert.Equal(t, "INV-2", st.Lines[1].Doc.Code.String())
 }
