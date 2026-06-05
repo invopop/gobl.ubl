@@ -261,13 +261,21 @@ func applyPeppolDocumentResponse(dr *DocumentResponse, line *bill.StatusLine) er
 		if r == nil {
 			continue
 		}
-		resp.Status = append(resp.Status, peppolStatus(peppolStatusReasonListID, peppolStatusReasonCodes[r.Key], r.Description))
+		rc, ok := peppolStatusReasonCodes[r.Key]
+		if !ok {
+			return fmt.Errorf("peppol invoice response does not support reason %q", r.Key)
+		}
+		resp.Status = append(resp.Status, peppolStatus(peppolStatusReasonListID, rc, r.Description))
 	}
 	for _, a := range line.Actions {
 		if a == nil {
 			continue
 		}
-		resp.Status = append(resp.Status, peppolStatus(peppolStatusActionListID, peppolStatusActionCodes[a.Key], a.Description))
+		ac, ok := peppolStatusActionCodes[a.Key]
+		if !ok {
+			return fmt.Errorf("peppol invoice response does not support action %q", a.Key)
+		}
+		resp.Status = append(resp.Status, peppolStatus(peppolStatusActionListID, ac, a.Description))
 	}
 	if peppolClarificationCodes[code] && len(resp.Status) == 0 {
 		return fmt.Errorf("peppol invoice response with status %q requires a reason or action clarification", code)
