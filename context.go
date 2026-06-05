@@ -215,8 +215,9 @@ var ContextPeppolFranceExtended = Context{
 }
 
 // ContextPeppolInvoiceResponse defines the Peppol BIS Invoice Response context.
-// It is a distinct customization from the billing invoice/credit-note context
-// (ContextPeppol), so it is registered as its own context.
+// It is its own context (separate from the billing ContextPeppol) because the
+// Invoice Response declares a different CustomizationID, which is what
+// FindContext matches a parsed document against.
 var ContextPeppolInvoiceResponse = Context{
 	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
 	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
