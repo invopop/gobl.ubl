@@ -34,8 +34,9 @@ type ApplicationResponse struct {
 	DocumentResponse []*DocumentResponse `xml:"cac:DocumentResponse"`
 }
 
-// DocumentResponse couples a response with the document it concerns. It is
-// modelled as a single response, which is all the supported profiles need.
+// DocumentResponse pairs one Response with the document it concerns. An
+// ApplicationResponse may carry several (generic UBL allows one per status
+// line); the Peppol Invoice Response is restricted to one per message.
 type DocumentResponse struct {
 	Response          *Response                  `xml:"cac:Response"`
 	DocumentReference *ResponseDocumentReference `xml:"cac:DocumentReference"`
