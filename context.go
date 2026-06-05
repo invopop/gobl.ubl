@@ -27,6 +27,8 @@ type VESIDMapping struct {
 	Invoice string
 	// CreditNote is the VESID for credit notes
 	CreditNote string
+	// ApplicationResponse is the VESID for application responses
+	ApplicationResponse string
 }
 
 // Context is used to ensure that the generated UBL document
