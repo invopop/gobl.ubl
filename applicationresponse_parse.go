@@ -75,8 +75,7 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 }
 
 // goblStatusLine maps the generic parts of a single UBL DocumentResponse. The
-// response code and the status clarifications are profile-specific and are
-// mapped back by the matching context.
+// response code and the status clarifications are context specific.
 func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) {
 	line := new(bill.StatusLine)
 	if dr == nil {
