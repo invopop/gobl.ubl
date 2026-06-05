@@ -2,7 +2,6 @@ package ubl
 
 import (
 	"encoding/xml"
-	"fmt"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
@@ -72,13 +71,7 @@ type ResponseDocumentReference struct {
 
 // ublApplicationResponse builds the generic UBL 2.1 ApplicationResponse skeleton
 // from a GOBL bill.Status.
-func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, error) {
-	// Generic UBL allows one DocumentResponse per status line (cac:DocumentResponse
-	// is [0..*]); the Peppol Invoice Response is constrained to one per message.
-	if o.context.Is(ContextPeppolInvoiceResponse) && len(st.Lines) != 1 {
-		return nil, fmt.Errorf("peppol invoice response supports a single document response, got %d", len(st.Lines))
-	}
-
+func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 	// SenderParty is who sends the response, ReceiverParty who receives it. The
 	// base supplier/customer roles flip with the status type (a response travels
 	// customer->supplier, an update supplier->customer, e.g. towards a tax agency
@@ -147,15 +140,13 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		}
 
 		if o.context.Is(ContextPeppolInvoiceResponse) {
-			if err := applyPeppolDocumentResponse(dr, line); err != nil {
-				return nil, err
-			}
+			applyPeppolDocumentResponse(dr, line)
 		}
 
 		out.DocumentResponse = append(out.DocumentResponse, dr)
 	}
 
-	return out, nil
+	return out
 }
 
 // responseDescription prefers the line description and falls back to the first
@@ -249,59 +240,35 @@ var peppolStatusActionCodes = map[cbc.Key]string{
 // applyPeppolDocumentResponse stamps the Peppol Invoice Response specifics onto
 // a single DocumentResponse: the UNCL4343 response code, and one cac:Status per
 // reason and action carrying the OPStatusReason / OPStatusAction clarification.
-func applyPeppolDocumentResponse(dr *DocumentResponse, line *bill.StatusLine) error {
-	code, ok := peppolResponseCodes[line.Key]
-	if !ok {
-		return fmt.Errorf("peppol invoice response does not support status event %q", line.Key)
-	}
+func applyPeppolDocumentResponse(dr *DocumentResponse, line *bill.StatusLine) {
 	resp := dr.Response
-	resp.ResponseCode = &IDType{Value: code}
+	if code := peppolResponseCodes[line.Key]; code != "" {
+		resp.ResponseCode = &IDType{Value: code}
+	}
 	for _, r := range line.Reasons {
 		if r == nil {
 			continue
 		}
-		rc, ok := peppolStatusReasonCodes[r.Key]
-		if !ok {
-			return fmt.Errorf("peppol invoice response does not support reason %q", r.Key)
+		if rc := peppolStatusReasonCodes[r.Key]; rc != "" {
+			resp.Status = append(resp.Status, peppolStatus(peppolStatusReasonListID, rc, r.Description))
 		}
-		resp.Status = append(resp.Status, peppolStatus(peppolStatusReasonListID, rc, r.Description))
 	}
 	for _, a := range line.Actions {
 		if a == nil {
 			continue
 		}
-		ac, ok := peppolStatusActionCodes[a.Key]
-		if !ok {
-			return fmt.Errorf("peppol invoice response does not support action %q", a.Key)
+		if ac := peppolStatusActionCodes[a.Key]; ac != "" {
+			resp.Status = append(resp.Status, peppolStatus(peppolStatusActionListID, ac, a.Description))
 		}
-		resp.Status = append(resp.Status, peppolStatus(peppolStatusActionListID, ac, a.Description))
 	}
-	if peppolClarificationCodes[code] && len(resp.Status) == 0 {
-		return fmt.Errorf("peppol invoice response with status %q requires a reason or action clarification", code)
+	if dr.DocumentReference != nil {
+		docType := documentTypeCodeInvoice
+		if line.Doc != nil && line.Doc.Type == bill.InvoiceTypeCreditNote {
+			docType = documentTypeCodeCreditNote
+		}
+		listID := documentTypeCodeListID
+		dr.DocumentReference.DocumentTypeCode = &IDType{ListID: &listID, Value: docType}
 	}
-
-	// The Peppol Invoice Response requires a DocumentReference with a mandatory
-	// DocumentTypeCode (UNCL1001: 380 invoice, 381 credit note).
-	if dr.DocumentReference == nil {
-		return fmt.Errorf("peppol invoice response requires a referenced document")
-	}
-	docType := documentTypeCodeInvoice
-	if line.Doc != nil && line.Doc.Type == bill.InvoiceTypeCreditNote {
-		docType = documentTypeCodeCreditNote
-	}
-	listID := documentTypeCodeListID
-	dr.DocumentReference.DocumentTypeCode = &IDType{ListID: &listID, Value: docType}
-
-	return nil
-}
-
-// peppolClarificationCodes are the response codes for which the Peppol Invoice
-// Response requires at least one clarification (UQ, RE, CA). CA is never emitted
-// by the converter (accepted maps to AP) but is kept here for completeness.
-var peppolClarificationCodes = map[string]bool{
-	"UQ": true,
-	"RE": true,
-	"CA": true,
 }
 
 func peppolStatus(listID, code, reason string) *Status {

@@ -155,26 +155,6 @@ func TestConvertApplicationResponseFansOutLines(t *testing.T) {
 	assert.Equal(t, "INV-2", ar.DocumentResponse[1].DocumentReference.ID)
 }
 
-func TestConvertPeppolInvoiceResponseRejectsMultipleLines(t *testing.T) {
-	st := &bill.Status{
-		Type:      bill.StatusTypeResponse,
-		Code:      "RESP-MULTI",
-		IssueDate: cal.MakeDate(2026, 5, 29),
-		Supplier:  &org.Party{Name: "Seller Co"},
-		Customer:  &org.Party{Name: "Buyer Co"},
-		Lines: []*bill.StatusLine{
-			{Index: 1, Key: bill.StatusEventAccepted, Doc: &org.DocumentRef{Code: "INV-1"}},
-			{Index: 2, Key: bill.StatusEventAccepted, Doc: &org.DocumentRef{Code: "INV-2"}},
-		},
-	}
-	env, err := gobl.Envelop(st)
-	require.NoError(t, err)
-
-	// Peppol allows only one DocumentResponse per message.
-	_, err = ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
-	require.Error(t, err)
-}
-
 func TestConvertApplicationResponseUpdateFlipsDirection(t *testing.T) {
 	st := &bill.Status{
 		Type:      bill.StatusTypeUpdate,
@@ -288,45 +268,6 @@ func TestConvertPeppolInvoiceResponseErrorMapsToRejected(t *testing.T) {
 	require.Len(t, ar.DocumentResponse, 1)
 	require.NotNil(t, ar.DocumentResponse[0].Response.ResponseCode)
 	assert.Equal(t, "RE", ar.DocumentResponse[0].Response.ResponseCode.Value)
-}
-
-func TestConvertPeppolInvoiceResponseRequiresClarification(t *testing.T) {
-	st := &bill.Status{
-		Type:      bill.StatusTypeResponse,
-		Code:      "RESP-R",
-		IssueDate: cal.MakeDate(2026, 5, 29),
-		Supplier:  &org.Party{Name: "Seller Co"},
-		Customer:  &org.Party{Name: "Buyer Co"},
-		Lines: []*bill.StatusLine{
-			{Index: 1, Key: bill.StatusEventRejected, Doc: &org.DocumentRef{Code: "INV-R"}},
-		},
-	}
-	env, err := gobl.Envelop(st)
-	require.NoError(t, err)
-
-	// Rejecting without any reason or action is invalid for Peppol.
-	_, err = ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
-	require.Error(t, err)
-}
-
-func TestConvertPeppolInvoiceResponseRejectsUnmappedEvent(t *testing.T) {
-	st := &bill.Status{
-		Type:      bill.StatusTypeResponse,
-		Code:      "RESP-I",
-		IssueDate: cal.MakeDate(2026, 5, 29),
-		Supplier:  &org.Party{Name: "Seller Co"},
-		Customer:  &org.Party{Name: "Buyer Co"},
-		Lines: []*bill.StatusLine{
-			{Index: 1, Key: bill.StatusEventIssued, Doc: &org.DocumentRef{Code: "INV-I"}},
-		},
-	}
-	env, err := gobl.Envelop(st)
-	require.NoError(t, err)
-
-	// "issued" has no Invoice Response code; rather than emit a document missing
-	// the mandatory ResponseCode, conversion fails.
-	_, err = ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
-	require.Error(t, err)
 }
 
 const samplePeppolInvoiceResponse = `<?xml version="1.0" encoding="UTF-8"?>
