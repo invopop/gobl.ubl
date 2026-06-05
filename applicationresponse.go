@@ -71,9 +71,7 @@ type ResponseDocumentReference struct {
 }
 
 // ublApplicationResponse builds the generic UBL 2.1 ApplicationResponse skeleton
-// from a GOBL bill.Status. The profile-specific values (the response code and
-// its code-list attributes, the document-type code, profile identifiers and any
-// regional party formatting) are stamped afterwards by the matching context.
+// from a GOBL bill.Status.
 func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, error) {
 	// Generic UBL allows one DocumentResponse per status line (cac:DocumentResponse
 	// is [0..*]); the Peppol Invoice Response is constrained to one per message.
@@ -84,8 +82,7 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 	// SenderParty is who sends the response, ReceiverParty who receives it. The
 	// base supplier/customer roles flip with the status type (a response travels
 	// customer->supplier, an update supplier->customer, e.g. towards a tax agency
-	// held as the recipient); the issuer is the sender-side intermediary and the
-	// recipient the receiver-side one.
+	// held as the recipient);
 	sender, receiver := st.Customer, st.Supplier
 	if st.Type == bill.StatusTypeUpdate {
 		sender, receiver = st.Supplier, st.Customer
