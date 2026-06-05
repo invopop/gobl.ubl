@@ -63,21 +63,22 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 		out.Notes = append(out.Notes, &org.Note{Text: n})
 	}
 
-	line, err := ar.goblStatusLine(o)
-	if err != nil {
-		return nil, err
+	for _, dr := range ar.DocumentResponse {
+		line, err := goblStatusLine(dr, o)
+		if err != nil {
+			return nil, err
+		}
+		out.Lines = append(out.Lines, line)
 	}
-	out.Lines = []*bill.StatusLine{line}
 
 	return out, nil
 }
 
-// goblStatusLine maps the generic parts of a UBL DocumentResponse. The response
-// code and the status clarifications are profile-specific and are mapped back by
-// the matching context.
-func (ar *ApplicationResponse) goblStatusLine(o *options) (*bill.StatusLine, error) {
+// goblStatusLine maps the generic parts of a single UBL DocumentResponse. The
+// response code and the status clarifications are profile-specific and are
+// mapped back by the matching context.
+func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) {
 	line := new(bill.StatusLine)
-	dr := ar.DocumentResponse
 	if dr == nil {
 		return line, nil
 	}
