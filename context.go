@@ -247,6 +247,9 @@ var ContextZATCA = Context{
 var ContextPeppolInvoiceResponse = Context{
 	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
 	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
+	VESIDs: VESIDMapping{
+		ApplicationResponse: "eu.peppol.bis3:invoice-message-response:2025.5",
+	},
 }
 
 // contexts is used internally for reverse lookups during parsing.

@@ -114,6 +114,14 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		}
 	}
 
+	if o.context.Is(ContextPeppolInvoiceResponse) {
+		// T111's data model omits these root elements and restricts the parties.
+		out.UBLVersionID = ""
+		out.UUID = ""
+		trimToResponseParty(out.SenderParty)
+		trimToResponseParty(out.ReceiverParty)
+	}
+
 	for _, line := range st.Lines {
 		dr := &DocumentResponse{Response: &Response{}}
 		// ReferenceID and Description are valid generic UBL but are not part of the
@@ -269,6 +277,18 @@ func applyPeppolDocumentResponse(dr *DocumentResponse, line *bill.StatusLine) {
 		listID := documentTypeCodeListID
 		dr.DocumentReference.DocumentTypeCode = &IDType{ListID: &listID, Value: docType}
 	}
+}
+
+// trimToResponseParty reduces a party to the elements the Peppol Invoice
+// Response (T111) permits on SenderParty/ReceiverParty: EndpointID,
+// PartyIdentification, PartyLegalEntity and Contact. The CIUS forbids the rest.
+func trimToResponseParty(p *Party) {
+	if p == nil {
+		return
+	}
+	p.PartyName = nil
+	p.PostalAddress = nil
+	p.PartyTaxScheme = nil
 }
 
 func peppolStatus(listID, code, reason string) *Status {

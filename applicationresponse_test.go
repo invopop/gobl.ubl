@@ -1,6 +1,8 @@
 package ubl_test
 
 import (
+	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -9,8 +11,11 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/phive"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const sampleApplicationResponse = `<?xml version="1.0" encoding="UTF-8"?>
@@ -127,6 +132,46 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 	// stamped by the generic conversion.
 	assert.Nil(t, dr.Response.ResponseCode)
 	assert.Nil(t, dr.DocumentReference.DocumentTypeCode)
+}
+
+func TestConvertPeppolInvoiceResponseValidate(t *testing.T) {
+	if !*validate {
+		t.Skip("phive validation not requested (use -validate)")
+	}
+	conn, err := grpc.NewClient("127.0.0.1:9091", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(t, err)
+	defer conn.Close() //nolint:errcheck
+	pc := phive.NewValidationServiceClient(conn)
+
+	st := &bill.Status{
+		Type:      bill.StatusTypeResponse,
+		Code:      "RESP-1",
+		IssueDate: cal.MakeDate(2026, 5, 29),
+		Supplier:  &org.Party{Name: "Seller Co", Inboxes: []*org.Inbox{{Scheme: "9920", Code: "B98602642"}}},
+		Customer:  &org.Party{Name: "Buyer Co", Inboxes: []*org.Inbox{{Scheme: "9920", Code: "A39200019"}}},
+		Lines: []*bill.StatusLine{
+			{
+				Index:   1,
+				Key:     bill.StatusEventRejected,
+				Doc:     &org.DocumentRef{Code: "INV-9"},
+				Reasons: []*bill.Reason{{Key: bill.ReasonKeyReferences, Description: "missing PO"}},
+			},
+		},
+	}
+	env, err := gobl.Envelop(st)
+	require.NoError(t, err)
+
+	doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	require.NoError(t, err)
+	data, err := ubl.Bytes(doc)
+	require.NoError(t, err)
+
+	vesid := ubl.ContextPeppolInvoiceResponse.VESIDs.ApplicationResponse
+	resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{Vesid: vesid, XmlContent: data})
+	require.NoError(t, err)
+	results, err := json.MarshalIndent(resp.Results, "", "  ")
+	require.NoError(t, err)
+	require.True(t, resp.Success, "Peppol Invoice Response should validate for %s: %s", vesid, string(results))
 }
 
 func TestConvertApplicationResponseFansOutLines(t *testing.T) {
