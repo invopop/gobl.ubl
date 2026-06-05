@@ -125,6 +125,32 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 	assert.Nil(t, ar.DocumentResponse.DocumentReference.DocumentTypeCode)
 }
 
+func TestConvertApplicationResponseUpdateFlipsDirection(t *testing.T) {
+	st := &bill.Status{
+		Type:      bill.StatusTypeUpdate,
+		Code:      "UPD-1",
+		IssueDate: cal.MakeDate(2026, 5, 29),
+		Supplier:  &org.Party{Name: "Seller Co"},
+		Customer:  &org.Party{Name: "Buyer Co"},
+		Lines: []*bill.StatusLine{
+			{Index: 1, Key: bill.StatusEventPaid, Doc: &org.DocumentRef{Code: "INV-1"}},
+		},
+	}
+	env, err := gobl.Envelop(st)
+	require.NoError(t, err)
+
+	doc, err := ubl.Convert(env)
+	require.NoError(t, err)
+	ar, ok := doc.(*ubl.ApplicationResponse)
+	require.True(t, ok)
+
+	// An update travels supplier -> customer, the reverse of a response.
+	require.NotNil(t, ar.SenderParty)
+	assert.Equal(t, "Seller Co", ar.SenderParty.PartyName.Name)
+	require.NotNil(t, ar.ReceiverParty)
+	assert.Equal(t, "Buyer Co", ar.ReceiverParty.PartyName.Name)
+}
+
 func TestConvertPeppolInvoiceResponse(t *testing.T) {
 	st := &bill.Status{
 		Type:      bill.StatusTypeResponse,
