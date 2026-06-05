@@ -11,8 +11,7 @@ import (
 const NamespaceUBLApplicationResponse = "urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2"
 
 // ApplicationResponse represents a UBL 2.1 ApplicationResponse document, used to
-// return a response (accept or reject) for a previously received document such
-// as an invoice.
+// return a response (accept or reject) for a previously received document.
 type ApplicationResponse struct {
 	XMLName      xml.Name
 	CACNamespace string `xml:"xmlns:cac,attr"`
@@ -70,8 +69,6 @@ type ResponseDocumentReference struct {
 	DocumentTypeCode *IDType `xml:"cbc:DocumentTypeCode"`
 }
 
-// ublApplicationResponse builds the generic UBL 2.1 ApplicationResponse skeleton
-// from a GOBL bill.Status.
 func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 	// SenderParty is who sends the response, ReceiverParty who receives it. The
 	// base supplier/customer roles flip with the status type (a response travels
