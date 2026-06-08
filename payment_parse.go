@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	oioubl "github.com/invopop/gobl.dk.oioubl/oioubl"
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"

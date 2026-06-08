@@ -3,7 +3,7 @@ package ubl
 import (
 	"strconv"
 
-	oioubl "github.com/invopop/gobl.dk.oioubl/oioubl"
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"

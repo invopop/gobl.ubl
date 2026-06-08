@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
-	oioubl "github.com/invopop/gobl.dk.oioubl/oioubl"
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	ubl "github.com/invopop/gobl.ubl"
 	en16931 "github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
