@@ -1,8 +1,8 @@
 package ubl
 
 import (
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/addons/de/xrechnung"
-	"github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/addons/fr/facturx"

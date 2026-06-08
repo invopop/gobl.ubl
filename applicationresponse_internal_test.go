@@ -3,7 +3,7 @@ package ubl
 import (
 	"testing"
 
-	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

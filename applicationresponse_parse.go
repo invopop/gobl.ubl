@@ -4,7 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 
 	"github.com/invopop/gobl"
-	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"

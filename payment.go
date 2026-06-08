@@ -3,7 +3,7 @@ package ubl
 import (
 	"errors"
 
-	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
