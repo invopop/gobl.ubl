@@ -4,11 +4,20 @@ go 1.24.4
 
 require (
 	github.com/invopop/gobl v0.403.1-0.20260603091605-04cd0c610990
+	github.com/invopop/gobl.dk.oioubl v0.0.0-00010101000000-000000000000
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
 	gitlab.com/flimzy/testy v0.14.0
 )
+
+// Dev-only: the OIOUBL addon now lives in the standalone gobl.dk.oioubl module,
+// built here against the local gobl core that has the addon removed (the
+// externalize-dk-oioubl branch). Both replaces drop once a core tag and the
+// gobl.dk.oioubl repo are published (see gobl.dk.oioubl/MIGRATION.md).
+replace github.com/invopop/gobl => ../gobl
+
+replace github.com/invopop/gobl.dk.oioubl => ../gobl.dk.oioubl
 
 require (
 	cloud.google.com/go v0.118.0
@@ -33,7 +42,6 @@ require (
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
 	github.com/magefile/mage v1.15.0 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
+	oioubl "github.com/invopop/gobl.dk.oioubl/oioubl"
 	ubl "github.com/invopop/gobl.ubl"
-	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	en16931 "github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/org"
