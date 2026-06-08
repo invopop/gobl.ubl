@@ -3,24 +3,16 @@ module github.com/invopop/gobl.ubl
 go 1.24.4
 
 require (
-	github.com/invopop/gobl v0.403.1-0.20260603091605-04cd0c610990
-	github.com/invopop/gobl.dk.oioubl v0.0.0-00010101000000-000000000000
+	github.com/invopop/gobl v0.403.1-0.20260608111203-e6aa7fce7689
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
 	gitlab.com/flimzy/testy v0.14.0
 )
 
-// Dev-only: the OIOUBL addon now lives in the standalone gobl.dk.oioubl module,
-// built here against the local gobl core that has the addon removed (the
-// externalize-dk-oioubl branch). Both replaces drop once a core tag and the
-// gobl.dk.oioubl repo are published (see gobl.dk.oioubl/MIGRATION.md).
-replace github.com/invopop/gobl => ../gobl
-
-replace github.com/invopop/gobl.dk.oioubl => ../gobl.dk.oioubl
-
 require (
 	cloud.google.com/go v0.118.0
+	github.com/invopop/gobl.dk.oioubl v0.0.0-20260608112206-b43cc2cff4d7
 	github.com/invopop/phive v0.6.0
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
@@ -34,7 +26,7 @@ require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beevik/etree v1.6.0 // indirect
 	github.com/buger/jsonparser v1.1.2 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/expr-lang/expr v1.17.8 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -45,7 +37,7 @@ require (
 	github.com/magefile/mage v1.15.0 // indirect
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/russellhaering/goxmldsig v1.5.0 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
