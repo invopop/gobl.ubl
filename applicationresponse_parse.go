@@ -121,9 +121,6 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 		line.Doc = doc
 	}
 
-	if o.context.Is(ContextPeppolInvoiceResponse) {
-		applyPeppolStatusLine(line, dr)
-	}
 	if o.context.Is(ContextOIOUBL21) {
 		applyOIOUBL21StatusLine(line, dr)
 	}
@@ -152,57 +149,4 @@ func applyOIOUBL21StatusLine(line *bill.StatusLine, dr *DocumentResponse) {
 		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == responseDocTypeCreditNote {
 		line.Doc.Type = bill.InvoiceTypeCreditNote
 	}
-}
-
-// applyPeppolStatusLine maps the Peppol Invoice Response codes back to GOBL: the
-// UNCL4343 response code to a status event, and each OPStatusReason /
-// OPStatusAction cac:Status clarification to a reason or action.
-func applyPeppolStatusLine(line *bill.StatusLine, dr *DocumentResponse) {
-	r := dr.Response
-	if r == nil {
-		return
-	}
-	if r.ResponseCode != nil {
-		line.Key = peppolResponseEvents[r.ResponseCode.Value]
-	}
-	for _, s := range r.Status {
-		if s == nil || s.StatusReasonCode == nil {
-			continue
-		}
-		listID := ""
-		if s.StatusReasonCode.ListID != nil {
-			listID = *s.StatusReasonCode.ListID
-		}
-		desc := ""
-		if len(s.StatusReason) > 0 {
-			desc = s.StatusReason[0]
-		}
-		switch listID {
-		case peppolStatusReasonListID:
-			if key := keyForCode(peppolStatusReasonCodes, s.StatusReasonCode.Value); key != "" {
-				line.Reasons = append(line.Reasons, &bill.Reason{Key: key, Description: desc})
-			}
-		case peppolStatusActionListID:
-			if key := keyForCode(peppolStatusActionCodes, s.StatusReasonCode.Value); key != "" {
-				line.Actions = append(line.Actions, &bill.Action{Key: key, Description: desc})
-			}
-		}
-	}
-
-	// Map the mandatory DocumentTypeCode back to the referenced document type.
-	if ref := dr.DocumentReference; ref != nil && line.Doc != nil &&
-		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == documentTypeCodeCreditNote {
-		line.Doc.Type = bill.InvoiceTypeCreditNote
-	}
-}
-
-// keyForCode returns the GOBL key mapped to the given code in m, or empty if
-// none matches.
-func keyForCode(m map[cbc.Key]string, code string) cbc.Key {
-	for k, v := range m {
-		if v == code {
-			return k
-		}
-	}
-	return ""
 }
