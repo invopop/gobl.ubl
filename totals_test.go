@@ -12,8 +12,7 @@ import (
 
 func TestNewTotals(t *testing.T) {
 	t.Run("peppol-1-advance.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("peppol/peppol-1-advance.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "peppol/peppol-1-advance.json")
 
 		assert.Equal(t, "1620.00", doc.LegalMonetaryTotal.LineExtensionAmount.Value)
 		assert.Equal(t, "1620.00", doc.LegalMonetaryTotal.TaxExclusiveAmount.Value)
@@ -29,8 +28,7 @@ func TestNewTotals(t *testing.T) {
 	})
 
 	t.Run("standard_invoice_no_exemption_reason", func(t *testing.T) {
-		doc, err := testInvoiceFrom("peppol/invoice-minimal.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "peppol/invoice-minimal.json")
 
 		require.Len(t, doc.TaxTotal, 1)
 		require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
@@ -40,8 +38,7 @@ func TestNewTotals(t *testing.T) {
 	})
 
 	t.Run("reverse_charge_exemption_from_tax_notes", func(t *testing.T) {
-		doc, err := testInvoiceFrom("peppol/peppol-reverse-charge.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "peppol/peppol-reverse-charge.json")
 
 		require.Len(t, doc.TaxTotal, 1)
 		require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
@@ -57,8 +54,7 @@ func TestNewTotals(t *testing.T) {
 }
 
 func TestOIOUBL21DualCurrencyTotals(t *testing.T) {
-	doc, err := testInvoiceFrom("oioubl21/invoice-minimal.json")
-	require.NoError(t, err)
+	doc := testInvoiceFrom(t, "oioubl21/invoice-minimal.json")
 
 	// OIOUBL carries the accounting-currency tax inside the single TaxTotal,
 	// not as a second TaxTotal block (F-INV018 / F-CRN013).
@@ -82,8 +78,7 @@ func TestOIOUBL21DualCurrencyTotals(t *testing.T) {
 
 func TestParseTaxNotes(t *testing.T) {
 	t.Run("reverse_charge", func(t *testing.T) {
-		env, err := testParseInvoice("peppol/nbio-stuck-ubl.xml")
-		require.NoError(t, err)
+		env := parseXMLInvoice(t, "peppol/nbio-stuck-ubl.xml")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -99,8 +94,7 @@ func TestParseTaxNotes(t *testing.T) {
 	})
 
 	t.Run("standard_no_tax_notes", func(t *testing.T) {
-		env, err := testParseInvoice("peppol/base-example.xml")
-		require.NoError(t, err)
+		env := parseXMLInvoice(t, "peppol/base-example.xml")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)

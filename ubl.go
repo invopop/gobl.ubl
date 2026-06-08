@@ -113,42 +113,45 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		opt(o)
 	}
 
-	doc := env.Extract()
-	switch d := doc.(type) {
+	switch doc := env.Extract().(type) {
 	case *bill.Invoice:
 		// Check and add missing addons
-		if err := ensureAddons(d, o.context.Addons); err != nil {
+		if err := ensureAddons(env, o.context.Addons); err != nil {
 			return nil, err
 		}
-
 		// Removes included taxes as they are not supported in UBL
-		if err := d.RemoveIncludedTaxes(); err != nil {
+		if err := doc.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
 		}
-
-		return ublInvoice(d, o)
+		return ublInvoice(doc, o)
 	case *bill.Status:
-		if err := ensureAddons(d, o.context.Addons); err != nil {
-			return nil, err
-		}
-		return ublApplicationResponse(d, o)
+		// The ApplicationResponse converter maps only; it neither auto-adds
+		// addons nor validates (a keyless or partial status is a generic UBL
+		// shape). Correctness is gated by the addon rules at envelope validation
+		// and by schematron downstream.
+		return ublApplicationResponse(doc, o), nil
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
 }
 
-// addonsDocument is implemented by the GOBL document types that carry addons
-// and can recalculate themselves once an addon is added.
+// addonsDocument is implemented by the GOBL document types that carry addons.
 type addonsDocument interface {
 	GetAddons() []cbc.Key
 	SetAddons(...cbc.Key)
-	Calculate() error
 }
 
-// ensureAddons checks if the document has all required addons and adds missing ones
-func ensureAddons(doc addonsDocument, required []cbc.Key) error {
+// ensureAddons checks if the document has all required addons and adds the
+// missing ones, recalculating and revalidating the envelope so any rule the
+// newly added addon enforces is surfaced (as a *gobl.Error carrying the faults).
+func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 	if len(required) == 0 {
 		return nil
+	}
+
+	doc, ok := env.Extract().(addonsDocument)
+	if !ok {
+		return ErrUnsupportedDocumentType
 	}
 
 	var missing []cbc.Key
@@ -158,16 +161,15 @@ func ensureAddons(doc addonsDocument, required []cbc.Key) error {
 			missing = append(missing, addon)
 		}
 	}
-
 	if len(missing) == 0 {
 		return nil
 	}
 
 	doc.SetAddons(append(existing, missing...)...)
-	if err := doc.Calculate(); err != nil {
-		return fmt.Errorf("gobl document missing addon %v: %w", missing, err)
+	if err := env.Calculate(); err != nil {
+		return err
 	}
-	return nil
+	return env.Validate()
 }
 
 func extractRootNamespace(data []byte) (string, error) {

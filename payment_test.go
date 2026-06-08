@@ -13,8 +13,7 @@ import (
 
 func TestNewPayment(t *testing.T) {
 	t.Run("self-billed-invoice", func(t *testing.T) {
-		doc, err := testInvoiceFrom("peppol-self-billed/self-billed-invoice.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "peppol-self-billed/self-billed-invoice.json")
 
 		// PayeeParty should have PartyName (BR-17) but not RegistrationName (UBL-CR-275)
 		assert.Equal(t, "Ebeneser Scrooge AS", doc.PayeeParty.PartyName.Name)
@@ -28,8 +27,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("credit transfer with account number", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-account-number.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-account-number.json")
 
 		// Verify the account number was set in the UBL financial account ID
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
@@ -39,21 +37,19 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("document type extension", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 
 		inv.Payment.Instructions.Ext = tax.MakeExtensions()
 
-		_, err = ubl.ConvertInvoice(env)
+		_, err := ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 
 	t.Run("non OIO keeps payment means untouched", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-minimal.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-minimal.json")
 		require.NotEmpty(t, doc.PaymentMeans)
 
 		pm := doc.PaymentMeans[0]
@@ -65,8 +61,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("oioubl21 applies OIO payment mapping", func(t *testing.T) {
-		env, err := loadTestEnvelope("oioubl21/invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "oioubl21/invoice-minimal.json")
 
 		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextOIOUBL21))
 		require.NoError(t, err)
@@ -87,8 +82,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("oioubl21 keeps explicit payment-channel", func(t *testing.T) {
-		env, err := loadTestEnvelope("oioubl21/invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "oioubl21/invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -104,9 +98,8 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "31", doc.PaymentMeans[0].PaymentMeansCode.Value)
 	})
 
-	t.Run("oioubl21 single due date without date does not panic", func(t *testing.T) {
-		env, err := loadTestEnvelope("oioubl21/invoice-bare.json")
-		require.NoError(t, err)
+	t.Run("oioubl21 rejects a due date without a date", func(t *testing.T) {
+		env := loadTestEnvelope(t, "oioubl21/invoice-bare.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -114,10 +107,12 @@ func TestNewPayment(t *testing.T) {
 		require.NotNil(t, inv.Payment.Terms)
 		require.Len(t, inv.Payment.Terms.DueDates, 1)
 
+		// An incomplete due date is rejected during conversion: Convert validates
+		// after auto-adding the OIOUBL addon, so the fault surfaces rather than the
+		// converter dropping the date silently (or panicking).
 		inv.Payment.Terms.DueDates[0].Date = nil
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextOIOUBL21))
-		require.NoError(t, err)
-		assert.Empty(t, doc.DueDate)
+		_, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextOIOUBL21))
+		require.Error(t, err)
 	})
 
 }

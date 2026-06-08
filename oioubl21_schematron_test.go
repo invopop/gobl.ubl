@@ -71,8 +71,7 @@ func requireSaxonAndSchematron(t *testing.T, xsl string) {
 
 func renderOIOUBL21Fixture(t *testing.T, fixture string) []byte {
 	t.Helper()
-	env, err := loadTestEnvelope(fixture)
-	require.NoError(t, err)
+	env := loadTestEnvelope(t, fixture)
 	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextOIOUBL21))
 	require.NoError(t, err)
 	xmlData, err := ubl.Bytes(doc)

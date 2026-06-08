@@ -223,7 +223,10 @@ func TestConvertCreditNoteToXMLWithOIOUBL21Context(t *testing.T) {
 func loadTestEnvelope(t *testing.T) *gobl.Envelope {
 	t.Helper()
 
-	path := filepath.Join("..", "..", "test", "data", "convert", "invoice-minimal.json")
+	// A DK invoice that is valid under every context exercised here, including
+	// OIOUBL: Convert now validates after auto-adding a required addon, so the
+	// fixture must satisfy the OIOUBL invoice rules (inboxes, customer people).
+	path := filepath.Join("..", "..", "test", "data", "convert", "oioubl21", "invoice-bare.json")
 	data, err := os.ReadFile(path)
 	require.NoError(t, err)
 

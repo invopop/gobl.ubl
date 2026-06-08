@@ -15,8 +15,7 @@ import (
 
 func TestNewParty(t *testing.T) {
 	t.Run("invoice-de-de.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-de-de.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-de-de.json")
 
 		assert.Equal(t, "DE111111125", doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID.Value)
 		assert.Equal(t, "Provide One GmbH", *doc.AccountingSupplierParty.Party.PartyLegalEntity.RegistrationName)
@@ -42,16 +41,14 @@ func TestNewParty(t *testing.T) {
 	})
 
 	t.Run("invoice-complete.json", func(t *testing.T) {
-		doc, err := testInvoiceFrom("invoice-complete.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-complete.json")
 
 		assert.Equal(t, "inbox@example.com", doc.AccountingSupplierParty.Party.EndpointID.Value)
 		assert.Equal(t, "EM", doc.AccountingSupplierParty.Party.EndpointID.SchemeID)
 	})
 
 	t.Run("oioubl21 party uses real data without fallbacks", func(t *testing.T) {
-		doc, err := testInvoiceFrom("oioubl21/invoice-bare.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "oioubl21/invoice-bare.json")
 
 		supplier := doc.AccountingSupplierParty.Party
 		customer := doc.AccountingCustomerParty.Party
@@ -83,8 +80,7 @@ func TestNewParty(t *testing.T) {
 	})
 
 	t.Run("identity scopes map to legal and tax identifiers", func(t *testing.T) {
-		env, err := loadTestEnvelope("invoice-minimal.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -139,4 +135,52 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "1234567890128", doc.AccountingSupplierParty.Party.PartyIdentification[0].ID.Value)
 	})
 
+	t.Run("identities with iso scheme id propagate to SchemeID", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		// Supplier identity without a Scope, carrying iso scheme ID:
+		// exercises newParty's third-pass branch.
+		inv.Supplier.Identities = []*org.Identity{
+			{
+				Code: "TEST-001",
+				Ext:  tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0088"}),
+			},
+		}
+
+		// Payee with a legal identity carrying iso scheme ID:
+		// exercises both passes inside newPayeeParty.
+		if inv.Payment == nil {
+			inv.Payment = &bill.PaymentDetails{}
+		}
+		inv.Payment.Payee = &org.Party{
+			Name: "Test Payee",
+			Identities: []*org.Identity{
+				{
+					Code:  "PAYEE-001",
+					Scope: org.IdentityScopeLegal,
+					Ext:   tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0088"}),
+				},
+			},
+		}
+
+		require.NoError(t, env.Calculate())
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		require.NotEmpty(t, doc.AccountingSupplierParty.Party.PartyIdentification)
+		pid := doc.AccountingSupplierParty.Party.PartyIdentification[0]
+		require.NotNil(t, pid.ID.SchemeID)
+		assert.Equal(t, "0088", *pid.ID.SchemeID)
+		assert.Equal(t, "TEST-001", pid.ID.Value)
+
+		require.NotNil(t, doc.PayeeParty)
+		require.NotEmpty(t, doc.PayeeParty.PartyIdentification)
+		require.NotNil(t, doc.PayeeParty.PartyIdentification[0].ID.SchemeID)
+		assert.Equal(t, "0088", *doc.PayeeParty.PartyIdentification[0].ID.SchemeID)
+		require.NotNil(t, doc.PayeeParty.PartyLegalEntity)
+		require.NotNil(t, doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
+		assert.Equal(t, "0088", *doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
+	})
 }
