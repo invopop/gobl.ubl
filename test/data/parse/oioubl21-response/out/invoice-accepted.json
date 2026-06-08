@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "08f6e03cb05101e567ef7f0f1004c79567f4aea2df00ed00c19c6df4c618bc26"
+			"val": "b6864db289609315f6a1f05003cac7594037887566120fd36a455a4e2c4ec1c0"
 		}
 	},
 	"doc": {
@@ -86,6 +86,9 @@
 				"doc": {
 					"issue_date": "2026-05-29",
 					"code": "FINAL-002"
+				},
+				"ext": {
+					"dk-oioubl-response-code": "BusinessAccept"
 				}
 			}
 		]

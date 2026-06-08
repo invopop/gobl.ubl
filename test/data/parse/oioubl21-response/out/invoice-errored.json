@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "77bf67e64125d346baa6346e0368e8e016e33fb0e09273c1280e06e14015f096"
+			"val": "587476e8d3120a6fb0f5a3abf14cefc7ff8a4ea04a5bce510269484222610b41"
 		}
 	},
 	"doc": {
@@ -87,7 +87,10 @@
 					"issue_date": "2026-05-29",
 					"code": "FINAL-004"
 				},
-				"description": "Dokumentet kunne ikke behandles teknisk: ugyldig XML-struktur"
+				"description": "Dokumentet kunne ikke behandles teknisk: ugyldig XML-struktur",
+				"ext": {
+					"dk-oioubl-response-code": "TechnicalReject"
+				}
 			}
 		]
 	}

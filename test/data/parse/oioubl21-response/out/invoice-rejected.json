@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "251b41e630e27ae3dac4899bd9bd84841d028ac848d0b0c3a8931ecd73aff643"
+			"val": "12eae96681b2d958b6d7b99b595a3d424145f1228ea49fdddf01fda5ffc1fac1"
 		}
 	},
 	"doc": {
@@ -87,7 +87,10 @@
 					"issue_date": "2026-05-29",
 					"code": "FINAL-001"
 				},
-				"description": "Den aftalte rabat på 800,- kr mangler på fakturaen"
+				"description": "Den aftalte rabat på 800,- kr mangler på fakturaen",
+				"ext": {
+					"dk-oioubl-response-code": "BusinessReject"
+				}
 			}
 		]
 	}

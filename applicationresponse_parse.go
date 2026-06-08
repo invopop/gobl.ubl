@@ -4,6 +4,7 @@ import (
 	"cloud.google.com/go/civil"
 
 	"github.com/invopop/gobl"
+	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -128,22 +129,13 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 	return line, nil
 }
 
-// goblResponseEvents reverses oioublResponseCodes, mapping an OIOUBL
-// responsecode-1.1 value back to a GOBL status event.
-var goblResponseEvents = map[string]cbc.Key{
-	responseCodeBusinessAccept:  bill.StatusEventAccepted,
-	responseCodeBusinessReject:  bill.StatusEventRejected,
-	responseCodeTechnicalAccept: bill.StatusEventAcknowledged,
-	responseCodeTechnicalReject: bill.StatusEventError,
-	responseCodeProfileReject:   bill.StatusEventError,
-}
-
-// applyOIOUBL21StatusLine maps the OIOUBL 2.1 code-list values on a parsed
-// ApplicationResponse back to GOBL: the responsecode-1.1 response code to a
-// status event, and the responsedocumenttypecode-1.1 value to a document type.
+// applyOIOUBL21StatusLine records the parsed OIOUBL code-list values on the GOBL
+// status line: the responsecode-1.1 value into the dk-oioubl-response-code
+// extension (the addon normalizer recovers the status event from it during
+// Calculate), and the responsedocumenttypecode-1.1 value into the document type.
 func applyOIOUBL21StatusLine(line *bill.StatusLine, dr *DocumentResponse) {
-	if r := dr.Response; r != nil && r.ResponseCode != nil {
-		line.Key = goblResponseEvents[r.ResponseCode.Value]
+	if r := dr.Response; r != nil && r.ResponseCode != nil && r.ResponseCode.Value != "" {
+		line.Ext = line.Ext.Set(oioubl.ExtKeyResponseCode, cbc.Code(r.ResponseCode.Value))
 	}
 	if ref := dr.DocumentReference; ref != nil && line.Doc != nil &&
 		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == responseDocTypeCreditNote {

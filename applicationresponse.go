@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"strconv"
 
+	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
@@ -167,32 +168,11 @@ const (
 	oioublCodeListAgencyID   = "320"
 )
 
-// OIOUBL responsecode-1.1 values accepted by the ApplicationResponse schematron.
-// F-APR018 allows five of the six codelist values: ProfileAccept exists in the
-// codelist but the schematron explicitly rejects it, so it is intentionally
-// absent here.
-const (
-	responseCodeBusinessAccept  = "BusinessAccept"
-	responseCodeBusinessReject  = "BusinessReject"
-	responseCodeTechnicalAccept = "TechnicalAccept"
-	responseCodeTechnicalReject = "TechnicalReject"
-	responseCodeProfileReject   = "ProfileReject"
-)
-
 // OIOUBL responsedocumenttypecode-1.1 values for the referenced document.
 const (
 	responseDocTypeInvoice    = "Invoice"
 	responseDocTypeCreditNote = "CreditNote"
 )
-
-// oioublResponseCodes maps GOBL status events to the OIOUBL responsecode-1.1
-// values accepted by the ApplicationResponse schematron (F-APR018).
-var oioublResponseCodes = map[cbc.Key]string{
-	bill.StatusEventAccepted:     responseCodeBusinessAccept,
-	bill.StatusEventRejected:     responseCodeBusinessReject,
-	bill.StatusEventAcknowledged: responseCodeTechnicalAccept,
-	bill.StatusEventError:        responseCodeTechnicalReject,
-}
 
 // applyOIOUBL21ResponseProfile stamps the OIOUBL profileid-1.4 code-list
 // attributes onto the ProfileID and, for a technical acknowledgement, swaps in
@@ -206,7 +186,7 @@ func applyOIOUBL21ResponseProfile(out *ApplicationResponse, st *bill.Status) {
 	schemeID := oioublProfileSchemeID
 	out.ProfileID.SchemeAgencyID = &agencyID
 	out.ProfileID.SchemeID = &schemeID
-	if len(st.Lines) > 0 && oioublResponseCodes[st.Lines[0].Key] == responseCodeTechnicalAccept {
+	if len(st.Lines) > 0 && st.Lines[0].Ext.Get(oioubl.ExtKeyResponseCode) == oioubl.ExtValueResponseCodeTechnicalAccept {
 		out.ProfileID.Value = oioublProfileTechnicalID
 	}
 }
@@ -219,12 +199,12 @@ func applyOIOUBL21DocumentResponse(dr *DocumentResponse, line *bill.StatusLine) 
 	resp.ReferenceID = strconv.Itoa(responseReferenceID(line.Index))
 
 	agencyID := oioublCodeListAgencyID
-	if code := oioublResponseCodes[line.Key]; code != "" {
+	if code := line.Ext.Get(oioubl.ExtKeyResponseCode); code != "" {
 		codeListID := responseCodeListID
 		resp.ResponseCode = &IDType{
 			ListAgencyID: &agencyID,
 			ListID:       &codeListID,
-			Value:        code,
+			Value:        code.String(),
 		}
 	}
 

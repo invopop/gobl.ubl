@@ -3,6 +3,7 @@ package ubl
 import (
 	"testing"
 
+	oioubl "github.com/invopop/gobl/addons/dk/oioubl-v2-1"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -20,21 +21,6 @@ func TestOIOUBLResponseReferenceID(t *testing.T) {
 	assert.Equal(t, 4, responseReferenceID(4))
 }
 
-// TestOIOUBLResponseCodeSymmetry checks every emitted response code parses back
-// to a status event, so convert and parse stay in sync.
-func TestOIOUBLResponseCodeSymmetry(t *testing.T) {
-	for event, code := range oioublResponseCodes {
-		got, ok := goblResponseEvents[code]
-		assert.True(t, ok, "response code %q has no reverse mapping", code)
-		assert.Equal(t, event, got, "response code %q does not round-trip", code)
-	}
-}
-
-func TestOIOUBLResponseUnsupportedEvent(t *testing.T) {
-	_, ok := oioublResponseCodes[bill.StatusEventPaid]
-	assert.False(t, ok, "paid event is not representable in OIOUBL ApplicationResponse")
-}
-
 // The status-line parser handles ApplicationResponses that arrive from the
 // NemHandel network, so the partial and malformed shapes below must degrade
 // gracefully rather than panic.
@@ -48,26 +34,22 @@ func TestGoblStatusLineNilDocumentResponse(t *testing.T) {
 	assert.Nil(t, line.Doc)
 }
 
-func TestGoblStatusLineResponseCodes(t *testing.T) {
+func TestGoblStatusLineRecordsResponseCode(t *testing.T) {
 	o := &options{context: ContextOIOUBL21}
-	for code, want := range goblResponseEvents {
+	// The parser records the raw responsecode-1.1 value in the addon extension
+	// (verbatim, even unknown values); the dk-oioubl normalizer recovers the GOBL
+	// status event from it during Calculate.
+	for _, code := range []string{"BusinessAccept", "NotAKnownCode"} {
 		dr := &DocumentResponse{Response: &Response{
 			ResponseCode: &IDType{Value: code},
 			Description:  []string{"a reason"},
 		}}
 		line, err := goblStatusLine(dr, o)
 		require.NoError(t, err)
-		assert.Equal(t, want, line.Key, "code %q", code)
+		assert.Equal(t, code, line.Ext.Get(oioubl.ExtKeyResponseCode).String(), "code %q", code)
+		assert.Empty(t, line.Key, "the parser does not set the key directly")
 		assert.Equal(t, "a reason", line.Description)
 	}
-}
-
-func TestGoblStatusLineUnknownCode(t *testing.T) {
-	o := &options{context: ContextOIOUBL21}
-	dr := &DocumentResponse{Response: &Response{ResponseCode: &IDType{Value: "NotAKnownCode"}}}
-	line, err := goblStatusLine(dr, o)
-	require.NoError(t, err)
-	assert.Empty(t, line.Key, "an unknown response code maps to an empty key, never a panic")
 }
 
 func TestGoblStatusLineDocumentReference(t *testing.T) {
