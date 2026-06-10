@@ -63,10 +63,20 @@ func TestOIOUBL21AddonIntegration(t *testing.T) {
 		assert.Contains(t, err.Error(), "F-INV046")
 	})
 
-	t.Run("our addon fires: missing supplier inbox -> F-INV031", func(t *testing.T) {
+	t.Run("addon derives the participant for a bare DK supplier", func(t *testing.T) {
 		inv, env := load(t)
 		inv.Customer.People = contact()
 		inv.Supplier.Inboxes = nil
+		require.NoError(t, env.Calculate())
+		require.NoError(t, env.Validate())
+		require.NotEmpty(t, inv.Supplier.Endpoints)
+	})
+
+	t.Run("our addon fires: no participant or tax ID code -> F-INV031", func(t *testing.T) {
+		inv, env := load(t)
+		inv.Customer.People = contact()
+		inv.Supplier.Inboxes = nil
+		inv.Supplier.TaxID = &tax.Identity{Country: "DK"}
 		require.NoError(t, env.Calculate())
 		err := env.Validate()
 		require.Error(t, err)
