@@ -129,9 +129,18 @@ func (ui *Invoice) addOrdering(o *bill.Ordering) {
 		}
 
 		for _, contract := range o.Contracts {
-			ui.ContractDocumentReference = append(ui.ContractDocumentReference, Reference{
+			ref := Reference{
 				ID: IDType{Value: string(contract.Code)},
-			})
+			}
+			// BT-12 carries the contract reference (cbc:ID). The French CTC/Chorus
+			// Pro extension (EXT-FR-FE-01) also expects the contract type in
+			// cbc:DocumentType. contract.Type is a cbc.Key, so it is always
+			// lower-case (e.g. "marche"); upper-case values are rejected upstream
+			// by GOBL's key pattern validation.
+			if contract.Type != "" {
+				ref.DocumentType = contract.Type.String()
+			}
+			ui.ContractDocumentReference = append(ui.ContractDocumentReference, ref)
 		}
 
 		for _, tender := range o.Tender {
