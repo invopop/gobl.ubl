@@ -32,7 +32,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73 // indirect
-	github.com/invopop/gobl.sa.zatca v0.0.0-20260609191958-838f60aae0ef // indirect
+	github.com/invopop/gobl.sa.zatca v0.0.0-20260610154554-f86834adc28b // indirect
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
