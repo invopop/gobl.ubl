@@ -3,7 +3,7 @@ module github.com/invopop/gobl.ubl
 go 1.24.4
 
 require (
-	github.com/invopop/gobl v0.403.0
+	github.com/invopop/gobl v0.403.1-0.20260609131918-abf22fe63a79
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
@@ -16,8 +16,6 @@ require (
 	github.com/invopop/xmlctx v0.13.0
 	google.golang.org/grpc v1.77.0
 )
-
-require github.com/kr/text v0.2.0 // indirect
 
 require (
 	cloud.google.com/go v0.118.0 // indirect

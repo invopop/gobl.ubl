@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fdaaf356d233f19f174c57124aba3ab639e8f396d457c947bcb32c73a332d03d"
-		}
+			"val": "0062de6133202ae69d0b482d66135ac9fe7fdbc7a7a76fdfff54347cd344056b"
+		},
+		"from": "iso6523-actorid-upis::0225:324872211",
+		"to": "iso6523-actorid-upis::0225:439368049"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -74,6 +76,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:324872211"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "peppol",
@@ -121,6 +128,11 @@
 					"name": {
 						"given": "Contact ACHETEUR(DEP COMPTAFOUR)"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0225:439368049"
 				}
 			],
 			"inboxes": [

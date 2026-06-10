@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "891f17fb00b588566d7034fe6ec610cb429d69c77c0d34bbc6dd46d005d2a832"
-		}
+			"val": "6ae36799ca32750768cc6fe31180c9c5fce3717a8cfc653c3c4b7fc8f9da0190"
+		},
+		"from": "iso6523-actorid-upis::9920:B98602642",
+		"to": "iso6523-actorid-upis::9920:54387763P"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -36,6 +38,11 @@
 						"given": "María",
 						"surname": "García"
 					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:B98602642"
 				}
 			],
 			"inboxes": [
@@ -72,6 +79,11 @@
 				"country": "ES",
 				"code": "54387763P"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9920:54387763P"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "peppol",
