@@ -12,7 +12,7 @@ require (
 
 require (
 	cloud.google.com/go v0.118.0
-	github.com/invopop/gobl.dk.oioubl v0.0.0-20260608112206-b43cc2cff4d7
+	github.com/invopop/gobl.dk.oioubl v0.0.0-20260610121929-91dac2d90cd6
 	github.com/invopop/phive v0.6.0
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
@@ -52,5 +52,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.7.0 // indirect
 )
-
-replace github.com/invopop/gobl.dk.oioubl => ../gobl.dk.oioubl

@@ -37,6 +37,8 @@ github.com/invopop/gobl v0.403.1-0.20260610095043-ed195eab80d6 h1:kRgdu/d8wDzuPl
 github.com/invopop/gobl v0.403.1-0.20260610095043-ed195eab80d6/go.mod h1:EGDHHuPbF8JxRfct0q/s9t7ei2gjkOwjH3SytjB3aS0=
 github.com/invopop/gobl.dk.oioubl v0.0.0-20260608112206-b43cc2cff4d7 h1:7pz2citrgLWqHlncRmV2O4Xa60QkugwQ0qWcsb227Tw=
 github.com/invopop/gobl.dk.oioubl v0.0.0-20260608112206-b43cc2cff4d7/go.mod h1:+mX4NAlCePIGpwgfFq51vJeoNWJysZrsN8fdgA8qZhQ=
+github.com/invopop/gobl.dk.oioubl v0.0.0-20260610121929-91dac2d90cd6 h1:pZpvHeIe8mAu2GWoYtmV58FteaM/4dQPjzf/gPfChcs=
+github.com/invopop/gobl.dk.oioubl v0.0.0-20260610121929-91dac2d90cd6/go.mod h1:qOy/3eKYcH08VZtgd8wKhI1hRncbQoayljHbq0BIBVY=
 github.com/invopop/gobl.fr.ctc v0.0.2 h1:LMIW2fAzIVRL+ffsDuluB8J7k6sTYssrRWG+8Ca9pJw=
 github.com/invopop/gobl.fr.ctc v0.0.2/go.mod h1:qK/EQ074w5C34DJkuUph6DjWKiNoK7D6Eh+1zZMDDAE=
 github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73 h1:lDYca5PCe2EMMBrBVHpiW9YaY9mv3tksWpzOxQeIihY=
