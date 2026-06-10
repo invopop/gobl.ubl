@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f8adf3344dcbfb11656c143f997d12e97110063988b606535d5f58cf0b1e4b07"
+			"val": "5b0bf91c019ca9ab9f683f506e0389c8a3c7a4e3c231726844c72d3481a1b226"
 		}
 	},
 	"doc": {
@@ -54,7 +54,7 @@
 			"inboxes": [
 				{
 					"key": "peppol",
-					"scheme": "9957",
+					"scheme": "0225",
 					"code": "334175221"
 				}
 			],
@@ -84,6 +84,16 @@
 				"country": "FR",
 				"code": "96552100554"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"type": "SIREN",
+					"code": "552100554",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
 			"inboxes": [
 				{
 					"key": "peppol",
