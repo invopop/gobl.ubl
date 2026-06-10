@@ -69,4 +69,35 @@ func TestNewParty(t *testing.T) {
 		require.NotNil(t, doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
 		assert.Equal(t, "0088", *doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
 	})
+
+	// France "code routage" / Chorus Pro "Code Service" is modelled as an
+	// identity with key "private-id". The CTC (B2B CIUS) addon sets the
+	// iso-scheme-id ext to 0224, but the Factur-X (France Extended / B2G) addon
+	// is a placeholder and does not. The customer identity must still be
+	// serialized as PartyIdentification schemeID="0224" (BR-FR-CPRO-11) here, so
+	// the scheme is derived from the key when the ext is absent.
+	t.Run("private-id key maps to scheme 0224 without ext", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		// No iso-scheme-id ext set, mirroring the Factur-X / Extended profile.
+		inv.Customer.Identities = []*org.Identity{
+			{Key: "private-id", Code: "SERVICE-ACHATS-01"},
+		}
+
+		require.NoError(t, env.Calculate())
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		var found bool
+		for _, pid := range doc.AccountingCustomerParty.Party.PartyIdentification {
+			if pid.ID != nil && pid.ID.Value == "SERVICE-ACHATS-01" {
+				require.NotNil(t, pid.ID.SchemeID)
+				assert.Equal(t, "0224", *pid.ID.SchemeID)
+				found = true
+			}
+		}
+		assert.True(t, found, "expected code routage identity in PartyIdentification")
+	})
 }

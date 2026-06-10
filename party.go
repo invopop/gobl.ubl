@@ -15,6 +15,31 @@ const SchemeIDEmail = "EM"
 // TaxSchemeVAT is the tax scheme code for VAT
 const TaxSchemeVAT = "VAT"
 
+// identityKeyPrivateID is the GOBL identity key used for France's "code
+// routage" / Chorus Pro "Code Service", and identitySchemeIDRoutage is the
+// ISO 6523 scheme (0224) it maps to. The France CTC addon sets the
+// iso-scheme-id extension to 0224 during normalization, but the Factur-X
+// (France Extended / B2G) addon is a placeholder and does not, so we derive
+// the scheme here to ensure the buyer's code routage is serialized as
+// PartyIdentification schemeID="0224" (BR-FR-CPRO-11) regardless of profile.
+const (
+	identityKeyPrivateID    = "private-id"
+	identitySchemeIDRoutage = "0224"
+)
+
+// identitySchemeID resolves the ISO 6523 scheme ID to use for a party
+// identity. It prefers the explicit iso-scheme-id extension and falls back to
+// known GOBL identity keys that map to a fixed scheme.
+func identitySchemeID(id *org.Identity) string {
+	if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+		return s
+	}
+	if id.Key == identityKeyPrivateID {
+		return identitySchemeIDRoutage
+	}
+	return ""
+}
+
 // SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
 	Party *Party `xml:"cac:Party"`
@@ -219,7 +244,7 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 				p.PartyLegalEntity.CompanyID = &IDType{
 					Value: code,
 				}
-				if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				if s := identitySchemeID(id); s != "" {
 					p.PartyLegalEntity.CompanyID.SchemeID = &s
 				}
 				firstLegalIdx = i
@@ -256,7 +281,7 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 			idType := &IDType{
 				Value: id.Code.String(),
 			}
-			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+			if s := identitySchemeID(id); s != "" {
 				idType.SchemeID = &s
 			}
 			p.PartyIdentification = append(p.PartyIdentification, Identification{
