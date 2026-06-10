@@ -64,18 +64,11 @@ type ResponseDocumentReference struct {
 
 func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 	// SenderParty is who sends the response, ReceiverParty who receives it. The
-	// base supplier/customer roles flip with the status type (a response travels
-	// customer->supplier, an update supplier->customer, e.g. towards a tax agency
-	// held as the recipient);
+	// supplier/customer roles flip with the status type (a response travels
+	// customer->supplier, an update supplier->customer).
 	sender, receiver := st.Customer, st.Supplier
 	if st.Type == bill.StatusTypeUpdate {
 		sender, receiver = st.Supplier, st.Customer
-	}
-	if st.Issuer != nil {
-		sender = st.Issuer
-	}
-	if st.Recipient != nil {
-		receiver = st.Recipient
 	}
 
 	out := &ApplicationResponse{

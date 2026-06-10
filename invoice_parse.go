@@ -5,8 +5,8 @@ import (
 
 	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl/addons/fr/ctc"
-	"github.com/invopop/gobl/addons/sa/zatca"
+	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
+	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -120,7 +120,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 // applyContextTaxExtensions sets tax extensions that depend on the active context.
 func (ui *Invoice) applyContextTaxExtensions(out *bill.Invoice, o *options) {
 	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		out.Tax.Ext = out.Tax.Ext.Set(ctc.ExtKeyBillingMode, cbc.Code(profileIDValue(ui.ProfileID)))
+		out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(profileIDValue(ui.ProfileID)))
 	}
 
 	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {

@@ -3,7 +3,7 @@ module github.com/invopop/gobl.ubl
 go 1.24.4
 
 require (
-	github.com/invopop/gobl v0.403.1-0.20260608111203-e6aa7fce7689
+	github.com/invopop/gobl v0.403.1-0.20260610095043-ed195eab80d6
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
@@ -31,6 +31,8 @@ require (
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73 // indirect
+	github.com/invopop/gobl.sa.zatca v0.0.0-20260609191958-838f60aae0ef // indirect
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
@@ -50,3 +52,5 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.7.0 // indirect
 )
+
+replace github.com/invopop/gobl.dk.oioubl => ../gobl.dk.oioubl

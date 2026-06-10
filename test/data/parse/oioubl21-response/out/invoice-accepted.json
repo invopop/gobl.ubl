@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b6864db289609315f6a1f05003cac7594037887566120fd36a455a4e2c4ec1c0"
+			"val": "984e9f24cad2d29e6c3a5ba2eda23926c5eace74ec6611229a2621b214e34251"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",

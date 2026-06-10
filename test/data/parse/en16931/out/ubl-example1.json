@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4d378f23899e5ec9eb98985a1e1affe507895f1b3ec8d3125ad1878eedd9aae7"
+			"val": "0334798d68fe23fe2148ca221022ac2f972464186e027f8f287d343c5c13e26c"
 		}
 	},
 	"doc": {
@@ -522,7 +522,7 @@
 			},
 			"instructions": {
 				"key": "credit-transfer",
-				"ref": "Deb.10202 Fact.12115118",
+				"ref": "Deb. 10202 / Fact. 12115118",
 				"credit_transfer": [
 					{
 						"iban": "NL57 RABO 0107307510"

@@ -201,7 +201,7 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 		Lines: []*bill.StatusLine{
 			{
 				Index:       1,
-				Key:         bill.StatusEventAccepted,
+				Key:         bill.StatusLineAccepted,
 				Date:        &effDate,
 				Description: "All good",
 				Doc:         &org.DocumentRef{Code: "INV-42"},
@@ -280,7 +280,7 @@ func TestConvertApplicationResponseUpdateFlipsDirection(t *testing.T) {
 		Supplier:  &org.Party{Name: "Seller Co"},
 		Customer:  &org.Party{Name: "Buyer Co"},
 		Lines: []*bill.StatusLine{
-			{Index: 1, Key: bill.StatusEventPaid, Doc: &org.DocumentRef{Code: "INV-1"}},
+			{Index: 1, Key: bill.StatusLinePaid, Doc: &org.DocumentRef{Code: "INV-1"}},
 		},
 	}
 	env, err := gobl.Envelop(st)

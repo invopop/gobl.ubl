@@ -33,8 +33,16 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/invopop/gobl v0.403.1-0.20260608111203-e6aa7fce7689 h1:ihh9K6kqEbFAV8phRZytYBuuU8xXvBYLhYExmwoDJbs=
 github.com/invopop/gobl v0.403.1-0.20260608111203-e6aa7fce7689/go.mod h1:6jYbcNFgUcBXIsS3PIeZc99rrMLBaGzPsFEg7y2DyrQ=
+github.com/invopop/gobl v0.403.1-0.20260610095043-ed195eab80d6 h1:kRgdu/d8wDzuPl7zNsndPMm7GjYGRiVW8yOfLMFTibA=
+github.com/invopop/gobl v0.403.1-0.20260610095043-ed195eab80d6/go.mod h1:EGDHHuPbF8JxRfct0q/s9t7ei2gjkOwjH3SytjB3aS0=
 github.com/invopop/gobl.dk.oioubl v0.0.0-20260608112206-b43cc2cff4d7 h1:7pz2citrgLWqHlncRmV2O4Xa60QkugwQ0qWcsb227Tw=
 github.com/invopop/gobl.dk.oioubl v0.0.0-20260608112206-b43cc2cff4d7/go.mod h1:+mX4NAlCePIGpwgfFq51vJeoNWJysZrsN8fdgA8qZhQ=
+github.com/invopop/gobl.fr.ctc v0.0.2 h1:LMIW2fAzIVRL+ffsDuluB8J7k6sTYssrRWG+8Ca9pJw=
+github.com/invopop/gobl.fr.ctc v0.0.2/go.mod h1:qK/EQ074w5C34DJkuUph6DjWKiNoK7D6Eh+1zZMDDAE=
+github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73 h1:lDYca5PCe2EMMBrBVHpiW9YaY9mv3tksWpzOxQeIihY=
+github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73/go.mod h1:9eowIMNRW8pU7lwoC8pz6I3iCvclr2eXrNDro8sGNMw=
+github.com/invopop/gobl.sa.zatca v0.0.0-20260609191958-838f60aae0ef h1:kVKUK6n7vsOLGn2NX+SFEmX+XHQhIkGsiQE9z2vJ63o=
+github.com/invopop/gobl.sa.zatca v0.0.0-20260609191958-838f60aae0ef/go.mod h1:HTTAUUQoJgpvqbsd2wvLxbH6aAeypHBfuNadoeafQK8=
 github.com/invopop/jsonschema v0.14.0 h1:MHQqLhvpNUZfw+hM3AZDYK7jxO8FZoQeQM77g8iyZjg=
 github.com/invopop/jsonschema v0.14.0/go.mod h1:ygm6C2EaVNMBDPpaPlnOA2pFAxBnxGjFlMZABxm9n2I=
 github.com/invopop/phive v0.6.0 h1:wtk5+ieD/muViF6SJXGGVA/vYPzed9NoaCl63TjmWU4=
