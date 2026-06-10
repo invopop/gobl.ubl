@@ -164,7 +164,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			Value: code,
 		}
 		if string(tID.Country) == "DK" {
-			s := "0198"
+			s := icdDKSE
 			companyID.SchemeID = &s
 		}
 
@@ -212,7 +212,15 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		p.Contact = contact
 	}
 
-	if len(party.Inboxes) > 0 {
+	if ep := party.Endpoint(iso6523EndpointScheme); ep != nil {
+		if icd, code, ok := splitISO6523Endpoint(ep.URI); ok {
+			p.EndpointID = &EndpointID{
+				SchemeID: normalizeEndpointScheme(icd),
+				Value:    code,
+			}
+		}
+	}
+	if p.EndpointID == nil && len(party.Inboxes) > 0 {
 		ib := party.Inboxes[0]
 		if ib.Email != "" {
 			p.EndpointID = &EndpointID{
@@ -304,7 +312,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	}
 
 	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID == nil && party.TaxID != nil && string(party.TaxID.Country) == "DK" {
-		s := "0184"
+		s := icdDKCVR
 		p.PartyLegalEntity.CompanyID = &IDType{
 			SchemeID: &s,
 			Value:    party.TaxID.Code.String(),
@@ -433,10 +441,25 @@ func newPayeeParty(party *org.Party) *Party {
 	return p
 }
 
+// iso6523EndpointScheme is the URI scheme used by org.Endpoint for
+// Peppol-style participant identifiers (iso6523-actorid-upis::<ICD>:<code>).
+const iso6523EndpointScheme = "iso6523-actorid-upis"
+
+// splitISO6523Endpoint extracts the ISO 6523 ICD and participant code from an
+// iso6523-actorid-upis endpoint URI.
+func splitISO6523Endpoint(uri cbc.URI) (string, string, bool) {
+	rest := strings.TrimPrefix(uri.Opaque(), ":")
+	icd, code, ok := strings.Cut(rest, ":")
+	if !ok || icd == "" || code == "" {
+		return "", "", false
+	}
+	return icd, code, true
+}
+
 func normalizeEndpointScheme(s string) string {
 	switch strings.ToUpper(s) {
-	case "GLN":
-		return "0088"
+	case oioubl21SchemeGLN:
+		return icdGLN
 	default:
 		return s
 	}
@@ -531,15 +554,31 @@ func contactName(n *org.Name) string {
 	return fmt.Sprintf("%s %s", given, surname)
 }
 
-// oioubl21SchemeDKCVR is the OIOUBL symbolic scheme for a Danish CVR number.
-const oioubl21SchemeDKCVR = "DK:CVR"
+// OIOUBL symbolic EndpointID schemes (F-LIB179) and the ISO 6523 ICDs they
+// correspond to.
+const (
+	oioubl21SchemeDKCVR = "DK:CVR"
+	oioubl21SchemeDKSE  = "DK:SE"
+	oioubl21SchemeGLN   = "GLN"
+	icdGLN              = "0088"
+	icdDKCVR            = "0184"
+	icdDKSE             = "0198"
+)
 
 // oioubl21EndpointSchemes maps the ISO 6523 ICDs that Peppol-style endpoints
 // use to the symbolic OIOUBL EndpointID schemeID codelist (F-LIB179).
 var oioubl21EndpointSchemes = map[string]string{
-	"0088": "GLN",
-	"0184": oioubl21SchemeDKCVR,
-	"0198": "DK:SE",
+	icdGLN:   oioubl21SchemeGLN,
+	icdDKCVR: oioubl21SchemeDKCVR,
+	icdDKSE:  oioubl21SchemeDKSE,
+}
+
+// oioubl21EndpointICDs is the exact inverse of oioubl21EndpointSchemes, used
+// by parse to restore wire EndpointIDs as ISO 6523 endpoints.
+var oioubl21EndpointICDs = map[string]string{
+	oioubl21SchemeGLN:   icdGLN,
+	oioubl21SchemeDKCVR: icdDKCVR,
+	oioubl21SchemeDKSE:  icdDKSE,
 }
 
 // applyOIOUBL21Party rewrites an assembled party into OIOUBL 2.1 form: symbolic
@@ -578,7 +617,7 @@ func applyOIOUBL21Party(p *Party) {
 		for i := range p.PartyTaxScheme {
 			pts := &p.PartyTaxScheme[i]
 			if pts.CompanyID != nil {
-				scheme := "DK:SE"
+				scheme := oioubl21SchemeDKSE
 				pts.CompanyID.SchemeID = &scheme
 				if !strings.HasPrefix(pts.CompanyID.Value, "DK") {
 					pts.CompanyID.Value = "DK" + pts.CompanyID.Value
