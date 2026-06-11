@@ -149,10 +149,11 @@ func TestConvertSurfacesValidationFaultsAfterAutoAddon(t *testing.T) {
 	assert.NotEmpty(t, first.Message(), "fault must carry a message")
 	assert.NotEmpty(t, first.Paths(), "fault must carry at least one JSON path")
 
-	// The France CTC addon's "billing mode extension is required" rule
-	// must be among the reported faults.
-	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-08"),
-		"expected billing-mode-required fault; got: %s", err)
+	// The France CTC addon's SIREN-identity requirement must be among the
+	// reported faults (the billing mode is now defaulted by the addon's
+	// normalizer, so its rule no longer fires on a calculated document).
+	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-12"),
+		"expected supplier-SIREN-required fault; got: %s", err)
 }
 
 func TestConvertUnsupportedDocumentType(t *testing.T) {
