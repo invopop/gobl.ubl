@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
-	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"

@@ -4,9 +4,9 @@ import (
 	"strings"
 
 	"cloud.google.com/go/civil"
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
-	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"

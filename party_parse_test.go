@@ -23,7 +23,7 @@ func TestParseParty(t *testing.T) {
 		supplier := inv.Supplier
 		require.NotNil(t, supplier)
 		assert.Equal(t, "Tax handling company AS", supplier.Name)
-		assert.Equal(t, cbc.Code("967611265MVA"), supplier.TaxID.Code)
+		assert.Equal(t, cbc.Code("967611265"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
 		assert.Equal(t, "Regent street", supplier.Addresses[0].Street)
 		assert.Equal(t, "Newtown", supplier.Addresses[0].Locality)
@@ -35,7 +35,7 @@ func TestParseParty(t *testing.T) {
 		seller := inv.Ordering.Seller
 		require.NotNil(t, seller)
 		assert.Equal(t, "Salescompany ltd.", seller.Name)
-		assert.Equal(t, cbc.Code("123456789MVA"), seller.TaxID.Code)
+		assert.Equal(t, cbc.Code("123456789"), seller.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
 		require.Len(t, seller.Identities, 2)
 		assert.Equal(t, cbc.Code("123456789"), seller.Identities[0].Code)
@@ -59,7 +59,7 @@ func TestParseParty(t *testing.T) {
 		customer := inv.Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "The Buyercompany", customer.Name)
-		assert.Equal(t, cbc.Code("987654321MVA"), customer.TaxID.Code)
+		assert.Equal(t, cbc.Code("987654321"), customer.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
 		assert.Equal(t, "Anystreet 8", customer.Addresses[0].Street)
 		assert.Equal(t, "Back door", customer.Addresses[0].StreetExtra)
