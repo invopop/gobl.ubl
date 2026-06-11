@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b02b28d873ebdbbf64e7d8cfbc35ab61b3b1423b23d4f952fe2824eb8f601c06"
+			"val": "5c2b3c11d39413d0789e157abcbc853408a207b8c70393d7a2df78aa2fb77697"
 		}
 	},
 	"doc": {
@@ -107,6 +107,7 @@
 						"key": "exempt",
 						"ext": {
 							"cef-vatex": "VATEX-EU-132",
+							"dk-oioubl-tax-category": "ZeroRated",
 							"untdid-tax-category": "E"
 						}
 					}
@@ -128,6 +129,7 @@
 					}
 				],
 				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
 					"untdid-payment-means": "30"
 				}
 			}
@@ -144,6 +146,7 @@
 								"key": "exempt",
 								"ext": {
 									"cef-vatex": "VATEX-EU-132",
+									"dk-oioubl-tax-category": "ZeroRated",
 									"untdid-tax-category": "E"
 								},
 								"base": "8000.00",

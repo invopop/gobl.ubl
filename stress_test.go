@@ -87,6 +87,9 @@ func canonicalParticipant(p *org.Party) string {
 	}
 	if ep := p.Endpoint("iso6523-actorid-upis"); ep != nil {
 		rest := strings.TrimPrefix(ep.URI.Opaque(), ":")
+		if icd, code, ok := strings.Cut(rest, ":"); ok {
+			return icd + ":" + strings.TrimPrefix(code, "DK")
+		}
 		return rest
 	}
 	if len(p.Inboxes) > 0 {

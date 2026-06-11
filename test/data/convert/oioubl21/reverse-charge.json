@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d83ead6b6f1801022634bd43473924cbdbb3c8a92fe4fff0c798fbda11152c4e"
+			"val": "83478009ad57eef99e39d5e3483c3b64b7199c956e47846e89ac592df8c55252"
 		}
 	},
 	"doc": {
@@ -107,6 +107,7 @@
 						"key": "reverse-charge",
 						"ext": {
 							"cef-vatex": "VATEX-EU-AE",
+							"dk-oioubl-tax-category": "ReverseCharge",
 							"untdid-tax-category": "AE"
 						}
 					}
@@ -128,6 +129,7 @@
 					}
 				],
 				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
 					"untdid-payment-means": "30"
 				}
 			}
@@ -144,6 +146,7 @@
 								"key": "reverse-charge",
 								"ext": {
 									"cef-vatex": "VATEX-EU-AE",
+									"dk-oioubl-tax-category": "ReverseCharge",
 									"untdid-tax-category": "AE"
 								},
 								"base": "9000.00",

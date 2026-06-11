@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "aaf6d7a0ef5f3479aedbf835300be25400fe3b12a9de81bde76014a74b446fbb"
-		}
+			"val": "27ca9365b36e06ac4332ab3f4b1900869d6ea09e0d4cb3234e019f05808738f8"
+		},
+		"from": "iso6523-actorid-upis::0184:12345674",
+		"to": "iso6523-actorid-upis::0184:76543216"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -39,6 +41,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
 			"addresses": [
 				{
 					"num": "12",
@@ -51,11 +58,6 @@
 			"emails": [
 				{
 					"addr": "billing@eksempel-software.dk"
-				}
-			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
 				}
 			]
 		},
@@ -79,6 +81,11 @@
 					]
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:76543216"
+				}
+			],
 			"addresses": [
 				{
 					"num": "45",
@@ -91,11 +98,6 @@
 			"emails": [
 				{
 					"addr": "ap@modtager-handel.dk"
-				}
-			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0184:76543216"
 				}
 			]
 		},
@@ -115,6 +117,7 @@
 						"key": "standard",
 						"percent": "25%",
 						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
 							"untdid-tax-category": "S"
 						}
 					}
@@ -136,6 +139,7 @@
 					}
 				],
 				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
 					"untdid-payment-means": "30"
 				}
 			}
@@ -151,6 +155,7 @@
 							{
 								"key": "standard",
 								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
 									"untdid-tax-category": "S"
 								},
 								"base": "10000.00",
