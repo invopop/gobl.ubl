@@ -134,6 +134,12 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
+	if typeCode == nil && ui.XMLName.Local == rootNameCreditNote {
+		// A CreditNote document carries no mandatory type code (OIOUBL's
+		// samples omit it entirely); the root element is authoritative.
+		out.Type = bill.InvoiceTypeCreditNote
+		return
+	}
 	out.Type = typeCodeParse(typeCode, o.context)
 	if tags := tagCodeParse(typeCode, o.context); len(tags) != 0 {
 		out.SetTags(tags...)
