@@ -3,9 +3,11 @@ package ubl
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 )
 
@@ -142,6 +144,11 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 
 	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
 		code := party.TaxID.String()
+		// Norwegian VAT numbers require the MVA suffix on the wire
+		// (PEPPOL-EN16931 NO-R-001), which GOBL normalization may strip.
+		if tID.Country.Code() == l10n.NO && !strings.HasSuffix(code, "MVA") {
+			code += "MVA"
+		}
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {
 			// Peppol default
