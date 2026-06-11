@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "00"
-		}
+			"val": "fde2430ddb52502f899bfcfc8fb84ce9a0ed9b3d93c4ab3644219d3c4394317e"
+		},
+		"from": "iso6523-actorid-upis::0208:0123456749",
+		"to": "iso6523-actorid-upis::0208:0987654394"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -33,6 +35,11 @@
 				"country": "BE",
 				"code": "0123456749"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0208:0123456749"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "peppol",
@@ -60,6 +67,11 @@
 				"country": "BE",
 				"code": "0987654394"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0208:0987654394"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "peppol",
@@ -91,6 +103,7 @@
 					"price": "9.90",
 					"unit": "one"
 				},
+				"sum": "9.90",
 				"discounts": [
 					{
 						"reason": "Loyalty credits",
@@ -107,7 +120,8 @@
 							"untdid-tax-category": "S"
 						}
 					}
-				]
+				],
+				"total": "8.14"
 			},
 			{
 				"i": 2,
@@ -118,6 +132,7 @@
 					"price": "74.90",
 					"unit": "one"
 				},
+				"sum": "74.90",
 				"discounts": [
 					{
 						"reason": "Loyalty credits",
@@ -134,7 +149,8 @@
 							"untdid-tax-category": "S"
 						}
 					}
-				]
+				],
+				"total": "61.56"
 			}
 		],
 		"payment": {
@@ -154,6 +170,34 @@
 					"untdid-payment-means": "49"
 				}
 			}
+		},
+		"totals": {
+			"sum": "69.70",
+			"tax_included": "12.10",
+			"total": "57.60",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "57.61",
+								"percent": "21.0%",
+								"amount": "12.10"
+							}
+						],
+						"amount": "12.10"
+					}
+				],
+				"sum": "12.10"
+			},
+			"tax": "12.10",
+			"total_with_tax": "69.70",
+			"payable": "69.70"
 		}
 	}
 }
