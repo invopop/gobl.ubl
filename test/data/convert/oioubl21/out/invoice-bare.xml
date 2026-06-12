@@ -18,7 +18,7 @@
         <cbc:Name>Worksome Aps</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
+        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredLax</cbc:AddressFormatCode>
         <cbc:StreetName>Dampfærgevej</cbc:StreetName>
         <cbc:BuildingNumber>7-9</cbc:BuildingNumber>
         <cbc:CityName>København Ø</cbc:CityName>
@@ -47,7 +47,7 @@
         <cbc:Name>Lego System A/S</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
+        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredLax</cbc:AddressFormatCode>
         <cbc:StreetName>Aastvej</cbc:StreetName>
         <cbc:BuildingNumber>1</cbc:BuildingNumber>
         <cbc:CityName>Billund</cbc:CityName>

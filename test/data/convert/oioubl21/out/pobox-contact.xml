@@ -18,7 +18,7 @@
         <cbc:Name>Eksempel Software ApS</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
+        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredLax</cbc:AddressFormatCode>
         <cbc:Postbox>2500</cbc:Postbox>
         <cbc:StreetName>Postboksvej</cbc:StreetName>
         <cbc:CityName>København</cbc:CityName>
@@ -52,7 +52,7 @@
         <cbc:Name>Modtager Handel A/S</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredDK</cbc:AddressFormatCode>
+        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredLax</cbc:AddressFormatCode>
         <cbc:StreetName>Vestergade</cbc:StreetName>
         <cbc:BuildingNumber>45</cbc:BuildingNumber>
         <cbc:CityName>Aarhus</cbc:CityName>

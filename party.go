@@ -475,8 +475,9 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 	addr := &PostalAddress{}
 
 	if ctx.Is(ContextOIOUBL21) {
-		// OIOUBL StructuredDK keeps the street number and PO box in their own
-		// elements (F-LIB035) rather than folding them into StreetName.
+		// OIOUBL keeps the street number and PO box in their own elements when
+		// GOBL provides them; under StructuredLax these are emitted but not
+		// required, so an inline street number is preserved as-is in StreetName.
 		if a.Street != "" {
 			addr.StreetName = &a.Street
 		}
@@ -645,7 +646,7 @@ var oioubl21EndpointICDs = func() map[string]string {
 
 // applyOIOUBL21Party rewrites an assembled party into OIOUBL 2.1 form: symbolic
 // endpoint scheme + DK-prefixed CVR (F-LIB179/F-LIB180), a fallback PartyName,
-// the StructuredDK address format, and the DK:SE/DK:CVR company-ID schemes.
+// the StructuredLax address format, and the DK:SE/DK:CVR company-ID schemes.
 func applyOIOUBL21Party(p *Party) {
 	if p == nil {
 		return
@@ -672,7 +673,11 @@ func applyOIOUBL21Party(p *Party) {
 		p.PostalAddress.AddressFormatCode = &IDType{
 			ListID:       &listID,
 			ListAgencyID: &listAgencyID,
-			Value:        "StructuredDK",
+			// StructuredLax (not StructuredDK): the schematron requires no
+			// mandatory sub-fields for Lax, matching real NemHandel traffic and
+			// GOBL's optional address model — we still emit StreetName/
+			// BuildingNumber/PostalZone whenever GOBL has them.
+			Value: "StructuredLax",
 		}
 	}
 	if p.PartyTaxScheme != nil {
