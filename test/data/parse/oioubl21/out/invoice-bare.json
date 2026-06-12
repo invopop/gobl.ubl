@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6351f7afaa75f4d0289b7e28afb66deefd1343176eb50eb6e0fb56f01598dd64"
+			"val": "54940a04acd1aa71c9697c65cba9cef5fe990e67bdc37633a4e84d7effc0d7bb"
 		},
 		"from": "iso6523-actorid-upis::0184:37990485",
 		"to": "iso6523-actorid-upis::0184:47458714"
@@ -153,12 +153,22 @@
 			]
 		},
 		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-06-15",
+						"amount": "41178.80",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "other",
 				"ref": "SAMPLE-001",
 				"credit_transfer": [
 					{
 						"iban": "DK5000400440116243",
+						"bic": "DABADKKK",
 						"name": "Danske Bank"
 					}
 				],

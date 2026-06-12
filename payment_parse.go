@@ -44,10 +44,13 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	}
 
 	var dueDate string
-	if ui.CreditNoteTypeCode == nil && ui.DueDate != "" {
+	if ui.CreditNoteTypeCode == nil {
 		dueDate = ui.DueDate
 	}
-	if ui.CreditNoteTypeCode != nil && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
+	// OIOUBL (and credit notes, which have no root DueDate) carry the due date on
+	// the payment means rather than the document root — the converter moves it
+	// there and clears the root. Read it back when the root is absent.
+	if dueDate == "" && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
 		dueDate = *ui.PaymentMeans[0].PaymentDueDate
 	}
 
@@ -204,8 +207,14 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	if account.Name != nil {
 		creditTransfer.Name = cleanString(*account.Name)
 	}
-	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
+	if branch := account.FinancialInstitutionBranch; branch != nil {
+		// Standard UBL carries the BIC on the branch ID; OIOUBL strips that for
+		// IBAN accounts (F-LIB295) and nests it under FinancialInstitution/ID.
+		if branch.ID != nil {
+			creditTransfer.BIC = cleanString(*branch.ID)
+		} else if branch.FinancialInstitution != nil && branch.FinancialInstitution.ID != nil {
+			creditTransfer.BIC = cleanString(*branch.FinancialInstitution.ID)
+		}
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}

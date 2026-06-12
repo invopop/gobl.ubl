@@ -197,6 +197,25 @@ func TestParsePaymentAdvances(t *testing.T) {
 	})
 }
 
+func TestParseOIOUBLDueDateAndNestedBIC(t *testing.T) {
+	// OIOUBL moves the invoice due date onto the payment means (clearing the
+	// root) and nests the BIC under FinancialInstitution/ID after stripping the
+	// branch ID (F-LIB295). Both must survive the parse. (FINDINGS §2.17, §2.18.)
+	env := parseXMLInvoice(t, "oioubl21/invoice-bare.xml")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.NotNil(t, inv.Payment)
+
+	require.NotNil(t, inv.Payment.Terms)
+	require.Len(t, inv.Payment.Terms.DueDates, 1)
+	require.NotNil(t, inv.Payment.Terms.DueDates[0].Date)
+	assert.Equal(t, "2024-06-15", inv.Payment.Terms.DueDates[0].Date.String())
+
+	require.NotNil(t, inv.Payment.Instructions)
+	require.Len(t, inv.Payment.Instructions.CreditTransfer, 1)
+	assert.Equal(t, "DABADKKK", inv.Payment.Instructions.CreditTransfer[0].BIC)
+}
+
 func TestPaymentRoundTrip(t *testing.T) {
 	t.Run("account number round trip", func(t *testing.T) {
 		// Load the test envelope with account number (not IBAN)

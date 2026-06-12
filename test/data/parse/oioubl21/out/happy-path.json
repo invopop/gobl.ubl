@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2ec6ceb72fdc237111032339f2ffc20545abdaecb8aad08ce8d512a8f6f66b21"
+			"val": "088a0af40f84f1e578aed13ce71b2fac9e6953c8231029036740c9d0830ecd6f"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:76543216"
@@ -156,7 +156,8 @@
 				"ref": "TEST-001",
 				"credit_transfer": [
 					{
-						"iban": "DK5000400440116243"
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK"
 					}
 				],
 				"ext": {

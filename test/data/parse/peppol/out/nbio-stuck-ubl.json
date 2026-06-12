@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2c12a5fb0ae6183d8d1943bc13ab4280ef57a02a992ed08ae54f6e510f285f95"
+			"val": "4017421da4ceafa9a213cfbfc724bddcdf6ec65c65dec4aa70f7c343d3a08576"
 		}
 	},
 	"doc": {
@@ -177,7 +177,8 @@
 				"ref": "020250000001",
 				"credit_transfer": [
 					{
-						"iban": "BE68539007547034"
+						"iban": "BE68539007547034",
+						"bic": "GKCCBEBB"
 					}
 				],
 				"ext": {
