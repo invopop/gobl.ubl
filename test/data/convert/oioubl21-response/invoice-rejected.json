@@ -4,13 +4,16 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ce7610f612a4640ff2f3d0e6b4a0d1b8c2f7505a19ccfbf781dfd4a8d6661f85"
-		}
+			"val": "64b50fd810bd3a9b35a6a43c59b55e55f022c52bf2bec9c7d1de13cf40cd9272"
+		},
+		"from": "iso6523-actorid-upis::0184:76543216",
+		"to": "iso6523-actorid-upis::0184:12345674"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -23,6 +26,11 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
 			"addresses": [
 				{
 					"num": "12",
@@ -30,11 +38,6 @@
 					"locality": "København",
 					"code": "2100",
 					"country": "DK"
-				}
-			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
 				}
 			]
 		},
@@ -44,6 +47,11 @@
 				"country": "DK",
 				"code": "76543216"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:76543216"
+				}
+			],
 			"addresses": [
 				{
 					"num": "45",
@@ -51,11 +59,6 @@
 					"locality": "Aarhus",
 					"code": "8000",
 					"country": "DK"
-				}
-			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0184:76543216"
 				}
 			]
 		},
@@ -68,7 +71,10 @@
 					"series": "FINAL",
 					"code": "001"
 				},
-				"description": "Den aftalte rabat på 800,- kr mangler på fakturaen"
+				"description": "Den aftalte rabat på 800,- kr mangler på fakturaen",
+				"ext": {
+					"dk-oioubl-response-code": "BusinessReject"
+				}
 			}
 		]
 	}

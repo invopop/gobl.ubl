@@ -29,7 +29,7 @@ func TestConvertBuildOptionsNemhandel(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "OIOUBL-2.1", doc.CustomizationID)
 	assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", doc.ProfileID.Value)
-	assert.Equal(t, "2.1", doc.UBLVersionID)
+	assert.Equal(t, "2.0", doc.UBLVersionID)
 	assert.NotEmpty(t, doc.UUID)
 }
 
@@ -175,7 +175,7 @@ func TestConvertJSONToXMLWithOIOUBL21Context(t *testing.T) {
 	require.NoError(t, err)
 	xml := string(data)
 	assert.Contains(t, xml, "<cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>")
-	assert.Contains(t, xml, "<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.4\">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>")
+	assert.Contains(t, xml, "<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.2\">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>")
 	assert.Contains(t, xml, "<cbc:InvoiceTypeCode listAgencyID=\"320\" listID=\"urn:oioubl:codelist:invoicetypecode-1.1\">380</cbc:InvoiceTypeCode>")
 }
 
@@ -216,7 +216,7 @@ func TestConvertCreditNoteToXMLWithOIOUBL21Context(t *testing.T) {
 	xml := string(data)
 	assert.Contains(t, xml, "<CreditNote ")
 	assert.Contains(t, xml, "<cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>")
-	assert.Contains(t, xml, "<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.4\">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>")
+	assert.Contains(t, xml, "<cbc:ProfileID schemeAgencyID=\"320\" schemeID=\"urn:oioubl:id:profileid-1.2\">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>")
 	assert.Contains(t, xml, "<cbc:CreditNoteTypeCode listAgencyID=\"320\" listID=\"urn:oioubl:codelist:invoicetypecode-1.1\">381</cbc:CreditNoteTypeCode>")
 }
 

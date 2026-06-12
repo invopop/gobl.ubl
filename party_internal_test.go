@@ -28,13 +28,22 @@ func TestGoblPartyOIOUBLEndpoints(t *testing.T) {
 		assert.Equal(t, "iso6523-actorid-upis::0088:5790000000000", p.Endpoints[0].URI.String())
 	})
 
+	t.Run("country schemes restore to their canonical ICD", func(t *testing.T) {
+		p := goblParty(&Party{
+			EndpointID: &EndpointID{SchemeID: "IS:KT", Value: "5504033150"},
+		}, o)
+		require.Len(t, p.Endpoints, 1)
+		assert.Equal(t, "iso6523-actorid-upis::0196:5504033150", p.Endpoints[0].URI.String(),
+			"legacy EAS 9917 also feeds IS:KT; the canonical 0196 wins on parse")
+	})
+
 	t.Run("unmapped scheme falls back to an inbox", func(t *testing.T) {
 		p := goblParty(&Party{
-			EndpointID: &EndpointID{SchemeID: "DK:P", Value: "1234567890"},
+			EndpointID: &EndpointID{SchemeID: "DK:VANS", Value: "1234567890"},
 		}, o)
 		assert.Empty(t, p.Endpoints)
 		require.Len(t, p.Inboxes, 1)
-		assert.Equal(t, "DK:P", p.Inboxes[0].Scheme.String())
+		assert.Equal(t, "DK:VANS", p.Inboxes[0].Scheme.String())
 		assert.Equal(t, "1234567890", p.Inboxes[0].Code.String())
 	})
 

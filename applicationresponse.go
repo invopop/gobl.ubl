@@ -71,12 +71,18 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		sender, receiver = st.Supplier, st.Customer
 	}
 
+	// OIOUBL declares UBLVersionID 2.0 on the wire; other UBL contexts keep 2.1.
+	ublVersion := Version
+	if o.context.Is(ContextOIOUBL21) {
+		ublVersion = oioublUBLVersion
+	}
+
 	out := &ApplicationResponse{
 		XMLName:         xml.Name{Local: "ApplicationResponse"},
 		CACNamespace:    NamespaceCAC,
 		CBCNamespace:    NamespaceCBC,
 		UBLNamespace:    NamespaceUBLApplicationResponse,
-		UBLVersionID:    Version,
+		UBLVersionID:    ublVersion,
 		CustomizationID: o.context.CustomizationID,
 		ID:              invoiceNumber(st.Series, st.Code),
 		IssueDate:       formatDate(st.IssueDate),
@@ -154,11 +160,19 @@ func responseDescription(line *bill.StatusLine) string {
 // OIOUBL ApplicationResponse code list identifiers and the technical-response
 // profile that the schematron couples with the TechnicalAccept response code.
 const (
-	responseCodeListID       = "urn:oioubl:codelist:responsecode-1.1"
-	responseDocTypeListID    = "urn:oioubl:codelist:responsedocumenttypecode-1.1"
+	responseCodeListID    = "urn:oioubl:codelist:responsecode-1.1"
+	responseDocTypeListID = "urn:oioubl:codelist:responsedocumenttypecode-1.1"
+	// The ApplicationResponse profiles (Procurement-TecRes-1.0 and the billing
+	// profile) only appear in the profileid-1.4 code list, so the response
+	// must declare 1.4 — unlike invoices, which use 1.2 (see invoice.go).
 	oioublProfileSchemeID    = "urn:oioubl:id:profileid-1.4"
 	oioublProfileTechnicalID = "Procurement-TecRes-1.0"
 	oioublCodeListAgencyID   = "320"
+	// oioublUBLVersion is the UBLVersionID OIOUBL 2.1 documents declare on the
+	// wire: real NemHandel traffic carries "2.0" (the OIOUBL element model
+	// derives from UBL 2.0), even though the documents validate against the
+	// UBL 2.1 schema. F-LIB001 accepts both; "2.0" matches production.
+	oioublUBLVersion = "2.0"
 )
 
 // OIOUBL responsedocumenttypecode-1.1 values for the referenced document.

@@ -155,13 +155,15 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if o.context.Is(ContextOIOUBL21) {
-		out.UBLVersionID = Version
+		out.UBLVersionID = oioublUBLVersion
 		if !inv.UUID.IsZero() {
 			out.UUID = inv.UUID.String()
 		}
 		if out.ProfileID != nil {
-			schemeID := "urn:oioubl:id:profileid-1.4"
-			schemeAgencyID := "320"
+			// Invoices/credit notes carry profile5:ver2.0, valid from the
+			// profileid-1.2 code list — which real NemHandel traffic uses.
+			schemeID := "urn:oioubl:id:profileid-1.2"
+			schemeAgencyID := oioublCodeListAgencyID
 			out.ProfileID.SchemeID = &schemeID
 			out.ProfileID.SchemeAgencyID = &schemeAgencyID
 		}

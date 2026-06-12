@@ -73,7 +73,7 @@ func TestOIOUBL21DualCurrencyTotals(t *testing.T) {
 	// ProfileID carries OIOUBL scheme attributes natively (no post-serialize hack).
 	require.NotNil(t, doc.ProfileID)
 	require.NotNil(t, doc.ProfileID.SchemeID)
-	assert.Equal(t, "urn:oioubl:id:profileid-1.4", *doc.ProfileID.SchemeID)
+	assert.Equal(t, "urn:oioubl:id:profileid-1.2", *doc.ProfileID.SchemeID)
 }
 
 func TestParseTaxNotes(t *testing.T) {

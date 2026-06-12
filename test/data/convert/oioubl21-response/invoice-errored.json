@@ -4,13 +4,16 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "381632cdb08dc5c9f58fbb066551f9e734012d01f58575bc17d5f66eda73e981"
-		}
+			"val": "a311d2ed3f00e61884f76b7f884df4f628903675e00770dff6125cd23008c30d"
+		},
+		"from": "iso6523-actorid-upis::0184:76543216",
+		"to": "iso6523-actorid-upis::0184:12345674"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
 		"$regime": "DK",
 		"$addons": [
+			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
@@ -23,6 +26,11 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
 			"addresses": [
 				{
 					"num": "12",
@@ -30,11 +38,6 @@
 					"locality": "København",
 					"code": "2100",
 					"country": "DK"
-				}
-			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
 				}
 			]
 		},
@@ -44,6 +47,11 @@
 				"country": "DK",
 				"code": "76543216"
 			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:76543216"
+				}
+			],
 			"addresses": [
 				{
 					"num": "45",
@@ -51,11 +59,6 @@
 					"locality": "Aarhus",
 					"code": "8000",
 					"country": "DK"
-				}
-			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0184:76543216"
 				}
 			]
 		},
@@ -68,7 +71,10 @@
 					"series": "FINAL",
 					"code": "004"
 				},
-				"description": "Dokumentet kunne ikke behandles teknisk: ugyldig XML-struktur"
+				"description": "Dokumentet kunne ikke behandles teknisk: ugyldig XML-struktur",
+				"ext": {
+					"dk-oioubl-response-code": "TechnicalReject"
+				}
 			}
 		]
 	}

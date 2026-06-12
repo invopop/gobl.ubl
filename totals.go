@@ -375,13 +375,13 @@ func taxCurrencyTaxAmount(taxTotals []TaxTotal) (num.Amount, bool) {
 }
 
 // OIOUBL taxcategoryid-1.1 wire values (sourced from the dk-oioubl addon) and
-// the serialization-only taxschemeid-1.2 VAT (Moms) code.
+// the serialization-only taxschemeid-1.1 VAT (Moms) code.
 const (
 	oioubl21TaxCategoryStandardRated = string(oioubl.ExtValueTaxCategoryStandardRated)
 	oioubl21TaxCategoryZeroRated     = string(oioubl.ExtValueTaxCategoryZeroRated)
 	oioubl21TaxCategoryReverseCharge = string(oioubl.ExtValueTaxCategoryReverseCharge)
 
-	oioubl21TaxSchemeVATCode = "63" // taxschemeid-1.2 VAT (Moms)
+	oioubl21TaxSchemeVATCode = "63" // taxschemeid-1.1 VAT (Moms)
 )
 
 // oioubl21TaxCategoryID returns the value to emit as cac:TaxCategory/cbc:ID. The
@@ -449,7 +449,7 @@ func applyOIOUBL21TaxScheme(ts *TaxScheme) {
 	if ts == nil {
 		return
 	}
-	schemeID := "urn:oioubl:id:taxschemeid-1.2"
+	schemeID := "urn:oioubl:id:taxschemeid-1.1"
 	schemeAgencyID := "320"
 	ts.ID = IDType{
 		SchemeID:       &schemeID,
