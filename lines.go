@@ -142,7 +142,8 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				it.Name = l.Item.Name
 			}
 
-			if l.Item.Origin != "" {
+			// OIOUBL forbids cac:OriginCountry on a line item (F-INV211 / F-CRN109).
+			if l.Item.Origin != "" && !context.Is(ContextOIOUBL21) {
 				it.OriginCountry = &Country{
 					IdentificationCode: l.Item.Origin.String(),
 				}
