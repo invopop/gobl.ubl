@@ -3,9 +3,39 @@ package ubl
 import (
 	"testing"
 
+	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestNewPartyDKSchemeGatedToOIOUBL(t *testing.T) {
+	mk := func() *org.Party {
+		return &org.Party{
+			Name:  "Eksempel ApS",
+			TaxID: &tax.Identity{Country: "DK", Code: "12345674"},
+		}
+	}
+
+	t.Run("OIOUBL scopes the DK:SE tax scheme and fabricates the legal entity ID", func(t *testing.T) {
+		p := newParty(mk(), ContextOIOUBL21)
+		require.Len(t, p.PartyTaxScheme, 1)
+		require.NotNil(t, p.PartyTaxScheme[0].CompanyID.SchemeID)
+		assert.Equal(t, icdDKSE, *p.PartyTaxScheme[0].CompanyID.SchemeID)
+		require.NotNil(t, p.PartyLegalEntity)
+		require.NotNil(t, p.PartyLegalEntity.CompanyID)
+		require.NotNil(t, p.PartyLegalEntity.CompanyID.SchemeID)
+		assert.Equal(t, icdDKCVR, *p.PartyLegalEntity.CompanyID.SchemeID)
+	})
+
+	t.Run("non-OIOUBL leaves the DK tax id unscoped and the legal entity ID unfabricated", func(t *testing.T) {
+		p := newParty(mk(), ContextEN16931)
+		require.Len(t, p.PartyTaxScheme, 1)
+		assert.Nil(t, p.PartyTaxScheme[0].CompanyID.SchemeID, "no DK:SE leak outside OIOUBL")
+		require.NotNil(t, p.PartyLegalEntity)
+		assert.Nil(t, p.PartyLegalEntity.CompanyID, "legal entity ID must not be fabricated from the tax id")
+	})
+}
 
 func TestGoblPartyOIOUBLEndpoints(t *testing.T) {
 	o := &options{context: ContextOIOUBL21}

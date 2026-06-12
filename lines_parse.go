@@ -227,9 +227,11 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 		}
 		percent, _ := num.PercentageFromString(percentStr)
 
-		// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
-		// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
-		if percent.IsZero() && ctc.ID != nil && ctc.ID.Value != "Z" {
+		// Skip setting percent if it's 0% and the tax category is not zero-rated.
+		// This prevents GOBL from normalizing to "zero" tax rate for
+		// exempt/reverse-charge cases. Compare via goblTaxCategoryCode so the
+		// OIOUBL "ZeroRated" wire value is recognised, not just the UNTDID "Z".
+		if percent.IsZero() && ctc.ID != nil && goblTaxCategoryCode(ctc.ID.Value) != "Z" {
 			return
 		}
 

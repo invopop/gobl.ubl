@@ -163,7 +163,9 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		companyID := &IDType{
 			Value: code,
 		}
-		if string(tID.Country) == "DK" {
+		// The DK:SE (0198) scheme on PartyTaxScheme/CompanyID is OIOUBL-specific;
+		// emitting it under other contexts (e.g. Peppol) is unintended surface.
+		if ctx.Is(ContextOIOUBL21) && string(tID.Country) == "DK" {
 			s := icdDKSE
 			companyID.SchemeID = &s
 		}
@@ -311,7 +313,10 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 	}
 
-	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID == nil && party.TaxID != nil && string(party.TaxID.Country) == "DK" {
+	// Fabricating a DK:CVR (0184) PartyLegalEntity/CompanyID from the tax ID is
+	// OIOUBL-specific; under other contexts the legal identity should come from
+	// real data, not the tax number.
+	if ctx.Is(ContextOIOUBL21) && p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID == nil && party.TaxID != nil && string(party.TaxID.Country) == "DK" {
 		s := icdDKCVR
 		p.PartyLegalEntity.CompanyID = &IDType{
 			SchemeID: &s,
