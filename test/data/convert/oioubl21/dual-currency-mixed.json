@@ -1,0 +1,219 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "c93322587b41d709c9081f6e1b1e075147656bbc245b1124cdb5b412004aeab6"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "FINAL",
+		"code": "DUAL-MIX",
+		"issue_date": "2026-05-29",
+		"currency": "EUR",
+		"exchange_rates": [
+			{
+				"from": "EUR",
+				"to": "DKK",
+				"amount": "7.46"
+			}
+		],
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Jens",
+						"surname": "Hansen"
+					},
+					"identities": [
+						{
+							"code": "S-001"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@eksempel-software.dk"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Mette",
+						"surname": "Sørensen"
+					},
+					"identities": [
+						{
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "ap@modtager-handel.dk"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Udvikling timer",
+					"price": "1000.00",
+					"unit": "h"
+				},
+				"sum": "10000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10000.00"
+			},
+			{
+				"i": 2,
+				"quantity": "2",
+				"item": {
+					"name": "Eksport ydelse",
+					"price": "500.00",
+					"unit": "h"
+				},
+				"sum": "1000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "zero",
+						"percent": "0%",
+						"ext": {
+							"dk-oioubl-tax-category": "ZeroRated",
+							"untdid-tax-category": "Z"
+						}
+					}
+				],
+				"total": "1000.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "Netto 30 dage"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "TEST-001",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK"
+					}
+				],
+				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "11000.00",
+			"total": "11000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
+									"untdid-tax-category": "S"
+								},
+								"base": "10000.00",
+								"percent": "25%",
+								"amount": "2500.00"
+							},
+							{
+								"key": "zero",
+								"ext": {
+									"dk-oioubl-tax-category": "ZeroRated",
+									"untdid-tax-category": "Z"
+								},
+								"base": "1000.00",
+								"percent": "0%",
+								"amount": "0.00"
+							}
+						],
+						"amount": "2500.00"
+					}
+				],
+				"sum": "2500.00"
+			},
+			"tax": "2500.00",
+			"total_with_tax": "13500.00",
+			"payable": "13500.00"
+		}
+	}
+}

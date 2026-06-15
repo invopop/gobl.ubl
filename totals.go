@@ -212,19 +212,13 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 				if r.Base != (num.Amount{}) {
 					subtotal.TaxableAmount = Amount{Value: r.Base.String(), CurrencyID: &currency}
 				}
-				// F-INV018 / F-CRN013: when DocumentCurrencyCode differs from the
-				// tax currency, OIOUBL carries the tax in the tax currency here.
-				// F-INV339 fixes its currencyID to the TaxCurrencyCode.
-				if ctx.Is(ContextOIOUBL21) && accRate != nil {
-					subtotal.TransactionCurrencyTaxAmount = &Amount{
-						Value:      accRate.Convert(r.Amount).String(),
-						CurrencyID: &rCurrency,
-					}
-				}
+				// Computed early because F-LIB373 gates the dual-currency amount on it.
+				catID := oioubl21TaxCategoryID(r.Ext)
+				subtotal.TransactionCurrencyTaxAmount = oioubl21TransactionTax(ctx, accRate, catID, r.Amount, rCurrency)
 				taxCat := TaxCategory{}
 
-				if k := oioubl21TaxCategoryID(r.Ext); k != "" {
-					taxCat.ID = &IDType{Value: k}
+				if catID != "" {
+					taxCat.ID = &IDType{Value: catID}
 				}
 				if v := r.Ext.Get(cef.ExtKeyVATEX).String(); v != "" {
 					taxCat.TaxExemptionReasonCode = &v
@@ -383,6 +377,16 @@ const (
 
 	oioubl21TaxSchemeVATCode = "63" // taxschemeid-1.1 VAT (Moms)
 )
+
+// oioubl21TransactionTax restates a subtotal's tax in the tax currency. F-LIB373
+// allows it only on StandardRated, so it returns nil otherwise (and for
+// non-OIOUBL or single-currency invoices).
+func oioubl21TransactionTax(ctx Context, accRate *cur.ExchangeRate, catID string, amount num.Amount, currencyID string) *Amount {
+	if !ctx.Is(ContextOIOUBL21) || accRate == nil || catID != oioubl21TaxCategoryStandardRated {
+		return nil
+	}
+	return &Amount{Value: accRate.Convert(amount).String(), CurrencyID: &currencyID}
+}
 
 // oioubl21TaxCategoryID returns the value to emit as cac:TaxCategory/cbc:ID. The
 // dk-oioubl addon (required by ContextOIOUBL21) precomputes the OIOUBL
