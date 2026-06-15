@@ -242,7 +242,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		// the address country (restricted formats drop it).
 		applyOIOUBL21AddressFormat(out.AccountingSupplierParty.Party.PostalAddress, inv.Supplier)
 		applyOIOUBL21AddressFormat(out.AccountingCustomerParty.Party.PostalAddress, inv.Customer)
-		out.applyOIOUBL21CreditNoteRef()
+		out.applyOIOUBL21BillingReference()
+		out.applyOIOUBL21Attachments()
 		out.applyOIOUBL21Totals()
 	}
 
@@ -335,15 +336,23 @@ func applyOIOUBL21TypeCode(t *IDType) {
 	t.ListAgencyID = &listAgencyID
 }
 
-// applyOIOUBL21CreditNoteRef drops the DocumentTypeCode from billing references
-// on credit notes; the OIOUBL credit-note schematron rejects it there.
-func (ui *Invoice) applyOIOUBL21CreditNoteRef() {
-	if ui.CreditNoteTypeCode == nil {
-		return
-	}
+// applyOIOUBL21BillingReference drops the DocumentTypeCode from billing
+// references; OIOUBL excludes it on both invoices and credit notes (F-LIB172).
+func (ui *Invoice) applyOIOUBL21BillingReference() {
 	for i := range ui.BillingReference {
 		if ref := ui.BillingReference[i]; ref != nil && ref.InvoiceDocumentReference != nil {
 			ref.InvoiceDocumentReference.DocumentTypeCode = ""
+		}
+	}
+}
+
+// applyOIOUBL21Attachments stamps a DocumentType on every additional document
+// reference; OIOUBL requires DocumentType or DocumentTypeCode on each (F-LIB092).
+func (ui *Invoice) applyOIOUBL21Attachments() {
+	for i := range ui.AdditionalDocumentReference {
+		ref := &ui.AdditionalDocumentReference[i]
+		if ref.DocumentType == "" && ref.DocumentTypeCode == "" {
+			ref.DocumentType = "Supporting Document"
 		}
 	}
 }
