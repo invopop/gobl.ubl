@@ -169,6 +169,24 @@ func parseAddress(address *PostalAddress) *org.Address {
 	if address.CitySubdivisionName != nil && addr.StreetExtra == "" {
 		addr.StreetExtra = cleanString(*address.CitySubdivisionName)
 	}
+	// Unstructured addresses (OIOUBL AddressFormatCode "Unstructured") carry
+	// their content as free-text cac:AddressLine rather than the structured
+	// fields above. Fall back to it so the content survives the parse: the first
+	// line becomes the street, any remaining lines the street extra.
+	if addr.Street == "" && len(address.AddressLine) > 0 {
+		var lines []string
+		for _, l := range address.AddressLine {
+			if s := cleanString(l.Line); s != "" {
+				lines = append(lines, s)
+			}
+		}
+		if len(lines) > 0 {
+			addr.Street = lines[0]
+			if len(lines) > 1 && addr.StreetExtra == "" {
+				addr.StreetExtra = strings.Join(lines[1:], ", ")
+			}
+		}
+	}
 	return addr
 }
 
