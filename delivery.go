@@ -35,14 +35,25 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	}
 
 	if del.Period != nil {
-		end := formatDate(del.Period.End)
 		start := formatDate(del.Period.Start)
-		out.LatestDeliveryDate = &end
 		out.ActualDeliveryDate = &start
+		// OIOUBL forbids cac:Delivery/cbc:LatestDeliveryDate (F-INV087); only the
+		// actual delivery date (period start) is carried under OIOUBL.
+		if !ctx.Is(ContextOIOUBL21) {
+			end := formatDate(del.Period.End)
+			out.LatestDeliveryDate = &end
+		}
 	}
 
 	if del.Receiver != nil {
 		out.DeliveryParty = newDeliveryParty(del.Receiver)
+		// OIOUBL requires a non-empty CompanyID whenever PartyLegalEntity is
+		// present (F-LIB187), but a delivery party only identifies a location and
+		// carries no company id. PartyLegalEntity isn't mandatory here, so drop it
+		// and keep just the PartyName.
+		if ctx.Is(ContextOIOUBL21) && out.DeliveryParty != nil {
+			out.DeliveryParty.PartyLegalEntity = nil
+		}
 		out.DeliveryLocation =
 			&Location{
 				Address: newAddress(del.Receiver.Addresses, ctx),

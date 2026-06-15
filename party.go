@@ -470,6 +470,21 @@ func normalizeEndpointScheme(s string) string {
 	}
 }
 
+// oioubl21AddressFormatCode returns the OIOUBL StructuredLax AddressFormatCode
+// (codelist addressformatcode-1.1) required on every address (F-LIB025).
+// StructuredLax imposes no mandatory sub-fields, matching real NemHandel traffic
+// and GOBL's optional address model — we still emit StreetName/BuildingNumber/
+// PostalZone whenever GOBL has them.
+func oioubl21AddressFormatCode() *IDType {
+	listID := "urn:oioubl:codelist:addressformatcode-1.1"
+	listAgencyID := "320"
+	return &IDType{
+		ListID:       &listID,
+		ListAgencyID: &listAgencyID,
+		Value:        "StructuredLax",
+	}
+}
+
 func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 	if len(addresses) == 0 {
 		return nil
@@ -480,6 +495,10 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 	addr := &PostalAddress{}
 
 	if ctx.Is(ContextOIOUBL21) {
+		// Every OIOUBL address needs an AddressFormatCode (F-LIB025). Stamping it
+		// here covers delivery and payee addresses too, not just the supplier and
+		// customer handled by applyOIOUBL21Party.
+		addr.AddressFormatCode = oioubl21AddressFormatCode()
 		// OIOUBL keeps the street number and PO box in their own elements when
 		// GOBL provides them; under StructuredLax these are emitted but not
 		// required, so an inline street number is preserved as-is in StreetName.
@@ -677,17 +696,9 @@ func applyOIOUBL21Party(p *Party) {
 		}
 	}
 	if p.PostalAddress != nil && p.PostalAddress.AddressFormatCode == nil {
-		listID := "urn:oioubl:codelist:addressformatcode-1.1"
-		listAgencyID := "320"
-		p.PostalAddress.AddressFormatCode = &IDType{
-			ListID:       &listID,
-			ListAgencyID: &listAgencyID,
-			// StructuredLax (not StructuredDK): the schematron requires no
-			// mandatory sub-fields for Lax, matching real NemHandel traffic and
-			// GOBL's optional address model — we still emit StreetName/
-			// BuildingNumber/PostalZone whenever GOBL has them.
-			Value: "StructuredLax",
-		}
+		// Covers a party that has a tax identity but no address (newAddress
+		// returns nil, so the bare PostalAddress is created without a format code).
+		p.PostalAddress.AddressFormatCode = oioubl21AddressFormatCode()
 	}
 	// DK:SE/DK:CVR (with the DK-prefixed value the schematron mandates) apply
 	// only to Danish parties; a foreign party's tax and legal identifiers carry
