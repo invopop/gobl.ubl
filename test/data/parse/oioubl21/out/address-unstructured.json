@@ -4,13 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8fb70473f435a236d1fc4b78a25fdfd3923781e9676d0a57a2147751d0d51717"
+			"val": "ec08e1bedfb9cb538cd967c4654bdb9a6292571bc13edce1ee95de08bd63ac69"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:88146328"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
 		"$addons": [
 			"eu-en16931-v2017",
 			"dk-oioubl-v2-1"
@@ -29,9 +30,8 @@
 		"supplier": {
 			"name": "Eksempel A/S",
 			"tax_id": {
-				"country": "",
-				"code": "DK12345674",
-				"scheme": "VAT"
+				"country": "DK",
+				"code": "12345674"
 			},
 			"identities": [
 				{

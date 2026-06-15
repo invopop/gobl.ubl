@@ -107,7 +107,7 @@ func goblParty(party *Party, o *options) *org.Party {
 	}
 
 	handleLegalEntityIdentity(party, p)
-	handlePartyTaxSchemes(party, p)
+	handlePartyTaxSchemes(party, p, o)
 	handlePartyIdentifications(party, p, o)
 
 	return p
@@ -255,18 +255,50 @@ func handleLegalEntityIdentity(party *Party, p *org.Party) {
 	p.Identities = append(p.Identities, identity)
 }
 
-func handlePartyTaxSchemes(party *Party, p *org.Party) {
+func handlePartyTaxSchemes(party *Party, p *org.Party, o *options) {
 	if len(party.PartyTaxScheme) == 0 {
 		return
 	}
 
+	cc := party.resolveCountry(o.context)
 	validSchemes := extractValidTaxSchemes(party.PartyTaxScheme)
 
 	if len(validSchemes) == 1 {
-		setTaxIDFromScheme(validSchemes[0], p, party.CountryCode())
+		setTaxIDFromScheme(validSchemes[0], p, cc)
 	} else if len(validSchemes) > 1 {
-		handleMultipleTaxSchemes(validSchemes, p, party.CountryCode())
+		handleMultipleTaxSchemes(validSchemes, p, cc)
 	}
+}
+
+// resolveCountry returns the party country for tax-identity parsing. An OIOUBL
+// StructuredID address carries only an identifier (F-LIB038), so the postal
+// address has no country to derive it from; fall back to the DK:SE/DK:CVR
+// company-ID scheme, which only a Danish party carries, so the tax-id country
+// and the DK-prefix strip still resolve.
+func (p *Party) resolveCountry(ctx Context) string {
+	if c := p.CountryCode(); c != "" {
+		return c
+	}
+	if ctx.Is(ContextOIOUBL21) && p.hasDanishCompanyScheme() {
+		return "DK"
+	}
+	return ""
+}
+
+// hasDanishCompanyScheme reports whether any tax-scheme or legal-entity company
+// ID carries a Danish OIOUBL scheme (DK:SE/DK:CVR).
+func (p *Party) hasDanishCompanyScheme() bool {
+	for _, pts := range p.PartyTaxScheme {
+		if id := pts.CompanyID; id != nil && id.SchemeID != nil &&
+			(*id.SchemeID == oioubl21SchemeDKSE || *id.SchemeID == oioubl21SchemeDKCVR) {
+			return true
+		}
+	}
+	if le := p.PartyLegalEntity; le != nil && le.CompanyID != nil && le.CompanyID.SchemeID != nil &&
+		(*le.CompanyID.SchemeID == oioubl21SchemeDKSE || *le.CompanyID.SchemeID == oioubl21SchemeDKCVR) {
+		return true
+	}
+	return false
 }
 
 func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
