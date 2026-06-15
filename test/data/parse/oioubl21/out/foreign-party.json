@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "33ce595e4ee48a8fba51c82d2fddcd2ab52e05e931bd3f7952fe62d417c1f5ca"
+			"val": "f561412ae92942d70835b9d88bac0b3bb6dc49f5ebd5e00906490284483e0d9f"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::0184:76543216"
+		"to": "iso6523-actorid-upis::9930:DE282741168"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -18,7 +18,7 @@
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"code": "FINAL-DD01",
+		"code": "FINAL-FOREIGN-1",
 		"issue_date": "2026-05-29",
 		"currency": "DKK",
 		"tax": {
@@ -53,69 +53,72 @@
 					"code": "2100",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"customer": {
-			"name": "Modtager Handel A/S",
+			"name": "Beispiel GmbH",
 			"tax_id": {
-				"country": "DK",
-				"code": "76543216"
+				"country": "DE",
+				"code": "282741168"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "HRB12345",
+					"ext": {
+						"iso-scheme-id": "ZZZ"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
-						"given": "Mette Sørensen"
+						"given": "Klaus Müller"
 					},
 					"identities": [
 						{
-							"code": "C-001"
+							"code": "C-002"
 						}
 					]
 				}
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:76543216"
+					"uri": "iso6523-actorid-upis::9930:DE282741168"
 				}
 			],
 			"addresses": [
 				{
-					"num": "45",
-					"street": "Vestergade",
-					"locality": "Aarhus",
-					"code": "8000",
-					"country": "DK"
+					"num": "7",
+					"street": "Hauptstrasse",
+					"locality": "Berlin",
+					"code": "10115",
+					"country": "DE"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "2",
+				"quantity": "1",
 				"item": {
-					"name": "Konsulent timer",
-					"price": "1000.00",
-					"unit": "h"
+					"name": "Reverse charge ydelse",
+					"price": "9000.00",
+					"unit": "one"
 				},
-				"sum": "2000.00",
+				"sum": "9000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "standard",
-						"percent": "25%",
+						"key": "reverse-charge",
 						"ext": {
-							"dk-oioubl-tax-category": "StandardRated",
-							"untdid-tax-category": "S"
+							"cef-vatex": "VATEX-EU-AE",
+							"dk-oioubl-tax-category": "ReverseCharge",
+							"untdid-tax-category": "AE"
 						}
 					}
 				],
-				"total": "2000.00"
+				"total": "9000.00"
 			}
 		],
 		"ordering": {
@@ -127,45 +130,50 @@
 		},
 		"payment": {
 			"terms": {
-				"notes": "Trækkes automatisk"
+				"notes": "Netto 30 dage"
 			},
 			"instructions": {
-				"key": "direct-debit",
-				"direct_debit": {
-					"ref": "MANDATE-2026-001"
-				},
+				"key": "other",
+				"ref": "TEST-006",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK"
+					}
+				],
 				"ext": {
-					"untdid-payment-means": "49"
+					"dk-oioubl-payment-channel": "IBAN",
+					"untdid-payment-means": "31"
 				}
 			}
 		},
 		"totals": {
-			"sum": "2000.00",
-			"total": "2000.00",
+			"sum": "9000.00",
+			"total": "9000.00",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
+								"key": "reverse-charge",
 								"ext": {
-									"dk-oioubl-tax-category": "StandardRated",
-									"untdid-tax-category": "S"
+									"cef-vatex": "VATEX-EU-AE",
+									"dk-oioubl-tax-category": "ReverseCharge",
+									"untdid-tax-category": "AE"
 								},
-								"base": "2000.00",
-								"percent": "25%",
-								"amount": "500.00"
+								"base": "9000.00",
+								"amount": "0.00"
 							}
 						],
-						"amount": "500.00"
+						"amount": "0.00"
 					}
 				],
-				"sum": "500.00"
+				"sum": "0.00"
 			},
-			"tax": "500.00",
-			"total_with_tax": "2500.00",
-			"payable": "2500.00"
+			"tax": "0.00",
+			"total_with_tax": "9000.00",
+			"payable": "9000.00"
 		}
 	}
 }
