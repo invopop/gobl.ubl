@@ -2,6 +2,7 @@ package ubl_test
 
 import (
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -9,6 +10,7 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	en16931 "github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -38,6 +40,29 @@ func TestOIOUBL21AddonIntegration(t *testing.T) {
 			Identities: []*org.Identity{{Code: "EMP-7781"}},
 		}}
 	}
+
+	t.Run("credit note with value_date emits TaxPointDate before CreditNoteTypeCode (XSD order)", func(t *testing.T) {
+		inv, env := load(t)
+		inv.Customer.People = contact()
+		inv.Type = bill.InvoiceTypeCreditNote
+		d := cal.MakeDate(2024, 6, 15)
+		inv.ValueDate = &d
+
+		require.NoError(t, env.Calculate())
+		require.NoError(t, env.Validate())
+
+		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextOIOUBL21))
+		require.NoError(t, err)
+		out, err := ubl.Bytes(doc)
+		require.NoError(t, err)
+
+		xml := string(out)
+		tpd := strings.Index(xml, "<cbc:TaxPointDate>")
+		tc := strings.Index(xml, "<cbc:CreditNoteTypeCode")
+		require.Greater(t, tpd, -1, "TaxPointDate must be present")
+		require.Greater(t, tc, -1, "CreditNoteTypeCode must be present")
+		assert.Less(t, tpd, tc, "the UBL CreditNote XSD sequences TaxPointDate before CreditNoteTypeCode")
+	})
 
 	t.Run("valid OIOUBL invoice passes en16931 + dk-oioubl-v2-1 and converts", func(t *testing.T) {
 		inv, env := load(t)

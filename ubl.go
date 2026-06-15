@@ -202,6 +202,10 @@ func Bytes(in any) ([]byte, error) {
 	// this is a quick fix
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
 
+	if creditNoteNeedsTaxPointDateReorder(in) {
+		b = reorderCreditNoteTaxPointDate(b)
+	}
+
 	return append([]byte(xml.Header), b...), nil
 }
 
@@ -213,5 +217,84 @@ func BytesCompact(in any) ([]byte, error) {
 		return nil, err
 	}
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
+
+	if creditNoteNeedsTaxPointDateReorder(in) {
+		b = reorderCreditNoteTaxPointDate(b)
+	}
+
 	return append([]byte(xml.Header), b...), nil
+}
+
+// creditNoteNeedsTaxPointDateReorder reports whether in is a credit note that
+// carries a cbc:TaxPointDate. The shared Invoice struct emits TaxPointDate after
+// CreditNoteTypeCode (correct for Invoice), but the UBL CreditNote XSD sequences
+// it before — see reorderCreditNoteTaxPointDate.
+func creditNoteNeedsTaxPointDateReorder(in any) bool {
+	var inv *Invoice
+	switch v := in.(type) {
+	case *Invoice:
+		inv = v
+	case Invoice:
+		inv = &v
+	default:
+		return false
+	}
+	return inv != nil && inv.XMLName.Local == rootNameCreditNote && inv.TaxPointDate != ""
+}
+
+// reorderCreditNoteTaxPointDate moves the cbc:TaxPointDate element ahead of
+// cbc:CreditNoteTypeCode so the output matches the UBL CreditNote XSD sequence
+// (TaxPointDate precedes the type code). Invoice and CreditNote share one Go
+// struct whose field order is correct for Invoice but not CreditNote, and Go's
+// xml package can neither express two element orders for one struct nor survive a
+// decode/re-encode pass (it mangles the cac:/cbc: prefixes). Adjusting the
+// already-marshaled bytes keeps the exact prefixes and indentation, and only runs
+// for the rare credit note that carries a TaxPointDate.
+func reorderCreditNoteTaxPointDate(b []byte) []byte {
+	const (
+		open     = "<cbc:TaxPointDate>"
+		closeTag = "</cbc:TaxPointDate>"
+		typeCode = "<cbc:CreditNoteTypeCode"
+	)
+
+	tpd := bytes.Index(b, []byte(open))
+	tc := bytes.Index(b, []byte(typeCode))
+	if tpd < 0 || tc < 0 || tpd < tc {
+		return b // type code absent, or already correctly ordered
+	}
+	rel := bytes.Index(b[tpd:], []byte(closeTag))
+	if rel < 0 {
+		return b
+	}
+	elemEnd := tpd + rel + len(closeTag)
+	elem := append([]byte(nil), b[tpd:elemEnd]...)
+
+	// Drop the element together with the newline + indent that preceded it.
+	cut := tpd
+	for cut > 0 && (b[cut-1] == ' ' || b[cut-1] == '\t') {
+		cut--
+	}
+	if cut > 0 && b[cut-1] == '\n' {
+		cut--
+	}
+	rest := append(append([]byte(nil), b[:cut]...), b[elemEnd:]...)
+
+	// Re-insert it before the type code, reusing that line's leading whitespace
+	// (empty for the compact, non-indented output).
+	tc = bytes.Index(rest, []byte(typeCode))
+	indentStart := tc
+	for indentStart > 0 && (rest[indentStart-1] == ' ' || rest[indentStart-1] == '\t') {
+		indentStart--
+	}
+	if indentStart > 0 && rest[indentStart-1] == '\n' {
+		indentStart--
+	}
+	sep := rest[indentStart:tc]
+
+	out := make([]byte, 0, len(rest)+len(elem)+len(sep))
+	out = append(out, rest[:tc]...)
+	out = append(out, elem...)
+	out = append(out, sep...)
+	out = append(out, rest[tc:]...)
+	return out
 }
