@@ -56,6 +56,7 @@ type PartyName struct {
 
 // PostalAddress represents a postal address
 type PostalAddress struct {
+	ID                   *IDType             `xml:"cbc:ID,omitempty"`
 	AddressFormatCode    *IDType             `xml:"cbc:AddressFormatCode"`
 	Postbox              *string             `xml:"cbc:Postbox,omitempty"`
 	StreetName           *string             `xml:"cbc:StreetName"`
@@ -66,6 +67,8 @@ type PostalAddress struct {
 	CityName             *string             `xml:"cbc:CityName"`
 	PostalZone           *string             `xml:"cbc:PostalZone"`
 	CountrySubentity     *string             `xml:"cbc:CountrySubentity"`
+	Region               *string             `xml:"cbc:Region,omitempty"`
+	District             *string             `xml:"cbc:District,omitempty"`
 	AddressLine          []AddressLine       `xml:"cac:AddressLine"`
 	Country              *Country            `xml:"cac:Country"`
 	LocationCoordinate   *LocationCoordinate `xml:"cac:LocationCoordinate"`
@@ -470,19 +473,121 @@ func normalizeEndpointScheme(s string) string {
 	}
 }
 
-// oioubl21AddressFormatCode returns the OIOUBL StructuredLax AddressFormatCode
-// (codelist addressformatcode-1.1) required on every address (F-LIB025).
-// StructuredLax imposes no mandatory sub-fields, matching real NemHandel traffic
-// and GOBL's optional address model — we still emit StreetName/BuildingNumber/
-// PostalZone whenever GOBL has them.
-func oioubl21AddressFormatCode() *IDType {
+// oioubl21AddressFormatCode returns an OIOUBL AddressFormatCode (codelist
+// addressformatcode-1.1), required on every address (F-LIB025). The value
+// defaults to StructuredLax, which imposes no mandatory sub-fields and matches
+// real NemHandel traffic; a party may override it via the dk-oioubl-address-format
+// extension (see applyOIOUBL21AddressFormat).
+func oioubl21AddressFormatCode(value string) *IDType {
 	listID := "urn:oioubl:codelist:addressformatcode-1.1"
 	listAgencyID := "320"
 	return &IDType{
 		ListID:       &listID,
 		ListAgencyID: &listAgencyID,
-		Value:        "StructuredLax",
+		Value:        value,
 	}
+}
+
+// OIOUBL address-format extension keys and values, mirrored from the dk-oioubl
+// addon. The converter reads them as plain extension keys on the GOBL party
+// (GOBL has no address-level extension); only the formats that reshape the
+// output need an explicit case.
+const (
+	oioubl21AddressFormatKey   cbc.Key = "dk-oioubl-address-format"
+	oioubl21AddressIDKey       cbc.Key = "dk-oioubl-address-id"
+	oioubl21AddressDistrictKey cbc.Key = "dk-oioubl-address-district"
+
+	oioubl21AddressUnstructured     = "Unstructured"
+	oioubl21AddressStructuredID     = "StructuredID"
+	oioubl21AddressStructuredRegion = "StructuredRegion"
+)
+
+// applyOIOUBL21AddressFormat reshapes a party's postal address to the OIOUBL
+// addressformatcode-1.1 value declared on the GOBL party
+// (dk-oioubl-address-format). Without a declared format the address keeps the
+// StructuredLax form newAddress produced. Each restricted format drops the
+// elements OIOUBL forbids (F-LIB031/038/040); the StructuredID identifier and the
+// StructuredRegion district — which GOBL does not model — are read from the party
+// extension. It must run after applyOIOUBL21Party, which derives the DK vs ZZZ
+// schemes from the address country before the restricted formats drop it.
+func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
+	if addr == nil || party == nil {
+		return
+	}
+	format := party.Ext.Get(oioubl21AddressFormatKey)
+	if format == "" {
+		return
+	}
+	addr.AddressFormatCode = oioubl21AddressFormatCode(format.String())
+	switch format.String() {
+	case oioubl21AddressUnstructured:
+		// F-LIB031: an Unstructured address carries only AddressLine.
+		lines := oioubl21AddressLines(party)
+		clearStructuredAddress(addr)
+		addr.AddressLine = lines
+	case oioubl21AddressStructuredID:
+		// F-LIB038: a StructuredID address carries only the identifier.
+		id := party.Ext.Get(oioubl21AddressIDKey).String()
+		clearStructuredAddress(addr)
+		if id != "" {
+			addr.ID = &IDType{Value: id}
+		}
+	case oioubl21AddressStructuredRegion:
+		// F-LIB040: a StructuredRegion address carries only Region, District and
+		// Country. newAddress mapped the GOBL region to CountrySubentity; move it
+		// to cbc:Region and add the district from the extension.
+		region := addr.CountrySubentity
+		country := addr.Country
+		clearStructuredAddress(addr)
+		addr.Region = region
+		addr.Country = country
+		if d := party.Ext.Get(oioubl21AddressDistrictKey).String(); d != "" {
+			addr.District = &d
+		}
+	}
+	// StructuredDK and StructuredLax keep the structured fields as built.
+}
+
+// clearStructuredAddress blanks every postal element except the
+// AddressFormatCode, leaving a canvas for a format-specific rebuild.
+func clearStructuredAddress(addr *PostalAddress) {
+	addr.ID = nil
+	addr.Postbox = nil
+	addr.StreetName = nil
+	addr.AdditionalStreetName = nil
+	addr.BuildingNumber = nil
+	addr.PlotIdentification = nil
+	addr.CitySubdivisionName = nil
+	addr.CityName = nil
+	addr.PostalZone = nil
+	addr.CountrySubentity = nil
+	addr.Region = nil
+	addr.District = nil
+	addr.AddressLine = nil
+	addr.Country = nil
+	addr.LocationCoordinate = nil
+}
+
+// oioubl21AddressLines renders a GOBL address as OIOUBL free-text AddressLine
+// elements for an Unstructured address.
+func oioubl21AddressLines(party *org.Party) []AddressLine {
+	if len(party.Addresses) == 0 {
+		return nil
+	}
+	a := party.Addresses[0]
+	var lines []AddressLine
+	if one := a.LineOne(); one != "" {
+		lines = append(lines, AddressLine{Line: one})
+	} else if a.PostOfficeBox != "" {
+		lines = append(lines, AddressLine{Line: a.PostOfficeBox})
+	}
+	if two := a.LineTwo(); two != "" {
+		lines = append(lines, AddressLine{Line: two})
+	}
+	if loc := strings.TrimSpace(a.Code.String() + " " + a.Locality); loc != "" {
+		lines = append(lines, AddressLine{Line: loc})
+	}
+	return lines
 }
 
 func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
@@ -498,7 +603,7 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 		// Every OIOUBL address needs an AddressFormatCode (F-LIB025). Stamping it
 		// here covers delivery and payee addresses too, not just the supplier and
 		// customer handled by applyOIOUBL21Party.
-		addr.AddressFormatCode = oioubl21AddressFormatCode()
+		addr.AddressFormatCode = oioubl21AddressFormatCode("StructuredLax")
 		// OIOUBL keeps the street number and PO box in their own elements when
 		// GOBL provides them; under StructuredLax these are emitted but not
 		// required, so an inline street number is preserved as-is in StreetName.
@@ -699,7 +804,7 @@ func applyOIOUBL21Party(p *Party) {
 	if p.PostalAddress != nil && p.PostalAddress.AddressFormatCode == nil {
 		// Covers a party that has a tax identity but no address (newAddress
 		// returns nil, so the bare PostalAddress is created without a format code).
-		p.PostalAddress.AddressFormatCode = oioubl21AddressFormatCode()
+		p.PostalAddress.AddressFormatCode = oioubl21AddressFormatCode("StructuredLax")
 	}
 	// DK:SE/DK:CVR (with the DK-prefixed value the schematron mandates) apply
 	// only to Danish parties; a foreign party's tax and legal identifiers carry

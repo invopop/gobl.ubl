@@ -237,6 +237,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		applyOIOUBL21Party(out.AccountingCustomerParty.Party)
 		applyOIOUBL21Party(out.PayeeParty)
 		applyOIOUBL21TaxRepParty(out.TaxRepresentativeParty)
+		// Reshape the supplier and customer addresses to their declared OIOUBL
+		// address format, after the party pass has derived the DK/ZZZ schemes from
+		// the address country (restricted formats drop it).
+		applyOIOUBL21AddressFormat(out.AccountingSupplierParty.Party.PostalAddress, inv.Supplier)
+		applyOIOUBL21AddressFormat(out.AccountingCustomerParty.Party.PostalAddress, inv.Customer)
 		out.applyOIOUBL21CreditNoteRef()
 		out.applyOIOUBL21Totals()
 	}
