@@ -235,6 +235,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		applyOIOUBL21TypeCode(out.CreditNoteTypeCode)
 		applyOIOUBL21Party(out.AccountingSupplierParty.Party)
 		applyOIOUBL21Party(out.AccountingCustomerParty.Party)
+		applyOIOUBL21Party(out.PayeeParty)
 		out.applyOIOUBL21CreditNoteRef()
 		out.applyOIOUBL21Totals()
 	}

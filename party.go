@@ -542,7 +542,8 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 		addr.Country = &Country{IdentificationCode: string(a.Country)}
 	}
 
-	if a.Coordinates != nil {
+	// OIOUBL forbids cac:LocationCoordinate on an address (F-LIB212).
+	if a.Coordinates != nil && !ctx.Is(ContextOIOUBL21) {
 		lat := strconv.FormatFloat(*a.Coordinates.Latitude, 'f', -1, 64)
 		lon := strconv.FormatFloat(*a.Coordinates.Longitude, 'f', -1, 64)
 		addr.LocationCoordinate = &LocationCoordinate{
@@ -736,6 +737,44 @@ func applyOIOUBL21Party(p *Party) {
 			p.PartyLegalEntity.CompanyID.SchemeID = &scheme
 		}
 	}
+	applyOIOUBL21PartyIdentifications(p)
+}
+
+// applyOIOUBL21PartyIdentifications normalises each PartyIdentification/ID scheme
+// to the symbolic OIOUBL PartyID codelist (F-LIB183) — a numeric ICD maps to its
+// symbolic scheme, anything unmappable becomes ZZZ — and DK-prefixes DK:CVR/DK:SE
+// values (F-LIB184), mirroring the company-ID handling.
+func applyOIOUBL21PartyIdentifications(p *Party) {
+	for i := range p.PartyIdentification {
+		id := p.PartyIdentification[i].ID
+		if id == nil || id.SchemeID == nil {
+			continue
+		}
+		scheme := *id.SchemeID
+		if mapped, ok := oioubl21EndpointSchemes[scheme]; ok {
+			scheme = mapped
+		} else if isNumericICDScheme(scheme) {
+			scheme = oioubl21SchemeZZZ
+		}
+		id.SchemeID = &scheme
+		if (scheme == oioubl21SchemeDKCVR || scheme == oioubl21SchemeDKSE) && !strings.HasPrefix(id.Value, "DK") {
+			id.Value = "DK" + id.Value
+		}
+	}
+}
+
+// isNumericICDScheme reports whether a scheme is a bare 4-digit ISO 6523 ICD
+// (e.g. "0184") rather than a symbolic OIOUBL scheme.
+func isNumericICDScheme(s string) bool {
+	if len(s) != 4 {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 // partyIsDanish reports whether an assembled OIOUBL party is Danish, the signal
