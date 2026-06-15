@@ -501,6 +501,12 @@ const (
 	oioubl21AddressUnstructured     = "Unstructured"
 	oioubl21AddressStructuredID     = "StructuredID"
 	oioubl21AddressStructuredRegion = "StructuredRegion"
+
+	// oioubl21AddressIDScheme is the address-register schemeID OIOUBL mandates on
+	// a StructuredID address ID (F-LIB028/029); the ID is a GLN.
+	oioubl21AddressIDScheme = "GLN"
+	// oioubl21GLNAgencyID is the GS1 scheme agency (9) OIOUBL stamps on GLN IDs.
+	oioubl21GLNAgencyID = "9"
 )
 
 // applyOIOUBL21AddressFormat reshapes a party's postal address to the OIOUBL
@@ -527,11 +533,15 @@ func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
 		clearStructuredAddress(addr)
 		addr.AddressLine = lines
 	case oioubl21AddressStructuredID:
-		// F-LIB038: a StructuredID address carries only the identifier.
+		// F-LIB038: a StructuredID address carries only the identifier. The
+		// address-register schemeID is mandatory on it (F-LIB028/029); the ID is a
+		// GLN, matching the scheme OIOUBL uses for every other GLN identifier.
 		id := party.Ext.Get(oioubl21AddressIDKey).String()
 		clearStructuredAddress(addr)
 		if id != "" {
-			addr.ID = &IDType{Value: id}
+			scheme := oioubl21AddressIDScheme
+			agency := oioubl21GLNAgencyID
+			addr.ID = &IDType{Value: id, SchemeID: &scheme, SchemeAgencyID: &agency}
 		}
 	case oioubl21AddressStructuredRegion:
 		// F-LIB040: a StructuredRegion address carries only Region, District and

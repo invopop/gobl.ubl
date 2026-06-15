@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5fecf5641bb7f824f74d60ec6c82810bc5bb28dd475e2a13332b7d5e43cfd94d"
+			"val": "99c1bb0af23e5834caf44ca63b1592d954a66a3851e406246b426ffe9eebb69d"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:88146328"
@@ -52,7 +52,7 @@
 			],
 			"ext": {
 				"dk-oioubl-address-format": "StructuredID",
-				"dk-oioubl-address-id": "5790000000001"
+				"dk-oioubl-address-id": "5798009811578"
 			}
 		},
 		"customer": {

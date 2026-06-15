@@ -18,7 +18,7 @@
         <cbc:Name>Eksempel A/S</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:ID>5790000000001</cbc:ID>
+        <cbc:ID schemeAgencyID="9" schemeID="GLN">5798009811578</cbc:ID>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredID</cbc:AddressFormatCode>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
