@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "874d67da1aab47a9cded71a48ad796d2bf91d72a2fffa0b7262dfa4d3fb4e775"
+			"val": "bf6d1d2a9cad73d5e06c9852af9b5ced024a69bfb0c44cde844ffc6ffbf4c2a1"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::0184:76543216"
+		"to": "iso6523-actorid-upis::0184:88146328"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -18,7 +18,7 @@
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"code": "FINAL-DD01",
+		"code": "ADDR-1000",
 		"issue_date": "2026-05-29",
 		"currency": "DKK",
 		"tax": {
@@ -28,7 +28,7 @@
 			}
 		},
 		"supplier": {
-			"name": "Eksempel Software ApS",
+			"name": "Eksempel A/S",
 			"tax_id": {
 				"country": "DK",
 				"code": "12345674"
@@ -42,13 +42,6 @@
 					}
 				}
 			],
-			"people": [
-				{
-					"name": {
-						"given": "Jens Hansen"
-					}
-				}
-			],
 			"endpoints": [
 				{
 					"uri": "iso6523-actorid-upis::0184:12345674"
@@ -56,27 +49,25 @@
 			],
 			"addresses": [
 				{
-					"num": "12",
-					"street": "Kongevejen",
-					"locality": "København",
-					"code": "2100",
+					"region": "Hovedstaden",
 					"country": "DK"
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
+				"dk-oioubl-address-district": "Nørrebro",
+				"dk-oioubl-address-format": "StructuredRegion"
 			}
 		},
 		"customer": {
-			"name": "Modtager Handel A/S",
+			"name": "Kunde ApS",
 			"tax_id": {
 				"country": "DK",
-				"code": "76543216"
+				"code": "88146328"
 			},
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "DK76543216",
+					"code": "DK88146328",
 					"ext": {
 						"iso-scheme-id": "DK:CVR"
 					}
@@ -85,7 +76,7 @@
 			"people": [
 				{
 					"name": {
-						"given": "Mette Sørensen"
+						"given": "Anders Jensen"
 					},
 					"identities": [
 						{
@@ -96,44 +87,41 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:76543216"
+					"uri": "iso6523-actorid-upis::0184:88146328"
 				}
 			],
 			"addresses": [
 				{
-					"num": "45",
-					"street": "Vestergade",
+					"num": "5",
+					"street": "Bygaden",
 					"locality": "Aarhus",
 					"code": "8000",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "2",
+				"quantity": "1",
 				"item": {
-					"name": "Konsulent timer",
-					"price": "1000.00",
-					"unit": "h"
+					"name": "Produkt",
+					"price": "10000.00",
+					"unit": "one"
 				},
-				"sum": "2000.00",
+				"sum": "10000.00",
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%",
+						"percent": "25.0%",
 						"ext": {
 							"dk-oioubl-tax-category": "StandardRated",
 							"untdid-tax-category": "S"
 						}
 					}
 				],
-				"total": "2000.00"
+				"total": "10000.00"
 			}
 		],
 		"ordering": {
@@ -143,23 +131,9 @@
 				}
 			]
 		},
-		"payment": {
-			"terms": {
-				"notes": "Trækkes automatisk"
-			},
-			"instructions": {
-				"key": "direct-debit",
-				"direct_debit": {
-					"ref": "MANDATE-2026-001"
-				},
-				"ext": {
-					"untdid-payment-means": "49"
-				}
-			}
-		},
 		"totals": {
-			"sum": "2000.00",
-			"total": "2000.00",
+			"sum": "10000.00",
+			"total": "10000.00",
 			"taxes": {
 				"categories": [
 					{
@@ -171,19 +145,19 @@
 									"dk-oioubl-tax-category": "StandardRated",
 									"untdid-tax-category": "S"
 								},
-								"base": "2000.00",
-								"percent": "25%",
-								"amount": "500.00"
+								"base": "10000.00",
+								"percent": "25.0%",
+								"amount": "2500.00"
 							}
 						],
-						"amount": "500.00"
+						"amount": "2500.00"
 					}
 				],
-				"sum": "500.00"
+				"sum": "2500.00"
 			},
-			"tax": "500.00",
-			"total_with_tax": "2500.00",
-			"payable": "2500.00"
+			"tax": "2500.00",
+			"total_with_tax": "12500.00",
+			"payable": "12500.00"
 		}
 	}
 }

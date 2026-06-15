@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6b496f5ecb4b6a6dfdf4b1eb2d0f1c324fb5f3fc6403f7630e0952291fd9585c"
+			"val": "58733cccebd0c3b67fe8d1556b9c206560577ae8fcc38ed5d8facb53cb51fd03"
 		},
 		"from": "iso6523-actorid-upis::0184:76543216",
 		"to": "iso6523-actorid-upis::0184:12345674"
@@ -48,7 +48,10 @@
 					"code": "2100",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK"
+			}
 		},
 		"customer": {
 			"name": "Modtager Handel A/S",
@@ -78,7 +81,10 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK"
+			}
 		},
 		"lines": [
 			{

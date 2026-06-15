@@ -84,6 +84,9 @@ func goblParty(party *Party, o *options) *org.Party {
 		p.Addresses = []*org.Address{
 			parseAddress(party.PostalAddress),
 		}
+		if o.context.Is(ContextOIOUBL21) {
+			applyOIOUBL21AddressFormatParse(party.PostalAddress, p)
+		}
 	}
 
 	if party.Contact != nil {
@@ -158,6 +161,11 @@ func parseAddress(address *PostalAddress) *org.Address {
 	if address.CountrySubentity != nil {
 		addr.Region = cleanString(*address.CountrySubentity)
 	}
+	// A StructuredRegion address carries its region in cbc:Region rather than
+	// cbc:CountrySubentity (F-LIB040). No other profile emits cbc:Region.
+	if address.Region != nil && addr.Region == "" {
+		addr.Region = cleanString(*address.Region)
+	}
 	if address.BuildingNumber != nil {
 		addr.Number = cleanString(*address.BuildingNumber)
 	}
@@ -188,6 +196,43 @@ func parseAddress(address *PostalAddress) *org.Address {
 		}
 	}
 	return addr
+}
+
+// applyOIOUBL21AddressFormatParse restores the OIOUBL address format declared on
+// the wire (cbc:AddressFormatCode) to the GOBL party extensions the emit side
+// reads (see applyOIOUBL21AddressFormat), so the format round-trips. StructuredLax
+// is the default form newAddress emits for an address without a declared format,
+// so it carries no extension. The StructuredID identifier (cbc:ID) and the
+// StructuredRegion district (cbc:District) are not modelled by org.Address and are
+// read back onto the party extension.
+func applyOIOUBL21AddressFormatParse(address *PostalAddress, p *org.Party) {
+	if address == nil || address.AddressFormatCode == nil {
+		return
+	}
+	format := address.AddressFormatCode.Value
+	if format == "" || format == oioubl21AddressStructuredLax {
+		return
+	}
+	exts := cbc.CodeMap{oioubl21AddressFormatKey: cbc.Code(format)}
+	switch format {
+	case oioubl21AddressStructuredID:
+		// F-LIB038: the identifier lives in cbc:ID, which GOBL does not model on
+		// the address.
+		if address.ID != nil {
+			if id := cleanString(address.ID.Value); id != "" {
+				exts[oioubl21AddressIDKey] = cbc.Code(id)
+			}
+		}
+	case oioubl21AddressStructuredRegion:
+		// F-LIB040: cbc:District is not modelled by GOBL; the region is parsed
+		// into org.Address.Region by parseAddress.
+		if address.District != nil {
+			if d := cleanString(*address.District); d != "" {
+				exts[oioubl21AddressDistrictKey] = cbc.Code(d)
+			}
+		}
+	}
+	p.Ext = tax.ExtensionsOf(exts)
 }
 
 func handleLegalEntityIdentity(party *Party, p *org.Party) {

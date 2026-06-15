@@ -497,6 +497,7 @@ const (
 	oioubl21AddressIDKey       cbc.Key = "dk-oioubl-address-id"
 	oioubl21AddressDistrictKey cbc.Key = "dk-oioubl-address-district"
 
+	oioubl21AddressStructuredLax    = "StructuredLax"
 	oioubl21AddressUnstructured     = "Unstructured"
 	oioubl21AddressStructuredID     = "StructuredID"
 	oioubl21AddressStructuredRegion = "StructuredRegion"

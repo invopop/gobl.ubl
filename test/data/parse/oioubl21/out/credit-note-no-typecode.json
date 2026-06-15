@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "91f50c043b3cfc8aa0d488d61cb5b87d22f04ce31eb191c2a980e2f08461620b"
+			"val": "0a91bc01b51f92fb2ad8c666ca34ec8d363784b84fbbc83fc14cefdb535870de"
 		},
 		"from": "iso6523-actorid-upis::0088:5790000436101",
 		"to": "iso6523-actorid-upis::0088:5790000436057"
@@ -73,7 +73,10 @@
 				{
 					"addr": "billing@example.com"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK"
+			}
 		},
 		"customer": {
 			"name": "Sample Consumer",
@@ -120,7 +123,10 @@
 				{
 					"addr": "email@sample.com"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK"
+			}
 		},
 		"lines": [
 			{

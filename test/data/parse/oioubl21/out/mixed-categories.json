@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "159bcf41318a6fc92c107e20e688e28d5f8b422dbf1b976c9958d7a06bcbeffe"
+			"val": "7212712346258fcf49a1b1163597fcc3781879555884095e6754358e79e722a6"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:76543216"
@@ -67,7 +67,10 @@
 				{
 					"addr": "billing@eksempel-software.dk"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK"
+			}
 		},
 		"customer": {
 			"name": "Modtager Handel A/S",
@@ -114,7 +117,10 @@
 				{
 					"addr": "ap@modtager-handel.dk"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK"
+			}
 		},
 		"lines": [
 			{
