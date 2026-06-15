@@ -13,8 +13,7 @@ import (
 
 func TestParsePayment(t *testing.T) {
 	t.Run("general example", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -45,8 +44,7 @@ func TestParsePayment(t *testing.T) {
 
 func TestParsePaymentPayee(t *testing.T) {
 	t.Run("payee with two identities", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -64,8 +62,7 @@ func TestParsePaymentPayee(t *testing.T) {
 	})
 
 	t.Run("payee with one identity", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example5.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example5.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -85,8 +82,7 @@ func TestParsePaymentPayee(t *testing.T) {
 
 func TestParsePaymentInstructions(t *testing.T) {
 	t.Run("instructions with credit transfer", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -104,8 +100,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 	})
 
 	t.Run("instructions with direct debit", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example5.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example5.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -122,8 +117,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 	})
 
 	t.Run("instructions with notes", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example7.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example7.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -140,8 +134,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 	})
 
 	t.Run("instructions with only IBAN", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example8.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example8.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -160,8 +153,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 
 func TestParsePaymentTerms(t *testing.T) {
 	t.Run("terms with notes", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -174,8 +166,7 @@ func TestParsePaymentTerms(t *testing.T) {
 	})
 
 	t.Run("only due date present", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example10.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example10.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -193,8 +184,7 @@ func TestParsePaymentTerms(t *testing.T) {
 
 func TestParsePaymentAdvances(t *testing.T) {
 	t.Run("totals with prepaid amount", func(t *testing.T) {
-		e, err := testParseInvoice("en16931/ubl-example2.xml")
-		require.NoError(t, err)
+		e := parseXMLInvoice(t, "en16931/ubl-example2.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -210,15 +200,13 @@ func TestParsePaymentAdvances(t *testing.T) {
 func TestPaymentRoundTrip(t *testing.T) {
 	t.Run("account number round trip", func(t *testing.T) {
 		// Load the test envelope with account number (not IBAN)
-		env, err := loadTestEnvelope("invoice-account-number.json")
-		require.NoError(t, err)
+		env := loadTestEnvelope(t, "invoice-account-number.json")
 
 		originalInv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
 		// Convert to UBL
-		doc, err := testInvoiceFrom("invoice-account-number.json")
-		require.NoError(t, err)
+		doc := testInvoiceFrom(t, "invoice-account-number.json")
 
 		// Convert back to GOBL
 		resultEnv, err := doc.Convert()

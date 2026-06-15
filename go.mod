@@ -18,7 +18,6 @@ require (
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
 	github.com/invopop/xmldsig v0.14.0
-	github.com/lestrrat-go/libxml2 v0.0.0-20240905100032-c934e3fcb9d3
 	google.golang.org/grpc v1.77.0
 )
 

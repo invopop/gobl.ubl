@@ -203,7 +203,9 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 		},
 	}
 	if ctc.ID != nil {
-		line.Taxes[0].Ext = line.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(*ctc.ID))
+		line.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
+			untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
+		})
 
 		// Try to get exemption code from TaxTotal
 		key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID, ctc.Percent)
