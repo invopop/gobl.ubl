@@ -740,6 +740,24 @@ func applyOIOUBL21Party(p *Party) {
 	applyOIOUBL21PartyIdentifications(p)
 }
 
+// applyOIOUBL21TaxRepParty rewrites a cac:TaxRepresentativeParty into OIOUBL 2.1
+// form. OIOUBL allows only PartyName (F-LIB353), PartyTaxScheme (F-LIB371/372)
+// and a PostalAddress carrying an AddressFormatCode (F-LIB354) on this party; it
+// forbids EndpointID (F-LIB357), PartyIdentification (F-LIB358), PartyLegalEntity
+// (F-LIB361) and Contact (F-LIB362), all of which the full supplier party (reused
+// as the tax representative) carries. Drop the forbidden elements, then run the
+// standard OIOUBL party pass for the scheme/prefix/address-format normalization.
+func applyOIOUBL21TaxRepParty(p *Party) {
+	if p == nil {
+		return
+	}
+	p.EndpointID = nil
+	p.PartyIdentification = nil
+	p.PartyLegalEntity = nil
+	p.Contact = nil
+	applyOIOUBL21Party(p)
+}
+
 // applyOIOUBL21PartyIdentifications normalises each PartyIdentification/ID scheme
 // to the symbolic OIOUBL PartyID codelist (F-LIB183) — a numeric ICD maps to its
 // symbolic scheme, anything unmappable becomes ZZZ — and DK-prefixes DK:CVR/DK:SE
