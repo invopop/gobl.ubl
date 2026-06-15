@@ -158,7 +158,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		// BR-KSA-70
 		out.TaxCurrencyCode = string(inv.RegimeDef().Currency)
 		// BR-KSA-06
-		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceTypeTransactions).String()
+		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceType).String()
 		out.InvoiceTypeCode.Name = &invType
 		// ZATCA treats all documents as invoices
 		docType = bill.InvoiceTypeStandard

@@ -124,7 +124,7 @@ func (ui *Invoice) applyContextTaxExtensions(out *bill.Invoice, o *options) {
 	}
 
 	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {
-		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceTypeTransactions, cbc.Code(*ui.InvoiceTypeCode.Name))
+		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceType, cbc.Code(*ui.InvoiceTypeCode.Name))
 	}
 }
 
