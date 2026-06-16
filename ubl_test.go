@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
+	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/eu/en16931"
-	"github.com/invopop/gobl/addons/fr/ctc"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/note"
@@ -86,14 +86,14 @@ func TestConvertAutomaticallyAddsRequiredAddons(t *testing.T) {
 
 		// Drop the ctc addon; keep the en16931 one. SetAddons replaces the list.
 		inv.SetAddons(en16931.V2017)
-		require.NotContains(t, inv.GetAddons(), ctc.Flow2V1,
+		require.NotContains(t, inv.GetAddons(), flow2.V1,
 			"precondition: ctc addon must be absent before Convert runs")
 
 		_, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
 		require.NoError(t, err)
 
 		// After Convert the addon should have been appended in-place.
-		assert.Contains(t, inv.GetAddons(), ctc.Flow2V1)
+		assert.Contains(t, inv.GetAddons(), flow2.V1)
 		// And the pre-existing addon must be preserved.
 		assert.Contains(t, inv.GetAddons(), en16931.V2017)
 	})
@@ -121,7 +121,7 @@ func TestConvertSurfacesValidationFaultsAfterAutoAddon(t *testing.T) {
 	// instead of a flattened string.
 
 	// Minimal DE invoice doesn't satisfy the France CTC rule set. Convert
-	// with the France CIUS context to force ensureAddons to add ctc.Flow2V1
+	// with the France CIUS context to force ensureAddons to add flow2.V1
 	// and then fail validation.
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 
@@ -149,10 +149,12 @@ func TestConvertSurfacesValidationFaultsAfterAutoAddon(t *testing.T) {
 	assert.NotEmpty(t, first.Message(), "fault must carry a message")
 	assert.NotEmpty(t, first.Paths(), "fault must carry at least one JSON path")
 
-	// The France CTC addon's "billing mode extension is required" rule
-	// must be among the reported faults.
-	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-08"),
-		"expected billing-mode-required fault; got: %s", err)
+	// The France CTC addon's "supplier inboxes are required for French B2B
+	// invoices" rule must be among the reported faults. (The billing-mode rule
+	// is now auto-satisfied by the addon's normalization, so a structural rule
+	// the minimal invoice cannot satisfy is used instead.)
+	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-11"),
+		"expected supplier-inboxes-required fault; got: %s", err)
 }
 
 func TestConvertUnsupportedDocumentType(t *testing.T) {

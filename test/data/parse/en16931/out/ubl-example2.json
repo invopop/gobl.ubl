@@ -4,11 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f4615111b131781059f37d184159812d4514dcd8244e4be34ddde6f866005ca9"
+			"val": "a8111d5b3ddd689bc88e3f018cb0f6c8c5f49664e87bb811210071359e7134d8"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "NO",
 		"$addons": [
 			"eu-en16931-v2017"
 		],
@@ -38,8 +39,7 @@
 			"name": "Tax handling company AS",
 			"tax_id": {
 				"country": "NO",
-				"code": "967611265MVA",
-				"scheme": "VAT"
+				"code": "967611265"
 			},
 			"addresses": [
 				{
@@ -56,8 +56,7 @@
 			"name": "The Buyercompany",
 			"tax_id": {
 				"country": "NO",
-				"code": "987654321MVA",
-				"scheme": "VAT"
+				"code": "987654321"
 			},
 			"identities": [
 				{
@@ -379,8 +378,7 @@
 				"name": "Salescompany ltd.",
 				"tax_id": {
 					"country": "NO",
-					"code": "123456789MVA",
-					"scheme": "VAT"
+					"code": "123456789"
 				},
 				"identities": [
 					{

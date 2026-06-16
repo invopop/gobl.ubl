@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "66ff3d4a0eb25f9317848628369db511f788dfb72039bc9b9acaa1119bf84825"
+			"val": "9a859176b4b7400632a42a3805b0feada387215cd1a96760c6483ca0aa6aa72e"
 		}
 	},
 	"doc": {
@@ -34,6 +34,7 @@
 			],
 			"addresses": [
 				{
+					"num": "56A",
 					"street": "Busy Street",
 					"locality": "Farthing",
 					"region": "Heremouthshire",
@@ -68,6 +69,7 @@
 			],
 			"addresses": [
 				{
+					"num": "56A",
 					"street": "Avon Way",
 					"locality": "Bridgtow",
 					"region": "Avon",
