@@ -71,7 +71,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
-		doc, err := ubl.ConvertInvoice(env, opts...)
+		doc, err := ubl.Convert(env, opts...)
 		if err != nil {
 			return fmt.Errorf("building UBL document: %w", err)
 		}
@@ -88,12 +88,16 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}
 
-		inv, ok := doc.(*ubl.Invoice)
+		// Every supported UBL document (Invoice, ApplicationResponse, Reminder)
+		// converts back to a GOBL envelope through this method.
+		conv, ok := doc.(interface {
+			Convert() (*gobl.Envelope, error)
+		})
 		if !ok {
 			return fmt.Errorf("building GOBL envelope: %w", ubl.ErrUnsupportedDocumentType)
 		}
 
-		env, err := inv.Convert()
+		env, err := conv.Convert()
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}

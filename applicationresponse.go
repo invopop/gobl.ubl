@@ -225,8 +225,10 @@ func applyOIOUBL21DocumentResponse(dr *DocumentResponse, line *bill.StatusLine) 
 	}
 }
 
-// responseReferenceID returns a 1-based reference for the Response, as the
-// schematron requires a non-empty ReferenceID (F-APR016).
+// responseReferenceID returns the 1-based line reference for the Response. The
+// StatusLine index is 1-based once calculated; an unset (zero) index falls back
+// to 1 so the emitted ReferenceID is always a valid line pointer rather than the
+// meaningless "0". The schematron also requires it to be non-empty (F-APR016).
 func responseReferenceID(index int) int {
 	if index < 1 {
 		return 1
