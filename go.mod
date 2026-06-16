@@ -13,8 +13,8 @@ require (
 require (
 	cloud.google.com/go v0.118.0
 	github.com/invopop/gobl.dk.oioubl v0.0.0-20260616144006-86071bcc7a52
-	github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73
-	github.com/invopop/gobl.sa.zatca v0.0.1
+	github.com/invopop/gobl.fr.ctc v0.0.3
+	github.com/invopop/gobl.sa.zatca v0.0.2
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
 	github.com/invopop/xmldsig v0.14.0
@@ -38,7 +38,7 @@ require (
 	github.com/pb33f/ordered-map/v2 v2.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/russellhaering/goxmldsig v1.5.0 // indirect
+	github.com/russellhaering/goxmldsig v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.6 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/crypto v0.47.0 // indirect

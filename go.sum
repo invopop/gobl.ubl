@@ -29,10 +29,10 @@ github.com/invopop/gobl v0.500.1-0.20260611093239-b095308b8267 h1:JESDuqkaOexIBJ
 github.com/invopop/gobl v0.500.1-0.20260611093239-b095308b8267/go.mod h1:EGDHHuPbF8JxRfct0q/s9t7ei2gjkOwjH3SytjB3aS0=
 github.com/invopop/gobl.dk.oioubl v0.0.0-20260616144006-86071bcc7a52 h1:mbS8Uyp0h5vy/PBT+UHboslQmatkLu06xGiNoBX8/i4=
 github.com/invopop/gobl.dk.oioubl v0.0.0-20260616144006-86071bcc7a52/go.mod h1:tODJD+IZkk4Ds8PR8XEpe3umiyiG2NUN0+sBRnXnE0g=
-github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73 h1:lDYca5PCe2EMMBrBVHpiW9YaY9mv3tksWpzOxQeIihY=
-github.com/invopop/gobl.fr.ctc v0.0.3-0.20260609134133-16fd5925da73/go.mod h1:9eowIMNRW8pU7lwoC8pz6I3iCvclr2eXrNDro8sGNMw=
-github.com/invopop/gobl.sa.zatca v0.0.1 h1:P4d6IDPId6CU9zA0c1YaXzFYsNq2hgV5kvNRNSI2sVE=
-github.com/invopop/gobl.sa.zatca v0.0.1/go.mod h1:HTTAUUQoJgpvqbsd2wvLxbH6aAeypHBfuNadoeafQK8=
+github.com/invopop/gobl.fr.ctc v0.0.3 h1:v4IxMfKr1Bl1CQ4IrBPMIMch5g8EI/unKya5sg4v0ec=
+github.com/invopop/gobl.fr.ctc v0.0.3/go.mod h1:9eowIMNRW8pU7lwoC8pz6I3iCvclr2eXrNDro8sGNMw=
+github.com/invopop/gobl.sa.zatca v0.0.2 h1:qU2Y0LP+4mjvZkuG1TOUp/Zs0XxRAzkzQFHy3WOVFEU=
+github.com/invopop/gobl.sa.zatca v0.0.2/go.mod h1:tmLCoaKb4X7sZ2zRU8LalA1sgxM2kQv/uqMzZslhE6A=
 github.com/invopop/jsonschema v0.14.0 h1:MHQqLhvpNUZfw+hM3AZDYK7jxO8FZoQeQM77g8iyZjg=
 github.com/invopop/jsonschema v0.14.0/go.mod h1:ygm6C2EaVNMBDPpaPlnOA2pFAxBnxGjFlMZABxm9n2I=
 github.com/invopop/validation v0.8.0 h1:e5hXHGnONHImgJdonIpNbctg1hlWy1ncaHoVIQ0JWuw=
@@ -69,8 +69,8 @@ github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRI
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.14.1 h1:UQB4HGPB6osV0SQTLymcB4TgvyWu6ZyliaW0tI/otEQ=
 github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7so1lCWt35ZSgc=
-github.com/russellhaering/goxmldsig v1.5.0 h1:AU2UkkYIUOTyZRbe08XMThaOCelArgvNfYapcmSjBNw=
-github.com/russellhaering/goxmldsig v1.5.0/go.mod h1:x98CjQNFJcWfMxeOrMnMKg70lvDP6tE0nTaeUnjXDmk=
+github.com/russellhaering/goxmldsig v1.6.0 h1:8fdWXEPh2k/NZNQBPFNoVfS3JmzS4ZprY/sAOpKQLks=
+github.com/russellhaering/goxmldsig v1.6.0/go.mod h1:TrnaquDcYxWXfJrOjeMBTX4mLBeYAqaHEyUeWPxZlBM=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
 github.com/spf13/cobra v1.9.1 h1:CXSaggrXdbHK9CF+8ywj8Amf7PBRmPCOJugH954Nnlo=
 github.com/spf13/cobra v1.9.1/go.mod h1:nDyEzZ8ogv936Cinf6g1RU9MRY64Ir93oCnqb9wxYW0=
