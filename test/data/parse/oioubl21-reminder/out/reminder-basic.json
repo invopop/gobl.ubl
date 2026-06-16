@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e3864dd76d5e2681ecbf2314b72ab7ee64f13710fe308b524513f6de6b564b31"
+			"val": "53165a08fbbc237e8c19440d3e7ae9580a95ef23299db368a23c41c0672b7c53"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:88146328"
@@ -84,7 +84,16 @@
 				"amount": "1250.00"
 			}
 		],
-		"methods": null,
+		"methods": [
+			{
+				"key": "credit-transfer",
+				"amount": "1250.00",
+				"credit_transfer": {
+					"iban": "DK5000400440116243",
+					"bic": "DABADKKK"
+				}
+			}
+		],
 		"total": "1250.00"
 	}
 }

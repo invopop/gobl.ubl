@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/pay"
 )
 
 // NamespaceUBLReminder is the UBL 2.1 Reminder root namespace.
@@ -39,6 +40,7 @@ type Reminder struct {
 	AccountingSupplierParty SupplierParty  `xml:"cac:AccountingSupplierParty"`
 	AccountingCustomerParty CustomerParty  `xml:"cac:AccountingCustomerParty"`
 	PayeeParty              *Party         `xml:"cac:PayeeParty,omitempty"`
+	PaymentMeans            []PaymentMeans `xml:"cac:PaymentMeans,omitempty"`
 	TaxTotal                []TaxTotal     `xml:"cac:TaxTotal,omitempty"`
 	LegalMonetaryTotal      MonetaryTotal  `xml:"cac:LegalMonetaryTotal"`
 	ReminderLine            []ReminderLine `xml:"cac:ReminderLine"`
@@ -93,6 +95,7 @@ func ublReminder(pmt *bill.Payment, o *options) *Reminder {
 
 	out.addReminderLines(pmt, currency)
 	out.addReminderTotals(pmt, currency)
+	out.addReminderPaymentMeans(pmt, o.context)
 
 	if o.context.Is(ContextOIOUBL21) {
 		applyOIOUBL21Reminder(out, pmt)
@@ -141,6 +144,29 @@ func (rem *Reminder) addReminderTotals(pmt *bill.Payment, currency string) {
 	}
 }
 
+// addReminderPaymentMeans emits cac:PaymentMeans for the reminder's payment
+// methods. First cut: credit-transfer (the dunning norm — "pay the outstanding
+// amount to this account"); other means keys are not emitted yet.
+func (rem *Reminder) addReminderPaymentMeans(pmt *bill.Payment, ctx Context) {
+	for _, m := range pmt.Methods {
+		if m == nil || !m.Key.HasPrefix(pay.MeansKeyCreditTransfer) {
+			continue
+		}
+		code := "30"
+		if ctx.Is(ContextOIOUBL21) {
+			code = "31"
+		}
+		pm := PaymentMeans{PaymentMeansCode: IDType{Value: code}}
+		if m.CreditTransfer != nil {
+			pm.PayeeFinancialAccount = newCreditTransferAccount(m.CreditTransfer, ctx, code)
+			if ctx.Is(ContextOIOUBL21) && m.CreditTransfer.IBAN != "" {
+				pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
+			}
+		}
+		rem.PaymentMeans = append(rem.PaymentMeans, pm)
+	}
+}
+
 // reminderDocumentReference maps a paid document to a UBL Reference.
 func reminderDocumentReference(doc *org.DocumentRef) *Reference {
 	ref := &Reference{
@@ -171,6 +197,10 @@ func applyOIOUBL21Reminder(out *Reminder, pmt *bill.Payment) {
 	applyOIOUBL21Party(out.AccountingCustomerParty.Party)
 	if out.PayeeParty != nil {
 		applyOIOUBL21Party(out.PayeeParty)
+	}
+
+	for i := range out.PaymentMeans {
+		stampOIOUBL21PaymentChannel(&out.PaymentMeans[i])
 	}
 
 	if out.ProfileID != nil {

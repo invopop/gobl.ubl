@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 	"github.com/invopop/gobl/uuid"
 )
@@ -71,6 +72,12 @@ func (rem *Reminder) goblPayment(o *options) (*bill.Payment, error) {
 		out.Lines = append(out.Lines, line)
 	}
 
+	for i := range rem.PaymentMeans {
+		if m := goblReminderMethod(&rem.PaymentMeans[i], o.context); m != nil {
+			out.Methods = append(out.Methods, m)
+		}
+	}
+
 	if o.context.Is(ContextOIOUBL21) {
 		applyOIOUBL21ReminderParse(out, rem)
 	}
@@ -102,6 +109,25 @@ func (rem *Reminder) goblPaymentLine(rl ReminderLine) (*bill.PaymentLine, error)
 	}
 
 	return line, nil
+}
+
+// goblReminderMethod reconstructs a payment Record from a cac:PaymentMeans.
+// First cut: credit-transfer only (the mirror of addReminderPaymentMeans). The
+// amount is left for Calculate to fill from the document total.
+func goblReminderMethod(pm *PaymentMeans, ctx Context) *pay.Record {
+	code := pm.PaymentMeansCode.Value
+	if ctx.Is(ContextOIOUBL21) && code == "31" {
+		code = "30"
+	}
+	key := goblPaymentMeansCode(code)
+	if !key.HasPrefix(pay.MeansKeyCreditTransfer) {
+		return nil
+	}
+	rec := &pay.Record{Key: key}
+	if pm.PayeeFinancialAccount != nil {
+		rec.CreditTransfer = goblCreditTransfer(pm)[0]
+	}
+	return rec
 }
 
 // applyOIOUBL21ReminderParse restores the reminder type and sequence onto the

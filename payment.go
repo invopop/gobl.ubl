@@ -147,13 +147,7 @@ const (
 func applyOIOUBL21PaymentMeans(out *Invoice) {
 	for i := range out.PaymentMeans {
 		pm := &out.PaymentMeans[i]
-		if pm.PaymentChannelCode != nil {
-			listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
-			pm.PaymentChannelCode.ListID = &listID
-			if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
-				pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
-			}
-		}
+		stampOIOUBL21PaymentChannel(pm)
 		if out.DueDate != "" && pm.PaymentDueDate == nil {
 			d := out.DueDate
 			pm.PaymentDueDate = &d
@@ -161,6 +155,21 @@ func applyOIOUBL21PaymentMeans(out *Invoice) {
 	}
 	if len(out.PaymentMeans) > 0 && out.DueDate != "" {
 		out.DueDate = ""
+	}
+}
+
+// stampOIOUBL21PaymentChannel stamps the paymentchannelcode-1.1 list ID and
+// strips the redundant FinancialInstitutionBranch from IBAN accounts (F-LIB295,
+// the BIC stays nested under FinancialInstitution/ID). The channel value itself
+// is set when the payment means is built.
+func stampOIOUBL21PaymentChannel(pm *PaymentMeans) {
+	if pm.PaymentChannelCode == nil {
+		return
+	}
+	listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
+	pm.PaymentChannelCode.ListID = &listID
+	if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
+		pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
 	}
 }
 
