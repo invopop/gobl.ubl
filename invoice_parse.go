@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"strings"
-
 	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
@@ -134,7 +132,7 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
-	out.Type = typeCodeParse(typeCode, o.context)
+	out.Type = typeCodeParse(typeCode)
 	if tags := tagCodeParse(typeCode, o.context); len(tags) != 0 {
 		out.SetTags(tags...)
 	}
@@ -249,19 +247,14 @@ func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice, o *options) {
 	out.Supplier = goblParty(ui.TaxRepresentativeParty, o)
 }
 
-// typeCodeParse maps UBL invoice type to GOBL equivalent.
+// typeCodeParse maps the UBL document type code (UNTDID 1001) to its GOBL
+// invoice type. The ZATCA transaction-type flags carried in typeCode.Name are
+// are mapped to tags by tagCodeParse.
 // Source: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
-func typeCodeParse(typeCode *IDType, ctx Context) cbc.Key {
+func typeCodeParse(typeCode *IDType) cbc.Key {
 	if typeCode == nil {
 		return bill.InvoiceTypeOther
 	}
-	if ctx.Is(ContextZATCA) && typeCode.Name != nil {
-		code := *typeCode.Name
-		if len(code) < 7 || code[0] != '0' || code[2] != '0' || code[3] != '0' || code[6] != '0' {
-			return bill.InvoiceTypeOther
-		}
-	}
-
 	if val, ok := invoiceTypeMap[typeCode.Value]; ok {
 		return val
 	}
@@ -276,21 +269,24 @@ func tagCodeParse(typeCode *IDType, ctx Context) []cbc.Key {
 	}
 
 	if ctx.Is(ContextZATCA) && typeCode.Name != nil {
-		transactionTypeCode := *typeCode.Name
-		if len(transactionTypeCode) < 7 || transactionTypeCode[0] != '0' {
-			return tags
-		}
-
-		if strings.HasPrefix(transactionTypeCode, "02") {
+		it := zatca.ParseInvoiceType(cbc.Code(*typeCode.Name))
+		if it.Simplified {
 			tags = append(tags, tax.TagSimplified)
 		}
-
-		if transactionTypeCode[4] == '1' {
+		if it.ThirdParty {
+			tags = append(tags, zatca.TagThirdParty)
+		}
+		if it.Nominal {
+			tags = append(tags, zatca.TagNominal)
+		}
+		if it.Export {
 			tags = append(tags, tax.TagExport)
 		}
-
-		if transactionTypeCode[5] == '1' {
+		if it.Summary {
 			tags = append(tags, zatca.TagSummary)
+		}
+		if it.SelfBilled {
+			tags = append(tags, tax.TagSelfBilled)
 		}
 
 	} else {
