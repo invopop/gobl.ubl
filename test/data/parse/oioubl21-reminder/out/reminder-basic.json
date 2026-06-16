@@ -1,0 +1,90 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "e3864dd76d5e2681ecbf2314b72ab7ee64f13710fe308b524513f6de6b564b31"
+		},
+		"from": "iso6523-actorid-upis::0184:12345674",
+		"to": "iso6523-actorid-upis::0184:88146328"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/payment",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "request",
+		"code": "2026-R-1000",
+		"issue_date": "2026-01-15",
+		"currency": "DKK",
+		"ext": {
+			"dk-oioubl-reminder-sequence": "1",
+			"dk-oioubl-reminder-type": "Reminder"
+		},
+		"supplier": {
+			"name": "Eksempel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1",
+					"street": "Hovedgaden",
+					"locality": "København",
+					"code": "1000",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Kunde ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "88146328"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Anders Jensen"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:88146328"
+				}
+			],
+			"addresses": [
+				{
+					"num": "5",
+					"street": "Bygaden",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"document": {
+					"issue_date": "2025-12-01",
+					"code": "2025-1000"
+				},
+				"amount": "1250.00"
+			}
+		],
+		"methods": null,
+		"total": "1250.00"
+	}
+}

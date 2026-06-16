@@ -1,0 +1,116 @@
+package ubl
+
+import (
+	"github.com/invopop/gobl"
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
+	"github.com/invopop/gobl/uuid"
+)
+
+// Convert turns a parsed UBL Reminder into a GOBL envelope wrapping a
+// bill.Payment of type "request".
+func (rem *Reminder) Convert() (*gobl.Envelope, error) {
+	o := new(options)
+	profileID := ""
+	if rem.ProfileID != nil {
+		profileID = rem.ProfileID.Value
+	}
+	ctx := FindContext(rem.CustomizationID, profileID)
+	if ctx == nil {
+		ctx = FindContext(rem.CustomizationID, "")
+	}
+	if ctx != nil {
+		o.context = *ctx
+	}
+
+	pmt, err := rem.goblPayment(o)
+	if err != nil {
+		return nil, err
+	}
+
+	env := gobl.NewEnvelope()
+	if err := env.Insert(pmt); err != nil {
+		return nil, err
+	}
+	return env, nil
+}
+
+func (rem *Reminder) goblPayment(o *options) (*bill.Payment, error) {
+	out := &bill.Payment{
+		Addons:   tax.Addons{List: o.context.Addons},
+		Type:     bill.PaymentTypeRequest,
+		Code:     cbc.Code(rem.ID),
+		Currency: currency.Code(rem.DocumentCurrencyCode),
+		Supplier: goblParty(rem.AccountingSupplierParty.Party, o),
+		Customer: goblParty(rem.AccountingCustomerParty.Party, o),
+	}
+	if rem.PayeeParty != nil {
+		out.Payee = goblParty(rem.PayeeParty, o)
+	}
+
+	issueDate, err := parseDate(rem.IssueDate)
+	if err != nil {
+		return nil, err
+	}
+	out.IssueDate = issueDate
+
+	for _, n := range rem.Note {
+		out.Notes = append(out.Notes, &org.Note{Text: n})
+	}
+
+	for _, rl := range rem.ReminderLine {
+		line, err := rem.goblPaymentLine(rl)
+		if err != nil {
+			return nil, err
+		}
+		out.Lines = append(out.Lines, line)
+	}
+
+	if o.context.Is(ContextOIOUBL21) {
+		applyOIOUBL21ReminderParse(out, rem)
+	}
+
+	return out, nil
+}
+
+func (rem *Reminder) goblPaymentLine(rl ReminderLine) (*bill.PaymentLine, error) {
+	amount, err := num.AmountFromString(normalizeNumericString(rl.DebitLineAmount.Value))
+	if err != nil {
+		return nil, err
+	}
+	line := &bill.PaymentLine{Amount: amount}
+
+	if br := rl.BillingReference; br != nil && br.InvoiceDocumentReference != nil {
+		ref := br.InvoiceDocumentReference
+		doc := &org.DocumentRef{Code: cbc.Code(ref.ID.Value)}
+		if ref.UUID != "" {
+			doc.UUID = uuid.UUID(ref.UUID)
+		}
+		if ref.IssueDate != "" {
+			d, err := parseDate(ref.IssueDate)
+			if err != nil {
+				return nil, err
+			}
+			doc.IssueDate = &d
+		}
+		line.Document = doc
+	}
+
+	return line, nil
+}
+
+// applyOIOUBL21ReminderParse restores the reminder type and sequence onto the
+// payment extensions the emit side reads, so they round-trip.
+func applyOIOUBL21ReminderParse(pmt *bill.Payment, rem *Reminder) {
+	if rem.ReminderTypeCode != nil && rem.ReminderTypeCode.Value != "" {
+		pmt.Ext = pmt.Ext.Set(oioubl.ExtKeyReminderType, cbc.Code(rem.ReminderTypeCode.Value))
+	}
+	if rem.ReminderSequenceNumeric != "" {
+		pmt.Ext = pmt.Ext.Set(oioubl.ExtKeyReminderSequence, cbc.Code(rem.ReminderSequenceNumeric))
+	}
+}

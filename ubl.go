@@ -70,14 +70,17 @@ func Parse(data []byte) (any, error) {
 
 	case NamespaceUBLApplicationResponse:
 		ar := new(ApplicationResponse)
-		if err := xmlctx.Unmarshal(data, ar, xmlctx.WithNamespaces(map[string]string{
-			"":    ns,
-			"cbc": NamespaceCBC,
-			"cac": NamespaceCAC,
-		})); err != nil {
+		if err := xmlctx.Unmarshal(data, ar, xmlctx.WithNamespaces(cbcCacNamespaces(ns))); err != nil {
 			return nil, err
 		}
 		return ar, nil
+
+	case NamespaceUBLReminder:
+		rem := new(Reminder)
+		if err := xmlctx.Unmarshal(data, rem, xmlctx.WithNamespaces(cbcCacNamespaces(ns))); err != nil {
+			return nil, err
+		}
+		return rem, nil
 
 	// Future document types can be added here
 	// case NamespaceUBLOrder:
@@ -130,6 +133,13 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		// shape). Correctness is gated by the addon rules at envelope validation
 		// and by schematron downstream.
 		return ublApplicationResponse(doc, o), nil
+	case *bill.Payment:
+		// A payment request maps to the OIOUBL Reminder (Rykker). Add any missing
+		// addons so the reminder-type/sequence rules surface, then convert.
+		if err := ensureAddons(env, o.context.Addons); err != nil {
+			return nil, err
+		}
+		return ublReminder(doc, o), nil
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
@@ -170,6 +180,17 @@ func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 		return err
 	}
 	return env.Validate()
+}
+
+// cbcCacNamespaces returns the namespace prefix map for the simpler UBL
+// documents (ApplicationResponse, Reminder) that use only the cbc and cac
+// component namespaces alongside their root namespace.
+func cbcCacNamespaces(ns string) map[string]string {
+	return map[string]string{
+		"":    ns,
+		"cbc": NamespaceCBC,
+		"cac": NamespaceCAC,
+	}
 }
 
 func extractRootNamespace(data []byte) (string, error) {
