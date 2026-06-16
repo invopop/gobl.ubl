@@ -6,6 +6,7 @@ import (
 
 	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
@@ -145,26 +146,92 @@ func (rem *Reminder) addReminderTotals(pmt *bill.Payment, currency string) {
 }
 
 // addReminderPaymentMeans emits cac:PaymentMeans for the reminder's payment
-// methods. First cut: credit-transfer (the dunning norm — "pay the outstanding
-// amount to this account"); other means keys are not emitted yet.
+// methods: credit transfer (IBAN) and the Danish Giro/FIK channels. Other means
+// keys carry no OIOUBL payment channel and are not emitted.
 func (rem *Reminder) addReminderPaymentMeans(pmt *bill.Payment, ctx Context) {
 	for _, m := range pmt.Methods {
-		if m == nil || !m.Key.HasPrefix(pay.MeansKeyCreditTransfer) {
+		if m == nil {
 			continue
 		}
-		code := "30"
-		if ctx.Is(ContextOIOUBL21) {
-			code = "31"
+		if pm, ok := reminderPaymentMeans(m, ctx); ok {
+			rem.PaymentMeans = append(rem.PaymentMeans, pm)
 		}
-		pm := PaymentMeans{PaymentMeansCode: IDType{Value: code}}
-		if m.CreditTransfer != nil {
-			pm.PayeeFinancialAccount = newCreditTransferAccount(m.CreditTransfer, ctx, code)
-			if ctx.Is(ContextOIOUBL21) && m.CreditTransfer.IBAN != "" {
-				pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
-			}
-		}
-		rem.PaymentMeans = append(rem.PaymentMeans, pm)
 	}
+}
+
+// reminderPaymentMeans maps a payment Record to an OIOUBL PaymentMeans, or
+// reports false when the means has no OIOUBL channel.
+func reminderPaymentMeans(m *pay.Record, ctx Context) (PaymentMeans, bool) {
+	code := reminderMeansCode(m, ctx)
+	if code == "" {
+		return PaymentMeans{}, false
+	}
+	pm := PaymentMeans{PaymentMeansCode: IDType{Value: code}}
+	if ctx.Is(ContextOIOUBL21) {
+		// The Giro/FIK channel is precomputed in the dk-oioubl-payment-channel
+		// extension; a plain credit transfer takes the IBAN channel from the
+		// account. The kortart (dk-oioubl-payment-id) and payment number follow.
+		if ch := m.Ext.Get(oioubl.ExtKeyPaymentChannel).String(); ch != "" {
+			pm.PaymentChannelCode = &IDType{Value: ch}
+		} else if m.CreditTransfer != nil && m.CreditTransfer.IBAN != "" {
+			pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
+		}
+		applyOIOUBL21RecordPaymentID(&pm, m, code)
+	}
+	addRecordCreditTransferAccount(&pm, m, ctx, code)
+	return pm, true
+}
+
+// reminderMeansCode resolves the OIOUBL PaymentMeansCode for a record: an
+// explicit UNTDID means (Giro 50 / FIK 93) wins, otherwise a credit transfer
+// maps to 31 (OIOUBL) / 30 (generic). OIOUBL re-codes the 30 bank transfer to 31.
+func reminderMeansCode(m *pay.Record, ctx Context) string {
+	if code := m.Ext.Get(untdid.ExtKeyPaymentMeans).String(); code != "" {
+		if ctx.Is(ContextOIOUBL21) && code == "30" {
+			return "31"
+		}
+		return code
+	}
+	if m.Key.HasPrefix(pay.MeansKeyCreditTransfer) {
+		if ctx.Is(ContextOIOUBL21) {
+			return "31"
+		}
+		return "30"
+	}
+	return ""
+}
+
+// applyOIOUBL21RecordPaymentID sets the Giro (50) / FIK (93) cbc:PaymentID from
+// the dk-oioubl-payment-id kortart and the payment number (cbc:InstructionID)
+// from the record reference, mirroring the invoice path. FIK 73 forbids the
+// payment number (F-LIB275); the other kortart may carry it.
+func applyOIOUBL21RecordPaymentID(pm *PaymentMeans, m *pay.Record, code string) {
+	if code != "50" && code != "93" {
+		return
+	}
+	kortart := m.Ext.Get(oioubl.ExtKeyPaymentID).String()
+	if kortart == "" {
+		return
+	}
+	pm.PaymentID = &kortart
+	if oioubl21KortartAllowsInstructionID(kortart) && m.Ref != "" {
+		ref := m.Ref
+		pm.InstructionID = &ref
+	}
+}
+
+// addRecordCreditTransferAccount wires the credit-transfer account onto the
+// payment means. For OIOUBL FIK (93) the creditor account lives in
+// cac:CreditAccount/cbc:AccountID (F-LIB305) rather than PayeeFinancialAccount.
+func addRecordCreditTransferAccount(pm *PaymentMeans, m *pay.Record, ctx Context, code string) {
+	if m.CreditTransfer == nil {
+		return
+	}
+	if ctx.Is(ContextOIOUBL21) && code == "93" {
+		pm.CreditAccount = &CreditAccount{AccountID: m.CreditTransfer.Number}
+		return
+	}
+	pm.PayeeFinancialAccount = newCreditTransferAccount(m.CreditTransfer, ctx, code)
 }
 
 // reminderDocumentReference maps a paid document to a UBL Reference.
