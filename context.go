@@ -139,21 +139,30 @@ func WithContext(c Context) Option {
 	}
 }
 
-// When adding new contexts, remember to add them to both the exported
-// variable definitions below AND the contexts slice.
+// contexts holds every registered context, used for reverse lookups during
+// parsing. Each exported Context below registers itself via registerContext,
+// so the lookup table and the variables can never drift apart.
+var contexts []Context
+
+// registerContext records c for reverse lookups and returns it, letting an
+// exported context name itself and join the lookup table in one declaration.
+func registerContext(c Context) Context {
+	contexts = append(contexts, c)
+	return c
+}
 
 // ContextEN16931 is the default context for basic UBL documents.
-var ContextEN16931 = Context{
+var ContextEN16931 = registerContext(Context{
 	CustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:          []cbc.Key{en16931.V2017},
 	VESIDs: VESIDMapping{
 		Invoice:    "eu.cen.en16931:ubl:1.3.14-2",
 		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.15",
 	},
-}
+})
 
 // ContextPeppol defines the default Peppol context.
-var ContextPeppol = Context{
+var ContextPeppol = registerContext(Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{en16931.V2017},
@@ -161,10 +170,10 @@ var ContextPeppol = Context{
 		Invoice:    "eu.peppol.bis3:invoice:2025.5",
 		CreditNote: "eu.peppol.bis3:creditnote:2025.5",
 	},
-}
+})
 
 // ContextPeppolSelfBilled defines the Peppol self-billed context.
-var ContextPeppolSelfBilled = Context{
+var ContextPeppolSelfBilled = registerContext(Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
 	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
 	Addons:          []cbc.Key{en16931.V2017},
@@ -176,10 +185,10 @@ var ContextPeppolSelfBilled = Context{
 		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.3",
 		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.3",
 	},
-}
+})
 
 // ContextXRechnung defines the main context to use for XRechnung UBL documents.
-var ContextXRechnung = Context{
+var ContextXRechnung = registerContext(Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{xrechnung.V3},
@@ -187,10 +196,10 @@ var ContextXRechnung = Context{
 		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
 		CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",
 	},
-}
+})
 
 // ContextPeppolFranceCIUS defines the context for France UBL Invoice CIUS.
-var ContextPeppolFranceCIUS = Context{
+var ContextPeppolFranceCIUS = registerContext(Context{
 	CustomizationID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
 	ProfileID:             PeppolFranceProcessIDRegulated,
 	OutputCustomizationID: "urn:cen.eu:en16931:2017",
@@ -199,10 +208,10 @@ var ContextPeppolFranceCIUS = Context{
 		Invoice:    "fr.ctc:ubl-invoice:1.3",
 		CreditNote: "fr.ctc:ubl-creditnote:1.3",
 	},
-}
+})
 
 // ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
-var ContextPeppolFranceExtended = Context{
+var ContextPeppolFranceExtended = registerContext(Context{
 	CustomizationID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
 	ProfileID:             PeppolFranceProcessIDRegulated,
 	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
@@ -211,10 +220,10 @@ var ContextPeppolFranceExtended = Context{
 		Invoice:    "fr.ctc:ubl-invoice:1.3",
 		CreditNote: "fr.ctc:ubl-creditnote:1.3",
 	},
-}
+})
 
 // ContextZATCA defines the context for Saudi Arabia ZATCA Phase 2 e-invoicing.
-var ContextZATCA = Context{
+var ContextZATCA = registerContext(Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:zatca.gov.sa:e-invoicing:1.0",
 	ProfileID:       "reporting:1.0", // BT-23
 	Addons:          []cbc.Key{zatca.V1},
@@ -222,8 +231,4 @@ var ContextZATCA = Context{
 		Invoice:    "sa.zatca:ubl-invoice:2.3.8",
 		CreditNote: "sa.zatca:ubl-invoice:2.3.8",
 	},
-}
-
-// contexts is used internally for reverse lookups during parsing.
-// When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA}
+})
