@@ -314,7 +314,11 @@ func newCreditTransferAccount(ct *pay.CreditTransfer, ctx Context, paymentMeansC
 	}
 	if ct.BIC != "" {
 		branch := &Branch{ID: &ct.BIC}
-		if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "31" {
+		// IBAN-channel transfers (domestic 31, SEPA 58) nest the BIC under
+		// FinancialInstitution; the redundant branch ID is then stripped for the
+		// IBAN channel (F-LIB295), so without the nesting the BIC would be lost
+		// and the branch left empty.
+		if ctx.Is(ContextOIOUBL21) && (paymentMeansCode == "31" || paymentMeansCode == "58") {
 			branch.FinancialInstitution = &FinancialInstitution{
 				ID: &ct.BIC,
 			}

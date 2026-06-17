@@ -4,6 +4,7 @@ import (
 	"github.com/invopop/gobl"
 	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
@@ -111,10 +112,18 @@ func (rem *Reminder) goblPaymentLine(rl ReminderLine) (*bill.PaymentLine, error)
 	return line, nil
 }
 
-// goblReminderMethod reconstructs a payment Record from a cac:PaymentMeans.
-// First cut: credit-transfer only (the mirror of addReminderPaymentMeans). The
-// amount is left for Calculate to fill from the document total.
+// goblReminderMethod reconstructs a payment Record from a cac:PaymentMeans, the
+// mirror of addReminderPaymentMeans. The amount is left for Calculate to fill
+// from the document total.
 func goblReminderMethod(pm *PaymentMeans, ctx Context) *pay.Record {
+	channel := ""
+	if pm.PaymentChannelCode != nil {
+		channel = pm.PaymentChannelCode.Value
+	}
+	if ctx.Is(ContextOIOUBL21) && (channel == oioubl21PaymentChannelGiro || channel == oioubl21PaymentChannelFIK) {
+		return goblReminderGiroFIKMethod(pm, channel)
+	}
+
 	code := pm.PaymentMeansCode.Value
 	if ctx.Is(ContextOIOUBL21) && code == "31" {
 		code = "30"
@@ -125,6 +134,33 @@ func goblReminderMethod(pm *PaymentMeans, ctx Context) *pay.Record {
 	}
 	rec := &pay.Record{Key: key}
 	if pm.PayeeFinancialAccount != nil {
+		rec.CreditTransfer = goblCreditTransfer(pm)[0]
+	}
+	return rec
+}
+
+// goblReminderGiroFIKMethod reverses an OIOUBL Giro/FIK payment means. The OIOUBL
+// means code and channel are preserved on a generic "other" record, the kortart
+// and payment number are recovered from cbc:PaymentID / cbc:InstructionID, and
+// the FIK creditor account from cac:CreditAccount.
+func goblReminderGiroFIKMethod(pm *PaymentMeans, channel string) *pay.Record {
+	rec := &pay.Record{
+		Key: pay.MeansKeyOther,
+		Ext: tax.ExtensionsOf(cbc.CodeMap{
+			untdid.ExtKeyPaymentMeans:   cbc.Code(pm.PaymentMeansCode.Value),
+			oioubl.ExtKeyPaymentChannel: cbc.Code(channel),
+		}),
+	}
+	if pm.PaymentID != nil {
+		rec.Ext = rec.Ext.Set(oioubl.ExtKeyPaymentID, cbc.Code(*pm.PaymentID))
+	}
+	if pm.InstructionID != nil {
+		rec.Ref = cleanString(*pm.InstructionID)
+	}
+	switch {
+	case pm.CreditAccount != nil && pm.CreditAccount.AccountID != "":
+		rec.CreditTransfer = &pay.CreditTransfer{Number: pm.CreditAccount.AccountID}
+	case pm.PayeeFinancialAccount != nil:
 		rec.CreditTransfer = goblCreditTransfer(pm)[0]
 	}
 	return rec
