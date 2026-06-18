@@ -401,8 +401,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			},
 		}
 		if s := ch.Ext.Get(untdid.ExtKeyCharge).String(); s != "" {
-			e := s
-			ac.AllowanceChargeReasonCode = &e
+			ac.AllowanceChargeReasonCode = &s
 		}
 		if ch.Reason != "" {
 			ac.AllowanceChargeReason = &ch.Reason
@@ -428,8 +427,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			},
 		}
 		if s := d.Ext.Get(untdid.ExtKeyAllowance).String(); s != "" {
-			e := s
-			ac.AllowanceChargeReasonCode = &e
+			ac.AllowanceChargeReasonCode = &s
 		}
 		if d.Reason != "" {
 			ac.AllowanceChargeReason = &d.Reason

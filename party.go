@@ -40,9 +40,8 @@ type Party struct {
 
 // EndpointID represents an endpoint identifier
 type EndpointID struct {
-	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
-	SchemeID       string  `xml:"schemeID,attr"`
-	Value          string  `xml:",chardata"`
+	SchemeID string `xml:"schemeID,attr"`
+	Value    string `xml:",chardata"`
 }
 
 // Identification represents an identification
