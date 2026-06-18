@@ -311,3 +311,36 @@ func TestFindContext(t *testing.T) {
 		assert.Nil(t, ctx)
 	})
 }
+
+func TestContextByName(t *testing.T) {
+	t.Run("resolves canonical names and aliases", func(t *testing.T) {
+		cases := map[string]ubl.Context{
+			"en16931":                ubl.ContextEN16931,
+			"en":                     ubl.ContextEN16931,
+			"peppol":                 ubl.ContextPeppol,
+			"peppol-self-billed":     ubl.ContextPeppolSelfBilled,
+			"peppol-self":            ubl.ContextPeppolSelfBilled,
+			"xrechnung":              ubl.ContextXRechnung,
+			"fr-cius":                ubl.ContextPeppolFranceCIUS,
+			"peppol-france-extended": ubl.ContextPeppolFranceExtended,
+			"zatca":                  ubl.ContextZATCA,
+			"sa-zatca":               ubl.ContextZATCA,
+		}
+		for name, want := range cases {
+			got, ok := ubl.ContextByName(name)
+			require.True(t, ok, "expected %q to resolve", name)
+			assert.Equal(t, want.CustomizationID, got.CustomizationID, "name %q", name)
+		}
+	})
+
+	t.Run("is case-insensitive", func(t *testing.T) {
+		got, ok := ubl.ContextByName("PeppOl")
+		require.True(t, ok)
+		assert.Equal(t, ubl.ContextPeppol.CustomizationID, got.CustomizationID)
+	})
+
+	t.Run("unknown name returns false", func(t *testing.T) {
+		_, ok := ubl.ContextByName("nope")
+		assert.False(t, ok)
+	})
+}

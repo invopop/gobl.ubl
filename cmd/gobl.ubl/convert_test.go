@@ -54,6 +54,8 @@ func TestConvertBuildOptionsContextAliases(t *testing.T) {
 		{name: "xrechnung alias", context: "xrechnung", convertible: false},
 		{name: "france cius alias", context: "fr-cius", convertible: false},
 		{name: "france extended alias", context: "fr-extended", convertible: false},
+		{name: "zatca alias", context: "zatca", convertible: false},
+		{name: "sa-zatca alias", context: "sa-zatca", convertible: false},
 		{name: "mixed case alias", context: "PeppOl", convertible: true, expected: ubl.ContextPeppol},
 	}
 

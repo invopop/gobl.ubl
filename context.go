@@ -1,6 +1,9 @@
 package ubl
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/addons/de/xrechnung"
@@ -139,16 +142,30 @@ func WithContext(c Context) Option {
 	}
 }
 
-// contexts holds every registered context, used for reverse lookups during
-// parsing. Each exported Context below registers itself via registerContext,
-// so the lookup table and the variables can never drift apart.
-var contexts []Context
+// Lookup tables, populated as each exported context below registers itself:
+// contexts is scanned when parsing, contextsByName resolves CLI --context names.
+var (
+	contexts       []Context
+	contextsByName = map[string]Context{}
+)
 
-// registerContext records c for reverse lookups and returns it, letting an
-// exported context name itself and join the lookup table in one declaration.
-func registerContext(c Context) Context {
+// registerContext records c under each (lower-case) name and returns it, so a
+// context is defined and registered in one place. A duplicate name panics.
+func registerContext(c Context, names ...string) Context {
 	contexts = append(contexts, c)
+	for _, n := range names {
+		if _, dup := contextsByName[n]; dup {
+			panic(fmt.Sprintf("ubl: duplicate context name %q", n))
+		}
+		contextsByName[n] = c
+	}
 	return c
+}
+
+// ContextByName resolves a context name or alias, case-insensitively.
+func ContextByName(name string) (Context, bool) {
+	c, ok := contextsByName[strings.ToLower(name)]
+	return c, ok
 }
 
 // ContextEN16931 is the default context for basic UBL documents.
@@ -159,7 +176,7 @@ var ContextEN16931 = registerContext(Context{
 		Invoice:    "eu.cen.en16931:ubl:1.3.14-2",
 		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.15",
 	},
-})
+}, "en16931", "en")
 
 // ContextPeppol defines the default Peppol context.
 var ContextPeppol = registerContext(Context{
@@ -170,7 +187,7 @@ var ContextPeppol = registerContext(Context{
 		Invoice:    "eu.peppol.bis3:invoice:2025.5",
 		CreditNote: "eu.peppol.bis3:creditnote:2025.5",
 	},
-})
+}, "peppol")
 
 // ContextPeppolSelfBilled defines the Peppol self-billed context.
 var ContextPeppolSelfBilled = registerContext(Context{
@@ -185,7 +202,7 @@ var ContextPeppolSelfBilled = registerContext(Context{
 		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.3",
 		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.3",
 	},
-})
+}, "peppol-self-billed", "peppol-selfbilled", "peppol-self")
 
 // ContextXRechnung defines the main context to use for XRechnung UBL documents.
 var ContextXRechnung = registerContext(Context{
@@ -196,7 +213,7 @@ var ContextXRechnung = registerContext(Context{
 		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
 		CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",
 	},
-})
+}, "xrechnung")
 
 // ContextPeppolFranceCIUS defines the context for France UBL Invoice CIUS.
 var ContextPeppolFranceCIUS = registerContext(Context{
@@ -208,7 +225,7 @@ var ContextPeppolFranceCIUS = registerContext(Context{
 		Invoice:    "fr.ctc:ubl-invoice:1.3",
 		CreditNote: "fr.ctc:ubl-creditnote:1.3",
 	},
-})
+}, "peppol-france-cius", "france-cius", "fr-cius")
 
 // ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
 var ContextPeppolFranceExtended = registerContext(Context{
@@ -220,7 +237,7 @@ var ContextPeppolFranceExtended = registerContext(Context{
 		Invoice:    "fr.ctc:ubl-invoice:1.3",
 		CreditNote: "fr.ctc:ubl-creditnote:1.3",
 	},
-})
+}, "peppol-france-extended", "france-extended", "fr-extended")
 
 // ContextZATCA defines the context for Saudi Arabia ZATCA Phase 2 e-invoicing.
 var ContextZATCA = registerContext(Context{
@@ -231,4 +248,4 @@ var ContextZATCA = registerContext(Context{
 		Invoice:    "sa.zatca:ubl-invoice:2.3.8",
 		CreditNote: "sa.zatca:ubl-invoice:2.3.8",
 	},
-})
+}, "zatca", "sa-zatca")

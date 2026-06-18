@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
@@ -23,14 +22,25 @@ func convert(o *rootOpts) *convertOpts {
 
 func (c *convertOpts) cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "convert <infile> <outfile>",
-		Short: "Convert a GOBL JSON into a Universal Business Language (UBL) document and vice versa",
-		RunE:  c.runE,
+		Use:   "convert <infile> [outfile]",
+		Short: "Convert between GOBL and UBL documents",
+		Long: `Convert between GOBL and UBL, auto-detecting the direction from the input:
+
+  - JSON input is read as a GOBL envelope and converted to a UBL XML document.
+    Use --context (and optionally --profile-id) to select the UBL customization.
+  - XML input is read as a UBL document (Invoice, ApplicationResponse or Reminder)
+    and converted back to a GOBL envelope.
+
+<infile> is required; [outfile] defaults to stdout. Either may be "-" for stdin/stdout.`,
+		RunE: c.runE,
 	}
 
 	flags := cmd.Flags()
-	flags.StringVar(&c.contextName, "context", "", "Context for UBL conversion (en16931, peppol, xrechnung, ...)")
-	flags.StringVar(&c.profileID, "profile-id", "", "Override UBL ProfileID for JSON to XML conversion")
+	flags.StringVar(&c.contextName, "context", "",
+		"UBL customization for JSON->XML conversion: en16931, peppol, peppol-self-billed, "+
+			"xrechnung, fr-cius, fr-extended, zatca (default en16931)")
+	flags.StringVar(&c.profileID, "profile-id", "",
+		"Override the UBL ProfileID (JSON->XML conversion only)")
 
 	return cmd
 }
@@ -57,12 +67,9 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("reading input: %w", err)
 	}
 
-	// Check if input is JSON or XML
-	isJSON := json.Valid(inData)
-
+	// Direction is auto-detected: JSON => UBL XML, otherwise UBL => GOBL.
 	var outputData []byte
-
-	if isJSON {
+	if json.Valid(inData) {
 		env := new(gobl.Envelope)
 		if err := json.Unmarshal(inData, env); err != nil {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
@@ -122,22 +129,11 @@ func (c *convertOpts) buildOptions() ([]ubl.Option, error) {
 
 	ctx := ubl.ContextEN16931
 	if c.contextName != "" {
-		switch strings.ToLower(c.contextName) {
-		case "en16931", "en":
-			ctx = ubl.ContextEN16931
-		case "peppol":
-			ctx = ubl.ContextPeppol
-		case "peppol-self-billed", "peppol-selfbilled", "peppol-self":
-			ctx = ubl.ContextPeppolSelfBilled
-		case "xrechnung":
-			ctx = ubl.ContextXRechnung
-		case "peppol-france-cius", "france-cius", "fr-cius":
-			ctx = ubl.ContextPeppolFranceCIUS
-		case "peppol-france-extended", "france-extended", "fr-extended":
-			ctx = ubl.ContextPeppolFranceExtended
-		default:
+		found, ok := ubl.ContextByName(c.contextName)
+		if !ok {
 			return nil, fmt.Errorf("unknown context %q", c.contextName)
 		}
+		ctx = found
 	}
 
 	if c.profileID != "" {
