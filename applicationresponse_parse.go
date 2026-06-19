@@ -62,7 +62,7 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	out.IssueDate = issueDate
 
 	if ar.IssueTime != "" {
-		ct, err := civil.ParseTime(ar.IssueTime)
+		ct, err := civil.ParseTime(trimTimeZone(ar.IssueTime))
 		if err != nil {
 			return nil, err
 		}

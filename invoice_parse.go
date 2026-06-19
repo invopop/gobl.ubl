@@ -161,7 +161,7 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 	out.IssueDate = issueDate
 
 	if ui.IssueTime != "" {
-		ct, err := civil.ParseTime(ui.IssueTime)
+		ct, err := civil.ParseTime(trimTimeZone(ui.IssueTime))
 		if err != nil {
 			return err
 		}

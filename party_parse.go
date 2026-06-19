@@ -401,9 +401,8 @@ func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx 
 func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
 	for _, partyID := range party.PartyIdentification {
 		if partyID.ID != nil {
-			identity := &org.Identity{
-				Code: cbc.Code(partyID.ID.Value),
-			}
+			code := partyID.ID.Value
+			identity := &org.Identity{}
 			if partyID.ID.SchemeID != nil {
 				s := *partyID.ID.SchemeID
 				if o.context.Is(ContextZATCA) {
@@ -413,7 +412,13 @@ func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
 						iso.ExtKeySchemeID: cbc.Code(s),
 					})
 				}
+				if o.context.Is(ContextOIOUBL21) && (s == oioubl21SchemeDKCVR || s == oioubl21SchemeDKSE) {
+					// Reverse the wire-only DK prefix (F-LIB180), matching the
+					// endpoint parse and gobl's canonical country-prefix-free codes.
+					code = strings.TrimPrefix(code, "DK")
+				}
 			}
+			identity.Code = cbc.Code(code)
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)
 			}
