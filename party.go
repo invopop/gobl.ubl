@@ -3,6 +3,7 @@ package ubl
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
@@ -145,15 +146,15 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	contact := &Contact{}
 
 	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
-		code := cbc.Code(party.TaxID.String())
+		code := party.TaxID.String()
 		// Norwegian VAT numbers require the MVA suffix on the wire
 		// (PEPPOL-EN16931 NO-R-001), which GOBL normalization may strip.
-		if tID.Country.Code() == l10n.NO && !code.HasSuffix("MVA") {
+		if tID.Country.Code() == l10n.NO && !strings.HasSuffix(code, "MVA") {
 			code += "MVA"
 		}
 		if ctx.Is(ContextZATCA) {
 			// ZATCA expects the bare tax number without the country prefix.
-			code = code.TrimPrefix(cbc.Code(tID.Country.Code()))
+			code = strings.TrimPrefix(code, tID.Country.String())
 		}
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {
@@ -161,9 +162,8 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			id = TaxSchemeVAT
 		}
 
-		companyID := code.String()
 		taxScheme := PartyTaxScheme{
-			CompanyID: &companyID,
+			CompanyID: &code,
 			TaxScheme: &TaxScheme{
 				ID: id.String(),
 			},
