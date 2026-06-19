@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 )
@@ -12,7 +13,20 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 	// Only one delivery Location and Receiver are supported, so if more than one is passed the former will be overwritten
 	if len(ui.Delivery) > 0 {
 		for _, del := range ui.Delivery {
-			if del.ActualDeliveryDate != nil {
+			if del.ActualDeliveryDate != nil && del.LatestDeliveryDate != nil {
+				// ZATCA maps delivery period as ActualDeliveryDate (start) +
+				// LatestDeliveryDate (end)
+				start, err := parseDate(*del.ActualDeliveryDate)
+				if err != nil {
+					return err
+				}
+				end, err := parseDate(*del.LatestDeliveryDate)
+				if err != nil {
+					return err
+				}
+				d.Date = &start
+				d.Period = &cal.Period{Start: start, End: end}
+			} else if del.ActualDeliveryDate != nil {
 				deliveryDate, err := parseDate(*del.ActualDeliveryDate)
 				if err != nil {
 					return err

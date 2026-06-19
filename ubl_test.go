@@ -149,12 +149,12 @@ func TestConvertSurfacesValidationFaultsAfterAutoAddon(t *testing.T) {
 	assert.NotEmpty(t, first.Message(), "fault must carry a message")
 	assert.NotEmpty(t, first.Paths(), "fault must carry at least one JSON path")
 
-	// A France CTC addon rule must be among the reported faults. The
-	// minimal invoice lacks the mandatory SIREN identity (BR-FR-10/11);
-	// billing mode is auto-normalized by the addon so it no longer
-	// surfaces as a fault.
-	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-12"),
-		"expected France CTC supplier-SIREN fault; got: %s", err)
+	// The France CTC addon's "supplier inboxes are required for French B2B
+	// invoices" rule must be among the reported faults. (The billing-mode rule
+	// is now auto-satisfied by the addon's normalization, so a structural rule
+	// the minimal invoice cannot satisfy is used instead.)
+	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-11"),
+		"expected supplier-inboxes-required fault; got: %s", err)
 }
 
 func TestConvertUnsupportedDocumentType(t *testing.T) {

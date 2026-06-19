@@ -22,6 +22,7 @@ type InvoiceLine struct {
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
 	DocumentReference   *LineDocReference   `xml:"cac:DocumentReference,omitempty"`
 	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
+	TaxTotal            []TaxTotal          `xml:"cac:TaxTotal,omitempty"`
 	Item                *Item               `xml:"cac:Item"`
 	Price               *Price              `xml:"cac:Price"`
 }
@@ -32,12 +33,13 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
+func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
 
 	var lines []InvoiceLine
+	invoiceType := ui.getInvoiceTypeBasedOnXMLName()
 
 	for _, l := range inv.Lines {
 		ccy := l.Item.Currency.String()
@@ -60,7 +62,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 		if l.Item != nil && l.Item.Unit != "" {
 			iq.UnitCode = string(l.Item.Unit.UNECE())
 		}
-		if inv.Type.In(bill.InvoiceTypeCreditNote) {
+		if invoiceType.In(bill.InvoiceTypeCreditNote) {
 			invLine.CreditedQuantity = iq
 		} else {
 			invLine.InvoicedQuantity = iq
@@ -108,6 +110,19 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
 			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
+		}
+
+		// Line VAT amount (KSA-11) is mandatory for tax
+		// invoice and associated credit notes and debit notes
+		if context.Is(ContextZATCA) && l.Total != nil && len(l.Taxes) > 0 && l.Taxes[0].Percent != nil {
+			taxAmount := l.Taxes[0].Percent.Of(*l.Total)
+			roundingAmount := l.Total.Add(taxAmount)
+			invLine.TaxTotal = []TaxTotal{
+				{
+					TaxAmount:      Amount{Value: taxAmount.String(), CurrencyID: &ccy},
+					RoundingAmount: &Amount{Value: roundingAmount.String(), CurrencyID: &ccy},
+				},
+			}
 		}
 
 		if l.Item != nil {
@@ -230,7 +245,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 
 		lines = append(lines, invLine)
 	}
-	if inv.Type.In(bill.InvoiceTypeCreditNote) {
+	if invoiceType.In(bill.InvoiceTypeCreditNote) {
 		ui.CreditNoteLines = lines
 	} else {
 		ui.InvoiceLines = lines

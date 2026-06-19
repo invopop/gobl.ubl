@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8585c31233dc56f58f584c7f89f365224cd790a25289242569be17dcd3719b30"
+			"val": "bed7c079ba1f06d65d5d80337e1f4518e4b8998c66577586a3e0d71b5b81e961"
 		}
 	},
 	"doc": {
@@ -18,6 +18,13 @@
 		"code": "TOSL110",
 		"issue_date": "2013-04-10",
 		"currency": "DKK",
+		"exchange_rates": [
+			{
+				"from": "DKK",
+				"to": "EUR",
+				"amount": "0.93"
+			}
+		],
 		"preceding": [
 			{
 				"issue_date": "2013-03-10",

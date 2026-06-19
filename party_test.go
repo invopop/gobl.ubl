@@ -69,4 +69,24 @@ func TestNewParty(t *testing.T) {
 		require.NotNil(t, doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
 		assert.Equal(t, "0088", *doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
 	})
+
+	t.Run("norwegian VAT numbers carry the MVA suffix", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Supplier.TaxID = &tax.Identity{Country: "NO", Code: "923456783"}
+		require.NoError(t, env.Calculate())
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		require.NotEmpty(t, doc.AccountingSupplierParty.Party.PartyTaxScheme)
+		assert.Equal(t, "NO923456783MVA", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
+
+		// An already-suffixed code must not be doubled.
+		inv.Supplier.TaxID.Code = "923456783MVA"
+		doc, err = ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, "NO923456783MVA", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
+	})
 }
