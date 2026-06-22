@@ -250,10 +250,14 @@ func reminderDocumentReference(doc *org.DocumentRef) *Reference {
 
 // OIOUBL 2.1 Reminder specifics follow.
 
-// Reminders ride the same profile5:ver2.0 / profileid-1.2 profile as invoices.
+// Reminders ride the billing-only Procurement-BilSim-1.0 profile (profileid-1.2),
+// NOT the profile5 invoices use: the OIOUBL Reminder belongs to the billing
+// process, and the billing-only profile avoids advertising the order documents
+// that the OrdSim-BilSim profiles carry.
 const (
-	reminderTypeCodeListID = "urn:oioubl:codelist:remindertypecode-1.1"
-	oioublProfileSchemeV12 = "urn:oioubl:id:profileid-1.2"
+	reminderTypeCodeListID  = "urn:oioubl:codelist:remindertypecode-1.1"
+	oioublProfileSchemeV12  = "urn:oioubl:id:profileid-1.2"
+	oioublReminderProfileID = "Procurement-BilSim-1.0"
 )
 
 // applyOIOUBL21Reminder stamps the OIOUBL specifics: party formatting, the
@@ -270,12 +274,14 @@ func applyOIOUBL21Reminder(out *Reminder, pmt *bill.Payment) {
 		stampOIOUBL21PaymentChannel(&out.PaymentMeans[i])
 	}
 
-	if out.ProfileID != nil {
-		schemeID := oioublProfileSchemeV12
-		agencyID := oioublCodeListAgencyID
-		out.ProfileID.SchemeID = &schemeID
-		out.ProfileID.SchemeAgencyID = &agencyID
+	if out.ProfileID == nil {
+		out.ProfileID = &IDType{}
 	}
+	schemeID := oioublProfileSchemeV12
+	agencyID := oioublCodeListAgencyID
+	out.ProfileID.SchemeID = &schemeID
+	out.ProfileID.SchemeAgencyID = &agencyID
+	out.ProfileID.Value = oioublReminderProfileID
 
 	if code := pmt.Ext.Get(oioubl.ExtKeyReminderType); code != "" {
 		agencyID := oioublCodeListAgencyID

@@ -2,7 +2,7 @@
 <Reminder xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Reminder-2">
   <cbc:UBLVersionID>2.0</cbc:UBLVersionID>
   <cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>
-  <cbc:ProfileID schemeAgencyID="320" schemeID="urn:oioubl:id:profileid-1.2">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>
+  <cbc:ProfileID schemeAgencyID="320" schemeID="urn:oioubl:id:profileid-1.2">Procurement-BilSim-1.0</cbc:ProfileID>
   <cbc:ID>2026-R-1000</cbc:ID>
   <cbc:UUID>019ed096-350c-73bc-9695-b103e1d03b93</cbc:UUID>
   <cbc:IssueDate>2026-01-15</cbc:IssueDate>
