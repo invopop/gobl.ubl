@@ -153,7 +153,8 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			code += "MVA"
 		}
 		if ctx.Is(ContextZATCA) {
-			code = code[2:]
+			// ZATCA expects the bare tax number without the country prefix.
+			code = strings.TrimPrefix(code, tID.Country.String())
 		}
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {

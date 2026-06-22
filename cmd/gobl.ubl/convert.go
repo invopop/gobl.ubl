@@ -12,6 +12,14 @@ import (
 
 type convertOpts struct {
 	*rootOpts
+	contextName string
+	profileID   string
+}
+
+// converter is implemented by every UBL document Parse can return (Invoice,
+// ApplicationResponse, Reminder); each converts back to a GOBL envelope.
+type converter interface {
+	Convert() (*gobl.Envelope, error)
 }
 
 func convert(o *rootOpts) *convertOpts {
@@ -20,10 +28,25 @@ func convert(o *rootOpts) *convertOpts {
 
 func (c *convertOpts) cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "convert <infile> <outfile>",
-		Short: "Convert a GOBL JSON into a Universal Business Language (UBL) document and vice versa",
-		RunE:  c.runE,
+		Use:   "convert <infile> [outfile]",
+		Short: "Convert between GOBL and UBL documents",
+		Long: `Convert between GOBL and UBL, auto-detecting the direction from the input:
+
+  - JSON input is read as a GOBL envelope and converted to a UBL XML document.
+    Use --context (and optionally --profile-id) to select the UBL customization.
+  - XML input is read as a UBL document (Invoice, ApplicationResponse or Reminder)
+    and converted back to a GOBL envelope.
+
+<infile> is required; [outfile] defaults to stdout. Either may be "-" for stdin/stdout.`,
+		RunE: c.runE,
 	}
+
+	flags := cmd.Flags()
+	flags.StringVar(&c.contextName, "context", "",
+		"UBL customization for JSON->XML conversion: en16931, peppol, peppol-self-billed, "+
+			"xrechnung, peppol-france-cius, peppol-france-extended, zatca (default en16931)")
+	flags.StringVar(&c.profileID, "profile-id", "",
+		"Override the UBL ProfileID (JSON->XML conversion only)")
 
 	return cmd
 }
@@ -50,17 +73,18 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("reading input: %w", err)
 	}
 
-	// Check if input is JSON or XML
-	isJSON := json.Valid(inData)
-
+	// Direction is auto-detected: JSON => UBL XML, otherwise UBL => GOBL.
 	var outputData []byte
-
-	if isJSON {
+	if json.Valid(inData) {
 		env := new(gobl.Envelope)
 		if err := json.Unmarshal(inData, env); err != nil {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
 		}
-		doc, err := ubl.ConvertInvoice(env)
+		opts, err := c.buildOptions()
+		if err != nil {
+			return err
+		}
+		doc, err := ubl.Convert(env, opts...)
 		if err != nil {
 			return fmt.Errorf("building UBL document: %w", err)
 		}
@@ -72,7 +96,19 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	} else {
 		// Assume XML if not JSON
 
-		env, err := ubl.Parse(inData)
+		doc, err := ubl.Parse(inData)
+		if err != nil {
+			return fmt.Errorf("building GOBL envelope: %w", err)
+		}
+
+		// Every supported UBL document (Invoice, ApplicationResponse, Reminder)
+		// converts back to a GOBL envelope through this method.
+		conv, ok := doc.(converter)
+		if !ok {
+			return fmt.Errorf("building GOBL envelope: %w", ubl.ErrUnsupportedDocumentType)
+		}
+
+		env, err := conv.Convert()
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}
@@ -88,4 +124,25 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func (c *convertOpts) buildOptions() ([]ubl.Option, error) {
+	if c.contextName == "" && c.profileID == "" {
+		return nil, nil
+	}
+
+	ctx := ubl.ContextEN16931
+	if c.contextName != "" {
+		found, ok := ubl.ContextByName(c.contextName)
+		if !ok {
+			return nil, fmt.Errorf("unknown context %q", c.contextName)
+		}
+		ctx = found
+	}
+
+	if c.profileID != "" {
+		ctx.ProfileID = c.profileID
+	}
+
+	return []ubl.Option{ubl.WithContext(ctx)}, nil
 }
