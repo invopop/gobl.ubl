@@ -313,18 +313,15 @@ func TestFindContext(t *testing.T) {
 }
 
 func TestContextByName(t *testing.T) {
-	t.Run("resolves canonical names and aliases", func(t *testing.T) {
+	t.Run("resolves context names", func(t *testing.T) {
 		cases := map[string]ubl.Context{
 			"en16931":                ubl.ContextEN16931,
-			"en":                     ubl.ContextEN16931,
 			"peppol":                 ubl.ContextPeppol,
 			"peppol-self-billed":     ubl.ContextPeppolSelfBilled,
-			"peppol-self":            ubl.ContextPeppolSelfBilled,
 			"xrechnung":              ubl.ContextXRechnung,
-			"fr-cius":                ubl.ContextPeppolFranceCIUS,
+			"peppol-france-cius":     ubl.ContextPeppolFranceCIUS,
 			"peppol-france-extended": ubl.ContextPeppolFranceExtended,
 			"zatca":                  ubl.ContextZATCA,
-			"sa-zatca":               ubl.ContextZATCA,
 		}
 		for name, want := range cases {
 			got, ok := ubl.ContextByName(name)

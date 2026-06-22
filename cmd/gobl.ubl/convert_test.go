@@ -41,22 +41,21 @@ func TestConvertBuildOptionsUnknownContext(t *testing.T) {
 	require.EqualError(t, err, `unknown context "unknown"`)
 }
 
-func TestConvertBuildOptionsContextAliases(t *testing.T) {
+func TestConvertBuildOptionsContextNames(t *testing.T) {
 	tests := []struct {
 		name        string
 		context     string
 		convertible bool
 		expected    ubl.Context
 	}{
-		{name: "en alias", context: "en", convertible: true, expected: ubl.ContextEN16931},
-		{name: "peppol alias", context: "peppol", convertible: true, expected: ubl.ContextPeppol},
-		{name: "peppol self billed alias", context: "peppol-selfbilled", convertible: false},
-		{name: "xrechnung alias", context: "xrechnung", convertible: false},
-		{name: "france cius alias", context: "fr-cius", convertible: false},
-		{name: "france extended alias", context: "fr-extended", convertible: false},
-		{name: "zatca alias", context: "zatca", convertible: false},
-		{name: "sa-zatca alias", context: "sa-zatca", convertible: false},
-		{name: "mixed case alias", context: "PeppOl", convertible: true, expected: ubl.ContextPeppol},
+		{name: "en16931", context: "en16931", convertible: true, expected: ubl.ContextEN16931},
+		{name: "peppol", context: "peppol", convertible: true, expected: ubl.ContextPeppol},
+		{name: "peppol-self-billed", context: "peppol-self-billed", convertible: false},
+		{name: "xrechnung", context: "xrechnung", convertible: false},
+		{name: "peppol-france-cius", context: "peppol-france-cius", convertible: false},
+		{name: "peppol-france-extended", context: "peppol-france-extended", convertible: false},
+		{name: "zatca", context: "zatca", convertible: false},
+		{name: "mixed case", context: "PeppOl", convertible: true, expected: ubl.ContextPeppol},
 	}
 
 	for _, tt := range tests {

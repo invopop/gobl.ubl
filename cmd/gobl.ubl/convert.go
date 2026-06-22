@@ -16,6 +16,12 @@ type convertOpts struct {
 	profileID   string
 }
 
+// converter is implemented by every UBL document Parse can return (Invoice,
+// ApplicationResponse, Reminder); each converts back to a GOBL envelope.
+type converter interface {
+	Convert() (*gobl.Envelope, error)
+}
+
 func convert(o *rootOpts) *convertOpts {
 	return &convertOpts{rootOpts: o}
 }
@@ -38,7 +44,7 @@ func (c *convertOpts) cmd() *cobra.Command {
 	flags := cmd.Flags()
 	flags.StringVar(&c.contextName, "context", "",
 		"UBL customization for JSON->XML conversion: en16931, peppol, peppol-self-billed, "+
-			"xrechnung, fr-cius, fr-extended, zatca (default en16931)")
+			"xrechnung, peppol-france-cius, peppol-france-extended, zatca (default en16931)")
 	flags.StringVar(&c.profileID, "profile-id", "",
 		"Override the UBL ProfileID (JSON->XML conversion only)")
 
@@ -97,9 +103,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 
 		// Every supported UBL document (Invoice, ApplicationResponse, Reminder)
 		// converts back to a GOBL envelope through this method.
-		conv, ok := doc.(interface {
-			Convert() (*gobl.Envelope, error)
-		})
+		conv, ok := doc.(converter)
 		if !ok {
 			return fmt.Errorf("building GOBL envelope: %w", ubl.ErrUnsupportedDocumentType)
 		}
