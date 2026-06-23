@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "60bc70aedef820940eb64acaff65c0b3afcf2a944c488beae8f3a862142a290b"
+			"val": "dd732440a514f0007fc0c730ff6709e1cbaed47e5b830a4564bf20319b913c04"
 		},
-		"from": "iso6523-actorid-upis::0184:11421210",
-		"to": "iso6523-actorid-upis::0088:6777420277858"
+		"from": "iso6523-actorid-upis::0184:10000009",
+		"to": "iso6523-actorid-upis::0088:5790000000005"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -29,16 +29,16 @@
 		},
 		"supplier": {
 			"uuid": "e096fcc8-d810-443e-948e-85331d4680c3",
-			"name": "Hotel E2E Copenhagen Company",
+			"name": "Example Hotel ApS",
 			"tax_id": {
 				"country": "DK",
-				"code": "11421210"
+				"code": "10000009"
 			},
 			"identities": [
 				{
 					"scope": "legal",
 					"type": "CVR",
-					"code": "11421210",
+					"code": "10000009",
 					"ext": {
 						"iso-scheme-id": "0184"
 					}
@@ -47,25 +47,25 @@
 			"people": [
 				{
 					"name": {
-						"given": "E4XDV2ULZH-DC-5ER2DRIGGU8RV40D744T"
+						"given": "Jens Hansen"
 					}
 				}
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:11421210"
+					"uri": "iso6523-actorid-upis::0184:10000009"
 				}
 			],
 			"inboxes": [
 				{
 					"key": "peppol",
 					"scheme": "0184",
-					"code": "11421210"
+					"code": "10000009"
 				}
 			],
 			"addresses": [
 				{
-					"street": "Rådhuspladsen 1",
+					"street": "Eksempelvej 1",
 					"locality": "København",
 					"code": "1550",
 					"country": "DK"
@@ -84,31 +84,31 @@
 			],
 			"telephones": [
 				{
-					"num": "+4912471842187"
+					"num": "+4512345678"
 				}
 			]
 		},
 		"customer": {
-			"name": "Blixen Hoteller ApS",
+			"name": "Example Customer ApS",
 			"tax_id": {
 				"country": "DK",
 				"code": "22222228"
 			},
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0088:6777420277858"
+					"uri": "iso6523-actorid-upis::0088:5790000000005"
 				}
 			],
 			"inboxes": [
 				{
 					"key": "peppol",
 					"scheme": "0088",
-					"code": "6777420277858"
+					"code": "5790000000005"
 				}
 			],
 			"addresses": [
 				{
-					"street": "Strøget 12",
+					"street": "Eksempelvej 2",
 					"locality": "København",
 					"code": "1160",
 					"country": "DK"
