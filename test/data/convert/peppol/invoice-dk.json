@@ -1,0 +1,190 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "dd732440a514f0007fc0c730ff6709e1cbaed47e5b830a4564bf20319b913c04"
+		},
+		"from": "iso6523-actorid-upis::0184:10000009",
+		"to": "iso6523-actorid-upis::0088:5790000000005"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "20260600000001",
+		"issue_date": "2026-06-22",
+		"issue_time": "13:29:04",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"uuid": "e096fcc8-d810-443e-948e-85331d4680c3",
+			"name": "Example Hotel ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "10000009"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"type": "CVR",
+					"code": "10000009",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Jens Hansen"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:10000009"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0184",
+					"code": "10000009"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Eksempelvej 1",
+					"locality": "København",
+					"code": "1550",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "admin@example.com"
+				},
+				{
+					"addr": "support@example.com"
+				},
+				{
+					"addr": "billing@example.com"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+4512345678"
+				}
+			]
+		},
+		"customer": {
+			"name": "Example Customer ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "22222228"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0088:5790000000005"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0088",
+					"code": "5790000000005"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Eksempelvej 2",
+					"locality": "København",
+					"code": "1160",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"key": "services",
+					"name": "double room",
+					"price": "88.00",
+					"unit": "service"
+				},
+				"sum": "88.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"rate": "general",
+						"percent": "25.0%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "88.00"
+			}
+		],
+		"ordering": {
+			"code": "No information provided"
+		},
+		"payment": {
+			"advances": [
+				{
+					"description": "CreditCard",
+					"amount": "110.00"
+				}
+			],
+			"instructions": {
+				"key": "any",
+				"ext": {
+					"untdid-payment-means": "1"
+				}
+			}
+		},
+		"totals": {
+			"sum": "88.00",
+			"total": "88.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "88.00",
+								"percent": "25.0%",
+								"amount": "22.00"
+							}
+						],
+						"amount": "22.00"
+					}
+				],
+				"sum": "22.00"
+			},
+			"tax": "22.00",
+			"total_with_tax": "110.00",
+			"payable": "110.00",
+			"advance": "110.00",
+			"due": "0.00"
+		}
+	}
+}

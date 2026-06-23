@@ -10,6 +10,7 @@ import (
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	cur "github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -143,8 +144,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
 	}
 
-	// PEPPOL-EN16931-R005
-	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency {
+	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate
+	// is available. BT-111 is only added in that case and BR-53 requires
+	// BT-111 whenever BT-6 is present, so the two must be gated identically.
+	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency &&
+		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
 		out.TaxCurrencyCode = string(taxCurrency)
 	}
 
