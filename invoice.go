@@ -148,10 +148,9 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// matching exchange rate is available. BT-111 (the VAT total in accounting
 	// currency) is only added in that case (see totals.go), and BR-53 requires
 	// BT-111 whenever BT-6 is present, so the two must be gated identically.
-	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency {
-		if cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
-			out.TaxCurrencyCode = string(taxCurrency)
-		}
+	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency &&
+		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
+		out.TaxCurrencyCode = string(taxCurrency)
 	}
 
 	docType := inv.Type
