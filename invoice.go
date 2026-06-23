@@ -10,6 +10,7 @@ import (
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	cur "github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -143,9 +144,14 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
 	}
 
-	// PEPPOL-EN16931-R005
+	// PEPPOL-EN16931-R005 / BR-53: only emit BT-6 (TaxCurrencyCode) when a
+	// matching exchange rate is available. BT-111 (the VAT total in accounting
+	// currency) is only added in that case (see totals.go), and BR-53 requires
+	// BT-111 whenever BT-6 is present, so the two must be gated identically.
 	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency {
-		out.TaxCurrencyCode = string(taxCurrency)
+		if cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
+			out.TaxCurrencyCode = string(taxCurrency)
+		}
 	}
 
 	docType := inv.Type
