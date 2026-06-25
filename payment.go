@@ -120,7 +120,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	if ctx.Is(ContextOIOUBL21) {
 		applyOIOUBL21PaymentMeans(ui)
 		// F-INV134: the payment terms carry the payable amount in OIOUBL.
-		if ui.PaymentTerms != nil && ui.PaymentTerms.Amount == nil {
+		if ui.PaymentTerms != nil && ui.PaymentTerms.Amount == nil && ui.LegalMonetaryTotal.PayableAmount != nil {
 			ui.PaymentTerms.Amount = &Amount{
 				Value:      ui.LegalMonetaryTotal.PayableAmount.Value,
 				CurrencyID: ui.LegalMonetaryTotal.PayableAmount.CurrencyID,
