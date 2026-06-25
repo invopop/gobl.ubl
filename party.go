@@ -222,11 +222,16 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		p.Contact = contact
 	}
 
-	if ep := party.Endpoint(iso6523EndpointScheme); ep != nil {
-		if icd, code, ok := splitISO6523Endpoint(ep.URI); ok {
-			p.EndpointID = &EndpointID{
-				SchemeID: normalizeEndpointScheme(icd),
-				Value:    code,
+	// The iso6523 endpoint lookup and the OIOUBL scheme normalization are
+	// OIOUBL-specific. Other contexts derive the endpoint from the party inbox
+	// using its raw scheme, matching the generic UBL behaviour.
+	if ctx.Is(ContextOIOUBL21) {
+		if ep := party.Endpoint(iso6523EndpointScheme); ep != nil {
+			if icd, code, ok := splitISO6523Endpoint(ep.URI); ok {
+				p.EndpointID = &EndpointID{
+					SchemeID: normalizeEndpointScheme(icd),
+					Value:    code,
+				}
 			}
 		}
 	}
@@ -238,8 +243,12 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 				Value:    ib.Email,
 			}
 		} else if ib.Scheme != "" {
+			scheme := ib.Scheme.String()
+			if ctx.Is(ContextOIOUBL21) {
+				scheme = normalizeEndpointScheme(scheme)
+			}
 			p.EndpointID = &EndpointID{
-				SchemeID: normalizeEndpointScheme(ib.Scheme.String()),
+				SchemeID: scheme,
 				Value:    ib.Code.String(),
 			}
 		}
