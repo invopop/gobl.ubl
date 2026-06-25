@@ -71,7 +71,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 	}
 	if di := docLine.Item; di != nil {
 		goblConvertLineItem(di, line.Item)
-		goblConvertLineItemTaxes(di, line, taxCategoryMap)
+		goblConvertLineItemTaxes(di, line, taxCategoryMap, ctx)
 	}
 
 	notes := make([]*org.Note, 0)
@@ -191,7 +191,7 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 	}
 }
 
-func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo) {
+func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo, ctx Context) {
 	ctc := di.ClassifiedTaxCategory
 	if ctc == nil || ctc.TaxScheme == nil {
 		return
@@ -205,10 +205,11 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 	if ctc.ID != nil {
 		line.Taxes[0].Ext = line.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, goblTaxCategoryCode(ctc.ID.Value))
 
-		if ctc.TaxExemptionReasonCode != nil {
+		// OIOUBL carries the exemption reason on the line; other profiles source
+		// it from the document-level TaxTotal subtotal.
+		if ctx.Is(ContextOIOUBL21) && ctc.TaxExemptionReasonCode != nil {
 			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(*ctc.TaxExemptionReasonCode))
 		} else {
-			// Try to get exemption code from TaxTotal
 			key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value, ctc.Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
