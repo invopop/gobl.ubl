@@ -2,92 +2,81 @@
 <Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:qdt="urn:oasis:names:specification:ubl:schema:xsd:QualifiedDataTypes-2" xmlns:udt="urn:oasis:names:specification:ubl:schema:xsd:UnqualifiedDataTypes-2" xmlns:ccts="urn:un:unece:uncefact:documentation:2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
   <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
   <cbc:ProfileID>S1</cbc:ProfileID>
-  <cbc:ID>FR-CIUS-2024-001</cbc:ID>
-  <cbc:IssueDate>2024-05-15</cbc:IssueDate>
+  <cbc:ID>FAC-2024-001</cbc:ID>
+  <cbc:IssueDate>2024-06-13</cbc:IssueDate>
+  <cbc:DueDate>2024-07-13</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
-  <cbc:Note>#PMT#Indemnité forfaitaire de recouvrement: 40 EUR</cbc:Note>
-  <cbc:Note>#PMD#Pénalités selon le taux légal en vigueur</cbc:Note>
-  <cbc:Note>#AAB#Pas d'escompte pour paiement anticipé</cbc:Note>
+  <cbc:Note>#PMT#Conditions.</cbc:Note>
+  <cbc:Note>#PMD#Penalties.</cbc:Note>
+  <cbc:Note>#AAB#No early discount.</cbc:Note>
   <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
-  <cbc:BuyerReference>PO-2024-001</cbc:BuyerReference>
+  <cac:OrderReference>
+    <cbc:ID>NA</cbc:ID>
+  </cac:OrderReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
-      <cbc:EndpointID schemeID="0225">334175221</cbc:EndpointID>
+      <cbc:EndpointID schemeID="0225">356000000</cbc:EndpointID>
       <cac:PartyName>
-        <cbc:Name>Société Exemple SARL</cbc:Name>
+        <cbc:Name>Supplier SARL</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:StreetName>16 10 Rue de la Paix</cbc:StreetName>
+        <cbc:StreetName>1 Rue</cbc:StreetName>
         <cbc:CityName>Paris</cbc:CityName>
-        <cbc:PostalZone>75002</cbc:PostalZone>
+        <cbc:PostalZone>75001</cbc:PostalZone>
         <cac:Country>
           <cbc:IdentificationCode>FR</cbc:IdentificationCode>
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
-        <cbc:CompanyID>FR23334175221</cbc:CompanyID>
+        <cbc:CompanyID>FR39356000000</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
-        <cbc:RegistrationName>Société Exemple SARL</cbc:RegistrationName>
-        <cbc:CompanyID schemeID="0002">334175221</cbc:CompanyID>
+        <cbc:RegistrationName>Supplier SARL</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="0002">356000000</cbc:CompanyID>
       </cac:PartyLegalEntity>
-      <cac:Contact>
-        <cbc:Name>John Doe</cbc:Name>
-        <cbc:Telephone>+49621123456</cbc:Telephone>
-        <cbc:ElectronicMail>facturation@exemple.fr</cbc:ElectronicMail>
-      </cac:Contact>
     </cac:Party>
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
     <cac:Party>
-      <cbc:EndpointID schemeID="0225">552100554</cbc:EndpointID>
+      <cbc:EndpointID schemeID="0225">732829320</cbc:EndpointID>
       <cac:PartyName>
-        <cbc:Name>Client Exemple</cbc:Name>
+        <cbc:Name>Customer SAS</cbc:Name>
       </cac:PartyName>
       <cac:PostalAddress>
-        <cbc:StreetName>25 25 Avenue des Champs-Élysées</cbc:StreetName>
+        <cbc:StreetName>1 Rue</cbc:StreetName>
         <cbc:CityName>Paris</cbc:CityName>
-        <cbc:PostalZone>75008</cbc:PostalZone>
+        <cbc:PostalZone>75001</cbc:PostalZone>
         <cac:Country>
           <cbc:IdentificationCode>FR</cbc:IdentificationCode>
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
-        <cbc:CompanyID>FR96552100554</cbc:CompanyID>
+        <cbc:CompanyID>FR44732829320</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID>VAT</cbc:ID>
         </cac:TaxScheme>
       </cac:PartyTaxScheme>
       <cac:PartyLegalEntity>
-        <cbc:RegistrationName>Client Exemple</cbc:RegistrationName>
-        <cbc:CompanyID schemeID="0002">552100554</cbc:CompanyID>
+        <cbc:RegistrationName>Customer SAS</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="0002">732829320</cbc:CompanyID>
       </cac:PartyLegalEntity>
-      <cac:Contact>
-        <cbc:ElectronicMail>contact@client.fr</cbc:ElectronicMail>
-      </cac:Contact>
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode>30</cbc:PaymentMeansCode>
-    <cbc:PaymentID>0003434323213231</cbc:PaymentID>
     <cac:PayeeFinancialAccount>
-      <cbc:ID>NO9386011117947</cbc:ID>
-      <cac:FinancialInstitutionBranch>
-        <cbc:ID>DNBANOKK</cbc:ID>
-      </cac:FinancialInstitutionBranch>
+      <cbc:ID>FR7630006000011234567890189</cbc:ID>
+      <cbc:Name>Supplier SARL</cbc:Name>
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
-  <cac:PaymentTerms>
-    <cbc:Note>on receipt within 30 days</cbc:Note>
-  </cac:PaymentTerms>
   <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="EUR">360.00</cbc:TaxAmount>
+    <cbc:TaxAmount currencyID="EUR">200.00</cbc:TaxAmount>
     <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="EUR">1800.00</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="EUR">360.00</cbc:TaxAmount>
+      <cbc:TaxableAmount currencyID="EUR">1000.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">200.00</cbc:TaxAmount>
       <cac:TaxCategory>
         <cbc:ID>S</cbc:ID>
         <cbc:Percent>20</cbc:Percent>
@@ -98,17 +87,17 @@
     </cac:TaxSubtotal>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">1800.00</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="EUR">2160.00</cbc:TaxInclusiveAmount>
-    <cbc:PayableAmount currencyID="EUR">2160.00</cbc:PayableAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">1000.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">1000.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">1200.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">1200.00</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
-    <cbc:InvoicedQuantity unitCode="HUR">20</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
+    <cbc:InvoicedQuantity unitCode="C62">10</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">1000.00</cbc:LineExtensionAmount>
     <cac:Item>
-      <cbc:Name>Development services</cbc:Name>
+      <cbc:Name>Service</cbc:Name>
       <cac:ClassifiedTaxCategory>
         <cbc:ID>S</cbc:ID>
         <cbc:Percent>20</cbc:Percent>
@@ -118,7 +107,7 @@
       </cac:ClassifiedTaxCategory>
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="EUR">90.00</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="EUR">100.00</cbc:PriceAmount>
     </cac:Price>
   </cac:InvoiceLine>
 </Invoice>

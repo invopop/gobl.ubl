@@ -217,8 +217,11 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	}
 	ui.addCreditTransferAccount(instr, ctx, paymentMeansCode)
 	if instr.DirectDebit != nil {
-		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
-			ID: IDType{Value: instr.DirectDebit.Ref},
+		// Skip the mandate without a reference; an empty <cbc:ID/> is rejected by Peppol.
+		if instr.DirectDebit.Ref != "" {
+			ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
+				ID: IDType{Value: instr.DirectDebit.Ref},
+			}
 		}
 		if instr.DirectDebit.Account != "" {
 			ui.PaymentMeans[0].PayerFinancialAccount = &FinancialAccount{

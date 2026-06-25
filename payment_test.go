@@ -6,6 +6,7 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -34,6 +35,40 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "123456789", *doc.PaymentMeans[0].PayeeFinancialAccount.ID)
 		assert.Equal(t, "Test Bank Account", *doc.PaymentMeans[0].PayeeFinancialAccount.Name)
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
+	})
+
+	t.Run("direct debit without mandate reference omits the mandate", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Payment.Instructions.CreditTransfer = nil
+		inv.Payment.Instructions.DirectDebit = &pay.DirectDebit{Account: "0667"}
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		require.NotEmpty(t, doc.PaymentMeans)
+
+		// No reference means no mandate element, otherwise we emit an empty <cbc:ID/>.
+		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate)
+		assert.Equal(t, "0667", *doc.PaymentMeans[0].PayerFinancialAccount.ID)
+	})
+
+	t.Run("direct debit with mandate reference includes the mandate", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Payment.Instructions.CreditTransfer = nil
+		inv.Payment.Instructions.DirectDebit = &pay.DirectDebit{Ref: "MANDATE-123", Account: "0667"}
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		require.NotEmpty(t, doc.PaymentMeans)
+		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
+		assert.Equal(t, "MANDATE-123", doc.PaymentMeans[0].PaymentMandate.ID.Value)
 	})
 
 	t.Run("document type extension", func(t *testing.T) {
