@@ -3,6 +3,7 @@ package ubl_test
 import (
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -76,6 +77,32 @@ func TestOIOUBL21DualCurrencyTotals(t *testing.T) {
 	assert.Equal(t, "urn:oioubl:id:profileid-1.2", *doc.ProfileID.SchemeID)
 }
 
+// TestOIOUBL21MixedCategoryExchangeRate locks the exchange-rate reconstruction
+// for a foreign-currency invoice that mixes StandardRated and ZeroRated lines.
+// OIOUBL emits TransactionCurrencyTaxAmount only on StandardRated subtotals
+// (F-LIB373), so the parse numerator covers only standard-rated tax; the
+// denominator is the document tax amount, to which zero-rated lines contribute
+// nothing (zero tax). The reconstructed rate must therefore equal the
+// pure-standard-rated rate and be unaffected by the zero-rated line.
+func TestOIOUBL21MixedCategoryExchangeRate(t *testing.T) {
+	doc, err := ubl.Parse([]byte(mixedCategoryDualCurrencyXML))
+	require.NoError(t, err)
+	inv, ok := doc.(*ubl.Invoice)
+	require.True(t, ok)
+
+	env, err := inv.Convert()
+	require.NoError(t, err)
+	gi, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.Len(t, gi.ExchangeRates, 1)
+	rate := gi.ExchangeRates[0]
+	assert.Equal(t, "EUR", string(rate.From))
+	assert.Equal(t, "DKK", string(rate.To))
+	// 2551.32 DKK (standard-rated tax) / 342.00 EUR (document tax) = 7.46.
+	assert.Equal(t, "7.46", rate.Amount.String())
+}
+
 func TestParseTaxNotes(t *testing.T) {
 	t.Run("reverse_charge", func(t *testing.T) {
 		env := parseXMLInvoice(t, "peppol/nbio-stuck-ubl.xml")
@@ -104,3 +131,131 @@ func TestParseTaxNotes(t *testing.T) {
 		}
 	})
 }
+
+// mixedCategoryDualCurrencyXML is a foreign-currency (EUR document, DKK tax)
+// OIOUBL invoice mixing a StandardRated line (carrying TransactionCurrencyTaxAmount)
+// with a ZeroRated line (which does not). Used to lock the exchange-rate
+// reconstruction against the mixed-category case.
+const mixedCategoryDualCurrencyXML = `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2">
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>
+  <cbc:ProfileID schemeAgencyID="320" schemeID="urn:oioubl:id:profileid-1.4">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>
+  <cbc:ID>SAMPLE-001</cbc:ID>
+  <cbc:IssueDate>2024-05-15</cbc:IssueDate>
+  <cbc:InvoiceTypeCode listAgencyID="320" listID="urn:oioubl:codelist:invoicetypecode-1.1">380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:TaxCurrencyCode>DKK</cbc:TaxCurrencyCode>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="GLN">5790000436101</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Provide One GmbH</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Dietmar-Hopp-Allee 16</cbc:StreetName>
+        <cbc:CityName>Walldorf</cbc:CityName>
+        <cbc:PostalZone>69190</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>DK</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Provide One GmbH</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="DK:CVR">DK37990485</cbc:CompanyID>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="GLN">5790000436057</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Sample Consumer</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:StreetName>Werner-Heisenberg-Allee 25</cbc:StreetName>
+        <cbc:CityName>München</cbc:CityName>
+        <cbc:PostalZone>80939</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>DK</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Sample Consumer</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="DK:CVR">DK47458714</cbc:CompanyID>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">1800.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">342.00</cbc:TaxAmount>
+      <cbc:TransactionCurrencyTaxAmount currencyID="DKK">2551.32</cbc:TransactionCurrencyTaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">StandardRated</cbc:ID>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
+          <cbc:Name>Moms</cbc:Name>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">1000.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">0.00</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">ZeroRated</cbc:ID>
+        <cbc:Percent>0</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
+          <cbc:Name>Moms</cbc:Name>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">2800.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">342.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">3142.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">3142.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="HUR">20</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">1800.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Development services</cbc:Name>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">StandardRated</cbc:ID>
+        <cbc:Percent>19</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
+          <cbc:Name>Moms</cbc:Name>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">90.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+  <cac:InvoiceLine>
+    <cbc:ID>2</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="HUR">10</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">1000.00</cbc:LineExtensionAmount>
+    <cac:Item>
+      <cbc:Name>Exported goods</cbc:Name>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">ZeroRated</cbc:ID>
+        <cbc:Percent>0</cbc:Percent>
+        <cac:TaxScheme>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.2">63</cbc:ID>
+          <cbc:Name>Moms</cbc:Name>
+        </cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price>
+      <cbc:PriceAmount currencyID="EUR">100.00</cbc:PriceAmount>
+    </cac:Price>
+  </cac:InvoiceLine>
+</Invoice>`
