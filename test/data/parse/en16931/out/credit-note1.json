@@ -4,14 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9542c7ed6a2d7bb55ec1198c78cb252a8e1ebe06c9514513a68d3ddf7aaafd38"
+			"val": "9a859176b4b7400632a42a3805b0feada387215cd1a96760c6483ca0aa6aa72e"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
-		"type": "credit-note",
+		"type": "other",
 		"code": "CN758494",
 		"issue_date": "2005-06-25",
 		"value_date": "2005-06-21",

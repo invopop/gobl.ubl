@@ -140,9 +140,8 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
-	if typeCode == nil && ui.XMLName.Local == rootNameCreditNote {
-		// A CreditNote document carries no mandatory type code (OIOUBL's
-		// samples omit it entirely); the root element is authoritative.
+	if typeCode == nil && o.context.Is(ContextOIOUBL21) && ui.XMLName.Local == rootNameCreditNote {
+		// OIOUBL omits the credit-note type code; the root element is authoritative.
 		out.Type = bill.InvoiceTypeCreditNote
 		return
 	}
@@ -161,7 +160,7 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 	out.IssueDate = issueDate
 
 	if ui.IssueTime != "" {
-		ct, err := civil.ParseTime(trimTimeZone(ui.IssueTime))
+		ct, err := civil.ParseTime(ui.IssueTime)
 		if err != nil {
 			return err
 		}
