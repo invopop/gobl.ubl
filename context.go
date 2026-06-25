@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"strings"
-
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/addons/de/xrechnung"
@@ -141,103 +139,97 @@ func WithContext(c Context) Option {
 	}
 }
 
-// contexts is the single source of truth for every supported context, keyed by
-// the descriptive name accepted by the CLI's --context flag. The exported
-// ContextX variables below are thin references into this map. ContextByName
-// resolves the key; FindContext ranges over the values to identify incoming
-// documents by CustomizationID.
-var contexts = map[string]Context{
-	// en16931 is the default context for basic UBL documents.
-	"en16931": {
-		CustomizationID: "urn:cen.eu:en16931:2017",
-		Addons:          []cbc.Key{en16931.V2017},
-		VESIDs: VESIDMapping{
-			Invoice:    "eu.cen.en16931:ubl:1.3.14-2",
-			CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.15",
-		},
-	},
-	// peppol is the default Peppol context.
-	"peppol": {
-		CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
-		ProfileID:       PeppolBillingProfileIDDefault,
-		Addons:          []cbc.Key{en16931.V2017},
-		VESIDs: VESIDMapping{
-			Invoice:    "eu.peppol.bis3:invoice:2025.5",
-			CreditNote: "eu.peppol.bis3:creditnote:2025.5",
-		},
-	},
-	// peppol-self-billed is the Peppol self-billed context.
-	"peppol-self-billed": {
-		CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
-		ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
-		Addons:          []cbc.Key{en16931.V2017},
-		// The Peppol self-billing rule sets are versioned independently from the
-		// regular invoice/credit-note ones. phive-rules keeps only a rolling window
-		// of releases, so the older ":2025.3" sets were dropped in phive-rules 4.3.x;
-		// ":2026.3" is the oldest still published and validates the same documents.
-		VESIDs: VESIDMapping{
-			Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.3",
-			CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.3",
-		},
-	},
-	// xrechnung is the context for XRechnung UBL documents.
-	"xrechnung": {
-		CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
-		ProfileID:       PeppolBillingProfileIDDefault,
-		Addons:          []cbc.Key{xrechnung.V3},
-		VESIDs: VESIDMapping{
-			Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
-			CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",
-		},
-	},
-	// peppol-france-cius is the context for France UBL Invoice CIUS.
-	"peppol-france-cius": {
-		CustomizationID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
-		ProfileID:             PeppolFranceProcessIDRegulated,
-		OutputCustomizationID: "urn:cen.eu:en16931:2017",
-		Addons:                []cbc.Key{flow2.V1},
-		VESIDs: VESIDMapping{
-			Invoice:    "fr.ctc:ubl-invoice:1.3",
-			CreditNote: "fr.ctc:ubl-creditnote:1.3",
-		},
-	},
-	// peppol-france-extended is the context for France UBL Invoice Extended.
-	"peppol-france-extended": {
-		CustomizationID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
-		ProfileID:             PeppolFranceProcessIDRegulated,
-		OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
-		Addons:                []cbc.Key{facturx.V1},
-		VESIDs: VESIDMapping{
-			Invoice:    "fr.ctc:ubl-invoice:1.3",
-			CreditNote: "fr.ctc:ubl-creditnote:1.3",
-		},
-	},
-	// zatca is the context for Saudi Arabia ZATCA Phase 2 e-invoicing.
-	"zatca": {
-		CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:zatca.gov.sa:e-invoicing:1.0",
-		ProfileID:       "reporting:1.0", // BT-23
-		Addons:          []cbc.Key{zatca.V1},
-		VESIDs: VESIDMapping{
-			Invoice:    "sa.zatca:ubl-invoice:2.3.8",
-			CreditNote: "sa.zatca:ubl-invoice:2.3.8",
-		},
-	},
+// contexts is the set of every supported context, scanned by FindContext
+// to identify incoming documents by their CustomizationID. Each exported
+// context registers itself here as it is declared, so there is no lookup table
+// to keep in sync by hand.
+var contexts []Context
+
+// registerContext records c for reverse lookups and returns it, so each
+// exported context can be defined and registered in a single declaration.
+func registerContext(c Context) Context {
+	contexts = append(contexts, c)
+	return c
 }
 
-// Exported contexts for programmatic configuration via WithContext. Each is a
-// reference to its single definition in the contexts map above.
-var (
-	ContextEN16931              = contexts["en16931"]
-	ContextPeppol               = contexts["peppol"]
-	ContextPeppolSelfBilled     = contexts["peppol-self-billed"]
-	ContextXRechnung            = contexts["xrechnung"]
-	ContextPeppolFranceCIUS     = contexts["peppol-france-cius"]
-	ContextPeppolFranceExtended = contexts["peppol-france-extended"]
-	ContextZATCA                = contexts["zatca"]
-)
+// ContextEN16931 is the default context for basic UBL documents.
+var ContextEN16931 = registerContext(Context{
+	CustomizationID: "urn:cen.eu:en16931:2017",
+	Addons:          []cbc.Key{en16931.V2017},
+	VESIDs: VESIDMapping{
+		Invoice:    "eu.cen.en16931:ubl:1.3.14-2",
+		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.15",
+	},
+})
 
-// ContextByName resolves a context by its name, case-insensitively.
-func ContextByName(name string) (Context, bool) {
-	c, ok := contexts[strings.ToLower(name)]
-	return c, ok
-}
+// ContextPeppol is the default Peppol context.
+var ContextPeppol = registerContext(Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
+	ProfileID:       PeppolBillingProfileIDDefault,
+	Addons:          []cbc.Key{en16931.V2017},
+	VESIDs: VESIDMapping{
+		Invoice:    "eu.peppol.bis3:invoice:2025.5",
+		CreditNote: "eu.peppol.bis3:creditnote:2025.5",
+	},
+})
+
+// ContextPeppolSelfBilled is the Peppol self-billed context.
+var ContextPeppolSelfBilled = registerContext(Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
+	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
+	Addons:          []cbc.Key{en16931.V2017},
+	// The Peppol self-billing rule sets are versioned independently from the
+	// regular invoice/credit-note ones. phive-rules keeps only a rolling window
+	// of releases, so the older ":2025.3" sets were dropped in phive-rules 4.3.x;
+	// ":2026.3" is the oldest still published and validates the same documents.
+	VESIDs: VESIDMapping{
+		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.3",
+		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.3",
+	},
+})
+
+// ContextXRechnung is the context for XRechnung UBL documents.
+var ContextXRechnung = registerContext(Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
+	ProfileID:       PeppolBillingProfileIDDefault,
+	Addons:          []cbc.Key{xrechnung.V3},
+	VESIDs: VESIDMapping{
+		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
+		CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",
+	},
+})
+
+// ContextPeppolFranceCIUS is the context for France UBL Invoice CIUS.
+var ContextPeppolFranceCIUS = registerContext(Context{
+	CustomizationID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
+	ProfileID:             PeppolFranceProcessIDRegulated,
+	OutputCustomizationID: "urn:cen.eu:en16931:2017",
+	Addons:                []cbc.Key{flow2.V1},
+	VESIDs: VESIDMapping{
+		Invoice:    "fr.ctc:ubl-invoice:1.3",
+		CreditNote: "fr.ctc:ubl-creditnote:1.3",
+	},
+})
+
+// ContextPeppolFranceExtended is the context for France UBL Invoice Extended.
+var ContextPeppolFranceExtended = registerContext(Context{
+	CustomizationID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
+	ProfileID:             PeppolFranceProcessIDRegulated,
+	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
+	Addons:                []cbc.Key{facturx.V1},
+	VESIDs: VESIDMapping{
+		Invoice:    "fr.ctc:ubl-invoice:1.3",
+		CreditNote: "fr.ctc:ubl-creditnote:1.3",
+	},
+})
+
+// ContextZATCA is the context for Saudi Arabia ZATCA Phase 2 e-invoicing.
+var ContextZATCA = registerContext(Context{
+	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:zatca.gov.sa:e-invoicing:1.0",
+	ProfileID:       "reporting:1.0", // BT-23
+	Addons:          []cbc.Key{zatca.V1},
+	VESIDs: VESIDMapping{
+		Invoice:    "sa.zatca:ubl-invoice:2.3.8",
+		CreditNote: "sa.zatca:ubl-invoice:2.3.8",
+	},
+})

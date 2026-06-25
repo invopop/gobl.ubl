@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
@@ -14,6 +15,24 @@ type convertOpts struct {
 	*rootOpts
 	contextName string
 	profileID   string
+}
+
+// contextsByName maps the --context flag values to their library contexts. The
+// names are a CLI concern, so they live here rather than in the ubl package.
+var contextsByName = map[string]ubl.Context{
+	"en16931":                ubl.ContextEN16931,
+	"peppol":                 ubl.ContextPeppol,
+	"peppol-self-billed":     ubl.ContextPeppolSelfBilled,
+	"xrechnung":              ubl.ContextXRechnung,
+	"peppol-france-cius":     ubl.ContextPeppolFranceCIUS,
+	"peppol-france-extended": ubl.ContextPeppolFranceExtended,
+	"zatca":                  ubl.ContextZATCA,
+}
+
+// contextByName resolves a --context flag value, case-insensitively.
+func contextByName(name string) (ubl.Context, bool) {
+	c, ok := contextsByName[strings.ToLower(name)]
+	return c, ok
 }
 
 // converter is implemented by every UBL document Parse can return (Invoice,
@@ -133,7 +152,7 @@ func (c *convertOpts) buildOptions() ([]ubl.Option, error) {
 
 	ctx := ubl.ContextEN16931
 	if c.contextName != "" {
-		found, ok := ubl.ContextByName(c.contextName)
+		found, ok := contextByName(c.contextName)
 		if !ok {
 			return nil, fmt.Errorf("unknown context %q", c.contextName)
 		}
