@@ -90,7 +90,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 	ui.applyExchangeRates(out)
 
-	if err := ui.goblAddLines(out); err != nil {
+	if err := ui.goblAddLines(out, o.context); err != nil {
 		return nil, err
 	}
 	if err := ui.goblAddPayment(out, o); err != nil {
@@ -112,7 +112,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	ui.applyTaxRepresentative(out, o)
 
 	if len(ui.AllowanceCharge) > 0 {
-		if err := ui.goblAddCharges(out); err != nil {
+		if err := ui.goblAddCharges(out, o.context); err != nil {
 			return nil, err
 		}
 	}
