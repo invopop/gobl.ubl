@@ -177,10 +177,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
 				}
-
-				if s := oioubl21TaxCategoryID(l.Taxes[0].Ext); s != "" {
-					it.ClassifiedTaxCategory.ID = &IDType{Value: s}
-				}
 			}
 
 			if len(l.Item.Identities) > 0 {
@@ -204,8 +200,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 						break
 					}
 
+					s := id.Ext.Get(iso.ExtKeySchemeID).String()
+
 					// Map first identity without extension to BuyersItemIdentification
-					if id.Ext.Get(iso.ExtKeySchemeID).String() == "" {
+					if s == "" {
 						if it.BuyersItemIdentification == nil {
 							it.BuyersItemIdentification = &ItemIdentification{
 								ID: &IDType{
@@ -218,7 +216,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 
 					// Map first identity with extension to StandardItemIdentification
 					if it.StandardItemIdentification == nil {
-						s := id.Ext.Get(iso.ExtKeySchemeID).String()
 						it.StandardItemIdentification = &ItemIdentification{
 							ID: &IDType{
 								SchemeID: &s,
@@ -400,8 +397,8 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 				CurrencyID: &ccy,
 			},
 		}
-		if s := ch.Ext.Get(untdid.ExtKeyCharge).String(); s != "" {
-			ac.AllowanceChargeReasonCode = &s
+		if e := ch.Ext.Get(untdid.ExtKeyCharge).String(); e != "" {
+			ac.AllowanceChargeReasonCode = &e
 		}
 		if ch.Reason != "" {
 			ac.AllowanceChargeReason = &ch.Reason
@@ -426,8 +423,8 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 				CurrencyID: &ccy,
 			},
 		}
-		if s := d.Ext.Get(untdid.ExtKeyAllowance).String(); s != "" {
-			ac.AllowanceChargeReasonCode = &s
+		if e := d.Ext.Get(untdid.ExtKeyAllowance).String(); e != "" {
+			ac.AllowanceChargeReasonCode = &e
 		}
 		if d.Reason != "" {
 			ac.AllowanceChargeReason = &d.Reason

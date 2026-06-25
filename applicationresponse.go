@@ -35,8 +35,8 @@ type ApplicationResponse struct {
 	DocumentResponse []*DocumentResponse `xml:"cac:DocumentResponse"`
 }
 
-// DocumentResponse pairs one Response with the document it concerns. An
-// ApplicationResponse may carry one per status line (OIOUBL restricts it to one).
+// DocumentResponse pairs one Response with the document it concerns; an
+// ApplicationResponse carries one per status line.
 type DocumentResponse struct {
 	Response          *Response                  `xml:"cac:Response"`
 	DocumentReference *ResponseDocumentReference `xml:"cac:DocumentReference"`
@@ -110,6 +110,8 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		applyOIOUBL21ResponseProfile(out, st)
 	}
 
+	// One DocumentResponse per status line: its response (description, effective
+	// date) plus a reference to the document being responded to.
 	for _, line := range st.Lines {
 		dr := &DocumentResponse{Response: &Response{}}
 		if desc := responseDescription(line); desc != "" {
@@ -168,10 +170,12 @@ const (
 	oioublProfileSchemeID    = "urn:oioubl:id:profileid-1.4"
 	oioublProfileTechnicalID = "Procurement-TecRes-1.0"
 	oioublCodeListAgencyID   = "320"
-	// oioublUBLVersion is the UBLVersionID OIOUBL 2.1 documents declare on the
-	// wire: real NemHandel traffic carries "2.0" (the OIOUBL element model
-	// derives from UBL 2.0), even though the documents validate against the
-	// UBL 2.1 schema. F-LIB001 accepts both; "2.0" matches production.
+	// oioublUBLVersion is the UBLVersionID OIOUBL declares on the wire. "OIOUBL 2.1"
+	// is the profile (cbc:CustomizationID); the UBL syntax version is separate, and
+	// we emit "2.0" to match the documents Unimaze produces. The element model is
+	// UBL 2.1 regardless.
+	// FLAGGED: F-LIB001 permits "2.1" too, so this OIOUBL-only override could be
+	// dropped for a uniform 2.1 once a Unimaze re-send confirms 2.1 is accepted.
 	oioublUBLVersion = "2.0"
 )
 
@@ -225,10 +229,8 @@ func applyOIOUBL21DocumentResponse(dr *DocumentResponse, line *bill.StatusLine) 
 	}
 }
 
-// responseReferenceID returns the 1-based line reference for the Response. The
-// StatusLine index is 1-based once calculated; an unset (zero) index falls back
-// to 1 so the emitted ReferenceID is always a valid line pointer rather than the
-// meaningless "0". The schematron also requires it to be non-empty (F-APR016).
+// responseReferenceID returns the 1-based line reference for the Response,
+// falling back to 1 for an unset index (F-APR016 requires a non-empty value).
 func responseReferenceID(index int) int {
 	if index < 1 {
 		return 1
