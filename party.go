@@ -330,16 +330,6 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 	}
 
-	// Fabricating a DK:CVR (0184) PartyLegalEntity/CompanyID from the tax ID is
-	// OIOUBL-specific; under other contexts the legal identity should come from
-	// real data, not the tax number.
-	if ctx.Is(ContextOIOUBL21) && p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID == nil && party.TaxID != nil && string(party.TaxID.Country) == "DK" {
-		s := icdDKCVR
-		p.PartyLegalEntity.CompanyID = &IDType{
-			SchemeID: &s,
-			Value:    party.TaxID.Code.String(),
-		}
-	}
 	return p
 }
 
