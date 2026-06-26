@@ -47,12 +47,18 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		if ccy == "" {
 			ccy = inv.Currency.String()
 		}
+		// OIOUBL F-INV348 requires the gross Price×Qty here (line allowances are
+		// netted at the document level); other profiles use the net line total.
+		lineExt := l.Total.String()
+		if context.Is(ContextOIOUBL21) && l.Sum != nil {
+			lineExt = rescaleToCurrency(*l.Sum, ccy)
+		}
 		invLine := InvoiceLine{
 			ID: strconv.Itoa(l.Index),
 
 			LineExtensionAmount: Amount{
 				CurrencyID: &ccy,
-				Value:      lineExtensionValue(l, context, ccy),
+				Value:      lineExt,
 			},
 		}
 
@@ -304,17 +310,6 @@ func roundToCurrency(a num.Amount, ccy string) num.Amount {
 
 func rescaleToCurrency(a num.Amount, ccy string) string {
 	return roundToCurrency(a, ccy).String()
-}
-
-// lineExtensionValue renders the line LineExtensionAmount. OIOUBL F-INV348
-// requires the gross Price×Qty (line allowances are carried separately and
-// netted at the document level); other profiles use the net line total.
-func lineExtensionValue(l *bill.Line, ctx Context, ccy string) string {
-	if ctx.Is(ContextOIOUBL21) && l.Sum != nil {
-		// gross, rounded to currency precision (l.Sum is the raw qty×price)
-		return rescaleToCurrency(*l.Sum, ccy)
-	}
-	return l.Total.String()
 }
 
 func makeLineTaxTotals(line *bill.Line, ccy string, ctx Context) []TaxTotal {
