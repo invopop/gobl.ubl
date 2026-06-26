@@ -488,28 +488,24 @@ func oioubl21AddressFormatCode(value string) *IDType {
 	}
 }
 
-// OIOUBL address-format extension keys and values, mirrored from the dk-oioubl
-// addon. The converter reads them as plain extension keys on the GOBL party
-// (GOBL has no address-level extension); only the formats that reshape the
-// output need an explicit case.
+// OIOUBL address extension keys and values, sourced from the dk-oioubl addon (the
+// single source of truth) so the converter and addon never drift. The converter
+// reads them as plain party extensions (GOBL has no address-level extension).
 const (
-	oioubl21AddressFormatKey   cbc.Key = "dk-oioubl-address-format"
-	oioubl21AddressIDKey       cbc.Key = "dk-oioubl-address-id"
-	oioubl21AddressDistrictKey cbc.Key = "dk-oioubl-address-district"
-	// oioubl21AddressSchemeKey overrides the derived EndpointID/PartyIdentification
-	// symbolic scheme (F-LIB179/F-LIB183) for a foreign participant; see newParty.
-	oioubl21AddressSchemeKey cbc.Key = "dk-oioubl-address-scheme"
+	oioubl21AddressFormatKey   = oioubl.ExtKeyAddressFormat
+	oioubl21AddressIDKey       = oioubl.ExtKeyAddressID
+	oioubl21AddressDistrictKey = oioubl.ExtKeyAddressDistrict
+	oioubl21AddressSchemeKey   = oioubl.ExtKeyAddressScheme
 
-	oioubl21AddressStructuredLax    = "StructuredLax"
-	oioubl21AddressUnstructured     = "Unstructured"
-	oioubl21AddressStructuredID     = "StructuredID"
-	oioubl21AddressStructuredRegion = "StructuredRegion"
+	oioubl21AddressStructuredLax    = string(oioubl.ExtValueAddressFormatStructuredLax)
+	oioubl21AddressUnstructured     = string(oioubl.ExtValueAddressFormatUnstructured)
+	oioubl21AddressStructuredID     = string(oioubl.ExtValueAddressFormatStructuredID)
+	oioubl21AddressStructuredRegion = string(oioubl.ExtValueAddressFormatStructuredRegion)
 
-	// oioubl21AddressIDScheme is the address-register schemeID OIOUBL mandates on
-	// a StructuredID address ID (F-LIB028/029); the ID is a GLN.
-	oioubl21AddressIDScheme = "GLN"
-	// oioubl21GLNAgencyID is the GS1 scheme agency (9) OIOUBL stamps on GLN IDs.
-	oioubl21GLNAgencyID = "9"
+	// oioubl21AddressIDScheme (GLN) and its GS1 agency are wire-serialization
+	// attributes OIOUBL mandates on a StructuredID address ID (F-LIB028/029).
+	oioubl21AddressIDScheme = string(oioubl.SchemeGLN)
+	oioubl21GLNAgencyID     = "9"
 )
 
 // applyOIOUBL21AddressFormat reshapes a party's postal address to the OIOUBL
@@ -716,15 +712,13 @@ const (
 // already passes through here. An unmapped value passes through unchanged.
 var oioubl21EndpointSchemes = oioubl.EndpointSchemes
 
-// oioubl21EndpointICDs restores wire EndpointIDs to ISO 6523 endpoints on
-// parse. Inverse of oioubl21EndpointSchemes (the Danish schemes); a foreign
-// symbolic scheme has no ICD here and is restored as an inbox instead.
+// oioubl21EndpointICDs is the inverse of the Danish endpoint-scheme map, used on
+// parse to restore a wire EndpointID to its ISO 6523 endpoint. The map is 1:1, so
+// a foreign symbolic scheme has no entry and is restored as an inbox instead.
 var oioubl21EndpointICDs = func() map[string]string {
 	m := make(map[string]string, len(oioubl21EndpointSchemes))
 	for icd, scheme := range oioubl21EndpointSchemes {
-		if cur, ok := m[scheme]; !ok || icd < cur {
-			m[scheme] = icd
-		}
+		m[scheme] = icd
 	}
 	return m
 }()

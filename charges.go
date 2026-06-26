@@ -68,7 +68,7 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, ctx Context)
 		}
 	}
 	if ch.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(ch.Taxes)
+		c.TaxCategory = makeTaxCategory(ch.Taxes, ctx)
 	}
 
 	return c
@@ -99,19 +99,24 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, ctx Conte
 		}
 	}
 	if d.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(d.Taxes)
+		c.TaxCategory = makeTaxCategory(d.Taxes, ctx)
 	}
 
 	return c
 }
 
-func makeTaxCategory(taxes tax.Set) []*TaxCategory {
+func makeTaxCategory(taxes tax.Set, ctx Context) []*TaxCategory {
 	set := []*TaxCategory{}
 	for _, t := range taxes {
 		category := TaxCategory{}
 		category.TaxScheme = &TaxScheme{ID: IDType{Value: t.Category.String()}}
 
-		e := oioubl21TaxCategoryID(t.Ext)
+		// OIOUBL emits its own taxcategoryid-1.1 value (StandardRated/…); other
+		// profiles use the EN 16931 UNTDID category directly.
+		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
+		if ctx.Is(ContextOIOUBL21) {
+			e = oioubl21TaxCategoryID(t.Ext)
+		}
 		if e != "" {
 			category.ID = &IDType{Value: e}
 		}

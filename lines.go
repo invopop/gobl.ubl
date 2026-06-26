@@ -411,7 +411,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			}
 		}
 		if ctx.Is(ContextOIOUBL21) {
-			ac.TaxCategory = makeTaxCategory(taxes) // F-LIB226: line allowance needs a TaxCategory
+			ac.TaxCategory = makeTaxCategory(taxes, ctx) // F-LIB226: line allowance needs a TaxCategory
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}
@@ -437,7 +437,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			}
 		}
 		if ctx.Is(ContextOIOUBL21) {
-			ac.TaxCategory = makeTaxCategory(taxes) // F-LIB226: line allowance needs a TaxCategory
+			ac.TaxCategory = makeTaxCategory(taxes, ctx) // F-LIB226: line allowance needs a TaxCategory
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}

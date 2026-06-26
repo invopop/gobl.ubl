@@ -21,11 +21,9 @@ func (ar *ApplicationResponse) Convert() (*gobl.Envelope, error) {
 	if ar.ProfileID != nil {
 		profileID = ar.ProfileID.Value
 	}
-	// Resolve by CustomizationID + ProfileID first, then fall back to the
-	// CustomizationID alone. OIOUBL keeps a single CustomizationID across all
-	// response types but swaps in a technical-response ProfileID for
-	// acknowledgements (F-APR057/F-APR058), which would otherwise fail the
-	// ProfileID-qualified lookup.
+	// Resolve by CustomizationID+ProfileID, else CustomizationID alone: OIOUBL
+	// swaps in a technical-response ProfileID for acknowledgements (F-APR057/058)
+	// that would fail the ProfileID-qualified lookup.
 	ctx := FindContext(ar.CustomizationID, profileID)
 	if ctx == nil {
 		ctx = FindContext(ar.CustomizationID, "")
