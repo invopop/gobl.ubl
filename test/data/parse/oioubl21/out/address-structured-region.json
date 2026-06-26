@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bf6d1d2a9cad73d5e06c9852af9b5ced024a69bfb0c44cde844ffc6ffbf4c2a1"
+			"val": "7af299c3542d2a182bde08ee1f12647ad11a7b748106a65535ce0461d3ad100c"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:88146328"
@@ -55,7 +55,8 @@
 			],
 			"ext": {
 				"dk-oioubl-address-district": "Nørrebro",
-				"dk-oioubl-address-format": "StructuredRegion"
+				"dk-oioubl-address-format": "StructuredRegion",
+				"dk-oioubl-address-scheme": "DK:CVR"
 			}
 		},
 		"customer": {
@@ -98,7 +99,10 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
 		},
 		"lines": [
 			{

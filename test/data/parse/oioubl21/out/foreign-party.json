@@ -4,10 +4,9 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9de4c4bd8372b53511e1286d9aad8ee8e7dc34d97092a8a3d7f23ef65162ad98"
+			"val": "2460de8b6191db8d26e79432229be53d00ee3d69f73776bd2fa1c596c896192c"
 		},
-		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::9930:DE282741168"
+		"from": "iso6523-actorid-upis::0184:12345674"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -62,7 +61,10 @@
 					"code": "2100",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
 		},
 		"customer": {
 			"name": "Beispiel GmbH",
@@ -91,9 +93,10 @@
 					]
 				}
 			],
-			"endpoints": [
+			"inboxes": [
 				{
-					"uri": "iso6523-actorid-upis::9930:DE282741168"
+					"scheme": "DE:VAT",
+					"code": "DE282741168"
 				}
 			],
 			"addresses": [

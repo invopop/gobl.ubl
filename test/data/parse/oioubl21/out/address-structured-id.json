@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1aa95cd41384bbbb081a531a20086dab2c7f855a609db01d0619c8a2f55447e5"
+			"val": "98fa2403982169a4959bddd6ca99138956cecc1f0f3ee1ad812048f9586dde62"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:88146328"
@@ -52,7 +52,8 @@
 			],
 			"ext": {
 				"dk-oioubl-address-format": "StructuredID",
-				"dk-oioubl-address-id": "5798009811578"
+				"dk-oioubl-address-id": "5798009811578",
+				"dk-oioubl-address-scheme": "DK:CVR"
 			}
 		},
 		"customer": {
@@ -95,7 +96,10 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
 		},
 		"lines": [
 			{

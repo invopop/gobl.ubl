@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "646ad8827d9ebe715643bbfb15425d264e0280ef13e34fd5a46954fbcad4314d"
+			"val": "74129066caea716ddda03387dd6f74e120c0ed60845043dcc22c30e204f2ffaa"
 		},
 		"from": "iso6523-actorid-upis::0088:5790000436101",
 		"to": "iso6523-actorid-upis::0088:5790000436057"
@@ -79,7 +79,8 @@
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "Unstructured"
+				"dk-oioubl-address-format": "Unstructured",
+				"dk-oioubl-address-scheme": "GLN"
 			}
 		},
 		"customer": {
@@ -127,7 +128,8 @@
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
+				"dk-oioubl-address-format": "StructuredDK",
+				"dk-oioubl-address-scheme": "GLN"
 			}
 		},
 		"lines": [

@@ -57,6 +57,9 @@
 		},
 		"customer": {
 			"name": "Beispiel GmbH",
+			"ext": {
+				"dk-oioubl-address-scheme": "DE:VAT"
+			},
 			"tax_id": {
 				"country": "DE",
 				"code": "282741168"

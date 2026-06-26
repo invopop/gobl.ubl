@@ -12,7 +12,7 @@ require (
 
 require (
 	cloud.google.com/go v0.118.0
-	github.com/invopop/gobl.dk.oioubl v0.0.0-20260625163930-d76ee753d032
+	github.com/invopop/gobl.dk.oioubl v0.0.0-20260626085027-b52a11b0b281
 	github.com/invopop/gobl.fr.ctc v0.0.4
 	github.com/invopop/gobl.sa.zatca v0.0.2
 	github.com/invopop/phive v0.17.0
