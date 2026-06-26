@@ -473,11 +473,8 @@ func splitISO6523Endpoint(uri cbc.URI) (string, string, bool) {
 	return icd, code, true
 }
 
-// oioubl21AddressFormatCode returns an OIOUBL AddressFormatCode (codelist
-// addressformatcode-1.1), required on every address (F-LIB025). The value
-// defaults to StructuredLax, which imposes no mandatory sub-fields and matches
-// real NemHandel traffic; a party may override it via the dk-oioubl-address-format
-// extension (see applyOIOUBL21AddressFormat).
+// oioubl21AddressFormatCode builds the cbc:AddressFormatCode (codelist
+// addressformatcode-1.1) required on every OIOUBL address (F-LIB025).
 func oioubl21AddressFormatCode(value string) *IDType {
 	listID := "urn:oioubl:codelist:addressformatcode-1.1"
 	listAgencyID := "320"
@@ -508,14 +505,10 @@ const (
 	oioubl21GLNAgencyID     = "9"
 )
 
-// applyOIOUBL21AddressFormat reshapes a party's postal address to the OIOUBL
-// addressformatcode-1.1 value declared on the GOBL party
-// (dk-oioubl-address-format). Without a declared format the address keeps the
-// StructuredLax form newAddress produced. Each restricted format drops the
-// elements OIOUBL forbids (F-LIB031/038/040); the StructuredID identifier and the
-// StructuredRegion district — which GOBL does not model — are read from the party
-// extension. It must run after applyOIOUBL21Party, which derives the DK vs ZZZ
-// schemes from the address country before the restricted formats drop it.
+// applyOIOUBL21AddressFormat reshapes a party's postal address to its declared
+// dk-oioubl-address-format, dropping the elements each restricted format forbids
+// (F-LIB031/038/040). Must run after applyOIOUBL21Party, which needs the address
+// country before the restricted formats drop it.
 func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
 	if addr == nil || party == nil {
 		return

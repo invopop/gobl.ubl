@@ -28,7 +28,7 @@ const (
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
-// validate is a flag that enables Phive validation (used by the France probe test).
+// validate is a flag that enables Phive validation
 var validate = flag.Bool("validate", false, "Run Phive validation on generated XML")
 
 func TestConvertToInvoice(t *testing.T) {

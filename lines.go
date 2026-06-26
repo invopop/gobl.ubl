@@ -164,8 +164,14 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 					},
 				}
 
-				if s := oioubl21TaxCategoryID(l.Taxes[0].Ext); s != "" {
-					it.ClassifiedTaxCategory.ID = &IDType{Value: s}
+				// OIOUBL emits its own taxcategoryid-1.1 value; other profiles use
+				// the EN 16931 UNTDID category directly.
+				cat := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String()
+				if context.Is(ContextOIOUBL21) {
+					cat = oioubl21TaxCategoryID(l.Taxes[0].Ext)
+				}
+				if cat != "" {
+					it.ClassifiedTaxCategory.ID = &IDType{Value: cat}
 				}
 
 				// Set percent: required unless category is "O" (outside scope)

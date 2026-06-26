@@ -76,11 +76,9 @@ func TestParseInvoiceTypes(t *testing.T) {
 }
 
 func TestParseInvoiceOIOUBLNonProfile5Context(t *testing.T) {
-	// Real NemHandel invoices keep the single CustomizationID "OIOUBL-2.1" but
-	// carry one of the ~40 procurement ProfileIDs (Procurement-BilSim-1.0, …)
-	// rather than profile5. The parser must still resolve the OIOUBL context —
-	// and its dk-oioubl-v2-1 addon — via the CustomizationID-only fallback;
-	// otherwise the document parses with no addons. (FINDINGS-2026-06-11 §2.16.)
+	// A non-profile5 ProfileID (one of OIOUBL's ~40 procurement profiles) must
+	// still resolve the OIOUBL context and its addon via the CustomizationID-only
+	// fallback; otherwise the document parses with no addons.
 	data, err := testLoadXML("oioubl21/invoice-minimal.xml")
 	require.NoError(t, err)
 

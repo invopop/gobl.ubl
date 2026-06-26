@@ -200,13 +200,10 @@ func parseAddress(address *PostalAddress) *org.Address {
 	return addr
 }
 
-// applyOIOUBL21AddressFormatParse restores the OIOUBL address format declared on
-// the wire (cbc:AddressFormatCode) to the GOBL party extensions the emit side
-// reads (see applyOIOUBL21AddressFormat), so the format round-trips. StructuredLax
-// is the default form newAddress emits for an address without a declared format,
-// so it carries no extension. The StructuredID identifier (cbc:ID) and the
-// StructuredRegion district (cbc:District) are not modelled by org.Address and are
-// read back onto the party extension.
+// applyOIOUBL21AddressFormatParse restores the wire cbc:AddressFormatCode to the
+// dk-oioubl-address-format extension so the format round-trips. StructuredLax is
+// the default and carries no extension; the StructuredID id and StructuredRegion
+// district (not modelled by org.Address) are read back onto the party extension.
 func applyOIOUBL21AddressFormatParse(address *PostalAddress, p *org.Party) {
 	if address == nil || address.AddressFormatCode == nil {
 		return
