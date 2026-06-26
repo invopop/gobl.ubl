@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d9abb345b55f74477bae9c2f7348c2e15850dedaa0c5a995fb8c3b3ed3a4b0fe"
+			"val": "8fbe51c4a63e7c9ca07d97a08b88ad9633fb415834bd8500ac7b084a918f3c5e"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:88146328"
@@ -31,6 +31,15 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
 			"endpoints": [
 				{
 					"uri": "iso6523-actorid-upis::0184:12345674"
@@ -44,7 +53,10 @@
 					"code": "1000",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
 		},
 		"customer": {
 			"name": "Kunde ApS",
@@ -52,6 +64,15 @@
 				"country": "DK",
 				"code": "88146328"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK88146328",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -72,7 +93,10 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
 		},
 		"lines": [
 			{

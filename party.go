@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -229,7 +230,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		if ep := party.Endpoint(iso6523EndpointScheme); ep != nil {
 			if icd, code, ok := splitISO6523Endpoint(ep.URI); ok {
 				p.EndpointID = &EndpointID{
-					SchemeID: normalizeEndpointScheme(icd),
+					SchemeID: icd,
 					Value:    code,
 				}
 			}
@@ -243,14 +244,18 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 				Value:    ib.Email,
 			}
 		} else if ib.Scheme != "" {
-			scheme := ib.Scheme.String()
-			if ctx.Is(ContextOIOUBL21) {
-				scheme = normalizeEndpointScheme(scheme)
-			}
 			p.EndpointID = &EndpointID{
-				SchemeID: scheme,
+				SchemeID: ib.Scheme.String(),
 				Value:    ib.Code.String(),
 			}
+		}
+	}
+	// An explicit OIOUBL identifier scheme overrides the derived one: the manual
+	// path for a foreign participant whose scheme is not in the Danish derivation
+	// applied by applyOIOUBL21Party. Email endpoints keep their EM scheme.
+	if ctx.Is(ContextOIOUBL21) && p.EndpointID != nil && p.EndpointID.SchemeID != SchemeIDEmail {
+		if s := party.Ext.Get(oioubl21AddressSchemeKey).String(); s != "" {
+			p.EndpointID.SchemeID = s
 		}
 	}
 
@@ -330,16 +335,6 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 	}
 
-	// Fabricating a DK:CVR (0184) PartyLegalEntity/CompanyID from the tax ID is
-	// OIOUBL-specific; under other contexts the legal identity should come from
-	// real data, not the tax number.
-	if ctx.Is(ContextOIOUBL21) && p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID == nil && party.TaxID != nil && string(party.TaxID.Country) == "DK" {
-		s := icdDKCVR
-		p.PartyLegalEntity.CompanyID = &IDType{
-			SchemeID: &s,
-			Value:    party.TaxID.Code.String(),
-		}
-	}
 	return p
 }
 
@@ -478,15 +473,6 @@ func splitISO6523Endpoint(uri cbc.URI) (string, string, bool) {
 	return icd, code, true
 }
 
-func normalizeEndpointScheme(s string) string {
-	switch strings.ToUpper(s) {
-	case oioubl21SchemeGLN:
-		return icdGLN
-	default:
-		return s
-	}
-}
-
 // oioubl21AddressFormatCode returns an OIOUBL AddressFormatCode (codelist
 // addressformatcode-1.1), required on every address (F-LIB025). The value
 // defaults to StructuredLax, which imposes no mandatory sub-fields and matches
@@ -510,6 +496,9 @@ const (
 	oioubl21AddressFormatKey   cbc.Key = "dk-oioubl-address-format"
 	oioubl21AddressIDKey       cbc.Key = "dk-oioubl-address-id"
 	oioubl21AddressDistrictKey cbc.Key = "dk-oioubl-address-district"
+	// oioubl21AddressSchemeKey overrides the derived EndpointID/PartyIdentification
+	// symbolic scheme (F-LIB179/F-LIB183) for a foreign participant; see newParty.
+	oioubl21AddressSchemeKey cbc.Key = "dk-oioubl-address-scheme"
 
 	oioubl21AddressStructuredLax    = "StructuredLax"
 	oioubl21AddressUnstructured     = "Unstructured"
@@ -711,88 +700,25 @@ func contactName(n *org.Name) string {
 }
 
 // OIOUBL symbolic EndpointID schemes (F-LIB179) and the ISO 6523 ICDs they
-// correspond to.
+// correspond to. The symbolic schemes are defined by the dk-oioubl addon (the
+// single source of truth, shared with the ICD->scheme map below).
 const (
-	oioubl21SchemeDKCVR = "DK:CVR"
-	oioubl21SchemeDKSE  = "DK:SE"
-	oioubl21SchemeGLN   = "GLN"
-	// oioubl21SchemeZZZ is the OIOUBL "other" company-ID scheme, the only
-	// PartyTaxScheme/PartyLegalEntity scheme valid for a non-Danish identifier
-	// (F-LIB195 allows {DK:SE, ZZZ}; F-LIB189 allows {DK:CVR, DK:CPR, ZZZ}).
-	oioubl21SchemeZZZ = "ZZZ"
-	icdGLN            = "0088"
-	icdDKCVR          = "0184"
-	icdDKSE           = "0198"
+	oioubl21SchemeDKCVR = oioubl.SchemeDKCVR
+	oioubl21SchemeDKSE  = oioubl.SchemeDKSE
+	oioubl21SchemeZZZ   = oioubl.SchemeZZZ
+	icdDKSE             = "0198"
 )
 
-// oioubl21EndpointSchemes maps ISO 6523 ICDs / Peppol EAS codes to the
-// symbolic OIOUBL EndpointID schemeID codelist (F-LIB179) — numeric scheme
-// IDs are rejected on the NemHandel wire. Only codes with an unambiguous
-// symbolic counterpart are mapped; anything else passes through numerically.
-var oioubl21EndpointSchemes = map[string]string{
-	"0007":   "SE:ORGNR",
-	"0009":   "FR:SIRET",
-	"0037":   "FI:OVT",
-	"0060":   "DUNS",
-	icdGLN:   oioubl21SchemeGLN,
-	"0096":   "DK:P",
-	icdDKCVR: oioubl21SchemeDKCVR,
-	"0192":   "NO:ORGNR",
-	"0196":   "IS:KT",
-	icdDKSE:  oioubl21SchemeDKSE,
-	"0212":   "FI:ORGNR",
-	"0213":   "FI:VAT",
-	"9902":   oioubl21SchemeDKCVR, // legacy EAS for DK:CVR
-	"9906":   "IT:VAT",
-	"9907":   "IT:CF",
-	"9909":   "NO:VAT",
-	"9910":   "HU:VAT",
-	"9912":   "EU:VAT",
-	"9913":   "EU:REID",
-	"9914":   "AT:VAT",
-	"9915":   "AT:GOV",
-	"9917":   "IS:KT", // legacy EAS for IS:KT
-	"9918":   "IBAN",
-	"9919":   "AT:KUR",
-	"9920":   "ES:VAT",
-	"9922":   "AD:VAT",
-	"9923":   "AL:VAT",
-	"9924":   "BA:VAT",
-	"9925":   "BE:VAT",
-	"9926":   "BG:VAT",
-	"9927":   "CH:VAT",
-	"9928":   "CY:VAT",
-	"9929":   "CZ:VAT",
-	"9930":   "DE:VAT",
-	"9931":   "EE:VAT",
-	"9932":   "GB:VAT",
-	"9933":   "GR:VAT",
-	"9934":   "HR:VAT",
-	"9935":   "IE:VAT",
-	"9936":   "LI:VAT",
-	"9937":   "LT:VAT",
-	"9938":   "LU:VAT",
-	"9939":   "LV:VAT",
-	"9940":   "MC:VAT",
-	"9941":   "ME:VAT",
-	"9942":   "MK:VAT",
-	"9943":   "MT:VAT",
-	"9944":   "NL:VAT",
-	"9945":   "PL:VAT",
-	"9946":   "PT:VAT",
-	"9947":   "RO:VAT",
-	"9948":   "RS:VAT",
-	"9949":   "SI:VAT",
-	"9950":   "SK:VAT",
-	"9951":   "SM:VAT",
-	"9952":   "TR:VAT",
-	"9953":   "VA:VAT",
-	"9955":   "SE:VAT",
-}
+// oioubl21EndpointSchemes maps the Danish ISO 6523 ICDs to their symbolic
+// OIOUBL EndpointID schemeID (F-LIB179) — numeric scheme IDs are rejected on
+// the NemHandel wire. Danish ICDs are derived; a foreign participant supplies
+// its scheme via the dk-oioubl-address-scheme extension (see newParty), which
+// already passes through here. An unmapped value passes through unchanged.
+var oioubl21EndpointSchemes = oioubl.EndpointSchemes
 
 // oioubl21EndpointICDs restores wire EndpointIDs to ISO 6523 endpoints on
-// parse. Inverse of oioubl21EndpointSchemes; symbolic schemes fed by several
-// codes restore to the lowest (canonical, non-legacy) one.
+// parse. Inverse of oioubl21EndpointSchemes (the Danish schemes); a foreign
+// symbolic scheme has no ICD here and is restored as an inbox instead.
 var oioubl21EndpointICDs = func() map[string]string {
 	m := make(map[string]string, len(oioubl21EndpointSchemes))
 	for icd, scheme := range oioubl21EndpointSchemes {
@@ -811,10 +737,9 @@ func applyOIOUBL21Party(p *Party) {
 		return
 	}
 	if p.EndpointID != nil {
-		if mapped, ok := oioubl21EndpointSchemes[p.EndpointID.SchemeID]; ok {
-			p.EndpointID.SchemeID = mapped
-		}
-		// OIOUBL CVR endpoints must carry the DK-prefixed form (F-LIB180).
+		// The schemeID is the dk-oioubl-address-scheme extension value (set in
+		// newParty), emitted 1:1. OIOUBL CVR endpoints must carry the DK-prefixed
+		// form (F-LIB180).
 		if p.EndpointID.SchemeID == oioubl21SchemeDKCVR && !strings.HasPrefix(p.EndpointID.Value, "DK") {
 			p.EndpointID.Value = "DK" + p.EndpointID.Value
 		}

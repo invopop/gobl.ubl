@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "08d8138226c6a5592e5131ba9c2207e984c7bae87c623d81f43efe7cd1d38270"
+			"val": "03d6048cdd98ca16eb6f12fdef276b518fef6d06795b3cf07d3a28444bfbb093"
 		},
 		"from": "iso6523-actorid-upis::0184:12345674",
 		"to": "iso6523-actorid-upis::0184:88146328"
@@ -33,6 +33,15 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
 			"endpoints": [
 				{
 					"uri": "iso6523-actorid-upis::0184:12345674"
@@ -45,7 +54,8 @@
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "Unstructured"
+				"dk-oioubl-address-format": "Unstructured",
+				"dk-oioubl-address-scheme": "DK:CVR"
 			}
 		},
 		"customer": {
@@ -54,6 +64,15 @@
 				"country": "DK",
 				"code": "88146328"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK88146328",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -79,7 +98,10 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			]
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
 		},
 		"lines": [
 			{

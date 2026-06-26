@@ -106,7 +106,7 @@ func goblParty(party *Party, o *options) *org.Party {
 		}
 	}
 
-	handleLegalEntityIdentity(party, p, o)
+	handleLegalEntityIdentity(party, p)
 	handlePartyTaxSchemes(party, p, o)
 	handlePartyIdentifications(party, p, o)
 
@@ -235,17 +235,10 @@ func applyOIOUBL21AddressFormatParse(address *PostalAddress, p *org.Party) {
 	p.Ext = tax.ExtensionsOf(exts)
 }
 
-func handleLegalEntityIdentity(party *Party, p *org.Party, o *options) {
+func handleLegalEntityIdentity(party *Party, p *org.Party) {
 	if party.PartyLegalEntity == nil || party.PartyLegalEntity.CompanyID == nil {
 		return
 	}
-	// Under OIOUBL the PartyLegalEntity/CompanyID is fabricated from the DK tax ID
-	// (see newParty), so don't restore it as a separate legal identity the source
-	// document never carried.
-	if o.context.Is(ContextOIOUBL21) && oioublFabricatedLegalID(party) {
-		return
-	}
-
 	if p.Identities == nil {
 		p.Identities = make([]*org.Identity, 0)
 	}
@@ -259,24 +252,6 @@ func handleLegalEntityIdentity(party *Party, p *org.Party, o *options) {
 		})
 	}
 	p.Identities = append(p.Identities, identity)
-}
-
-// oioublFabricatedLegalID reports whether the PartyLegalEntity/CompanyID is the
-// DK:CVR value the converter fabricates from the DK tax ID — a DK:CVR scheme whose
-// CVR matches a PartyTaxScheme CompanyID. Such an id duplicates the tax identity
-// and is not a distinct legal identity.
-func oioublFabricatedLegalID(party *Party) bool {
-	le := party.PartyLegalEntity.CompanyID
-	if le.SchemeID == nil || *le.SchemeID != oioubl21SchemeDKCVR {
-		return false
-	}
-	cvr := strings.TrimPrefix(le.Value, "DK")
-	for _, pts := range party.PartyTaxScheme {
-		if pts.CompanyID != nil && strings.TrimPrefix(pts.CompanyID.Value, "DK") == cvr {
-			return true
-		}
-	}
-	return false
 }
 
 func handlePartyTaxSchemes(party *Party, p *org.Party, o *options) {
