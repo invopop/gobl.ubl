@@ -473,11 +473,8 @@ func splitISO6523Endpoint(uri cbc.URI) (string, string, bool) {
 	return icd, code, true
 }
 
-// oioubl21AddressFormatCode returns an OIOUBL AddressFormatCode (codelist
-// addressformatcode-1.1), required on every address (F-LIB025). The value
-// defaults to StructuredLax, which imposes no mandatory sub-fields and matches
-// real NemHandel traffic; a party may override it via the dk-oioubl-address-format
-// extension (see applyOIOUBL21AddressFormat).
+// oioubl21AddressFormatCode builds the cbc:AddressFormatCode (codelist
+// addressformatcode-1.1) required on every OIOUBL address (F-LIB025).
 func oioubl21AddressFormatCode(value string) *IDType {
 	listID := "urn:oioubl:codelist:addressformatcode-1.1"
 	listAgencyID := "320"
@@ -488,38 +485,30 @@ func oioubl21AddressFormatCode(value string) *IDType {
 	}
 }
 
-// OIOUBL address-format extension keys and values, mirrored from the dk-oioubl
-// addon. The converter reads them as plain extension keys on the GOBL party
-// (GOBL has no address-level extension); only the formats that reshape the
-// output need an explicit case.
+// OIOUBL address extension keys and values, sourced from the dk-oioubl addon (the
+// single source of truth) so the converter and addon never drift. The converter
+// reads them as plain party extensions (GOBL has no address-level extension).
 const (
-	oioubl21AddressFormatKey   cbc.Key = "dk-oioubl-address-format"
-	oioubl21AddressIDKey       cbc.Key = "dk-oioubl-address-id"
-	oioubl21AddressDistrictKey cbc.Key = "dk-oioubl-address-district"
-	// oioubl21AddressSchemeKey overrides the derived EndpointID/PartyIdentification
-	// symbolic scheme (F-LIB179/F-LIB183) for a foreign participant; see newParty.
-	oioubl21AddressSchemeKey cbc.Key = "dk-oioubl-address-scheme"
+	oioubl21AddressFormatKey   = oioubl.ExtKeyAddressFormat
+	oioubl21AddressIDKey       = oioubl.ExtKeyAddressID
+	oioubl21AddressDistrictKey = oioubl.ExtKeyAddressDistrict
+	oioubl21AddressSchemeKey   = oioubl.ExtKeyAddressScheme
 
-	oioubl21AddressStructuredLax    = "StructuredLax"
-	oioubl21AddressUnstructured     = "Unstructured"
-	oioubl21AddressStructuredID     = "StructuredID"
-	oioubl21AddressStructuredRegion = "StructuredRegion"
+	oioubl21AddressStructuredLax    = string(oioubl.ExtValueAddressFormatStructuredLax)
+	oioubl21AddressUnstructured     = string(oioubl.ExtValueAddressFormatUnstructured)
+	oioubl21AddressStructuredID     = string(oioubl.ExtValueAddressFormatStructuredID)
+	oioubl21AddressStructuredRegion = string(oioubl.ExtValueAddressFormatStructuredRegion)
 
-	// oioubl21AddressIDScheme is the address-register schemeID OIOUBL mandates on
-	// a StructuredID address ID (F-LIB028/029); the ID is a GLN.
-	oioubl21AddressIDScheme = "GLN"
-	// oioubl21GLNAgencyID is the GS1 scheme agency (9) OIOUBL stamps on GLN IDs.
-	oioubl21GLNAgencyID = "9"
+	// oioubl21AddressIDScheme (GLN) and its GS1 agency are wire-serialization
+	// attributes OIOUBL mandates on a StructuredID address ID (F-LIB028/029).
+	oioubl21AddressIDScheme = string(oioubl.SchemeGLN)
+	oioubl21GLNAgencyID     = "9"
 )
 
-// applyOIOUBL21AddressFormat reshapes a party's postal address to the OIOUBL
-// addressformatcode-1.1 value declared on the GOBL party
-// (dk-oioubl-address-format). Without a declared format the address keeps the
-// StructuredLax form newAddress produced. Each restricted format drops the
-// elements OIOUBL forbids (F-LIB031/038/040); the StructuredID identifier and the
-// StructuredRegion district — which GOBL does not model — are read from the party
-// extension. It must run after applyOIOUBL21Party, which derives the DK vs ZZZ
-// schemes from the address country before the restricted formats drop it.
+// applyOIOUBL21AddressFormat reshapes a party's postal address to its declared
+// dk-oioubl-address-format, dropping the elements each restricted format forbids
+// (F-LIB031/038/040). Must run after applyOIOUBL21Party, which needs the address
+// country before the restricted formats drop it.
 func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
 	if addr == nil || party == nil {
 		return
@@ -699,35 +688,15 @@ func contactName(n *org.Name) string {
 	return fmt.Sprintf("%s %s", given, surname)
 }
 
-// OIOUBL symbolic EndpointID schemes (F-LIB179) and the ISO 6523 ICDs they
-// correspond to. The symbolic schemes are defined by the dk-oioubl addon (the
-// single source of truth, shared with the ICD->scheme map below).
+// OIOUBL symbolic schemes (F-LIB179), defined by the dk-oioubl addon (the single
+// source of truth). The ICD<->scheme codelist also lives in the addon, reached via
+// oioubl.SchemeForICD (convert) and oioubl.ICDForScheme (parse).
 const (
 	oioubl21SchemeDKCVR = oioubl.SchemeDKCVR
 	oioubl21SchemeDKSE  = oioubl.SchemeDKSE
 	oioubl21SchemeZZZ   = oioubl.SchemeZZZ
 	icdDKSE             = "0198"
 )
-
-// oioubl21EndpointSchemes maps the Danish ISO 6523 ICDs to their symbolic
-// OIOUBL EndpointID schemeID (F-LIB179) — numeric scheme IDs are rejected on
-// the NemHandel wire. Danish ICDs are derived; a foreign participant supplies
-// its scheme via the dk-oioubl-address-scheme extension (see newParty), which
-// already passes through here. An unmapped value passes through unchanged.
-var oioubl21EndpointSchemes = oioubl.EndpointSchemes
-
-// oioubl21EndpointICDs restores wire EndpointIDs to ISO 6523 endpoints on
-// parse. Inverse of oioubl21EndpointSchemes (the Danish schemes); a foreign
-// symbolic scheme has no ICD here and is restored as an inbox instead.
-var oioubl21EndpointICDs = func() map[string]string {
-	m := make(map[string]string, len(oioubl21EndpointSchemes))
-	for icd, scheme := range oioubl21EndpointSchemes {
-		if cur, ok := m[scheme]; !ok || icd < cur {
-			m[scheme] = icd
-		}
-	}
-	return m
-}()
 
 // applyOIOUBL21Party rewrites an assembled party into OIOUBL 2.1 form: symbolic
 // endpoint scheme + DK-prefixed CVR (F-LIB179/F-LIB180), a fallback PartyName,
@@ -824,8 +793,8 @@ func applyOIOUBL21PartyIdentifications(p *Party) {
 			continue
 		}
 		scheme := *id.SchemeID
-		if mapped, ok := oioubl21EndpointSchemes[scheme]; ok {
-			scheme = mapped
+		if mapped := oioubl.SchemeForICD(scheme); mapped != "" {
+			scheme = mapped.String()
 		} else if isNumericICDScheme(scheme) {
 			scheme = oioubl21SchemeZZZ
 		}

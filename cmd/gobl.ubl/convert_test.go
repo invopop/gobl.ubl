@@ -29,7 +29,7 @@ func TestConvertBuildOptionsNemhandel(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "OIOUBL-2.1", doc.CustomizationID)
 	assert.Equal(t, "urn:www.nesubl.eu:profiles:profile5:ver2.0", doc.ProfileID.Value)
-	assert.Equal(t, "2.0", doc.UBLVersionID)
+	assert.Equal(t, "2.1", doc.UBLVersionID)
 	assert.NotEmpty(t, doc.UUID)
 }
 

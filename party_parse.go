@@ -3,6 +3,7 @@ package ubl
 import (
 	"strings"
 
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -25,10 +26,11 @@ func goblParty(party *Party, o *options) *org.Party {
 		case eID.SchemeID == "EM": // email
 			p.Inboxes = append(p.Inboxes, &org.Inbox{Email: eID.Value})
 		case o.context.Is(ContextOIOUBL21):
-			// OIOUBL participants are restored as ISO 6523 endpoints, the
-			// going-forward GOBL routing model. Symbolic schemes without an
-			// ICD equivalent fall back to an inbox so no identifier is lost.
-			if icd, ok := oioubl21EndpointICDs[eID.SchemeID]; ok {
+			// OIOUBL participants are restored as ISO 6523 org.Endpoints, the
+			// going-forward routing model (org.Inbox is deprecated). The numeric ICD
+			// comes from the addon codelist (ICDForScheme); a foreign symbolic scheme
+			// has no Danish ICD and falls back to an inbox so no identifier is lost.
+			if icd, ok := oioubl.ICDForScheme(eID.SchemeID); ok {
 				code := eID.Value
 				if eID.SchemeID == oioubl21SchemeDKCVR {
 					// Reverse the wire-only DK prefix (F-LIB180).
@@ -198,13 +200,10 @@ func parseAddress(address *PostalAddress) *org.Address {
 	return addr
 }
 
-// applyOIOUBL21AddressFormatParse restores the OIOUBL address format declared on
-// the wire (cbc:AddressFormatCode) to the GOBL party extensions the emit side
-// reads (see applyOIOUBL21AddressFormat), so the format round-trips. StructuredLax
-// is the default form newAddress emits for an address without a declared format,
-// so it carries no extension. The StructuredID identifier (cbc:ID) and the
-// StructuredRegion district (cbc:District) are not modelled by org.Address and are
-// read back onto the party extension.
+// applyOIOUBL21AddressFormatParse restores the wire cbc:AddressFormatCode to the
+// dk-oioubl-address-format extension so the format round-trips. StructuredLax is
+// the default and carries no extension; the StructuredID id and StructuredRegion
+// district (not modelled by org.Address) are read back onto the party extension.
 func applyOIOUBL21AddressFormatParse(address *PostalAddress, p *org.Party) {
 	if address == nil || address.AddressFormatCode == nil {
 		return

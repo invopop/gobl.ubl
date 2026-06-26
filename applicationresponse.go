@@ -71,18 +71,12 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		sender, receiver = st.Supplier, st.Customer
 	}
 
-	// OIOUBL declares UBLVersionID 2.0 on the wire; other UBL contexts keep 2.1.
-	ublVersion := Version
-	if o.context.Is(ContextOIOUBL21) {
-		ublVersion = oioublUBLVersion
-	}
-
 	out := &ApplicationResponse{
 		XMLName:         xml.Name{Local: "ApplicationResponse"},
 		CACNamespace:    NamespaceCAC,
 		CBCNamespace:    NamespaceCBC,
 		UBLNamespace:    NamespaceUBLApplicationResponse,
-		UBLVersionID:    ublVersion,
+		UBLVersionID:    Version,
 		CustomizationID: o.context.CustomizationID,
 		ID:              invoiceNumber(st.Series, st.Code),
 		IssueDate:       formatDate(st.IssueDate),
@@ -170,13 +164,6 @@ const (
 	oioublProfileSchemeID    = "urn:oioubl:id:profileid-1.4"
 	oioublProfileTechnicalID = "Procurement-TecRes-1.0"
 	oioublCodeListAgencyID   = "320"
-	// oioublUBLVersion is the UBLVersionID OIOUBL declares on the wire. "OIOUBL 2.1"
-	// is the profile (cbc:CustomizationID); the UBL syntax version is separate, and
-	// we emit "2.0" to match the documents Unimaze produces. The element model is
-	// UBL 2.1 regardless.
-	// FLAGGED: F-LIB001 permits "2.1" too, so this OIOUBL-only override could be
-	// dropped for a uniform 2.1 once a Unimaze re-send confirms 2.1 is accepted.
-	oioublUBLVersion = "2.0"
 )
 
 // OIOUBL responsedocumenttypecode-1.1 values for the referenced document.

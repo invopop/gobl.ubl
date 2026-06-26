@@ -39,12 +39,9 @@ var InvoiceTagMap = map[string][]cbc.Key{
 func (ui *Invoice) Convert() (*gobl.Envelope, error) {
 	o := new(options)
 
-	// Detect context from the invoice. Resolve by CustomizationID + ProfileID
-	// first, then fall back to the CustomizationID alone, mirroring the
-	// ApplicationResponse parser. OIOUBL keeps a single CustomizationID
-	// ("OIOUBL-2.1") but carries one of ~40 legal procurement ProfileIDs
-	// (Procurement-BilSim-1.0, …) rather than only profile5, which would
-	// otherwise fail the ProfileID-qualified lookup and parse with no addons.
+	// Resolve by CustomizationID+ProfileID, else CustomizationID alone: OIOUBL
+	// carries ~40 procurement ProfileIDs under one CustomizationID, so the
+	// ProfileID-qualified lookup alone would miss the context (and its addons).
 	ctx := FindContext(ui.CustomizationID, profileIDValue(ui.ProfileID))
 	if ctx == nil {
 		ctx = FindContext(ui.CustomizationID, "")
