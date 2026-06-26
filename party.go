@@ -695,33 +695,15 @@ func contactName(n *org.Name) string {
 	return fmt.Sprintf("%s %s", given, surname)
 }
 
-// OIOUBL symbolic EndpointID schemes (F-LIB179) and the ISO 6523 ICDs they
-// correspond to. The symbolic schemes are defined by the dk-oioubl addon (the
-// single source of truth, shared with the ICD->scheme map below).
+// OIOUBL symbolic schemes (F-LIB179), defined by the dk-oioubl addon (the single
+// source of truth). The ICD<->scheme codelist also lives in the addon, reached via
+// oioubl.SchemeForICD (convert) and oioubl.ICDForScheme (parse).
 const (
 	oioubl21SchemeDKCVR = oioubl.SchemeDKCVR
 	oioubl21SchemeDKSE  = oioubl.SchemeDKSE
 	oioubl21SchemeZZZ   = oioubl.SchemeZZZ
 	icdDKSE             = "0198"
 )
-
-// oioubl21EndpointSchemes maps the Danish ISO 6523 ICDs to their symbolic
-// OIOUBL EndpointID schemeID (F-LIB179) — numeric scheme IDs are rejected on
-// the NemHandel wire. Danish ICDs are derived; a foreign participant supplies
-// its scheme via the dk-oioubl-address-scheme extension (see newParty), which
-// already passes through here. An unmapped value passes through unchanged.
-var oioubl21EndpointSchemes = oioubl.EndpointSchemes
-
-// oioubl21EndpointICDs is the inverse of the Danish endpoint-scheme map, used on
-// parse to restore a wire EndpointID to its ISO 6523 endpoint. The map is 1:1, so
-// a foreign symbolic scheme has no entry and is restored as an inbox instead.
-var oioubl21EndpointICDs = func() map[string]string {
-	m := make(map[string]string, len(oioubl21EndpointSchemes))
-	for icd, scheme := range oioubl21EndpointSchemes {
-		m[scheme] = icd
-	}
-	return m
-}()
 
 // applyOIOUBL21Party rewrites an assembled party into OIOUBL 2.1 form: symbolic
 // endpoint scheme + DK-prefixed CVR (F-LIB179/F-LIB180), a fallback PartyName,
@@ -818,8 +800,8 @@ func applyOIOUBL21PartyIdentifications(p *Party) {
 			continue
 		}
 		scheme := *id.SchemeID
-		if mapped, ok := oioubl21EndpointSchemes[scheme]; ok {
-			scheme = mapped
+		if mapped := oioubl.SchemeForICD(scheme); mapped != "" {
+			scheme = mapped.String()
 		} else if isNumericICDScheme(scheme) {
 			scheme = oioubl21SchemeZZZ
 		}

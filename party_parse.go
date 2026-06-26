@@ -3,6 +3,7 @@ package ubl
 import (
 	"strings"
 
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -25,10 +26,11 @@ func goblParty(party *Party, o *options) *org.Party {
 		case eID.SchemeID == "EM": // email
 			p.Inboxes = append(p.Inboxes, &org.Inbox{Email: eID.Value})
 		case o.context.Is(ContextOIOUBL21):
-			// OIOUBL participants are restored as ISO 6523 endpoints, the
-			// going-forward GOBL routing model. Symbolic schemes without an
-			// ICD equivalent fall back to an inbox so no identifier is lost.
-			if icd, ok := oioubl21EndpointICDs[eID.SchemeID]; ok {
+			// OIOUBL participants are restored as ISO 6523 org.Endpoints, the
+			// going-forward routing model (org.Inbox is deprecated). The numeric ICD
+			// comes from the addon codelist (ICDForScheme); a foreign symbolic scheme
+			// has no Danish ICD and falls back to an inbox so no identifier is lost.
+			if icd, ok := oioubl.ICDForScheme(eID.SchemeID); ok {
 				code := eID.Value
 				if eID.SchemeID == oioubl21SchemeDKCVR {
 					// Reverse the wire-only DK prefix (F-LIB180).
