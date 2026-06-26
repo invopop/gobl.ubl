@@ -368,12 +368,10 @@ func taxCurrencyTaxAmount(taxTotals []TaxTotal) (num.Amount, bool) {
 	return total, found
 }
 
-// OIOUBL taxcategoryid-1.1 wire values (sourced from the dk-oioubl addon) and
-// the serialization-only taxschemeid-1.1 VAT (Moms) code.
+// OIOUBL taxcategoryid-1.1 StandardRated value (sourced from the dk-oioubl addon)
+// and the serialization-only taxschemeid-1.1 VAT (Moms) code.
 const (
 	oioubl21TaxCategoryStandardRated = string(oioubl.ExtValueTaxCategoryStandardRated)
-	oioubl21TaxCategoryZeroRated     = string(oioubl.ExtValueTaxCategoryZeroRated)
-	oioubl21TaxCategoryReverseCharge = string(oioubl.ExtValueTaxCategoryReverseCharge)
 
 	oioubl21TaxSchemeVATCode = "63" // taxschemeid-1.1 VAT (Moms)
 )
