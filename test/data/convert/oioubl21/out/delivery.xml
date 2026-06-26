@@ -80,7 +80,6 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:Delivery>
-    <cbc:ActualDeliveryDate>2026-05-20</cbc:ActualDeliveryDate>
     <cac:DeliveryLocation>
       <cac:Address>
         <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredLax</cbc:AddressFormatCode>
@@ -93,6 +92,10 @@
         </cac:Country>
       </cac:Address>
     </cac:DeliveryLocation>
+    <cac:RequestedDeliveryPeriod>
+      <cbc:StartDate>2026-05-20</cbc:StartDate>
+      <cbc:EndDate>2026-05-25</cbc:EndDate>
+    </cac:RequestedDeliveryPeriod>
     <cac:DeliveryParty>
       <cac:PartyName>
         <cbc:Name>Leveringssted ApS</cbc:Name>

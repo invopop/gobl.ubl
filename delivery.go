@@ -7,6 +7,7 @@ type Delivery struct {
 	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
 	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
 	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
+	RequestedDeliveryPeriod *Period   `xml:"cac:RequestedDeliveryPeriod"`
 	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
 }
@@ -35,11 +36,17 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	}
 
 	if del.Period != nil {
-		start := formatDate(del.Period.Start)
-		out.ActualDeliveryDate = &start
-		// OIOUBL forbids cac:Delivery/cbc:LatestDeliveryDate (F-INV087); only the
-		// actual delivery date (period start) is carried under OIOUBL.
-		if !ctx.Is(ContextOIOUBL21) {
+		if ctx.Is(ContextOIOUBL21) {
+			// A delivery window maps to RequestedDeliveryPeriod — the only delivery
+			// period OIOUBL permits, since it forbids LatestDeliveryDate (F-INV087)
+			// and the Promised/Estimated periods (F-INV089/F-INV090).
+			out.RequestedDeliveryPeriod = &Period{
+				StartDate: formatDate(del.Period.Start),
+				EndDate:   formatDate(del.Period.End),
+			}
+		} else {
+			start := formatDate(del.Period.Start)
+			out.ActualDeliveryDate = &start
 			end := formatDate(del.Period.End)
 			out.LatestDeliveryDate = &end
 		}
