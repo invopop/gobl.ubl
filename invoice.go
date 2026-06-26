@@ -159,7 +159,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if o.context.Is(ContextOIOUBL21) {
-		out.UBLVersionID = oioublUBLVersion
+		out.UBLVersionID = Version
 		if !inv.UUID.IsZero() {
 			out.UUID = inv.UUID.String()
 		}

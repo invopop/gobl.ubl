@@ -57,18 +57,12 @@ type ReminderLine struct {
 func ublReminder(pmt *bill.Payment, o *options) *Reminder {
 	currency := pmt.Currency.String()
 
-	// OIOUBL declares UBLVersionID 2.0 on the wire; other UBL contexts keep 2.1.
-	ublVersion := Version
-	if o.context.Is(ContextOIOUBL21) {
-		ublVersion = oioublUBLVersion
-	}
-
 	out := &Reminder{
 		XMLName:                 xml.Name{Local: "Reminder"},
 		CBCNamespace:            NamespaceCBC,
 		CACNamespace:            NamespaceCAC,
 		UBLNamespace:            NamespaceUBLReminder,
-		UBLVersionID:            ublVersion,
+		UBLVersionID:            Version,
 		CustomizationID:         o.context.CustomizationID,
 		ID:                      invoiceNumber(pmt.Series, pmt.Code),
 		IssueDate:               formatDate(pmt.IssueDate),
