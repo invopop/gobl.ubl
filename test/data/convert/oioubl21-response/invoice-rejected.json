@@ -1,0 +1,81 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "64b50fd810bd3a9b35a6a43c59b55e55f022c52bf2bec9c7d1de13cf40cd9272"
+		},
+		"from": "iso6523-actorid-upis::0184:76543216",
+		"to": "iso6523-actorid-upis::0184:12345674"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2026-05-29",
+		"code": "RESP-001",
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "rejected",
+				"doc": {
+					"issue_date": "2026-05-29",
+					"series": "FINAL",
+					"code": "001"
+				},
+				"description": "Den aftalte rabat på 800,- kr mangler på fakturaen",
+				"ext": {
+					"dk-oioubl-response-code": "BusinessReject"
+				}
+			}
+		]
+	}
+}

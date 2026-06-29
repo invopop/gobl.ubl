@@ -1,0 +1,186 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "e97fefb6b599ebff7381fe1a3196d2f136b056a0373052c04e61ea8a69a2f17d"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "FINAL",
+		"code": "DA01",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Jens",
+						"surname": "Hansen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Mette",
+						"surname": "Sørensen"
+					},
+					"identities": [
+						{
+							"label": "Contact",
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Konsulent timer",
+					"price": "1000.00",
+					"unit": "h"
+				},
+				"sum": "10000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10000.00"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Loyalitetsrabat",
+				"percent": "5%",
+				"amount": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "Netto 30 dage"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "TEST-006",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK"
+					}
+				],
+				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "10000.00",
+			"discount": "500.00",
+			"total": "9500.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
+									"untdid-tax-category": "S"
+								},
+								"base": "9500.00",
+								"percent": "25%",
+								"amount": "2375.00"
+							}
+						],
+						"amount": "2375.00"
+					}
+				],
+				"sum": "2375.00"
+			},
+			"tax": "2375.00",
+			"total_with_tax": "11875.00",
+			"payable": "11875.00"
+		}
+	}
+}

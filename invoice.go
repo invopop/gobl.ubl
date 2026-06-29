@@ -18,6 +18,9 @@ import (
 const (
 	NamespaceUBLInvoice    = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
 	NamespaceUBLCreditNote = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
+
+	// rootNameCreditNote is the local name of a UBL CreditNote root element.
+	rootNameCreditNote = "CreditNote"
 )
 
 // Schema locationa and customization constants
@@ -44,7 +47,7 @@ type Invoice struct {
 	Extensions         *Extensions `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID       string      `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID    string      `xml:"cbc:CustomizationID,omitempty"`
-	ProfileID          string      `xml:"cbc:ProfileID,omitempty"`
+	ProfileID          *IDType     `xml:"cbc:ProfileID,omitempty"`
 	ProfileExecutionID string      `xml:"cbc:ProfileExecutionID,omitempty"`
 	ID                 string      `xml:"cbc:ID"`
 	CopyIndicator      bool        `xml:"cbc:CopyIndicator,omitempty"`
@@ -134,10 +137,9 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		EXTNamespace:            NamespaceEXT,
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
-		ProfileID:               profileID,
+		ProfileID:               newProfileID(profileID),
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
-		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
@@ -150,6 +152,25 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency &&
 		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
 		out.TaxCurrencyCode = string(taxCurrency)
+	}
+
+	if inv.Ordering != nil && inv.Ordering.Cost != "" {
+		out.AccountingCost = inv.Ordering.Cost.String()
+	}
+
+	if o.context.Is(ContextOIOUBL21) {
+		out.UBLVersionID = Version
+		if !inv.UUID.IsZero() {
+			out.UUID = inv.UUID.String()
+		}
+		if out.ProfileID != nil {
+			// Invoices/credit notes carry profile5:ver2.0, valid from the
+			// profileid-1.2 code list — which real NemHandel traffic uses.
+			schemeID := "urn:oioubl:id:profileid-1.2"
+			schemeAgencyID := oioublCodeListAgencyID
+			out.ProfileID.SchemeID = &schemeID
+			out.ProfileID.SchemeAgencyID = &schemeAgencyID
+		}
 	}
 
 	docType := inv.Type
@@ -169,7 +190,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if docType.In(bill.InvoiceTypeCreditNote) {
-		out.XMLName = xml.Name{Local: "CreditNote"}
+		out.XMLName = xml.Name{Local: rootNameCreditNote}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
 		out.InvoiceTypeCode = nil
@@ -202,7 +223,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addPreceding(inv.Preceding)
 	out.addOrdering(inv.Ordering, o.context)
 	out.addTaxPoint(inv.Tax)
-	out.addCharges(inv)
+	out.addCharges(inv, o.context)
 	out.addTotals(inv, o.context)
 	out.addLines(inv, o.context)
 	out.AddAttachments(inv.Attachments)
@@ -212,6 +233,26 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 	if d := newDelivery(inv.Delivery, o.context); d != nil {
 		out.Delivery = []*Delivery{d}
+	}
+	if o.context.Is(ContextOIOUBL21) {
+		applyOIOUBL21TypeCode(out.InvoiceTypeCode)
+		applyOIOUBL21TypeCode(out.CreditNoteTypeCode)
+		applyOIOUBL21Party(out.AccountingSupplierParty.Party)
+		applyOIOUBL21Party(out.AccountingCustomerParty.Party)
+		applyOIOUBL21Party(out.PayeeParty)
+		applyOIOUBL21TaxRepParty(out.TaxRepresentativeParty)
+		// Reshape the supplier and customer addresses to their declared OIOUBL
+		// address format, after the party pass has derived the DK/ZZZ schemes from
+		// the address country (restricted formats drop it).
+		if p := out.AccountingSupplierParty.Party; p != nil {
+			applyOIOUBL21AddressFormat(p.PostalAddress, inv.Supplier)
+		}
+		if p := out.AccountingCustomerParty.Party; p != nil {
+			applyOIOUBL21AddressFormat(p.PostalAddress, inv.Customer)
+		}
+		out.applyOIOUBL21BillingReference()
+		out.applyOIOUBL21Attachments()
+		out.applyOIOUBL21Totals()
 	}
 
 	return out, nil
@@ -253,6 +294,20 @@ func invoiceNumber(series cbc.Code, code cbc.Code) string {
 	return fmt.Sprintf("%s-%s", series, code)
 }
 
+func newProfileID(profileID string) *IDType {
+	if profileID == "" {
+		return nil
+	}
+	return &IDType{Value: profileID}
+}
+
+func profileIDValue(id *IDType) string {
+	if id == nil {
+		return ""
+	}
+	return id.Value
+}
+
 // ConvertInvoice is a convenience function that converts a GOBL envelope
 // containing an invoice into a UBL Invoice or CreditNote document.
 func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
@@ -272,9 +327,40 @@ func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 // based on XML name instead of gobl's invoice type key
 func (ui *Invoice) getInvoiceTypeBasedOnXMLName() cbc.Key {
 	switch ui.XMLName.Local {
-	case "CreditNote":
+	case rootNameCreditNote:
 		return bill.InvoiceTypeCreditNote
 	default:
 		return bill.InvoiceTypeStandard
+	}
+}
+
+func applyOIOUBL21TypeCode(t *IDType) {
+	if t == nil {
+		return
+	}
+	listID := "urn:oioubl:codelist:invoicetypecode-1.1"
+	listAgencyID := "320"
+	t.ListID = &listID
+	t.ListAgencyID = &listAgencyID
+}
+
+// applyOIOUBL21BillingReference drops the DocumentTypeCode from billing
+// references; OIOUBL excludes it on both invoices and credit notes (F-LIB172).
+func (ui *Invoice) applyOIOUBL21BillingReference() {
+	for i := range ui.BillingReference {
+		if ref := ui.BillingReference[i]; ref != nil && ref.InvoiceDocumentReference != nil {
+			ref.InvoiceDocumentReference.DocumentTypeCode = ""
+		}
+	}
+}
+
+// applyOIOUBL21Attachments stamps a DocumentType on every additional document
+// reference; OIOUBL requires DocumentType or DocumentTypeCode on each (F-LIB092).
+func (ui *Invoice) applyOIOUBL21Attachments() {
+	for i := range ui.AdditionalDocumentReference {
+		ref := &ui.AdditionalDocumentReference[i]
+		if ref.DocumentType == "" && ref.DocumentTypeCode == "" {
+			ref.DocumentType = "Supporting Document"
+		}
 	}
 }

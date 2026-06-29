@@ -1,0 +1,106 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "77ad5eb6caab2af0faa0bc6515838d07a7ee0935ecc4a7ac2cf0b95c27d46849"
+		},
+		"from": "iso6523-actorid-upis::0184:76543216",
+		"to": "iso6523-actorid-upis::0184:12345674"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2026-05-29",
+		"code": "RESP-001",
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK",
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK76543216",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK",
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "rejected",
+				"doc": {
+					"issue_date": "2026-05-29",
+					"code": "FINAL-001"
+				},
+				"description": "Den aftalte rabat på 800,- kr mangler på fakturaen",
+				"ext": {
+					"dk-oioubl-response-code": "BusinessReject"
+				}
+			}
+		]
+	}
+}

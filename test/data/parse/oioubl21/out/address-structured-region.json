@@ -1,0 +1,167 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "7af299c3542d2a182bde08ee1f12647ad11a7b748106a65535ce0461d3ad100c"
+		},
+		"from": "iso6523-actorid-upis::0184:12345674",
+		"to": "iso6523-actorid-upis::0184:88146328"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "ADDR-1000",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Eksempel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
+			"addresses": [
+				{
+					"region": "Hovedstaden",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-district": "Nørrebro",
+				"dk-oioubl-address-format": "StructuredRegion",
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"customer": {
+			"name": "Kunde ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "88146328"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK88146328",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Anders Jensen"
+					},
+					"identities": [
+						{
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:88146328"
+				}
+			],
+			"addresses": [
+				{
+					"num": "5",
+					"street": "Bygaden",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Produkt",
+					"price": "10000.00",
+					"unit": "one"
+				},
+				"sum": "10000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25.0%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10000.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"totals": {
+			"sum": "10000.00",
+			"total": "10000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
+									"untdid-tax-category": "S"
+								},
+								"base": "10000.00",
+								"percent": "25.0%",
+								"amount": "2500.00"
+							}
+						],
+						"amount": "2500.00"
+					}
+				],
+				"sum": "2500.00"
+			},
+			"tax": "2500.00",
+			"total_with_tax": "12500.00",
+			"payable": "12500.00"
+		}
+	}
+}

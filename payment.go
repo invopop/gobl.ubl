@@ -3,8 +3,10 @@ package ubl
 import (
 	"errors"
 
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/validation"
 )
@@ -12,14 +14,21 @@ import (
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
-	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
+	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate,omitempty"`
+	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
 	PaymentID             *string           `xml:"cbc:PaymentID"`
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
+	CreditAccount         *CreditAccount    `xml:"cac:CreditAccount"`
 	PaymentMandate        *PaymentMandate   `xml:"cac:PaymentMandate"`
+}
+
+// CreditAccount carries the OIOUBL FIK creditor account (cbc:AccountID).
+type CreditAccount struct {
+	AccountID string `xml:"cbc:AccountID"`
 }
 
 // PaymentMandate represents a payment mandate
@@ -45,13 +54,20 @@ type FinancialAccount struct {
 
 // Branch represents a branch of a financial institution
 type Branch struct {
-	ID   *string `xml:"cbc:ID"`
-	Name *string `xml:"cbc:Name"`
+	ID                   *string               `xml:"cbc:ID"`
+	Name                 *string               `xml:"cbc:Name"`
+	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
+}
+
+// FinancialInstitution represents a financial institution.
+type FinancialInstitution struct {
+	ID *string `xml:"cbc:ID"`
 }
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	Note string `xml:"cbc:Note"`
+	Note   string  `xml:"cbc:Note,omitempty"`
+	Amount *Amount `xml:"cbc:Amount,omitempty"`
 }
 
 // PrepaidPayment represents a prepaid payment
@@ -101,7 +117,58 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 		}
 	}
 
+	if ctx.Is(ContextOIOUBL21) {
+		applyOIOUBL21PaymentMeans(ui)
+		// F-INV134: the payment terms carry the payable amount in OIOUBL.
+		if ui.PaymentTerms != nil && ui.PaymentTerms.Amount == nil && ui.LegalMonetaryTotal.PayableAmount != nil {
+			ui.PaymentTerms.Amount = &Amount{
+				Value:      ui.LegalMonetaryTotal.PayableAmount.Value,
+				CurrencyID: ui.LegalMonetaryTotal.PayableAmount.CurrencyID,
+			}
+		}
+	}
+
 	return nil
+}
+
+// OIOUBL paymentchannelcode-1.1 wire values. Sourced from the dk-oioubl addon
+// because the converter writes the extension straight to the XML and reads it
+// back on parse, so the wire values match the extension values by construction.
+const (
+	oioubl21PaymentChannelIBAN = string(oioubl.ExtValuePaymentChannelIBAN)
+	oioubl21PaymentChannelGiro = string(oioubl.ExtValuePaymentChannelGiro)
+	oioubl21PaymentChannelFIK  = string(oioubl.ExtValuePaymentChannelFIK)
+)
+
+// applyOIOUBL21PaymentMeans stamps the payment channel (see
+// stampOIOUBL21PaymentChannel) and moves the document due date onto each means.
+func applyOIOUBL21PaymentMeans(out *Invoice) {
+	for i := range out.PaymentMeans {
+		pm := &out.PaymentMeans[i]
+		stampOIOUBL21PaymentChannel(pm)
+		if out.DueDate != "" && pm.PaymentDueDate == nil {
+			d := out.DueDate
+			pm.PaymentDueDate = &d
+		}
+	}
+	if len(out.PaymentMeans) > 0 && out.DueDate != "" {
+		out.DueDate = ""
+	}
+}
+
+// stampOIOUBL21PaymentChannel stamps the paymentchannelcode-1.1 list ID and
+// strips the redundant FinancialInstitutionBranch from IBAN accounts (F-LIB295,
+// the BIC stays nested under FinancialInstitution/ID). The channel value itself
+// is set when the payment means is built.
+func stampOIOUBL21PaymentChannel(pm *PaymentMeans) {
+	if pm.PaymentChannelCode == nil {
+		return
+	}
+	listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
+	pm.PaymentChannelCode.ListID = &listID
+	if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
+		pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
+	}
 }
 
 func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error {
@@ -115,20 +182,32 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 			},
 		}
 	}
+	paymentMeansCode := instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()
 	ui.PaymentMeans = []PaymentMeans{
 		{
-			PaymentMeansCode: IDType{Value: instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
+			PaymentMeansCode: IDType{Value: paymentMeansCode},
 		},
+	}
+	if instr.Meta != nil {
+		if channel, ok := instr.Meta[cbc.Key("payment-channel")]; ok && channel != "" {
+			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: channel}
+		}
 	}
 	if ref := instr.Ref.String(); ref != "" {
 		ui.PaymentMeans[0].PaymentID = &ref
 	}
+	// The OIOUBL payment channel and PaymentID are precomputed by the dk-oioubl
+	// addon extensions; the converter emits them directly (see applyOIOUBL21PaymentID).
+	if ctx.Is(ContextOIOUBL21) {
+		if ch := instr.Ext.Get(oioubl.ExtKeyPaymentChannel).String(); ch != "" && ui.PaymentMeans[0].PaymentChannelCode == nil {
+			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: ch}
+		}
+		applyOIOUBL21PaymentID(&ui.PaymentMeans[0], instr, paymentMeansCode)
+	}
 	if instr.Detail != "" {
 		ui.PaymentMeans[0].PaymentMeansCode.Name = &instr.Detail
 	}
-	if len(instr.CreditTransfer) > 0 {
-		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0])
-	}
+	ui.addCreditTransferAccount(instr, ctx, paymentMeansCode)
 	if instr.DirectDebit != nil {
 		// Skip the mandate without a reference; an empty <cbc:ID/> is rejected by Peppol.
 		if instr.DirectDebit.Ref != "" {
@@ -164,7 +243,44 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	return nil
 }
 
-func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
+// applyOIOUBL21PaymentID sets the OIOUBL Giro (50) / FIK (93) cbc:PaymentID from
+// the dk-oioubl-payment-id "kortart" (overriding instr.Ref, which is the Peppol
+// mapping). The FIK creditor account flows through the credit-transfer Number
+// (F-LIB305).
+func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMeansCode string) {
+	if paymentMeansCode != "50" && paymentMeansCode != "93" {
+		return
+	}
+	kortart := instr.Ext.Get(oioubl.ExtKeyPaymentID).String()
+	if kortart == "" {
+		return
+	}
+	pm.PaymentID = &kortart
+	// The payment number rides cbc:InstructionID; the kortart has just overridden
+	// instr.Ref as the PaymentID. The addon governs which kortarts may carry it
+	// (FIK 73 forbids it, the structured types require it).
+	if ref := instr.Ref.String(); ref != "" {
+		pm.InstructionID = &ref
+	}
+}
+
+// addCreditTransferAccount wires the credit-transfer account onto the payment
+// means. For OIOUBL FIK (93) the creditor account lives in
+// cac:CreditAccount/cbc:AccountID (8 chars, F-LIB305) rather than
+// PayeeFinancialAccount.
+func (ui *Invoice) addCreditTransferAccount(instr *pay.Instructions, ctx Context, paymentMeansCode string) {
+	if len(instr.CreditTransfer) == 0 {
+		return
+	}
+	pm := &ui.PaymentMeans[0]
+	if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "93" {
+		pm.CreditAccount = &CreditAccount{AccountID: instr.CreditTransfer[0].Number}
+		return
+	}
+	pm.PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0], ctx, paymentMeansCode)
+}
+
+func newCreditTransferAccount(ct *pay.CreditTransfer, ctx Context, paymentMeansCode string) *FinancialAccount {
 	pfa := new(FinancialAccount)
 	if ct.IBAN != "" {
 		pfa.ID = &ct.IBAN
@@ -175,7 +291,17 @@ func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 		pfa.Name = &ct.Name
 	}
 	if ct.BIC != "" {
-		pfa.FinancialInstitutionBranch = &Branch{ID: &ct.BIC}
+		branch := &Branch{ID: &ct.BIC}
+		// IBAN-channel transfers (domestic 31, SEPA 58) nest the BIC under
+		// FinancialInstitution; the redundant branch ID is then stripped for the
+		// IBAN channel (F-LIB295), so without the nesting the BIC would be lost
+		// and the branch left empty.
+		if ctx.Is(ContextOIOUBL21) && (paymentMeansCode == "31" || paymentMeansCode == "58") {
+			branch.FinancialInstitution = &FinancialInstitution{
+				ID: &ct.BIC,
+			}
+		}
+		pfa.FinancialInstitutionBranch = branch
 	}
 	return pfa
 }
@@ -188,7 +314,7 @@ func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
 	}
 
 	// Only one due date allowed under EN 16931
-	if ui.CreditNoteTypeCode == nil && len(pymt.Terms.DueDates) > 0 {
+	if ui.CreditNoteTypeCode == nil && len(pymt.Terms.DueDates) > 0 && pymt.Terms.DueDates[0].Date != nil {
 		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
 	}
 }

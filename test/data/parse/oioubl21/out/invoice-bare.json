@@ -1,0 +1,218 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "ebb0ac00a382d7e9dc7fb7b04c1c1241b13a2435bb5ab18eaca8996cbbe3a860"
+		},
+		"from": "iso6523-actorid-upis::0184:37990485",
+		"to": "iso6523-actorid-upis::0184:47458714"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "SAMPLE-001",
+		"issue_date": "2024-05-15",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Worksome Aps",
+			"tax_id": {
+				"country": "DK",
+				"code": "37990485"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK37990485",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:37990485"
+				}
+			],
+			"addresses": [
+				{
+					"num": "7-9",
+					"street": "Dampfærgevej",
+					"locality": "København Ø",
+					"code": "2100",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK",
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"customer": {
+			"name": "Lego System A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "47458714"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK47458714",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Kontakt Ansvarlig"
+					},
+					"identities": [
+						{
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:47458714"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1",
+					"street": "Aastvej",
+					"locality": "Billund",
+					"code": "7190",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK",
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Booking Fee (Fixed Rate)",
+					"price": "31676.00",
+					"unit": "one"
+				},
+				"sum": "31676.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "31676.00"
+			},
+			{
+				"i": 2,
+				"quantity": "1",
+				"item": {
+					"name": "Worksome service fee",
+					"price": "1267.04",
+					"unit": "one"
+				},
+				"sum": "1267.04",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1267.04"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2024-06-15",
+						"amount": "41178.80",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "other",
+				"ref": "SAMPLE-001",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK",
+						"name": "Danske Bank"
+					}
+				],
+				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "32943.04",
+			"total": "32943.04",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
+									"untdid-tax-category": "S"
+								},
+								"base": "32943.04",
+								"percent": "25%",
+								"amount": "8235.76"
+							}
+						],
+						"amount": "8235.76"
+					}
+				],
+				"sum": "8235.76"
+			},
+			"tax": "8235.76",
+			"total_with_tax": "41178.80",
+			"payable": "41178.80"
+		}
+	}
+}

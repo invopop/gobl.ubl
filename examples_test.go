@@ -62,6 +62,7 @@ func TestConvertToInvoice(t *testing.T) {
 		{"FranceCIUS", ubl.ContextPeppolFranceCIUS, "france-cius"},
 		{"FranceExtended", ubl.ContextPeppolFranceExtended, "france-extended"},
 		{"ZATCA", ubl.ContextZATCA, "zatca"},
+		{"OIOUBL21", ubl.ContextOIOUBL21, "oioubl21"},
 	}
 
 	for _, ctx := range contexts {
@@ -92,7 +93,6 @@ func TestConvertToInvoice(t *testing.T) {
 
 					// Run Phive validation if requested
 					if *validate {
-						// Determine VESID based on document type
 						env, err := loadTestEnvelopeFromPath(example)
 						require.NoError(t, err)
 						inv, ok := env.Extract().(*bill.Invoice)
@@ -131,6 +131,7 @@ func TestParseInvoice(t *testing.T) {
 		{"FranceCIUS", "france-cius"},
 		{"FranceExtended", "france-extended"},
 		{"ZATCA", "zatca"},
+		{"OIOUBL21", "oioubl21"},
 	}
 
 	for _, ctx := range contexts {
@@ -217,14 +218,19 @@ func TestParseInvoice(t *testing.T) {
 	}
 }
 
-// testInvoiceFrom creates a UBL Invoice from a GOBL file in the `test/data` folder,
-// failing the test on any error.
+// testInvoiceFrom creates a UBL Invoice from a GOBL file in the `test/data`
+// folder, failing the test on any error. The UBL context is selected from the
+// file's path prefix (oioubl21/ uses OIOUBL 2.1; everything else uses Peppol).
 func testInvoiceFrom(t *testing.T, name string) *ubl.Invoice {
 	t.Helper()
 
 	env := loadTestEnvelope(t, name)
 
-	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+	ctx := ubl.ContextPeppol
+	if strings.HasPrefix(name, "oioubl21/") {
+		ctx = ubl.ContextOIOUBL21
+	}
+	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ctx))
 	require.NoError(t, err)
 	return doc
 }

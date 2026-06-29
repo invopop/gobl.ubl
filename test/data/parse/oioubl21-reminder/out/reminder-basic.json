@@ -1,0 +1,123 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "2ad2e98e58cea2169620b7067569967b2fb4648476b15afe44f662c15292fded"
+		},
+		"from": "iso6523-actorid-upis::0184:12345674",
+		"to": "iso6523-actorid-upis::0184:88146328"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/payment",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "request",
+		"code": "2026-R-1000",
+		"issue_date": "2026-01-15",
+		"currency": "DKK",
+		"ext": {
+			"dk-oioubl-reminder-sequence": "1",
+			"dk-oioubl-reminder-type": "Reminder"
+		},
+		"supplier": {
+			"name": "Eksempel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1",
+					"street": "Hovedgaden",
+					"locality": "København",
+					"code": "1000",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"customer": {
+			"name": "Kunde ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "88146328"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK88146328",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Anders Jensen"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:88146328"
+				}
+			],
+			"addresses": [
+				{
+					"num": "5",
+					"street": "Bygaden",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"document": {
+					"issue_date": "2025-12-01",
+					"code": "2025-1000"
+				},
+				"amount": "1250.00"
+			}
+		],
+		"methods": [
+			{
+				"key": "credit-transfer",
+				"amount": "1250.00",
+				"credit_transfer": {
+					"iban": "DK5000400440116243",
+					"bic": "DABADKKK"
+				}
+			}
+		],
+		"total": "1250.00"
+	}
+}

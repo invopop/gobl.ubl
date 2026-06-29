@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/tax"
 )
 
 // InvoiceLine represents a line item in an invoice and credit note
@@ -46,12 +47,18 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		if ccy == "" {
 			ccy = inv.Currency.String()
 		}
+		// OIOUBL F-INV348 requires the gross Price×Qty here (line allowances are
+		// netted at the document level); other profiles use the net line total.
+		lineExt := l.Total.String()
+		if context.Is(ContextOIOUBL21) && l.Sum != nil {
+			lineExt = roundToCurrency(*l.Sum, ccy).String()
+		}
 		invLine := InvoiceLine{
 			ID: strconv.Itoa(l.Index),
 
 			LineExtensionAmount: Amount{
 				CurrencyID: &ccy,
-				Value:      l.Total.String(),
+				Value:      lineExt,
 			},
 		}
 
@@ -89,7 +96,8 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				ID:               IDType{Value: l.Identifier.Code.String()},
 				DocumentTypeCode: &typeCode,
 			}
-			if s := l.Identifier.Ext.Get(untdid.ExtKeyReference).String(); s != "" {
+			if l.Identifier.Ext.Has(untdid.ExtKeyReference) {
+				s := l.Identifier.Ext.Get(untdid.ExtKeyReference).String()
 				ref.ID.SchemeID = &s
 			}
 			invLine.DocumentReference = ref
@@ -108,8 +116,11 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			}
 		}
 
-		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
+		// OIOUBL reconciles allowances/charges at the DOCUMENT level
+		// (F-INV126/128/129 sum document-level AllowanceCharge, not line-level),
+		// so for OIOUBL they're promoted in addTotals instead of set on the line.
+		if (len(l.Charges) > 0 || len(l.Discounts) > 0) && !context.Is(ContextOIOUBL21) {
+			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum, context, l.Taxes)
 		}
 
 		// Line VAT amount (KSA-11) is mandatory for tax
@@ -137,7 +148,8 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				it.Name = l.Item.Name
 			}
 
-			if l.Item.Origin != "" {
+			// OIOUBL forbids cac:OriginCountry on a line item (F-INV211 / F-CRN109).
+			if l.Item.Origin != "" && !context.Is(ContextOIOUBL21) {
 				it.OriginCountry = &Country{
 					IdentificationCode: l.Item.Origin.String(),
 				}
@@ -154,26 +166,28 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			if len(l.Taxes) > 0 && l.Taxes[0].Category != "" {
 				it.ClassifiedTaxCategory = &ClassifiedTaxCategory{
 					TaxScheme: &TaxScheme{
-						ID: l.Taxes[0].Category.String(),
+						ID: IDType{Value: l.Taxes[0].Category.String()},
 					},
 				}
 
-				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
-					it.ClassifiedTaxCategory.ID = &rate
+				// OIOUBL emits its own taxcategoryid-1.1 value; other profiles use
+				// the EN 16931 UNTDID category directly.
+				cat := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String()
+				if context.Is(ContextOIOUBL21) {
+					cat = oioubl21TaxCategoryID(l.Taxes[0].Ext)
+				}
+				if cat != "" {
+					it.ClassifiedTaxCategory.ID = &IDType{Value: cat}
 				}
 
 				// Set percent: required unless category is "O" (outside scope)
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
-				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
+				} else if it.ClassifiedTaxCategory.ID == nil || it.ClassifiedTaxCategory.ID.Value != "O" {
 					// Default to 0% when not outside scope
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
-				}
-
-				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
-					it.ClassifiedTaxCategory.ID = &rate
 				}
 			}
 
@@ -198,8 +212,9 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 						break
 					}
 
-					// Map first identity without extension to BuyersItemIdentification
 					s := id.Ext.Get(iso.ExtKeySchemeID).String()
+
+					// Map first identity without extension to BuyersItemIdentification
 					if s == "" {
 						if it.BuyersItemIdentification == nil {
 							it.BuyersItemIdentification = &ItemIdentification{
@@ -243,6 +258,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			}
 		}
 
+		if context.Is(ContextOIOUBL21) {
+			invLine.TaxTotal = makeOIOUBL21LineTaxTotals(l, ccy)
+		}
+
 		lines = append(lines, invLine)
 	}
 	if invoiceType.In(bill.InvoiceTypeCreditNote) {
@@ -250,19 +269,107 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 	} else {
 		ui.InvoiceLines = lines
 	}
+
+	if context.Is(ContextOIOUBL21) {
+		applyOIOUBL21LineTaxCategories(ui.InvoiceLines)
+		applyOIOUBL21LineTaxCategories(ui.CreditNoteLines)
+	}
 }
 
-// rescaleToCurrency rounds the amount to the natural precision of the given
+// applyOIOUBL21LineTaxCategories maps the tax categories on a set of lines: the
+// item classified category, the line-level subtotals, and any promoted
+// allowance/charges. Invoice and credit-note lines share the InvoiceLine type.
+func applyOIOUBL21LineTaxCategories(lines []InvoiceLine) {
+	for i := range lines {
+		line := &lines[i]
+		if line.Item != nil && line.Item.ClassifiedTaxCategory != nil {
+			applyOIOUBL21ClassifiedTaxCategory(line.Item.ClassifiedTaxCategory)
+		}
+		for j := range line.TaxTotal {
+			for k := range line.TaxTotal[j].TaxSubtotal {
+				applyOIOUBL21TaxCategory(&line.TaxTotal[j].TaxSubtotal[k].TaxCategory)
+			}
+		}
+		for _, ac := range line.AllowanceCharge {
+			for _, tc := range ac.TaxCategory {
+				applyOIOUBL21TaxCategory(tc)
+			}
+		}
+	}
+}
+
+// roundToCurrency rounds the amount to the natural precision of the given
 // currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
 // existing precision if the currency code is unknown.
-func rescaleToCurrency(a num.Amount, ccy string) string {
+func roundToCurrency(a num.Amount, ccy string) num.Amount {
 	if def := currency.Code(ccy).Def(); def != nil {
-		return def.Rescale(a).String()
+		return def.Rescale(a)
 	}
-	return a.String()
+	return a
 }
 
-func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
+// makeOIOUBL21LineTaxTotals builds the OIOUBL line-level cac:TaxTotal. It is only
+// called for OIOUBL 2.1, which (unlike other profiles) requires a line TaxTotal
+// on every line, even at 0% (F-INV138 / F-LIB404).
+func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
+	if line == nil || len(line.Taxes) == 0 {
+		return nil
+	}
+
+	var taxable num.Amount
+	switch {
+	case line.Sum != nil:
+		// OIOUBL line TaxableAmount is gross (Price×Qty), rounded to currency
+		// precision (l.Sum is the raw product); the discount is subtracted once
+		// at the document level (F-LIB402 sums gross line taxable amounts then
+		// adjusts for the document AllowanceCharge).
+		taxable = roundToCurrency(*line.Sum, ccy)
+	case line.Total != nil:
+		taxable = *line.Total
+	default:
+		return nil
+	}
+
+	taxTotal := TaxTotal{
+		TaxAmount: Amount{Value: "0", CurrencyID: &ccy},
+	}
+	totalAmount := num.MakeAmount(0, taxable.Exp())
+
+	for _, t := range line.Taxes {
+		subtotal := TaxSubtotal{
+			TaxableAmount: Amount{Value: taxable.String(), CurrencyID: &ccy},
+		}
+		taxCat := TaxCategory{}
+
+		if k := oioubl21TaxCategoryID(t.Ext); k != "" {
+			taxCat.ID = &IDType{Value: k}
+		}
+
+		if t.Percent != nil {
+			p := t.Percent.StringWithoutSymbol()
+			taxCat.Percent = &p
+			amount := t.Percent.Of(taxable).Rescale(taxable.Exp())
+			subtotal.TaxAmount = Amount{Value: amount.String(), CurrencyID: &ccy}
+			totalAmount = totalAmount.Add(amount)
+		} else {
+			// No percent (e.g. exempt): still emit at currency precision
+			// ("0.00"), or OIOUBL F-LIB263 rejects a bare "0".
+			subtotal.TaxAmount = Amount{Value: num.MakeAmount(0, taxable.Exp()).String(), CurrencyID: &ccy}
+		}
+
+		if t.Category != "" {
+			taxCat.TaxScheme = &TaxScheme{ID: IDType{Value: t.Category.String()}}
+		}
+		subtotal.TaxCategory = taxCat
+		taxTotal.TaxSubtotal = append(taxTotal.TaxSubtotal, subtotal)
+	}
+
+	taxTotal.TaxAmount = Amount{Value: totalAmount.String(), CurrencyID: &ccy}
+
+	return []TaxTotal{taxTotal}
+}
+
+func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount, ctx Context, taxes tax.Set) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
 	// BR-DEC-24 / UBL-DT-01: line allowance and charge amounts (BT-136/BT-141)
 	// and their base amounts must match the currency's natural precision.
@@ -271,7 +378,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	var base *Amount
 	if baseSum != nil {
 		base = &Amount{
-			Value:      rescaleToCurrency(*baseSum, ccy),
+			Value:      roundToCurrency(*baseSum, ccy).String(),
 			CurrencyID: &ccy,
 		}
 	}
@@ -279,7 +386,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
 			Amount: Amount{
-				Value:      rescaleToCurrency(ch.Amount, ccy),
+				Value:      roundToCurrency(ch.Amount, ccy).String(),
 				CurrencyID: &ccy,
 			},
 		}
@@ -290,11 +397,14 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &ch.Reason
 		}
 		if ch.Percent != nil {
-			p := ch.Percent.StringWithoutSymbol()
+			p := allowanceMultiplier(ch.Percent, ctx)
 			ac.MultiplierFactorNumeric = &p
 			if base != nil {
 				ac.BaseAmount = base
 			}
+		}
+		if ctx.Is(ContextOIOUBL21) {
+			ac.TaxCategory = makeTaxCategory(taxes, ctx) // F-LIB226: line allowance needs a TaxCategory
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}
@@ -302,7 +412,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
 			Amount: Amount{
-				Value:      rescaleToCurrency(d.Amount, ccy),
+				Value:      roundToCurrency(d.Amount, ccy).String(),
 				CurrencyID: &ccy,
 			},
 		}
@@ -313,11 +423,14 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 			ac.AllowanceChargeReason = &d.Reason
 		}
 		if d.Percent != nil {
-			p := d.Percent.StringWithoutSymbol()
+			p := allowanceMultiplier(d.Percent, ctx)
 			ac.MultiplierFactorNumeric = &p
 			if base != nil {
 				ac.BaseAmount = base
 			}
+		}
+		if ctx.Is(ContextOIOUBL21) {
+			ac.TaxCategory = makeTaxCategory(taxes, ctx) // F-LIB226: line allowance needs a TaxCategory
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}

@@ -39,8 +39,13 @@ var InvoiceTagMap = map[string][]cbc.Key{
 func (ui *Invoice) Convert() (*gobl.Envelope, error) {
 	o := new(options)
 
-	// Detect context from the invoice
-	ctx := FindContext(ui.CustomizationID, ui.ProfileID)
+	// Resolve by CustomizationID+ProfileID, else CustomizationID alone: OIOUBL
+	// carries ~40 procurement ProfileIDs under one CustomizationID, so the
+	// ProfileID-qualified lookup alone would miss the context (and its addons).
+	ctx := FindContext(ui.CustomizationID, profileIDValue(ui.ProfileID))
+	if ctx == nil {
+		ctx = FindContext(ui.CustomizationID, "")
+	}
 	if ctx != nil {
 		o.context = *ctx
 	}
@@ -82,7 +87,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 	ui.applyExchangeRates(out)
 
-	if err := ui.goblAddLines(out); err != nil {
+	if err := ui.goblAddLines(out, o.context); err != nil {
 		return nil, err
 	}
 	if err := ui.goblAddPayment(out, o); err != nil {
@@ -104,7 +109,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	ui.applyTaxRepresentative(out, o)
 
 	if len(ui.AllowanceCharge) > 0 {
-		if err := ui.goblAddCharges(out); err != nil {
+		if err := ui.goblAddCharges(out, o.context); err != nil {
 			return nil, err
 		}
 	}
@@ -118,7 +123,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 // applyContextTaxExtensions sets tax extensions that depend on the active context.
 func (ui *Invoice) applyContextTaxExtensions(out *bill.Invoice, o *options) {
 	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
+		out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(profileIDValue(ui.ProfileID)))
 	}
 
 	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {
@@ -131,6 +136,11 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
+	}
+	if typeCode == nil && o.context.Is(ContextOIOUBL21) && ui.XMLName.Local == rootNameCreditNote {
+		// OIOUBL omits the credit-note type code; the root element is authoritative.
+		out.Type = bill.InvoiceTypeCreditNote
+		return
 	}
 	out.Type = typeCodeParse(typeCode)
 	if tags := tagCodeParse(typeCode, o.context); len(tags) != 0 {

@@ -1,0 +1,80 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "3079654d1a07db195c9db95b1977b58360c8e7b603700dda5010c904d7b65cdf"
+		},
+		"from": "iso6523-actorid-upis::0184:76543216",
+		"to": "iso6523-actorid-upis::0184:12345674"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/status",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "response",
+		"issue_date": "2026-05-29",
+		"code": "RESP-002",
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"index": 1,
+				"key": "accepted",
+				"doc": {
+					"issue_date": "2026-05-29",
+					"series": "FINAL",
+					"code": "002"
+				},
+				"ext": {
+					"dk-oioubl-response-code": "BusinessAccept"
+				}
+			}
+		]
+	}
+}

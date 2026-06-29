@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strings"
 
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -43,10 +44,13 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	}
 
 	var dueDate string
-	if ui.CreditNoteTypeCode == nil && ui.DueDate != "" {
+	if ui.CreditNoteTypeCode == nil {
 		dueDate = ui.DueDate
 	}
-	if ui.CreditNoteTypeCode != nil && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
+	// OIOUBL (and credit notes, which have no root DueDate) carry the due date on
+	// the payment means rather than the document root — the converter moves it
+	// there and clears the root. Read it back when the root is absent.
+	if dueDate == "" && len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentDueDate != nil {
 		dueDate = *ui.PaymentMeans[0].PaymentDueDate
 	}
 
@@ -76,42 +80,43 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 		payment.Instructions = goblInvoiceInstructions(out, &ui.PaymentMeans[0])
 	}
 
-	// We do not currently map this as Peppol and EN16931 do not use it.
-	/*
-		if len(in.PrepaidPayment) > 0 {
-			payment.Advances = make([]*pay.Record, 0, len(in.PrepaidPayment))
-			for _, p := range in.PrepaidPayment {
-				amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
+	// OIOUBL records each advance as a cac:PrepaidPayment with its own
+	// PaidAmount/ReceivedDate (F-INV131), so reconstruct them individually.
+	// Peppol and EN 16931 only carry the total PrepaidAmount, so for those a
+	// single advance is recovered from that total.
+	switch {
+	case o.context.Is(ContextOIOUBL21) && len(ui.PrepaidPayment) > 0:
+		payment.Advances = make([]*pay.Record, 0, len(ui.PrepaidPayment))
+		for _, p := range ui.PrepaidPayment {
+			if p.PaidAmount == nil {
+				continue
+			}
+			amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
+			if err != nil {
+				return err
+			}
+			advance := &pay.Record{Amount: amount}
+			if p.ReceivedDate != nil {
+				d, err := parseDate(*p.ReceivedDate)
 				if err != nil {
 					return err
 				}
-				advance := &pay.Record{
-					Amount: amount,
-				}
-				if p.ReceivedDate != nil {
-					d, err := parseDate(*p.ReceivedDate)
-					if err != nil {
-						return err
-					}
-					advance.Date = &d
-				}
-				payment.Advances = append(payment.Advances, advance)
+				advance.Date = &d
 			}
+			if p.InstructionID != nil {
+				advance.Ref = *p.InstructionID
 			}
-	*/
-
-	if ui.LegalMonetaryTotal.PrepaidAmount != nil {
+			payment.Advances = append(payment.Advances, advance)
+		}
+	case ui.LegalMonetaryTotal.PrepaidAmount != nil:
 		totalPrepaid, err := num.AmountFromString(normalizeNumericString(ui.LegalMonetaryTotal.PrepaidAmount.Value))
 		if err != nil {
 			return err
 		}
-
-		advance := &pay.Record{
+		payment.Advances = append(payment.Advances, &pay.Record{
 			Amount:      totalPrepaid,
 			Description: "Prepaid Amount",
-		}
-		payment.Advances = append(payment.Advances, advance)
-
+		})
 	}
 
 	if payment.Payee != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
@@ -146,7 +151,41 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 		instructions.Card = goblCard(paymentMeans)
 	}
 
+	goblOIOUBLPaymentChannel(instructions, paymentMeans)
+
 	return instructions
+}
+
+// goblOIOUBLPaymentChannel reverses the OIOUBL payment-channel handling. It pins
+// the instruction to MeansKeyOther so EN 16931 normalization keeps the explicit
+// cbc:PaymentMeansCode read from the document, and for Giro/FIK recovers the
+// kortart, payment number and FIK creditor account from the wire.
+func goblOIOUBLPaymentChannel(instr *pay.Instructions, paymentMeans *PaymentMeans) {
+	if paymentMeans.PaymentChannelCode == nil {
+		return
+	}
+	switch paymentMeans.PaymentChannelCode.Value {
+	case oioubl21PaymentChannelIBAN:
+		instr.Key = pay.MeansKeyOther
+		return
+	case oioubl21PaymentChannelGiro, oioubl21PaymentChannelFIK:
+	default:
+		return
+	}
+
+	instr.Key = pay.MeansKeyOther
+	if paymentMeans.PaymentID != nil {
+		instr.Ext = instr.Ext.Set(oioubl.ExtKeyPaymentID, cbc.Code(*paymentMeans.PaymentID))
+	}
+	// The generic path put the kortart in Ref; the real payment number, if any,
+	// is the InstructionID of the structured card types.
+	instr.Ref = ""
+	if paymentMeans.InstructionID != nil {
+		instr.Ref = cbc.Code(cleanString(*paymentMeans.InstructionID))
+	}
+	if paymentMeans.CreditAccount != nil && paymentMeans.CreditAccount.AccountID != "" {
+		instr.CreditTransfer = []*pay.CreditTransfer{{Number: paymentMeans.CreditAccount.AccountID}}
+	}
 }
 
 func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
@@ -164,8 +203,14 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	if account.Name != nil {
 		creditTransfer.Name = cleanString(*account.Name)
 	}
-	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
+	if branch := account.FinancialInstitutionBranch; branch != nil {
+		// Standard UBL carries the BIC on the branch ID; OIOUBL strips that for
+		// IBAN accounts (F-LIB295) and nests it under FinancialInstitution/ID.
+		if branch.ID != nil {
+			creditTransfer.BIC = cleanString(*branch.ID)
+		} else if branch.FinancialInstitution != nil && branch.FinancialInstitution.ID != nil {
+			creditTransfer.BIC = cleanString(*branch.FinancialInstitution.ID)
+		}
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}

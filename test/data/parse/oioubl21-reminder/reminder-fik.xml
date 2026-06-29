@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Reminder xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns="urn:oasis:names:specification:ubl:schema:xsd:Reminder-2">
+  <cbc:UBLVersionID>2.0</cbc:UBLVersionID>
+  <cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>
+  <cbc:ProfileID schemeAgencyID="320" schemeID="urn:oioubl:id:profileid-1.2">Procurement-BilSim-1.0</cbc:ProfileID>
+  <cbc:ID>2026-R-1000</cbc:ID>
+  <cbc:UUID>019ed096-350c-73bc-9695-b103e1d03b93</cbc:UUID>
+  <cbc:IssueDate>2026-01-15</cbc:IssueDate>
+  <cbc:ReminderTypeCode listAgencyID="320" listID="urn:oioubl:codelist:remindertypecode-1.1">Reminder</cbc:ReminderTypeCode>
+  <cbc:ReminderSequenceNumeric>1</cbc:ReminderSequenceNumeric>
+  <cbc:DocumentCurrencyCode>DKK</cbc:DocumentCurrencyCode>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="DK:CVR">DK12345674</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Eksempel A/S</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredLax</cbc:AddressFormatCode>
+        <cbc:StreetName>Hovedgaden</cbc:StreetName>
+        <cbc:BuildingNumber>1</cbc:BuildingNumber>
+        <cbc:CityName>København</cbc:CityName>
+        <cbc:PostalZone>1000</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>DK</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID schemeID="DK:SE">DK12345674</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.1">63</cbc:ID>
+          <cbc:Name>Moms</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Eksempel A/S</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="DK:CVR">DK12345674</cbc:CompanyID>
+      </cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="DK:CVR">DK88146328</cbc:EndpointID>
+      <cac:PartyName>
+        <cbc:Name>Kunde ApS</cbc:Name>
+      </cac:PartyName>
+      <cac:PostalAddress>
+        <cbc:AddressFormatCode listAgencyID="320" listID="urn:oioubl:codelist:addressformatcode-1.1">StructuredLax</cbc:AddressFormatCode>
+        <cbc:StreetName>Bygaden</cbc:StreetName>
+        <cbc:BuildingNumber>5</cbc:BuildingNumber>
+        <cbc:CityName>Aarhus</cbc:CityName>
+        <cbc:PostalZone>8000</cbc:PostalZone>
+        <cac:Country>
+          <cbc:IdentificationCode>DK</cbc:IdentificationCode>
+        </cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID schemeID="DK:SE">DK88146328</cbc:CompanyID>
+        <cac:TaxScheme>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.1">63</cbc:ID>
+          <cbc:Name>Moms</cbc:Name>
+        </cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity>
+        <cbc:RegistrationName>Kunde ApS</cbc:RegistrationName>
+        <cbc:CompanyID schemeID="DK:CVR">DK88146328</cbc:CompanyID>
+      </cac:PartyLegalEntity>
+      <cac:Contact>
+        <cbc:Name>Anders Jensen</cbc:Name>
+      </cac:Contact>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:PaymentMeans>
+    <cbc:PaymentMeansCode>93</cbc:PaymentMeansCode>
+    <cbc:PaymentChannelCode listID="urn:oioubl:codelist:paymentchannelcode-1.1">DK:FIK</cbc:PaymentChannelCode>
+    <cbc:InstructionID>000000000012345</cbc:InstructionID>
+    <cbc:PaymentID>71</cbc:PaymentID>
+    <cac:CreditAccount>
+      <cbc:AccountID>12345678</cbc:AccountID>
+    </cac:CreditAccount>
+  </cac:PaymentMeans>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="DKK">1250.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="DKK">0.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="DKK">1250.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="DKK">1250.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:ReminderLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:DebitLineAmount currencyID="DKK">1250.00</cbc:DebitLineAmount>
+    <cac:BillingReference>
+      <cac:InvoiceDocumentReference>
+        <cbc:ID>2025-1000</cbc:ID>
+        <cbc:IssueDate>2025-12-01</cbc:IssueDate>
+      </cac:InvoiceDocumentReference>
+    </cac:BillingReference>
+  </cac:ReminderLine>
+</Reminder>

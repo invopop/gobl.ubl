@@ -1,6 +1,7 @@
 package ubl
 
 import (
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/addons/de/xrechnung"
@@ -27,6 +28,10 @@ type VESIDMapping struct {
 	Invoice string
 	// CreditNote is the VESID for credit notes
 	CreditNote string
+	// ApplicationResponse is the VESID for application responses
+	ApplicationResponse string
+	// Reminder is the VESID for reminders
+	Reminder string
 }
 
 // Context is used to ensure that the generated UBL document
@@ -224,6 +229,20 @@ var ContextZATCA = Context{
 	},
 }
 
+// ContextOIOUBL21 defines the context for OIOUBL 2.1 documents on the Danish
+// NemHandel network.
+var ContextOIOUBL21 = Context{
+	CustomizationID: "OIOUBL-2.1",
+	ProfileID:       "urn:www.nesubl.eu:profiles:profile5:ver2.0",
+	Addons:          []cbc.Key{oioubl.V2_1},
+	VESIDs: VESIDMapping{
+		Invoice:             "dk.oioubl:invoice:1.17.2",
+		CreditNote:          "dk.oioubl:credit-note:1.17.2",
+		ApplicationResponse: "dk.oioubl:application-response:1.17.2",
+		Reminder:            "dk.oioubl:reminder:1.17.2",
+	},
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextOIOUBL21}

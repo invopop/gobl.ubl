@@ -1,0 +1,191 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "2460de8b6191db8d26e79432229be53d00ee3d69f73776bd2fa1c596c896192c"
+		},
+		"from": "iso6523-actorid-upis::0184:12345674"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "FINAL-FOREIGN-1",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Jens Hansen"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0184:12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-scheme": "DK:CVR"
+			}
+		},
+		"customer": {
+			"name": "Beispiel GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "282741168"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "HRB12345",
+					"ext": {
+						"iso-scheme-id": "ZZZ"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Klaus Müller"
+					},
+					"identities": [
+						{
+							"code": "C-002"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "DE:VAT",
+					"code": "DE282741168"
+				}
+			],
+			"addresses": [
+				{
+					"num": "7",
+					"street": "Hauptstrasse",
+					"locality": "Berlin",
+					"code": "10115",
+					"country": "DE"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Reverse charge ydelse",
+					"price": "9000.00",
+					"unit": "one"
+				},
+				"sum": "9000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "reverse-charge",
+						"ext": {
+							"cef-vatex": "VATEX-EU-AE",
+							"dk-oioubl-tax-category": "ReverseCharge",
+							"untdid-tax-category": "AE"
+						}
+					}
+				],
+				"total": "9000.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "Netto 30 dage"
+			},
+			"instructions": {
+				"key": "other",
+				"ref": "TEST-006",
+				"credit_transfer": [
+					{
+						"iban": "DK5000400440116243",
+						"bic": "DABADKKK"
+					}
+				],
+				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "9000.00",
+			"total": "9000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "reverse-charge",
+								"ext": {
+									"cef-vatex": "VATEX-EU-AE",
+									"dk-oioubl-tax-category": "ReverseCharge",
+									"untdid-tax-category": "AE"
+								},
+								"base": "9000.00",
+								"amount": "0.00"
+							}
+						],
+						"amount": "0.00"
+					}
+				],
+				"sum": "0.00"
+			},
+			"tax": "0.00",
+			"total_with_tax": "9000.00",
+			"payable": "9000.00"
+		}
+	}
+}

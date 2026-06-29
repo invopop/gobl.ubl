@@ -12,7 +12,7 @@ import (
 )
 
 // goblAddCharges adds the invoice charges to the gobl output.
-func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
+func (ui *Invoice) goblAddCharges(out *bill.Invoice, ctx Context) error {
 	var charges []*bill.Charge
 	var discounts []*bill.Discount
 
@@ -21,7 +21,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 
 	for _, allowanceCharge := range ui.AllowanceCharge {
 		if allowanceCharge.ChargeIndicator {
-			charge, err := goblCharge(&allowanceCharge, taxCategoryMap)
+			charge, err := goblCharge(&allowanceCharge, taxCategoryMap, ctx)
 			if err != nil {
 				return err
 			}
@@ -30,7 +30,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 			}
 			charges = append(charges, charge)
 		} else {
-			discount, err := goblDiscount(&allowanceCharge, taxCategoryMap)
+			discount, err := goblDiscount(&allowanceCharge, taxCategoryMap, ctx)
 			if err != nil {
 				return err
 			}
@@ -49,7 +49,26 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	return nil
 }
 
-func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Charge, error) {
+// goblAllowancePercent parses an AllowanceCharge MultiplierFactorNumeric into a
+// GOBL percentage, or returns nil when none is present. OIOUBL stores the
+// decimal factor (0.05 = 5%), which PercentageFromString reads directly; other
+// profiles store the percent number (5), which needs the % suffix.
+func goblAllowancePercent(ac *AllowanceCharge, ctx Context) (*num.Percentage, error) {
+	if ac.MultiplierFactorNumeric == nil {
+		return nil, nil
+	}
+	multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
+	if !ctx.Is(ContextOIOUBL21) && !strings.HasSuffix(multiplier, "%") {
+		multiplier += "%"
+	}
+	p, err := num.PercentageFromString(multiplier)
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
+
+func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo, ctx Context) (*bill.Charge, error) {
 	ch := &bill.Charge{}
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
@@ -73,16 +92,12 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 		}
 		ch.Base = &b
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		p, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		ch.Percent = &p
+	pct, err := goblAllowancePercent(ac, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		ch.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
@@ -96,16 +111,16 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		ch.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID),
+				Category: goblTaxSchemeCategory(ac.TaxCategory[0].TaxScheme.ID.Value),
 			},
 		}
 
 		// Add tax category ID to extensions
 		if ac.TaxCategory[0].ID != nil {
-			ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(*ac.TaxCategory[0].ID))
+			ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, goblTaxCategoryCode(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID, ac.TaxCategory[0].Percent)
+			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
@@ -123,7 +138,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 
 			// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
 			// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
-			if !p.IsZero() || (ac.TaxCategory[0].ID != nil && *ac.TaxCategory[0].ID == "Z") {
+			if !p.IsZero() || (ac.TaxCategory[0].ID != nil && ac.TaxCategory[0].ID.Value == "Z") {
 				ch.Taxes[0].Percent = &p
 			}
 		}
@@ -131,7 +146,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 	return ch, nil
 }
 
-func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Discount, error) {
+func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo, ctx Context) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
@@ -155,16 +170,12 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		}
 		d.Base = &b
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		p, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
+	pct, err := goblAllowancePercent(ac, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		d.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
@@ -178,16 +189,16 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 	if len(ac.TaxCategory) > 0 && ac.TaxCategory[0].TaxScheme != nil {
 		d.Taxes = tax.Set{
 			{
-				Category: cbc.Code(ac.TaxCategory[0].TaxScheme.ID),
+				Category: goblTaxSchemeCategory(ac.TaxCategory[0].TaxScheme.ID.Value),
 			},
 		}
 
 		// Add tax category ID to extensions
 		if ac.TaxCategory[0].ID != nil {
-			d.Taxes[0].Ext = d.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(*ac.TaxCategory[0].ID))
+			d.Taxes[0].Ext = d.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, goblTaxCategoryCode(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID, *ac.TaxCategory[0].ID, ac.TaxCategory[0].Percent)
+			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
@@ -205,7 +216,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 
 			// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
 			// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
-			if !percent.IsZero() || (ac.TaxCategory[0].ID != nil && *ac.TaxCategory[0].ID == "Z") {
+			if !percent.IsZero() || (ac.TaxCategory[0].ID != nil && ac.TaxCategory[0].ID.Value == "Z") {
 				d.Taxes[0].Percent = &percent
 			}
 		}
@@ -213,7 +224,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 	return d, nil
 }
 
-func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
+func goblLineCharge(ac *AllowanceCharge, ctx Context) (*bill.LineCharge, error) {
 	amount, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
 	if err != nil {
 		return nil, err
@@ -229,16 +240,12 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		percent, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		ch.Percent = &percent
+	pct, err := goblAllowancePercent(ac, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		ch.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
@@ -252,7 +259,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	return ch, nil
 }
 
-func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
+func goblLineDiscount(ac *AllowanceCharge, ctx Context) (*bill.LineDiscount, error) {
 	a, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
 	if err != nil {
 		return nil, err
@@ -268,16 +275,12 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
 	}
-	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
-		if !strings.HasSuffix(multiplier, "%") {
-			multiplier += "%"
-		}
-		p, err := num.PercentageFromString(multiplier)
-		if err != nil {
-			return nil, err
-		}
-		d.Percent = &p
+	pct, err := goblAllowancePercent(ac, ctx)
+	if err != nil {
+		return nil, err
+	}
+	if pct != nil {
+		d.Percent = pct
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {

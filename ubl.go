@@ -32,6 +32,7 @@ const Version = "2.1"
 //
 // Supported types:
 //   - *Invoice (for both Invoice and CreditNote documents)
+//   - *ApplicationResponse (for OIOUBL invoice responses)
 //
 // Example usage:
 //
@@ -67,6 +68,20 @@ func Parse(data []byte) (any, error) {
 		}
 		return in, nil
 
+	case NamespaceUBLApplicationResponse:
+		ar := new(ApplicationResponse)
+		if err := xmlctx.Unmarshal(data, ar, xmlctx.WithNamespaces(cbcCacNamespaces(ns))); err != nil {
+			return nil, err
+		}
+		return ar, nil
+
+	case NamespaceUBLReminder:
+		rem := new(Reminder)
+		if err := xmlctx.Unmarshal(data, rem, xmlctx.WithNamespaces(cbcCacNamespaces(ns))); err != nil {
+			return nil, err
+		}
+		return rem, nil
+
 	// Future document types can be added here
 	// case NamespaceUBLOrder:
 	//     order := new(Order)
@@ -101,36 +116,56 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		opt(o)
 	}
 
-	// Check and add missing addons
-	if err := ensureAddons(env, o.context.Addons); err != nil {
-		return nil, err
-	}
-
 	switch doc := env.Extract().(type) {
 	case *bill.Invoice:
+		// Check and add missing addons
+		if err := ensureAddons(env, o.context.Addons); err != nil {
+			return nil, err
+		}
 		// Removes included taxes as they are not supported in UBL
 		if err := doc.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
 		}
 		return ublInvoice(doc, o)
+	case *bill.Status:
+		// The ApplicationResponse converter maps only; it neither auto-adds
+		// addons nor validates (a keyless or partial status is a generic UBL
+		// shape). Correctness is gated by the addon rules at envelope validation
+		// and by schematron downstream.
+		return ublApplicationResponse(doc, o), nil
+	case *bill.Payment:
+		// A payment request maps to the OIOUBL Reminder (Rykker). Add any missing
+		// addons so the reminder-type/sequence rules surface, then convert.
+		if err := ensureAddons(env, o.context.Addons); err != nil {
+			return nil, err
+		}
+		return ublReminder(doc, o), nil
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
 }
 
-// ensureAddons checks if the invoice has all required addons and adds missing ones
+// addonsDocument is implemented by the GOBL document types that carry addons.
+type addonsDocument interface {
+	GetAddons() []cbc.Key
+	SetAddons(...cbc.Key)
+}
+
+// ensureAddons checks if the document has all required addons and adds the
+// missing ones, recalculating and revalidating the envelope so any rule the
+// newly added addon enforces is surfaced (as a *gobl.Error carrying the faults).
 func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 	if len(required) == 0 {
 		return nil
 	}
 
-	inv, ok := env.Extract().(*bill.Invoice)
+	doc, ok := env.Extract().(addonsDocument)
 	if !ok {
-		return fmt.Errorf("expected bill.Invoice, got %T", env.Extract())
+		return ErrUnsupportedDocumentType
 	}
 
 	var missing []cbc.Key
-	existing := inv.GetAddons()
+	existing := doc.GetAddons()
 	for _, addon := range required {
 		if !addon.In(existing...) {
 			missing = append(missing, addon)
@@ -140,14 +175,22 @@ func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 		return nil
 	}
 
-	inv.SetAddons(append(existing, missing...)...)
+	doc.SetAddons(append(existing, missing...)...)
 	if err := env.Calculate(); err != nil {
 		return err
 	}
-	if err := env.Validate(); err != nil {
-		return err
+	return env.Validate()
+}
+
+// cbcCacNamespaces returns the namespace prefix map for the simpler UBL
+// documents (ApplicationResponse, Reminder) that use only the cbc and cac
+// component namespaces alongside their root namespace.
+func cbcCacNamespaces(ns string) map[string]string {
+	return map[string]string{
+		"":    ns,
+		"cbc": NamespaceCBC,
+		"cac": NamespaceCAC,
 	}
-	return nil
 }
 
 func extractRootNamespace(data []byte) (string, error) {
@@ -179,6 +222,11 @@ func Bytes(in any) ([]byte, error) {
 	// Go's xml.Marshal encodes single quotes as &#39,
 	// this is a quick fix
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
+
+	if creditNoteNeedsTaxPointDateReorder(in) {
+		b = reorderCreditNoteTaxPointDate(b)
+	}
+
 	return append([]byte(xml.Header), b...), nil
 }
 
@@ -190,5 +238,80 @@ func BytesCompact(in any) ([]byte, error) {
 		return nil, err
 	}
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
+
+	if creditNoteNeedsTaxPointDateReorder(in) {
+		b = reorderCreditNoteTaxPointDate(b)
+	}
+
 	return append([]byte(xml.Header), b...), nil
+}
+
+// creditNoteNeedsTaxPointDateReorder reports whether in is a credit note
+// carrying a cbc:TaxPointDate, which the CreditNote XSD sequences differently
+// from the shared Invoice struct — see reorderCreditNoteTaxPointDate.
+func creditNoteNeedsTaxPointDateReorder(in any) bool {
+	var inv *Invoice
+	switch v := in.(type) {
+	case *Invoice:
+		inv = v
+	case Invoice:
+		inv = &v
+	default:
+		return false
+	}
+	return inv != nil && inv.XMLName.Local == rootNameCreditNote && inv.TaxPointDate != ""
+}
+
+// reorderCreditNoteTaxPointDate moves cbc:TaxPointDate ahead of
+// cbc:CreditNoteTypeCode to match the CreditNote XSD sequence. Invoice and
+// CreditNote share one Go struct, and encoding/xml can neither vary field order
+// per struct nor survive a decode/re-encode (it mangles the cac:/cbc: prefixes),
+// so the fix edits the marshaled bytes directly.
+func reorderCreditNoteTaxPointDate(b []byte) []byte {
+	const (
+		open     = "<cbc:TaxPointDate>"
+		closeTag = "</cbc:TaxPointDate>"
+		typeCode = "<cbc:CreditNoteTypeCode"
+	)
+
+	tpd := bytes.Index(b, []byte(open))
+	tc := bytes.Index(b, []byte(typeCode))
+	if tpd < 0 || tc < 0 || tpd < tc {
+		return b // type code absent, or already correctly ordered
+	}
+	rel := bytes.Index(b[tpd:], []byte(closeTag))
+	if rel < 0 {
+		return b
+	}
+	elemEnd := tpd + rel + len(closeTag)
+	elem := append([]byte(nil), b[tpd:elemEnd]...)
+
+	// Drop the element together with the newline + indent that preceded it.
+	cut := tpd
+	for cut > 0 && (b[cut-1] == ' ' || b[cut-1] == '\t') {
+		cut--
+	}
+	if cut > 0 && b[cut-1] == '\n' {
+		cut--
+	}
+	rest := append(append([]byte(nil), b[:cut]...), b[elemEnd:]...)
+
+	// Re-insert it before the type code, reusing that line's leading whitespace
+	// (empty for the compact, non-indented output).
+	tc = bytes.Index(rest, []byte(typeCode))
+	indentStart := tc
+	for indentStart > 0 && (rest[indentStart-1] == ' ' || rest[indentStart-1] == '\t') {
+		indentStart--
+	}
+	if indentStart > 0 && rest[indentStart-1] == '\n' {
+		indentStart--
+	}
+	sep := rest[indentStart:tc]
+
+	out := make([]byte, 0, len(rest)+len(elem)+len(sep))
+	out = append(out, rest[:tc]...)
+	out = append(out, elem...)
+	out = append(out, sep...)
+	out = append(out, rest[tc:]...)
+	return out
 }

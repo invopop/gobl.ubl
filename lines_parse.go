@@ -15,7 +15,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
+func (ui *Invoice) goblAddLines(out *bill.Invoice, ctx Context) error {
 	items := ui.InvoiceLines
 	if len(ui.CreditNoteLines) > 0 {
 		items = ui.CreditNoteLines
@@ -27,7 +27,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
 	for _, docLine := range items {
-		line, err := goblConvertLine(&docLine, taxCategoryMap)
+		line, err := goblConvertLine(&docLine, taxCategoryMap, ctx)
 		if err != nil {
 			return err
 		}
@@ -39,7 +39,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	return nil
 }
 
-func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo, ctx Context) (*bill.Line, error) {
 	if docLine.Price == nil {
 		// skip this line
 		return nil, nil
@@ -71,7 +71,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 	}
 	if di := docLine.Item; di != nil {
 		goblConvertLineItem(di, line.Item)
-		goblConvertLineItemTaxes(di, line, taxCategoryMap)
+		goblConvertLineItemTaxes(di, line, taxCategoryMap, ctx)
 	}
 
 	notes := make([]*org.Note, 0)
@@ -130,7 +130,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 	}
 
 	if docLine.AllowanceCharge != nil {
-		line, err = goblLineCharges(docLine.AllowanceCharge, line)
+		line, err = goblLineCharges(docLine.AllowanceCharge, line, ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -191,7 +191,7 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 	}
 }
 
-func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo) {
+func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo, ctx Context) {
 	ctc := di.ClassifiedTaxCategory
 	if ctc == nil || ctc.TaxScheme == nil {
 		return
@@ -199,18 +199,21 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 
 	line.Taxes = tax.Set{
 		{
-			Category: cbc.Code(ctc.TaxScheme.ID),
+			Category: goblTaxSchemeCategory(ctc.TaxScheme.ID.Value),
 		},
 	}
 	if ctc.ID != nil {
-		line.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyTaxCategory: cbc.Code(*ctc.ID),
-		})
+		line.Taxes[0].Ext = line.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, goblTaxCategoryCode(ctc.ID.Value))
 
-		// Try to get exemption code from TaxTotal
-		key := buildTaxCategoryKey(ctc.TaxScheme.ID, *ctc.ID, ctc.Percent)
-		if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
+		// OIOUBL carries the exemption reason on the line; other profiles source
+		// it from the document-level TaxTotal subtotal.
+		if ctx.Is(ContextOIOUBL21) && ctc.TaxExemptionReasonCode != nil {
+			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(*ctc.TaxExemptionReasonCode))
+		} else {
+			key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value, ctc.Percent)
+			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
+				line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
+			}
 		}
 
 	}
@@ -221,9 +224,11 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 		}
 		percent, _ := num.PercentageFromString(percentStr)
 
-		// Skip setting percent if it's 0% and tax category is not "Z" (zero-rated)
-		// This prevents GOBL from normalizing to "zero" tax rate for exempt/reverse-charge cases
-		if percent.IsZero() && ctc.ID != nil && *ctc.ID != "Z" {
+		// Skip setting percent if it's 0% and the tax category is not zero-rated.
+		// This prevents GOBL from normalizing to "zero" tax rate for
+		// exempt/reverse-charge cases. Compare via goblTaxCategoryCode so the
+		// OIOUBL "ZeroRated" wire value is recognised, not just the UNTDID "Z".
+		if percent.IsZero() && ctc.ID != nil && goblTaxCategoryCode(ctc.ID.Value) != "Z" {
 			return
 		}
 
@@ -288,10 +293,10 @@ func goblIdentity(id *IDType) *org.Identity {
 	return identity
 }
 
-func goblLineCharges(allowances []*AllowanceCharge, line *bill.Line) (*bill.Line, error) {
+func goblLineCharges(allowances []*AllowanceCharge, line *bill.Line, ctx Context) (*bill.Line, error) {
 	for _, ac := range allowances {
 		if ac.ChargeIndicator {
-			charge, err := goblLineCharge(ac)
+			charge, err := goblLineCharge(ac, ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -300,7 +305,7 @@ func goblLineCharges(allowances []*AllowanceCharge, line *bill.Line) (*bill.Line
 			}
 			line.Charges = append(line.Charges, charge)
 		} else {
-			discount, err := goblLineDiscount(ac)
+			discount, err := goblLineDiscount(ac, ctx)
 			if err != nil {
 				return nil, err
 			}

@@ -1,8 +1,11 @@
 package ubl_test
 
 import (
+	"bytes"
 	"testing"
 
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
@@ -70,6 +73,31 @@ func TestParseInvoiceTypes(t *testing.T) {
 		assert.Equal(t, bill.InvoiceTypeCreditNote, inv.Type)
 		assert.True(t, inv.HasTags(tax.TagSelfBilled), "should have self-billed tag")
 	})
+}
+
+func TestParseInvoiceOIOUBLNonProfile5Context(t *testing.T) {
+	// A non-profile5 ProfileID (one of OIOUBL's ~40 procurement profiles) must
+	// still resolve the OIOUBL context and its addon via the CustomizationID-only
+	// fallback; otherwise the document parses with no addons.
+	data, err := testLoadXML("oioubl21/invoice-minimal.xml")
+	require.NoError(t, err)
+
+	swapped := bytes.Replace(data,
+		[]byte("urn:www.nesubl.eu:profiles:profile5:ver2.0"),
+		[]byte("Procurement-BilSim-1.0"), 1)
+	require.NotEqual(t, data, swapped, "fixture should carry the profile5 ProfileID")
+
+	doc, err := ubl.Parse(swapped)
+	require.NoError(t, err)
+	inv, ok := doc.(*ubl.Invoice)
+	require.True(t, ok)
+
+	env, err := inv.Convert()
+	require.NoError(t, err)
+	out, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.Contains(t, out.Addons.List, oioubl.V2_1,
+		"OIOUBL context must resolve despite the non-profile5 ProfileID")
 }
 
 func TestParseInvoiceTags(t *testing.T) {

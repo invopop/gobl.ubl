@@ -1,6 +1,9 @@
 package ubl
 
 import (
+	"strings"
+
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -19,15 +22,35 @@ func goblParty(party *Party, o *options) *org.Party {
 	}
 
 	if eID := party.EndpointID; eID != nil {
-		oi := new(org.Inbox)
-		switch eID.SchemeID {
-		case "EM": // email
-			oi.Email = eID.Value
+		switch {
+		case eID.SchemeID == "EM": // email
+			p.Inboxes = append(p.Inboxes, &org.Inbox{Email: eID.Value})
+		case o.context.Is(ContextOIOUBL21):
+			// OIOUBL participants are restored as ISO 6523 org.Endpoints, the
+			// going-forward routing model (org.Inbox is deprecated). The numeric ICD
+			// comes from the addon codelist (ICDForScheme); a foreign symbolic scheme
+			// has no Danish ICD and falls back to an inbox so no identifier is lost.
+			if icd, ok := oioubl.ICDForScheme(eID.SchemeID); ok {
+				code := eID.Value
+				if eID.SchemeID == oioubl21SchemeDKCVR {
+					// Reverse the wire-only DK prefix (F-LIB180).
+					code = strings.TrimPrefix(code, "DK")
+				}
+				p.Endpoints = append(p.Endpoints, &org.Endpoint{
+					URI: cbc.URI(iso6523EndpointScheme + "::" + icd + ":" + code),
+				})
+			} else {
+				p.Inboxes = append(p.Inboxes, &org.Inbox{
+					Scheme: cbc.Code(eID.SchemeID),
+					Code:   cbc.Code(eID.Value),
+				})
+			}
 		default:
-			oi.Scheme = cbc.Code(eID.SchemeID)
-			oi.Code = cbc.Code(eID.Value)
+			p.Inboxes = append(p.Inboxes, &org.Inbox{
+				Scheme: cbc.Code(eID.SchemeID),
+				Code:   cbc.Code(eID.Value),
+			})
 		}
-		p.Inboxes = append(p.Inboxes, oi)
 	}
 
 	if party.PartyName != nil {
@@ -39,19 +62,32 @@ func goblParty(party *Party, o *options) *org.Party {
 		}
 	}
 
-	if party.Contact != nil && party.Contact.Name != nil {
-		p.People = []*org.Person{
-			{
-				Name: &org.Name{
-					Given: cleanString(*party.Contact.Name),
-				},
-			},
+	if c := party.Contact; c != nil {
+		person := new(org.Person)
+		if c.Name != nil {
+			person.Name = &org.Name{
+				Given: cleanString(*c.Name),
+			}
+		}
+		// OIOUBL carries the contact reference in cac:Contact/cbc:ID; restore it
+		// to the person's identities so the round-trip stays lossless (the
+		// outbound side sources Contact/ID from person.Identities for F-INV051).
+		if c.ID != nil && o.context.Is(ContextOIOUBL21) {
+			if code := cleanString(*c.ID); code != "" {
+				person.Identities = []*org.Identity{{Code: cbc.Code(code)}}
+			}
+		}
+		if person.Name != nil || len(person.Identities) > 0 {
+			p.People = []*org.Person{person}
 		}
 	}
 
 	if party.PostalAddress != nil {
 		p.Addresses = []*org.Address{
 			parseAddress(party.PostalAddress),
+		}
+		if o.context.Is(ContextOIOUBL21) {
+			applyOIOUBL21AddressFormatParse(party.PostalAddress, p)
 		}
 	}
 
@@ -73,7 +109,7 @@ func goblParty(party *Party, o *options) *org.Party {
 	}
 
 	handleLegalEntityIdentity(party, p)
-	handlePartyTaxSchemes(party, p)
+	handlePartyTaxSchemes(party, p, o)
 	handlePartyIdentifications(party, p, o)
 
 	return p
@@ -127,22 +163,81 @@ func parseAddress(address *PostalAddress) *org.Address {
 	if address.CountrySubentity != nil {
 		addr.Region = cleanString(*address.CountrySubentity)
 	}
+	// A StructuredRegion address carries its region in cbc:Region rather than
+	// cbc:CountrySubentity (F-LIB040). No other profile emits cbc:Region.
+	if address.Region != nil && addr.Region == "" {
+		addr.Region = cleanString(*address.Region)
+	}
 	if address.BuildingNumber != nil {
 		addr.Number = cleanString(*address.BuildingNumber)
+	}
+	if address.Postbox != nil {
+		addr.PostOfficeBox = cleanString(*address.Postbox)
 	}
 	// CitySubdivisionName is used by ZATCA to represent the district,
 	// which maps to StreetExtra in GOBL.
 	if address.CitySubdivisionName != nil && addr.StreetExtra == "" {
 		addr.StreetExtra = cleanString(*address.CitySubdivisionName)
 	}
+	// Unstructured addresses (OIOUBL AddressFormatCode "Unstructured") carry
+	// their content as free-text cac:AddressLine rather than the structured
+	// fields above. Fall back to it so the content survives the parse: the first
+	// line becomes the street, any remaining lines the street extra.
+	if addr.Street == "" && len(address.AddressLine) > 0 {
+		var lines []string
+		for _, l := range address.AddressLine {
+			if s := cleanString(l.Line); s != "" {
+				lines = append(lines, s)
+			}
+		}
+		if len(lines) > 0 {
+			addr.Street = lines[0]
+			if len(lines) > 1 && addr.StreetExtra == "" {
+				addr.StreetExtra = strings.Join(lines[1:], ", ")
+			}
+		}
+	}
 	return addr
+}
+
+// applyOIOUBL21AddressFormatParse restores the wire cbc:AddressFormatCode to the
+// dk-oioubl-address-format extension so the format round-trips. StructuredLax is
+// the default and carries no extension; the StructuredID id and StructuredRegion
+// district (not modelled by org.Address) are read back onto the party extension.
+func applyOIOUBL21AddressFormatParse(address *PostalAddress, p *org.Party) {
+	if address == nil || address.AddressFormatCode == nil {
+		return
+	}
+	format := address.AddressFormatCode.Value
+	if format == "" || format == oioubl21AddressStructuredLax {
+		return
+	}
+	exts := cbc.CodeMap{oioubl21AddressFormatKey: cbc.Code(format)}
+	switch format {
+	case oioubl21AddressStructuredID:
+		// F-LIB038: the identifier lives in cbc:ID, which GOBL does not model on
+		// the address.
+		if address.ID != nil {
+			if id := cleanString(address.ID.Value); id != "" {
+				exts[oioubl21AddressIDKey] = cbc.Code(id)
+			}
+		}
+	case oioubl21AddressStructuredRegion:
+		// F-LIB040: cbc:District is not modelled by GOBL; the region is parsed
+		// into org.Address.Region by parseAddress.
+		if address.District != nil {
+			if d := cleanString(*address.District); d != "" {
+				exts[oioubl21AddressDistrictKey] = cbc.Code(d)
+			}
+		}
+	}
+	p.Ext = tax.ExtensionsOf(exts)
 }
 
 func handleLegalEntityIdentity(party *Party, p *org.Party) {
 	if party.PartyLegalEntity == nil || party.PartyLegalEntity.CompanyID == nil {
 		return
 	}
-
 	if p.Identities == nil {
 		p.Identities = make([]*org.Identity, 0)
 	}
@@ -158,24 +253,56 @@ func handleLegalEntityIdentity(party *Party, p *org.Party) {
 	p.Identities = append(p.Identities, identity)
 }
 
-func handlePartyTaxSchemes(party *Party, p *org.Party) {
+func handlePartyTaxSchemes(party *Party, p *org.Party, o *options) {
 	if len(party.PartyTaxScheme) == 0 {
 		return
 	}
 
+	cc := party.resolveCountry(o.context)
 	validSchemes := extractValidTaxSchemes(party.PartyTaxScheme)
 
 	if len(validSchemes) == 1 {
-		setTaxIDFromScheme(validSchemes[0], p, party.CountryCode())
+		setTaxIDFromScheme(validSchemes[0], p, cc)
 	} else if len(validSchemes) > 1 {
-		handleMultipleTaxSchemes(validSchemes, p, party.CountryCode())
+		handleMultipleTaxSchemes(validSchemes, p, cc)
 	}
+}
+
+// resolveCountry returns the party country for tax-identity parsing. An OIOUBL
+// StructuredID address carries only an identifier (F-LIB038), so the postal
+// address has no country to derive it from; fall back to the DK:SE/DK:CVR
+// company-ID scheme, which only a Danish party carries, so the tax-id country
+// and the DK-prefix strip still resolve.
+func (p *Party) resolveCountry(ctx Context) string {
+	if c := p.CountryCode(); c != "" {
+		return c
+	}
+	if ctx.Is(ContextOIOUBL21) && p.hasDanishCompanyScheme() {
+		return "DK"
+	}
+	return ""
+}
+
+// hasDanishCompanyScheme reports whether any tax-scheme or legal-entity company
+// ID carries a Danish OIOUBL scheme (DK:SE/DK:CVR).
+func (p *Party) hasDanishCompanyScheme() bool {
+	for _, pts := range p.PartyTaxScheme {
+		if id := pts.CompanyID; id != nil && id.SchemeID != nil &&
+			(*id.SchemeID == oioubl21SchemeDKSE || *id.SchemeID == oioubl21SchemeDKCVR) {
+			return true
+		}
+	}
+	if le := p.PartyLegalEntity; le != nil && le.CompanyID != nil && le.CompanyID.SchemeID != nil &&
+		(*le.CompanyID.SchemeID == oioubl21SchemeDKSE || *le.CompanyID.SchemeID == oioubl21SchemeDKCVR) {
+		return true
+	}
+	return false
 }
 
 func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 	validSchemes := make([]PartyTaxScheme, 0)
 	for _, pts := range schemes {
-		if pts.CompanyID != nil && *pts.CompanyID != "" && pts.TaxScheme != nil {
+		if pts.CompanyID != nil && pts.CompanyID.Value != "" && pts.TaxScheme != nil {
 			validSchemes = append(validSchemes, pts)
 		}
 	}
@@ -185,15 +312,15 @@ func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
 	p.TaxID = &tax.Identity{
 		Country: l10n.TaxCountryCode(countryCode),
-		Code:    cbc.Code(*pts.CompanyID),
+		Code:    cbc.Code(pts.CompanyID.Value),
 	}
-	sc := cbc.Code(pts.TaxScheme.ID)
+	sc := goblTaxSchemeCategory(pts.TaxScheme.ID.Value)
 	if p.TaxID.GetScheme() != sc {
 		var scheme cbc.Code
 		if pts.TaxScheme.TaxTypeCode != "" {
 			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
 		} else {
-			scheme = cbc.Code(pts.TaxScheme.ID)
+			scheme = sc
 		}
 		p.TaxID.Scheme = scheme
 	}
@@ -218,7 +345,7 @@ func handleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, count
 
 func findVATSchemeIndex(schemes []PartyTaxScheme) int {
 	for i, pts := range schemes {
-		if pts.TaxScheme.ID == TaxSchemeVAT {
+		if goblTaxSchemeCategory(pts.TaxScheme.ID.Value) == cbc.Code(TaxSchemeVAT) {
 			return i
 		}
 	}
@@ -233,9 +360,9 @@ func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx 
 
 		identity := &org.Identity{
 			Country: l10n.ISOCountryCode(countryCode),
-			Code:    cbc.Code(*pts.CompanyID),
+			Code:    cbc.Code(pts.CompanyID.Value),
 			Scope:   org.IdentityScopeTax,
-			Type:    cbc.Code(pts.TaxScheme.ID),
+			Type:    goblTaxSchemeCategory(pts.TaxScheme.ID.Value),
 		}
 
 		if p.Identities == nil {
@@ -248,9 +375,8 @@ func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx 
 func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
 	for _, partyID := range party.PartyIdentification {
 		if partyID.ID != nil {
-			identity := &org.Identity{
-				Code: cbc.Code(partyID.ID.Value),
-			}
+			code := partyID.ID.Value
+			identity := &org.Identity{}
 			if partyID.ID.SchemeID != nil {
 				s := *partyID.ID.SchemeID
 				if o.context.Is(ContextZATCA) {
@@ -260,7 +386,13 @@ func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
 						iso.ExtKeySchemeID: cbc.Code(s),
 					})
 				}
+				if o.context.Is(ContextOIOUBL21) && (s == oioubl21SchemeDKCVR || s == oioubl21SchemeDKSE) {
+					// Reverse the wire-only DK prefix (F-LIB180), matching the
+					// endpoint parse and gobl's canonical country-prefix-free codes.
+					code = strings.TrimPrefix(code, "DK")
+				}
 			}
+			identity.Code = cbc.Code(code)
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)
 			}

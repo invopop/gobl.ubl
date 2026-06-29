@@ -1,0 +1,167 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "12ae8dfcca90d81cd8f7b668631d4ba27a5a36c814b177cd795f6a89e0b5047a"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "FINAL",
+		"code": "GIRO04",
+		"issue_date": "2026-05-29",
+		"currency": "DKK",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Eksempel Software ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Jens",
+						"surname": "Hansen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "12",
+					"street": "Kongevejen",
+					"locality": "København",
+					"code": "2100",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Modtager Handel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "76543216"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Mette",
+						"surname": "Sørensen"
+					},
+					"identities": [
+						{
+							"label": "Contact",
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "76543216"
+				}
+			],
+			"addresses": [
+				{
+					"num": "45",
+					"street": "Vestergade",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "2",
+				"item": {
+					"name": "Konsulent timer",
+					"price": "1000.00",
+					"unit": "h"
+				},
+				"sum": "2000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "2000.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "Netto 30 dage"
+			},
+			"instructions": {
+				"key": "other",
+				"detail": "Giro indbetaling",
+				"ref": "1234567890",
+				"credit_transfer": [
+					{
+						"number": "01234567"
+					}
+				],
+				"ext": {
+					"dk-oioubl-payment-channel": "DK:GIRO",
+					"dk-oioubl-payment-id": "04",
+					"untdid-payment-means": "50"
+				}
+			}
+		},
+		"totals": {
+			"sum": "2000.00",
+			"total": "2000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
+									"untdid-tax-category": "S"
+								},
+								"base": "2000.00",
+								"percent": "25%",
+								"amount": "500.00"
+							}
+						],
+						"amount": "500.00"
+					}
+				],
+				"sum": "500.00"
+			},
+			"tax": "500.00",
+			"total_with_tax": "2500.00",
+			"payable": "2500.00"
+		}
+	}
+}

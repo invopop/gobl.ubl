@@ -18,7 +18,7 @@ type AllowanceCharge struct {
 	TaxCategory               []*TaxCategory `xml:"cac:TaxCategory"`
 }
 
-func (ui *Invoice) addCharges(inv *bill.Invoice) {
+func (ui *Invoice) addCharges(inv *bill.Invoice, ctx Context) {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return
 	}
@@ -26,14 +26,24 @@ func (ui *Invoice) addCharges(inv *bill.Invoice) {
 	// Use invoice sum (before discounts) as base amount for percentage calculations
 	baseAmount := inv.Totals.Sum
 	for i, ch := range inv.Charges {
-		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount, ctx)
 	}
 	for i, d := range inv.Discounts {
-		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount, ctx)
 	}
 }
 
-func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCharge {
+// allowanceMultiplier renders MultiplierFactorNumeric. OIOUBL F-LIB228 requires
+// the decimal factor (Amount = BaseAmount × factor); other profiles keep the
+// percent number, matching their existing output.
+func allowanceMultiplier(pct *num.Percentage, ctx Context) string {
+	if ctx.Is(ContextOIOUBL21) {
+		return pct.Base().String()
+	}
+	return pct.StringWithoutSymbol()
+}
+
+func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, ctx Context) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: true,
 		Amount: Amount{
@@ -49,7 +59,7 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 		c.AllowanceChargeReasonCode = &e
 	}
 	if ch.Percent != nil {
-		p := ch.Percent.StringWithoutSymbol()
+		p := allowanceMultiplier(ch.Percent, ctx)
 		c.MultiplierFactorNumeric = &p
 		// Add BaseAmount when percentage is provided
 		c.BaseAmount = &Amount{
@@ -58,13 +68,13 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 		}
 	}
 	if ch.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(ch.Taxes)
+		c.TaxCategory = makeTaxCategory(ch.Taxes, ctx)
 	}
 
 	return c
 }
 
-func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) AllowanceCharge {
+func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, ctx Context) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: false,
 		Amount: Amount{
@@ -80,7 +90,7 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) Allowance
 		c.AllowanceChargeReasonCode = &e
 	}
 	if d.Percent != nil {
-		p := d.Percent.StringWithoutSymbol()
+		p := allowanceMultiplier(d.Percent, ctx)
 		c.MultiplierFactorNumeric = &p
 		// Add BaseAmount when percentage is provided
 		c.BaseAmount = &Amount{
@@ -89,28 +99,33 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) Allowance
 		}
 	}
 	if d.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(d.Taxes)
+		c.TaxCategory = makeTaxCategory(d.Taxes, ctx)
 	}
 
 	return c
 }
 
-func makeTaxCategory(taxes tax.Set) []*TaxCategory {
+func makeTaxCategory(taxes tax.Set, ctx Context) []*TaxCategory {
 	set := []*TaxCategory{}
 	for _, t := range taxes {
 		category := TaxCategory{}
-		category.TaxScheme = &TaxScheme{ID: t.Category.String()}
+		category.TaxScheme = &TaxScheme{ID: IDType{Value: t.Category.String()}}
 
+		// OIOUBL emits its own taxcategoryid-1.1 value (StandardRated/…); other
+		// profiles use the EN 16931 UNTDID category directly.
 		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
+		if ctx.Is(ContextOIOUBL21) {
+			e = oioubl21TaxCategoryID(t.Ext)
+		}
 		if e != "" {
-			category.ID = &e
+			category.ID = &IDType{Value: e}
 		}
 
 		// Set percent: required unless category is "O" (outside scope)
 		if t.Percent != nil {
 			p := t.Percent.StringWithoutSymbol()
 			category.Percent = &p
-		} else if category.ID == nil || *category.ID != "O" {
+		} else if category.ID == nil || category.ID.Value != "O" {
 			// Default to 0% when not outside scope
 			zero := "0"
 			category.Percent = &zero

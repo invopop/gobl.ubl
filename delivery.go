@@ -7,6 +7,7 @@ type Delivery struct {
 	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
 	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
 	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
+	RequestedDeliveryPeriod *Period   `xml:"cac:RequestedDeliveryPeriod"`
 	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
 }
@@ -35,14 +36,31 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	}
 
 	if del.Period != nil {
-		end := formatDate(del.Period.End)
-		start := formatDate(del.Period.Start)
-		out.LatestDeliveryDate = &end
-		out.ActualDeliveryDate = &start
+		if ctx.Is(ContextOIOUBL21) {
+			// A delivery window maps to RequestedDeliveryPeriod — the only delivery
+			// period OIOUBL permits, since it forbids LatestDeliveryDate (F-INV087)
+			// and the Promised/Estimated periods (F-INV089/F-INV090).
+			out.RequestedDeliveryPeriod = &Period{
+				StartDate: formatDate(del.Period.Start),
+				EndDate:   formatDate(del.Period.End),
+			}
+		} else {
+			start := formatDate(del.Period.Start)
+			out.ActualDeliveryDate = &start
+			end := formatDate(del.Period.End)
+			out.LatestDeliveryDate = &end
+		}
 	}
 
 	if del.Receiver != nil {
 		out.DeliveryParty = newDeliveryParty(del.Receiver)
+		// OIOUBL requires a non-empty CompanyID whenever PartyLegalEntity is
+		// present (F-LIB187), but a delivery party only identifies a location and
+		// carries no company id. PartyLegalEntity isn't mandatory here, so drop it
+		// and keep just the PartyName.
+		if ctx.Is(ContextOIOUBL21) && out.DeliveryParty != nil {
+			out.DeliveryParty.PartyLegalEntity = nil
+		}
 		out.DeliveryLocation =
 			&Location{
 				Address: newAddress(del.Receiver.Addresses, ctx),

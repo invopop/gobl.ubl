@@ -5,8 +5,10 @@ import (
 	"strconv"
 	"strings"
 
+	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/validation"
 )
 
@@ -30,12 +32,14 @@ const (
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
-	ListID        *string `xml:"listID,attr"`
-	ListVersionID *string `xml:"listVersionID,attr"`
-	SchemeID      *string `xml:"schemeID,attr"`
-	SchemeName    *string `xml:"schemeName,attr"`
-	Name          *string `xml:"name,attr"`
-	Value         string  `xml:",chardata"`
+	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
+	ListAgencyID   *string `xml:"listAgencyID,attr"`
+	ListID         *string `xml:"listID,attr"`
+	ListVersionID  *string `xml:"listVersionID,attr"`
+	SchemeID       *string `xml:"schemeID,attr"`
+	SchemeName     *string `xml:"schemeName,attr"`
+	Name           *string `xml:"name,attr"`
+	Value          string  `xml:",chardata"`
 }
 
 // ExchangeRate represents an exchange rate
@@ -102,9 +106,10 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        *string    `xml:"cbc:ID,omitempty"`
-	Percent   *string    `xml:"cbc:Percent,omitempty"`
-	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	ID                     *IDType    `xml:"cbc:ID,omitempty"`
+	Percent                *string    `xml:"cbc:Percent,omitempty"`
+	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
+	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
@@ -174,4 +179,25 @@ func normalizeNumericString(s string) string {
 	}
 
 	return s
+}
+
+// goblTaxSchemeCategory maps a UBL TaxScheme ID back to the GOBL tax category
+// code on parse. OIOUBL identifies VAT as "63" (Moms); other UBL profiles
+// already carry the GOBL "VAT" code, so the value passes through unchanged.
+func goblTaxSchemeCategory(schemeID string) cbc.Code {
+	if schemeID == oioubl21TaxSchemeVATCode {
+		return cbc.Code(TaxSchemeVAT)
+	}
+	return cbc.Code(schemeID)
+}
+
+// goblTaxCategoryCode maps a UBL TaxCategory ID back to the UNTDID 5305 code GOBL
+// expects on parse. The OIOUBL codelist lives in the addon (the inverse of its
+// category normalizer); a value from another profile already uses the UNTDID code
+// and passes through unchanged.
+func goblTaxCategoryCode(id string) cbc.Code {
+	if c := oioubl.GOBLTaxCategory(cbc.Code(id)); c != "" {
+		return c
+	}
+	return cbc.Code(id)
 }

@@ -1,0 +1,107 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "a5ab9e25627a89ca0a6c4a94c9cf3113e58cdc9494c0a209bbfe0b898eb9c329"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/payment",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "019ed096-350c-73bc-9695-b103e1d03b93",
+		"type": "request",
+		"series": "2026",
+		"code": "R-1000",
+		"issue_date": "2026-01-15",
+		"currency": "DKK",
+		"ext": {
+			"dk-oioubl-reminder-sequence": "1",
+			"dk-oioubl-reminder-type": "Reminder"
+		},
+		"supplier": {
+			"name": "Eksempel A/S",
+			"tax_id": {
+				"country": "DK",
+				"code": "12345674"
+			},
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "12345674"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1",
+					"street": "Hovedgaden",
+					"locality": "København",
+					"code": "1000",
+					"country": "DK"
+				}
+			]
+		},
+		"customer": {
+			"name": "Kunde ApS",
+			"tax_id": {
+				"country": "DK",
+				"code": "88146328"
+			},
+			"people": [
+				{
+					"name": {
+						"given": "Anders",
+						"surname": "Jensen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0184",
+					"code": "88146328"
+				}
+			],
+			"addresses": [
+				{
+					"num": "5",
+					"street": "Bygaden",
+					"locality": "Aarhus",
+					"code": "8000",
+					"country": "DK"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"document": {
+					"issue_date": "2025-12-01",
+					"series": "2025",
+					"code": "1000"
+				},
+				"amount": "1250.00"
+			}
+		],
+		"methods": [
+			{
+				"key": "other",
+				"ref": "000000000012345",
+				"amount": "1250.00",
+				"credit_transfer": {
+					"number": "12345678"
+				},
+				"ext": {
+					"dk-oioubl-payment-channel": "DK:FIK",
+					"dk-oioubl-payment-id": "71",
+					"untdid-payment-means": "93"
+				}
+			}
+		],
+		"total": "1250.00"
+	}
+}

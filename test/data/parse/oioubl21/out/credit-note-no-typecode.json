@@ -1,0 +1,212 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "26546e5136f10953edd90033a9c53c38af319bbb33a2d8b7a7efdbd2da603299"
+		},
+		"from": "iso6523-actorid-upis::0088:5790000436101",
+		"to": "iso6523-actorid-upis::0088:5790000436057"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DK",
+		"$addons": [
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "credit-note",
+		"code": "CN-001",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"exchange_rates": [
+			{
+				"from": "EUR",
+				"to": "DKK",
+				"amount": "7.46"
+			}
+		],
+		"preceding": [
+			{
+				"issue_date": "2024-05-01",
+				"code": "SAMPLE-001"
+			}
+		],
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "381"
+			}
+		},
+		"supplier": {
+			"name": "Provide One GmbH",
+			"tax_id": {
+				"country": "DK",
+				"code": "37990485"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK37990485",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0088:5790000436101"
+				}
+			],
+			"addresses": [
+				{
+					"num": "16",
+					"street": "Dietmar-Hopp-Allee",
+					"locality": "Walldorf",
+					"code": "69190",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK",
+				"dk-oioubl-address-scheme": "GLN"
+			}
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"tax_id": {
+				"country": "DK",
+				"code": "47458714"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK47458714",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Kontakt Ansvarlig"
+					},
+					"identities": [
+						{
+							"code": "C-001"
+						}
+					]
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0088:5790000436057"
+				}
+			],
+			"addresses": [
+				{
+					"num": "25",
+					"street": "Werner-Heisenberg-Allee",
+					"locality": "München",
+					"code": "80939",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
+				}
+			],
+			"ext": {
+				"dk-oioubl-address-format": "StructuredDK",
+				"dk-oioubl-address-scheme": "GLN"
+			}
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "20",
+				"item": {
+					"name": "Development services",
+					"price": "90.00",
+					"unit": "h"
+				},
+				"sum": "1800.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"dk-oioubl-tax-category": "StandardRated",
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1800.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
+			"instructions": {
+				"key": "other",
+				"ref": "0003434323213231",
+				"credit_transfer": [
+					{
+						"iban": "NO9386011117947",
+						"bic": "DNBANOKK"
+					}
+				],
+				"ext": {
+					"dk-oioubl-payment-channel": "IBAN",
+					"untdid-payment-means": "31"
+				}
+			}
+		},
+		"totals": {
+			"sum": "1800.00",
+			"total": "1800.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"dk-oioubl-tax-category": "StandardRated",
+									"untdid-tax-category": "S"
+								},
+								"base": "1800.00",
+								"percent": "19%",
+								"amount": "342.00"
+							}
+						],
+						"amount": "342.00"
+					}
+				],
+				"sum": "342.00"
+			},
+			"tax": "342.00",
+			"total_with_tax": "2142.00",
+			"payable": "2142.00"
+		}
+	}
+}
