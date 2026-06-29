@@ -132,85 +132,73 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
+func newParty(party *org.Party, ctx Context) *Party {
 	if party == nil {
 		return nil
 	}
 	p := &Party{
 		PostalAddress: newAddress(party.Addresses, ctx),
 	}
-
-	// Only add PartyName if name is not empty
 	if party.Name != "" {
-		p.PartyName = &PartyName{
-			Name: party.Name,
-		}
-		// Only add PartyLegalEntity if name is not empty
-		p.PartyLegalEntity = &PartyLegalEntity{
-			RegistrationName: &party.Name,
-		}
+		p.PartyName = &PartyName{Name: party.Name}
+		p.PartyLegalEntity = &PartyLegalEntity{RegistrationName: &party.Name}
 	}
+	addPartyTaxScheme(p, party, ctx)
+	p.Contact = newPartyContact(party, ctx)
+	addPartyEndpoint(p, party, ctx)
+	if party.Alias != "" {
+		p.PartyName = &PartyName{Name: party.Alias}
+	}
+	addPartyIdentities(p, party)
+	return p
+}
 
+// addPartyTaxScheme maps the party's primary tax identity to a PartyTaxScheme and
+// stamps its country onto the postal address.
+func addPartyTaxScheme(p *Party, party *org.Party, ctx Context) {
+	tID := party.TaxID
+	if tID == nil || tID.Code == "" {
+		return
+	}
+	code := tID.String()
+	// Norwegian VAT numbers require the MVA suffix on the wire
+	// (PEPPOL-EN16931 NO-R-001), which GOBL normalization may strip.
+	if tID.Country.Code() == l10n.NO && !strings.HasSuffix(code, "MVA") {
+		code += "MVA"
+	}
+	if ctx.Is(ContextZATCA) {
+		code = code[2:]
+	}
+	id := tID.GetScheme()
+	if id == cbc.CodeEmpty {
+		id = TaxSchemeVAT // Peppol default
+	}
+	p.PartyTaxScheme = []PartyTaxScheme{{
+		CompanyID: &IDType{Value: code},
+		TaxScheme: &TaxScheme{ID: IDType{Value: id.String()}},
+	}}
+	// Override the company address's country code.
+	if p.PostalAddress == nil {
+		p.PostalAddress = new(PostalAddress)
+	}
+	p.PostalAddress.Country = &Country{IdentificationCode: tID.Country.String()}
+}
+
+// newPartyContact builds the cac:Contact from the party's emails, phones and first
+// person, returning nil when none are present. For OIOUBL it sources the mandatory
+// cbc:ID (F-INV051) from the person's identity rather than fabricating one.
+func newPartyContact(party *org.Party, ctx Context) *Contact {
 	contact := &Contact{}
-
-	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
-		code := party.TaxID.String()
-		// Norwegian VAT numbers require the MVA suffix on the wire
-		// (PEPPOL-EN16931 NO-R-001), which GOBL normalization may strip.
-		if tID.Country.Code() == l10n.NO && !strings.HasSuffix(code, "MVA") {
-			code += "MVA"
-		}
-		if ctx.Is(ContextZATCA) {
-			code = code[2:]
-		}
-		id := tID.GetScheme()
-		if id == cbc.CodeEmpty {
-			// Peppol default
-			id = TaxSchemeVAT
-		}
-
-		companyID := &IDType{
-			Value: code,
-		}
-		// The DK:SE (0198) scheme on PartyTaxScheme/CompanyID is OIOUBL-specific;
-		// emitting it under other contexts (e.g. Peppol) is unintended surface.
-		if ctx.Is(ContextOIOUBL21) && string(tID.Country) == "DK" {
-			s := icdDKSE
-			companyID.SchemeID = &s
-		}
-
-		taxScheme := PartyTaxScheme{
-			CompanyID: companyID,
-			TaxScheme: &TaxScheme{
-				ID: IDType{Value: id.String()},
-			},
-		}
-
-		p.PartyTaxScheme = []PartyTaxScheme{taxScheme}
-		// Override the company address's country code
-		if p.PostalAddress == nil {
-			p.PostalAddress = new(PostalAddress)
-		}
-		p.PostalAddress.Country = &Country{
-			IdentificationCode: tID.Country.String(),
-		}
-	}
-
 	if len(party.Emails) > 0 {
 		contact.ElectronicMail = &party.Emails[0].Address
 	}
-
 	if len(party.Telephones) > 0 {
 		contact.Telephone = &party.Telephones[0].Number
 	}
-
 	if len(party.People) > 0 {
-		n := contactName(party.People[0].Name)
-		if n != "" {
+		if n := contactName(party.People[0].Name); n != "" {
 			contact.Name = &n
 		}
-		// OIOUBL requires cac:Contact/cbc:ID (F-INV051); source it from the
-		// person's identity when present rather than fabricating one.
 		if ctx.Is(ContextOIOUBL21) {
 			if ids := party.People[0].Identities; len(ids) > 0 && ids[0].Code != "" {
 				code := ids[0].Code.String()
@@ -218,124 +206,88 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			}
 		}
 	}
-
-	if contact.Name != nil || contact.Telephone != nil || contact.ElectronicMail != nil || contact.ID != nil {
-		p.Contact = contact
+	if contact.Name == nil && contact.Telephone == nil && contact.ElectronicMail == nil && contact.ID == nil {
+		return nil
 	}
+	return contact
+}
 
-	// The iso6523 endpoint lookup and the OIOUBL scheme normalization are
-	// OIOUBL-specific. Other contexts derive the endpoint from the party inbox
-	// using its raw scheme, matching the generic UBL behaviour.
+// addPartyEndpoint derives the cbc:EndpointID. For OIOUBL it prefers the ISO 6523
+// participant endpoint and lets an explicit dk-oioubl-address-scheme extension
+// override the derived scheme (the manual path for a foreign participant); other
+// contexts fall back to the first inbox using its raw scheme.
+func addPartyEndpoint(p *Party, party *org.Party, ctx Context) {
 	if ctx.Is(ContextOIOUBL21) {
 		if ep := party.Endpoint(iso6523EndpointScheme); ep != nil {
 			if icd, code, ok := splitISO6523Endpoint(ep.URI); ok {
-				p.EndpointID = &EndpointID{
-					SchemeID: icd,
-					Value:    code,
-				}
+				p.EndpointID = &EndpointID{SchemeID: icd, Value: code}
 			}
 		}
 	}
 	if p.EndpointID == nil && len(party.Inboxes) > 0 {
 		ib := party.Inboxes[0]
 		if ib.Email != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: SchemeIDEmail,
-				Value:    ib.Email,
-			}
+			p.EndpointID = &EndpointID{SchemeID: SchemeIDEmail, Value: ib.Email}
 		} else if ib.Scheme != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: ib.Scheme.String(),
-				Value:    ib.Code.String(),
-			}
+			p.EndpointID = &EndpointID{SchemeID: ib.Scheme.String(), Value: ib.Code.String()}
 		}
 	}
-	// An explicit OIOUBL identifier scheme overrides the derived one: the manual
-	// path for a foreign participant whose scheme is not in the Danish derivation
-	// applied by applyOIOUBL21Party. Email endpoints keep their EM scheme.
+	// Email endpoints keep their EM scheme.
 	if ctx.Is(ContextOIOUBL21) && p.EndpointID != nil && p.EndpointID.SchemeID != SchemeIDEmail {
 		if s := party.Ext.Get(oioubl21AddressSchemeKey).String(); s != "" {
 			p.EndpointID.SchemeID = s
 		}
 	}
+}
 
-	if party.Alias != "" {
-		p.PartyName = &PartyName{
-			Name: party.Alias,
+// addPartyIdentities classifies the party identities: the first legal-scope one
+// becomes PartyLegalEntity.CompanyID, tax-scope ones become additional
+// PartyTaxScheme entries, and the rest become PartyIdentification entries.
+func addPartyIdentities(p *Party, party *org.Party) {
+	firstLegalIdx := -1
+	for i, id := range party.Identities {
+		if id.Scope != org.IdentityScopeLegal {
+			continue
 		}
+		if p.PartyLegalEntity == nil {
+			p.PartyLegalEntity = &PartyLegalEntity{}
+		}
+		p.PartyLegalEntity.CompanyID = &IDType{Value: id.Code.String()}
+		if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+			p.PartyLegalEntity.CompanyID.SchemeID = &s
+		}
+		firstLegalIdx = i
+		break
 	}
-
-	if len(party.Identities) > 0 {
-		// First pass: Handle legal scope identities
-		// First legal identity goes to PartyLegalEntity.CompanyID
-		firstLegalIdx := -1
-		for i, id := range party.Identities {
-			if id.Scope == org.IdentityScopeLegal {
-				// Ensure PartyLegalEntity exists before setting CompanyID
-				if p.PartyLegalEntity == nil {
-					p.PartyLegalEntity = &PartyLegalEntity{}
-				}
-				code := id.Code.String()
-				p.PartyLegalEntity.CompanyID = &IDType{
-					Value: code,
-				}
-				if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
-					p.PartyLegalEntity.CompanyID.SchemeID = &s
-				}
-				firstLegalIdx = i
-				break
-			}
+	for _, id := range party.Identities {
+		if id.Scope != org.IdentityScopeTax {
+			continue
 		}
-
-		// Second pass: Handle tax scope identities -> PartyTaxScheme
-		for _, id := range party.Identities {
-			if id.Scope == org.IdentityScopeTax {
-				code := id.Code.String()
-				companyID := &IDType{Value: code}
-				if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
-					companyID.SchemeID = &s
-				}
-				taxScheme := PartyTaxScheme{
-					CompanyID: companyID,
-					TaxScheme: &TaxScheme{
-						ID: IDType{Value: id.Type.String()},
-					},
-				}
-				p.PartyTaxScheme = append(p.PartyTaxScheme, taxScheme)
-			}
+		companyID := &IDType{Value: id.Code.String()}
+		if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+			companyID.SchemeID = &s
 		}
-
-		// Third pass: Handle remaining identities -> PartyIdentification array
-		// This includes non-scoped identities and additional legal identities after the first
-		for i, id := range party.Identities {
-			// Skip the first legal identity (already in CompanyID)
-			if id.Scope == org.IdentityScopeLegal && i == firstLegalIdx {
-				continue
-			}
-			// Skip tax scope identities (already in PartyTaxScheme)
-			if id.Scope == org.IdentityScopeTax {
-				continue
-			}
-			// Add to PartyIdentification array
-			idType := &IDType{
-				Value: id.Code.String(),
-			}
-			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
-				idType.SchemeID = &s
-			} else if id.Ext.IsZero() {
-				// ZATCA has very specific identities that do not
-				// require an ISO extension and are only described with type
-				if t := id.Type.String(); t != "" {
-					idType.SchemeID = &t
-				}
-			}
-			p.PartyIdentification = append(p.PartyIdentification, Identification{
-				ID: idType,
-			})
-		}
+		p.PartyTaxScheme = append(p.PartyTaxScheme, PartyTaxScheme{
+			CompanyID: companyID,
+			TaxScheme: &TaxScheme{ID: IDType{Value: id.Type.String()}},
+		})
 	}
-
-	return p
+	for i, id := range party.Identities {
+		if (id.Scope == org.IdentityScopeLegal && i == firstLegalIdx) || id.Scope == org.IdentityScopeTax {
+			continue
+		}
+		idType := &IDType{Value: id.Code.String()}
+		if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+			idType.SchemeID = &s
+		} else if id.Ext.IsZero() {
+			// ZATCA has very specific identities that do not require an ISO
+			// extension and are only described with type.
+			if t := id.Type.String(); t != "" {
+				idType.SchemeID = &t
+			}
+		}
+		p.PartyIdentification = append(p.PartyIdentification, Identification{ID: idType})
+	}
 }
 
 // newDeliveryParty creates a Party structure for delivery parties
@@ -695,8 +647,34 @@ const (
 	oioubl21SchemeDKCVR = oioubl.SchemeDKCVR
 	oioubl21SchemeDKSE  = oioubl.SchemeDKSE
 	oioubl21SchemeZZZ   = oioubl.SchemeZZZ
-	icdDKSE             = "0198"
 )
+
+// dkPrefixed adds the "DK" country prefix the OIOUBL schematron mandates on
+// DK:CVR/DK:SE identifier values (F-LIB180/F-LIB184), only when absent.
+func dkPrefixed(value string) string {
+	if strings.HasPrefix(value, "DK") {
+		return value
+	}
+	return "DK" + value
+}
+
+// applyOIOUBL21CompanyID stamps a CompanyID's OIOUBL scheme: a Danish party gets
+// the given Danish scheme with the DK-prefixed value the schematron mandates
+// (F-LIB190/196); a foreign party gets the "other" scheme ZZZ with its value left
+// as-is, since forcing a DK scheme + prefix onto a foreign identifier is wire-fatal.
+// A nil CompanyID is ignored.
+func applyOIOUBL21CompanyID(id *IDType, danishScheme string, danish bool) {
+	if id == nil {
+		return
+	}
+	if danish {
+		id.SchemeID = &danishScheme
+		id.Value = dkPrefixed(id.Value)
+		return
+	}
+	scheme := oioubl21SchemeZZZ
+	id.SchemeID = &scheme
+}
 
 // applyOIOUBL21Party rewrites an assembled party into OIOUBL 2.1 form: symbolic
 // endpoint scheme + DK-prefixed CVR (F-LIB179/F-LIB180), a fallback PartyName,
@@ -705,13 +683,11 @@ func applyOIOUBL21Party(p *Party) {
 	if p == nil {
 		return
 	}
-	if p.EndpointID != nil {
+	if p.EndpointID != nil && p.EndpointID.SchemeID == oioubl21SchemeDKCVR {
 		// The schemeID is the dk-oioubl-address-scheme extension value (set in
 		// newParty), emitted 1:1. OIOUBL CVR endpoints must carry the DK-prefixed
 		// form (F-LIB180).
-		if p.EndpointID.SchemeID == oioubl21SchemeDKCVR && !strings.HasPrefix(p.EndpointID.Value, "DK") {
-			p.EndpointID.Value = "DK" + p.EndpointID.Value
-		}
+		p.EndpointID.Value = dkPrefixed(p.EndpointID.Value)
 	}
 	if p.PartyName == nil && len(p.PartyIdentification) == 0 {
 		if p.PartyLegalEntity != nil && p.PartyLegalEntity.RegistrationName != nil {
@@ -725,41 +701,14 @@ func applyOIOUBL21Party(p *Party) {
 		// returns nil, so the bare PostalAddress is created without a format code).
 		p.PostalAddress.AddressFormatCode = oioubl21AddressFormatCode("StructuredLax")
 	}
-	// DK:SE/DK:CVR (with the DK-prefixed value the schematron mandates) apply
-	// only to Danish parties; a foreign party's tax and legal identifiers carry
-	// the OIOUBL "other" scheme ZZZ, with the value left as-is. Forcing DK:SE/
-	// DK:CVR + a DK prefix onto a foreign identifier is wire-fatal (F-LIB196/190)
-	// or silently corrupting.
 	danish := partyIsDanish(p)
-	if p.PartyTaxScheme != nil {
-		for i := range p.PartyTaxScheme {
-			pts := &p.PartyTaxScheme[i]
-			if pts.CompanyID != nil {
-				if danish {
-					scheme := oioubl21SchemeDKSE
-					pts.CompanyID.SchemeID = &scheme
-					if !strings.HasPrefix(pts.CompanyID.Value, "DK") {
-						pts.CompanyID.Value = "DK" + pts.CompanyID.Value
-					}
-				} else {
-					scheme := oioubl21SchemeZZZ
-					pts.CompanyID.SchemeID = &scheme
-				}
-			}
-			applyOIOUBL21TaxScheme(pts.TaxScheme)
-		}
+	for i := range p.PartyTaxScheme {
+		pts := &p.PartyTaxScheme[i]
+		applyOIOUBL21CompanyID(pts.CompanyID, oioubl21SchemeDKSE, danish)
+		applyOIOUBL21TaxScheme(pts.TaxScheme)
 	}
-	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID != nil {
-		if danish {
-			scheme := oioubl21SchemeDKCVR
-			p.PartyLegalEntity.CompanyID.SchemeID = &scheme
-			if !strings.HasPrefix(p.PartyLegalEntity.CompanyID.Value, "DK") {
-				p.PartyLegalEntity.CompanyID.Value = "DK" + p.PartyLegalEntity.CompanyID.Value
-			}
-		} else {
-			scheme := oioubl21SchemeZZZ
-			p.PartyLegalEntity.CompanyID.SchemeID = &scheme
-		}
+	if p.PartyLegalEntity != nil {
+		applyOIOUBL21CompanyID(p.PartyLegalEntity.CompanyID, oioubl21SchemeDKCVR, danish)
 	}
 	applyOIOUBL21PartyIdentifications(p)
 }
@@ -795,8 +744,8 @@ func applyOIOUBL21PartyIdentifications(p *Party) {
 			scheme = oioubl21SchemeZZZ
 		}
 		id.SchemeID = &scheme
-		if (scheme == oioubl21SchemeDKCVR || scheme == oioubl21SchemeDKSE) && !strings.HasPrefix(id.Value, "DK") {
-			id.Value = "DK" + id.Value
+		if scheme == oioubl21SchemeDKCVR || scheme == oioubl21SchemeDKSE {
+			id.Value = dkPrefixed(id.Value)
 		}
 	}
 }
