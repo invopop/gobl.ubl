@@ -246,10 +246,9 @@ func BytesCompact(in any) ([]byte, error) {
 	return append([]byte(xml.Header), b...), nil
 }
 
-// creditNoteNeedsTaxPointDateReorder reports whether in is a credit note that
-// carries a cbc:TaxPointDate. The shared Invoice struct emits TaxPointDate after
-// CreditNoteTypeCode (correct for Invoice), but the UBL CreditNote XSD sequences
-// it before — see reorderCreditNoteTaxPointDate.
+// creditNoteNeedsTaxPointDateReorder reports whether in is a credit note
+// carrying a cbc:TaxPointDate, which the CreditNote XSD sequences differently
+// from the shared Invoice struct — see reorderCreditNoteTaxPointDate.
 func creditNoteNeedsTaxPointDateReorder(in any) bool {
 	var inv *Invoice
 	switch v := in.(type) {
@@ -263,14 +262,11 @@ func creditNoteNeedsTaxPointDateReorder(in any) bool {
 	return inv != nil && inv.XMLName.Local == rootNameCreditNote && inv.TaxPointDate != ""
 }
 
-// reorderCreditNoteTaxPointDate moves the cbc:TaxPointDate element ahead of
-// cbc:CreditNoteTypeCode so the output matches the UBL CreditNote XSD sequence
-// (TaxPointDate precedes the type code). Invoice and CreditNote share one Go
-// struct whose field order is correct for Invoice but not CreditNote, and Go's
-// xml package can neither express two element orders for one struct nor survive a
-// decode/re-encode pass (it mangles the cac:/cbc: prefixes). Adjusting the
-// already-marshaled bytes keeps the exact prefixes and indentation, and only runs
-// for the rare credit note that carries a TaxPointDate.
+// reorderCreditNoteTaxPointDate moves cbc:TaxPointDate ahead of
+// cbc:CreditNoteTypeCode to match the CreditNote XSD sequence. Invoice and
+// CreditNote share one Go struct, and encoding/xml can neither vary field order
+// per struct nor survive a decode/re-encode (it mangles the cac:/cbc: prefixes),
+// so the fix edits the marshaled bytes directly.
 func reorderCreditNoteTaxPointDate(b []byte) []byte {
 	const (
 		open     = "<cbc:TaxPointDate>"

@@ -197,8 +197,8 @@ func reminderMeansCode(m *pay.Record, ctx Context) string {
 
 // applyOIOUBL21RecordPaymentID sets the Giro (50) / FIK (93) cbc:PaymentID from
 // the dk-oioubl-payment-id kortart and the payment number (cbc:InstructionID)
-// from the record reference, mirroring the invoice path. FIK 73 forbids the
-// payment number (F-LIB275); the other kortart may carry it.
+// from the record reference, mirroring the invoice path. The addon governs which
+// kortarts may carry the payment number (FIK 73 forbids it).
 func applyOIOUBL21RecordPaymentID(pm *PaymentMeans, m *pay.Record, code string) {
 	if code != "50" && code != "93" {
 		return
@@ -208,7 +208,7 @@ func applyOIOUBL21RecordPaymentID(pm *PaymentMeans, m *pay.Record, code string) 
 		return
 	}
 	pm.PaymentID = &kortart
-	if oioubl21KortartAllowsInstructionID(kortart) && m.Ref != "" {
+	if m.Ref != "" {
 		ref := m.Ref
 		pm.InstructionID = &ref
 	}

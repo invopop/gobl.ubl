@@ -35,8 +35,10 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/invopop/gobl v0.500.1-0.20260611093239-b095308b8267 h1:JESDuqkaOexIBJQ9AQOxaSSbQADO1s+HtRnNsCNWvaA=
 github.com/invopop/gobl v0.500.1-0.20260611093239-b095308b8267/go.mod h1:EGDHHuPbF8JxRfct0q/s9t7ei2gjkOwjH3SytjB3aS0=
-github.com/invopop/gobl.dk.oioubl v0.0.0-20260626111014-3b4d7acb3c88 h1:0djEtsAdZvKZ0ddcCCstHXgFThtg+dPQhNegNLCgCC0=
-github.com/invopop/gobl.dk.oioubl v0.0.0-20260626111014-3b4d7acb3c88/go.mod h1:tODJD+IZkk4Ds8PR8XEpe3umiyiG2NUN0+sBRnXnE0g=
+github.com/invopop/gobl.dk.oioubl v0.0.0-20260626145122-4c36e296c1d1 h1:UUHOmPyEt3ZDARPEU1bvwtS9XYPzTUT/ESqT9PuWPCk=
+github.com/invopop/gobl.dk.oioubl v0.0.0-20260626145122-4c36e296c1d1/go.mod h1:tODJD+IZkk4Ds8PR8XEpe3umiyiG2NUN0+sBRnXnE0g=
+github.com/invopop/gobl.dk.oioubl v0.0.0-20260629120251-4f2ea68475ac h1:sZCkmDdT67btt8bAkIfiTgnUecPdnx1TtrVx/MaVnsg=
+github.com/invopop/gobl.dk.oioubl v0.0.0-20260629120251-4f2ea68475ac/go.mod h1:tODJD+IZkk4Ds8PR8XEpe3umiyiG2NUN0+sBRnXnE0g=
 github.com/invopop/gobl.fr.ctc v0.0.4 h1:x4eJ3hp9Y9lTCzWFhNqZYm9kCXyuC34EytOuaU03faE=
 github.com/invopop/gobl.fr.ctc v0.0.4/go.mod h1:YXJ0G7lCWxUehI4C2xBPL1y6rTNC29t/kOul7wY+3Xs=
 github.com/invopop/gobl.sa.zatca v0.0.2 h1:qU2Y0LP+4mjvZkuG1TOUp/Zs0XxRAzkzQFHy3WOVFEU=

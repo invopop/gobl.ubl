@@ -156,14 +156,10 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	return instructions
 }
 
-// goblOIOUBLPaymentChannel reverses the OIOUBL payment-channel handling. The
-// channel marks an OIOUBL document, so the instruction is pinned to the
-// MeansKeyOther key: this keeps the explicit OIOUBL payment-means code read from
-// the document (cbc:PaymentMeansCode) intact, since EN 16931 normalization would
-// otherwise re-derive the code from the GOBL key. For the Giro/FIK channels it
-// additionally reverses the kortart (cbc:PaymentID -> dk-oioubl-payment-id), the
-// payment number (cbc:InstructionID -> instr.Ref) and the FIK creditor account
-// (cac:CreditAccount/cbc:AccountID rather than PayeeFinancialAccount).
+// goblOIOUBLPaymentChannel reverses the OIOUBL payment-channel handling. It pins
+// the instruction to MeansKeyOther so EN 16931 normalization keeps the explicit
+// cbc:PaymentMeansCode read from the document, and for Giro/FIK recovers the
+// kortart, payment number and FIK creditor account from the wire.
 func goblOIOUBLPaymentChannel(instr *pay.Instructions, paymentMeans *PaymentMeans) {
 	if paymentMeans.PaymentChannelCode == nil {
 		return

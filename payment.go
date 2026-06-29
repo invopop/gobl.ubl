@@ -140,10 +140,8 @@ const (
 	oioubl21PaymentChannelFIK  = string(oioubl.ExtValuePaymentChannelFIK)
 )
 
-// applyOIOUBL21PaymentMeans stamps the paymentchannelcode-1.1 list ID, defaults
-// the per-means due date and strips a redundant FinancialInstitutionBranch from
-// IBAN accounts (F-LIB295). The channel value itself is set from the
-// dk-oioubl-payment-channel extension when the payment means is built.
+// applyOIOUBL21PaymentMeans stamps the payment channel (see
+// stampOIOUBL21PaymentChannel) and moves the document due date onto each means.
 func applyOIOUBL21PaymentMeans(out *Invoice) {
 	for i := range out.PaymentMeans {
 		pm := &out.PaymentMeans[i]
@@ -185,9 +183,6 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 		}
 	}
 	paymentMeansCode := instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()
-	if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "30" {
-		paymentMeansCode = "31"
-	}
 	ui.PaymentMeans = []PaymentMeans{
 		{
 			PaymentMeansCode: IDType{Value: paymentMeansCode},
@@ -264,29 +259,12 @@ func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMe
 		return
 	}
 	pm.PaymentID = &kortart
-	// The payment number is carried in cbc:InstructionID, sourced from instr.Ref
-	// (which the kortart has just overridden as the PaymentID). Every Giro/FIK
-	// card type may carry it except FIK 73, where it is forbidden (F-LIB275);
-	// the structured types (Giro 04/15, FIK 71/75) additionally require it
-	// (F-LIB145/F-LIB153, enforced by the addon).
-	pm.InstructionID = nil
-	if oioubl21KortartAllowsInstructionID(kortart) {
-		if ref := instr.Ref.String(); ref != "" {
-			pm.InstructionID = &ref
-		}
+	// The payment number rides cbc:InstructionID; the kortart has just overridden
+	// instr.Ref as the PaymentID. The addon governs which kortarts may carry it
+	// (FIK 73 forbids it, the structured types require it).
+	if ref := instr.Ref.String(); ref != "" {
+		pm.InstructionID = &ref
 	}
-}
-
-// oioubl21KortartAllowsInstructionID reports whether an OIOUBL Giro/FIK kortart
-// may carry a cbc:InstructionID payment number. All of them may except FIK 73,
-// which forbids it (F-LIB275); Giro 01 is optional, the structured types
-// (04/15/71/75) require it.
-func oioubl21KortartAllowsInstructionID(kortart string) bool {
-	switch kortart {
-	case "01", "04", "15", "71", "75":
-		return true
-	}
-	return false
 }
 
 // addCreditTransferAccount wires the credit-transfer account onto the payment
