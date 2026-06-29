@@ -51,7 +51,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		// netted at the document level); other profiles use the net line total.
 		lineExt := l.Total.String()
 		if context.Is(ContextOIOUBL21) && l.Sum != nil {
-			lineExt = rescaleToCurrency(*l.Sum, ccy)
+			lineExt = roundToCurrency(*l.Sum, ccy).String()
 		}
 		invLine := InvoiceLine{
 			ID: strconv.Itoa(l.Index),
@@ -259,7 +259,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		}
 
 		if context.Is(ContextOIOUBL21) {
-			invLine.TaxTotal = makeLineTaxTotals(l, ccy, context)
+			invLine.TaxTotal = makeOIOUBL21LineTaxTotals(l, ccy)
 		}
 
 		lines = append(lines, invLine)
@@ -298,7 +298,7 @@ func applyOIOUBL21LineTaxCategories(lines []InvoiceLine) {
 	}
 }
 
-// rescaleToCurrency rounds the amount to the natural precision of the given
+// roundToCurrency rounds the amount to the natural precision of the given
 // currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
 // existing precision if the currency code is unknown.
 func roundToCurrency(a num.Amount, ccy string) num.Amount {
@@ -308,18 +308,17 @@ func roundToCurrency(a num.Amount, ccy string) num.Amount {
 	return a
 }
 
-func rescaleToCurrency(a num.Amount, ccy string) string {
-	return roundToCurrency(a, ccy).String()
-}
-
-func makeLineTaxTotals(line *bill.Line, ccy string, ctx Context) []TaxTotal {
+// makeOIOUBL21LineTaxTotals builds the OIOUBL line-level cac:TaxTotal. It is only
+// called for OIOUBL 2.1, which (unlike other profiles) requires a line TaxTotal
+// on every line, even at 0% (F-INV138 / F-LIB404).
+func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 	if line == nil || len(line.Taxes) == 0 {
 		return nil
 	}
 
 	var taxable num.Amount
 	switch {
-	case ctx.Is(ContextOIOUBL21) && line.Sum != nil:
+	case line.Sum != nil:
 		// OIOUBL line TaxableAmount is gross (Price×Qty), rounded to currency
 		// precision (l.Sum is the raw product); the discount is subtracted once
 		// at the document level (F-LIB402 sums gross line taxable amounts then
@@ -327,8 +326,6 @@ func makeLineTaxTotals(line *bill.Line, ccy string, ctx Context) []TaxTotal {
 		taxable = roundToCurrency(*line.Sum, ccy)
 	case line.Total != nil:
 		taxable = *line.Total
-	case line.Sum != nil:
-		taxable = *line.Sum
 	default:
 		return nil
 	}
@@ -367,11 +364,6 @@ func makeLineTaxTotals(line *bill.Line, ccy string, ctx Context) []TaxTotal {
 		taxTotal.TaxSubtotal = append(taxTotal.TaxSubtotal, subtotal)
 	}
 
-	// OIOUBL requires a line TaxTotal even for 0% lines (F-INV138 / F-LIB404);
-	// other profiles omit it when the line tax amount is zero.
-	if totalAmount.IsZero() && !ctx.Is(ContextOIOUBL21) {
-		return nil
-	}
 	taxTotal.TaxAmount = Amount{Value: totalAmount.String(), CurrencyID: &ccy}
 
 	return []TaxTotal{taxTotal}
@@ -386,7 +378,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	var base *Amount
 	if baseSum != nil {
 		base = &Amount{
-			Value:      rescaleToCurrency(*baseSum, ccy),
+			Value:      roundToCurrency(*baseSum, ccy).String(),
 			CurrencyID: &ccy,
 		}
 	}
@@ -394,7 +386,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
 			Amount: Amount{
-				Value:      rescaleToCurrency(ch.Amount, ccy),
+				Value:      roundToCurrency(ch.Amount, ccy).String(),
 				CurrencyID: &ccy,
 			},
 		}
@@ -420,7 +412,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
 			Amount: Amount{
-				Value:      rescaleToCurrency(d.Amount, ccy),
+				Value:      roundToCurrency(d.Amount, ccy).String(),
 				CurrencyID: &ccy,
 			},
 		}
