@@ -196,11 +196,8 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if ref := instr.Ref.String(); ref != "" {
 		ui.PaymentMeans[0].PaymentID = &ref
 	}
-	// OIOUBL PaymentChannelCode (IBAN / DK:GIRO / DK:FIK, F-LIB155/F-LIB277) is
-	// precomputed by the dk-oioubl addon in the dk-oioubl-payment-channel
-	// extension. cbc:PaymentID is the dk-oioubl-payment-id "kortart" (overriding
-	// instr.Ref, the Peppol mapping); the FIK creditor account flows through the
-	// credit-transfer Number below (F-LIB305).
+	// The OIOUBL payment channel and PaymentID are precomputed by the dk-oioubl
+	// addon extensions; the converter emits them directly (see applyOIOUBL21PaymentID).
 	if ctx.Is(ContextOIOUBL21) {
 		if ch := instr.Ext.Get(oioubl.ExtKeyPaymentChannel).String(); ch != "" && ui.PaymentMeans[0].PaymentChannelCode == nil {
 			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: ch}
