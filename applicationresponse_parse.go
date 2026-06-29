@@ -127,10 +127,9 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 	return line, nil
 }
 
-// applyOIOUBL21StatusLine records the parsed OIOUBL code-list values on the GOBL
-// status line: the responsecode-1.1 value into the dk-oioubl-response-code
-// extension (the addon normalizer recovers the status event from it during
-// Calculate), and the responsedocumenttypecode-1.1 value into the document type.
+// applyOIOUBL21StatusLine records the parsed OIOUBL code-list values (response
+// code into the dk-oioubl-response-code extension, document-type code) on the
+// GOBL status line.
 func applyOIOUBL21StatusLine(line *bill.StatusLine, dr *DocumentResponse) {
 	if r := dr.Response; r != nil && r.ResponseCode != nil && r.ResponseCode.Value != "" {
 		line.Ext = line.Ext.Set(oioubl.ExtKeyResponseCode, cbc.Code(r.ResponseCode.Value))
