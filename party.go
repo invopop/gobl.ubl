@@ -172,12 +172,6 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		companyID := &IDType{
 			Value: code,
 		}
-		// The DK:SE (0198) scheme on PartyTaxScheme/CompanyID is OIOUBL-specific;
-		// emitting it under other contexts (e.g. Peppol) is unintended surface.
-		if ctx.Is(ContextOIOUBL21) && string(tID.Country) == "DK" {
-			s := icdDKSE
-			companyID.SchemeID = &s
-		}
 
 		taxScheme := PartyTaxScheme{
 			CompanyID: companyID,
@@ -695,8 +689,34 @@ const (
 	oioubl21SchemeDKCVR = oioubl.SchemeDKCVR
 	oioubl21SchemeDKSE  = oioubl.SchemeDKSE
 	oioubl21SchemeZZZ   = oioubl.SchemeZZZ
-	icdDKSE             = "0198"
 )
+
+// dkPrefixed adds the "DK" country prefix the OIOUBL schematron mandates on
+// DK:CVR/DK:SE identifier values (F-LIB180/F-LIB184), only when absent.
+func dkPrefixed(value string) string {
+	if strings.HasPrefix(value, "DK") {
+		return value
+	}
+	return "DK" + value
+}
+
+// applyOIOUBL21CompanyID stamps a CompanyID's OIOUBL scheme: a Danish party gets
+// the given Danish scheme with the DK-prefixed value the schematron mandates
+// (F-LIB190/196); a foreign party gets the "other" scheme ZZZ with its value left
+// as-is, since forcing a DK scheme + prefix onto a foreign identifier is wire-fatal.
+// A nil CompanyID is ignored.
+func applyOIOUBL21CompanyID(id *IDType, danishScheme string, danish bool) {
+	if id == nil {
+		return
+	}
+	if danish {
+		id.SchemeID = &danishScheme
+		id.Value = dkPrefixed(id.Value)
+		return
+	}
+	scheme := oioubl21SchemeZZZ
+	id.SchemeID = &scheme
+}
 
 // applyOIOUBL21Party rewrites an assembled party into OIOUBL 2.1 form: symbolic
 // endpoint scheme + DK-prefixed CVR (F-LIB179/F-LIB180), a fallback PartyName,
@@ -705,13 +725,11 @@ func applyOIOUBL21Party(p *Party) {
 	if p == nil {
 		return
 	}
-	if p.EndpointID != nil {
+	if p.EndpointID != nil && p.EndpointID.SchemeID == oioubl21SchemeDKCVR {
 		// The schemeID is the dk-oioubl-address-scheme extension value (set in
 		// newParty), emitted 1:1. OIOUBL CVR endpoints must carry the DK-prefixed
 		// form (F-LIB180).
-		if p.EndpointID.SchemeID == oioubl21SchemeDKCVR && !strings.HasPrefix(p.EndpointID.Value, "DK") {
-			p.EndpointID.Value = "DK" + p.EndpointID.Value
-		}
+		p.EndpointID.Value = dkPrefixed(p.EndpointID.Value)
 	}
 	if p.PartyName == nil && len(p.PartyIdentification) == 0 {
 		if p.PartyLegalEntity != nil && p.PartyLegalEntity.RegistrationName != nil {
@@ -725,41 +743,14 @@ func applyOIOUBL21Party(p *Party) {
 		// returns nil, so the bare PostalAddress is created without a format code).
 		p.PostalAddress.AddressFormatCode = oioubl21AddressFormatCode("StructuredLax")
 	}
-	// DK:SE/DK:CVR (with the DK-prefixed value the schematron mandates) apply
-	// only to Danish parties; a foreign party's tax and legal identifiers carry
-	// the OIOUBL "other" scheme ZZZ, with the value left as-is. Forcing DK:SE/
-	// DK:CVR + a DK prefix onto a foreign identifier is wire-fatal (F-LIB196/190)
-	// or silently corrupting.
 	danish := partyIsDanish(p)
-	if p.PartyTaxScheme != nil {
-		for i := range p.PartyTaxScheme {
-			pts := &p.PartyTaxScheme[i]
-			if pts.CompanyID != nil {
-				if danish {
-					scheme := oioubl21SchemeDKSE
-					pts.CompanyID.SchemeID = &scheme
-					if !strings.HasPrefix(pts.CompanyID.Value, "DK") {
-						pts.CompanyID.Value = "DK" + pts.CompanyID.Value
-					}
-				} else {
-					scheme := oioubl21SchemeZZZ
-					pts.CompanyID.SchemeID = &scheme
-				}
-			}
-			applyOIOUBL21TaxScheme(pts.TaxScheme)
-		}
+	for i := range p.PartyTaxScheme {
+		pts := &p.PartyTaxScheme[i]
+		applyOIOUBL21CompanyID(pts.CompanyID, oioubl21SchemeDKSE, danish)
+		applyOIOUBL21TaxScheme(pts.TaxScheme)
 	}
-	if p.PartyLegalEntity != nil && p.PartyLegalEntity.CompanyID != nil {
-		if danish {
-			scheme := oioubl21SchemeDKCVR
-			p.PartyLegalEntity.CompanyID.SchemeID = &scheme
-			if !strings.HasPrefix(p.PartyLegalEntity.CompanyID.Value, "DK") {
-				p.PartyLegalEntity.CompanyID.Value = "DK" + p.PartyLegalEntity.CompanyID.Value
-			}
-		} else {
-			scheme := oioubl21SchemeZZZ
-			p.PartyLegalEntity.CompanyID.SchemeID = &scheme
-		}
+	if p.PartyLegalEntity != nil {
+		applyOIOUBL21CompanyID(p.PartyLegalEntity.CompanyID, oioubl21SchemeDKCVR, danish)
 	}
 	applyOIOUBL21PartyIdentifications(p)
 }
@@ -795,8 +786,8 @@ func applyOIOUBL21PartyIdentifications(p *Party) {
 			scheme = oioubl21SchemeZZZ
 		}
 		id.SchemeID = &scheme
-		if (scheme == oioubl21SchemeDKCVR || scheme == oioubl21SchemeDKSE) && !strings.HasPrefix(id.Value, "DK") {
-			id.Value = "DK" + id.Value
+		if scheme == oioubl21SchemeDKCVR || scheme == oioubl21SchemeDKSE {
+			id.Value = dkPrefixed(id.Value)
 		}
 	}
 }
