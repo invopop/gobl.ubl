@@ -183,9 +183,6 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 		}
 	}
 	paymentMeansCode := instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()
-	if ctx.Is(ContextOIOUBL21) && paymentMeansCode == "30" {
-		paymentMeansCode = "31"
-	}
 	ui.PaymentMeans = []PaymentMeans{
 		{
 			PaymentMeansCode: IDType{Value: paymentMeansCode},
