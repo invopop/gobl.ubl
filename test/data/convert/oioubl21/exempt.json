@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5c2b3c11d39413d0789e157abcbc853408a207b8c70393d7a2df78aa2fb77697"
-		}
+			"val": "e958be7d06bdfade867f9713c6de6877ea87980f2342816db3a737e2b0cc0acd"
+		},
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -31,6 +33,15 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "12345674",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -39,10 +50,9 @@
 					}
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0184",
-					"code": "12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -61,6 +71,15 @@
 				"country": "DK",
 				"code": "76543216"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "76543216",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -75,10 +94,9 @@
 					]
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0184",
-					"code": "76543216"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 				}
 			],
 			"addresses": [
@@ -106,9 +124,7 @@
 						"cat": "VAT",
 						"key": "exempt",
 						"ext": {
-							"cef-vatex": "VATEX-EU-132",
-							"dk-oioubl-tax-category": "ZeroRated",
-							"untdid-tax-category": "E"
+							"cef-vatex": "VATEX-EU-132"
 						}
 					}
 				],
@@ -130,7 +146,7 @@
 				],
 				"ext": {
 					"dk-oioubl-payment-channel": "IBAN",
-					"untdid-payment-means": "30"
+					"untdid-payment-means": "31"
 				}
 			}
 		},
@@ -145,9 +161,7 @@
 							{
 								"key": "exempt",
 								"ext": {
-									"cef-vatex": "VATEX-EU-132",
-									"dk-oioubl-tax-category": "ZeroRated",
-									"untdid-tax-category": "E"
+									"cef-vatex": "VATEX-EU-132"
 								},
 								"base": "8000.00",
 								"amount": "0.00"

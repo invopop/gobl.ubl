@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1e0214969eeb60d51d938eed3de28c5b8ccebe666a6f81e104879b131c1b3071"
-		}
+			"val": "eddc6cb1a4d851677639adc83757c2b2dd26724c642c9cd7df1525c21c0ddc16"
+		},
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -31,6 +33,15 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "12345674",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -44,10 +55,9 @@
 					]
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0184",
-					"code": "12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -71,6 +81,15 @@
 				"country": "DK",
 				"code": "76543216"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "76543216",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -84,10 +103,9 @@
 					]
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0184",
-					"code": "76543216"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 				}
 			],
 			"addresses": [
@@ -119,11 +137,7 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%",
-						"ext": {
-							"dk-oioubl-tax-category": "StandardRated",
-							"untdid-tax-category": "S"
-						}
+						"percent": "25%"
 					}
 				],
 				"total": "10000.00"
@@ -144,7 +158,7 @@
 				],
 				"ext": {
 					"dk-oioubl-payment-channel": "IBAN",
-					"untdid-payment-means": "30"
+					"untdid-payment-means": "31"
 				}
 			}
 		},
@@ -158,10 +172,6 @@
 						"rates": [
 							{
 								"key": "standard",
-								"ext": {
-									"dk-oioubl-tax-category": "StandardRated",
-									"untdid-tax-category": "S"
-								},
 								"base": "10000.00",
 								"percent": "25%",
 								"amount": "2500.00"

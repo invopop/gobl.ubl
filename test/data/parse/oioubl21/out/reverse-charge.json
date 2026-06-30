@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5d00967754b131b058aa293c2219fcd9c860714875798bf4916f2a69c5966c6e"
+			"val": "9968db49aee1fe1e2a1b454c155838612125cb57ca682ae80e1dfd64aa7e0a9a"
 		},
-		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::0184:76543216"
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -51,7 +51,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -64,8 +64,7 @@
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "StructuredDK",
-				"dk-oioubl-address-scheme": "DK:CVR"
+				"dk-oioubl-address-format": "StructuredDK"
 			}
 		},
 		"customer": {
@@ -97,7 +96,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:76543216"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 				}
 			],
 			"addresses": [
@@ -110,8 +109,7 @@
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "StructuredDK",
-				"dk-oioubl-address-scheme": "DK:CVR"
+				"dk-oioubl-address-format": "StructuredDK"
 			}
 		},
 		"lines": [
@@ -129,9 +127,7 @@
 						"cat": "VAT",
 						"key": "reverse-charge",
 						"ext": {
-							"cef-vatex": "VATEX-EU-AE",
-							"dk-oioubl-tax-category": "ReverseCharge",
-							"untdid-tax-category": "AE"
+							"cef-vatex": "VATEX-EU-AE"
 						}
 					}
 				],
@@ -175,9 +171,7 @@
 							{
 								"key": "reverse-charge",
 								"ext": {
-									"cef-vatex": "VATEX-EU-AE",
-									"dk-oioubl-tax-category": "ReverseCharge",
-									"untdid-tax-category": "AE"
+									"cef-vatex": "VATEX-EU-AE"
 								},
 								"base": "9000.00",
 								"amount": "0.00"

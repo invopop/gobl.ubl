@@ -174,7 +174,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				// the EN 16931 UNTDID category directly.
 				cat := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String()
 				if context.Is(ContextOIOUBL21) {
-					cat = oioubl21TaxCategoryID(l.Taxes[0].Ext)
+					cat = oioubl21TaxCategoryID(l.Taxes[0].Key)
 				}
 				if cat != "" {
 					it.ClassifiedTaxCategory.ID = &IDType{Value: cat}
@@ -341,7 +341,7 @@ func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 		}
 		taxCat := TaxCategory{}
 
-		if k := oioubl21TaxCategoryID(t.Ext); k != "" {
+		if k := oioubl21TaxCategoryID(t.Key); k != "" {
 			taxCat.ID = &IDType{Value: k}
 		}
 

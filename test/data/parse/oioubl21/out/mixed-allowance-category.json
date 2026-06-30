@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9c937f0123460e7bea152f4c844e77ccd97fa3d1fd06875782686669fed0310c"
+			"val": "2b65971435c08609647efe8fdf421a5d95de74c1676f4d2ea16d34e4505539db"
 		},
-		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::0184:76543216"
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -51,7 +51,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -69,8 +69,7 @@
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "StructuredDK",
-				"dk-oioubl-address-scheme": "DK:CVR"
+				"dk-oioubl-address-format": "StructuredDK"
 			}
 		},
 		"customer": {
@@ -102,7 +101,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:76543216"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 				}
 			],
 			"addresses": [
@@ -120,8 +119,7 @@
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "StructuredDK",
-				"dk-oioubl-address-scheme": "DK:CVR"
+				"dk-oioubl-address-format": "StructuredDK"
 			}
 		},
 		"lines": [
@@ -138,11 +136,7 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%",
-						"ext": {
-							"dk-oioubl-tax-category": "StandardRated",
-							"untdid-tax-category": "S"
-						}
+						"percent": "25%"
 					}
 				],
 				"total": "10000.00"
@@ -157,11 +151,7 @@
 					{
 						"cat": "VAT",
 						"key": "zero",
-						"percent": "0%",
-						"ext": {
-							"dk-oioubl-tax-category": "ZeroRated",
-							"untdid-tax-category": "Z"
-						}
+						"percent": "0%"
 					}
 				]
 			}
@@ -203,20 +193,12 @@
 						"rates": [
 							{
 								"key": "standard",
-								"ext": {
-									"dk-oioubl-tax-category": "StandardRated",
-									"untdid-tax-category": "S"
-								},
 								"base": "10000.00",
 								"percent": "25%",
 								"amount": "2500.00"
 							},
 							{
 								"key": "zero",
-								"ext": {
-									"dk-oioubl-tax-category": "ZeroRated",
-									"untdid-tax-category": "Z"
-								},
 								"base": "-1000.00",
 								"percent": "0%",
 								"amount": "0.00"

@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2ad2e98e58cea2169620b7067569967b2fb4648476b15afe44f662c15292fded"
+			"val": "a4148d374924e91d8912a8df7b66ff1ac61d1fdd3900f86ab76a76123b0d67df"
 		},
-		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::0184:88146328"
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/payment",
@@ -42,7 +42,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -53,10 +53,7 @@
 					"code": "1000",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-scheme": "DK:CVR"
-			}
+			]
 		},
 		"customer": {
 			"name": "Kunde ApS",
@@ -82,7 +79,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:88146328"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
 				}
 			],
 			"addresses": [
@@ -93,10 +90,7 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-scheme": "DK:CVR"
-			}
+			]
 		},
 		"lines": [
 			{

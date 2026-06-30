@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "240a7817dc582370afaf0a770404653c116fe7a6c32a4c84bdd77ae57ef19405"
-		}
+			"val": "aad36f5881511c4d42a9420dbeb8e1aeb960fefb99b63d98882edd6d6fd72759"
+		},
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -31,6 +33,15 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "12345674",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -39,10 +50,9 @@
 					}
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0184",
-					"code": "12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -61,6 +71,15 @@
 				"country": "DK",
 				"code": "76543216"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "76543216",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -75,10 +94,9 @@
 					]
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0184",
-					"code": "76543216"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
 				}
 			],
 			"addresses": [
@@ -104,11 +122,7 @@
 				"taxes": [
 					{
 						"cat": "VAT",
-						"key": "exempt",
-						"ext": {
-							"dk-oioubl-tax-category": "ZeroRated",
-							"untdid-tax-category": "E"
-						}
+						"key": "exempt"
 					}
 				],
 				"total": "8000.00"
@@ -129,7 +143,7 @@
 				],
 				"ext": {
 					"dk-oioubl-payment-channel": "IBAN",
-					"untdid-payment-means": "30"
+					"untdid-payment-means": "31"
 				}
 			}
 		},
@@ -143,10 +157,6 @@
 						"rates": [
 							{
 								"key": "exempt",
-								"ext": {
-									"dk-oioubl-tax-category": "ZeroRated",
-									"untdid-tax-category": "E"
-								},
 								"base": "8000.00",
 								"amount": "0.00"
 							}

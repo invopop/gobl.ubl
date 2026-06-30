@@ -3,7 +3,6 @@ package ubl
 import (
 	"strconv"
 
-	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -212,8 +211,13 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 				if r.Base != (num.Amount{}) {
 					subtotal.TaxableAmount = Amount{Value: r.Base.String(), CurrencyID: &currency}
 				}
-				// Computed early because F-LIB373 gates the dual-currency amount on it.
-				catID := oioubl21TaxCategoryID(r.Ext)
+				// OIOUBL maps the category from the GOBL key; other profiles emit the
+				// EN 16931 UNTDID category directly. Computed early because F-LIB373
+				// gates the dual-currency amount on it.
+				catID := r.Ext.Get(untdid.ExtKeyTaxCategory).String()
+				if ctx.Is(ContextOIOUBL21) {
+					catID = oioubl21TaxCategoryID(r.Key)
+				}
 				subtotal.TransactionCurrencyTaxAmount = oioubl21TransactionTax(ctx, accRate, catID, r.Amount, rCurrency)
 				taxCat := TaxCategory{}
 
@@ -294,14 +298,13 @@ func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
 	}
 }
 
-// findTaxNote finds a tax note that matches the given category code and rate total
-// by comparing category and the UNTDID tax category extension.
+// findTaxNote finds a tax note that matches the given category code and rate
+// total by category and VAT key — the same pair tax.Note uses to identify
+// itself. Matching on the key (rather than the UNTDID extension) works across
+// profiles and survives OIOUBL stripping that extension from the document.
 func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
 	for _, n := range notes {
-		if n.Category != catCode {
-			continue
-		}
-		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != cbc.CodeEmpty && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+		if n.Category == catCode && n.Key == rate.Key {
 			return n
 		}
 	}
@@ -368,10 +371,12 @@ func taxCurrencyTaxAmount(taxTotals []TaxTotal) (num.Amount, bool) {
 	return total, found
 }
 
-// OIOUBL taxcategoryid-1.1 StandardRated value (sourced from the dk-oioubl addon)
-// and the serialization-only taxschemeid-1.1 VAT (Moms) code.
+// OIOUBL taxcategoryid-1.1 category codes and the serialization-only
+// taxschemeid-1.1 VAT (Moms) code.
 const (
-	oioubl21TaxCategoryStandardRated = string(oioubl.ExtValueTaxCategoryStandardRated)
+	oioubl21TaxCategoryStandardRated = "StandardRated"
+	oioubl21TaxCategoryZeroRated     = "ZeroRated"
+	oioubl21TaxCategoryReverseCharge = "ReverseCharge"
 
 	oioubl21TaxSchemeVATCode = "63" // taxschemeid-1.1 VAT (Moms)
 )
@@ -386,15 +391,20 @@ func oioubl21TransactionTax(ctx Context, accRate *cur.ExchangeRate, catID string
 	return &Amount{Value: accRate.Convert(amount).String(), CurrencyID: &currencyID}
 }
 
-// oioubl21TaxCategoryID returns the value to emit as cac:TaxCategory/cbc:ID. The
-// dk-oioubl addon (required by ContextOIOUBL21) precomputes the OIOUBL
-// taxcategoryid-1.1 code in the dk-oioubl-tax-category extension; other profiles
-// fall back to the UNTDID category, which they use directly.
-func oioubl21TaxCategoryID(ext tax.Extensions) string {
-	if c := ext.Get(oioubl.ExtKeyTaxCategory); c != "" {
-		return c.String()
+// oioubl21TaxCategoryID maps a GOBL VAT key to the OIOUBL taxcategoryid-1.1 code
+// emitted as cac:TaxCategory/cbc:ID. OIOUBL 2.1 has no exempt category, so exempt
+// reports as ZeroRated. Returns "" for keys with no OIOUBL category (export,
+// intra-community and outside-scope, which the dk-oioubl addon rejects upstream).
+func oioubl21TaxCategoryID(key cbc.Key) string {
+	switch key {
+	case tax.KeyStandard, "":
+		return oioubl21TaxCategoryStandardRated
+	case tax.KeyZero, tax.KeyExempt:
+		return oioubl21TaxCategoryZeroRated
+	case tax.KeyReverseCharge:
+		return oioubl21TaxCategoryReverseCharge
 	}
-	return ext.Get(untdid.ExtKeyTaxCategory).String()
+	return ""
 }
 
 // applyOIOUBL21Totals stamps the taxcategoryid attributes on the document-level

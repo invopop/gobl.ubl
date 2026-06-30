@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c662e6ee96fbd0a089f4c1a0b7f49961dbf6e7dca6790d0a22de7e8e7d815819"
+			"val": "6bcd8f9287ed018e36714e4b32f9f6b6b29fcac16bd916b9e0b352cc717045ef"
 		},
-		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::0184:88146328"
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -33,9 +33,18 @@
 				"country": "DK",
 				"code": "12345674"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "12345674",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -58,6 +67,15 @@
 				"country": "DK",
 				"code": "88146328"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "88146328",
+					"ext": {
+						"iso-scheme-id": "0184"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -74,7 +92,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:88146328"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
 				}
 			],
 			"addresses": [
@@ -102,11 +120,7 @@
 						"cat": "VAT",
 						"key": "standard",
 						"rate": "general",
-						"percent": "25.0%",
-						"ext": {
-							"dk-oioubl-tax-category": "StandardRated",
-							"untdid-tax-category": "S"
-						}
+						"percent": "25.0%"
 					}
 				],
 				"total": "10000.00"
@@ -122,10 +136,6 @@
 						"rates": [
 							{
 								"key": "standard",
-								"ext": {
-									"dk-oioubl-tax-category": "StandardRated",
-									"untdid-tax-category": "S"
-								},
 								"base": "10000.00",
 								"percent": "25.0%",
 								"amount": "2500.00"

@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -192,12 +191,18 @@ func goblTaxSchemeCategory(schemeID string) cbc.Code {
 }
 
 // goblTaxCategoryCode maps a UBL TaxCategory ID back to the UNTDID 5305 code GOBL
-// expects on parse. The OIOUBL codelist lives in the addon (the inverse of its
-// category normalizer); a value from another profile already uses the UNTDID code
-// and passes through unchanged.
+// expects on parse. OIOUBL's named categories are mapped to their UNTDID
+// equivalent (en16931 then derives the GOBL key, and the dk-oioubl addon strips
+// the UNTDID extension again); a value from another profile already uses the
+// UNTDID code and passes through unchanged.
 func goblTaxCategoryCode(id string) cbc.Code {
-	if c := oioubl.GOBLTaxCategory(cbc.Code(id)); c != "" {
-		return c
+	switch id {
+	case oioubl21TaxCategoryStandardRated:
+		return "S"
+	case oioubl21TaxCategoryZeroRated:
+		return "Z"
+	case oioubl21TaxCategoryReverseCharge:
+		return "AE"
 	}
 	return cbc.Code(id)
 }

@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7af299c3542d2a182bde08ee1f12647ad11a7b748106a65535ce0461d3ad100c"
+			"val": "d5ae1eb62949c91d33f6658267c79529b1e0c329b8e37f56eeec511b3d2db734"
 		},
-		"from": "iso6523-actorid-upis::0184:12345674",
-		"to": "iso6523-actorid-upis::0184:88146328"
+		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
+		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -44,7 +44,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:12345674"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -55,8 +55,7 @@
 			],
 			"ext": {
 				"dk-oioubl-address-district": "Nørrebro",
-				"dk-oioubl-address-format": "StructuredRegion",
-				"dk-oioubl-address-scheme": "DK:CVR"
+				"dk-oioubl-address-format": "StructuredRegion"
 			}
 		},
 		"customer": {
@@ -88,7 +87,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::0184:88146328"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
 				}
 			],
 			"addresses": [
@@ -99,10 +98,7 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-scheme": "DK:CVR"
-			}
+			]
 		},
 		"lines": [
 			{
@@ -118,11 +114,7 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25.0%",
-						"ext": {
-							"dk-oioubl-tax-category": "StandardRated",
-							"untdid-tax-category": "S"
-						}
+						"percent": "25.0%"
 					}
 				],
 				"total": "10000.00"
@@ -145,10 +137,6 @@
 						"rates": [
 							{
 								"key": "standard",
-								"ext": {
-									"dk-oioubl-tax-category": "StandardRated",
-									"untdid-tax-category": "S"
-								},
 								"base": "10000.00",
 								"percent": "25.0%",
 								"amount": "2500.00"

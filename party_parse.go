@@ -26,25 +26,17 @@ func goblParty(party *Party, o *options) *org.Party {
 		case eID.SchemeID == "EM": // email
 			p.Inboxes = append(p.Inboxes, &org.Inbox{Email: eID.Value})
 		case o.context.Is(ContextOIOUBL21):
-			// OIOUBL participants are restored as ISO 6523 org.Endpoints, the
-			// going-forward routing model (org.Inbox is deprecated). The numeric ICD
-			// comes from the addon codelist (ICDForScheme); a foreign symbolic scheme
-			// has no Danish ICD and falls back to an inbox so no identifier is lost.
-			if icd, ok := oioubl.ICDForScheme(eID.SchemeID); ok {
-				code := eID.Value
-				if eID.SchemeID == oioubl21SchemeDKCVR {
-					// Reverse the wire-only DK prefix (F-LIB180).
-					code = strings.TrimPrefix(code, "DK")
-				}
-				p.Endpoints = append(p.Endpoints, &org.Endpoint{
-					URI: cbc.URI(iso6523EndpointScheme + "::" + icd + ":" + code),
-				})
-			} else {
-				p.Inboxes = append(p.Inboxes, &org.Inbox{
-					Scheme: cbc.Code(eID.SchemeID),
-					Code:   cbc.Code(eID.Value),
-				})
+			// OIOUBL participants are restored as org.Endpoints under the OIOUBL
+			// endpoint-identifier scheme (org.Inbox is deprecated). The symbolic
+			// scheme and code round-trip verbatim; only the wire-only DK prefix
+			// (F-LIB180) on a Danish identifier is reversed.
+			code := eID.Value
+			if eID.SchemeID == oioubl21SchemeDKCVR || eID.SchemeID == oioubl21SchemeDKSE {
+				code = strings.TrimPrefix(code, "DK")
 			}
+			p.Endpoints = append(p.Endpoints, &org.Endpoint{
+				URI: cbc.URI(oioubl.OIOUBLEndpointURI(eID.SchemeID, code)),
+			})
 		default:
 			p.Inboxes = append(p.Inboxes, &org.Inbox{
 				Scheme: cbc.Code(eID.SchemeID),

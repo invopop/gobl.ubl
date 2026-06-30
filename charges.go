@@ -115,7 +115,7 @@ func makeTaxCategory(taxes tax.Set, ctx Context) []*TaxCategory {
 		// profiles use the EN 16931 UNTDID category directly.
 		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
 		if ctx.Is(ContextOIOUBL21) {
-			e = oioubl21TaxCategoryID(t.Ext)
+			e = oioubl21TaxCategoryID(t.Key)
 		}
 		if e != "" {
 			category.ID = &IDType{Value: e}

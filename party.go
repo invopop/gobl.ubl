@@ -218,9 +218,15 @@ func newPartyContact(party *org.Party, ctx Context) *Contact {
 // contexts fall back to the first inbox using its raw scheme.
 func addPartyEndpoint(p *Party, party *org.Party, ctx Context) {
 	if ctx.Is(ContextOIOUBL21) {
-		if ep := party.Endpoint(iso6523EndpointScheme); ep != nil {
-			if icd, code, ok := splitISO6523Endpoint(ep.URI); ok {
-				p.EndpointID = &EndpointID{SchemeID: icd, Value: code}
+		for _, ep := range party.Endpoints {
+			if ep == nil {
+				continue
+			}
+			// The participant scheme (DK:CVR/DK:SE/GLN/…) and code are carried in the
+			// OIOUBL endpoint URI and emitted 1:1 as the EndpointID schemeID + value.
+			if scheme, value, ok := oioubl.ParseOIOUBLEndpoint(ep.URI.String()); ok {
+				p.EndpointID = &EndpointID{SchemeID: scheme, Value: value}
+				break
 			}
 		}
 	}
@@ -230,12 +236,6 @@ func addPartyEndpoint(p *Party, party *org.Party, ctx Context) {
 			p.EndpointID = &EndpointID{SchemeID: SchemeIDEmail, Value: ib.Email}
 		} else if ib.Scheme != "" {
 			p.EndpointID = &EndpointID{SchemeID: ib.Scheme.String(), Value: ib.Code.String()}
-		}
-	}
-	// Email endpoints keep their EM scheme.
-	if ctx.Is(ContextOIOUBL21) && p.EndpointID != nil && p.EndpointID.SchemeID != SchemeIDEmail {
-		if s := party.Ext.Get(oioubl21AddressSchemeKey).String(); s != "" {
-			p.EndpointID.SchemeID = s
 		}
 	}
 }
@@ -410,21 +410,6 @@ func newPayeeParty(party *org.Party) *Party {
 	return p
 }
 
-// iso6523EndpointScheme is the URI scheme used by org.Endpoint for
-// Peppol-style participant identifiers (iso6523-actorid-upis::<ICD>:<code>).
-const iso6523EndpointScheme = "iso6523-actorid-upis"
-
-// splitISO6523Endpoint extracts the ISO 6523 ICD and participant code from an
-// iso6523-actorid-upis endpoint URI.
-func splitISO6523Endpoint(uri cbc.URI) (string, string, bool) {
-	rest := strings.TrimPrefix(uri.Opaque(), ":")
-	icd, code, ok := strings.Cut(rest, ":")
-	if !ok || icd == "" || code == "" {
-		return "", "", false
-	}
-	return icd, code, true
-}
-
 // oioubl21AddressFormatCode builds the cbc:AddressFormatCode (codelist
 // addressformatcode-1.1) required on every OIOUBL address (F-LIB025).
 func oioubl21AddressFormatCode(value string) *IDType {
@@ -444,7 +429,6 @@ const (
 	oioubl21AddressFormatKey   = oioubl.ExtKeyAddressFormat
 	oioubl21AddressIDKey       = oioubl.ExtKeyAddressID
 	oioubl21AddressDistrictKey = oioubl.ExtKeyAddressDistrict
-	oioubl21AddressSchemeKey   = oioubl.ExtKeyAddressScheme
 
 	oioubl21AddressStructuredLax    = string(oioubl.ExtValueAddressFormatStructuredLax)
 	oioubl21AddressUnstructured     = string(oioubl.ExtValueAddressFormatUnstructured)
