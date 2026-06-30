@@ -1,0 +1,153 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "4de3fd5572039aab558ac035f12913c9054c7fc7d8a0041d427074d991f08284"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "SA",
+		"$addons": [
+			"eu-en16931-v2017",
+			"sa-zatca-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "credit-note",
+		"code": "SAMPLE-CN-0001",
+		"issue_date": "2026-06-30",
+		"issue_time": "18:06:03",
+		"currency": "ARS",
+		"preceding": [
+			{
+				"issue_date": "2026-06-30",
+				"code": "SAMPLE-1",
+				"reason": "Order change"
+			}
+		],
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"sa-zatca-invoice-type": "0100000",
+				"untdid-document-type": "381"
+			}
+		},
+		"supplier": {
+			"name": "Acme Industries Est.",
+			"tax_id": {
+				"country": "SA",
+				"code": "399999999900003"
+			},
+			"identities": [
+				{
+					"type": "CRN",
+					"code": "399999999900003"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1234",
+					"street": "King Fahd Road 1234",
+					"street_extra": "Al Olaya",
+					"locality": "Riyadh",
+					"code": "12345",
+					"country": "SA"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Global Buyer Co.",
+			"tax_id": {
+				"country": "SA",
+				"code": "399999999900043"
+			},
+			"addresses": [
+				{
+					"num": "1234",
+					"street": "Prince Sultan Road 1234",
+					"street_extra": "Al Malaz",
+					"locality": "Riyadh",
+					"code": "12345",
+					"country": "SA"
+				}
+			],
+			"emails": [
+				{
+					"addr": "info@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Consulting service",
+					"price": "10.00",
+					"unit": "one"
+				},
+				"sum": "10.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "15%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10.00"
+			}
+		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
+		"payment": {
+			"terms": {
+				"notes": "Credit note"
+			}
+		},
+		"delivery": {
+			"date": "2026-06-30"
+		},
+		"totals": {
+			"sum": "10.00",
+			"total": "10.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "10.00",
+								"percent": "15%",
+								"amount": "1.50"
+							}
+						],
+						"amount": "1.50"
+					}
+				],
+				"sum": "1.50"
+			},
+			"tax": "1.50",
+			"total_with_tax": "11.50",
+			"payable": "11.50"
+		}
+	}
+}

@@ -11,7 +11,7 @@ import (
 
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
-	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
+	PaymentMeansCode      *IDType           `xml:"cbc:PaymentMeansCode,omitempty"`
 	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
@@ -71,8 +71,20 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		if err := ui.addPaymentInstructions(inv, ctx); err != nil {
+		if err := ui.addPaymentInstructions(inv); err != nil {
 			return err
+		}
+	}
+
+	// BR-KSA-17: Debit and credit note must contain the reason for this
+	// invoice type issuing. Applies independently of payment instructions, so
+	// it runs after them and ensures a PaymentMeans exists to carry the notes.
+	if inv.Preceding != nil && ctx.Is(ContextZATCA) {
+		if len(ui.PaymentMeans) == 0 {
+			ui.PaymentMeans = []PaymentMeans{{}}
+		}
+		for _, ref := range inv.Preceding {
+			ui.PaymentMeans[0].InstructionNote = append(ui.PaymentMeans[0].InstructionNote, ref.Reason)
 		}
 	}
 
@@ -104,7 +116,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	return nil
 }
 
-func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error {
+func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 	instr := inv.Payment.Instructions
 	if instr.Ext.IsZero() || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
@@ -117,7 +129,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	}
 	ui.PaymentMeans = []PaymentMeans{
 		{
-			PaymentMeansCode: IDType{Value: instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
+			PaymentMeansCode: &IDType{Value: instr.Ext.Get(untdid.ExtKeyPaymentMeans).String()},
 		},
 	}
 	if ref := instr.Ref.String(); ref != "" {
@@ -153,13 +165,6 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if ui.CreditNoteTypeCode != nil && inv.Payment.Terms != nil && len(inv.Payment.Terms.DueDates) > 0 {
 		formattedDate := formatDate(*inv.Payment.Terms.DueDates[0].Date)
 		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
-	}
-	// BR-KSA-17: Debit and credit note must contain the
-	// reason for this invoice type issuing.
-	if inv.Preceding != nil && ctx.Is(ContextZATCA) {
-		for _, ref := range inv.Preceding {
-			ui.PaymentMeans[0].InstructionNote = append(ui.PaymentMeans[0].InstructionNote, ref.Reason)
-		}
 	}
 	return nil
 }

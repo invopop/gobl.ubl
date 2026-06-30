@@ -1,0 +1,153 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "1145188f18fc716a88a6ce279e40ddf53757a3041eeb636f241d111cd284c3c9"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "SA",
+		"$addons": [
+			"eu-en16931-v2017",
+			"sa-zatca-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "credit-note",
+		"series": "SAMPLE-CN",
+		"code": "0001",
+		"issue_date": "2026-06-30",
+		"issue_time": "18:06:03",
+		"currency": "ARS",
+		"preceding": [
+			{
+				"type": "standard",
+				"issue_date": "2026-06-30",
+				"series": "SAMPLE",
+				"code": "1",
+				"reason": "Order change"
+			}
+		],
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"sa-zatca-invoice-type": "0100000",
+				"untdid-document-type": "381"
+			}
+		},
+		"supplier": {
+			"uuid": "0c9aebea-a0e2-411e-b2dc-c5a689623fa7",
+			"name": "Acme Industries Est.",
+			"tax_id": {
+				"country": "SA",
+				"code": "399999999900003"
+			},
+			"identities": [
+				{
+					"type": "CRN",
+					"code": "399999999900003"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1234",
+					"street": "King Fahd Road",
+					"street_extra": "Al Olaya",
+					"locality": "Riyadh",
+					"code": "12345",
+					"country": "SA"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"uuid": "300fcb2c-65c4-41c3-9a7d-3b566f0359eb",
+			"name": "Global Buyer Co.",
+			"tax_id": {
+				"country": "SA",
+				"code": "399999999900043"
+			},
+			"addresses": [
+				{
+					"num": "1234",
+					"street": "Prince Sultan Road",
+					"street_extra": "Al Malaz",
+					"locality": "Riyadh",
+					"code": "12345",
+					"country": "SA"
+				}
+			],
+			"emails": [
+				{
+					"addr": "info@example.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"uuid": "cc624cd2-b159-4a12-a1f2-b398acb1a846",
+				"i": 1,
+				"quantity": "1",
+				"item": {
+					"name": "Consulting service",
+					"currency": "ARS",
+					"price": "10.00",
+					"unit": "one"
+				},
+				"sum": "10.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "15%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "10.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "Credit note"
+			}
+		},
+		"delivery": {
+			"date": "2026-06-30"
+		},
+		"totals": {
+			"sum": "10.00",
+			"total": "10.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "10.00",
+								"percent": "15%",
+								"amount": "1.50"
+							}
+						],
+						"amount": "1.50"
+					}
+				],
+				"sum": "1.50"
+			},
+			"tax": "1.50",
+			"total_with_tax": "11.50",
+			"payable": "11.50"
+		}
+	}
+}

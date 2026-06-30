@@ -72,7 +72,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 		payment.Terms.DueDates[0].Percent = &percent
 	}
 
-	if len(ui.PaymentMeans) > 0 {
+	if len(ui.PaymentMeans) > 0 && ui.PaymentMeans[0].PaymentMeansCode != nil {
 		payment.Instructions = goblInvoiceInstructions(out, &ui.PaymentMeans[0])
 	}
 
