@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2ca239bf01c4cae4b229a55785093ac388560e3360f23c5ad069970d617a5e91"
+			"val": "b83b75b9808cac0345dd54907ccab646f0ce5e0c22284946f6530371eeecff26"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
@@ -88,9 +88,6 @@
 					"issue_date": "2026-05-29",
 					"series": "FINAL",
 					"code": "003"
-				},
-				"ext": {
-					"dk-oioubl-response-code": "TechnicalAccept"
 				}
 			}
 		]

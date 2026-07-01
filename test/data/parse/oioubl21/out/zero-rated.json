@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "62ed78ce71b10e8117f59e68eeeeb233e902b86571396a7a8511c07eef10e61e"
+			"val": "6119e6483e8d4b77f4fba533dc648136441b6c8132f238565f9dff8936dbe2c5"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
@@ -153,7 +153,6 @@
 					}
 				],
 				"ext": {
-					"dk-oioubl-payment-channel": "IBAN",
 					"untdid-payment-means": "31"
 				}
 			}

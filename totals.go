@@ -59,6 +59,10 @@ func (ui *Invoice) addOIOUBL21MonetaryTotal(inv *bill.Invoice, ctx Context, curr
 	grossSum := num.MakeAmount(0, exp)
 	lineDiscounts := num.MakeAmount(0, exp)
 	lineCharges := num.MakeAmount(0, exp)
+	// excise holds duty charges OIOUBL emits as cac:TaxTotal/Excise subtotals; they
+	// leave the AllowanceCharge/ChargeTotalAmount path and land in
+	// TaxInclusiveAmount as tax instead (the subtotals are built in addTotals).
+	excise := num.MakeAmount(0, exp)
 	for _, l := range inv.Lines {
 		if l.Sum != nil {
 			grossSum = grossSum.Add(roundToCurrency(*l.Sum, currency))
@@ -66,12 +70,18 @@ func (ui *Invoice) addOIOUBL21MonetaryTotal(inv *bill.Invoice, ctx Context, curr
 		for _, d := range l.Discounts {
 			lineDiscounts = lineDiscounts.Add(d.Amount)
 		}
+		ordinary := make([]*bill.LineCharge, 0, len(l.Charges))
 		for _, c := range l.Charges {
+			if chargeExciseScheme(c.Ext) != "" {
+				excise = excise.Add(roundToCurrency(c.Amount, currency))
+				continue
+			}
 			lineCharges = lineCharges.Add(c.Amount)
+			ordinary = append(ordinary, c)
 		}
-		// Promote line allowances/charges to document-level AllowanceCharge
+		// Promote ordinary line allowances/charges to document-level AllowanceCharge
 		// so they sum to Allowance/ChargeTotalAmount (F-INV129/F-INV130).
-		for _, ac := range makeLineCharges(l.Charges, l.Discounts, currency, l.Sum, ctx, l.Taxes) {
+		for _, ac := range makeLineCharges(ordinary, l.Discounts, currency, l.Sum, ctx, l.Taxes) {
 			ui.AllowanceCharge = append(ui.AllowanceCharge, *ac)
 		}
 	}
@@ -87,13 +97,20 @@ func (ui *Invoice) addOIOUBL21MonetaryTotal(inv *bill.Invoice, ctx Context, curr
 	if t.Charge != nil {
 		chg = chg.Add(*t.Charge)
 	}
+	for _, ch := range inv.Charges {
+		if chargeExciseScheme(ch.Ext) != "" {
+			a := roundToCurrency(ch.Amount, currency)
+			excise = excise.Add(a)
+			chg = chg.Subtract(a) // counted in t.Charge above; OIOUBL emits it as tax
+		}
+	}
 	if !chg.IsZero() {
 		ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: chg.String(), CurrencyID: &currency}
 	}
 	// OIOUBL rounds per line then sums (F-INV128/F-INV133); GOBL end-rounds,
 	// which can differ by a cent on fractional quantities. Recompute the
 	// inclusive/payable totals from the rounded components so they reconcile.
-	incl := grossSum.Add(t.Tax).Add(chg).Subtract(allow)
+	incl := grossSum.Add(t.Tax).Add(excise).Add(chg).Subtract(allow)
 	if t.Rounding != nil {
 		incl = incl.Add(*t.Rounding)
 	}
@@ -251,6 +268,13 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 				ui.TaxTotal[0].TaxSubtotal = append(ui.TaxTotal[0].TaxSubtotal, subtotal)
 			}
 		}
+	}
+
+	// Non-VAT excise duties travel as their own cac:TaxTotal blocks (the VAT total
+	// already includes them in its base, GOBL having folded the charge into the
+	// line). applyOIOUBL21Totals sums every TaxTotal into TaxExclusiveAmount.
+	if ctx.Is(ContextOIOUBL21) {
+		ui.TaxTotal = append(ui.TaxTotal, makeOIOUBL21ExciseTaxTotals(collectOIOUBL21Excise(inv, currency), currency)...)
 	}
 }
 
@@ -415,7 +439,13 @@ func oioubl21TaxCategoryID(key cbc.Key) string {
 func (ui *Invoice) applyOIOUBL21Totals() {
 	for i := range ui.TaxTotal {
 		for j := range ui.TaxTotal[i].TaxSubtotal {
-			applyOIOUBL21TaxCategory(&ui.TaxTotal[i].TaxSubtotal[j].TaxCategory)
+			st := &ui.TaxTotal[i].TaxSubtotal[j]
+			// Excise subtotals carry their own scheme code, name and TaxTypeCode; the
+			// VAT overlay would clobber them with 63/Moms, so leave them untouched.
+			if st.TaxCategory.ID != nil && st.TaxCategory.ID.Value == oioubl21TaxCategoryExcise {
+				continue
+			}
+			applyOIOUBL21TaxCategory(&st.TaxCategory)
 		}
 	}
 	for i := range ui.AllowanceCharge {
@@ -423,9 +453,31 @@ func (ui *Invoice) applyOIOUBL21Totals() {
 			applyOIOUBL21TaxCategory(tc)
 		}
 	}
-	if len(ui.TaxTotal) > 0 {
-		ui.LegalMonetaryTotal.TaxExclusiveAmount = ui.TaxTotal[0].TaxAmount
+	// TaxExclusiveAmount is the sum of all tax — VAT plus any excise (F-INV127).
+	ui.LegalMonetaryTotal.TaxExclusiveAmount = sumTaxTotalAmounts(ui.TaxTotal)
+}
+
+// sumTaxTotalAmounts totals the TaxAmount of every cac:TaxTotal. With a single
+// (VAT) total it returns that amount unchanged; excise totals add to it.
+func sumTaxTotalAmounts(totals []TaxTotal) Amount {
+	if len(totals) == 0 {
+		return Amount{}
 	}
+	if len(totals) == 1 {
+		return totals[0].TaxAmount
+	}
+	sum, err := num.AmountFromString(normalizeNumericString(totals[0].TaxAmount.Value))
+	if err != nil {
+		return totals[0].TaxAmount
+	}
+	for _, tt := range totals[1:] {
+		a, err := num.AmountFromString(normalizeNumericString(tt.TaxAmount.Value))
+		if err != nil {
+			continue
+		}
+		sum = sum.Add(a.Rescale(sum.Exp()))
+	}
+	return Amount{Value: sum.String(), CurrencyID: totals[0].TaxAmount.CurrencyID}
 }
 
 // oioubl21CategoryID stamps the taxcategoryid-1.1 codelist attributes onto a

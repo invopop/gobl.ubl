@@ -162,13 +162,10 @@ func reminderPaymentMeans(m *pay.Record, ctx Context) (PaymentMeans, bool) {
 	}
 	pm := PaymentMeans{PaymentMeansCode: IDType{Value: code}}
 	if ctx.Is(ContextOIOUBL21) {
-		// The Giro/FIK channel is precomputed in the dk-oioubl-payment-channel
-		// extension; a plain credit transfer takes the IBAN channel from the
-		// account. The kortart (dk-oioubl-payment-id) and payment number follow.
-		if ch := m.Ext.Get(oioubl.ExtKeyPaymentChannel).String(); ch != "" {
+		// The channel is derived from the means (Giro/FIK/IBAN); the kortart
+		// (dk-oioubl-payment-id) and payment number follow.
+		if ch := oioubl21PaymentChannel(code); ch != "" {
 			pm.PaymentChannelCode = &IDType{Value: ch}
-		} else if m.CreditTransfer != nil && m.CreditTransfer.IBAN != "" {
-			pm.PaymentChannelCode = &IDType{Value: oioubl21PaymentChannelIBAN}
 		}
 		applyOIOUBL21RecordPaymentID(&pm, m, code)
 	}

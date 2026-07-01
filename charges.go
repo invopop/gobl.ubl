@@ -22,14 +22,18 @@ func (ui *Invoice) addCharges(inv *bill.Invoice, ctx Context) {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return
 	}
-	ui.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	// Use invoice sum (before discounts) as base amount for percentage calculations
 	baseAmount := inv.Totals.Sum
-	for i, ch := range inv.Charges {
-		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount, ctx)
+	for _, ch := range inv.Charges {
+		// OIOUBL emits an excise duty (a charge tagged with dk-oioubl-tax-scheme) as
+		// a cac:TaxTotal/Excise subtotal built in addTotals, not as a charge.
+		if ctx.Is(ContextOIOUBL21) && chargeExciseScheme(ch.Ext) != "" {
+			continue
+		}
+		ui.AllowanceCharge = append(ui.AllowanceCharge, makeCharge(ch, string(inv.Currency), baseAmount, ctx))
 	}
-	for i, d := range inv.Discounts {
-		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount, ctx)
+	for _, d := range inv.Discounts {
+		ui.AllowanceCharge = append(ui.AllowanceCharge, makeDiscount(d, string(inv.Currency), baseAmount, ctx))
 	}
 }
 

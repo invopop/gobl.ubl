@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8f7d1f775cc49cea241599be5343261b0e0b8070f3de94252984302c4b9dcd8b"
+			"val": "c78e91a0e89333e00ff25796d764d6992c62f6081d58c82c276065d1a1345541"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
@@ -36,10 +36,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "12345674",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "12345674"
 				}
 			],
 			"people": [
@@ -79,10 +76,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "76543216",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "76543216"
 				}
 			],
 			"people": [
@@ -171,7 +165,6 @@
 					}
 				],
 				"ext": {
-					"dk-oioubl-payment-channel": "IBAN",
 					"untdid-payment-means": "31"
 				}
 			}

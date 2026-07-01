@@ -121,7 +121,7 @@ func goblReminderMethod(pm *PaymentMeans, ctx Context) *pay.Record {
 		channel = pm.PaymentChannelCode.Value
 	}
 	if ctx.Is(ContextOIOUBL21) && (channel == oioubl21PaymentChannelGiro || channel == oioubl21PaymentChannelFIK) {
-		return goblReminderGiroFIKMethod(pm, channel)
+		return goblReminderGiroFIKMethod(pm)
 	}
 
 	code := pm.PaymentMeansCode.Value
@@ -140,15 +140,14 @@ func goblReminderMethod(pm *PaymentMeans, ctx Context) *pay.Record {
 }
 
 // goblReminderGiroFIKMethod reverses an OIOUBL Giro/FIK payment means. The OIOUBL
-// means code and channel are preserved on a generic "other" record, the kortart
-// and payment number are recovered from cbc:PaymentID / cbc:InstructionID, and
-// the FIK creditor account from cac:CreditAccount.
-func goblReminderGiroFIKMethod(pm *PaymentMeans, channel string) *pay.Record {
+// means code is preserved on a generic "other" record (the channel is derivable
+// from it), the kortart and payment number are recovered from cbc:PaymentID /
+// cbc:InstructionID, and the FIK creditor account from cac:CreditAccount.
+func goblReminderGiroFIKMethod(pm *PaymentMeans) *pay.Record {
 	rec := &pay.Record{
 		Key: pay.MeansKeyOther,
 		Ext: tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyPaymentMeans:   cbc.Code(pm.PaymentMeansCode.Value),
-			oioubl.ExtKeyPaymentChannel: cbc.Code(channel),
+			untdid.ExtKeyPaymentMeans: cbc.Code(pm.PaymentMeansCode.Value),
 		}),
 	}
 	if pm.PaymentID != nil {

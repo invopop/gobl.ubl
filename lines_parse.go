@@ -136,6 +136,16 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		}
 	}
 
+	// OIOUBL mirrors each line's excise duties as line-level cac:TaxTotal/Excise
+	// blocks; reconstruct them as line charges so the duty stays on its line.
+	if ctx.Is(ContextOIOUBL21) {
+		excise, err := exciseLineChargesFromTaxTotals(docLine.TaxTotal)
+		if err != nil {
+			return nil, err
+		}
+		line.Charges = append(line.Charges, excise...)
+	}
+
 	if len(notes) > 0 {
 		line.Notes = notes
 	}

@@ -287,7 +287,13 @@ func applyOIOUBL21LineTaxCategories(lines []InvoiceLine) {
 		}
 		for j := range line.TaxTotal {
 			for k := range line.TaxTotal[j].TaxSubtotal {
-				applyOIOUBL21TaxCategory(&line.TaxTotal[j].TaxSubtotal[k].TaxCategory)
+				st := &line.TaxTotal[j].TaxSubtotal[k]
+				// Excise subtotals carry their own scheme code, name and TaxTypeCode;
+				// the VAT overlay would clobber them with 63/Moms, so leave them be.
+				if st.TaxCategory.ID != nil && st.TaxCategory.ID.Value == oioubl21TaxCategoryExcise {
+					continue
+				}
+				applyOIOUBL21TaxCategory(&st.TaxCategory)
 			}
 		}
 		for _, ac := range line.AllowanceCharge {
@@ -330,6 +336,15 @@ func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 		return nil
 	}
 
+	// An excise duty is a VAT-rated charge OIOUBL emits as its own tax (not an
+	// AllowanceCharge), so fold it into the VAT taxable base here — VAT lands on
+	// the duty-inclusive amount and F-LIB402 reconciles without a charge bridge.
+	for _, ch := range line.Charges {
+		if chargeExciseScheme(ch.Ext) != "" {
+			taxable = taxable.Add(roundToCurrency(ch.Amount, ccy))
+		}
+	}
+
 	taxTotal := TaxTotal{
 		TaxAmount: Amount{Value: "0", CurrencyID: &ccy},
 	}
@@ -366,7 +381,13 @@ func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 
 	taxTotal.TaxAmount = Amount{Value: totalAmount.String(), CurrencyID: &ccy}
 
-	return []TaxTotal{taxTotal}
+	// Mirror the line's excise duties as line-level cac:TaxTotal/Excise blocks so
+	// the wire records which line each duty belongs to. The duty is also summed
+	// into the document-level TaxTotal (which drives TaxExclusiveAmount); OIOUBL
+	// permits — and reconciles — a tax at both levels, exactly as it does for VAT.
+	totals := []TaxTotal{taxTotal}
+	totals = append(totals, makeOIOUBL21ExciseTaxTotals(collectLineExcise(line, ccy), ccy)...)
+	return totals
 }
 
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount, ctx Context, taxes tax.Set) []*AllowanceCharge {

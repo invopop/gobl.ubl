@@ -140,6 +140,22 @@ const (
 	oioubl21PaymentChannelFIK  = string(oioubl.ExtValuePaymentChannelFIK)
 )
 
+// oioubl21PaymentChannel maps a UNTDID 4461 payment means to its OIOUBL
+// paymentchannelcode-1.1 value: Giro (50) → DK:GIRO, FIK (93) → DK:FIK, and the
+// account-transfer means (30/31 bank transfer, 58 SEPA credit transfer) → IBAN.
+// Every other means settles outside a payment channel and carries none.
+func oioubl21PaymentChannel(means string) string {
+	switch means {
+	case "50":
+		return oioubl21PaymentChannelGiro
+	case "93":
+		return oioubl21PaymentChannelFIK
+	case "30", "31", "58":
+		return oioubl21PaymentChannelIBAN
+	}
+	return ""
+}
+
 // applyOIOUBL21PaymentMeans stamps the payment channel (see
 // stampOIOUBL21PaymentChannel) and moves the document due date onto each means.
 func applyOIOUBL21PaymentMeans(out *Invoice) {
@@ -196,10 +212,10 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if ref := instr.Ref.String(); ref != "" {
 		ui.PaymentMeans[0].PaymentID = &ref
 	}
-	// The OIOUBL payment channel and PaymentID are precomputed by the dk-oioubl
-	// addon extensions; the converter emits them directly (see applyOIOUBL21PaymentID).
+	// The OIOUBL payment channel is derived from the means; the PaymentID kortart is
+	// precomputed by the dk-oioubl addon (see applyOIOUBL21PaymentID).
 	if ctx.Is(ContextOIOUBL21) {
-		if ch := instr.Ext.Get(oioubl.ExtKeyPaymentChannel).String(); ch != "" && ui.PaymentMeans[0].PaymentChannelCode == nil {
+		if ch := oioubl21PaymentChannel(paymentMeansCode); ch != "" && ui.PaymentMeans[0].PaymentChannelCode == nil {
 			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: ch}
 		}
 		applyOIOUBL21PaymentID(&ui.PaymentMeans[0], instr, paymentMeansCode)

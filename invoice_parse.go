@@ -113,6 +113,9 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 			return nil, err
 		}
 	}
+	if err := ui.goblAddExciseCharges(out, o.context); err != nil {
+		return nil, err
+	}
 
 	out.Attachments = ui.goblAddAttachments()
 	ui.goblAddTaxNotes(out)

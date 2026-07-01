@@ -3,7 +3,7 @@
   <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
   <cbc:CustomizationID>OIOUBL-2.1</cbc:CustomizationID>
   <cbc:ProfileID schemeAgencyID="320" schemeID="urn:oioubl:id:profileid-1.2">urn:www.nesubl.eu:profiles:profile5:ver2.0</cbc:ProfileID>
-  <cbc:ID>FINAL-EXNR01</cbc:ID>
+  <cbc:ID>FINAL-EXC-CHG-01</cbc:ID>
   <cbc:UUID>0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2</cbc:UUID>
   <cbc:IssueDate>2026-05-29</cbc:IssueDate>
   <cbc:InvoiceTypeCode listAgencyID="320" listID="urn:oioubl:codelist:invoicetypecode-1.1">380</cbc:InvoiceTypeCode>
@@ -79,7 +79,7 @@
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode>31</cbc:PaymentMeansCode>
     <cbc:PaymentChannelCode listID="urn:oioubl:codelist:paymentchannelcode-1.1">IBAN</cbc:PaymentChannelCode>
-    <cbc:PaymentID>TEST-006</cbc:PaymentID>
+    <cbc:PaymentID>TEST-EXC-CHG</cbc:PaymentID>
     <cac:PayeeFinancialAccount>
       <cbc:ID>DK5000400440116243</cbc:ID>
       <cac:FinancialInstitutionBranch>
@@ -89,18 +89,14 @@
       </cac:FinancialInstitutionBranch>
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
-  <cac:PaymentTerms>
-    <cbc:Note>Netto 30 dage</cbc:Note>
-    <cbc:Amount currencyID="DKK">8000.00</cbc:Amount>
-  </cac:PaymentTerms>
   <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="DKK">0.00</cbc:TaxAmount>
+    <cbc:TaxAmount currencyID="DKK">452.50</cbc:TaxAmount>
     <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="DKK">8000.00</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="DKK">0.00</cbc:TaxAmount>
+      <cbc:TaxableAmount currencyID="DKK">1810.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="DKK">452.50</cbc:TaxAmount>
       <cac:TaxCategory>
-        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">ZeroRated</cbc:ID>
-        <cbc:Percent>0</cbc:Percent>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">StandardRated</cbc:ID>
+        <cbc:Percent>25.0</cbc:Percent>
         <cac:TaxScheme>
           <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.1">63</cbc:ID>
           <cbc:Name>Moms</cbc:Name>
@@ -108,23 +104,39 @@
       </cac:TaxCategory>
     </cac:TaxSubtotal>
   </cac:TaxTotal>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="DKK">10.00</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="DKK">10.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="DKK">10.00</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">Excise</cbc:ID>
+        <cac:TaxScheme>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.1">16</cbc:ID>
+          <cbc:Name>Mineralvandsafgift</cbc:Name>
+          <cbc:TaxTypeCode listAgencyID="320" listID="urn:oioubl:codelist:taxtypecode-1.1">StandardRated</cbc:TaxTypeCode>
+        </cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="DKK">8000.00</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="DKK">0.00</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="DKK">8000.00</cbc:TaxInclusiveAmount>
-    <cbc:PayableAmount currencyID="DKK">8000.00</cbc:PayableAmount>
+    <cbc:LineExtensionAmount currencyID="DKK">1800.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="DKK">462.50</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="DKK">2262.50</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="DKK">2262.50</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
-    <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="DKK">8000.00</cbc:LineExtensionAmount>
+    <cbc:InvoicedQuantity unitCode="LTR">20</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="DKK">1800.00</cbc:LineExtensionAmount>
     <cac:TaxTotal>
-      <cbc:TaxAmount currencyID="DKK">0.00</cbc:TaxAmount>
+      <cbc:TaxAmount currencyID="DKK">452.50</cbc:TaxAmount>
       <cac:TaxSubtotal>
-        <cbc:TaxableAmount currencyID="DKK">8000.00</cbc:TaxableAmount>
-        <cbc:TaxAmount currencyID="DKK">0.00</cbc:TaxAmount>
+        <cbc:TaxableAmount currencyID="DKK">1810.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="DKK">452.50</cbc:TaxAmount>
         <cac:TaxCategory>
-          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">ZeroRated</cbc:ID>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">StandardRated</cbc:ID>
+          <cbc:Percent>25.0</cbc:Percent>
           <cac:TaxScheme>
             <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.1">63</cbc:ID>
             <cbc:Name>Moms</cbc:Name>
@@ -132,11 +144,26 @@
         </cac:TaxCategory>
       </cac:TaxSubtotal>
     </cac:TaxTotal>
+    <cac:TaxTotal>
+      <cbc:TaxAmount currencyID="DKK">10.00</cbc:TaxAmount>
+      <cac:TaxSubtotal>
+        <cbc:TaxableAmount currencyID="DKK">10.00</cbc:TaxableAmount>
+        <cbc:TaxAmount currencyID="DKK">10.00</cbc:TaxAmount>
+        <cac:TaxCategory>
+          <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">Excise</cbc:ID>
+          <cac:TaxScheme>
+            <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.1">16</cbc:ID>
+            <cbc:Name>Mineralvandsafgift</cbc:Name>
+            <cbc:TaxTypeCode listAgencyID="320" listID="urn:oioubl:codelist:taxtypecode-1.1">StandardRated</cbc:TaxTypeCode>
+          </cac:TaxScheme>
+        </cac:TaxCategory>
+      </cac:TaxSubtotal>
+    </cac:TaxTotal>
     <cac:Item>
-      <cbc:Name>Momsfritaget ydelse</cbc:Name>
+      <cbc:Name>Sodavand</cbc:Name>
       <cac:ClassifiedTaxCategory>
-        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">ZeroRated</cbc:ID>
-        <cbc:Percent>0</cbc:Percent>
+        <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxcategoryid-1.1">StandardRated</cbc:ID>
+        <cbc:Percent>25.0</cbc:Percent>
         <cac:TaxScheme>
           <cbc:ID schemeAgencyID="320" schemeID="urn:oioubl:id:taxschemeid-1.1">63</cbc:ID>
           <cbc:Name>Moms</cbc:Name>
@@ -144,7 +171,7 @@
       </cac:ClassifiedTaxCategory>
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="DKK">8000.00</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="DKK">90.00</cbc:PriceAmount>
     </cac:Price>
   </cac:InvoiceLine>
 </Invoice>

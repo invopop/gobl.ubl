@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e34c253ce2c3c2e5444d51624f35b3a70ba035350891b6500e5a22e9ea886f95"
+			"val": "9d9d10f6f0ec229ff37dcfb71edc1b9c90faf401dfa3303b9173a63b7f06c56d"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
@@ -36,10 +36,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "12345674",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "12345674"
 				}
 			],
 			"endpoints": [
@@ -71,10 +68,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "88146328",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "88146328"
 				}
 			],
 			"people": [

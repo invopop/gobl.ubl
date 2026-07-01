@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f6b37b48cd024c9a8af02af96f284643b6868c46a6866be61f6e2f716844f5c6"
+			"val": "1fbd974ec92dd1e46f87dfd0c4a48e12aefba58dd4459830a807808ee0a3e968"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
@@ -89,10 +89,7 @@
 					"series": "FINAL",
 					"code": "004"
 				},
-				"description": "Dokumentet kunne ikke behandles teknisk: ugyldig XML-struktur",
-				"ext": {
-					"dk-oioubl-response-code": "TechnicalReject"
-				}
+				"description": "Dokumentet kunne ikke behandles teknisk: ugyldig XML-struktur"
 			}
 		]
 	}

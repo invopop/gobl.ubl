@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ae68aba8aeb7884b81409111911f5d68daa3daa695fd3de221a315ad342f7356"
+			"val": "7a4145e4a9749a3c9cf4a2c594409c968a7c0345c4b7ee6795c844c2f1d9a7c9"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
@@ -36,10 +36,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "12345674",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "12345674"
 				}
 			],
 			"people": [
@@ -74,10 +71,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "76543216",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "76543216"
 				}
 			],
 			"people": [
@@ -142,7 +136,6 @@
 					}
 				],
 				"ext": {
-					"dk-oioubl-payment-channel": "DK:GIRO",
 					"dk-oioubl-payment-id": "01",
 					"untdid-payment-means": "50"
 				}

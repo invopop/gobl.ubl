@@ -184,9 +184,26 @@ func applyOIOUBL21ResponseProfile(out *ApplicationResponse, st *bill.Status) {
 	schemeID := oioublProfileSchemeID
 	out.ProfileID.SchemeAgencyID = &agencyID
 	out.ProfileID.SchemeID = &schemeID
-	if len(st.Lines) > 0 && st.Lines[0].Ext.Get(oioubl.ExtKeyResponseCode) == oioubl.ExtValueResponseCodeTechnicalAccept {
+	if len(st.Lines) > 0 && st.Lines[0].Key == bill.StatusLineAcknowledged {
 		out.ProfileID.Value = oioublProfileTechnicalID
 	}
+}
+
+// oioubl21ResponseCode maps a GOBL status event to its OIOUBL responsecode-1.1
+// value, or "" for events OIOUBL does not represent (rejected by F-APR018). The
+// code is derived from the event rather than carried in an extension.
+func oioubl21ResponseCode(key cbc.Key) string {
+	switch key {
+	case bill.StatusLineAccepted:
+		return string(oioubl.ExtValueResponseCodeBusinessAccept)
+	case bill.StatusLineRejected:
+		return string(oioubl.ExtValueResponseCodeBusinessReject)
+	case bill.StatusLineAcknowledged:
+		return string(oioubl.ExtValueResponseCodeTechnicalAccept)
+	case bill.StatusLineError:
+		return string(oioubl.ExtValueResponseCodeTechnicalReject)
+	}
+	return ""
 }
 
 // applyOIOUBL21DocumentResponse stamps the OIOUBL 2.1 specifics onto a single
@@ -197,12 +214,12 @@ func applyOIOUBL21DocumentResponse(dr *DocumentResponse, line *bill.StatusLine) 
 	resp.ReferenceID = strconv.Itoa(responseReferenceID(line.Index))
 
 	agencyID := oioublCodeListAgencyID
-	if code := line.Ext.Get(oioubl.ExtKeyResponseCode); code != "" {
+	if code := oioubl21ResponseCode(line.Key); code != "" {
 		codeListID := responseCodeListID
 		resp.ResponseCode = &IDType{
 			ListAgencyID: &agencyID,
 			ListID:       &codeListID,
-			Value:        code.String(),
+			Value:        code,
 		}
 	}
 

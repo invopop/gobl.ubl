@@ -127,15 +127,33 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 	return line, nil
 }
 
-// applyOIOUBL21StatusLine records the parsed OIOUBL code-list values (response
-// code into the dk-oioubl-response-code extension, document-type code) on the
-// GOBL status line.
+// applyOIOUBL21StatusLine recovers the GOBL status event from the parsed OIOUBL
+// responsecode-1.1 value and records the document-type code on the status line.
 func applyOIOUBL21StatusLine(line *bill.StatusLine, dr *DocumentResponse) {
 	if r := dr.Response; r != nil && r.ResponseCode != nil && r.ResponseCode.Value != "" {
-		line.Ext = line.Ext.Set(oioubl.ExtKeyResponseCode, cbc.Code(r.ResponseCode.Value))
+		if event := goblStatusEvent(r.ResponseCode.Value); event != "" {
+			line.Key = event
+		}
 	}
 	if ref := dr.DocumentReference; ref != nil && line.Doc != nil &&
 		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == responseDocTypeCreditNote {
 		line.Doc.Type = bill.InvoiceTypeCreditNote
 	}
+}
+
+// goblStatusEvent maps an OIOUBL responsecode-1.1 value to its GOBL status event;
+// ProfileReject has no dedicated GOBL event and folds into error alongside
+// TechnicalReject.
+func goblStatusEvent(code string) cbc.Key {
+	switch cbc.Code(code) {
+	case oioubl.ExtValueResponseCodeBusinessAccept:
+		return bill.StatusLineAccepted
+	case oioubl.ExtValueResponseCodeBusinessReject:
+		return bill.StatusLineRejected
+	case oioubl.ExtValueResponseCodeTechnicalAccept:
+		return bill.StatusLineAcknowledged
+	case oioubl.ExtValueResponseCodeTechnicalReject, oioubl.ExtValueResponseCodeProfileReject:
+		return bill.StatusLineError
+	}
+	return ""
 }

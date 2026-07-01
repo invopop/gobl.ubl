@@ -309,8 +309,8 @@ func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
 	sc := goblTaxSchemeCategory(pts.TaxScheme.ID.Value)
 	if p.TaxID.GetScheme() != sc {
 		var scheme cbc.Code
-		if pts.TaxScheme.TaxTypeCode != "" {
-			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
+		if pts.TaxScheme.TaxTypeCode != nil && pts.TaxScheme.TaxTypeCode.Value != "" {
+			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode.Value)
 		} else {
 			scheme = sc
 		}

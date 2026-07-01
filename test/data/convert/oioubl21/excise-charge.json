@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "86b2eae03e78ca2fe267469bf950717afb0a07ba68d57cf07fafb4e58b20ed3e"
+			"val": "82856fa90fee9735bc9c1f5defb8719b14e4eadc26d0f1cef9c0c948b67e00f5"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
@@ -19,7 +19,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "FINAL",
-		"code": "FQ01",
+		"code": "EXC-CHG-01",
 		"issue_date": "2026-05-29",
 		"currency": "DKK",
 		"tax": {
@@ -36,10 +36,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "12345674",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "12345674"
 				}
 			],
 			"people": [
@@ -74,10 +71,7 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "76543216",
-					"ext": {
-						"iso-scheme-id": "0184"
-					}
+					"code": "76543216"
 				}
 			],
 			"people": [
@@ -112,30 +106,40 @@
 		"lines": [
 			{
 				"i": 1,
-				"quantity": "3.5",
+				"quantity": "20",
 				"item": {
-					"name": "Materiale (kg)",
-					"price": "1234.56789",
-					"unit": "kg"
+					"name": "Sodavand",
+					"price": "90.00",
+					"unit": "l"
 				},
-				"sum": "4320.98762",
+				"sum": "1800.00",
+				"charges": [
+					{
+						"reason": "Mineralvandsafgift",
+						"quantity": "20",
+						"unit": "l",
+						"rate": "0.50",
+						"amount": "10.00",
+						"ext": {
+							"dk-oioubl-tax-scheme": "16"
+						}
+					}
+				],
 				"taxes": [
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "25%"
+						"rate": "general",
+						"percent": "25.0%"
 					}
 				],
-				"total": "4320.98762"
+				"total": "1810.00"
 			}
 		],
 		"payment": {
-			"terms": {
-				"notes": "Netto 30 dage"
-			},
 			"instructions": {
 				"key": "credit-transfer",
-				"ref": "TEST-006",
+				"ref": "TEST-EXC-CHG",
 				"credit_transfer": [
 					{
 						"iban": "DK5000400440116243",
@@ -143,14 +147,13 @@
 					}
 				],
 				"ext": {
-					"dk-oioubl-payment-channel": "IBAN",
 					"untdid-payment-means": "31"
 				}
 			}
 		},
 		"totals": {
-			"sum": "4320.99",
-			"total": "4320.99",
+			"sum": "1810.00",
+			"total": "1810.00",
 			"taxes": {
 				"categories": [
 					{
@@ -158,19 +161,19 @@
 						"rates": [
 							{
 								"key": "standard",
-								"base": "4320.99",
-								"percent": "25%",
-								"amount": "1080.25"
+								"base": "1810.00",
+								"percent": "25.0%",
+								"amount": "452.50"
 							}
 						],
-						"amount": "1080.25"
+						"amount": "452.50"
 					}
 				],
-				"sum": "1080.25"
+				"sum": "452.50"
 			},
-			"tax": "1080.25",
-			"total_with_tax": "5401.23",
-			"payable": "5401.23"
+			"tax": "452.50",
+			"total_with_tax": "2262.50",
+			"payable": "2262.50"
 		}
 	}
 }

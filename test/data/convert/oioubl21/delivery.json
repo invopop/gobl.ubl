@@ -4,14 +4,17 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5274c4437df1000b8d8397f342069ba30af35fed3866a79cf0d3fdb6f0fb8a96"
-		}
+			"val": "3b6aaa53f711a225fa23b0242530730a9fabe18a28a8a4fcd7aa8ce8cd13d559"
+		},
+		"from": "urn:oioubl:scheme:endpointid-1.1::GLN:5790000436101",
+		"to": "urn:oioubl:scheme:endpointid-1.1::GLN:5790000436057"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "DK",
 		"$addons": [
-			"eu-en16931-v2017"
+			"eu-en16931-v2017",
+			"dk-oioubl-v2-1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
@@ -38,10 +41,15 @@
 				"country": "DK",
 				"code": "37990485"
 			},
-			"inboxes": [
+			"identities": [
 				{
-					"scheme": "GLN",
-					"code": "5790000436101"
+					"scope": "legal",
+					"code": "37990485"
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "urn:oioubl:scheme:endpointid-1.1::GLN:5790000436101"
 				}
 			],
 			"addresses": [
@@ -66,6 +74,12 @@
 				"country": "DK",
 				"code": "47458714"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "47458714"
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -80,10 +94,9 @@
 					]
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "GLN",
-					"code": "5790000436057"
+					"uri": "urn:oioubl:scheme:endpointid-1.1::GLN:5790000436057"
 				}
 			],
 			"addresses": [
@@ -115,10 +128,7 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"percent": "19%",
-						"ext": {
-							"untdid-tax-category": "S"
-						}
+						"percent": "19%"
 					}
 				],
 				"total": "1800.00"
@@ -141,7 +151,7 @@
 					}
 				],
 				"ext": {
-					"untdid-payment-means": "30"
+					"untdid-payment-means": "31"
 				}
 			}
 		},
@@ -173,9 +183,6 @@
 						"rates": [
 							{
 								"key": "standard",
-								"ext": {
-									"untdid-tax-category": "S"
-								},
 								"base": "1800.00",
 								"percent": "19%",
 								"amount": "342.00"
