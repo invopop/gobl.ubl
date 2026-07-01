@@ -14,7 +14,7 @@
 		"$regime": "DK",
 		"$addons": [
 			"eu-en16931-v2017",
-			"dk-oioubl-v2-1"
+			"dk-oioubl-v2"
 		],
 		"uuid": "019ed096-350c-73bc-9695-b103e1d03b93",
 		"type": "request",

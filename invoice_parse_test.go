@@ -96,7 +96,7 @@ func TestParseInvoiceOIOUBLNonProfile5Context(t *testing.T) {
 	require.NoError(t, err)
 	out, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)
-	assert.Contains(t, out.Addons.List, oioubl.V2_1,
+	assert.Contains(t, out.Addons.List, oioubl.V2,
 		"OIOUBL context must resolve despite the non-profile5 ProfileID")
 }
 

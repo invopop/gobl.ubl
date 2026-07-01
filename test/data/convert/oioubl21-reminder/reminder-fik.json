@@ -14,7 +14,7 @@
 		"$regime": "DK",
 		"$addons": [
 			"eu-en16931-v2017",
-			"dk-oioubl-v2-1"
+			"dk-oioubl-v2"
 		],
 		"$tags": [
 			"advis"

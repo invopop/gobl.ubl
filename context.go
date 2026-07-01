@@ -234,7 +234,7 @@ var ContextZATCA = Context{
 var ContextOIOUBL21 = Context{
 	CustomizationID: "OIOUBL-2.1",
 	ProfileID:       "urn:www.nesubl.eu:profiles:profile5:ver2.0",
-	Addons:          []cbc.Key{oioubl.V2_1},
+	Addons:          []cbc.Key{oioubl.V2},
 	VESIDs: VESIDMapping{
 		Invoice:             "dk.oioubl:invoice:1.17.2",
 		CreditNote:          "dk.oioubl:credit-note:1.17.2",
