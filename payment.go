@@ -131,13 +131,12 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	return nil
 }
 
-// OIOUBL paymentchannelcode-1.1 wire values. Sourced from the dk-oioubl addon
-// because the converter writes the extension straight to the XML and reads it
-// back on parse, so the wire values match the extension values by construction.
+// OIOUBL paymentchannelcode-1.1 wire values. Derived from the payment means (see
+// oioubl21PaymentChannel), not carried in an extension.
 const (
-	oioubl21PaymentChannelIBAN = string(oioubl.ExtValuePaymentChannelIBAN)
-	oioubl21PaymentChannelGiro = string(oioubl.ExtValuePaymentChannelGiro)
-	oioubl21PaymentChannelFIK  = string(oioubl.ExtValuePaymentChannelFIK)
+	oioubl21PaymentChannelIBAN = "IBAN"
+	oioubl21PaymentChannelGiro = "DK:GIRO"
+	oioubl21PaymentChannelFIK  = "DK:FIK"
 )
 
 // oioubl21PaymentChannel maps a UNTDID 4461 payment means to its OIOUBL

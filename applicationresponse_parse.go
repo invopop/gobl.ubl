@@ -4,7 +4,6 @@ import (
 	"cloud.google.com/go/civil"
 
 	"github.com/invopop/gobl"
-	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -146,13 +145,13 @@ func applyOIOUBL21StatusLine(line *bill.StatusLine, dr *DocumentResponse) {
 // TechnicalReject.
 func goblStatusEvent(code string) cbc.Key {
 	switch cbc.Code(code) {
-	case oioubl.ExtValueResponseCodeBusinessAccept:
+	case oioubl21ResponseCodeBusinessAccept:
 		return bill.StatusLineAccepted
-	case oioubl.ExtValueResponseCodeBusinessReject:
+	case oioubl21ResponseCodeBusinessReject:
 		return bill.StatusLineRejected
-	case oioubl.ExtValueResponseCodeTechnicalAccept:
+	case oioubl21ResponseCodeTechnicalAccept:
 		return bill.StatusLineAcknowledged
-	case oioubl.ExtValueResponseCodeTechnicalReject, oioubl.ExtValueResponseCodeProfileReject:
+	case oioubl21ResponseCodeTechnicalReject, oioubl21ResponseCodeProfileReject:
 		return bill.StatusLineError
 	}
 	return ""

@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"strconv"
 
-	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
@@ -174,19 +173,30 @@ func applyOIOUBL21ResponseProfile(out *ApplicationResponse, st *bill.Status) {
 	}
 }
 
+// OIOUBL responsecode-1.1 wire values. Derived from the status event (see
+// oioubl21ResponseCode), not carried in an extension. F-APR018 accepts five of
+// the six codelist values (ProfileAccept is rejected).
+const (
+	oioubl21ResponseCodeBusinessAccept  cbc.Code = "BusinessAccept"
+	oioubl21ResponseCodeBusinessReject  cbc.Code = "BusinessReject"
+	oioubl21ResponseCodeTechnicalAccept cbc.Code = "TechnicalAccept"
+	oioubl21ResponseCodeTechnicalReject cbc.Code = "TechnicalReject"
+	oioubl21ResponseCodeProfileReject   cbc.Code = "ProfileReject"
+)
+
 // oioubl21ResponseCode maps a GOBL status event to its OIOUBL responsecode-1.1
 // value, or "" for events OIOUBL does not represent (rejected by F-APR018). The
 // code is derived from the event rather than carried in an extension.
 func oioubl21ResponseCode(key cbc.Key) string {
 	switch key {
 	case bill.StatusLineAccepted:
-		return string(oioubl.ExtValueResponseCodeBusinessAccept)
+		return string(oioubl21ResponseCodeBusinessAccept)
 	case bill.StatusLineRejected:
-		return string(oioubl.ExtValueResponseCodeBusinessReject)
+		return string(oioubl21ResponseCodeBusinessReject)
 	case bill.StatusLineAcknowledged:
-		return string(oioubl.ExtValueResponseCodeTechnicalAccept)
+		return string(oioubl21ResponseCodeTechnicalAccept)
 	case bill.StatusLineError:
-		return string(oioubl.ExtValueResponseCodeTechnicalReject)
+		return string(oioubl21ResponseCodeTechnicalReject)
 	}
 	return ""
 }
