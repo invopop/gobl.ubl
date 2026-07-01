@@ -625,8 +625,7 @@ func contactName(n *org.Name) string {
 }
 
 // OIOUBL symbolic schemes (F-LIB179), defined by the dk-oioubl addon (the single
-// source of truth). The ICD<->scheme codelist also lives in the addon, reached via
-// oioubl.SchemeForICD (convert) and oioubl.ICDForScheme (parse).
+// source of truth).
 const (
 	oioubl21SchemeDKCVR = oioubl.SchemeDKCVR
 	oioubl21SchemeDKSE  = oioubl.SchemeDKSE
@@ -711,41 +710,20 @@ func applyOIOUBL21TaxRepParty(p *Party) {
 	applyOIOUBL21Party(p)
 }
 
-// applyOIOUBL21PartyIdentifications normalises each PartyIdentification/ID scheme
-// to the symbolic OIOUBL PartyID codelist (F-LIB183) — a numeric ICD maps to its
-// symbolic scheme, anything unmappable becomes ZZZ — and DK-prefixes DK:CVR/DK:SE
-// values (F-LIB184), mirroring the company-ID handling.
+// applyOIOUBL21PartyIdentifications DK-prefixes DK:CVR/DK:SE PartyIdentification
+// values (F-LIB184), mirroring the company-ID handling. Schemes are expected to
+// be OIOUBL-symbolic already (F-LIB183); an ISO 6523 identifier must be supplied
+// pre-formatted as an OIOUBL scheme.
 func applyOIOUBL21PartyIdentifications(p *Party) {
 	for i := range p.PartyIdentification {
 		id := p.PartyIdentification[i].ID
 		if id == nil || id.SchemeID == nil {
 			continue
 		}
-		scheme := *id.SchemeID
-		if mapped := oioubl.SchemeForICD(scheme); mapped != "" {
-			scheme = mapped.String()
-		} else if isNumericICDScheme(scheme) {
-			scheme = oioubl21SchemeZZZ
-		}
-		id.SchemeID = &scheme
-		if scheme == oioubl21SchemeDKCVR || scheme == oioubl21SchemeDKSE {
+		if s := *id.SchemeID; s == oioubl21SchemeDKCVR || s == oioubl21SchemeDKSE {
 			id.Value = dkPrefixed(id.Value)
 		}
 	}
-}
-
-// isNumericICDScheme reports whether a scheme is a bare 4-digit ISO 6523 ICD
-// (e.g. "0184") rather than a symbolic OIOUBL scheme.
-func isNumericICDScheme(s string) bool {
-	if len(s) != 4 {
-		return false
-	}
-	for _, r := range s {
-		if r < '0' || r > '9' {
-			return false
-		}
-	}
-	return true
 }
 
 // partyIsDanish reports whether an assembled OIOUBL party is Danish, the signal
