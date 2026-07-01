@@ -486,10 +486,8 @@ func oioubl21CategoryID(id *IDType) *IDType {
 	if id == nil {
 		id = &IDType{Value: oioubl21TaxCategoryStandardRated}
 	}
-	schemeID := "urn:oioubl:id:taxcategoryid-1.1"
-	schemeAgencyID := "320"
-	id.SchemeID = &schemeID
-	id.SchemeAgencyID = &schemeAgencyID
+	id.SchemeID = ptr(oioublSchemeTaxCategory)
+	id.SchemeAgencyID = ptr(oioublAgencyID)
 	return id
 }
 
@@ -513,13 +511,10 @@ func applyOIOUBL21TaxScheme(ts *TaxScheme) {
 	if ts == nil {
 		return
 	}
-	schemeID := "urn:oioubl:id:taxschemeid-1.1"
-	schemeAgencyID := "320"
 	ts.ID = IDType{
-		SchemeID:       &schemeID,
-		SchemeAgencyID: &schemeAgencyID,
+		SchemeID:       ptr(oioublSchemeTaxScheme),
+		SchemeAgencyID: ptr(oioublAgencyID),
 		Value:          oioubl21TaxSchemeVATCode,
 	}
-	name := "Moms"
-	ts.Name = &name
+	ts.Name = ptr("Moms")
 }

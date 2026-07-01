@@ -15,6 +15,11 @@ import (
 // used when constructing validation.Errors trees.
 const extFieldKey = "ext"
 
+// ptr returns a pointer to v. It keeps the many optional *string XML attributes
+// (schemeID, listID, …) legible: ptr(oioublSchemeTaxScheme) rather than a
+// throwaway local variable per attribute.
+func ptr[T any](v T) *T { return &v }
+
 // UBL schema constants
 const (
 	NamespaceCBC  = "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"

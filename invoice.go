@@ -166,10 +166,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		if out.ProfileID != nil {
 			// Invoices/credit notes carry profile5:ver2.0, valid from the
 			// profileid-1.2 code list — which real NemHandel traffic uses.
-			schemeID := "urn:oioubl:id:profileid-1.2"
-			schemeAgencyID := oioublCodeListAgencyID
-			out.ProfileID.SchemeID = &schemeID
-			out.ProfileID.SchemeAgencyID = &schemeAgencyID
+			out.ProfileID.SchemeID = ptr(oioublSchemeProfileV12)
+			out.ProfileID.SchemeAgencyID = ptr(oioublAgencyID)
 		}
 	}
 
@@ -338,10 +336,8 @@ func applyOIOUBL21TypeCode(t *IDType) {
 	if t == nil {
 		return
 	}
-	listID := "urn:oioubl:codelist:invoicetypecode-1.1"
-	listAgencyID := "320"
-	t.ListID = &listID
-	t.ListAgencyID = &listAgencyID
+	t.ListID = ptr(oioublListInvoiceType)
+	t.ListAgencyID = ptr(oioublAgencyID)
 }
 
 // applyOIOUBL21BillingReference drops the DocumentTypeCode from billing

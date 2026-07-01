@@ -245,17 +245,7 @@ func reminderDocumentReference(doc *org.DocumentRef) *Reference {
 // NOT the profile5 invoices use: the OIOUBL Reminder belongs to the billing
 // process, and the billing-only profile avoids advertising the order documents
 // that the OrdSim-BilSim profiles carry.
-const (
-	reminderTypeCodeListID  = "urn:oioubl:codelist:remindertypecode-1.1"
-	oioublProfileSchemeV12  = "urn:oioubl:id:profileid-1.2"
-	oioublReminderProfileID = "Procurement-BilSim-1.0"
-
-	// remindertypecode-1.1 values (F-REM061). The type is a GOBL document-variant
-	// tag, not an extension: an untagged reminder is a formal Reminder, the addon's
-	// advis tag marks it an advisory notice.
-	reminderTypeCodeReminder = "Reminder"
-	reminderTypeCodeAdvis    = "Advis"
-)
+const oioublReminderProfileID = "Procurement-BilSim-1.0"
 
 // applyOIOUBL21Reminder stamps the OIOUBL specifics: party formatting, the
 // profileid scheme attributes, and the reminder type (F-REM006/061) and
@@ -274,21 +264,20 @@ func applyOIOUBL21Reminder(out *Reminder, pmt *bill.Payment) {
 	if out.ProfileID == nil {
 		out.ProfileID = &IDType{}
 	}
-	schemeID := oioublProfileSchemeV12
-	agencyID := oioublCodeListAgencyID
-	out.ProfileID.SchemeID = &schemeID
-	out.ProfileID.SchemeAgencyID = &agencyID
+	out.ProfileID.SchemeID = ptr(oioublSchemeProfileV12)
+	out.ProfileID.SchemeAgencyID = ptr(oioublAgencyID)
 	out.ProfileID.Value = oioublReminderProfileID
 
-	code := reminderTypeCodeReminder
+	// remindertypecode-1.1 (F-REM061): the type is a GOBL document-variant tag,
+	// not an extension — an untagged reminder is a formal Reminder, the addon's
+	// advis tag marks it an advisory notice.
+	code := "Reminder"
 	if pmt.HasTags(oioubl.TagAdvis) {
-		code = reminderTypeCodeAdvis
+		code = "Advis"
 	}
-	typeAgencyID := oioublCodeListAgencyID
-	listID := reminderTypeCodeListID
 	out.ReminderTypeCode = &IDType{
-		ListAgencyID: &typeAgencyID,
-		ListID:       &listID,
+		ListAgencyID: ptr(oioublAgencyID),
+		ListID:       ptr(oioublListReminderType),
 		Value:        code,
 	}
 	out.ReminderSequenceNumeric = pmt.Ext.Get(oioubl.ExtKeyReminderSequence).String()

@@ -169,7 +169,7 @@ func goblReminderGiroFIKMethod(pm *PaymentMeans) *pay.Record {
 // payment so they round-trip: the type is a document-variant tag (Advis → the
 // advis tag; Reminder is the untagged default), the sequence a payment extension.
 func applyOIOUBL21ReminderParse(pmt *bill.Payment, rem *Reminder) {
-	if rem.ReminderTypeCode != nil && rem.ReminderTypeCode.Value == reminderTypeCodeAdvis {
+	if rem.ReminderTypeCode != nil && rem.ReminderTypeCode.Value == "Advis" {
 		pmt.SetTags(oioubl.TagAdvis)
 	}
 	if rem.ReminderSequenceNumeric != "" {

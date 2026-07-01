@@ -246,3 +246,24 @@ var ContextOIOUBL21 = Context{
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
 var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextOIOUBL21}
+
+// OIOUBL 2.1 code-list and scheme identifiers. These are the schemeID/listID
+// attribute values the schematron expects (agency 320 throughout); centralised
+// so every OIOUBL wire identifier has a single source of truth.
+const (
+	oioublAgencyID    = "320"
+	oioublGLNAgencyID = "9" // GS1 agency for a StructuredID GLN (F-LIB029)
+
+	oioublSchemeTaxCategory = "urn:oioubl:id:taxcategoryid-1.1"
+	oioublSchemeTaxScheme   = "urn:oioubl:id:taxschemeid-1.1"
+	oioublSchemeProfileV12  = "urn:oioubl:id:profileid-1.2"
+	oioublSchemeProfileV14  = "urn:oioubl:id:profileid-1.4"
+
+	oioublListInvoiceType     = "urn:oioubl:codelist:invoicetypecode-1.1"
+	oioublListPaymentChannel  = "urn:oioubl:codelist:paymentchannelcode-1.1"
+	oioublListAddressFormat   = "urn:oioubl:codelist:addressformatcode-1.1"
+	oioublListTaxType         = "urn:oioubl:codelist:taxtypecode-1.1"
+	oioublListResponseCode    = "urn:oioubl:codelist:responsecode-1.1"
+	oioublListResponseDocType = "urn:oioubl:codelist:responsedocumenttypecode-1.1"
+	oioublListReminderType    = "urn:oioubl:codelist:remindertypecode-1.1"
+)

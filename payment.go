@@ -180,8 +180,7 @@ func stampOIOUBL21PaymentChannel(pm *PaymentMeans) {
 	if pm.PaymentChannelCode == nil {
 		return
 	}
-	listID := "urn:oioubl:codelist:paymentchannelcode-1.1"
-	pm.PaymentChannelCode.ListID = &listID
+	pm.PaymentChannelCode.ListID = ptr(oioublListPaymentChannel)
 	if pm.PaymentChannelCode.Value == oioubl21PaymentChannelIBAN && pm.PayeeFinancialAccount != nil && pm.PayeeFinancialAccount.FinancialInstitutionBranch != nil {
 		pm.PayeeFinancialAccount.FinancialInstitutionBranch.ID = nil
 	}

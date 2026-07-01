@@ -136,7 +136,7 @@ func applyOIOUBL21StatusLine(line *bill.StatusLine, dr *DocumentResponse) {
 		}
 	}
 	if ref := dr.DocumentReference; ref != nil && line.Doc != nil &&
-		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == responseDocTypeCreditNote {
+		ref.DocumentTypeCode != nil && ref.DocumentTypeCode.Value == "CreditNote" {
 		line.Doc.Type = bill.InvoiceTypeCreditNote
 	}
 }

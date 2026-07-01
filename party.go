@@ -413,11 +413,9 @@ func newPayeeParty(party *org.Party) *Party {
 // oioubl21AddressFormatCode builds the cbc:AddressFormatCode (codelist
 // addressformatcode-1.1) required on every OIOUBL address (F-LIB025).
 func oioubl21AddressFormatCode(value string) *IDType {
-	listID := "urn:oioubl:codelist:addressformatcode-1.1"
-	listAgencyID := "320"
 	return &IDType{
-		ListID:       &listID,
-		ListAgencyID: &listAgencyID,
+		ListID:       ptr(oioublListAddressFormat),
+		ListAgencyID: ptr(oioublAgencyID),
 		Value:        value,
 	}
 }
@@ -434,10 +432,9 @@ const (
 	oioubl21AddressStructuredID     = string(oioubl.ExtValueAddressFormatStructuredID)
 	oioubl21AddressStructuredRegion = string(oioubl.ExtValueAddressFormatStructuredRegion)
 
-	// oioubl21AddressIDScheme (GLN) and its GS1 agency are wire-serialization
-	// attributes OIOUBL mandates on a StructuredID address ID (F-LIB028/029).
+	// oioubl21AddressIDScheme (GLN) is the scheme OIOUBL mandates on a StructuredID
+	// address ID (F-LIB028/029); its GS1 agency is oioublGLNAgencyID.
 	oioubl21AddressIDScheme = string(oioubl.SchemeGLN)
-	oioubl21GLNAgencyID     = "9"
 )
 
 // applyOIOUBL21AddressFormat reshapes a party's postal address to its declared
@@ -471,9 +468,7 @@ func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
 		}
 		clearStructuredAddress(addr)
 		if id != "" {
-			scheme := oioubl21AddressIDScheme
-			agency := oioubl21GLNAgencyID
-			addr.ID = &IDType{Value: id, SchemeID: &scheme, SchemeAgencyID: &agency}
+			addr.ID = &IDType{Value: id, SchemeID: ptr(oioubl21AddressIDScheme), SchemeAgencyID: ptr(oioublGLNAgencyID)}
 		}
 	case oioubl21AddressStructuredRegion:
 		// F-LIB040: a StructuredRegion address carries only Region, District and

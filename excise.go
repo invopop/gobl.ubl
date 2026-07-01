@@ -15,8 +15,6 @@ import (
 // the duty-inclusive base (the charge folds into the line total).
 const oioubl21TaxCategoryExcise = "Excise"
 
-const oioubl21TaxTypeListID = "urn:oioubl:codelist:taxtypecode-1.1"
-
 // oioubl21Excise is a duty charge resolved into the values OIOUBL needs: the
 // taxschemeid duty-type code, the scheme name (the charge reason) and the amount.
 type oioubl21Excise struct {
@@ -97,9 +95,6 @@ func collectLineExcise(line *bill.Line, currency string) []oioubl21Excise {
 // outright rather than as a percentage of a base.
 func makeOIOUBL21ExciseTaxTotals(excises []oioubl21Excise, currency string) []TaxTotal {
 	var totals []TaxTotal
-	agency := "320"
-	schemeIDAttr := "urn:oioubl:id:taxschemeid-1.1"
-	listID := oioubl21TaxTypeListID
 	for _, e := range excises {
 		amt := Amount{Value: e.amount.String(), CurrencyID: &currency}
 		typeCode := oioubl21TaxCategoryStandardRated
@@ -107,12 +102,11 @@ func makeOIOUBL21ExciseTaxTotals(excises []oioubl21Excise, currency string) []Ta
 			typeCode = oioubl21TaxCategoryZeroRated
 		}
 		scheme := &TaxScheme{
-			ID:          IDType{SchemeID: &schemeIDAttr, SchemeAgencyID: &agency, Value: e.scheme},
-			TaxTypeCode: &IDType{ListAgencyID: &agency, ListID: &listID, Value: typeCode},
+			ID:          IDType{SchemeID: ptr(oioublSchemeTaxScheme), SchemeAgencyID: ptr(oioublAgencyID), Value: e.scheme},
+			TaxTypeCode: &IDType{ListAgencyID: ptr(oioublAgencyID), ListID: ptr(oioublListTaxType), Value: typeCode},
 		}
 		if e.name != "" {
-			name := e.name
-			scheme.Name = &name
+			scheme.Name = ptr(e.name)
 		}
 		totals = append(totals, TaxTotal{
 			TaxAmount: amt,

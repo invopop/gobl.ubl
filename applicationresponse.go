@@ -153,24 +153,11 @@ func responseDescription(line *bill.StatusLine) string {
 
 // OIOUBL 2.1 ApplicationResponse specifics follow.
 
-// OIOUBL ApplicationResponse code list identifiers and the technical-response
-// profile that the schematron couples with the TechnicalAccept response code.
-const (
-	responseCodeListID    = "urn:oioubl:codelist:responsecode-1.1"
-	responseDocTypeListID = "urn:oioubl:codelist:responsedocumenttypecode-1.1"
-	// The ApplicationResponse profiles (Procurement-TecRes-1.0 and the billing
-	// profile) only appear in the profileid-1.4 code list, so the response
-	// must declare 1.4 — unlike invoices, which use 1.2 (see invoice.go).
-	oioublProfileSchemeID    = "urn:oioubl:id:profileid-1.4"
-	oioublProfileTechnicalID = "Procurement-TecRes-1.0"
-	oioublCodeListAgencyID   = "320"
-)
-
-// OIOUBL responsedocumenttypecode-1.1 values for the referenced document.
-const (
-	responseDocTypeInvoice    = "Invoice"
-	responseDocTypeCreditNote = "CreditNote"
-)
+// oioublProfileTechnicalID is the technical-response profile the schematron
+// couples with the TechnicalAccept response code (F-APR057/058). Both
+// ApplicationResponse profiles only appear in the profileid-1.4 code list
+// (oioublSchemeProfileV14), unlike invoices, which use 1.2 (see invoice.go).
+const oioublProfileTechnicalID = "Procurement-TecRes-1.0"
 
 // applyOIOUBL21ResponseProfile stamps the OIOUBL profileid-1.4 code-list
 // attributes onto the ProfileID and, for a technical acknowledgement, swaps in
@@ -180,10 +167,8 @@ func applyOIOUBL21ResponseProfile(out *ApplicationResponse, st *bill.Status) {
 	if out.ProfileID == nil {
 		return
 	}
-	agencyID := oioublCodeListAgencyID
-	schemeID := oioublProfileSchemeID
-	out.ProfileID.SchemeAgencyID = &agencyID
-	out.ProfileID.SchemeID = &schemeID
+	out.ProfileID.SchemeAgencyID = ptr(oioublAgencyID)
+	out.ProfileID.SchemeID = ptr(oioublSchemeProfileV14)
 	if len(st.Lines) > 0 && st.Lines[0].Key == bill.StatusLineAcknowledged {
 		out.ProfileID.Value = oioublProfileTechnicalID
 	}
@@ -213,21 +198,18 @@ func applyOIOUBL21DocumentResponse(dr *DocumentResponse, line *bill.StatusLine) 
 	resp := dr.Response
 	resp.ReferenceID = strconv.Itoa(responseReferenceID(line.Index))
 
-	agencyID := oioublCodeListAgencyID
 	if code := oioubl21ResponseCode(line.Key); code != "" {
-		codeListID := responseCodeListID
 		resp.ResponseCode = &IDType{
-			ListAgencyID: &agencyID,
-			ListID:       &codeListID,
+			ListAgencyID: ptr(oioublAgencyID),
+			ListID:       ptr(oioublListResponseCode),
 			Value:        code,
 		}
 	}
 
 	if ref := dr.DocumentReference; ref != nil && line.Doc != nil {
-		docTypeListID := responseDocTypeListID
 		ref.DocumentTypeCode = &IDType{
-			ListAgencyID: &agencyID,
-			ListID:       &docTypeListID,
+			ListAgencyID: ptr(oioublAgencyID),
+			ListID:       ptr(oioublListResponseDocType),
 			Value:        oioublResponseDocType(line.Doc.Type),
 		}
 	}
@@ -246,7 +228,7 @@ func responseReferenceID(index int) int {
 // responsedocumenttypecode-1.1 value.
 func oioublResponseDocType(t cbc.Key) string {
 	if t == bill.InvoiceTypeCreditNote {
-		return responseDocTypeCreditNote
+		return "CreditNote"
 	}
-	return responseDocTypeInvoice
+	return "Invoice"
 }
