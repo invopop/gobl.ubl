@@ -340,7 +340,7 @@ func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 	// AllowanceCharge), so fold it into the VAT taxable base here — VAT lands on
 	// the duty-inclusive amount and F-LIB402 reconciles without a charge bridge.
 	for _, ch := range line.Charges {
-		if chargeExciseScheme(ch.Ext) != "" {
+		if chargeExciseScheme(ch.Key) != "" {
 			taxable = taxable.Add(roundToCurrency(ch.Amount, ccy))
 		}
 	}

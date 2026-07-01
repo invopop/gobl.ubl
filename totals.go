@@ -72,7 +72,7 @@ func (ui *Invoice) addOIOUBL21MonetaryTotal(inv *bill.Invoice, ctx Context, curr
 		}
 		ordinary := make([]*bill.LineCharge, 0, len(l.Charges))
 		for _, c := range l.Charges {
-			if chargeExciseScheme(c.Ext) != "" {
+			if chargeExciseScheme(c.Key) != "" {
 				excise = excise.Add(roundToCurrency(c.Amount, currency))
 				continue
 			}
@@ -98,7 +98,7 @@ func (ui *Invoice) addOIOUBL21MonetaryTotal(inv *bill.Invoice, ctx Context, curr
 		chg = chg.Add(*t.Charge)
 	}
 	for _, ch := range inv.Charges {
-		if chargeExciseScheme(ch.Ext) != "" {
+		if chargeExciseScheme(ch.Key) != "" {
 			a := roundToCurrency(ch.Amount, currency)
 			excise = excise.Add(a)
 			chg = chg.Subtract(a) // counted in t.Charge above; OIOUBL emits it as tax

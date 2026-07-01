@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "82856fa90fee9735bc9c1f5defb8719b14e4eadc26d0f1cef9c0c948b67e00f5"
+			"val": "1acf01095e5e80b83b71572ee8f976437ead03a15881a126b8a9c579d6a8ccd1"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
@@ -115,14 +115,12 @@
 				"sum": "1800.00",
 				"charges": [
 					{
+						"key": "16",
 						"reason": "Mineralvandsafgift",
 						"quantity": "20",
 						"unit": "l",
 						"rate": "0.50",
-						"amount": "10.00",
-						"ext": {
-							"dk-oioubl-tax-scheme": "16"
-						}
+						"amount": "10.00"
 					}
 				],
 				"taxes": [

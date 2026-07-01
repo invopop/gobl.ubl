@@ -25,9 +25,9 @@ func (ui *Invoice) addCharges(inv *bill.Invoice, ctx Context) {
 	// Use invoice sum (before discounts) as base amount for percentage calculations
 	baseAmount := inv.Totals.Sum
 	for _, ch := range inv.Charges {
-		// OIOUBL emits an excise duty (a charge tagged with dk-oioubl-tax-scheme) as
+		// OIOUBL emits an excise duty (a charge whose Key is a taxschemeid code) as
 		// a cac:TaxTotal/Excise subtotal built in addTotals, not as a charge.
-		if ctx.Is(ContextOIOUBL21) && chargeExciseScheme(ch.Ext) != "" {
+		if ctx.Is(ContextOIOUBL21) && chargeExciseScheme(ch.Key) != "" {
 			continue
 		}
 		ui.AllowanceCharge = append(ui.AllowanceCharge, makeCharge(ch, string(inv.Currency), baseAmount, ctx))

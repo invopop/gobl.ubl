@@ -1,18 +1,18 @@
 package ubl
 
 import (
-	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
+	"strings"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
-	"github.com/invopop/gobl/tax"
 )
 
 // OIOUBL emits a non-VAT excise duty as a cac:TaxTotal/cac:TaxSubtotal carrying
 // the constant taxcategoryid-1.1 "Excise" category and the duty-type taxschemeid
 // code, rather than as a cac:AllowanceCharge. GOBL models the duty as a VAT-rated
-// charge tagged with the dk-oioubl-tax-scheme extension; VAT therefore already
-// lands on the duty-inclusive base (the charge folds into the line total).
+// charge whose Key is the taxschemeid duty code; VAT therefore already lands on
+// the duty-inclusive base (the charge folds into the line total).
 const oioubl21TaxCategoryExcise = "Excise"
 
 const oioubl21TaxTypeListID = "urn:oioubl:codelist:taxtypecode-1.1"
@@ -25,10 +25,40 @@ type oioubl21Excise struct {
 	amount num.Amount
 }
 
-// chargeExciseScheme returns the OIOUBL duty-type code a charge carries via the
-// dk-oioubl-tax-scheme extension, or "" if the charge is an ordinary charge.
-func chargeExciseScheme(ext tax.Extensions) string {
-	return ext.Get(oioubl.ExtKeyTaxScheme).String()
+// chargeExciseScheme returns the OIOUBL taxschemeid duty-type code a charge
+// carries in its Key, or "" for an ordinary charge. An excise duty is keyed with
+// its numeric taxschemeid code (e.g. "16"); GOBL's own charge keys are alphabetic
+// slugs (stamp-duty, handling, …), so an all-digit key marks the duty. A
+// single-digit code is stored zero-padded ("9" → "09"), since cbc.Key requires a
+// two-character minimum for digits; the leading zero is stripped to recover the
+// wire value.
+func chargeExciseScheme(key cbc.Key) string {
+	s := key.String()
+	if s == "" || !isAllDigits(s) {
+		return ""
+	}
+	if code := strings.TrimLeft(s, "0"); code != "" {
+		return code
+	}
+	return "0"
+}
+
+// exciseSchemeKey builds the charge Key for an OIOUBL taxschemeid duty code,
+// zero-padding a single digit so it is a valid cbc.Key.
+func exciseSchemeKey(code string) cbc.Key {
+	if len(code) == 1 {
+		return cbc.Key("0" + code)
+	}
+	return cbc.Key(code)
+}
+
+func isAllDigits(s string) bool {
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 // collectOIOUBL21Excise gathers every excise duty across the document- and
@@ -36,7 +66,7 @@ func chargeExciseScheme(ext tax.Extensions) string {
 func collectOIOUBL21Excise(inv *bill.Invoice, currency string) []oioubl21Excise {
 	var out []oioubl21Excise
 	for _, ch := range inv.Charges {
-		if s := chargeExciseScheme(ch.Ext); s != "" {
+		if s := chargeExciseScheme(ch.Key); s != "" {
 			out = append(out, oioubl21Excise{scheme: s, name: ch.Reason, amount: roundToCurrency(ch.Amount, currency)})
 		}
 	}
@@ -52,7 +82,7 @@ func collectOIOUBL21Excise(inv *bill.Invoice, currency string) []oioubl21Excise 
 func collectLineExcise(line *bill.Line, currency string) []oioubl21Excise {
 	var out []oioubl21Excise
 	for _, ch := range line.Charges {
-		if s := chargeExciseScheme(ch.Ext); s != "" {
+		if s := chargeExciseScheme(ch.Key); s != "" {
 			out = append(out, oioubl21Excise{scheme: s, name: ch.Reason, amount: roundToCurrency(ch.Amount, currency)})
 		}
 	}
@@ -101,7 +131,7 @@ func makeOIOUBL21ExciseTaxTotals(excises []oioubl21Excise, currency string) []Ta
 
 // exciseLineChargesFromTaxTotals reconstructs a bill.LineCharge for every
 // cac:TaxTotal/Excise subtotal in the given totals, the inverse of
-// makeOIOUBL21ExciseTaxTotals: ext dk-oioubl-tax-scheme from the TaxScheme code,
+// makeOIOUBL21ExciseTaxTotals: the taxschemeid duty code becomes the charge Key,
 // reason from the scheme name, amount from the subtotal. Non-excise (VAT)
 // subtotals are ignored.
 func exciseLineChargesFromTaxTotals(totals []TaxTotal) ([]*bill.LineCharge, error) {
@@ -120,10 +150,8 @@ func exciseLineChargesFromTaxTotals(totals []TaxTotal) ([]*bill.LineCharge, erro
 				return nil, err
 			}
 			ch := &bill.LineCharge{
+				Key:    exciseSchemeKey(st.TaxCategory.TaxScheme.ID.Value),
 				Amount: amount,
-				Ext: tax.ExtensionsOf(cbc.CodeMap{
-					oioubl.ExtKeyTaxScheme: cbc.Code(st.TaxCategory.TaxScheme.ID.Value),
-				}),
 			}
 			if st.TaxCategory.TaxScheme.Name != nil {
 				ch.Reason = *st.TaxCategory.TaxScheme.Name
@@ -150,7 +178,7 @@ func (ui *Invoice) goblAddExciseCharges(out *bill.Invoice, ctx Context) error {
 	}
 	for _, l := range out.Lines {
 		for _, ch := range l.Charges {
-			if chargeExciseScheme(ch.Ext) != "" {
+			if chargeExciseScheme(ch.Key) != "" {
 				// A line already carried its excise (line-level blocks were parsed);
 				// the document-level totals are their mirror, so don't re-add them.
 				return nil
