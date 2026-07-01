@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d5ae1eb62949c91d33f6658267c79529b1e0c329b8e37f56eeec511b3d2db734"
+			"val": "653b64b1cbbd99b5dab78fc104926e5ebec0d31c6a6092d6ff2e43ece1438a4b"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
@@ -49,12 +49,12 @@
 			],
 			"addresses": [
 				{
+					"locality": "Nørrebro",
 					"region": "Hovedstaden",
 					"country": "DK"
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-district": "Nørrebro",
 				"dk-oioubl-address-format": "StructuredRegion"
 			}
 		},

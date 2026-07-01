@@ -426,10 +426,9 @@ func oioubl21AddressFormatCode(value string) *IDType {
 // single source of truth) so the converter and addon never drift. The converter
 // reads them as plain party extensions (GOBL has no address-level extension).
 const (
-	oioubl21AddressFormatKey   = oioubl.ExtKeyAddressFormat
-	oioubl21AddressIDKey       = oioubl.ExtKeyAddressID
-	oioubl21AddressDistrictKey = oioubl.ExtKeyAddressDistrict
+	oioubl21AddressFormatKey = oioubl.ExtKeyAddressFormat
 
+	oioubl21AddressStructuredDK     = string(oioubl.ExtValueAddressFormatStructuredDK)
 	oioubl21AddressStructuredLax    = string(oioubl.ExtValueAddressFormatStructuredLax)
 	oioubl21AddressUnstructured     = string(oioubl.ExtValueAddressFormatUnstructured)
 	oioubl21AddressStructuredID     = string(oioubl.ExtValueAddressFormatStructuredID)
@@ -461,10 +460,15 @@ func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
 		clearStructuredAddress(addr)
 		addr.AddressLine = lines
 	case oioubl21AddressStructuredID:
-		// F-LIB038: a StructuredID address carries only the identifier. The
-		// address-register schemeID is mandatory on it (F-LIB028/029); the ID is a
-		// GLN, matching the scheme OIOUBL uses for every other GLN identifier.
-		id := party.Ext.Get(oioubl21AddressIDKey).String()
+		// F-LIB038: a StructuredID address carries only the identifier. GOBL has no
+		// address-identifier field, so the register GLN rides org.Address.Number
+		// (mapped to BuildingNumber by newAddress and idle in this format, which
+		// clears every postal element). Re-emit it as cbc:ID with the mandatory GLN
+		// schemeID (F-LIB028/029), the scheme OIOUBL uses for every GLN identifier.
+		id := ""
+		if addr.BuildingNumber != nil {
+			id = *addr.BuildingNumber
+		}
 		clearStructuredAddress(addr)
 		if id != "" {
 			scheme := oioubl21AddressIDScheme
@@ -473,16 +477,17 @@ func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
 		}
 	case oioubl21AddressStructuredRegion:
 		// F-LIB040: a StructuredRegion address carries only Region, District and
-		// Country. newAddress mapped the GOBL region to CountrySubentity; move it
-		// to cbc:Region and add the district from the extension.
+		// Country. newAddress mapped the GOBL region to CountrySubentity and the
+		// locality to CityName; move the region to cbc:Region and reinterpret the
+		// locality (org.Address defines it as "village, town, district, or city")
+		// as the district OIOUBL requires here.
 		region := addr.CountrySubentity
 		country := addr.Country
+		district := addr.CityName
 		clearStructuredAddress(addr)
 		addr.Region = region
 		addr.Country = country
-		if d := party.Ext.Get(oioubl21AddressDistrictKey).String(); d != "" {
-			addr.District = &d
-		}
+		addr.District = district
 	}
 	// StructuredDK and StructuredLax keep the structured fields as built.
 }

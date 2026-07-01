@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9d9d10f6f0ec229ff37dcfb71edc1b9c90faf401dfa3303b9173a63b7f06c56d"
+			"val": "a71c02d7efd8a1e2869d9ff6e984b0d30d827c900aac06c6c74d4d65829c4216"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
@@ -48,14 +48,13 @@
 				{
 					"num": "1",
 					"street": "Hovedgaden",
-					"locality": "København",
+					"locality": "Nørrebro",
 					"region": "Hovedstaden",
 					"code": "1000",
 					"country": "DK"
 				}
 			],
 			"ext": {
-				"dk-oioubl-address-district": "Nørrebro",
 				"dk-oioubl-address-format": "StructuredRegion"
 			}
 		},

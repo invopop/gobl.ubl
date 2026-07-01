@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "21f3d0e77128c3bac224076e5d62bd7139c1a5e0a33ce833ea7bd2949b3affe5"
+			"val": "ac6eb1d5afb5bdfcc37d034ddc0c367bb2908e0eb283a91f6d3b14f72d317fcb"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
@@ -48,11 +48,12 @@
 				}
 			],
 			"addresses": [
-				{}
+				{
+					"num": "5798009811578"
+				}
 			],
 			"ext": {
-				"dk-oioubl-address-format": "StructuredID",
-				"dk-oioubl-address-id": "5798009811578"
+				"dk-oioubl-address-format": "StructuredID"
 			}
 		},
 		"customer": {

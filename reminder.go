@@ -249,6 +249,12 @@ const (
 	reminderTypeCodeListID  = "urn:oioubl:codelist:remindertypecode-1.1"
 	oioublProfileSchemeV12  = "urn:oioubl:id:profileid-1.2"
 	oioublReminderProfileID = "Procurement-BilSim-1.0"
+
+	// remindertypecode-1.1 values (F-REM061). The type is a GOBL document-variant
+	// tag, not an extension: an untagged reminder is a formal Reminder, the addon's
+	// advis tag marks it an advisory notice.
+	reminderTypeCodeReminder = "Reminder"
+	reminderTypeCodeAdvis    = "Advis"
 )
 
 // applyOIOUBL21Reminder stamps the OIOUBL specifics: party formatting, the
@@ -274,14 +280,16 @@ func applyOIOUBL21Reminder(out *Reminder, pmt *bill.Payment) {
 	out.ProfileID.SchemeAgencyID = &agencyID
 	out.ProfileID.Value = oioublReminderProfileID
 
-	if code := pmt.Ext.Get(oioubl.ExtKeyReminderType); code != "" {
-		agencyID := oioublCodeListAgencyID
-		listID := reminderTypeCodeListID
-		out.ReminderTypeCode = &IDType{
-			ListAgencyID: &agencyID,
-			ListID:       &listID,
-			Value:        code.String(),
-		}
+	code := reminderTypeCodeReminder
+	if pmt.HasTags(oioubl.TagAdvis) {
+		code = reminderTypeCodeAdvis
+	}
+	typeAgencyID := oioublCodeListAgencyID
+	listID := reminderTypeCodeListID
+	out.ReminderTypeCode = &IDType{
+		ListAgencyID: &typeAgencyID,
+		ListID:       &listID,
+		Value:        code,
 	}
 	out.ReminderSequenceNumeric = pmt.Ext.Get(oioubl.ExtKeyReminderSequence).String()
 }

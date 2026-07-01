@@ -166,10 +166,11 @@ func goblReminderGiroFIKMethod(pm *PaymentMeans) *pay.Record {
 }
 
 // applyOIOUBL21ReminderParse restores the reminder type and sequence onto the
-// payment extensions the emit side reads, so they round-trip.
+// payment so they round-trip: the type is a document-variant tag (Advis → the
+// advis tag; Reminder is the untagged default), the sequence a payment extension.
 func applyOIOUBL21ReminderParse(pmt *bill.Payment, rem *Reminder) {
-	if rem.ReminderTypeCode != nil && rem.ReminderTypeCode.Value != "" {
-		pmt.Ext = pmt.Ext.Set(oioubl.ExtKeyReminderType, cbc.Code(rem.ReminderTypeCode.Value))
+	if rem.ReminderTypeCode != nil && rem.ReminderTypeCode.Value == reminderTypeCodeAdvis {
+		pmt.SetTags(oioubl.TagAdvis)
 	}
 	if rem.ReminderSequenceNumeric != "" {
 		pmt.Ext = pmt.Ext.Set(oioubl.ExtKeyReminderSequence, cbc.Code(rem.ReminderSequenceNumeric))

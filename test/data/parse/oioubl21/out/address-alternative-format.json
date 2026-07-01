@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "798b9b258075ed968d0736532d281dae94acbd41b745534db89a2c335ac3d6cb"
+			"val": "0745c8a934e2684f5eb1eea5640af273229b57609833de703d280066a182ff22"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
@@ -18,11 +18,11 @@
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
-		"series": "ADDR",
-		"code": "1000",
+		"code": "ADDR-1000",
 		"issue_date": "2026-05-29",
 		"currency": "DKK",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
 				"untdid-document-type": "380"
 			}
@@ -36,7 +36,10 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "12345674"
+					"code": "DK12345674",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
 				}
 			],
 			"endpoints": [
@@ -46,16 +49,13 @@
 			],
 			"addresses": [
 				{
-					"num": "5798009811578",
+					"num": "1",
 					"street": "Hovedgaden",
 					"locality": "København",
 					"code": "1000",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredID"
-			}
+			]
 		},
 		"customer": {
 			"name": "Kunde ApS",
@@ -66,18 +66,19 @@
 			"identities": [
 				{
 					"scope": "legal",
-					"code": "88146328"
+					"code": "DK88146328",
+					"ext": {
+						"iso-scheme-id": "DK:CVR"
+					}
 				}
 			],
 			"people": [
 				{
 					"name": {
-						"given": "Anders",
-						"surname": "Jensen"
+						"given": "Anders Jensen"
 					},
 					"identities": [
 						{
-							"label": "Contact",
 							"code": "C-001"
 						}
 					]
@@ -112,13 +113,19 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"rate": "general",
 						"percent": "25.0%"
 					}
 				],
 				"total": "10000.00"
 			}
 		],
+		"ordering": {
+			"purchases": [
+				{
+					"code": "NA"
+				}
+			]
+		},
 		"totals": {
 			"sum": "10000.00",
 			"total": "10000.00",

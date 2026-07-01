@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "40154506d4ffc0abee68d959799e33b72449ed0bd8f8482e61894d3e55451efc"
+			"val": "3bc5d409ad55dd0ae72c51782b4383d5a91d0237e84c36c47d351ca42011fd47"
 		},
 		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
 		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
@@ -23,8 +23,7 @@
 		"issue_date": "2026-01-15",
 		"currency": "DKK",
 		"ext": {
-			"dk-oioubl-reminder-sequence": "1",
-			"dk-oioubl-reminder-type": "Reminder"
+			"dk-oioubl-reminder-sequence": "1"
 		},
 		"supplier": {
 			"name": "Eksempel A/S",

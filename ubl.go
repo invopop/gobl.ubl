@@ -135,7 +135,7 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		return ublApplicationResponse(doc, o), nil
 	case *bill.Payment:
 		// A payment request maps to the OIOUBL Reminder (Rykker). Add any missing
-		// addons so the reminder-type/sequence rules surface, then convert.
+		// addons so the reminder-sequence rule surfaces, then convert.
 		if err := ensureAddons(env, o.context.Addons); err != nil {
 			return nil, err
 		}

@@ -6,7 +6,7 @@
   <cbc:ID>2026-R-1000</cbc:ID>
   <cbc:UUID>019ed096-350c-73bc-9695-b103e1d03b93</cbc:UUID>
   <cbc:IssueDate>2026-01-15</cbc:IssueDate>
-  <cbc:ReminderTypeCode listAgencyID="320" listID="urn:oioubl:codelist:remindertypecode-1.1">Reminder</cbc:ReminderTypeCode>
+  <cbc:ReminderTypeCode listAgencyID="320" listID="urn:oioubl:codelist:remindertypecode-1.1">Advis</cbc:ReminderTypeCode>
   <cbc:ReminderSequenceNumeric>1</cbc:ReminderSequenceNumeric>
   <cbc:DocumentCurrencyCode>DKK</cbc:DocumentCurrencyCode>
   <cac:AccountingSupplierParty>
