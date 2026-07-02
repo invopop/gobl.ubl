@@ -65,7 +65,7 @@ func collectOIOUBL21Excise(inv *bill.Invoice, currency string) []oioubl21Excise 
 	var out []oioubl21Excise
 	for _, ch := range inv.Charges {
 		if s := chargeExciseScheme(ch.Key); s != "" {
-			out = append(out, oioubl21Excise{scheme: s, name: ch.Reason, amount: roundToCurrency(ch.Amount, currency)})
+			out = append(out, oioubl21Excise{scheme: s, name: ch.Reason, amount: rescaleToCurrency(ch.Amount, currency)})
 		}
 	}
 	for _, l := range inv.Lines {
@@ -81,7 +81,7 @@ func collectLineExcise(line *bill.Line, currency string) []oioubl21Excise {
 	var out []oioubl21Excise
 	for _, ch := range line.Charges {
 		if s := chargeExciseScheme(ch.Key); s != "" {
-			out = append(out, oioubl21Excise{scheme: s, name: ch.Reason, amount: roundToCurrency(ch.Amount, currency)})
+			out = append(out, oioubl21Excise{scheme: s, name: ch.Reason, amount: rescaleToCurrency(ch.Amount, currency)})
 		}
 	}
 	return out

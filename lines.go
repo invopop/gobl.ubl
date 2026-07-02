@@ -51,7 +51,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		// netted at the document level); other profiles use the net line total.
 		lineExt := l.Total.String()
 		if context.Is(ContextOIOUBL21) && l.Sum != nil {
-			lineExt = roundToCurrency(*l.Sum, ccy).String()
+			lineExt = rescaleToCurrency(*l.Sum, ccy).String()
 		}
 		invLine := InvoiceLine{
 			ID: strconv.Itoa(l.Index),
@@ -304,10 +304,10 @@ func applyOIOUBL21LineTaxCategories(lines []InvoiceLine) {
 	}
 }
 
-// roundToCurrency rounds the amount to the natural precision of the given
+// rescaleToCurrency rounds the amount to the natural precision of the given
 // currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
 // existing precision if the currency code is unknown.
-func roundToCurrency(a num.Amount, ccy string) num.Amount {
+func rescaleToCurrency(a num.Amount, ccy string) num.Amount {
 	if def := currency.Code(ccy).Def(); def != nil {
 		return def.Rescale(a)
 	}
@@ -329,7 +329,7 @@ func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 		// precision (l.Sum is the raw product); the discount is subtracted once
 		// at the document level (F-LIB402 sums gross line taxable amounts then
 		// adjusts for the document AllowanceCharge).
-		taxable = roundToCurrency(*line.Sum, ccy)
+		taxable = rescaleToCurrency(*line.Sum, ccy)
 	case line.Total != nil:
 		taxable = *line.Total
 	default:
@@ -341,7 +341,7 @@ func makeOIOUBL21LineTaxTotals(line *bill.Line, ccy string) []TaxTotal {
 	// the duty-inclusive amount and F-LIB402 reconciles without a charge bridge.
 	for _, ch := range line.Charges {
 		if chargeExciseScheme(ch.Key) != "" {
-			taxable = taxable.Add(roundToCurrency(ch.Amount, ccy))
+			taxable = taxable.Add(rescaleToCurrency(ch.Amount, ccy))
 		}
 	}
 
@@ -399,7 +399,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	var base *Amount
 	if baseSum != nil {
 		base = &Amount{
-			Value:      roundToCurrency(*baseSum, ccy).String(),
+			Value:      rescaleToCurrency(*baseSum, ccy).String(),
 			CurrencyID: &ccy,
 		}
 	}
@@ -407,7 +407,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
 			Amount: Amount{
-				Value:      roundToCurrency(ch.Amount, ccy).String(),
+				Value:      rescaleToCurrency(ch.Amount, ccy).String(),
 				CurrencyID: &ccy,
 			},
 		}
@@ -433,7 +433,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
 			Amount: Amount{
-				Value:      roundToCurrency(d.Amount, ccy).String(),
+				Value:      rescaleToCurrency(d.Amount, ccy).String(),
 				CurrencyID: &ccy,
 			},
 		}
