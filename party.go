@@ -224,7 +224,7 @@ func addPartyEndpoint(p *Party, party *org.Party, ctx Context) {
 			// The participant scheme (DK:CVR/DK:SE/GLN/…) and code are carried in the
 			// OIOUBL endpoint URI and emitted 1:1 as the EndpointID schemeID + value.
 			if scheme, value, ok := oioubl.ParseOIOUBLEndpoint(ep.URI.String()); ok {
-				p.EndpointID = &EndpointID{SchemeID: scheme, Value: value}
+				p.EndpointID = &EndpointID{SchemeID: scheme.String(), Value: value.String()}
 				break
 			}
 		}
