@@ -15,13 +15,13 @@ import "encoding/xml"
 // simply not carried over.
 type CreditNote struct {
 	XMLName xml.Name
-	documentHeader
+	DocumentHeader
 
 	TaxPointDate       string   `xml:"cbc:TaxPointDate,omitempty"`
 	CreditNoteTypeCode *IDType  `xml:"cbc:CreditNoteTypeCode,omitempty"`
 	Note               []string `xml:"cbc:Note,omitempty"`
 
-	documentCurrency
+	DocumentCurrency
 
 	OrderReference              *OrderReference     `xml:"cac:OrderReference,omitempty"`
 	BillingReference            []*BillingReference `xml:"cac:BillingReference,omitempty"`
@@ -32,7 +32,7 @@ type CreditNote struct {
 	StatementDocumentReference  []Reference         `xml:"cac:StatementDocumentReference,omitempty"`
 	OriginatorDocumentReference []Reference         `xml:"cac:OriginatorDocumentReference,omitempty"`
 
-	documentParties
+	DocumentParties
 
 	TaxExchangeRate                *ExchangeRate     `xml:"cac:TaxExchangeRate,omitempty"`
 	PricingExchangeRate            *ExchangeRate     `xml:"cac:PricingExchangeRate,omitempty"`
@@ -56,11 +56,11 @@ func (ui *Invoice) toCreditNote() *CreditNote {
 	}
 	return &CreditNote{
 		XMLName:            ui.XMLName,
-		documentHeader:     ui.documentHeader,
+		DocumentHeader:     ui.DocumentHeader,
 		TaxPointDate:       ui.TaxPointDate,
 		CreditNoteTypeCode: ui.CreditNoteTypeCode,
 		Note:               ui.Note,
-		documentCurrency:   ui.documentCurrency,
+		DocumentCurrency:   ui.DocumentCurrency,
 
 		OrderReference:              ui.OrderReference,
 		BillingReference:            ui.BillingReference,
@@ -71,7 +71,7 @@ func (ui *Invoice) toCreditNote() *CreditNote {
 		StatementDocumentReference:  ui.StatementDocumentReference,
 		OriginatorDocumentReference: ui.OriginatorDocumentReference,
 
-		documentParties: ui.documentParties,
+		DocumentParties: ui.DocumentParties,
 
 		TaxExchangeRate:                ui.TaxExchangeRate,
 		PricingExchangeRate:            ui.PricingExchangeRate,

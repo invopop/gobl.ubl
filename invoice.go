@@ -26,17 +26,17 @@ const (
 	rootNameCreditNote = "CreditNote"
 )
 
-// Schema locationa and customization constants
+// Schema location and customization constants
 const (
 	SchemaLocationInvoice     = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
 	SchemaLocationCrediteNote = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd"
 )
 
-// documentHeader is the leading element run shared, in identical sequence, by
+// DocumentHeader is the leading element run shared, in identical sequence, by
 // the UBL Invoice and CreditNote XSDs (the root attributes through
 // cbc:IssueTime). Both document structs embed it so the shared prefix can never
 // drift between the two types.
-type documentHeader struct {
+type DocumentHeader struct {
 	// Attributes
 	CACNamespace   string `xml:"xmlns:cac,attr"`
 	CBCNamespace   string `xml:"xmlns:cbc,attr"`
@@ -60,9 +60,9 @@ type documentHeader struct {
 	IssueTime          string      `xml:"cbc:IssueTime,omitempty"`
 }
 
-// documentCurrency is the currency/accounting element run shared, in identical
+// DocumentCurrency is the currency/accounting element run shared, in identical
 // sequence, by both XSDs (cbc:DocumentCurrencyCode through cac:InvoicePeriod).
-type documentCurrency struct {
+type DocumentCurrency struct {
 	DocumentCurrencyCode           string   `xml:"cbc:DocumentCurrencyCode,omitempty"`
 	TaxCurrencyCode                string   `xml:"cbc:TaxCurrencyCode,omitempty"`
 	PricingCurrencyCode            string   `xml:"cbc:PricingCurrencyCode,omitempty"`
@@ -74,9 +74,9 @@ type documentCurrency struct {
 	InvoicePeriod                  []Period `xml:"cac:InvoicePeriod,omitempty"`
 }
 
-// documentParties is the party/delivery/payment element run shared, in identical
+// DocumentParties is the party/delivery/payment element run shared, in identical
 // sequence, by both XSDs (cac:Signature through cac:PaymentTerms).
-type documentParties struct {
+type DocumentParties struct {
 	Signature               []Signature    `xml:"cac:Signature,omitempty"`
 	AccountingSupplierParty SupplierParty  `xml:"cac:AccountingSupplierParty"`
 	AccountingCustomerParty CustomerParty  `xml:"cac:AccountingCustomerParty"`
@@ -96,12 +96,12 @@ type documentParties struct {
 // It doubles as the parse target for **both** Invoice and CreditNote XML:
 // unmarshalling is order-independent, so the extra CreditNote-only fields it
 // carries (CreditNoteTypeCode, CreditNoteLines) are populated when a credit note
-// is parsed and simply stay empty — and therefore unmarshalled — when marshalling
+// is parsed and simply stay empty — and therefore omitted — when marshalling
 // a real invoice. Marshalling a credit note goes through CreditNote (see
 // creditnote.go), which lays the divergent elements out in CreditNote-XSD order.
 type Invoice struct {
 	XMLName xml.Name
-	documentHeader
+	DocumentHeader
 
 	DueDate string `xml:"cbc:DueDate,omitempty"`
 
@@ -111,7 +111,7 @@ type Invoice struct {
 	Note         []string `xml:"cbc:Note,omitempty"`
 	TaxPointDate string   `xml:"cbc:TaxPointDate,omitempty"`
 
-	documentCurrency
+	DocumentCurrency
 
 	OrderReference              *OrderReference     `xml:"cac:OrderReference,omitempty"`
 	BillingReference            []*BillingReference `xml:"cac:BillingReference,omitempty"`
@@ -123,7 +123,7 @@ type Invoice struct {
 	AdditionalDocumentReference []Reference         `xml:"cac:AdditionalDocumentReference,omitempty"`
 	ProjectReference            []ProjectReference  `xml:"cac:ProjectReference,omitempty"`
 
-	documentParties
+	DocumentParties
 
 	PrepaidPayment                 []PrepaidPayment  `xml:"cac:PrepaidPayment,omitempty"`
 	AllowanceCharge                []AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
@@ -162,7 +162,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// Create the UBL document
 	out := &Invoice{
 		XMLName: xml.Name{Local: rootNameInvoice},
-		documentHeader: documentHeader{
+		DocumentHeader: DocumentHeader{
 			CACNamespace:    NamespaceCAC,
 			CBCNamespace:    NamespaceCBC,
 			QDTNamespace:    NamespaceQDT,
@@ -178,11 +178,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 			IssueDate:       formatDate(inv.IssueDate),
 		},
 		InvoiceTypeCode: &IDType{Value: tc},
-		documentCurrency: documentCurrency{
+		DocumentCurrency: DocumentCurrency{
 			AccountingCost:       "", // TODO: ordering cost
 			DocumentCurrencyCode: string(inv.Currency),
 		},
-		documentParties: documentParties{
+		DocumentParties: DocumentParties{
 			AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
 			AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
 		},

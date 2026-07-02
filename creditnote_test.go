@@ -2,6 +2,7 @@ package ubl_test
 
 import (
 	"encoding/xml"
+	"io"
 	"strings"
 	"testing"
 
@@ -18,6 +19,14 @@ import (
 // end to end — no post-marshal byte surgery involved.
 func TestCreditNoteMarshalOrdering(t *testing.T) {
 	inv := &ubl.Invoice{XMLName: xml.Name{Local: "CreditNote"}}
+	inv.CACNamespace = ubl.NamespaceCAC
+	inv.CBCNamespace = ubl.NamespaceCBC
+	inv.QDTNamespace = ubl.NamespaceQDT
+	inv.UDTNamespace = ubl.NamespaceUDT
+	inv.CCTSNamespace = ubl.NamespaceCCTS
+	inv.UBLNamespace = ubl.NamespaceUBLCreditNote
+	inv.XSINamespace = ubl.NamespaceXSI
+	inv.EXTNamespace = ubl.NamespaceEXT
 	inv.ID = "CN-1"
 	inv.IssueDate = "2024-02-14"
 
@@ -53,6 +62,16 @@ func TestCreditNoteMarshalOrdering(t *testing.T) {
 	data, err := ubl.Bytes(inv)
 	require.NoError(t, err)
 	out := string(data)
+
+	// The output must be well-formed XML with all prefixes bound.
+	dec := xml.NewDecoder(strings.NewReader(out))
+	for {
+		_, err := dec.Token()
+		if err == io.EOF {
+			break
+		}
+		require.NoError(t, err, "marshalled credit note must be well-formed XML")
+	}
 
 	// Root element is a CreditNote.
 	assert.Contains(t, out, "<CreditNote")
