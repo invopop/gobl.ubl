@@ -212,10 +212,9 @@ func newPartyContact(party *org.Party, ctx Context) *Contact {
 	return contact
 }
 
-// addPartyEndpoint derives the cbc:EndpointID. For OIOUBL it prefers the ISO 6523
-// participant endpoint and lets an explicit dk-oioubl-address-scheme extension
-// override the derived scheme (the manual path for a foreign participant); other
-// contexts fall back to the first inbox using its raw scheme.
+// addPartyEndpoint derives the cbc:EndpointID. For OIOUBL the participant scheme
+// and code are carried in the endpoint URI and emitted 1:1; other contexts fall
+// back to the first inbox using its raw scheme.
 func addPartyEndpoint(p *Party, party *org.Party, ctx Context) {
 	if ctx.Is(ContextOIOUBL21) {
 		for _, ep := range party.Endpoints {
@@ -667,9 +666,7 @@ func applyOIOUBL21Party(p *Party) {
 		return
 	}
 	if p.EndpointID != nil && p.EndpointID.SchemeID == oioubl21SchemeDKCVR {
-		// The schemeID is the dk-oioubl-address-scheme extension value (set in
-		// newParty), emitted 1:1. OIOUBL CVR endpoints must carry the DK-prefixed
-		// form (F-LIB180).
+		// OIOUBL CVR endpoints must carry the DK-prefixed form (F-LIB180).
 		p.EndpointID.Value = dkPrefixed(p.EndpointID.Value)
 	}
 	if p.PartyName == nil && len(p.PartyIdentification) == 0 {
