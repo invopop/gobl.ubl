@@ -20,6 +20,9 @@ const (
 	NamespaceUBLCreditNote = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
 )
 
+// rootNameCreditNote is the XML root element local name of a UBL Credit Note.
+const rootNameCreditNote = "CreditNote"
+
 // Schema locationa and customization constants
 const (
 	SchemaLocationInvoice     = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
@@ -169,7 +172,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if docType.In(bill.InvoiceTypeCreditNote) {
-		out.XMLName = xml.Name{Local: "CreditNote"}
+		out.XMLName = xml.Name{Local: rootNameCreditNote}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
 		out.InvoiceTypeCode = nil
@@ -272,7 +275,7 @@ func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 // based on XML name instead of gobl's invoice type key
 func (ui *Invoice) getInvoiceTypeBasedOnXMLName() cbc.Key {
 	switch ui.XMLName.Local {
-	case "CreditNote":
+	case rootNameCreditNote:
 		return bill.InvoiceTypeCreditNote
 	default:
 		return bill.InvoiceTypeStandard

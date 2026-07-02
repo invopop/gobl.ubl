@@ -214,7 +214,7 @@ func creditNoteNeedsTaxPointDateReorder(in any) bool {
 	default:
 		return false
 	}
-	return inv != nil && inv.XMLName.Local == "CreditNote" && inv.TaxPointDate != ""
+	return inv != nil && inv.XMLName.Local == rootNameCreditNote && inv.TaxPointDate != ""
 }
 
 // reorderCreditNoteTaxPointDate moves cbc:TaxPointDate ahead of
