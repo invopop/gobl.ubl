@@ -14,12 +14,6 @@ type convertOpts struct {
 	*rootOpts
 }
 
-// converter is implemented by every supported UBL document type that
-// ubl.Parse can return; each converts back to a GOBL envelope.
-type converter interface {
-	Convert() (*gobl.Envelope, error)
-}
-
 func convert(o *rootOpts) *convertOpts {
 	return &convertOpts{rootOpts: o}
 }
@@ -83,12 +77,12 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}
 
-		conv, ok := doc.(converter)
+		inv, ok := doc.(*ubl.Invoice)
 		if !ok {
 			return fmt.Errorf("building GOBL envelope: %w", ubl.ErrUnsupportedDocumentType)
 		}
 
-		env, err := conv.Convert()
+		env, err := inv.Convert()
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}
