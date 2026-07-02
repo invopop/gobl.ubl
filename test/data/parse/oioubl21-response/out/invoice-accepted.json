@@ -4,10 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "57a8dc2b0df1ff430edb3d075574dd9344a4ed1d2bcc0b1b67ac2f7e96438058"
+			"val": "055107565079bc2272bb5360299bee2bb0f303ee52a6c63879562222760018c3"
 		},
-		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216",
-		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
+		"from": "DK:CVR:76543216",
+		"to": "DK:CVR:12345674"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
@@ -37,7 +37,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
+					"uri": "DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -70,7 +70,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
+					"uri": "DK:CVR:76543216"
 				}
 			],
 			"addresses": [

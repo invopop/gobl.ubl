@@ -6,8 +6,8 @@
 			"alg": "sha256",
 			"val": "97465daeb1ca9aac42706859057ba9c0d1a88d7df40e04d44306bce6338040f2"
 		},
-		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216",
-		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
+		"from": "DK:CVR:76543216",
+		"to": "DK:CVR:12345674"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/status",
@@ -37,7 +37,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
+					"uri": "DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -67,7 +67,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:76543216"
+					"uri": "DK:CVR:76543216"
 				}
 			],
 			"addresses": [

@@ -6,8 +6,8 @@
 			"alg": "sha256",
 			"val": "3bc5d409ad55dd0ae72c51782b4383d5a91d0237e84c36c47d351ca42011fd47"
 		},
-		"from": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674",
-		"to": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
+		"from": "DK:CVR:12345674",
+		"to": "DK:CVR:88146328"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/payment",
@@ -39,7 +39,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:12345674"
+					"uri": "DK:CVR:12345674"
 				}
 			],
 			"addresses": [
@@ -74,7 +74,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "urn:oioubl:scheme:endpointid-1.1::DK:CVR:88146328"
+					"uri": "DK:CVR:88146328"
 				}
 			],
 			"addresses": [
