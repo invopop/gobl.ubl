@@ -179,6 +179,10 @@ func Bytes(in any) ([]byte, error) {
 	// Go's xml.Marshal encodes single quotes as &#39,
 	// this is a quick fix
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
+
+	if creditNoteNeedsTaxPointDateReorder(in) {
+		b = reorderCreditNoteTaxPointDate(b)
+	}
 	return append([]byte(xml.Header), b...), nil
 }
 
@@ -190,5 +194,79 @@ func BytesCompact(in any) ([]byte, error) {
 		return nil, err
 	}
 	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
+
+	if creditNoteNeedsTaxPointDateReorder(in) {
+		b = reorderCreditNoteTaxPointDate(b)
+	}
 	return append([]byte(xml.Header), b...), nil
+}
+
+// creditNoteNeedsTaxPointDateReorder reports whether in is a credit note
+// carrying a cbc:TaxPointDate, which the CreditNote XSD sequences differently
+// from the shared Invoice struct — see reorderCreditNoteTaxPointDate.
+func creditNoteNeedsTaxPointDateReorder(in any) bool {
+	var inv *Invoice
+	switch v := in.(type) {
+	case *Invoice:
+		inv = v
+	case Invoice:
+		inv = &v
+	default:
+		return false
+	}
+	return inv != nil && inv.XMLName.Local == "CreditNote" && inv.TaxPointDate != ""
+}
+
+// reorderCreditNoteTaxPointDate moves cbc:TaxPointDate ahead of
+// cbc:CreditNoteTypeCode to match the CreditNote XSD sequence. Invoice and
+// CreditNote share one Go struct, and encoding/xml can neither vary field order
+// per struct nor survive a decode/re-encode (it mangles the cac:/cbc: prefixes),
+// so the fix edits the marshaled bytes directly.
+func reorderCreditNoteTaxPointDate(b []byte) []byte {
+	const (
+		open     = "<cbc:TaxPointDate>"
+		closeTag = "</cbc:TaxPointDate>"
+		typeCode = "<cbc:CreditNoteTypeCode"
+	)
+
+	tpd := bytes.Index(b, []byte(open))
+	tc := bytes.Index(b, []byte(typeCode))
+	if tpd < 0 || tc < 0 || tpd < tc {
+		return b // type code absent, or already correctly ordered
+	}
+	rel := bytes.Index(b[tpd:], []byte(closeTag))
+	if rel < 0 {
+		return b
+	}
+	elemEnd := tpd + rel + len(closeTag)
+	elem := append([]byte(nil), b[tpd:elemEnd]...)
+
+	// Drop the element together with the newline + indent that preceded it.
+	cut := tpd
+	for cut > 0 && (b[cut-1] == ' ' || b[cut-1] == '\t') {
+		cut--
+	}
+	if cut > 0 && b[cut-1] == '\n' {
+		cut--
+	}
+	rest := append(append([]byte(nil), b[:cut]...), b[elemEnd:]...)
+
+	// Re-insert it before the type code, reusing that line's leading whitespace
+	// (empty for the compact, non-indented output).
+	tc = bytes.Index(rest, []byte(typeCode))
+	indentStart := tc
+	for indentStart > 0 && (rest[indentStart-1] == ' ' || rest[indentStart-1] == '\t') {
+		indentStart--
+	}
+	if indentStart > 0 && rest[indentStart-1] == '\n' {
+		indentStart--
+	}
+	sep := rest[indentStart:tc]
+
+	out := make([]byte, 0, len(rest)+len(elem)+len(sep))
+	out = append(out, rest[:tc]...)
+	out = append(out, elem...)
+	out = append(out, sep...)
+	out = append(out, rest[tc:]...)
+	return out
 }
