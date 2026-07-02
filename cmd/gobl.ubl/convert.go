@@ -72,7 +72,17 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 	} else {
 		// Assume XML if not JSON
 
-		env, err := ubl.Parse(inData)
+		doc, err := ubl.Parse(inData)
+		if err != nil {
+			return fmt.Errorf("building GOBL envelope: %w", err)
+		}
+
+		inv, ok := doc.(*ubl.Invoice)
+		if !ok {
+			return fmt.Errorf("building GOBL envelope: %w", ubl.ErrUnsupportedDocumentType)
+		}
+
+		env, err := inv.Convert()
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}
