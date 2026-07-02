@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "29417ed8a73a634ddd6770ae0abb35e394eafa61c1ddb3a75c49795fd5e3efc6"
+			"val": "f38cecea8256e868468949436bac40493da20920ea00ad9ca30822c9232043b2"
 		},
 		"from": "DK:CVR:37990485",
 		"to": "DK:CVR:47458714"
@@ -55,10 +55,7 @@
 					"code": "2100",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"customer": {
 			"name": "Lego System A/S",
@@ -100,10 +97,7 @@
 					"code": "7190",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"lines": [
 			{

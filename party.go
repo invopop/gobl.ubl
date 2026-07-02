@@ -419,114 +419,13 @@ func oioubl21AddressFormatCode(value string) *IDType {
 	}
 }
 
-// OIOUBL address extension keys and values, sourced from the dk-oioubl addon (the
-// single source of truth) so the converter and addon never drift. The converter
-// reads them as plain party extensions (GOBL has no address-level extension).
+// OIOUBL addressformatcode-1.1 values. Outbound the converter always emits
+// StructuredLax (it imposes no mandatory sub-fields); StructuredID is recognized
+// when parsing an inbound identifier-only address.
 const (
-	oioubl21AddressFormatKey = oioubl.ExtKeyAddressFormat
-
-	oioubl21AddressStructuredDK     = string(oioubl.ExtValueAddressFormatStructuredDK)
-	oioubl21AddressStructuredLax    = string(oioubl.ExtValueAddressFormatStructuredLax)
-	oioubl21AddressUnstructured     = string(oioubl.ExtValueAddressFormatUnstructured)
-	oioubl21AddressStructuredID     = string(oioubl.ExtValueAddressFormatStructuredID)
-	oioubl21AddressStructuredRegion = string(oioubl.ExtValueAddressFormatStructuredRegion)
-
-	// oioubl21AddressIDScheme (GLN) is the scheme OIOUBL mandates on a StructuredID
-	// address ID (F-LIB028/029); its GS1 agency is oioublGLNAgencyID.
-	oioubl21AddressIDScheme = string(oioubl.SchemeGLN)
+	oioubl21AddressStructuredLax = "StructuredLax"
+	oioubl21AddressStructuredID  = "StructuredID"
 )
-
-// applyOIOUBL21AddressFormat reshapes a party's postal address to its declared
-// dk-oioubl-address-format, dropping the elements each restricted format forbids
-// (F-LIB031/038/040). Must run after applyOIOUBL21Party, which needs the address
-// country before the restricted formats drop it.
-func applyOIOUBL21AddressFormat(addr *PostalAddress, party *org.Party) {
-	if addr == nil || party == nil {
-		return
-	}
-	format := party.Ext.Get(oioubl21AddressFormatKey)
-	if format == "" {
-		return
-	}
-	addr.AddressFormatCode = oioubl21AddressFormatCode(format.String())
-	switch format.String() {
-	case oioubl21AddressUnstructured:
-		// F-LIB031: an Unstructured address carries only AddressLine.
-		lines := oioubl21AddressLines(party)
-		clearStructuredAddress(addr)
-		addr.AddressLine = lines
-	case oioubl21AddressStructuredID:
-		// F-LIB038: a StructuredID address carries only the identifier. GOBL has no
-		// address-identifier field, so the register GLN rides org.Address.Number
-		// (mapped to BuildingNumber by newAddress and idle in this format, which
-		// clears every postal element). Re-emit it as cbc:ID with the mandatory GLN
-		// schemeID (F-LIB028/029), the scheme OIOUBL uses for every GLN identifier.
-		id := ""
-		if addr.BuildingNumber != nil {
-			id = *addr.BuildingNumber
-		}
-		clearStructuredAddress(addr)
-		if id != "" {
-			addr.ID = &IDType{Value: id, SchemeID: ptr(oioubl21AddressIDScheme), SchemeAgencyID: ptr(oioublGLNAgencyID)}
-		}
-	case oioubl21AddressStructuredRegion:
-		// F-LIB040: a StructuredRegion address carries only Region, District and
-		// Country. newAddress mapped the GOBL region to CountrySubentity and the
-		// locality to CityName; move the region to cbc:Region and reinterpret the
-		// locality (org.Address defines it as "village, town, district, or city")
-		// as the district OIOUBL requires here.
-		region := addr.CountrySubentity
-		country := addr.Country
-		district := addr.CityName
-		clearStructuredAddress(addr)
-		addr.Region = region
-		addr.Country = country
-		addr.District = district
-	}
-	// StructuredDK and StructuredLax keep the structured fields as built.
-}
-
-// clearStructuredAddress blanks every postal element except the
-// AddressFormatCode, leaving a canvas for a format-specific rebuild.
-func clearStructuredAddress(addr *PostalAddress) {
-	addr.ID = nil
-	addr.Postbox = nil
-	addr.StreetName = nil
-	addr.AdditionalStreetName = nil
-	addr.BuildingNumber = nil
-	addr.PlotIdentification = nil
-	addr.CitySubdivisionName = nil
-	addr.CityName = nil
-	addr.PostalZone = nil
-	addr.CountrySubentity = nil
-	addr.Region = nil
-	addr.District = nil
-	addr.AddressLine = nil
-	addr.Country = nil
-	addr.LocationCoordinate = nil
-}
-
-// oioubl21AddressLines renders a GOBL address as OIOUBL free-text AddressLine
-// elements for an Unstructured address.
-func oioubl21AddressLines(party *org.Party) []AddressLine {
-	if len(party.Addresses) == 0 {
-		return nil
-	}
-	a := party.Addresses[0]
-	var lines []AddressLine
-	if one := a.LineOne(); one != "" {
-		lines = append(lines, AddressLine{Line: one})
-	} else if a.PostOfficeBox != "" {
-		lines = append(lines, AddressLine{Line: a.PostOfficeBox})
-	}
-	if two := a.LineTwo(); two != "" {
-		lines = append(lines, AddressLine{Line: two})
-	}
-	if loc := strings.TrimSpace(a.Code.String() + " " + a.Locality); loc != "" {
-		lines = append(lines, AddressLine{Line: loc})
-	}
-	return lines
-}
 
 func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 	if len(addresses) == 0 {

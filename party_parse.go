@@ -78,9 +78,6 @@ func goblParty(party *Party, o *options) *org.Party {
 		p.Addresses = []*org.Address{
 			parseAddress(party.PostalAddress),
 		}
-		if o.context.Is(ContextOIOUBL21) {
-			applyOIOUBL21AddressFormatParse(party.PostalAddress, p)
-		}
 	}
 
 	if party.Contact != nil {
@@ -205,39 +202,6 @@ func parseAddress(address *PostalAddress) *org.Address {
 		}
 	}
 	return addr
-}
-
-// applyOIOUBL21AddressFormatParse restores the wire cbc:AddressFormatCode to the
-// dk-oioubl-address-format extension so the format round-trips. StructuredLax is
-// the default and carries no extension; the StructuredID id and StructuredRegion
-// region/district round-trip through org.Address fields (Number, Region,
-// Locality), so those formats need only the format extension.
-//
-// An unrecognized value carries no extension: an alternative codelist such as
-// UN/ECE 3477 (the interop AddressFormatCode used by non-OIOUBL senders,
-// OIOUBL_GUIDE_PARTIES §3.1.6) has no GOBL representation, so the address still
-// imports through its structured fields but is left as the lax default.
-func applyOIOUBL21AddressFormatParse(address *PostalAddress, p *org.Party) {
-	if address == nil || address.AddressFormatCode == nil {
-		return
-	}
-	format := address.AddressFormatCode.Value
-	if format == oioubl21AddressStructuredLax || !isOIOUBLAddressFormat(format) {
-		return
-	}
-	p.Ext = tax.ExtensionsOf(cbc.CodeMap{oioubl21AddressFormatKey: cbc.Code(format)})
-}
-
-// isOIOUBLAddressFormat reports whether the value is one of OIOUBL's own
-// addressformatcode-1.1 codes, as opposed to an alternative codelist (§3.1.6).
-func isOIOUBLAddressFormat(format string) bool {
-	switch format {
-	case oioubl21AddressStructuredDK, oioubl21AddressStructuredLax,
-		oioubl21AddressStructuredID, oioubl21AddressStructuredRegion,
-		oioubl21AddressUnstructured:
-		return true
-	}
-	return false
 }
 
 func handleLegalEntityIdentity(party *Party, p *org.Party) {

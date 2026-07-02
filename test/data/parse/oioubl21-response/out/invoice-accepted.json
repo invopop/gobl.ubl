@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "055107565079bc2272bb5360299bee2bb0f303ee52a6c63879562222760018c3"
+			"val": "9f9efa88b716423918ea8e986da9b0abcefabbe1a9b7b0bf241e1c41ab139d18"
 		},
 		"from": "DK:CVR:76543216",
 		"to": "DK:CVR:12345674"
@@ -48,10 +48,7 @@
 					"code": "2100",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"customer": {
 			"name": "Modtager Handel A/S",
@@ -81,10 +78,7 @@
 					"code": "8000",
 					"country": "DK"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"lines": [
 			{

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8076477fff4a25a4db7105b87c9117eefff3390c3820dec35778388225b31031"
+			"val": "85b0e340e074d014b70436b04f2ede2c87a9ed6f830bbd051ceb84625dc7f151"
 		},
 		"from": "DK:CVR:12345674",
 		"to": "DK:CVR:76543216"
@@ -67,10 +67,7 @@
 				{
 					"addr": "billing@eksempel-software.dk"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"customer": {
 			"name": "Modtager Handel A/S",
@@ -117,10 +114,7 @@
 				{
 					"addr": "ap@modtager-handel.dk"
 				}
-			],
-			"ext": {
-				"dk-oioubl-address-format": "StructuredDK"
-			}
+			]
 		},
 		"lines": [
 			{
