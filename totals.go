@@ -415,6 +415,24 @@ func oioubl21TransactionTax(ctx Context, accRate *cur.ExchangeRate, catID string
 	return &Amount{Value: accRate.Convert(amount).String(), CurrencyID: &currencyID}
 }
 
+// oioubl21HasStandardRated reports whether the invoice carries a StandardRated VAT
+// combo. cbc:TransactionCurrencyTaxAmount is emitted only on StandardRated
+// subtotals (F-LIB373), so cbc:TaxCurrencyCode — which then requires at least one
+// of those amounts (F-INV018) — must be suppressed when none is present.
+func oioubl21HasStandardRated(inv *bill.Invoice) bool {
+	if inv.Totals == nil || inv.Totals.Taxes == nil {
+		return false
+	}
+	for _, cat := range inv.Totals.Taxes.Categories {
+		for _, r := range cat.Rates {
+			if oioubl21TaxCategoryID(r.Key) == oioubl21TaxCategoryStandardRated {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // oioubl21TaxCategoryID maps a GOBL VAT key to the OIOUBL taxcategoryid-1.1 code
 // emitted as cac:TaxCategory/cbc:ID. OIOUBL 2.1 has no exempt category, so exempt
 // reports as ZeroRated. Returns "" for keys with no OIOUBL category (export,

@@ -149,8 +149,11 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate
 	// is available. BT-111 is only added in that case and BR-53 requires
 	// BT-111 whenever BT-6 is present, so the two must be gated identically.
+	// OIOUBL additionally carries the restated tax only on StandardRated
+	// subtotals (F-LIB373), so it needs one to satisfy F-INV018.
 	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency &&
-		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
+		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil &&
+		(!o.context.Is(ContextOIOUBL21) || oioubl21HasStandardRated(inv)) {
 		out.TaxCurrencyCode = string(taxCurrency)
 	}
 
