@@ -4,7 +4,6 @@ import (
 	"regexp"
 	"strings"
 
-	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -174,9 +173,6 @@ func goblOIOUBLPaymentChannel(instr *pay.Instructions, paymentMeans *PaymentMean
 	}
 
 	instr.Key = pay.MeansKeyOther
-	if paymentMeans.PaymentID != nil {
-		instr.Ext = instr.Ext.Set(oioubl.ExtKeyPaymentID, cbc.Code(*paymentMeans.PaymentID))
-	}
 	// The generic path put the kortart in Ref; the real payment number, if any,
 	// is the InstructionID of the structured card types.
 	instr.Ref = ""

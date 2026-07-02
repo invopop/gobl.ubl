@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "24a9e7723cd632a45eae61a800ff9481cda7beaee700260b31b5c124d68a78e3"
+			"val": "49d46b3bd708d58f449e63fdc57ab963e38b19f04a96cb4e8879e76a3f16fd6a"
 		},
 		"from": "DK:CVR:12345674",
 		"to": "DK:CVR:76543216"
@@ -136,7 +136,6 @@
 					}
 				],
 				"ext": {
-					"dk-oioubl-payment-id": "73",
 					"untdid-payment-means": "93"
 				}
 			}

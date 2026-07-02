@@ -3,7 +3,6 @@ package ubl
 import (
 	"errors"
 
-	oioubl "github.com/invopop/gobl.dk.oioubl/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -210,8 +209,8 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if ref := instr.Ref.String(); ref != "" {
 		ui.PaymentMeans[0].PaymentID = &ref
 	}
-	// The OIOUBL payment channel is derived from the means; the PaymentID kortart is
-	// precomputed by the dk-oioubl addon (see applyOIOUBL21PaymentID).
+	// The OIOUBL payment channel and the Giro/FIK PaymentID kortart are both derived
+	// from the payment means and reference (see applyOIOUBL21PaymentID).
 	if ctx.Is(ContextOIOUBL21) {
 		if ch := oioubl21PaymentChannel(paymentMeansCode); ch != "" && ui.PaymentMeans[0].PaymentChannelCode == nil {
 			ui.PaymentMeans[0].PaymentChannelCode = &IDType{Value: ch}
@@ -257,23 +256,44 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	return nil
 }
 
-// applyOIOUBL21PaymentID sets the OIOUBL Giro (50) / FIK (93) cbc:PaymentID from
-// the dk-oioubl-payment-id "kortart" (overriding instr.Ref, which is the Peppol
-// mapping). The FIK creditor account flows through the credit-transfer Number
-// (F-LIB305).
+// oioubl21PaymentID deduces the Giro/FIK "kortart" (cbc:PaymentID) from the
+// payment reference. FIK (means 93): no reference is the free-text kortart 73, a
+// 16-character reference is 75, and any other reference is 71 (whose 15-character
+// length F-LIB156 then confirms). Giro (means 50): the free-text kortart 01
+// without a reference, 04 (creditor number) with one — the two-reference form 15
+// isn't distinguishable from GOBL data. A malformed reference is left for the
+// schematron to reject (F-LIB149/156/157/312/336).
+func oioubl21PaymentID(paymentMeansCode, ref string) string {
+	switch paymentMeansCode {
+	case "93":
+		switch {
+		case ref == "":
+			return "73"
+		case len(ref) == 16:
+			return "75"
+		default:
+			return "71"
+		}
+	case "50":
+		if ref == "" {
+			return "01"
+		}
+		return "04"
+	}
+	return ""
+}
+
+// applyOIOUBL21PaymentID sets the Giro (50) / FIK (93) cbc:PaymentID to the kortart
+// deduced for the payment reference; the reference itself rides cbc:InstructionID
+// for the structured kortarts (the free-text 01/73 carry no payment number).
 func applyOIOUBL21PaymentID(pm *PaymentMeans, instr *pay.Instructions, paymentMeansCode string) {
 	if paymentMeansCode != "50" && paymentMeansCode != "93" {
 		return
 	}
-	kortart := instr.Ext.Get(oioubl.ExtKeyPaymentID).String()
-	if kortart == "" {
-		return
-	}
+	ref := instr.Ref.String()
+	kortart := oioubl21PaymentID(paymentMeansCode, ref)
 	pm.PaymentID = &kortart
-	// The payment number rides cbc:InstructionID; the kortart has just overridden
-	// instr.Ref as the PaymentID. The addon governs which kortarts may carry it
-	// (FIK 73 forbids it, the structured types require it).
-	if ref := instr.Ref.String(); ref != "" {
+	if ref != "" && kortart != "01" && kortart != "73" {
 		pm.InstructionID = &ref
 	}
 }

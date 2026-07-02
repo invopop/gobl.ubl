@@ -150,9 +150,6 @@ func goblReminderGiroFIKMethod(pm *PaymentMeans) *pay.Record {
 			untdid.ExtKeyPaymentMeans: cbc.Code(pm.PaymentMeansCode.Value),
 		}),
 	}
-	if pm.PaymentID != nil {
-		rec.Ext = rec.Ext.Set(oioubl.ExtKeyPaymentID, cbc.Code(*pm.PaymentID))
-	}
 	if pm.InstructionID != nil {
 		rec.Ref = cleanString(*pm.InstructionID)
 	}
