@@ -16,7 +16,7 @@ require (
 	github.com/invopop/gobl.sa.zatca v0.0.2
 	github.com/invopop/phive v0.6.0
 	github.com/invopop/validation v0.8.0
-	github.com/invopop/xmlctx v0.13.1-0.20260702150626-9900fb876d77
+	github.com/invopop/xmlctx v0.13.1-0.20260702151651-07cd0a8a0e91
 	github.com/invopop/xmldsig v0.14.0
 	google.golang.org/grpc v1.79.3
 )
