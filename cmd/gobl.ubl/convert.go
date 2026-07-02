@@ -77,7 +77,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}
 
-		// Every supported UBL document (Invoice, ApplicationResponse, Reminder)
+		// Every supported UBL document type
 		// converts back to a GOBL envelope through this method.
 		conv, ok := doc.(interface {
 			Convert() (*gobl.Envelope, error)
