@@ -171,7 +171,7 @@ func extractRootNamespace(data []byte) (string, error) {
 // Bytes returns the raw XML of the UBL document including
 // the XML Header.
 func Bytes(in any) ([]byte, error) {
-	b, err := xml.MarshalIndent(in, "", "  ")
+	b, err := xml.MarshalIndent(marshalDocument(in), "", "  ")
 	if err != nil {
 		return nil, err
 	}
@@ -185,7 +185,7 @@ func Bytes(in any) ([]byte, error) {
 // BytesCompact returns the raw XML of the UBL document without
 // indentation, including the XML Header.
 func BytesCompact(in any) ([]byte, error) {
-	b, err := xml.Marshal(in)
+	b, err := xml.Marshal(marshalDocument(in))
 	if err != nil {
 		return nil, err
 	}

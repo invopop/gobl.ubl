@@ -20,17 +20,24 @@ const (
 	NamespaceUBLCreditNote = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2"
 )
 
+// XML root element local names for the supported UBL document types.
+const (
+	rootNameInvoice    = "Invoice"
+	rootNameCreditNote = "CreditNote"
+)
+
 // Schema locationa and customization constants
 const (
 	SchemaLocationInvoice     = "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd"
 	SchemaLocationCrediteNote = "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2 https://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-CreditNote-2.1.xsd"
 )
 
-// Invoice represents the root element of a UBL Invoice **or** Credit Note; the structures
-// between the two types are so similar, that it doesn't make much sense to separate.
-type Invoice struct {
+// documentHeader is the leading element run shared, in identical sequence, by
+// the UBL Invoice and CreditNote XSDs (the root attributes through
+// cbc:IssueTime). Both document structs embed it so the shared prefix can never
+// drift between the two types.
+type documentHeader struct {
 	// Attributes
-	XMLName        xml.Name
 	CACNamespace   string `xml:"xmlns:cac,attr"`
 	CBCNamespace   string `xml:"xmlns:cbc,attr"`
 	QDTNamespace   string `xml:"xmlns:qdt,attr"`
@@ -51,53 +58,84 @@ type Invoice struct {
 	UUID               string      `xml:"cbc:UUID,omitempty"`
 	IssueDate          string      `xml:"cbc:IssueDate"`
 	IssueTime          string      `xml:"cbc:IssueTime,omitempty"`
-	DueDate            string      `xml:"cbc:DueDate,omitempty"`
+}
+
+// documentCurrency is the currency/accounting element run shared, in identical
+// sequence, by both XSDs (cbc:DocumentCurrencyCode through cac:InvoicePeriod).
+type documentCurrency struct {
+	DocumentCurrencyCode           string   `xml:"cbc:DocumentCurrencyCode,omitempty"`
+	TaxCurrencyCode                string   `xml:"cbc:TaxCurrencyCode,omitempty"`
+	PricingCurrencyCode            string   `xml:"cbc:PricingCurrencyCode,omitempty"`
+	PaymentCurrencyCode            string   `xml:"cbc:PaymentCurrencyCode,omitempty"`
+	PaymentAlternativeCurrencyCode string   `xml:"cbc:PaymentAlternativeCurrencyCode,omitempty"`
+	AccountingCost                 string   `xml:"cbc:AccountingCost,omitempty"`
+	LineCountNumeric               int      `xml:"cbc:LineCountNumeric,omitempty"`
+	BuyerReference                 string   `xml:"cbc:BuyerReference,omitempty"`
+	InvoicePeriod                  []Period `xml:"cac:InvoicePeriod,omitempty"`
+}
+
+// documentParties is the party/delivery/payment element run shared, in identical
+// sequence, by both XSDs (cac:Signature through cac:PaymentTerms).
+type documentParties struct {
+	Signature               []Signature    `xml:"cac:Signature,omitempty"`
+	AccountingSupplierParty SupplierParty  `xml:"cac:AccountingSupplierParty"`
+	AccountingCustomerParty CustomerParty  `xml:"cac:AccountingCustomerParty"`
+	PayeeParty              *Party         `xml:"cac:PayeeParty,omitempty"`
+	BuyerCustomerParty      *CustomerParty `xml:"cac:BuyerCustomerParty,omitempty"`
+	SellerSupplierParty     *SupplierParty `xml:"cac:SellerSupplierParty,omitempty"`
+	TaxRepresentativeParty  *Party         `xml:"cac:TaxRepresentativeParty,omitempty"`
+	Delivery                []*Delivery    `xml:"cac:Delivery,omitempty"`
+	DeliveryTerms           *DeliveryTerms `xml:"cac:DeliveryTerms,omitempty"`
+	PaymentMeans            []PaymentMeans `xml:"cac:PaymentMeans,omitempty"`
+	PaymentTerms            *PaymentTerms  `xml:"cac:PaymentTerms,omitempty"`
+}
+
+// Invoice represents a UBL Invoice document, with fields declared in the exact
+// sequence of the UBL-Invoice-2.1 XSD.
+//
+// It doubles as the parse target for **both** Invoice and CreditNote XML:
+// unmarshalling is order-independent, so the extra CreditNote-only fields it
+// carries (CreditNoteTypeCode, CreditNoteLines) are populated when a credit note
+// is parsed and simply stay empty — and therefore unmarshalled — when marshalling
+// a real invoice. Marshalling a credit note goes through CreditNote (see
+// creditnote.go), which lays the divergent elements out in CreditNote-XSD order.
+type Invoice struct {
+	XMLName xml.Name
+	documentHeader
+
+	DueDate string `xml:"cbc:DueDate,omitempty"`
 
 	InvoiceTypeCode    *IDType `xml:"cbc:InvoiceTypeCode,omitempty"`
 	CreditNoteTypeCode *IDType `xml:"cbc:CreditNoteTypeCode,omitempty"`
 
-	Note                           []string            `xml:"cbc:Note,omitempty"`
-	TaxPointDate                   string              `xml:"cbc:TaxPointDate,omitempty"`
-	DocumentCurrencyCode           string              `xml:"cbc:DocumentCurrencyCode,omitempty"`
-	TaxCurrencyCode                string              `xml:"cbc:TaxCurrencyCode,omitempty"`
-	PricingCurrencyCode            string              `xml:"cbc:PricingCurrencyCode,omitempty"`
-	PaymentCurrencyCode            string              `xml:"cbc:PaymentCurrencyCode,omitempty"`
-	PaymentAlternativeCurrencyCode string              `xml:"cbc:PaymentAlternativeCurrencyCode,omitempty"`
-	AccountingCost                 string              `xml:"cbc:AccountingCost,omitempty"`
-	LineCountNumeric               int                 `xml:"cbc:LineCountNumeric,omitempty"`
-	BuyerReference                 string              `xml:"cbc:BuyerReference,omitempty"`
-	InvoicePeriod                  []Period            `xml:"cac:InvoicePeriod,omitempty"`
-	OrderReference                 *OrderReference     `xml:"cac:OrderReference,omitempty"`
-	BillingReference               []*BillingReference `xml:"cac:BillingReference,omitempty"`
-	DespatchDocumentReference      []Reference         `xml:"cac:DespatchDocumentReference,omitempty"`
-	ReceiptDocumentReference       []Reference         `xml:"cac:ReceiptDocumentReference,omitempty"`
-	StatementDocumentReference     []Reference         `xml:"cac:StatementDocumentReference,omitempty"`
-	OriginatorDocumentReference    []Reference         `xml:"cac:OriginatorDocumentReference,omitempty"`
-	ContractDocumentReference      []Reference         `xml:"cac:ContractDocumentReference,omitempty"`
-	AdditionalDocumentReference    []Reference         `xml:"cac:AdditionalDocumentReference,omitempty"`
-	ProjectReference               []ProjectReference  `xml:"cac:ProjectReference,omitempty"`
-	Signature                      []Signature         `xml:"cac:Signature,omitempty"`
-	AccountingSupplierParty        SupplierParty       `xml:"cac:AccountingSupplierParty"`
-	AccountingCustomerParty        CustomerParty       `xml:"cac:AccountingCustomerParty"`
-	PayeeParty                     *Party              `xml:"cac:PayeeParty,omitempty"`
-	BuyerCustomerParty             *CustomerParty      `xml:"cac:BuyerCustomerParty,omitempty"`
-	SellerSupplierParty            *SupplierParty      `xml:"cac:SellerSupplierParty,omitempty"`
-	TaxRepresentativeParty         *Party              `xml:"cac:TaxRepresentativeParty,omitempty"`
-	Delivery                       []*Delivery         `xml:"cac:Delivery,omitempty"`
-	DeliveryTerms                  *DeliveryTerms      `xml:"cac:DeliveryTerms,omitempty"`
-	PaymentMeans                   []PaymentMeans      `xml:"cac:PaymentMeans,omitempty"`
-	PaymentTerms                   *PaymentTerms       `xml:"cac:PaymentTerms,omitempty"`
-	PrepaidPayment                 []PrepaidPayment    `xml:"cac:PrepaidPayment,omitempty"`
-	AllowanceCharge                []AllowanceCharge   `xml:"cac:AllowanceCharge,omitempty"`
-	TaxExchangeRate                *ExchangeRate       `xml:"cac:TaxExchangeRate,omitempty"`
-	PricingExchangeRate            *ExchangeRate       `xml:"cac:PricingExchangeRate,omitempty"`
-	PaymentExchangeRate            *ExchangeRate       `xml:"cac:PaymentExchangeRate,omitempty"`
-	PaymentAlternativeExchangeRate *ExchangeRate       `xml:"cac:PaymentAlternativeExchangeRate,omitempty"`
-	TaxTotal                       []TaxTotal          `xml:"cac:TaxTotal,omitempty"`
-	WithholdingTaxTotal            []TaxTotal          `xml:"cac:WithholdingTaxTotal,omitempty"`
-	LegalMonetaryTotal             MonetaryTotal       `xml:"cac:LegalMonetaryTotal"`
-	InvoiceLines                   []InvoiceLine       `xml:"cac:InvoiceLine,omitempty"`
-	CreditNoteLines                []InvoiceLine       `xml:"cac:CreditNoteLine,omitempty"`
+	Note         []string `xml:"cbc:Note,omitempty"`
+	TaxPointDate string   `xml:"cbc:TaxPointDate,omitempty"`
+
+	documentCurrency
+
+	OrderReference              *OrderReference     `xml:"cac:OrderReference,omitempty"`
+	BillingReference            []*BillingReference `xml:"cac:BillingReference,omitempty"`
+	DespatchDocumentReference   []Reference         `xml:"cac:DespatchDocumentReference,omitempty"`
+	ReceiptDocumentReference    []Reference         `xml:"cac:ReceiptDocumentReference,omitempty"`
+	StatementDocumentReference  []Reference         `xml:"cac:StatementDocumentReference,omitempty"`
+	OriginatorDocumentReference []Reference         `xml:"cac:OriginatorDocumentReference,omitempty"`
+	ContractDocumentReference   []Reference         `xml:"cac:ContractDocumentReference,omitempty"`
+	AdditionalDocumentReference []Reference         `xml:"cac:AdditionalDocumentReference,omitempty"`
+	ProjectReference            []ProjectReference  `xml:"cac:ProjectReference,omitempty"`
+
+	documentParties
+
+	PrepaidPayment                 []PrepaidPayment  `xml:"cac:PrepaidPayment,omitempty"`
+	AllowanceCharge                []AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
+	TaxExchangeRate                *ExchangeRate     `xml:"cac:TaxExchangeRate,omitempty"`
+	PricingExchangeRate            *ExchangeRate     `xml:"cac:PricingExchangeRate,omitempty"`
+	PaymentExchangeRate            *ExchangeRate     `xml:"cac:PaymentExchangeRate,omitempty"`
+	PaymentAlternativeExchangeRate *ExchangeRate     `xml:"cac:PaymentAlternativeExchangeRate,omitempty"`
+	TaxTotal                       []TaxTotal        `xml:"cac:TaxTotal,omitempty"`
+	WithholdingTaxTotal            []TaxTotal        `xml:"cac:WithholdingTaxTotal,omitempty"`
+	LegalMonetaryTotal             MonetaryTotal     `xml:"cac:LegalMonetaryTotal"`
+	InvoiceLines                   []InvoiceLine     `xml:"cac:InvoiceLine,omitempty"`
+	CreditNoteLines                []InvoiceLine     `xml:"cac:CreditNoteLine,omitempty"`
 }
 
 func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
@@ -123,25 +161,31 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 
 	// Create the UBL document
 	out := &Invoice{
-		XMLName:                 xml.Name{Local: "Invoice"},
-		CACNamespace:            NamespaceCAC,
-		CBCNamespace:            NamespaceCBC,
-		QDTNamespace:            NamespaceQDT,
-		UDTNamespace:            NamespaceUDT,
-		UBLNamespace:            NamespaceUBLInvoice,
-		CCTSNamespace:           NamespaceCCTS,
-		XSINamespace:            NamespaceXSI,
-		EXTNamespace:            NamespaceEXT,
-		SchemaLocation:          SchemaLocationInvoice,
-		CustomizationID:         customizationID,
-		ProfileID:               profileID,
-		ID:                      invoiceNumber(inv.Series, inv.Code),
-		IssueDate:               formatDate(inv.IssueDate),
-		AccountingCost:          "", // TODO: ordering cost
-		InvoiceTypeCode:         &IDType{Value: tc},
-		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
-		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
+		XMLName: xml.Name{Local: rootNameInvoice},
+		documentHeader: documentHeader{
+			CACNamespace:    NamespaceCAC,
+			CBCNamespace:    NamespaceCBC,
+			QDTNamespace:    NamespaceQDT,
+			UDTNamespace:    NamespaceUDT,
+			UBLNamespace:    NamespaceUBLInvoice,
+			CCTSNamespace:   NamespaceCCTS,
+			XSINamespace:    NamespaceXSI,
+			EXTNamespace:    NamespaceEXT,
+			SchemaLocation:  SchemaLocationInvoice,
+			CustomizationID: customizationID,
+			ProfileID:       profileID,
+			ID:              invoiceNumber(inv.Series, inv.Code),
+			IssueDate:       formatDate(inv.IssueDate),
+		},
+		InvoiceTypeCode: &IDType{Value: tc},
+		documentCurrency: documentCurrency{
+			AccountingCost:       "", // TODO: ordering cost
+			DocumentCurrencyCode: string(inv.Currency),
+		},
+		documentParties: documentParties{
+			AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
+			AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
+		},
 	}
 
 	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate
@@ -169,7 +213,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	if docType.In(bill.InvoiceTypeCreditNote) {
-		out.XMLName = xml.Name{Local: "CreditNote"}
+		out.XMLName = xml.Name{Local: rootNameCreditNote}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
 		out.InvoiceTypeCode = nil
@@ -272,7 +316,7 @@ func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 // based on XML name instead of gobl's invoice type key
 func (ui *Invoice) getInvoiceTypeBasedOnXMLName() cbc.Key {
 	switch ui.XMLName.Local {
-	case "CreditNote":
+	case rootNameCreditNote:
 		return bill.InvoiceTypeCreditNote
 	default:
 		return bill.InvoiceTypeStandard

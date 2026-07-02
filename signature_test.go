@@ -29,10 +29,9 @@ func TestAddSignatureReference(t *testing.T) {
 
 	t.Run("appends to existing slice", func(t *testing.T) {
 		existingMethod := "existing-method"
-		inv := &ubl.Invoice{
-			Signature: []ubl.Signature{
-				{ID: "existing-id", SignatureMethod: &existingMethod},
-			},
+		inv := &ubl.Invoice{}
+		inv.Signature = []ubl.Signature{
+			{ID: "existing-id", SignatureMethod: &existingMethod},
 		}
 		inv.AddSignatureReference(ubl.SignatureMethod, ubl.ReferenceSignatureID)
 

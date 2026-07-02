@@ -43,11 +43,10 @@ func TestAddExtension(t *testing.T) {
 
 	t.Run("appends to existing Extensions", func(t *testing.T) {
 		uri := "urn:existing"
-		inv := &ubl.Invoice{
-			Extensions: &ubl.Extensions{
-				Extension: []ubl.Extension{
-					{ExtensionURI: &uri},
-				},
+		inv := &ubl.Invoice{}
+		inv.Extensions = &ubl.Extensions{
+			Extension: []ubl.Extension{
+				{ExtensionURI: &uri},
 			},
 		}
 
