@@ -68,6 +68,7 @@ type DocumentCurrency struct {
 	PricingCurrencyCode            string   `xml:"cbc:PricingCurrencyCode,omitempty"`
 	PaymentCurrencyCode            string   `xml:"cbc:PaymentCurrencyCode,omitempty"`
 	PaymentAlternativeCurrencyCode string   `xml:"cbc:PaymentAlternativeCurrencyCode,omitempty"`
+	AccountingCostCode             string   `xml:"cbc:AccountingCostCode,omitempty"`
 	AccountingCost                 string   `xml:"cbc:AccountingCost,omitempty"`
 	LineCountNumeric               int      `xml:"cbc:LineCountNumeric,omitempty"`
 	BuyerReference                 string   `xml:"cbc:BuyerReference,omitempty"`
@@ -99,6 +100,13 @@ type DocumentParties struct {
 // is parsed and simply stay empty — and therefore omitted — when marshalling
 // a real invoice. Marshalling a credit note goes through CreditNote (see
 // creditnote.go), which lays the divergent elements out in CreditNote-XSD order.
+//
+// The shared element runs live in the embedded DocumentHeader, DocumentCurrency
+// and DocumentParties types. Because their fields are promoted, a keyed struct
+// literal cannot set them directly (e.g. Invoice{Signature: ...} does not
+// compile); construct via the embedded type (Invoice{DocumentParties:
+// DocumentParties{Signature: ...}}) or assign the promoted field after
+// construction (inv.Signature = ...). Most callers should use Convert instead.
 type Invoice struct {
 	XMLName xml.Name
 	DocumentHeader
