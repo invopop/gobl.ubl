@@ -24,7 +24,8 @@ type PaymentMeans struct {
 
 // PaymentMandate represents a payment mandate
 type PaymentMandate struct {
-	ID                    IDType            `xml:"cbc:ID"`
+	ID                    *IDType           `xml:"cbc:ID"`
+	PayerParty            *Party            `xml:"cac:PayerParty"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 }
 
@@ -84,6 +85,23 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 		ui.PayeeParty = newPayeeParty(pymt.Payee)
 	}
 
+	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
+	// profile, which maps it to the PaymentMandate's PayerParty.
+	if pymt.Payer != nil && ctx.Is(ContextPeppolFranceExtended) {
+		if len(ui.PaymentMeans) == 0 {
+			// PaymentMeans requires a PaymentMeansCode, so when the invoice
+			// carries no payment instructions, fall back to UNTDID 4461 code
+			// "1" (instrument not defined).
+			ui.PaymentMeans = []PaymentMeans{
+				{PaymentMeansCode: IDType{Value: "1"}},
+			}
+		}
+		if ui.PaymentMeans[0].PaymentMandate == nil {
+			ui.PaymentMeans[0].PaymentMandate = new(PaymentMandate)
+		}
+		ui.PaymentMeans[0].PaymentMandate.PayerParty = newParty(pymt.Payer, ctx)
+	}
+
 	// BT-90: Bank assigned creditor identifier
 	// In UBL this lives as a SEPA PartyIdentification on the payee (or seller)
 	if pymt.Instructions != nil && pymt.Instructions.DirectDebit != nil && pymt.Instructions.DirectDebit.Creditor != "" {
@@ -133,7 +151,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 		// Skip the mandate without a reference; an empty <cbc:ID/> is rejected by Peppol.
 		if instr.DirectDebit.Ref != "" {
 			ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
-				ID: IDType{Value: instr.DirectDebit.Ref},
+				ID: &IDType{Value: instr.DirectDebit.Ref},
 			}
 		}
 		if instr.DirectDebit.Account != "" {

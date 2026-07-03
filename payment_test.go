@@ -82,3 +82,77 @@ func TestNewPayment(t *testing.T) {
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 }
+
+func TestPaymentPayer(t *testing.T) {
+	const fixture = "france-extended/invoice-payer.json"
+
+	t.Run("french extended maps the payer to the payment mandate", func(t *testing.T) {
+		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
+		require.NoError(t, err)
+
+		require.NotEmpty(t, doc.PaymentMeans)
+		mandate := doc.PaymentMeans[0].PaymentMandate
+		require.NotNil(t, mandate)
+		payer := mandate.PayerParty
+		require.NotNil(t, payer)
+		assert.Equal(t, "Payeur SA", payer.PartyName.Name)
+		require.NotEmpty(t, payer.PartyIdentification)
+		assert.Equal(t, "39183804200003", payer.PartyIdentification[0].ID.Value)
+		assert.Equal(t, "0009", *payer.PartyIdentification[0].ID.SchemeID)
+		require.NotNil(t, payer.PartyLegalEntity)
+		assert.Equal(t, "391838042", payer.PartyLegalEntity.CompanyID.Value)
+		assert.Equal(t, "0002", *payer.PartyLegalEntity.CompanyID.SchemeID)
+
+		// The payee travels alongside the payer (BG-10).
+		require.NotNil(t, doc.PayeeParty)
+		assert.Equal(t, "Bénéficiaire SARL", doc.PayeeParty.PartyName.Name)
+	})
+
+	t.Run("payer without payment instructions synthesizes the payment means", func(t *testing.T) {
+		env := loadTestEnvelope(t, fixture)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Payment.Instructions = nil
+
+		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
+		require.NoError(t, err)
+		require.NotEmpty(t, doc.PaymentMeans)
+		assert.Equal(t, "1", doc.PaymentMeans[0].PaymentMeansCode.Value)
+		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
+		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate.ID)
+		assert.NotNil(t, doc.PaymentMeans[0].PaymentMandate.PayerParty)
+	})
+
+	t.Run("payer is ignored outside the french extended context", func(t *testing.T) {
+		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppol)
+		require.NoError(t, err)
+
+		require.NotEmpty(t, doc.PaymentMeans)
+		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate)
+	})
+
+	t.Run("parse restores the payer without inventing a direct debit", func(t *testing.T) {
+		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
+		require.NoError(t, err)
+		data, err := ubl.Bytes(doc)
+		require.NoError(t, err)
+
+		parsed, err := ubl.Parse(data)
+		require.NoError(t, err)
+		in, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		env, err := in.Convert()
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.NotNil(t, inv.Payment)
+		require.NotNil(t, inv.Payment.Payer)
+		assert.Equal(t, "Payeur SA", inv.Payment.Payer.Name)
+		require.NotNil(t, inv.Payment.Payee)
+		assert.Equal(t, "Bénéficiaire SARL", inv.Payment.Payee.Name)
+		require.NotNil(t, inv.Payment.Instructions)
+		assert.Nil(t, inv.Payment.Instructions.DirectDebit)
+	})
+}
