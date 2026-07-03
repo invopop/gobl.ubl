@@ -36,6 +36,14 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 		payment.Payee = goblParty(ui.PayeeParty, o)
 	}
 
+	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
+	// profile, which maps it to the PaymentMandate's PayerParty.
+	if o.context.Is(ContextPeppolFranceExtended) && len(ui.PaymentMeans) > 0 {
+		if pm := ui.PaymentMeans[0].PaymentMandate; pm != nil && pm.PayerParty != nil {
+			payment.Payer = goblParty(pm.PayerParty, o)
+		}
+	}
+
 	if ui.PaymentTerms != nil {
 		payment.Terms = &pay.Terms{
 			Notes: cleanString(ui.PaymentTerms.Note),
@@ -114,7 +122,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 
 	}
 
-	if payment.Payee != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
+	if payment.Payee != nil || payment.Payer != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
 		out.Payment = payment
 	}
 	return nil
@@ -139,7 +147,9 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	if paymentMeans.PayeeFinancialAccount != nil {
 		instructions.CreditTransfer = goblCreditTransfer(paymentMeans)
 	}
-	if paymentMeans.PaymentMandate != nil {
+	// A mandate holding only the extended-profile PayerParty is not a
+	// direct-debit arrangement.
+	if pm := paymentMeans.PaymentMandate; pm != nil && (pm.ID != nil || pm.PayerFinancialAccount != nil) {
 		instructions.DirectDebit = goblInvoiceDirectDebit(out, paymentMeans)
 	}
 	if paymentMeans.CardAccount != nil {
@@ -183,7 +193,9 @@ func isIBAN(s string) bool {
 func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.DirectDebit {
 	directDebit := &pay.DirectDebit{}
 
-	directDebit.Ref = paymentMeans.PaymentMandate.ID.Value
+	if paymentMeans.PaymentMandate.ID != nil {
+		directDebit.Ref = paymentMeans.PaymentMandate.ID.Value
+	}
 	if paymentMeans.PaymentMandate.PayerFinancialAccount != nil && paymentMeans.PaymentMandate.PayerFinancialAccount.ID != nil {
 		directDebit.Account = *paymentMeans.PaymentMandate.PayerFinancialAccount.ID
 	}

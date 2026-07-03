@@ -41,6 +41,7 @@ var franceProbes = []franceProbe{
 	{"CIUS/existing-credit-note", "france-cius", "credit-note-fr.json", ubl.ContextPeppolFranceCIUS},
 	{"Extended/standard", "france-extended", "invoice-standard.json", ubl.ContextPeppolFranceExtended},
 	{"Extended/credit-note", "france-extended", "credit-note.json", ubl.ContextPeppolFranceExtended},
+	{"Extended/payer", "france-extended", "invoice-payer.json", ubl.ContextPeppolFranceExtended},
 }
 
 // TestProbeFranceInvoices converts each Flow 2 fixture and pushes the
