@@ -67,6 +67,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
+		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate.ID)
 		assert.Equal(t, "MANDATE-123", doc.PaymentMeans[0].PaymentMandate.ID.Value)
 	})
 

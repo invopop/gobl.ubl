@@ -38,7 +38,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 
 	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
 	// profile, which maps it to the PaymentMandate's PayerParty.
-	if len(ui.PaymentMeans) > 0 {
+	if o.context.Is(ContextPeppolFranceExtended) && len(ui.PaymentMeans) > 0 {
 		if pm := ui.PaymentMeans[0].PaymentMandate; pm != nil && pm.PayerParty != nil {
 			payment.Payer = goblParty(pm.PayerParty, o)
 		}
