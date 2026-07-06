@@ -56,6 +56,9 @@ type PartyName struct {
 
 // PostalAddress represents a postal address
 type PostalAddress struct {
+	ID                   *IDType             `xml:"cbc:ID,omitempty"`
+	AddressFormatCode    *IDType             `xml:"cbc:AddressFormatCode"`
+	Postbox              *string             `xml:"cbc:Postbox,omitempty"`
 	StreetName           *string             `xml:"cbc:StreetName"`
 	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
 	BuildingNumber       *string             `xml:"cbc:BuildingNumber,omitempty"`
@@ -64,6 +67,8 @@ type PostalAddress struct {
 	CityName             *string             `xml:"cbc:CityName"`
 	PostalZone           *string             `xml:"cbc:PostalZone"`
 	CountrySubentity     *string             `xml:"cbc:CountrySubentity"`
+	Region               *string             `xml:"cbc:Region,omitempty"`
+	District             *string             `xml:"cbc:District,omitempty"`
 	AddressLine          []AddressLine       `xml:"cac:AddressLine"`
 	Country              *Country            `xml:"cac:Country"`
 	LocationCoordinate   *LocationCoordinate `xml:"cac:LocationCoordinate"`
@@ -89,14 +94,15 @@ type Country struct {
 
 // PartyTaxScheme represents a party's tax scheme
 type PartyTaxScheme struct {
-	CompanyID *string    `xml:"cbc:CompanyID"`
+	CompanyID *IDType    `xml:"cbc:CompanyID"`
 	TaxScheme *TaxScheme `xml:"cac:TaxScheme"`
 }
 
 // TaxScheme represents a tax scheme
 type TaxScheme struct {
-	ID          string `xml:"cbc:ID"`
-	TaxTypeCode string `xml:"cbc:TaxTypeCode,omitempty"`
+	ID          IDType  `xml:"cbc:ID"`
+	Name        *string `xml:"cbc:Name"`
+	TaxTypeCode *IDType `xml:"cbc:TaxTypeCode,omitempty"`
 }
 
 // PartyLegalEntity represents the legal entity of a party
@@ -108,6 +114,7 @@ type PartyLegalEntity struct {
 
 // Contact represents contact information
 type Contact struct {
+	ID             *string `xml:"cbc:ID"`
 	Name           *string `xml:"cbc:Name"`
 	Telephone      *string `xml:"cbc:Telephone"`
 	ElectronicMail *string `xml:"cbc:ElectronicMail"`
@@ -162,9 +169,9 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 
 		taxScheme := PartyTaxScheme{
-			CompanyID: &code,
+			CompanyID: &IDType{Value: code},
 			TaxScheme: &TaxScheme{
-				ID: id.String(),
+				ID: IDType{Value: id.String()},
 			},
 		}
 
@@ -245,9 +252,9 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			if id.Scope == org.IdentityScopeTax {
 				code := id.Code.String()
 				taxScheme := PartyTaxScheme{
-					CompanyID: &code,
+					CompanyID: &IDType{Value: code},
 					TaxScheme: &TaxScheme{
-						ID: id.Type.String(),
+						ID: IDType{Value: id.Type.String()},
 					},
 				}
 				p.PartyTaxScheme = append(p.PartyTaxScheme, taxScheme)

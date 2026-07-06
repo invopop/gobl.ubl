@@ -154,26 +154,26 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			if len(l.Taxes) > 0 && l.Taxes[0].Category != "" {
 				it.ClassifiedTaxCategory = &ClassifiedTaxCategory{
 					TaxScheme: &TaxScheme{
-						ID: l.Taxes[0].Category.String(),
+						ID: IDType{Value: l.Taxes[0].Category.String()},
 					},
 				}
 
 				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
-					it.ClassifiedTaxCategory.ID = &rate
+					it.ClassifiedTaxCategory.ID = &IDType{Value: rate}
 				}
 
 				// Set percent: required unless category is "O" (outside scope)
 				if l.Taxes[0].Percent != nil {
 					p := l.Taxes[0].Percent.StringWithoutSymbol()
 					it.ClassifiedTaxCategory.Percent = &p
-				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
+				} else if it.ClassifiedTaxCategory.ID == nil || it.ClassifiedTaxCategory.ID.Value != "O" {
 					// Default to 0% when not outside scope
 					p := "0"
 					it.ClassifiedTaxCategory.Percent = &p
 				}
 
 				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
-					it.ClassifiedTaxCategory.ID = &rate
+					it.ClassifiedTaxCategory.ID = &IDType{Value: rate}
 				}
 			}
 

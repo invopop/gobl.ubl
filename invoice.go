@@ -44,7 +44,7 @@ type Invoice struct {
 	Extensions         *Extensions `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID       string      `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID    string      `xml:"cbc:CustomizationID,omitempty"`
-	ProfileID          string      `xml:"cbc:ProfileID,omitempty"`
+	ProfileID          *IDType     `xml:"cbc:ProfileID,omitempty"`
 	ProfileExecutionID string      `xml:"cbc:ProfileExecutionID,omitempty"`
 	ID                 string      `xml:"cbc:ID"`
 	CopyIndicator      bool        `xml:"cbc:CopyIndicator,omitempty"`
@@ -134,7 +134,6 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		EXTNamespace:            NamespaceEXT,
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
-		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
@@ -142,6 +141,12 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		DocumentCurrencyCode:    string(inv.Currency),
 		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
+	}
+
+	// ProfileID is omitted when empty; when present it only carries a value here
+	// (a country overlay may add the schemeID/schemeAgencyID attributes).
+	if profileID != "" {
+		out.ProfileID = &IDType{Value: profileID}
 	}
 
 	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate

@@ -81,12 +81,12 @@ func TestNewParty(t *testing.T) {
 		require.NoError(t, err)
 
 		require.NotEmpty(t, doc.AccountingSupplierParty.Party.PartyTaxScheme)
-		assert.Equal(t, "NO923456783MVA", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
+		assert.Equal(t, "NO923456783MVA", doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID.Value)
 
 		// An already-suffixed code must not be doubled.
 		inv.Supplier.TaxID.Code = "923456783MVA"
 		doc, err = ubl.ConvertInvoice(env)
 		require.NoError(t, err)
-		assert.Equal(t, "NO923456783MVA", *doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID)
+		assert.Equal(t, "NO923456783MVA", doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID.Value)
 	})
 }

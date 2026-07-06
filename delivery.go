@@ -7,6 +7,7 @@ type Delivery struct {
 	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
 	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
 	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
+	RequestedDeliveryPeriod *Period   `xml:"cac:RequestedDeliveryPeriod"`
 	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
 }
