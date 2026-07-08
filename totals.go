@@ -161,7 +161,7 @@ func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 			if subtotal.TaxCategory.ID != nil && subtotal.TaxCategory.TaxScheme != nil {
 				schemeID := subtotal.TaxCategory.TaxScheme.ID.Value
 				categoryID := subtotal.TaxCategory.ID.Value
-				key := buildTaxCategoryKey(schemeID, categoryID, subtotal.TaxCategory.Percent)
+				key := BuildTaxCategoryKey(schemeID, categoryID, subtotal.TaxCategory.Percent)
 				info := &taxCategoryInfo{}
 				if subtotal.TaxCategory.TaxExemptionReasonCode != nil {
 					info.exemptionReasonCode = *subtotal.TaxCategory.TaxExemptionReasonCode
@@ -185,7 +185,7 @@ func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
 			}
 			note := &tax.Note{
 				Category: cbc.Code(tc.TaxScheme.ID.Value),
-				Text:     cleanString(*tc.TaxExemptionReason),
+				Text:     CleanString(*tc.TaxExemptionReason),
 				Ext:      tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTaxCategory: cbc.Code(tc.ID.Value)}),
 			}
 			inv.Tax = inv.Tax.MergeNotes(note)
@@ -214,11 +214,11 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 		return nil
 	}
 
-	docAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[0].TaxAmount.Value))
+	docAmount, err := num.AmountFromString(NormalizeNumericString(taxTotals[0].TaxAmount.Value))
 	if err != nil || docAmount.IsZero() {
 		return nil
 	}
-	taxAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[1].TaxAmount.Value))
+	taxAmount, err := num.AmountFromString(NormalizeNumericString(taxTotals[1].TaxAmount.Value))
 	if err != nil {
 		return nil
 	}

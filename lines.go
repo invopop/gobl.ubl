@@ -97,8 +97,8 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 
 		if l.Period != nil {
 			invLine.InvoicePeriod = &Period{
-				StartDate: formatDate(l.Period.Start),
-				EndDate:   formatDate(l.Period.End),
+				StartDate: FormatDate(l.Period.Start),
+				EndDate:   FormatDate(l.Period.End),
 			}
 		}
 

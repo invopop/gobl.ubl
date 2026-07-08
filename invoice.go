@@ -134,8 +134,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		EXTNamespace:            NamespaceEXT,
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
-		ID:                      invoiceNumber(inv.Series, inv.Code),
-		IssueDate:               formatDate(inv.IssueDate),
+		ID:                      InvoiceNumber(inv.Series, inv.Code),
+		IssueDate:               FormatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
@@ -183,13 +183,13 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 
 	// BT-7: VAT point date
 	if inv.ValueDate != nil {
-		out.TaxPointDate = formatDate(*inv.ValueDate)
+		out.TaxPointDate = FormatDate(*inv.ValueDate)
 	}
 
 	if len(inv.Notes) > 0 {
 		var noteTexts []string
 		for _, note := range inv.Notes {
-			if text := formatNote(note); text != "" {
+			if text := FormatNote(note); text != "" {
 				noteTexts = append(noteTexts, text)
 			}
 		}
@@ -251,7 +251,8 @@ func (ui *Invoice) addTaxPoint(t *bill.Tax) {
 	ui.InvoicePeriod[0].DescriptionCode = code
 }
 
-func invoiceNumber(series cbc.Code, code cbc.Code) string {
+// InvoiceNumber joins a GOBL series and code into a UBL document ID.
+func InvoiceNumber(series cbc.Code, code cbc.Code) string {
 	if series == "" {
 		return code.String()
 	}

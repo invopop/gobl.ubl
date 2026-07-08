@@ -55,7 +55,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 		ch.Reason = *ac.AllowanceChargeReason
 	}
 	if ac.Amount.Value != "" {
-		a, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
+		a, err := num.AmountFromString(NormalizeNumericString(ac.Amount.Value))
 		if err != nil {
 			return nil, err
 		}
@@ -67,14 +67,14 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 		})
 	}
 	if ac.BaseAmount != nil {
-		b, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+		b, err := num.AmountFromString(NormalizeNumericString(ac.BaseAmount.Value))
 		if err != nil {
 			return nil, err
 		}
 		ch.Base = &b
 	}
 	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
+		multiplier := NormalizeNumericString(*ac.MultiplierFactorNumeric)
 		if !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
@@ -86,7 +86,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
-			base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+			base, err := num.AmountFromString(NormalizeNumericString(ac.BaseAmount.Value))
 			if err != nil {
 				return nil, err
 			}
@@ -105,14 +105,14 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 			ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
+			key := BuildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
 		}
 
 		if ac.TaxCategory[0].Percent != nil {
-			percent := normalizeNumericString(*ac.TaxCategory[0].Percent)
+			percent := NormalizeNumericString(*ac.TaxCategory[0].Percent)
 			if !strings.HasSuffix(percent, "%") {
 				percent += "%"
 			}
@@ -137,7 +137,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		d.Reason = *ac.AllowanceChargeReason
 	}
 	if ac.Amount.Value != "" {
-		a, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
+		a, err := num.AmountFromString(NormalizeNumericString(ac.Amount.Value))
 		if err != nil {
 			return nil, err
 		}
@@ -149,14 +149,14 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		})
 	}
 	if ac.BaseAmount != nil {
-		b, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+		b, err := num.AmountFromString(NormalizeNumericString(ac.BaseAmount.Value))
 		if err != nil {
 			return nil, err
 		}
 		d.Base = &b
 	}
 	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
+		multiplier := NormalizeNumericString(*ac.MultiplierFactorNumeric)
 		if !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
@@ -168,7 +168,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
-			base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+			base, err := num.AmountFromString(NormalizeNumericString(ac.BaseAmount.Value))
 			if err != nil {
 				return nil, err
 			}
@@ -187,14 +187,14 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 			d.Taxes[0].Ext = d.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
-			key := buildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
+			key := BuildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
 			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
 				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 			}
 		}
 
 		if ac.TaxCategory[0].Percent != nil {
-			percentStr := normalizeNumericString(*ac.TaxCategory[0].Percent)
+			percentStr := NormalizeNumericString(*ac.TaxCategory[0].Percent)
 			if !strings.HasSuffix(percentStr, "%") {
 				percentStr += "%"
 			}
@@ -214,7 +214,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 }
 
 func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
-	amount, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
+	amount, err := num.AmountFromString(NormalizeNumericString(ac.Amount.Value))
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +230,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		ch.Reason = *ac.AllowanceChargeReason
 	}
 	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
+		multiplier := NormalizeNumericString(*ac.MultiplierFactorNumeric)
 		if !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
@@ -242,7 +242,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
-			base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+			base, err := num.AmountFromString(NormalizeNumericString(ac.BaseAmount.Value))
 			if err != nil {
 				return nil, err
 			}
@@ -253,7 +253,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 }
 
 func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
-	a, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
+	a, err := num.AmountFromString(NormalizeNumericString(ac.Amount.Value))
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		d.Reason = *ac.AllowanceChargeReason
 	}
 	if ac.MultiplierFactorNumeric != nil {
-		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
+		multiplier := NormalizeNumericString(*ac.MultiplierFactorNumeric)
 		if !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
 		}
@@ -281,7 +281,7 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 
 		// Check if there is a base amount
 		if ac.BaseAmount != nil {
-			base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+			base, err := num.AmountFromString(NormalizeNumericString(ac.BaseAmount.Value))
 			if err != nil {
 				return nil, err
 			}
