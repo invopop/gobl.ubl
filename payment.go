@@ -53,7 +53,7 @@ type Branch struct {
 	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
 }
 
-// FinancialInstitution represents a financial institution
+// FinancialInstitution identifies a financial institution by its BIC in cbc:ID.
 type FinancialInstitution struct {
 	ID *string `xml:"cbc:ID"`
 }
