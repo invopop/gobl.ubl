@@ -86,8 +86,8 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		if o.Period != nil {
 			ui.InvoicePeriod = []Period{
 				{
-					StartDate: formatDate(o.Period.Start),
-					EndDate:   formatDate(o.Period.End),
+					StartDate: FormatDate(o.Period.Start),
+					EndDate:   FormatDate(o.Period.End),
 				},
 			}
 		}

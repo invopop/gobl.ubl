@@ -88,7 +88,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	if err := ui.goblAddPayment(out, o); err != nil {
 		return nil, err
 	}
-	if err := ui.goblAddOrdering(out); err != nil {
+	if err := ui.GoblAddOrdering(out); err != nil {
 		return nil, err
 	}
 	if err := ui.goblAddDelivery(out); err != nil {
@@ -109,7 +109,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		}
 	}
 
-	out.Attachments = ui.goblAddAttachments()
+	out.Attachments = ui.GoblAddAttachments()
 	ui.goblAddTaxNotes(out)
 
 	return out, nil
@@ -148,7 +148,7 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
 
 // parseInvoiceDates parses IssueDate, IssueTime, and TaxPointDate (BT-7).
 func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
-	issueDate, err := parseDate(ui.IssueDate)
+	issueDate, err := ParseDate(ui.IssueDate)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 
 	// BT-7: VAT point date
 	if ui.TaxPointDate != "" {
-		vd, err := parseDate(ui.TaxPointDate)
+		vd, err := ParseDate(ui.TaxPointDate)
 		if err != nil {
 			return err
 		}
@@ -192,7 +192,7 @@ func (ui *Invoice) parseInvoiceNotes(out *bill.Invoice) {
 	}
 	out.Notes = make([]*org.Note, 0, len(ui.Note))
 	for _, note := range ui.Note {
-		out.Notes = append(out.Notes, parseNote(note))
+		out.Notes = append(out.Notes, ParseNote(note))
 	}
 }
 
@@ -209,13 +209,13 @@ func (ui *Invoice) parseBillingReferences(out *bill.Invoice) error {
 		)
 		switch {
 		case ref.InvoiceDocumentReference != nil:
-			docRef, err = goblReference(ref.InvoiceDocumentReference)
+			docRef, err = GoblReference(ref.InvoiceDocumentReference)
 		case ref.SelfBilledInvoiceDocumentReference != nil:
-			docRef, err = goblReference(ref.SelfBilledInvoiceDocumentReference)
+			docRef, err = GoblReference(ref.SelfBilledInvoiceDocumentReference)
 		case ref.CreditNoteDocumentReference != nil:
-			docRef, err = goblReference(ref.CreditNoteDocumentReference)
+			docRef, err = GoblReference(ref.CreditNoteDocumentReference)
 		case ref.AdditionalDocumentReference != nil:
-			docRef, err = goblReference(ref.AdditionalDocumentReference)
+			docRef, err = GoblReference(ref.AdditionalDocumentReference)
 		}
 		if err != nil {
 			return err

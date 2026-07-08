@@ -56,7 +56,7 @@ func TestNormalizeNumericString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := normalizeNumericString(tt.input)
+			result := NormalizeNumericString(tt.input)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

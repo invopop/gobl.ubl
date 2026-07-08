@@ -11,15 +11,15 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// cleanString strips the Unicode replacement character (U+FFFD) which can
+// CleanString strips the Unicode replacement character (U+FFFD) which can
 // appear in badly-encoded XML documents and causes canonical JSON
 // serialization to fail.
-func cleanString(s string) string {
+func CleanString(s string) string {
 	return strings.ReplaceAll(s, "\uFFFD", "")
 }
 
-// formatKey formats a string to comply with GOBL key requirements.
-func formatKey(key string) cbc.Key {
+// FormatKey formats a string to comply with GOBL key requirements.
+func FormatKey(key string) cbc.Key {
 	key = strings.ToLower(key)
 	key = strings.ReplaceAll(key, " ", "-")
 	re := regexp.MustCompile(`[^a-z0-9-+]`)
@@ -30,8 +30,8 @@ func formatKey(key string) cbc.Key {
 	return cbc.Key(key)
 }
 
-// goblUnitFromUNECE maps UN/ECE code to GOBL equivalent.
-func goblUnitFromUNECE(unece cbc.Code) org.Unit {
+// GoblUnitFromUNECE maps UN/ECE code to GOBL equivalent.
+func GoblUnitFromUNECE(unece cbc.Code) org.Unit {
 	for _, def := range org.UnitDefinitions {
 		if def.UNECE == unece {
 			return def.Unit
@@ -44,10 +44,10 @@ func goblUnitFromUNECE(unece cbc.Code) org.Unit {
 // UNTDID 4451 text subject qualifier codes, e.g. "#AAI#some text".
 var noteCodePattern = regexp.MustCompile(`^#([A-Z0-9]+)#(.*)$`)
 
-// parseNote converts a raw UBL note string into a GOBL Note. If the string
+// ParseNote converts a raw UBL note string into a GOBL Note. If the string
 // matches the #CODE#text format the code is stored as the untdid text-subject ext.
-func parseNote(text string) *org.Note {
-	text = cleanString(text)
+func ParseNote(text string) *org.Note {
+	text = CleanString(text)
 	if m := noteCodePattern.FindStringSubmatch(text); m != nil {
 		return &org.Note{
 			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(m[1])}),
@@ -57,7 +57,8 @@ func parseNote(text string) *org.Note {
 	return &org.Note{Text: text}
 }
 
-func formatNote(note *org.Note) string {
+// FormatNote renders a GOBL note as its UBL note text.
+func FormatNote(note *org.Note) string {
 	if note == nil {
 		return ""
 	}

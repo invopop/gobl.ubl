@@ -31,13 +31,13 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	out := new(Delivery)
 
 	if del.Date != nil {
-		date := formatDate(*del.Date)
+		date := FormatDate(*del.Date)
 		out.ActualDeliveryDate = &date
 	}
 
 	if del.Period != nil {
-		end := formatDate(del.Period.End)
-		start := formatDate(del.Period.Start)
+		end := FormatDate(del.Period.End)
+		start := FormatDate(del.Period.Start)
 		out.LatestDeliveryDate = &end
 		out.ActualDeliveryDate = &start
 	}

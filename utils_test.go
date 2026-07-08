@@ -25,7 +25,7 @@ func TestParseDate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := parseDate(tt.input)
+			result, err := ParseDate(tt.input)
 			if tt.expectError {
 				assert.Error(t, err)
 				assert.Empty(t, result)
@@ -154,7 +154,7 @@ func TestUnitFromUNECE(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := goblUnitFromUNECE(cbc.Code(tt.input))
+			result := GoblUnitFromUNECE(cbc.Code(tt.input))
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}
@@ -162,12 +162,12 @@ func TestUnitFromUNECE(t *testing.T) {
 
 // Define tests for the FormatKey function
 func TestFormatKey(t *testing.T) {
-	assert.Equal(t, cbc.Key("test"), formatKey("Test"))
-	assert.Equal(t, cbc.Key("test-key-2"), formatKey("Test Key 2"))
-	assert.Equal(t, cbc.Key("multiple-spaces"), formatKey("Multiple   Spaces"))
-	assert.Equal(t, cbc.Key("numbers-123"), formatKey("Numbers 123"))
-	assert.Equal(t, cbc.Key("trailing-space"), formatKey("Trailing Space  "))
-	assert.Equal(t, cbc.Key("mixed-case-with-123-numbers"), formatKey("MiXeD cAsE wItH 123 NuMbErS"))
+	assert.Equal(t, cbc.Key("test"), FormatKey("Test"))
+	assert.Equal(t, cbc.Key("test-key-2"), FormatKey("Test Key 2"))
+	assert.Equal(t, cbc.Key("multiple-spaces"), FormatKey("Multiple   Spaces"))
+	assert.Equal(t, cbc.Key("numbers-123"), FormatKey("Numbers 123"))
+	assert.Equal(t, cbc.Key("trailing-space"), FormatKey("Trailing Space  "))
+	assert.Equal(t, cbc.Key("mixed-case-with-123-numbers"), FormatKey("MiXeD cAsE wItH 123 NuMbErS"))
 }
 
 func TestCalculateRequiredPrecision(t *testing.T) {

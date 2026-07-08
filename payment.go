@@ -183,7 +183,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 		}
 	}
 	if ui.CreditNoteTypeCode != nil && inv.Payment.Terms != nil && len(inv.Payment.Terms.DueDates) > 0 {
-		formattedDate := formatDate(*inv.Payment.Terms.DueDates[0].Date)
+		formattedDate := FormatDate(*inv.Payment.Terms.DueDates[0].Date)
 		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
 	}
 	// BR-KSA-17: Debit and credit note must contain the
@@ -221,6 +221,6 @@ func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
 
 	// Only one due date allowed under EN 16931
 	if ui.CreditNoteTypeCode == nil && len(pymt.Terms.DueDates) > 0 {
-		ui.DueDate = formatDate(*pymt.Terms.DueDates[0].Date)
+		ui.DueDate = FormatDate(*pymt.Terms.DueDates[0].Date)
 	}
 }

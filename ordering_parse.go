@@ -21,16 +21,17 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Identities) > 0
 }
 
-func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
+// GoblAddOrdering maps the UBL order references and period onto the GOBL invoice.
+func (ui *Invoice) GoblAddOrdering(out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
-		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
+		ordering.Code = cbc.Code(CleanString(ui.BuyerReference))
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(ui.InvoicePeriod) > 0 {
-		p, err := goblPeriodDates(&ui.InvoicePeriod[0])
+		p, err := GoblPeriodDates(&ui.InvoicePeriod[0])
 		if err != nil {
 			return err
 		}
@@ -50,7 +51,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	if ui.DespatchDocumentReference != nil {
 		ordering.Despatch = make([]*org.DocumentRef, 0)
 		for _, despatchRef := range ui.DespatchDocumentReference {
-			docRef, err := goblReference(&despatchRef)
+			docRef, err := GoblReference(&despatchRef)
 			if err != nil {
 				return err
 			}
@@ -61,7 +62,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	if ui.ReceiptDocumentReference != nil {
 		ordering.Receiving = make([]*org.DocumentRef, 0)
 		for _, receiptRef := range ui.ReceiptDocumentReference {
-			docRef, err := goblReference(&receiptRef)
+			docRef, err := GoblReference(&receiptRef)
 			if err != nil {
 				return err
 			}
@@ -95,7 +96,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	if ui.ContractDocumentReference != nil {
 		ordering.Contracts = make([]*org.DocumentRef, 0)
 		for _, contractRef := range ui.ContractDocumentReference {
-			docRef, err := goblReference(&contractRef)
+			docRef, err := GoblReference(&contractRef)
 			if err != nil {
 				return err
 			}
@@ -106,7 +107,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	if ui.OriginatorDocumentReference != nil {
 		ordering.Tender = make([]*org.DocumentRef, 0)
 		for _, tenderRef := range ui.OriginatorDocumentReference {
-			docRef, err := goblReference(&tenderRef)
+			docRef, err := GoblReference(&tenderRef)
 			if err != nil {
 				return err
 			}
@@ -141,7 +142,8 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	return nil
 }
 
-func goblReference(ref *Reference) (*org.DocumentRef, error) {
+// GoblReference maps a UBL document reference to a GOBL document ref.
+func GoblReference(ref *Reference) (*org.DocumentRef, error) {
 	docRef := &org.DocumentRef{
 		Code: cbc.Code(ref.ID.Value),
 	}
@@ -149,7 +151,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.Type = cbc.Key(ref.DocumentType)
 	}
 	if ref.IssueDate != "" {
-		refDate, err := parseDate(ref.IssueDate)
+		refDate, err := ParseDate(ref.IssueDate)
 		if err != nil {
 			return nil, err
 		}
@@ -159,10 +161,10 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.DocumentTypeCode))
 	}
 	if ref.DocumentDescription != "" {
-		docRef.Description = cleanString(ref.DocumentDescription)
+		docRef.Description = CleanString(ref.DocumentDescription)
 	}
 	if ref.ValidityPeriod != nil {
-		p, err := goblPeriodDates(ref.ValidityPeriod)
+		p, err := GoblPeriodDates(ref.ValidityPeriod)
 		if err != nil {
 			return nil, err
 		}
@@ -171,20 +173,21 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 	return docRef, nil
 }
 
-func goblPeriodDates(invoicePeriod *Period) (*cal.Period, error) {
+// GoblPeriodDates maps a UBL period to a GOBL cal.Period.
+func GoblPeriodDates(invoicePeriod *Period) (*cal.Period, error) {
 	if invoicePeriod.StartDate == "" && invoicePeriod.EndDate == "" {
 		return nil, nil
 	}
 	period := &cal.Period{}
 	if invoicePeriod.StartDate != "" {
-		start, err := parseDate(invoicePeriod.StartDate)
+		start, err := ParseDate(invoicePeriod.StartDate)
 		if err != nil {
 			return nil, err
 		}
 		period.Start = start
 	}
 	if invoicePeriod.EndDate != "" {
-		end, err := parseDate(invoicePeriod.EndDate)
+		end, err := ParseDate(invoicePeriod.EndDate)
 		if err != nil {
 			return nil, err
 		}

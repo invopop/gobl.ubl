@@ -135,26 +135,26 @@ func getTypeCode(inv *bill.Invoice) (string, error) {
 	return inv.Tax.Ext.Get(untdid.ExtKeyDocumentType).String(), nil
 }
 
-// buildTaxCategoryKey constructs a unique key for a tax category from its scheme ID and category ID.
+// BuildTaxCategoryKey constructs a unique key for a tax category from its scheme ID and category ID.
 // For standard-rate "S" entries the normalized percent is also included, since a single invoice can
 // have multiple S subtotals at different rates (e.g. 10% and 20%). For all other categories (E, K,
 // AE, Z, etc.) there is at most one entry per scheme+category, so the percent is omitted to allow
 // lines and charges that omit the percent element to still match.
 // The percent is normalized so that "20", "20.0", and "20.00" all produce the same key.
-func buildTaxCategoryKey(taxSchemeID, categoryID string, percent *string) string {
+func BuildTaxCategoryKey(taxSchemeID, categoryID string, percent *string) string {
 	if categoryID == "S" {
-		return taxSchemeID + ":" + categoryID + ":" + normalizeTaxPercent(percent)
+		return taxSchemeID + ":" + categoryID + ":" + NormalizeTaxPercent(percent)
 	}
 	return taxSchemeID + ":" + categoryID
 }
 
-// normalizeTaxPercent converts a percent string to a canonical form by stripping trailing zeros,
+// NormalizeTaxPercent converts a percent string to a canonical form by stripping trailing zeros,
 // so that "20", "20.0", and "20.00" all map to "20".
-func normalizeTaxPercent(percent *string) string {
+func NormalizeTaxPercent(percent *string) string {
 	if percent == nil {
 		return ""
 	}
-	s := normalizeNumericString(*percent)
+	s := NormalizeNumericString(*percent)
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return s
@@ -162,11 +162,11 @@ func normalizeTaxPercent(percent *string) string {
 	return strconv.FormatFloat(f, 'f', -1, 64)
 }
 
-// normalizeNumericString cleans up numeric strings to ensure they can be parsed correctly.
+// NormalizeNumericString cleans up numeric strings to ensure they can be parsed correctly.
 // It handles:
 // - Leading/trailing whitespace (e.g., " 123.45 " -> "123.45")
 // - Numbers starting with decimal point (e.g., ".07" -> "0.07")
-func normalizeNumericString(s string) string {
+func NormalizeNumericString(s string) string {
 	// Trim whitespace
 	s = strings.TrimSpace(s)
 
