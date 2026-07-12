@@ -13,12 +13,14 @@ import (
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
 	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
+	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
 	PaymentID             *string           `xml:"cbc:PaymentID"`
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
+	CreditAccount         *CreditAccount    `xml:"cac:CreditAccount"`
 	PaymentMandate        *PaymentMandate   `xml:"cac:PaymentMandate"`
 }
 
@@ -46,13 +48,25 @@ type FinancialAccount struct {
 
 // Branch represents a branch of a financial institution
 type Branch struct {
-	ID   *string `xml:"cbc:ID"`
-	Name *string `xml:"cbc:Name"`
+	ID                   *string               `xml:"cbc:ID"`
+	Name                 *string               `xml:"cbc:Name"`
+	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
+}
+
+// FinancialInstitution identifies a financial institution by its BIC in cbc:ID.
+type FinancialInstitution struct {
+	ID *string `xml:"cbc:ID"`
+}
+
+// CreditAccount represents a credit account (e.g. the Danish Giro/FIK account)
+type CreditAccount struct {
+	AccountID string `xml:"cbc:AccountID"`
 }
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	Note string `xml:"cbc:Note"`
+	Note   string  `xml:"cbc:Note,omitempty"`
+	Amount *Amount `xml:"cbc:Amount,omitempty"`
 }
 
 // PrepaidPayment represents a prepaid payment
