@@ -51,7 +51,7 @@ func goblParty(party *Party, o *options) *org.Party {
 
 	if party.PostalAddress != nil {
 		p.Addresses = []*org.Address{
-			parseAddress(party.PostalAddress),
+			ParseAddress(party.PostalAddress),
 		}
 	}
 
@@ -72,17 +72,17 @@ func goblParty(party *Party, o *options) *org.Party {
 		}
 	}
 
-	handleLegalEntityIdentity(party, p)
+	HandleLegalEntityIdentity(party, p)
 	handlePartyTaxSchemes(party, p)
 	handlePartyIdentifications(party, p, o)
 
 	return p
 }
 
-// goblDeliveryParty creates a GOBL party with only the BTs available
+// GoblDeliveryParty creates a GOBL party with only the BTs available
 // for the delivery party (BT-70 name). Address is handled separately
 // via DeliveryLocation.
-func goblDeliveryParty(party *Party) *org.Party {
+func GoblDeliveryParty(party *Party) *org.Party {
 	if party == nil {
 		return nil
 	}
@@ -103,7 +103,8 @@ func goblDeliveryParty(party *Party) *org.Party {
 	return p
 }
 
-func parseAddress(address *PostalAddress) *org.Address {
+// ParseAddress builds a GOBL org.Address from a UBL PostalAddress.
+func ParseAddress(address *PostalAddress) *org.Address {
 	if address == nil {
 		return nil
 	}
@@ -138,7 +139,8 @@ func parseAddress(address *PostalAddress) *org.Address {
 	return addr
 }
 
-func handleLegalEntityIdentity(party *Party, p *org.Party) {
+// HandleLegalEntityIdentity restores a party's PartyLegalEntity/CompanyID as a legal-scope GOBL identity.
+func HandleLegalEntityIdentity(party *Party, p *org.Party) {
 	if party.PartyLegalEntity == nil || party.PartyLegalEntity.CompanyID == nil {
 		return
 	}

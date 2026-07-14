@@ -98,7 +98,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	if err := ui.GoblAddOrdering(out); err != nil {
 		return nil, err
 	}
-	if err := ui.goblAddDelivery(out); err != nil {
+	if err := ui.GoblAddDelivery(out); err != nil {
 		return nil, err
 	}
 

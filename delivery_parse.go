@@ -7,7 +7,8 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
+// GoblAddDelivery parses the UBL Delivery block(s) into GOBL delivery details.
+func (ui *Invoice) GoblAddDelivery(out *bill.Invoice) error {
 	d := &bill.DeliveryDetails{}
 
 	// Only one delivery Location and Receiver are supported, so if more than one is passed the former will be overwritten
@@ -50,14 +51,14 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 				d.Identities = []*org.Identity{id}
 			}
 			if del.DeliveryParty != nil {
-				d.Receiver = goblDeliveryParty(del.DeliveryParty)
+				d.Receiver = GoblDeliveryParty(del.DeliveryParty)
 			}
 			if del.DeliveryLocation != nil && del.DeliveryLocation.Address != nil {
 				if d.Receiver == nil {
 					d.Receiver = new(org.Party)
 				}
 				d.Receiver.Addresses = []*org.Address{
-					parseAddress(del.DeliveryLocation.Address),
+					ParseAddress(del.DeliveryLocation.Address),
 				}
 			}
 		}
