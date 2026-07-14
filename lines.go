@@ -33,7 +33,8 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyclo
+// AddLines builds InvoiceLine/CreditNoteLine entries from the GOBL invoice's lines.
+func (ui *Invoice) AddLines(inv *bill.Invoice, context Context) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -109,7 +110,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		}
 
 		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
+			invLine.AllowanceCharge = MakeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
 		}
 
 		// Line VAT amount (KSA-11) is mandatory for tax
@@ -252,17 +253,18 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 	}
 }
 
-// rescaleToCurrency rounds the amount to the natural precision of the given
+// RescaleToCurrency rounds the amount to the natural precision of the given
 // currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
 // existing precision if the currency code is unknown.
-func rescaleToCurrency(a num.Amount, ccy string) string {
+func RescaleToCurrency(a num.Amount, ccy string) string {
 	if def := currency.Code(ccy).Def(); def != nil {
 		return def.Rescale(a).String()
 	}
 	return a.String()
 }
 
-func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
+// MakeLineCharges builds a line's AllowanceCharge entries from its GOBL charges and discounts.
+func MakeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
 	// BR-DEC-24 / UBL-DT-01: line allowance and charge amounts (BT-136/BT-141)
 	// and their base amounts must match the currency's natural precision.
@@ -271,7 +273,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	var base *Amount
 	if baseSum != nil {
 		base = &Amount{
-			Value:      rescaleToCurrency(*baseSum, ccy),
+			Value:      RescaleToCurrency(*baseSum, ccy),
 			CurrencyID: &ccy,
 		}
 	}
@@ -279,7 +281,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
 			Amount: Amount{
-				Value:      rescaleToCurrency(ch.Amount, ccy),
+				Value:      RescaleToCurrency(ch.Amount, ccy),
 				CurrencyID: &ccy,
 			},
 		}
@@ -302,7 +304,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
 			Amount: Amount{
-				Value:      rescaleToCurrency(d.Amount, ccy),
+				Value:      RescaleToCurrency(d.Amount, ccy),
 				CurrencyID: &ccy,
 			},
 		}

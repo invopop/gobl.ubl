@@ -18,7 +18,8 @@ type AllowanceCharge struct {
 	TaxCategory               []*TaxCategory `xml:"cac:TaxCategory"`
 }
 
-func (ui *Invoice) addCharges(inv *bill.Invoice) {
+// AddCharges builds document-level AllowanceCharge entries from the GOBL invoice's charges and discounts.
+func (ui *Invoice) AddCharges(inv *bill.Invoice) {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return
 	}
@@ -58,7 +59,7 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 		}
 	}
 	if ch.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(ch.Taxes)
+		c.TaxCategory = MakeTaxCategory(ch.Taxes)
 	}
 
 	return c
@@ -89,13 +90,14 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) Allowance
 		}
 	}
 	if d.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(d.Taxes)
+		c.TaxCategory = MakeTaxCategory(d.Taxes)
 	}
 
 	return c
 }
 
-func makeTaxCategory(taxes tax.Set) []*TaxCategory {
+// MakeTaxCategory builds TaxCategory entries from a GOBL tax set.
+func MakeTaxCategory(taxes tax.Set) []*TaxCategory {
 	set := []*TaxCategory{}
 	for _, t := range taxes {
 		category := TaxCategory{}

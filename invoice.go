@@ -139,8 +139,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
-		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
+		AccountingSupplierParty: SupplierParty{Party: NewParty(inv.Supplier, o.context)},
+		AccountingCustomerParty: CustomerParty{Party: NewParty(inv.Customer, o.context)},
 	}
 
 	// ProfileID is omitted when empty; when present it only carries a value here
@@ -207,15 +207,15 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addPreceding(inv.Preceding)
 	out.addOrdering(inv.Ordering, o.context)
 	out.addTaxPoint(inv.Tax)
-	out.addCharges(inv)
+	out.AddCharges(inv)
 	out.addTotals(inv, o.context)
-	out.addLines(inv, o.context)
+	out.AddLines(inv, o.context)
 	out.AddAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv, o.context); err != nil {
+	if err = out.AddPayment(inv, o.context); err != nil {
 		return nil, err
 	}
-	if d := newDelivery(inv.Delivery, o.context); d != nil {
+	if d := NewDelivery(inv.Delivery, o.context); d != nil {
 		out.Delivery = []*Delivery{d}
 	}
 

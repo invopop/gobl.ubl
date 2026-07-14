@@ -79,7 +79,8 @@ type PrepaidPayment struct {
 
 const sepaSchemeID = "SEPA"
 
-func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
+// AddPayment populates PaymentMeans, PayeeParty, PaymentTerms, and PrepaidPayment from the GOBL invoice's payment details.
+func (ui *Invoice) AddPayment(inv *bill.Invoice, ctx Context) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
 	}
@@ -92,11 +93,11 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	}
 
 	if pymt.Terms != nil {
-		ui.addPaymentTerms(pymt)
+		ui.AddPaymentTerms(pymt)
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newPayeeParty(pymt.Payee)
+		ui.PayeeParty = NewPayeeParty(pymt.Payee)
 	}
 
 	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
@@ -113,7 +114,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 		if ui.PaymentMeans[0].PaymentMandate == nil {
 			ui.PaymentMeans[0].PaymentMandate = new(PaymentMandate)
 		}
-		ui.PaymentMeans[0].PaymentMandate.PayerParty = newParty(pymt.Payer, ctx)
+		ui.PaymentMeans[0].PaymentMandate.PayerParty = NewParty(pymt.Payer, ctx)
 	}
 
 	// BT-90: Bank assigned creditor identifier
@@ -212,7 +213,8 @@ func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 	return pfa
 }
 
-func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {
+// AddPaymentTerms sets PaymentTerms from the GOBL payment details' notes and due amount.
+func (ui *Invoice) AddPaymentTerms(pymt *bill.PaymentDetails) {
 	if pymt.Terms.Notes != "" {
 		ui.PaymentTerms = &PaymentTerms{
 			Note: pymt.Terms.Notes,
