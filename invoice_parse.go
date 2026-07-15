@@ -36,13 +36,17 @@ var InvoiceTagMap = map[string][]cbc.Key{
 // It automatically detects the context based on CustomizationID and ProfileID.
 // Binary attachments are ignored during conversion - use ExtractBinaryAttachments
 // to retrieve them separately.
-func (ui *Invoice) Convert() (*gobl.Envelope, error) {
+func (ui *Invoice) Convert(opts ...Option) (*gobl.Envelope, error) {
 	o := new(options)
-
-	// Detect context from the invoice
-	ctx := FindContext(ui.CustomizationID, ui.profileID())
-	if ctx != nil {
+	// Detect the context from the invoice first; callers may then override it
+	// (and supply routing) via opts.
+	if ctx := FindContext(ui.CustomizationID, ui.profileID()); ctx != nil {
 		o.context = *ctx
+	}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(o)
+		}
 	}
 
 	inv, err := ui.goblInvoice(o)
@@ -51,6 +55,9 @@ func (ui *Invoice) Convert() (*gobl.Envelope, error) {
 	}
 
 	env := gobl.NewEnvelope()
+	// Received document: record the transport routing before calculation so
+	// GOBL respects it instead of deriving an outgoing-direction guess.
+	setEnvelopeRouting(env, o)
 	if err := env.Insert(inv); err != nil {
 		return nil, err
 	}

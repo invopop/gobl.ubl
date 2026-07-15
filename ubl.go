@@ -13,6 +13,19 @@ import (
 	"github.com/invopop/xmlctx"
 )
 
+// setEnvelopeRouting records the transport addresses the document was received
+// with (opts' WithRouting) on the envelope's Head.From / Head.To, BEFORE the
+// envelope is calculated. The addresses are the fully-qualified participant
+// URIs the routing layer supplies and are recorded verbatim. GOBL's
+// normalizeRouting only fills empty routing fields, so setting them first makes
+// it respect them rather than derive them from the document assuming an
+// outgoing (supplier→customer) direction — wrong for a received document.
+// Applies to any document type.
+func setEnvelopeRouting(env *gobl.Envelope, o *options) {
+	env.Head.From = o.from
+	env.Head.To = o.to
+}
+
 var (
 	// ErrUnknownDocumentType is returned when the document type
 	// is not recognized during parsing.
