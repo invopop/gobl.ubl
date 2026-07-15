@@ -125,6 +125,8 @@ func isFrenchBillingMode(profileID string) bool {
 
 type options struct {
 	context Context
+	from    cbc.URI
+	to      cbc.URI
 }
 
 // Option is used to define configuration options to use during
@@ -136,6 +138,18 @@ type Option func(*options)
 func WithContext(c Context) Option {
 	return func(o *options) {
 		o.context = c
+	}
+}
+
+// WithRouting supplies the transport addresses the receiving app was routed
+// with (the Peppol SBD From / To — who sent the document, who received it).
+// They are recorded verbatim on the parsed envelope's Head.From / Head.To,
+// regardless of the document type, so a received document is never mislabelled
+// with GOBL's document-derived, outgoing-direction guess. See Invoice.Convert.
+func WithRouting(from, to cbc.URI) Option {
+	return func(o *options) {
+		o.from = from
+		o.to = to
 	}
 }
 
