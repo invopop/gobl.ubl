@@ -70,6 +70,28 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "0088", *doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
 	})
 
+	t.Run("registration maps to CompanyLegalForm for supplier and customer", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		// BT-33: additional legal information (cbc:CompanyLegalForm).
+		inv.Supplier.Registration = &org.Registration{Other: "Share capital 100.000 EUR"}
+		inv.Customer.Registration = &org.Registration{Other: "GmbH"}
+
+		require.NoError(t, env.Calculate())
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		require.NotNil(t, doc.AccountingSupplierParty.Party.PartyLegalEntity)
+		require.NotNil(t, doc.AccountingSupplierParty.Party.PartyLegalEntity.CompanyLegalForm)
+		assert.Equal(t, "Share capital 100.000 EUR", *doc.AccountingSupplierParty.Party.PartyLegalEntity.CompanyLegalForm)
+
+		require.NotNil(t, doc.AccountingCustomerParty.Party.PartyLegalEntity)
+		require.NotNil(t, doc.AccountingCustomerParty.Party.PartyLegalEntity.CompanyLegalForm)
+		assert.Equal(t, "GmbH", *doc.AccountingCustomerParty.Party.PartyLegalEntity.CompanyLegalForm)
+	})
+
 	t.Run("norwegian VAT numbers carry the MVA suffix", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-complete.json")
 		inv, ok := env.Extract().(*bill.Invoice)
