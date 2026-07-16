@@ -17,7 +17,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	var discounts []*bill.Discount
 
 	// Build tax category map from TaxTotal
-	taxCategoryMap := ui.buildTaxCategoryMap()
+	taxCategoryMap := ui.BuildTaxCategoryMap()
 
 	for _, allowanceCharge := range ui.AllowanceCharge {
 		if allowanceCharge.ChargeIndicator {
@@ -49,7 +49,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	return nil
 }
 
-func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Charge, error) {
+func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]string) (*bill.Charge, error) {
 	ch := &bill.Charge{}
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
@@ -106,8 +106,8 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 
 			// Look up exemption code from TaxTotal
 			key := BuildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
-			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-				ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
+			if code, ok := taxCategoryMap[key]; ok && code != "" {
+				ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(code))
 			}
 		}
 
@@ -131,7 +131,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 	return ch, nil
 }
 
-func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Discount, error) {
+func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]string) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
@@ -188,8 +188,8 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 
 			// Look up exemption code from TaxTotal
 			key := BuildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
-			if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
+			if code, ok := taxCategoryMap[key]; ok && code != "" {
+				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(code))
 			}
 		}
 

@@ -147,14 +147,10 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 	}
 }
 
-// taxCategoryInfo holds tax category information from TaxTotal
-type taxCategoryInfo struct {
-	exemptionReasonCode string
-}
-
-// buildTaxCategoryMap builds a map of tax category information from TaxTotal.
-func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
-	categoryMap := make(map[string]*taxCategoryInfo)
+// BuildTaxCategoryMap builds a map, keyed by BuildTaxCategoryKey, of each
+// subtotal's VATEX exemption reason code (empty when it carries none).
+func (ui *Invoice) BuildTaxCategoryMap() map[string]string {
+	categoryMap := make(map[string]string)
 
 	for _, taxTotal := range ui.TaxTotal {
 		for _, subtotal := range taxTotal.TaxSubtotal {
@@ -162,11 +158,11 @@ func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 				schemeID := subtotal.TaxCategory.TaxScheme.ID.Value
 				categoryID := subtotal.TaxCategory.ID.Value
 				key := BuildTaxCategoryKey(schemeID, categoryID, subtotal.TaxCategory.Percent)
-				info := &taxCategoryInfo{}
+				var code string
 				if subtotal.TaxCategory.TaxExemptionReasonCode != nil {
-					info.exemptionReasonCode = *subtotal.TaxCategory.TaxExemptionReasonCode
+					code = *subtotal.TaxCategory.TaxExemptionReasonCode
 				}
-				categoryMap[key] = info
+				categoryMap[key] = code
 			}
 		}
 	}

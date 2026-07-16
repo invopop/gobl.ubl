@@ -24,7 +24,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	out.Lines = make([]*bill.Line, 0, len(items))
 
 	// Build tax category map from TaxTotal
-	taxCategoryMap := ui.buildTaxCategoryMap()
+	taxCategoryMap := ui.BuildTaxCategoryMap()
 
 	for _, docLine := range items {
 		line, err := goblConvertLine(&docLine, taxCategoryMap)
@@ -39,7 +39,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	return nil
 }
 
-func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]string) (*bill.Line, error) {
 	if docLine.Price == nil {
 		// skip this line
 		return nil, nil
@@ -58,7 +58,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		if !baseQuantity.IsZero() {
 			// Calculate required precision dynamically to avoid rounding errors
 			// Formula: price_decimals + ceil(log10(base_quantity))
-			precision := calculateRequiredPrecision(price, baseQuantity)
+			precision := CalculateRequiredPrecision(price, baseQuantity)
 			price = price.RescaleUp(precision).Divide(baseQuantity)
 		}
 	}
@@ -70,7 +70,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		},
 	}
 	if di := docLine.Item; di != nil {
-		goblConvertLineItem(di, line.Item)
+		GoblConvertLineItem(di, line.Item)
 		goblConvertLineItemTaxes(di, line, taxCategoryMap)
 	}
 
@@ -142,11 +142,11 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 	return line, nil
 }
 
-// calculateRequiredPrecision determines the decimal precision needed when
+// CalculateRequiredPrecision determines the decimal precision needed when
 // dividing a price by a base quantity to avoid rounding errors.
 // Formula: price_decimals + ceil(log10(base_quantity))
 // Example: price with 2 decimals divided by 100 needs 2 + 2 = 4 decimals
-func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
+func CalculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
 	priceExp := price.Exp()
 
 	// Convert baseQuantity to a whole number to calculate needed decimal places
@@ -162,7 +162,7 @@ func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
 	return priceExp + additionalDecimals
 }
 
-func goblConvertLineItem(di *Item, item *org.Item) {
+func GoblConvertLineItem(di *Item, item *org.Item) {
 	if di.Name != "" {
 		item.Name = CleanString(di.Name)
 	}
@@ -178,7 +178,7 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 		item.Ref = cbc.Code(di.SellersItemIdentification.ID.Value)
 	}
 
-	item.Identities = goblItemIdentities(di)
+	item.Identities = GoblItemIdentities(di)
 
 	if di.AdditionalItemProperty != nil {
 		item.Meta = make(cbc.Meta)
@@ -191,7 +191,7 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 	}
 }
 
-func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo) {
+func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]string) {
 	ctc := di.ClassifiedTaxCategory
 	if ctc == nil || ctc.TaxScheme == nil {
 		return
@@ -209,8 +209,8 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 
 		// Try to get exemption code from TaxTotal
 		key := BuildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value, ctc.Percent)
-		if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
+		if code, ok := taxCategoryMap[key]; ok && code != "" {
+			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(code))
 		}
 
 	}
@@ -235,11 +235,11 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 	}
 }
 
-func goblItemIdentities(di *Item) []*org.Identity {
+func GoblItemIdentities(di *Item) []*org.Identity {
 	ids := make([]*org.Identity, 0)
 
 	if di.BuyersItemIdentification != nil && di.BuyersItemIdentification.ID != nil {
-		id := goblIdentity(di.BuyersItemIdentification.ID)
+		id := GoblIdentity(di.BuyersItemIdentification.ID)
 		if id != nil {
 			ids = append(ids, id)
 		}
@@ -262,7 +262,7 @@ func goblItemIdentities(di *Item) []*org.Identity {
 
 	if di.CommodityClassification != nil && len(*di.CommodityClassification) > 0 {
 		for _, classification := range *di.CommodityClassification {
-			id := goblIdentity(classification.ItemClassificationCode)
+			id := GoblIdentity(classification.ItemClassificationCode)
 			if id != nil {
 				ids = append(ids, id)
 			}
@@ -272,7 +272,7 @@ func goblItemIdentities(di *Item) []*org.Identity {
 	return ids
 }
 
-func goblIdentity(id *IDType) *org.Identity {
+func GoblIdentity(id *IDType) *org.Identity {
 	if id == nil {
 		return nil
 	}

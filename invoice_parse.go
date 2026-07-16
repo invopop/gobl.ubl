@@ -84,7 +84,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	ui.applyContextTaxExtensions(out, o)
 	ui.resolveInvoiceType(out, o)
 
-	if err := ui.parseInvoiceDates(out); err != nil {
+	if err := ui.ParseInvoiceDates(out); err != nil {
 		return nil, err
 	}
 	ui.applyExchangeRates(out)
@@ -102,7 +102,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		return nil, err
 	}
 
-	ui.parseInvoiceNotes(out)
+	ui.ParseInvoiceNotes(out)
 
 	if err := ui.parseBillingReferences(out); err != nil {
 		return nil, err
@@ -147,14 +147,14 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
-	out.Type = typeCodeParse(typeCode)
-	if tags := tagCodeParse(typeCode, o.context); len(tags) != 0 {
+	out.Type = TypeCodeParse(typeCode)
+	if tags := TagCodeParse(typeCode, o.context); len(tags) != 0 {
 		out.SetTags(tags...)
 	}
 }
 
-// parseInvoiceDates parses IssueDate, IssueTime, and TaxPointDate (BT-7).
-func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
+// ParseInvoiceDates parses IssueDate, IssueTime, and TaxPointDate (BT-7).
+func (ui *Invoice) ParseInvoiceDates(out *bill.Invoice) error {
 	issueDate, err := ParseDate(ui.IssueDate)
 	if err != nil {
 		return err
@@ -192,8 +192,8 @@ func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
 	}
 }
 
-// parseInvoiceNotes copies document-level notes into the GOBL invoice.
-func (ui *Invoice) parseInvoiceNotes(out *bill.Invoice) {
+// ParseInvoiceNotes copies document-level notes into the GOBL invoice.
+func (ui *Invoice) ParseInvoiceNotes(out *bill.Invoice) {
 	if len(ui.Note) == 0 {
 		return
 	}
@@ -262,11 +262,11 @@ func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice, o *options) {
 	out.Supplier = goblParty(ui.TaxRepresentativeParty, o)
 }
 
-// typeCodeParse maps the UBL document type code (UNTDID 1001) to its GOBL
+// TypeCodeParse maps the UBL document type code (UNTDID 1001) to its GOBL
 // invoice type. The ZATCA transaction-type flags carried in typeCode.Name are
-// are mapped to tags by tagCodeParse.
+// are mapped to tags by TagCodeParse.
 // Source: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
-func typeCodeParse(typeCode *IDType) cbc.Key {
+func TypeCodeParse(typeCode *IDType) cbc.Key {
 	if typeCode == nil {
 		return bill.InvoiceTypeOther
 	}
@@ -276,8 +276,8 @@ func typeCodeParse(typeCode *IDType) cbc.Key {
 	return bill.InvoiceTypeOther
 }
 
-// tagCodeParse maps UBL invoice type to GOBL equivalent tax tag.
-func tagCodeParse(typeCode *IDType, ctx Context) []cbc.Key {
+// TagCodeParse maps UBL invoice type to GOBL equivalent tax tag.
+func TagCodeParse(typeCode *IDType, ctx Context) []cbc.Key {
 	var tags []cbc.Key
 	if typeCode == nil {
 		return tags

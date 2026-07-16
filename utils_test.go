@@ -57,7 +57,7 @@ func TestTypeCodeParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := typeCodeParse(&IDType{Value: tt.input})
+			result := TypeCodeParse(&IDType{Value: tt.input})
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}
@@ -80,7 +80,7 @@ func TestTagCodeParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tagCodeParse(&IDType{Value: tt.input}, Context{})
+			result := TagCodeParse(&IDType{Value: tt.input}, Context{})
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -104,7 +104,7 @@ func TestTypeCodeParseZATCA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			code := tt.code
-			result := typeCodeParse(&IDType{Value: tt.value, Name: &code})
+			result := TypeCodeParse(&IDType{Value: tt.value, Name: &code})
 			assert.Equal(t, tt.expected, string(result))
 		})
 	}
@@ -132,7 +132,7 @@ func TestTagCodeParseZATCA(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			code := tt.code
-			result := tagCodeParse(&IDType{Name: &code}, ContextZATCA)
+			result := TagCodeParse(&IDType{Name: &code}, ContextZATCA)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -246,7 +246,7 @@ func TestCalculateRequiredPrecision(t *testing.T) {
 			baseQty, err := num.AmountFromString(tt.baseQuantity)
 			assert.NoError(t, err)
 
-			result := calculateRequiredPrecision(price, baseQty)
+			result := CalculateRequiredPrecision(price, baseQty)
 			assert.Equal(t, tt.expected, result)
 		})
 	}
