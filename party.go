@@ -143,6 +143,14 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 	}
 
+	// BT-33: additional legal information (cbc:CompanyLegalForm)
+	if party.Registration != nil && party.Registration.Other != "" {
+		if p.PartyLegalEntity == nil {
+			p.PartyLegalEntity = &PartyLegalEntity{}
+		}
+		p.PartyLegalEntity.CompanyLegalForm = &party.Registration.Other
+	}
+
 	contact := &Contact{}
 
 	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {

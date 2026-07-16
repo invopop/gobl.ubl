@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bed7c079ba1f06d65d5d80337e1f4518e4b8998c66577586a3e0d71b5b81e961"
+			"val": "c3c224719103d2feff58506fd5f98288784e6e7f6bcd6a5a00b729b7eb9c874f"
 		}
 	},
 	"doc": {
@@ -352,7 +352,10 @@
 					{
 						"num": "+3198989898"
 					}
-				]
+				],
+				"registration": {
+					"other": "Export"
+				}
 			},
 			"projects": [
 				{

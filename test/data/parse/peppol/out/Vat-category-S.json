@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "443a92b49a6d800f948b6961cf2552a17d108ab61e6d2f0a16aa459cf6693839"
+			"val": "f1a1aa239a54364209e5ac0991105031d43b7a713b31a45d6c865b1a638730fe"
 		}
 	},
 	"doc": {
@@ -74,7 +74,10 @@
 				{
 					"num": "9384203984"
 				}
-			]
+			],
+			"registration": {
+				"other": "AdditionalLegalInformation"
+			}
 		},
 		"customer": {
 			"name": "Buyer Official Name",
