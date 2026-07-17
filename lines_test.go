@@ -87,4 +87,25 @@ func TestNewLines(t *testing.T) {
 		assert.Equal(t, "61.9008", l2.Price.PriceAmount.Value)
 	})
 
+	// Covers 826af66: a line charge/discount with its own explicit Base must
+	// use that Base for cbc:BaseAmount, not the line's sum.
+	t.Run("invoice-charge-explicit-base.json", func(t *testing.T) {
+		doc := testInvoiceFrom(t, "invoice-charge-explicit-base.json")
+
+		require.Len(t, doc.InvoiceLines, 1)
+		line := doc.InvoiceLines[0]
+		require.Len(t, line.AllowanceCharge, 2)
+
+		charge := line.AllowanceCharge[0]
+		require.True(t, charge.ChargeIndicator)
+		require.NotNil(t, charge.BaseAmount)
+		assert.Equal(t, "200.00", charge.BaseAmount.Value, "should use the charge's own base, not the line sum")
+		assert.Equal(t, "20.00", charge.Amount.Value)
+
+		discount := line.AllowanceCharge[1]
+		require.False(t, discount.ChargeIndicator)
+		require.NotNil(t, discount.BaseAmount)
+		assert.Equal(t, "400.00", discount.BaseAmount.Value, "should use the discount's own base, not the line sum")
+		assert.Equal(t, "20.00", discount.Amount.Value)
+	})
 }

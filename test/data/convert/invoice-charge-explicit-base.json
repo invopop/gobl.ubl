@@ -1,0 +1,159 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a3",
+		"dig": {
+			"alg": "sha256",
+			"val": "2833e56f484ebb3a9ca08a2c4ab59a2f3fadae6613808c7105c36682c4e11f3c"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "DE",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a3",
+		"type": "standard",
+		"series": "SAMPLE",
+		"code": "002",
+		"issue_date": "2024-05-15",
+		"currency": "EUR",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Provide One GmbH",
+			"tax_id": {
+				"country": "DE",
+				"code": "111111125"
+			},
+			"addresses": [
+				{
+					"num": "16",
+					"street": "Dietmar-Hopp-Allee",
+					"locality": "Walldorf",
+					"code": "69190",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "billing@example.com"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Consumer",
+			"tax_id": {
+				"country": "DE",
+				"code": "282741168"
+			},
+			"addresses": [
+				{
+					"num": "25",
+					"street": "Werner-Heisenberg-Allee",
+					"locality": "München",
+					"code": "80939",
+					"country": "DE"
+				}
+			],
+			"emails": [
+				{
+					"addr": "email@sample.com"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Development services",
+					"price": "100.00",
+					"unit": "h"
+				},
+				"sum": "1000.00",
+				"charges": [
+					{
+						"reason": "Line charge on a different base",
+						"percent": "10%",
+						"base": "200.00"
+					}
+				],
+				"discounts": [
+					{
+						"reason": "Line discount on a different base",
+						"percent": "5%",
+						"base": "400.00"
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1000.00"
+			}
+		],
+		"charges": [
+			{
+				"reason": "Document charge on a different base",
+				"percent": "10%",
+				"base": "300.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			}
+		],
+		"discounts": [
+			{
+				"reason": "Document discount on a different base",
+				"percent": "5%",
+				"base": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "19%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				]
+			}
+		],
+		"payment": {
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"ref": "0003434323213231",
+				"credit_transfer": [
+					{
+						"iban": "NO9386011117947",
+						"bic": "DNBANOKK"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		}
+	}
+}
