@@ -162,6 +162,8 @@ func CalculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
 	return priceExp + additionalDecimals
 }
 
+// GoblConvertLineItem maps a UBL line item's name, description, origin,
+// seller reference, identities and additional properties onto a GOBL item.
 func GoblConvertLineItem(di *Item, item *org.Item) {
 	if di.Name != "" {
 		item.Name = CleanString(di.Name)
@@ -235,6 +237,8 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 	}
 }
 
+// GoblItemIdentities collects a line item's buyer/standard/commodity
+// identifications into GOBL identities.
 func GoblItemIdentities(di *Item) []*org.Identity {
 	ids := make([]*org.Identity, 0)
 
@@ -272,6 +276,8 @@ func GoblItemIdentities(di *Item) []*org.Identity {
 	return ids
 }
 
+// GoblIdentity builds a GOBL identity from a UBL identifier, labeling it
+// with the first non-nil scheme/list/name field found.
 func GoblIdentity(id *IDType) *org.Identity {
 	if id == nil {
 		return nil
