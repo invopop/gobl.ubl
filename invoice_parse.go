@@ -184,7 +184,7 @@ func (ui *Invoice) ParseInvoiceDates(out *bill.Invoice) error {
 // applyExchangeRates populates ExchangeRates when the tax currency differs from the document currency.
 func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
 	if ui.TaxCurrencyCode != "" && ui.DocumentCurrencyCode != ui.TaxCurrencyCode {
-		out.ExchangeRates = goblExchangeRates(
+		out.ExchangeRates = GoblExchangeRates(
 			currency.Code(ui.DocumentCurrencyCode),
 			currency.Code(ui.TaxCurrencyCode),
 			ui.TaxTotal,

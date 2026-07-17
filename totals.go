@@ -203,10 +203,12 @@ func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.
 	return nil
 }
 
-// goblExchangeRates derives the exchange rate from two TaxTotal blocks
-// when DocumentCurrencyCode differs from TaxCurrencyCode.
-func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) []*cur.ExchangeRate {
-	if len(taxTotals) < 2 {
+// GoblExchangeRates derives the exchange rate from TaxTotal blocks when
+// DocumentCurrencyCode differs from TaxCurrencyCode: a second TaxTotal block
+// when present, else the summed per-subtotal TransactionCurrencyTaxAmount of
+// the first.
+func GoblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) []*cur.ExchangeRate {
+	if len(taxTotals) == 0 {
 		return nil
 	}
 
@@ -214,8 +216,9 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 	if err != nil || docAmount.IsZero() {
 		return nil
 	}
-	taxAmount, err := num.AmountFromString(NormalizeNumericString(taxTotals[1].TaxAmount.Value))
-	if err != nil {
+
+	taxAmount, ok := taxCurrencyTaxAmount(taxTotals)
+	if !ok {
 		return nil
 	}
 
@@ -228,4 +231,34 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 			Amount: rate,
 		},
 	}
+}
+
+// taxCurrencyTaxAmount returns the total tax in the tax currency: a second
+// TaxTotal block if present, else the summed per-subtotal amounts of the first.
+func taxCurrencyTaxAmount(taxTotals []TaxTotal) (num.Amount, bool) {
+	if len(taxTotals) >= 2 {
+		a, err := num.AmountFromString(NormalizeNumericString(taxTotals[1].TaxAmount.Value))
+		if err != nil {
+			return num.Amount{}, false
+		}
+		return a, true
+	}
+
+	var total num.Amount
+	found := false
+	for _, st := range taxTotals[0].TaxSubtotal {
+		if st.TransactionCurrencyTaxAmount == nil {
+			continue
+		}
+		a, err := num.AmountFromString(NormalizeNumericString(st.TransactionCurrencyTaxAmount.Value))
+		if err != nil {
+			return num.Amount{}, false
+		}
+		if found {
+			total = total.Add(a)
+		} else {
+			total, found = a, true
+		}
+	}
+	return total, found
 }
