@@ -203,10 +203,8 @@ func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.
 	return nil
 }
 
-// GoblExchangeRates derives the exchange rate from TaxTotal blocks when
-// DocumentCurrencyCode differs from TaxCurrencyCode: a second TaxTotal block
-// when present, else the summed per-subtotal TransactionCurrencyTaxAmount of
-// the first.
+// GoblExchangeRates derives the rate from a second TaxTotal block if present,
+// else the summed per-subtotal TransactionCurrencyTaxAmount of the first.
 func GoblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) []*cur.ExchangeRate {
 	if len(taxTotals) == 0 {
 		return nil
