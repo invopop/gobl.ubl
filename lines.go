@@ -294,8 +294,14 @@ func MakeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if ch.Percent != nil {
 			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			if base != nil {
-				ac.BaseAmount = base
+			// Prefer the charge's own base over the line's sum, since it may
+			// have been computed against a different amount.
+			b := base
+			if ch.Base != nil {
+				b = &Amount{Value: RescaleToCurrency(*ch.Base, ccy), CurrencyID: &ccy}
+			}
+			if b != nil {
+				ac.BaseAmount = b
 			}
 		}
 		allowanceCharges = append(allowanceCharges, ac)
@@ -317,8 +323,14 @@ func MakeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if d.Percent != nil {
 			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			if base != nil {
-				ac.BaseAmount = base
+			// Prefer the discount's own base over the line's sum, since it may
+			// have been computed against a different amount.
+			b := base
+			if d.Base != nil {
+				b = &Amount{Value: RescaleToCurrency(*d.Base, ccy), CurrencyID: &ccy}
+			}
+			if b != nil {
+				ac.BaseAmount = b
 			}
 		}
 		allowanceCharges = append(allowanceCharges, ac)
