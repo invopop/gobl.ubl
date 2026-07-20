@@ -29,6 +29,34 @@ var (
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
 )
 
+// GoblTermsDueDate appends dueDate to payment.Terms.DueDates (creating Terms
+// if needed) and sets its percent to 100 if it ends up the only one. A blank
+// dueDate is a no-op.
+func GoblTermsDueDate(payment *bill.PaymentDetails, dueDate string) error {
+	if dueDate == "" {
+		return nil
+	}
+	d, err := ParseDate(dueDate)
+	if err != nil {
+		return err
+	}
+	if payment.Terms == nil {
+		payment.Terms = &pay.Terms{}
+	}
+	payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
+		Date: &d,
+	})
+
+	if len(payment.Terms.DueDates) == 1 {
+		percent, err := num.PercentageFromString("100%")
+		if err != nil {
+			return err
+		}
+		payment.Terms.DueDates[0].Percent = &percent
+	}
+	return nil
+}
+
 func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	payment := &bill.PaymentDetails{}
 
@@ -58,26 +86,8 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 		dueDate = *ui.PaymentMeans[0].PaymentDueDate
 	}
 
-	if dueDate != "" {
-		d, err := ParseDate(dueDate)
-		if err != nil {
-			return err
-		}
-		if payment.Terms == nil {
-			payment.Terms = &pay.Terms{}
-		}
-		payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
-			Date: &d,
-		})
-	}
-
-	// If there's only one due date, set its percent to 100
-	if payment.Terms != nil && len(payment.Terms.DueDates) == 1 {
-		percent, err := num.PercentageFromString("100%")
-		if err != nil {
-			return err
-		}
-		payment.Terms.DueDates[0].Percent = &percent
+	if err := GoblTermsDueDate(payment, dueDate); err != nil {
+		return err
 	}
 
 	if len(ui.PaymentMeans) > 0 {
