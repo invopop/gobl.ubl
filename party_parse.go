@@ -160,10 +160,8 @@ func HandleLegalEntityIdentity(party *Party, p *org.Party) {
 	p.Identities = append(p.Identities, identity)
 }
 
-// HandlePartyTaxSchemes restores a party's tax ID (and any further tax
-// schemes as tax-scoped identities) from its PartyTaxScheme entries.
-// mapScheme lets a caller translate a wire tax-scheme ID to its GOBL
-// equivalent before VAT-matching and stamping; nil behaves as identity.
+// HandlePartyTaxSchemes restores a party's tax ID from its PartyTaxScheme
+// entries; mapScheme translates wire scheme IDs (nil is identity).
 func HandlePartyTaxSchemes(party *Party, p *org.Party, countryCode string, mapScheme func(string) cbc.Code) {
 	if len(party.PartyTaxScheme) == 0 {
 		return
@@ -212,9 +210,8 @@ func SetTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string, ma
 	}
 }
 
-// HandleMultipleTaxSchemes picks the VAT scheme (if any) as the party's tax
-// ID and demotes the rest to tax-scoped identities; see HandlePartyTaxSchemes
-// for mapScheme.
+// HandleMultipleTaxSchemes picks the VAT scheme as the party's tax ID; the
+// rest become tax-scoped identities.
 func HandleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, countryCode string, mapScheme func(string) cbc.Code) {
 	// Multiple tax schemes: look for VAT, otherwise use first
 	vatIdx := FindVATSchemeIndex(validSchemes, mapScheme)
