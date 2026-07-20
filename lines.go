@@ -257,15 +257,10 @@ func (ui *Invoice) AddLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 // currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
 // existing precision if the currency code is unknown.
 func RescaleToCurrency(a num.Amount, ccy string) string {
-	return RescaleAmountToCurrency(a, ccy).String()
-}
-
-// RescaleAmountToCurrency is RescaleToCurrency without the final string conversion.
-func RescaleAmountToCurrency(a num.Amount, ccy string) num.Amount {
 	if def := currency.Code(ccy).Def(); def != nil {
-		return def.Rescale(a)
+		return def.Rescale(a).String()
 	}
-	return a
+	return a.String()
 }
 
 // MakeLineCharges builds a line's AllowanceCharge entries from its GOBL charges and discounts.
