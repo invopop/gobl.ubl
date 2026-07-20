@@ -41,6 +41,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::9930:111111125"
+				}
+			],
 			"inboxes": [
 				{
 					"scheme": "9930",

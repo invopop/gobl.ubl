@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4f143bec72342b8f0eba109d78cb4cab14f7df576fa2d585851169d6b87716f3"
-		}
+			"val": "1d8977121f613bc618ba3b77477d8836ef4d9132d34bedc76e6d44353cee6864"
+		},
+		"from": "iso6523-actorid-upis::0088:9482348239847239874",
+		"to": "iso6523-actorid-upis::0002:FR23342"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -40,10 +42,9 @@
 					"code": "99887766"
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0088",
-					"code": "9482348239847239874"
+					"uri": "iso6523-actorid-upis::0088:9482348239847239874"
 				}
 			],
 			"addresses": [
@@ -85,10 +86,9 @@
 					}
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0002",
-					"code": "FR23342"
+					"uri": "iso6523-actorid-upis::0002:FR23342"
 				}
 			],
 			"addresses": [

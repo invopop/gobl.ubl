@@ -4,8 +4,9 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bed7c079ba1f06d65d5d80337e1f4518e4b8998c66577586a3e0d71b5b81e961"
-		}
+			"val": "dce32bdb5f350174f0ca7810232ac88e45ccf7b4734dc541b158832ed02ada80"
+		},
+		"to": "mailto:info@buyercompany.dk"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -80,9 +81,9 @@
 					}
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"email": "info@buyercompany.dk"
+					"uri": "mailto:info@buyercompany.dk"
 				}
 			],
 			"addresses": [
@@ -328,9 +329,9 @@
 						}
 					}
 				],
-				"inboxes": [
+				"endpoints": [
 					{
-						"email": "info@selco.nl"
+						"uri": "mailto:info@selco.nl"
 					}
 				],
 				"addresses": [

@@ -18,16 +18,8 @@ func goblParty(party *Party, o *options) *org.Party {
 		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
 	}
 
-	if eID := party.EndpointID; eID != nil {
-		oi := new(org.Inbox)
-		switch eID.SchemeID {
-		case "EM": // email
-			oi.Email = eID.Value
-		default:
-			oi.Scheme = cbc.Code(eID.SchemeID)
-			oi.Code = cbc.Code(eID.Value)
-		}
-		p.Inboxes = append(p.Inboxes, oi)
+	if ep := goblEndpoint(party.EndpointID); ep != nil {
+		p.Endpoints = append(p.Endpoints, ep)
 	}
 
 	if party.PartyName != nil {
@@ -77,6 +69,23 @@ func goblParty(party *Party, o *options) *org.Party {
 	handlePartyIdentifications(party, p, o)
 
 	return p
+}
+
+// goblEndpoint maps a UBL EndpointID to a GOBL endpoint URI:
+//   - schemeID "EM" -> "mailto:<value>"
+//   - any other EAS -> "iso6523-actorid-upis::<schemeID>:<value>"
+func goblEndpoint(eID *EndpointID) *org.Endpoint {
+	if eID == nil || eID.Value == "" || eID.SchemeID == "" {
+		return nil
+	}
+	var uri cbc.URI
+	switch eID.SchemeID {
+	case SchemeIDEmail: // email
+		uri = cbc.URI(mailtoScheme + ":" + eID.Value)
+	default:
+		uri = cbc.URI(peppolEndpointScheme + "::" + eID.SchemeID + ":" + eID.Value)
+	}
+	return &org.Endpoint{URI: uri}
 }
 
 // goblDeliveryParty creates a GOBL party with only the BTs available

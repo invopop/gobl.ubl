@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "282d97abc8a84964422902cedce112870524853712a3f3aae77eeddf1998d769"
+			"val": "86ee9e83da867f403ead25d09c9c84c3fa1dbb4b09ffd0422691e6122674f016"
 		}
 	},
 	"doc": {
@@ -399,9 +399,9 @@
 						}
 					}
 				],
-				"inboxes": [
+				"endpoints": [
 					{
-						"email": "seller@email.de"
+						"uri": "mailto:seller@email.de"
 					}
 				],
 				"addresses": [
