@@ -52,10 +52,7 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 	if ch.Percent != nil {
 		p := ch.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
-		// Prefer the charge's own base over the invoice sum, since it may
-		// have been computed against a different amount. Rescale to the
-		// currency's natural precision (matches MakeLineCharges): an
-		// explicit Base isn't guaranteed to already carry it.
+		// Prefer the charge's own base over the invoice sum (matches MakeLineCharges).
 		base := baseAmount
 		if ch.Base != nil {
 			base = *ch.Base
@@ -90,10 +87,7 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) Allowance
 	if d.Percent != nil {
 		p := d.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
-		// Prefer the discount's own base over the invoice sum, since it may
-		// have been computed against a different amount. Rescale to the
-		// currency's natural precision (matches MakeLineCharges): an
-		// explicit Base isn't guaranteed to already carry it.
+		// Prefer the discount's own base over the invoice sum (matches MakeLineCharges).
 		base := baseAmount
 		if d.Base != nil {
 			base = *d.Base
