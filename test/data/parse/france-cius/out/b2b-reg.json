@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0062de6133202ae69d0b482d66135ac9fe7fdbc7a7a76fdfff54347cd344056b"
+			"val": "93e99f6b9c1d74c2c7e0ad7428526c68e9556ad6cecb5762682b7736e85762f1"
 		},
 		"from": "iso6523-actorid-upis::0225:324872211",
 		"to": "iso6523-actorid-upis::0225:439368049"
@@ -81,13 +81,6 @@
 					"uri": "iso6523-actorid-upis::0225:324872211"
 				}
 			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "324872211"
-				}
-			],
 			"addresses": [
 				{
 					"street": "35 rue d'ici",
@@ -133,13 +126,6 @@
 			"endpoints": [
 				{
 					"uri": "iso6523-actorid-upis::0225:439368049"
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "0225",
-					"code": "439368049"
 				}
 			],
 			"addresses": [

@@ -4,8 +4,10 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e12091060fc0ba82123f38741589480120e4a8443f57df206e0a00ebb717a316"
-		}
+			"val": "5f8d339fbdbc40354b89e6ca06302f0ebfb49858991378dc79d2a2ed39e01d70"
+		},
+		"from": "iso6523-actorid-upis::0088:7300010000001",
+		"to": "iso6523-actorid-upis::0184:DK12345678"
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -35,10 +37,9 @@
 					"code": "7300010000001"
 				}
 			],
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0088",
-					"code": "7300010000001"
+					"uri": "iso6523-actorid-upis::0088:7300010000001"
 				}
 			],
 			"addresses": [
@@ -52,10 +53,9 @@
 		},
 		"customer": {
 			"name": "The Buyercompany",
-			"inboxes": [
+			"endpoints": [
 				{
-					"scheme": "0184",
-					"code": "DK12345678"
+					"uri": "iso6523-actorid-upis::0184:DK12345678"
 				}
 			],
 			"addresses": [
