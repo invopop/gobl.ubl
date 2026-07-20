@@ -81,7 +81,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	}
 
 	if len(ui.PaymentMeans) > 0 {
-		payment.Instructions = goblInvoiceInstructions(out, &ui.PaymentMeans[0])
+		payment.Instructions = GoblInvoiceInstructions(out, &ui.PaymentMeans[0])
 	}
 
 	// We do not currently map this as Peppol and EN16931 do not use it.
@@ -128,7 +128,49 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	return nil
 }
 
-func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.Instructions {
+// GoblPaymentAdvances reconstructs bill.PaymentDetails.Advances from either
+// each cac:PrepaidPayment entry, or — when none are present — a single
+// advance recovered from the document's LegalMonetaryTotal/PrepaidAmount.
+func GoblPaymentAdvances(payment *bill.PaymentDetails, prepaidPayments []PrepaidPayment, prepaidAmount *Amount) error {
+	switch {
+	case len(prepaidPayments) > 0:
+		payment.Advances = make([]*pay.Record, 0, len(prepaidPayments))
+		for _, p := range prepaidPayments {
+			if p.PaidAmount == nil {
+				continue
+			}
+			amount, err := num.AmountFromString(NormalizeNumericString(p.PaidAmount.Value))
+			if err != nil {
+				return err
+			}
+			advance := &pay.Record{Amount: amount}
+			if p.ReceivedDate != nil {
+				d, err := ParseDate(*p.ReceivedDate)
+				if err != nil {
+					return err
+				}
+				advance.Date = &d
+			}
+			if p.InstructionID != nil {
+				advance.Ref = *p.InstructionID
+			}
+			payment.Advances = append(payment.Advances, advance)
+		}
+	case prepaidAmount != nil:
+		totalPrepaid, err := num.AmountFromString(NormalizeNumericString(prepaidAmount.Value))
+		if err != nil {
+			return err
+		}
+		payment.Advances = append(payment.Advances, &pay.Record{
+			Amount:      totalPrepaid,
+			Description: "Prepaid Amount",
+		})
+	}
+	return nil
+}
+
+// GoblInvoiceInstructions builds a GOBL pay.Instructions from a UBL PaymentMeans.
+func GoblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
 		Key: GoblPaymentMeansCode(paymentMeans.PaymentMeansCode.Value),
 		Ext: tax.ExtensionsOf(cbc.CodeMap{
