@@ -43,7 +43,7 @@
 			],
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::9957:334175221"
+					"uri": "iso6523-actorid-upis::0225:334175221"
 				}
 			],
 			"inboxes": [
@@ -80,7 +80,7 @@
 			},
 			"endpoints": [
 				{
-					"uri": "iso6523-actorid-upis::9957:552100554"
+					"uri": "iso6523-actorid-upis::0225:552100554"
 				}
 			],
 			"inboxes": [

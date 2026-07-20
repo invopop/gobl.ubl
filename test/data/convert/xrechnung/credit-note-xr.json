@@ -47,6 +47,11 @@
 					}
 				}
 			],
+			"endpoints": [
+				{
+					"uri": "mailto:billing@example.com"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "email",
@@ -79,6 +84,11 @@
 				"country": "DE",
 				"code": "282741168"
 			},
+			"endpoints": [
+				{
+					"uri": "mailto:email@sample.com"
+				}
+			],
 			"inboxes": [
 				{
 					"key": "email",

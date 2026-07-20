@@ -14,6 +14,14 @@ import (
 // SchemeIDEmail is the EAS codelist value for email
 const SchemeIDEmail = "EM"
 
+// mailtoScheme is the URI scheme GOBL uses for email endpoints
+// (e.g. "mailto:billing@example.com").
+const mailtoScheme = "mailto"
+
+// peppolEndpointScheme is the URI scheme GOBL uses for Peppol participant
+// identifier endpoints (e.g. "iso6523-actorid-upis::9930:111111125").
+const peppolEndpointScheme = "iso6523-actorid-upis"
+
 // TaxSchemeVAT is the tax scheme code for VAT
 const TaxSchemeVAT = "VAT"
 
@@ -42,6 +50,40 @@ type Party struct {
 type EndpointID struct {
 	SchemeID string `xml:"schemeID,attr"`
 	Value    string `xml:",chardata"`
+}
+
+// newEndpointID maps a party's preferred electronic address (its first
+// endpoint) to a UBL EndpointID. It understands the two URI forms emitted
+// by GOBL normalization:
+//   - "mailto:<address>"                      -> schemeID "EM"
+//   - "iso6523-actorid-upis::<scheme>:<code>" -> schemeID "<scheme>"
+func newEndpointID(party *org.Party) *EndpointID {
+	ep := party.FirstEndpoint()
+	if ep == nil {
+		return nil
+	}
+	switch ep.URI.Scheme() {
+	case mailtoScheme:
+		if addr := ep.URI.Opaque(); addr != "" {
+			return &EndpointID{SchemeID: SchemeIDEmail, Value: addr}
+		}
+	case peppolEndpointScheme:
+		if scheme, code, ok := splitPeppolEndpoint(ep.URI.Opaque()); ok {
+			return &EndpointID{SchemeID: scheme, Value: code}
+		}
+	}
+	return nil
+}
+
+// splitPeppolEndpoint splits the opaque part of an
+// "iso6523-actorid-upis::<scheme>:<code>" URI (which URL parsing exposes
+// as ":<scheme>:<code>") into its scheme and code components.
+func splitPeppolEndpoint(opaque string) (scheme, code string, ok bool) {
+	parts := strings.SplitN(strings.TrimPrefix(opaque, ":"), ":", 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", false
+	}
+	return parts[0], parts[1], true
 }
 
 // Identification represents an identification
@@ -204,20 +246,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		p.Contact = contact
 	}
 
-	if len(party.Inboxes) > 0 {
-		ib := party.Inboxes[0]
-		if ib.Email != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: SchemeIDEmail,
-				Value:    ib.Email,
-			}
-		} else if ib.Scheme != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: ib.Scheme.String(),
-				Value:    ib.Code.String(),
-			}
-		}
-	}
+	p.EndpointID = newEndpointID(party)
 
 	if party.Alias != "" {
 		p.PartyName = &PartyName{
