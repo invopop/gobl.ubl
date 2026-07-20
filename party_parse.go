@@ -73,7 +73,7 @@ func goblParty(party *Party, o *options) *org.Party {
 	}
 
 	HandleLegalEntityIdentity(party, p)
-	handlePartyTaxSchemes(party, p)
+	HandlePartyTaxSchemes(party, p, party.CountryCode(), nil)
 	handlePartyIdentifications(party, p, o)
 
 	return p
@@ -158,10 +158,6 @@ func HandleLegalEntityIdentity(party *Party, p *org.Party) {
 		})
 	}
 	p.Identities = append(p.Identities, identity)
-}
-
-func handlePartyTaxSchemes(party *Party, p *org.Party) {
-	HandlePartyTaxSchemes(party, p, party.CountryCode(), nil)
 }
 
 // HandlePartyTaxSchemes restores a party's tax ID (and any further tax
