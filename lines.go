@@ -33,7 +33,7 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-// AddLines builds InvoiceLine/CreditNoteLine entries from the GOBL invoice's lines.
+// AddLines builds the invoice's lines.
 func (ui *Invoice) AddLines(inv *bill.Invoice, context Context) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
@@ -294,8 +294,7 @@ func MakeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if ch.Percent != nil {
 			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			// Prefer the charge's own base over the line's sum, since it may
-			// have been computed against a different amount.
+			// Prefer the charge's own base over the line's sum (matches document-level).
 			b := base
 			if ch.Base != nil {
 				b = &Amount{Value: RescaleToCurrency(*ch.Base, ccy), CurrencyID: &ccy}
@@ -323,8 +322,7 @@ func MakeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if d.Percent != nil {
 			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			// Prefer the discount's own base over the line's sum, since it may
-			// have been computed against a different amount.
+			// Prefer the discount's own base over the line's sum (matches document-level).
 			b := base
 			if d.Base != nil {
 				b = &Amount{Value: RescaleToCurrency(*d.Base, ccy), CurrencyID: &ccy}
