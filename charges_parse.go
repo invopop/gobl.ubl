@@ -49,7 +49,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 	return nil
 }
 
-func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]string) (*bill.Charge, error) {
+func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*TaxCategoryInfo) (*bill.Charge, error) {
 	ch := &bill.Charge{}
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
@@ -106,8 +106,8 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]string) (*bill.Ch
 
 			// Look up exemption code from TaxTotal
 			key := BuildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
-			if code, ok := taxCategoryMap[key]; ok && code != "" {
-				ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(code))
+			if info, ok := taxCategoryMap[key]; ok && info.ExemptionReasonCode != "" {
+				ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.ExemptionReasonCode))
 			}
 		}
 
@@ -131,7 +131,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]string) (*bill.Ch
 	return ch, nil
 }
 
-func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]string) (*bill.Discount, error) {
+func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*TaxCategoryInfo) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
@@ -188,8 +188,8 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]string) (*bill.
 
 			// Look up exemption code from TaxTotal
 			key := BuildTaxCategoryKey(ac.TaxCategory[0].TaxScheme.ID.Value, ac.TaxCategory[0].ID.Value, ac.TaxCategory[0].Percent)
-			if code, ok := taxCategoryMap[key]; ok && code != "" {
-				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(code))
+			if info, ok := taxCategoryMap[key]; ok && info.ExemptionReasonCode != "" {
+				d.Taxes[0].Ext = d.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.ExemptionReasonCode))
 			}
 		}
 
