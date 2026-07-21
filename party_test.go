@@ -27,7 +27,7 @@ func TestNewParty(t *testing.T) {
 		require.True(t, ok)
 
 		// Supplier identity without a Scope, carrying iso scheme ID:
-		// exercises newParty's third-pass branch.
+		// exercises NewParty's third-pass branch.
 		inv.Supplier.Identities = []*org.Identity{
 			{
 				Code: "TEST-001",
@@ -36,7 +36,7 @@ func TestNewParty(t *testing.T) {
 		}
 
 		// Payee with a legal identity carrying iso scheme ID:
-		// exercises both passes inside newPayeeParty.
+		// exercises both passes inside NewPayeeParty.
 		if inv.Payment == nil {
 			inv.Payment = &bill.PaymentDetails{}
 		}

@@ -44,10 +44,10 @@ func NewDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	}
 
 	if del.Receiver != nil {
-		out.DeliveryParty = newDeliveryParty(del.Receiver)
+		out.DeliveryParty = NewDeliveryParty(del.Receiver)
 		out.DeliveryLocation =
 			&Location{
-				Address: newAddress(del.Receiver.Addresses, ctx),
+				Address: NewAddress(del.Receiver.Addresses, ctx),
 			}
 		if len(del.Identities) > 0 {
 			out.DeliveryLocation.ID = &IDType{Value: del.Identities[0].Code.String()}

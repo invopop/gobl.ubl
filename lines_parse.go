@@ -179,7 +179,7 @@ func GoblConvertLineItem(di *Item, item *org.Item) {
 		item.Ref = cbc.Code(di.SellersItemIdentification.ID.Value)
 	}
 
-	item.Identities = goblItemIdentities(di)
+	item.Identities = GoblItemIdentities(di)
 
 	if di.AdditionalItemProperty != nil {
 		item.Meta = make(cbc.Meta)
@@ -236,12 +236,12 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 	}
 }
 
-// goblItemIdentities collects a UBL line item's identities.
-func goblItemIdentities(di *Item) []*org.Identity {
+// GoblItemIdentities collects a UBL line item's identities.
+func GoblItemIdentities(di *Item) []*org.Identity {
 	ids := make([]*org.Identity, 0)
 
 	if di.BuyersItemIdentification != nil && di.BuyersItemIdentification.ID != nil {
-		id := goblIdentity(di.BuyersItemIdentification.ID)
+		id := GoblIdentity(di.BuyersItemIdentification.ID)
 		if id != nil {
 			ids = append(ids, id)
 		}
@@ -264,7 +264,7 @@ func goblItemIdentities(di *Item) []*org.Identity {
 
 	if di.CommodityClassification != nil && len(*di.CommodityClassification) > 0 {
 		for _, classification := range *di.CommodityClassification {
-			id := goblIdentity(classification.ItemClassificationCode)
+			id := GoblIdentity(classification.ItemClassificationCode)
 			if id != nil {
 				ids = append(ids, id)
 			}
@@ -274,8 +274,8 @@ func goblItemIdentities(di *Item) []*org.Identity {
 	return ids
 }
 
-// goblIdentity builds a GOBL identity from a UBL identifier.
-func goblIdentity(id *IDType) *org.Identity {
+// GoblIdentity builds a GOBL identity from a UBL identifier.
+func GoblIdentity(id *IDType) *org.Identity {
 	if id == nil {
 		return nil
 	}

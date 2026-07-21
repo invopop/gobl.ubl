@@ -79,10 +79,10 @@ func goblParty(party *Party, o *options) *org.Party {
 	return p
 }
 
-// goblDeliveryParty creates a GOBL party with only the BTs available
+// GoblDeliveryParty creates a GOBL party with only the BTs available
 // for the delivery party (BT-70 name). Address is handled separately
 // via DeliveryLocation.
-func goblDeliveryParty(party *Party) *org.Party {
+func GoblDeliveryParty(party *Party) *org.Party {
 	if party == nil {
 		return nil
 	}

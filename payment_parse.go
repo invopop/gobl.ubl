@@ -29,6 +29,34 @@ var (
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
 )
 
+// GoblTermsDueDate appends dueDate to payment.Terms.DueDates (creating Terms
+// if needed) and sets its percent to 100 if it ends up the only one. A blank
+// dueDate is a no-op.
+func GoblTermsDueDate(payment *bill.PaymentDetails, dueDate string) error {
+	if dueDate == "" {
+		return nil
+	}
+	d, err := ParseDate(dueDate)
+	if err != nil {
+		return err
+	}
+	if payment.Terms == nil {
+		payment.Terms = &pay.Terms{}
+	}
+	payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
+		Date: &d,
+	})
+
+	if len(payment.Terms.DueDates) == 1 {
+		percent, err := num.PercentageFromString("100%")
+		if err != nil {
+			return err
+		}
+		payment.Terms.DueDates[0].Percent = &percent
+	}
+	return nil
+}
+
 func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	payment := &bill.PaymentDetails{}
 
@@ -58,26 +86,8 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 		dueDate = *ui.PaymentMeans[0].PaymentDueDate
 	}
 
-	if dueDate != "" {
-		d, err := ParseDate(dueDate)
-		if err != nil {
-			return err
-		}
-		if payment.Terms == nil {
-			payment.Terms = &pay.Terms{}
-		}
-		payment.Terms.DueDates = append(payment.Terms.DueDates, &pay.DueDate{
-			Date: &d,
-		})
-	}
-
-	// If there's only one due date, set its percent to 100
-	if payment.Terms != nil && len(payment.Terms.DueDates) == 1 {
-		percent, err := num.PercentageFromString("100%")
-		if err != nil {
-			return err
-		}
-		payment.Terms.DueDates[0].Percent = &percent
+	if err := GoblTermsDueDate(payment, dueDate); err != nil {
+		return err
 	}
 
 	if len(ui.PaymentMeans) > 0 {
@@ -131,7 +141,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 // GoblInvoiceInstructions builds a GOBL pay.Instructions from a UBL PaymentMeans.
 func GoblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
-		Key: goblPaymentMeansCode(paymentMeans.PaymentMeansCode.Value),
+		Key: GoblPaymentMeansCode(paymentMeans.PaymentMeansCode.Value),
 		Ext: tax.ExtensionsOf(cbc.CodeMap{
 			untdid.ExtKeyPaymentMeans: cbc.Code(paymentMeans.PaymentMeansCode.Value),
 		}),
@@ -151,10 +161,10 @@ func GoblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	// A mandate holding only the extended-profile PayerParty is not a
 	// direct-debit arrangement.
 	if pm := paymentMeans.PaymentMandate; pm != nil && (pm.ID != nil || pm.PayerFinancialAccount != nil) {
-		instructions.DirectDebit = goblInvoiceDirectDebit(out, paymentMeans)
+		instructions.DirectDebit = GoblInvoiceDirectDebit(out, paymentMeans)
 	}
 	if paymentMeans.CardAccount != nil {
-		instructions.Card = goblCard(paymentMeans)
+		instructions.Card = GoblCard(paymentMeans)
 	}
 
 	return instructions
@@ -167,7 +177,7 @@ func GoblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 
 	if account.ID != nil {
 		id := CleanString(*account.ID)
-		if isIBAN(id) {
+		if IsIBAN(id) {
 			creditTransfer.IBAN = id
 		} else {
 			creditTransfer.Number = id
@@ -183,17 +193,17 @@ func GoblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	return []*pay.CreditTransfer{creditTransfer}
 }
 
-// isIBAN checks if a string looks like an IBAN
+// IsIBAN checks if a string looks like an IBAN
 // Returns true if the string starts with 2+ letters followed by alphanumeric characters
 // This covers standard IBANs (e.g., NO9386011117947 or NO93 8601 1117 947) and allows
 // some flexibility for various IBAN-like formats that may appear in UBL documents
-func isIBAN(s string) bool {
+func IsIBAN(s string) bool {
 	s = strings.ToUpper(strings.TrimSpace(s))
 	return ibanRegex.MatchString(s)
 }
 
-// goblInvoiceDirectDebit builds a GOBL DirectDebit from a UBL PaymentMeans' PaymentMandate.
-func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.DirectDebit {
+// GoblInvoiceDirectDebit builds a GOBL DirectDebit from a UBL PaymentMeans' PaymentMandate.
+func GoblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.DirectDebit {
 	directDebit := &pay.DirectDebit{}
 
 	if paymentMeans.PaymentMandate.ID != nil {
@@ -224,8 +234,8 @@ func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.
 	return directDebit
 }
 
-// goblCard builds a GOBL Card from a UBL PaymentMeans' CardAccount.
-func goblCard(paymentMeans *PaymentMeans) *pay.Card {
+// GoblCard builds a GOBL Card from a UBL PaymentMeans' CardAccount.
+func GoblCard(paymentMeans *PaymentMeans) *pay.Card {
 	card := &pay.Card{}
 	if paymentMeans.CardAccount.PrimaryAccountNumberID != nil {
 		pan := *paymentMeans.CardAccount.PrimaryAccountNumberID
@@ -240,8 +250,8 @@ func goblCard(paymentMeans *PaymentMeans) *pay.Card {
 	return card
 }
 
-// goblPaymentMeansCode maps UBL payment means to GOBL equivalent.
-func goblPaymentMeansCode(code string) cbc.Key {
+// GoblPaymentMeansCode maps UBL payment means to GOBL equivalent.
+func GoblPaymentMeansCode(code string) cbc.Key {
 	if val, ok := paymentMeansMap[code]; ok {
 		return val
 	}

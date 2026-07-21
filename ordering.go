@@ -82,7 +82,7 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 			p := ui.AccountingSupplierParty.Party
 			ui.TaxRepresentativeParty = p
 			ui.AccountingSupplierParty = SupplierParty{
-				Party: newParty(o.Seller, context),
+				Party: NewParty(o.Seller, context),
 			}
 		}
 

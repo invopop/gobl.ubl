@@ -131,13 +131,13 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-// newParty builds a UBL Party from a GOBL org.Party.
-func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
+// NewParty builds a UBL Party from a GOBL org.Party.
+func NewParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}
 	p := &Party{
-		PostalAddress: newAddress(party.Addresses, ctx),
+		PostalAddress: NewAddress(party.Addresses, ctx),
 	}
 
 	// Only add PartyName if name is not empty
@@ -294,11 +294,11 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	return p
 }
 
-// newDeliveryParty creates a Party structure for delivery parties
+// NewDeliveryParty creates a Party structure for delivery parties
 // according to UBL rules:
 //   - UBL-CR-394: A UBL invoice should not include the DeliveryParty PostalAddress
 //     (it's already in DeliveryLocation)
-func newDeliveryParty(party *org.Party) *Party {
+func NewDeliveryParty(party *org.Party) *Party {
 	if party == nil {
 		return nil
 	}
@@ -351,13 +351,13 @@ func newDeliveryParty(party *org.Party) *Party {
 	return p
 }
 
-// newPayeeParty creates a minimal Party structure for the Payee
+// NewPayeeParty creates a minimal Party structure for the Payee
 // according to UBL rules which state:
 // - BR-17: The Payee name shall be provided
 // - UBL-SR-20: Payee identifier shall occur maximum once
 // - UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress
 // - UBL-CR-275: A UBL invoice should not include the PayeeParty PartyLegalEntity RegistrationName
-func newPayeeParty(party *org.Party) *Party {
+func NewPayeeParty(party *org.Party) *Party {
 	if party == nil {
 		return nil
 	}
@@ -414,8 +414,8 @@ func newPayeeParty(party *org.Party) *Party {
 	return p
 }
 
-// newAddress builds a UBL PostalAddress from the first of a GOBL party's addresses.
-func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
+// NewAddress builds a UBL PostalAddress from the first of a GOBL party's addresses.
+func NewAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
