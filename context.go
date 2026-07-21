@@ -225,8 +225,8 @@ var ContextZATCA = Context{
 	},
 }
 
-// ContextPeppolPINT defines the context for Peppol PINT
-var ContextPeppolPINTAuNz = Context{
+// ContextPeppolPINT defines the default Peppol PINT context.
+var ContextPeppolPINT = Context{
 	CustomizationID: "urn:peppol:pint:billing-1@aunz-1",
 	ProfileID:       "urn:peppol:bis:billing",
 	Addons:          []cbc.Key{peppolpint.V1},
@@ -236,8 +236,8 @@ var ContextPeppolPINTAuNz = Context{
 	},
 }
 
-// ContextPeppolPINTSlefBilled defines the context for Peppol PINT self billed
-var ContextPeppolPINTAuNzSelfBilled = Context{
+// ContextPeppolPINTSelfBilled defines the Peppol PINT self-billed context.
+var ContextPeppolPINTSelfBilled = Context{
 	CustomizationID: "urn:peppol:pint:selfbilling-1@aunz-1",
 	ProfileID:       "urn:peppol:bis:selfbilling",
 	Addons:          []cbc.Key{peppolpint.V1},
@@ -249,4 +249,4 @@ var ContextPeppolPINTAuNzSelfBilled = Context{
 
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextPeppolPINTAuNz, ContextPeppolPINTAuNzSelfBilled}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextPeppolPINT, ContextPeppolPINTSelfBilled}
