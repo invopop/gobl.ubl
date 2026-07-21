@@ -51,7 +51,7 @@ func (ui *Invoice) GoblAddDelivery(out *bill.Invoice) error {
 				d.Identities = []*org.Identity{id}
 			}
 			if del.DeliveryParty != nil {
-				d.Receiver = GoblDeliveryParty(del.DeliveryParty)
+				d.Receiver = goblDeliveryParty(del.DeliveryParty)
 			}
 			if del.DeliveryLocation != nil && del.DeliveryLocation.Address != nil {
 				if d.Receiver == nil {
