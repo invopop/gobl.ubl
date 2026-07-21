@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/facturx"
+	peppolpint "github.com/invopop/gobl/addons/peppol/pint"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
@@ -224,6 +225,28 @@ var ContextZATCA = Context{
 	},
 }
 
+// ContextPeppolPINT defines the context for Peppol PINT
+var ContextPeppolPINTAuNz = Context{
+	CustomizationID: "urn:peppol:pint:billing-1@aunz-1",
+	ProfileID:       "urn:peppol:bis:billing",
+	Addons:          []cbc.Key{peppolpint.V1},
+	VESIDs: VESIDMapping{
+		Invoice:    "org.peppol.pint.aunz:invoice:1.1.2",
+		CreditNote: "org.peppol.pint.aunz:creditnote:1.1.2",
+	},
+}
+
+// ContextPeppolPINTSlefBilled defines the context for Peppol PINT self billed
+var ContextPeppolPINTAuNzSelfBilled = Context{
+	CustomizationID: "urn:peppol:pint:selfbilling-1@aunz-1",
+	ProfileID:       "urn:peppol:bis:selfbilling",
+	Addons:          []cbc.Key{peppolpint.V1},
+	VESIDs: VESIDMapping{
+		Invoice:    "org.peppol.pint.aunz:invoice-self-billing:1.1.2",
+		CreditNote: "org.peppol.pint.aunz:creditnote-self-billing:1.1.2",
+	},
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextPeppolPINTAuNz, ContextPeppolPINTAuNzSelfBilled}

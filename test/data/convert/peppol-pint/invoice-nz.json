@@ -1,0 +1,179 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "393af12a127f63a3ba37b212419c309156ef2973889eeecb4c254dce0b7bfa00"
+		},
+		"from": "iso6523-actorid-upis::0088:9429000000008",
+		"to": "iso6523-actorid-upis::0088:9429000000015"
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "NZ",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"series": "SAMPLE",
+		"code": "001",
+		"issue_date": "2024-05-15",
+		"currency": "NZD",
+		"tax": {
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Provide One Limited",
+			"tax_id": {
+				"country": "NZ",
+				"code": "49091850"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "9429000000000",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0088:9429000000000"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0088",
+					"code": "9429000000000"
+				}
+			],
+			"addresses": [
+				{
+					"num": "1",
+					"street": "Queen Street",
+					"locality": "Auckland",
+					"code": "1010",
+					"country": "NZ"
+				}
+			]
+		},
+		"customer": {
+			"name": "Sample Customer Limited",
+			"tax_id": {
+				"country": "NZ",
+				"code": "136410132"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "9429000000017",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"endpoints": [
+				{
+					"uri": "iso6523-actorid-upis::0088:9429000000017"
+				}
+			],
+			"inboxes": [
+				{
+					"key": "peppol",
+					"scheme": "0088",
+					"code": "9429000000017"
+				}
+			],
+			"addresses": [
+				{
+					"num": "10",
+					"street": "Lambton Quay",
+					"locality": "Wellington",
+					"code": "6011",
+					"country": "NZ"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "10",
+				"item": {
+					"name": "Consulting services",
+					"price": "100.00",
+					"unit": "h"
+				},
+				"sum": "1000.00",
+				"taxes": [
+					{
+						"cat": "GST",
+						"key": "standard",
+						"rate": "general",
+						"percent": "15.0%",
+						"ext": {
+							"untdid-tax-category": "O"
+						}
+					}
+				],
+				"total": "1000.00"
+			}
+		],
+		"payment": {
+			"terms": {
+				"key": "due-date",
+				"due_dates": [
+					{
+						"date": "2024-06-15",
+						"amount": "1150.00",
+						"percent": "100%"
+					}
+				]
+			},
+			"instructions": {
+				"key": "credit-transfer",
+				"credit_transfer": [
+					{
+						"number": "0100000000000",
+						"name": "Provide One Limited"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "1000.00",
+			"total": "1000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "GST",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "O"
+								},
+								"base": "1000.00",
+								"percent": "15.0%",
+								"amount": "150.00"
+							}
+						],
+						"amount": "150.00"
+					}
+				],
+				"sum": "150.00"
+			},
+			"tax": "150.00",
+			"total_with_tax": "1150.00",
+			"payable": "1150.00"
+		}
+	}
+}
