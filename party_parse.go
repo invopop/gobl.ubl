@@ -73,7 +73,7 @@ func goblParty(party *Party, o *options) *org.Party {
 	}
 
 	HandleLegalEntityIdentity(party, p)
-	HandlePartyTaxSchemes(party, p, party.CountryCode(), nil)
+	handlePartyTaxSchemes(party, p)
 	handlePartyIdentifications(party, p, o)
 
 	return p
@@ -160,25 +160,21 @@ func HandleLegalEntityIdentity(party *Party, p *org.Party) {
 	p.Identities = append(p.Identities, identity)
 }
 
-// HandlePartyTaxSchemes restores a party's tax ID from its PartyTaxScheme
-// entries; mapScheme translates wire scheme IDs (nil is identity).
-func HandlePartyTaxSchemes(party *Party, p *org.Party, countryCode string, mapScheme func(string) cbc.Code) {
+func handlePartyTaxSchemes(party *Party, p *org.Party) {
 	if len(party.PartyTaxScheme) == 0 {
 		return
 	}
 
-	validSchemes := ExtractValidTaxSchemes(party.PartyTaxScheme)
+	validSchemes := extractValidTaxSchemes(party.PartyTaxScheme)
 
 	if len(validSchemes) == 1 {
-		SetTaxIDFromScheme(validSchemes[0], p, countryCode, mapScheme)
+		setTaxIDFromScheme(validSchemes[0], p, party.CountryCode())
 	} else if len(validSchemes) > 1 {
-		HandleMultipleTaxSchemes(validSchemes, p, countryCode, mapScheme)
+		handleMultipleTaxSchemes(validSchemes, p, party.CountryCode())
 	}
 }
 
-// ExtractValidTaxSchemes filters PartyTaxScheme entries down to those
-// carrying both a company ID and a tax scheme.
-func ExtractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
+func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 	validSchemes := make([]PartyTaxScheme, 0)
 	for _, pts := range schemes {
 		if pts.CompanyID != nil && pts.CompanyID.Value != "" && pts.TaxScheme != nil {
@@ -188,33 +184,26 @@ func ExtractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 	return validSchemes
 }
 
-// SetTaxIDFromScheme builds a GOBL tax identity from a PartyTaxScheme; see
-// HandlePartyTaxSchemes for mapScheme.
-func SetTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string, mapScheme func(string) cbc.Code) {
+func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
 	p.TaxID = &tax.Identity{
 		Country: l10n.TaxCountryCode(countryCode),
 		Code:    cbc.Code(pts.CompanyID.Value),
 	}
 	sc := cbc.Code(pts.TaxScheme.ID.Value)
-	if mapScheme != nil {
-		sc = mapScheme(pts.TaxScheme.ID.Value)
-	}
 	if p.TaxID.GetScheme() != sc {
 		var scheme cbc.Code
 		if pts.TaxScheme.TaxTypeCode != nil && pts.TaxScheme.TaxTypeCode.Value != "" {
 			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode.Value)
 		} else {
-			scheme = sc
+			scheme = cbc.Code(pts.TaxScheme.ID.Value)
 		}
 		p.TaxID.Scheme = scheme
 	}
 }
 
-// HandleMultipleTaxSchemes picks the VAT scheme as the party's tax ID; the
-// rest become tax-scoped identities.
-func HandleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, countryCode string, mapScheme func(string) cbc.Code) {
+func handleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, countryCode string) {
 	// Multiple tax schemes: look for VAT, otherwise use first
-	vatIdx := FindVATSchemeIndex(validSchemes, mapScheme)
+	vatIdx := findVATSchemeIndex(validSchemes)
 
 	// Use VAT if found, otherwise first one
 	taxIDIdx := 0
@@ -223,45 +212,32 @@ func HandleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, count
 	}
 
 	// Set TaxID from chosen scheme
-	SetTaxIDFromScheme(validSchemes[taxIDIdx], p, countryCode, mapScheme)
+	setTaxIDFromScheme(validSchemes[taxIDIdx], p, countryCode)
 
 	// Rest become identities with tax scope
-	AddRemainingTaxSchemesAsIdentities(validSchemes, taxIDIdx, p, countryCode, mapScheme)
+	addRemainingTaxSchemesAsIdentities(validSchemes, taxIDIdx, p, countryCode)
 }
 
-// FindVATSchemeIndex returns the index of the first VAT scheme among
-// schemes, or -1; see HandlePartyTaxSchemes for mapScheme.
-func FindVATSchemeIndex(schemes []PartyTaxScheme, mapScheme func(string) cbc.Code) int {
+func findVATSchemeIndex(schemes []PartyTaxScheme) int {
 	for i, pts := range schemes {
-		sc := cbc.Code(pts.TaxScheme.ID.Value)
-		if mapScheme != nil {
-			sc = mapScheme(pts.TaxScheme.ID.Value)
-		}
-		if sc == TaxSchemeVAT {
+		if pts.TaxScheme.ID.Value == TaxSchemeVAT {
 			return i
 		}
 	}
 	return -1
 }
 
-// AddRemainingTaxSchemesAsIdentities appends every validSchemes entry other
-// than taxIDIdx to p.Identities as a tax-scoped identity; see
-// HandlePartyTaxSchemes for mapScheme.
-func AddRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx int, p *org.Party, countryCode string, mapScheme func(string) cbc.Code) {
+func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx int, p *org.Party, countryCode string) {
 	for i, pts := range validSchemes {
 		if i == taxIDIdx {
 			continue
 		}
 
-		typ := cbc.Code(pts.TaxScheme.ID.Value)
-		if mapScheme != nil {
-			typ = mapScheme(pts.TaxScheme.ID.Value)
-		}
 		identity := &org.Identity{
 			Country: l10n.ISOCountryCode(countryCode),
 			Code:    cbc.Code(pts.CompanyID.Value),
 			Scope:   org.IdentityScopeTax,
-			Type:    typ,
+			Type:    cbc.Code(pts.TaxScheme.ID.Value),
 		}
 
 		if p.Identities == nil {
