@@ -4,6 +4,8 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/org"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 // Period represents a time period with start and end dates
@@ -86,8 +88,8 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		if o.Period != nil {
 			ui.InvoicePeriod = []Period{
 				{
-					StartDate: formatDate(o.Period.Start),
-					EndDate:   formatDate(o.Period.End),
+					StartDate: utils.FormatDate(o.Period.Start),
+					EndDate:   utils.FormatDate(o.Period.End),
 				},
 			}
 		}

@@ -1,6 +1,10 @@
 package ubl
 
-import "github.com/invopop/gobl/bill"
+import (
+	"github.com/invopop/gobl/bill"
+
+	"github.com/invopop/gobl.ubl/utils"
+)
 
 // Delivery represents delivery information
 type Delivery struct {
@@ -31,13 +35,13 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	out := new(Delivery)
 
 	if del.Date != nil {
-		date := formatDate(*del.Date)
+		date := utils.FormatDate(*del.Date)
 		out.ActualDeliveryDate = &date
 	}
 
 	if del.Period != nil {
-		end := formatDate(del.Period.End)
-		start := formatDate(del.Period.Start)
+		end := utils.FormatDate(del.Period.End)
+		start := utils.FormatDate(del.Period.Start)
 		out.LatestDeliveryDate = &end
 		out.ActualDeliveryDate = &start
 	}

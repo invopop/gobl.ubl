@@ -8,6 +8,8 @@ import (
 	cur "github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 // TaxTotal represents a tax total
@@ -185,7 +187,7 @@ func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
 			}
 			note := &tax.Note{
 				Category: cbc.Code(tc.TaxScheme.ID.Value),
-				Text:     cleanString(*tc.TaxExemptionReason),
+				Text:     utils.CleanString(*tc.TaxExemptionReason),
 				Ext:      tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTaxCategory: cbc.Code(tc.ID.Value)}),
 			}
 			inv.Tax = inv.Tax.MergeNotes(note)
@@ -214,11 +216,11 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 		return nil
 	}
 
-	docAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[0].TaxAmount.Value))
+	docAmount, err := num.AmountFromString(utils.NormalizeNumericString(taxTotals[0].TaxAmount.Value))
 	if err != nil || docAmount.IsZero() {
 		return nil
 	}
-	taxAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[1].TaxAmount.Value))
+	taxAmount, err := num.AmountFromString(utils.NormalizeNumericString(taxTotals[1].TaxAmount.Value))
 	if err != nil {
 		return nil
 	}

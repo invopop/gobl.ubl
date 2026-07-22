@@ -2,12 +2,12 @@ package ubl
 
 import (
 	"errors"
-	"strconv"
-	"strings"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/validation"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 // extFieldKey is the JSON path segment for the `ext` field on GOBL structs,
@@ -144,37 +144,7 @@ func getTypeCode(inv *bill.Invoice) (string, error) {
 // The percent is normalized so that "20", "20.0", and "20.00" all produce the same key.
 func buildTaxCategoryKey(taxSchemeID, categoryID string, percent *string) string {
 	if categoryID == "S" {
-		return taxSchemeID + ":" + categoryID + ":" + normalizeTaxPercent(percent)
+		return taxSchemeID + ":" + categoryID + ":" + utils.NormalizeTaxPercent(percent)
 	}
 	return taxSchemeID + ":" + categoryID
-}
-
-// normalizeTaxPercent converts a percent string to a canonical form by stripping trailing zeros,
-// so that "20", "20.0", and "20.00" all map to "20".
-func normalizeTaxPercent(percent *string) string {
-	if percent == nil {
-		return ""
-	}
-	s := normalizeNumericString(*percent)
-	f, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return s
-	}
-	return strconv.FormatFloat(f, 'f', -1, 64)
-}
-
-// normalizeNumericString cleans up numeric strings to ensure they can be parsed correctly.
-// It handles:
-// - Leading/trailing whitespace (e.g., " 123.45 " -> "123.45")
-// - Numbers starting with decimal point (e.g., ".07" -> "0.07")
-func normalizeNumericString(s string) string {
-	// Trim whitespace
-	s = strings.TrimSpace(s)
-
-	// Add leading zero if string starts with decimal point
-	if strings.HasPrefix(s, ".") {
-		s = "0" + s
-	}
-
-	return s
 }

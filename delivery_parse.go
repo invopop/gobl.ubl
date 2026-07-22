@@ -5,6 +5,8 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
@@ -16,18 +18,18 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 			if del.ActualDeliveryDate != nil && del.LatestDeliveryDate != nil {
 				// ZATCA maps delivery period as ActualDeliveryDate (start) +
 				// LatestDeliveryDate (end)
-				start, err := parseDate(*del.ActualDeliveryDate)
+				start, err := utils.ParseDate(*del.ActualDeliveryDate)
 				if err != nil {
 					return err
 				}
-				end, err := parseDate(*del.LatestDeliveryDate)
+				end, err := utils.ParseDate(*del.LatestDeliveryDate)
 				if err != nil {
 					return err
 				}
 				d.Date = &start
 				d.Period = &cal.Period{Start: start, End: end}
 			} else if del.ActualDeliveryDate != nil {
-				deliveryDate, err := parseDate(*del.ActualDeliveryDate)
+				deliveryDate, err := utils.ParseDate(*del.ActualDeliveryDate)
 				if err != nil {
 					return err
 				}

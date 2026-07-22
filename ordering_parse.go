@@ -6,6 +6,8 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 func hasOrderingData(o *bill.Ordering) bool {
@@ -25,7 +27,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
-		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
+		ordering.Code = cbc.Code(utils.CleanString(ui.BuyerReference))
 	}
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
@@ -149,7 +151,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.Type = cbc.Key(ref.DocumentType)
 	}
 	if ref.IssueDate != "" {
-		refDate, err := parseDate(ref.IssueDate)
+		refDate, err := utils.ParseDate(ref.IssueDate)
 		if err != nil {
 			return nil, err
 		}
@@ -159,7 +161,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.DocumentTypeCode))
 	}
 	if ref.DocumentDescription != "" {
-		docRef.Description = cleanString(ref.DocumentDescription)
+		docRef.Description = utils.CleanString(ref.DocumentDescription)
 	}
 	if ref.ValidityPeriod != nil {
 		p, err := goblPeriodDates(ref.ValidityPeriod)
@@ -177,14 +179,14 @@ func goblPeriodDates(invoicePeriod *Period) (*cal.Period, error) {
 	}
 	period := &cal.Period{}
 	if invoicePeriod.StartDate != "" {
-		start, err := parseDate(invoicePeriod.StartDate)
+		start, err := utils.ParseDate(invoicePeriod.StartDate)
 		if err != nil {
 			return nil, err
 		}
 		period.Start = start
 	}
 	if invoicePeriod.EndDate != "" {
-		end, err := parseDate(invoicePeriod.EndDate)
+		end, err := utils.ParseDate(invoicePeriod.EndDate)
 		if err != nil {
 			return nil, err
 		}

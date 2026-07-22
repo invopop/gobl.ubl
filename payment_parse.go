@@ -10,6 +10,8 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 var (
@@ -46,7 +48,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 
 	if ui.PaymentTerms != nil {
 		payment.Terms = &pay.Terms{
-			Notes: cleanString(ui.PaymentTerms.Note),
+			Notes: utils.CleanString(ui.PaymentTerms.Note),
 		}
 	}
 
@@ -59,7 +61,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	}
 
 	if dueDate != "" {
-		d, err := parseDate(dueDate)
+		d, err := utils.ParseDate(dueDate)
 		if err != nil {
 			return err
 		}
@@ -89,7 +91,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 		if len(in.PrepaidPayment) > 0 {
 			payment.Advances = make([]*pay.Record, 0, len(in.PrepaidPayment))
 			for _, p := range in.PrepaidPayment {
-				amount, err := num.AmountFromString(normalizeNumericString(p.PaidAmount.Value))
+				amount, err := num.AmountFromString(utils.NormalizeNumericString(p.PaidAmount.Value))
 				if err != nil {
 					return err
 				}
@@ -97,7 +99,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 					Amount: amount,
 				}
 				if p.ReceivedDate != nil {
-					d, err := parseDate(*p.ReceivedDate)
+					d, err := utils.ParseDate(*p.ReceivedDate)
 					if err != nil {
 						return err
 					}
@@ -109,7 +111,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 	*/
 
 	if ui.LegalMonetaryTotal.PrepaidAmount != nil {
-		totalPrepaid, err := num.AmountFromString(normalizeNumericString(ui.LegalMonetaryTotal.PrepaidAmount.Value))
+		totalPrepaid, err := num.AmountFromString(utils.NormalizeNumericString(ui.LegalMonetaryTotal.PrepaidAmount.Value))
 		if err != nil {
 			return err
 		}
@@ -137,7 +139,7 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	}
 
 	if paymentMeans.PaymentMeansCode.Name != nil {
-		instructions.Detail = cleanString(*paymentMeans.PaymentMeansCode.Name)
+		instructions.Detail = utils.CleanString(*paymentMeans.PaymentMeansCode.Name)
 	}
 
 	if paymentMeans.PaymentID != nil {
@@ -164,7 +166,7 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	account := paymentMeans.PayeeFinancialAccount
 
 	if account.ID != nil {
-		id := cleanString(*account.ID)
+		id := utils.CleanString(*account.ID)
 		if isIBAN(id) {
 			creditTransfer.IBAN = id
 		} else {
@@ -172,10 +174,10 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 		}
 	}
 	if account.Name != nil {
-		creditTransfer.Name = cleanString(*account.Name)
+		creditTransfer.Name = utils.CleanString(*account.Name)
 	}
 	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
+		creditTransfer.BIC = utils.CleanString(*account.FinancialInstitutionBranch.ID)
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}

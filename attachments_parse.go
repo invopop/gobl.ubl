@@ -7,6 +7,8 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/dsig"
 	"github.com/invopop/gobl/org"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 // BinaryAttachment represents a binary attachment that can be extracted from
@@ -71,8 +73,8 @@ func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 		}
 	}
 
-	att.Code = cbc.Code(cleanString(ref.ID.Value))
-	att.Description = cleanString(ref.DocumentDescription)
+	att.Code = cbc.Code(utils.CleanString(ref.ID.Value))
+	att.Description = utils.CleanString(ref.DocumentDescription)
 
 	return att
 }

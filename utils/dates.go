@@ -1,4 +1,4 @@
-package ubl
+package utils
 
 import (
 	"time"
@@ -6,7 +6,8 @@ import (
 	"github.com/invopop/gobl/cal"
 )
 
-func formatDate(date cal.Date) string {
+// FormatDate formats a GOBL date as an ISO 8601 date string (YYYY-MM-DD).
+func FormatDate(date cal.Date) string {
 	if date.IsZero() {
 		return ""
 	}
@@ -14,8 +15,8 @@ func formatDate(date cal.Date) string {
 	return t.Format("2006-01-02")
 }
 
-// parseDate converts a date string to a cal.Date.
-func parseDate(date string) (cal.Date, error) {
+// ParseDate converts a date string to a cal.Date.
+func ParseDate(date string) (cal.Date, error) {
 	t, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return cal.Date{}, err

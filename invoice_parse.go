@@ -11,6 +11,8 @@ import (
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 var invoiceTypeMap = map[string]cbc.Key{
@@ -155,7 +157,7 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
 
 // parseInvoiceDates parses IssueDate, IssueTime, and TaxPointDate (BT-7).
 func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
-	issueDate, err := parseDate(ui.IssueDate)
+	issueDate, err := utils.ParseDate(ui.IssueDate)
 	if err != nil {
 		return err
 	}
@@ -171,7 +173,7 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 
 	// BT-7: VAT point date
 	if ui.TaxPointDate != "" {
-		vd, err := parseDate(ui.TaxPointDate)
+		vd, err := utils.ParseDate(ui.TaxPointDate)
 		if err != nil {
 			return err
 		}

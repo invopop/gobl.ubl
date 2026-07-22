@@ -12,6 +12,8 @@ import (
 	"github.com/invopop/gobl/cbc"
 	cur "github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/tax"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 // Main UBL Invoice Namespace
@@ -135,7 +137,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
-		IssueDate:               formatDate(inv.IssueDate),
+		IssueDate:               utils.FormatDate(inv.IssueDate),
 		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
@@ -183,7 +185,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 
 	// BT-7: VAT point date
 	if inv.ValueDate != nil {
-		out.TaxPointDate = formatDate(*inv.ValueDate)
+		out.TaxPointDate = utils.FormatDate(*inv.ValueDate)
 	}
 
 	if len(inv.Notes) > 0 {

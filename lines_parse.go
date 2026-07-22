@@ -1,7 +1,6 @@
 package ubl
 
 import (
-	"math"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -13,6 +12,8 @@ import (
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
@@ -44,21 +45,21 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		// skip this line
 		return nil, nil
 	}
-	price, err := num.AmountFromString(normalizeNumericString(docLine.Price.PriceAmount.Value))
+	price, err := num.AmountFromString(utils.NormalizeNumericString(docLine.Price.PriceAmount.Value))
 	if err != nil {
 		return nil, err
 	}
 
 	if docLine.Price.BaseQuantity != nil {
 		// Base quantity is the number of item units to which the price applies
-		baseQuantity, err := num.AmountFromString(normalizeNumericString(docLine.Price.BaseQuantity.Value))
+		baseQuantity, err := num.AmountFromString(utils.NormalizeNumericString(docLine.Price.BaseQuantity.Value))
 		if err != nil {
 			return nil, err
 		}
 		if !baseQuantity.IsZero() {
 			// Calculate required precision dynamically to avoid rounding errors
 			// Formula: price_decimals + ceil(log10(base_quantity))
-			precision := calculateRequiredPrecision(price, baseQuantity)
+			precision := utils.CalculateRequiredPrecision(price, baseQuantity)
 			price = price.RescaleUp(precision).Divide(baseQuantity)
 		}
 	}
@@ -81,7 +82,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		iq = docLine.CreditedQuantity
 	}
 	if iq != nil {
-		line.Quantity, err = num.AmountFromString(normalizeNumericString(iq.Value))
+		line.Quantity, err = num.AmountFromString(utils.NormalizeNumericString(iq.Value))
 		if err != nil {
 			return nil, err
 		}
@@ -95,7 +96,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		for _, note := range docLine.Note {
 			if note != "" {
 				notes = append(notes, &org.Note{
-					Text: cleanString(note),
+					Text: utils.CleanString(note),
 				})
 			}
 		}
@@ -142,32 +143,12 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 	return line, nil
 }
 
-// calculateRequiredPrecision determines the decimal precision needed when
-// dividing a price by a base quantity to avoid rounding errors.
-// Formula: price_decimals + ceil(log10(base_quantity))
-// Example: price with 2 decimals divided by 100 needs 2 + 2 = 4 decimals
-func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
-	priceExp := price.Exp()
-
-	// Convert baseQuantity to a whole number to calculate needed decimal places
-	baseQtyNormalized := baseQuantity.Rescale(0)
-	baseQtyFloat := math.Abs(float64(baseQtyNormalized.Value()))
-
-	additionalDecimals := uint32(0)
-	if baseQtyFloat > 1 {
-		// log10(100) = 2, log10(1000) = 3, etc.
-		additionalDecimals = uint32(math.Ceil(math.Log10(baseQtyFloat)))
-	}
-
-	return priceExp + additionalDecimals
-}
-
 func goblConvertLineItem(di *Item, item *org.Item) {
 	if di.Name != "" {
-		item.Name = cleanString(di.Name)
+		item.Name = utils.CleanString(di.Name)
 	}
 	if di.Description != nil {
-		item.Description = cleanString(*di.Description)
+		item.Description = utils.CleanString(*di.Description)
 	}
 
 	if di.OriginCountry != nil {
@@ -184,8 +165,8 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 		item.Meta = make(cbc.Meta)
 		for _, property := range *di.AdditionalItemProperty {
 			if property.Name != "" && property.Value != "" {
-				key := formatKey(property.Name)
-				item.Meta[key] = cleanString(property.Value)
+				key := utils.FormatKey(property.Name)
+				item.Meta[key] = utils.CleanString(property.Value)
 			}
 		}
 	}
@@ -215,7 +196,7 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 
 	}
 	if ctc.Percent != nil {
-		percentStr := normalizeNumericString(*ctc.Percent)
+		percentStr := utils.NormalizeNumericString(*ctc.Percent)
 		if !strings.HasSuffix(percentStr, "%") {
 			percentStr += "%"
 		}

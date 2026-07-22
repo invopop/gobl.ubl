@@ -6,6 +6,8 @@ import (
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
+
+	"github.com/invopop/gobl.ubl/utils"
 )
 
 func goblParty(party *Party, o *options) *org.Party {
@@ -15,7 +17,7 @@ func goblParty(party *Party, o *options) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
-		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
+		p.Name = utils.CleanString(*party.PartyLegalEntity.RegistrationName)
 	}
 
 	if eID := party.EndpointID; eID != nil {
@@ -32,10 +34,10 @@ func goblParty(party *Party, o *options) *org.Party {
 
 	if party.PartyName != nil {
 		if p.Name == "" {
-			p.Name = cleanString(party.PartyName.Name)
+			p.Name = utils.CleanString(party.PartyName.Name)
 		} else if party.PartyName.Name != p.Name {
 			// Only set alias if it's different from the name
-			p.Alias = cleanString(party.PartyName.Name)
+			p.Alias = utils.CleanString(party.PartyName.Name)
 		}
 	}
 
@@ -43,7 +45,7 @@ func goblParty(party *Party, o *options) *org.Party {
 		p.People = []*org.Person{
 			{
 				Name: &org.Name{
-					Given: cleanString(*party.Contact.Name),
+					Given: utils.CleanString(*party.Contact.Name),
 				},
 			},
 		}
@@ -59,14 +61,14 @@ func goblParty(party *Party, o *options) *org.Party {
 		if party.Contact.Telephone != nil {
 			p.Telephones = []*org.Telephone{
 				{
-					Number: cleanString(*party.Contact.Telephone),
+					Number: utils.CleanString(*party.Contact.Telephone),
 				},
 			}
 		}
 		if party.Contact.ElectronicMail != nil {
 			p.Emails = []*org.Email{
 				{
-					Address: cleanString(*party.Contact.ElectronicMail),
+					Address: utils.CleanString(*party.Contact.ElectronicMail),
 				},
 			}
 		}
@@ -89,11 +91,11 @@ func goblDeliveryParty(party *Party) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
-		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
+		p.Name = utils.CleanString(*party.PartyLegalEntity.RegistrationName)
 	}
 	if party.PartyName != nil {
 		if p.Name == "" {
-			p.Name = cleanString(party.PartyName.Name)
+			p.Name = utils.CleanString(party.PartyName.Name)
 		}
 	}
 
@@ -113,27 +115,27 @@ func parseAddress(address *PostalAddress) *org.Address {
 		addr.Country = l10n.ISOCountryCode(address.Country.IdentificationCode)
 	}
 	if address.StreetName != nil {
-		addr.Street = cleanString(*address.StreetName)
+		addr.Street = utils.CleanString(*address.StreetName)
 	}
 	if address.AdditionalStreetName != nil {
-		addr.StreetExtra = cleanString(*address.AdditionalStreetName)
+		addr.StreetExtra = utils.CleanString(*address.AdditionalStreetName)
 	}
 	if address.CityName != nil {
-		addr.Locality = cleanString(*address.CityName)
+		addr.Locality = utils.CleanString(*address.CityName)
 	}
 	if address.PostalZone != nil {
-		addr.Code = cbc.Code(cleanString(*address.PostalZone))
+		addr.Code = cbc.Code(utils.CleanString(*address.PostalZone))
 	}
 	if address.CountrySubentity != nil {
-		addr.Region = cleanString(*address.CountrySubentity)
+		addr.Region = utils.CleanString(*address.CountrySubentity)
 	}
 	if address.BuildingNumber != nil {
-		addr.Number = cleanString(*address.BuildingNumber)
+		addr.Number = utils.CleanString(*address.BuildingNumber)
 	}
 	// CitySubdivisionName is used by ZATCA to represent the district,
 	// which maps to StreetExtra in GOBL.
 	if address.CitySubdivisionName != nil && addr.StreetExtra == "" {
-		addr.StreetExtra = cleanString(*address.CitySubdivisionName)
+		addr.StreetExtra = utils.CleanString(*address.CitySubdivisionName)
 	}
 	return addr
 }
