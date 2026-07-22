@@ -58,9 +58,6 @@ func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 		if ref.IssueDate != nil {
 			r.IssueDate = ref.IssueDate.String()
 		}
-		if !ref.UUID.IsZero() {
-			r.UUID = ref.UUID.String()
-		}
 		if dt := ref.Ext.Get(untdid.ExtKeyDocumentType); dt != "" {
 			r.DocumentTypeCode = dt.String()
 		}
@@ -99,9 +96,6 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 			purchase := o.Purchases[0]
 			ui.OrderReference = &OrderReference{
 				ID: purchase.Code.String(),
-			}
-			if purchase.IssueDate != nil {
-				ui.OrderReference.IssueDate = FormatDate(*purchase.IssueDate)
 			}
 		}
 
