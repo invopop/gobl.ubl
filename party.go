@@ -474,6 +474,9 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 }
 
 func contactName(n *org.Name) string {
+	if n == nil {
+		return ""
+	}
 	given := n.Given
 	surname := n.Surname
 
