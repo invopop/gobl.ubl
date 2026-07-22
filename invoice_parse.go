@@ -201,7 +201,7 @@ func (ui *Invoice) parseInvoiceNotes(out *bill.Invoice) {
 	}
 	out.Notes = make([]*org.Note, 0, len(ui.Note))
 	for _, note := range ui.Note {
-		out.Notes = append(out.Notes, parseNote(note))
+		out.Notes = append(out.Notes, utils.ParseNote(note))
 	}
 }
 

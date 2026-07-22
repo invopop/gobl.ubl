@@ -293,3 +293,13 @@ func goblLineCharges(allowances []*AllowanceCharge, line *bill.Line) (*bill.Line
 	}
 	return line, nil
 }
+
+// goblUnitFromUNECE maps UN/ECE code to GOBL equivalent.
+func goblUnitFromUNECE(unece cbc.Code) org.Unit {
+	for _, def := range org.UnitDefinitions {
+		if def.UNECE == unece {
+			return def.Unit
+		}
+	}
+	return org.Unit(unece)
+}

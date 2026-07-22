@@ -191,7 +191,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	if len(inv.Notes) > 0 {
 		var noteTexts []string
 		for _, note := range inv.Notes {
-			if text := formatNote(note); text != "" {
+			if text := utils.FormatNote(note); text != "" {
 				noteTexts = append(noteTexts, text)
 			}
 		}
