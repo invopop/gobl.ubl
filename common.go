@@ -117,9 +117,10 @@ type AdditionalItemProperty struct {
 
 // Price represents the price of an item
 type Price struct {
-	PriceAmount     Amount           `xml:"cbc:PriceAmount"`
-	BaseQuantity    *Quantity        `xml:"cbc:BaseQuantity,omitempty"`
-	AllowanceCharge *AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
+	PriceAmount             Amount           `xml:"cbc:PriceAmount"`
+	BaseQuantity            *Quantity        `xml:"cbc:BaseQuantity,omitempty"`
+	OrderableUnitFactorRate *string          `xml:"cbc:OrderableUnitFactorRate,omitempty"`
+	AllowanceCharge         *AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
 }
 
 func getTypeCode(inv *bill.Invoice) (string, error) {
