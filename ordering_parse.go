@@ -29,9 +29,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
 	}
 
-	if sp := ui.AccountingSupplierParty.Party; sp != nil && sp.ServiceProviderParty != nil {
-		ordering.Issuer = goblParty(sp.ServiceProviderParty.Party, o)
-	}
+	ordering.Issuer = ui.goblOrderingIssuer(o)
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(ui.InvoicePeriod) > 0 {
@@ -144,6 +142,14 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	}
 
 	return nil
+}
+
+func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
+	sp := ui.AccountingSupplierParty.Party
+	if sp == nil || sp.ServiceProviderParty == nil {
+		return nil
+	}
+	return goblParty(sp.ServiceProviderParty.Party, o)
 }
 
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
