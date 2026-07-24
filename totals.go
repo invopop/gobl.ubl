@@ -53,7 +53,7 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 	t := inv.Totals
 
 	currency := inv.Currency.String()
-	rCurrency := inv.RegimeDef().Currency.String()
+	rCurrency := inv.RegimeDef().GetCurrency().String()
 
 	ui.LegalMonetaryTotal = MonetaryTotal{
 		LineExtensionAmount: Amount{Value: t.Sum.String(), CurrencyID: &currency},
@@ -84,9 +84,9 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 		},
 	}
 
-	// BT-111
-	if inv.Currency.String() != rCurrency {
-		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().Currency); rate != nil {
+	// BT-111: only when the regime currency is known and differs from the document currency.
+	if rCurrency != "" && inv.Currency.String() != rCurrency {
+		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().GetCurrency()); rate != nil {
 			taxInAccCurrency := rate.Convert(t.Tax)
 			accTaxTotal := TaxTotal{
 				TaxAmount: Amount{

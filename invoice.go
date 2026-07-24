@@ -152,7 +152,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate
 	// is available. BT-111 is only added in that case and BR-53 requires
 	// BT-111 whenever BT-6 is present, so the two must be gated identically.
-	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency &&
+	if taxCurrency := inv.RegimeDef().GetCurrency(); taxCurrency != inv.Currency &&
 		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
 		out.TaxCurrencyCode = string(taxCurrency)
 	}
@@ -165,7 +165,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		// BR-KSA-70
 		out.IssueTime = inv.IssueTime.String()
 		// BR-KSA-70
-		out.TaxCurrencyCode = string(inv.RegimeDef().Currency)
+		out.TaxCurrencyCode = string(inv.RegimeDef().GetCurrency())
 		// BR-KSA-06
 		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceType).String()
 		out.InvoiceTypeCode.Name = &invType
