@@ -137,3 +137,28 @@ func TestInvoiceHeaders(t *testing.T) {
 		assert.Equal(t, "001", out.ID)
 	})
 }
+
+// TestConvertInvoiceUnregisteredRegime ensures conversion does not panic when
+// the invoice's tax regime is a valid country code that GOBL has no regime
+// definition for (e.g. "LU"). In that case inv.RegimeDef() is nil, and the
+// converter must fall back to the nil-safe GetCurrency() accessor instead of
+// dereferencing the RegimeDef fields directly.
+func TestConvertInvoiceUnregisteredRegime(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-complete.json")
+
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	// Luxembourg is a valid ISO country but has no GOBL tax regime, so
+	// RegimeDef() returns nil.
+	inv.Regime.Country = "LU"
+	require.Nil(t, inv.RegimeDef(), "expected no regime definition for LU")
+
+	require.NotPanics(t, func() {
+		out, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		require.NotNil(t, out)
+		// With an unknown regime currency, no tax-accounting currency is emitted.
+		assert.Empty(t, out.TaxCurrencyCode)
+	})
+}
