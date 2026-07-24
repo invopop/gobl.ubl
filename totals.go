@@ -84,8 +84,8 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 		},
 	}
 
-	// BT-111
-	if inv.Currency.String() != rCurrency {
+	// BT-111: only when the regime currency is known and differs from the document currency.
+	if rCurrency != "" && inv.Currency.String() != rCurrency {
 		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().GetCurrency()); rate != nil {
 			taxInAccCurrency := rate.Convert(t.Tax)
 			accTaxTotal := TaxTotal{

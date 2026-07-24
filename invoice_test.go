@@ -149,10 +149,13 @@ func TestConvertInvoiceUnregisteredRegime(t *testing.T) {
 	inv, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)
 
-	// Luxembourg is a valid ISO country but has no GOBL tax regime, so
-	// RegimeDef() returns nil.
-	inv.Regime.Country = "LU"
-	require.Nil(t, inv.RegimeDef(), "expected no regime definition for LU")
+	// Luxembourg is a valid ISO country but currently has no GOBL tax regime,
+	// so RegimeDef() returns nil. If GOBL later adds an LU regime this test
+	// would no longer exercise the nil path, so skip rather than fail.
+	inv.Country = "LU"
+	if inv.RegimeDef() != nil {
+		t.Skip("GOBL now defines an LU regime; RegimeDef() is no longer nil here")
+	}
 
 	require.NotPanics(t, func() {
 		out, err := ubl.ConvertInvoice(env)
