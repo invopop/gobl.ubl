@@ -27,9 +27,7 @@ type CustomerParty struct {
 	Party *Party `xml:"cac:Party"`
 }
 
-// ServiceProviderParty represents a service provider party. It carries the
-// ordering issuer: a third party responsible for issuing the document on behalf
-// of the supplier but not liable for tax.
+// ServiceProviderParty represents a service provider party in a transaction
 type ServiceProviderParty struct {
 	Party *Party `xml:"cac:Party"`
 }

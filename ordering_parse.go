@@ -29,7 +29,6 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
 	}
 
-	// The supplier's ServiceProviderParty carries the ordering issuer.
 	if sp := ui.AccountingSupplierParty.Party; sp != nil && sp.ServiceProviderParty != nil {
 		ordering.Issuer = goblParty(sp.ServiceProviderParty.Party, o)
 	}
