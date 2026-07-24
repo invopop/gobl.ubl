@@ -83,6 +83,15 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 			}
 		}
 
+		// The ordering issuer (a third party that issued the document on behalf
+		// of the supplier but is not liable for tax) maps to the supplier's
+		// ServiceProviderParty/Party.
+		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {
+			ui.AccountingSupplierParty.Party.ServiceProviderParty = &ServiceProviderParty{
+				Party: newParty(o.Issuer, context),
+			}
+		}
+
 		if o.Period != nil {
 			ui.InvoicePeriod = []Period{
 				{

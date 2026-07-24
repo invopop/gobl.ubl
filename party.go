@@ -27,6 +27,13 @@ type CustomerParty struct {
 	Party *Party `xml:"cac:Party"`
 }
 
+// ServiceProviderParty represents a service provider party. It carries the
+// ordering issuer: a third party responsible for issuing the document on behalf
+// of the supplier but not liable for tax.
+type ServiceProviderParty struct {
+	Party *Party `xml:"cac:Party"`
+}
+
 // Party represents a party involved in a transaction
 type Party struct {
 	EndpointID          *EndpointID       `xml:"cbc:EndpointID"`
@@ -36,6 +43,9 @@ type Party struct {
 	PartyTaxScheme      []PartyTaxScheme  `xml:"cac:PartyTaxScheme"`
 	PartyLegalEntity    *PartyLegalEntity `xml:"cac:PartyLegalEntity"`
 	Contact             *Contact          `xml:"cac:Contact"`
+	// ServiceProviderParty follows Contact in the UBL PartyType sequence and
+	// holds the ordering issuer when present on the supplier party.
+	ServiceProviderParty *ServiceProviderParty `xml:"cac:ServiceProviderParty"`
 }
 
 // EndpointID represents an endpoint identifier
