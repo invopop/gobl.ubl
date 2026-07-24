@@ -36,15 +36,13 @@ type ServiceProviderParty struct {
 
 // Party represents a party involved in a transaction
 type Party struct {
-	EndpointID          *EndpointID       `xml:"cbc:EndpointID"`
-	PartyIdentification []Identification  `xml:"cac:PartyIdentification"`
-	PartyName           *PartyName        `xml:"cac:PartyName"`
-	PostalAddress       *PostalAddress    `xml:"cac:PostalAddress"`
-	PartyTaxScheme      []PartyTaxScheme  `xml:"cac:PartyTaxScheme"`
-	PartyLegalEntity    *PartyLegalEntity `xml:"cac:PartyLegalEntity"`
-	Contact             *Contact          `xml:"cac:Contact"`
-	// ServiceProviderParty follows Contact in the UBL PartyType sequence and
-	// holds the ordering issuer when present on the supplier party.
+	EndpointID           *EndpointID           `xml:"cbc:EndpointID"`
+	PartyIdentification  []Identification      `xml:"cac:PartyIdentification"`
+	PartyName            *PartyName            `xml:"cac:PartyName"`
+	PostalAddress        *PostalAddress        `xml:"cac:PostalAddress"`
+	PartyTaxScheme       []PartyTaxScheme      `xml:"cac:PartyTaxScheme"`
+	PartyLegalEntity     *PartyLegalEntity     `xml:"cac:PartyLegalEntity"`
+	Contact              *Contact              `xml:"cac:Contact"`
 	ServiceProviderParty *ServiceProviderParty `xml:"cac:ServiceProviderParty"`
 }
 
