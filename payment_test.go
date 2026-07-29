@@ -71,6 +71,33 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "MANDATE-123", doc.PaymentMeans[0].PaymentMandate.ID.Value)
 	})
 
+	t.Run("card payment includes the network ID required by the schema", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Payment.Instructions.CreditTransfer = nil
+		inv.Payment.Instructions.Card = &pay.Card{Last4: "0312"}
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+		require.NotEmpty(t, doc.PaymentMeans)
+
+		card := doc.PaymentMeans[0].CardAccount
+		require.NotNil(t, card)
+		require.NotNil(t, card.PrimaryAccountNumberID)
+		assert.Equal(t, "0312", *card.PrimaryAccountNumberID)
+		// cbc:NetworkID is mandatory in UBL, but has no EN 16931 business term.
+		require.NotNil(t, card.NetworkID)
+		assert.Equal(t, "NA", *card.NetworkID)
+		assert.Nil(t, card.HolderName)
+
+		data, err := ubl.Bytes(doc)
+		require.NoError(t, err)
+		assert.Contains(t, string(data), "<cac:CardAccount>\n      <cbc:PrimaryAccountNumberID>0312</cbc:PrimaryAccountNumberID>\n      <cbc:NetworkID>NA</cbc:NetworkID>\n    </cac:CardAccount>")
+	})
+
 	t.Run("document type extension", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 
