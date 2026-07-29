@@ -78,6 +78,7 @@ type PrepaidPayment struct {
 }
 
 const sepaSchemeID = "SEPA"
+const cardNetworkNotApplicable = "NA"
 
 func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	if inv == nil || inv.Payment == nil {
@@ -175,8 +176,10 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 		}
 	}
 	if instr.Card != nil {
+		network := cardNetworkNotApplicable
 		ui.PaymentMeans[0].CardAccount = &CardAccount{
 			PrimaryAccountNumberID: &instr.Card.Last4,
+			NetworkID:              &network,
 		}
 		if instr.Card.Holder != "" {
 			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
