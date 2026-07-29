@@ -27,15 +27,21 @@ type CustomerParty struct {
 	Party *Party `xml:"cac:Party"`
 }
 
+// ServiceProviderParty represents a service provider party in a transaction
+type ServiceProviderParty struct {
+	Party *Party `xml:"cac:Party"`
+}
+
 // Party represents a party involved in a transaction
 type Party struct {
-	EndpointID          *EndpointID       `xml:"cbc:EndpointID"`
-	PartyIdentification []Identification  `xml:"cac:PartyIdentification"`
-	PartyName           *PartyName        `xml:"cac:PartyName"`
-	PostalAddress       *PostalAddress    `xml:"cac:PostalAddress"`
-	PartyTaxScheme      []PartyTaxScheme  `xml:"cac:PartyTaxScheme"`
-	PartyLegalEntity    *PartyLegalEntity `xml:"cac:PartyLegalEntity"`
-	Contact             *Contact          `xml:"cac:Contact"`
+	EndpointID           *EndpointID           `xml:"cbc:EndpointID"`
+	PartyIdentification  []Identification      `xml:"cac:PartyIdentification"`
+	PartyName            *PartyName            `xml:"cac:PartyName"`
+	PostalAddress        *PostalAddress        `xml:"cac:PostalAddress"`
+	PartyTaxScheme       []PartyTaxScheme      `xml:"cac:PartyTaxScheme"`
+	PartyLegalEntity     *PartyLegalEntity     `xml:"cac:PartyLegalEntity"`
+	Contact              *Contact              `xml:"cac:Contact"`
+	ServiceProviderParty *ServiceProviderParty `xml:"cac:ServiceProviderParty"`
 }
 
 // EndpointID represents an endpoint identifier

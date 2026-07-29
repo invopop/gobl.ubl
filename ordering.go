@@ -83,6 +83,12 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 			}
 		}
 
+		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {
+			ui.AccountingSupplierParty.Party.ServiceProviderParty = &ServiceProviderParty{
+				Party: newParty(o.Issuer, context),
+			}
+		}
+
 		if o.Period != nil {
 			ui.InvoicePeriod = []Period{
 				{

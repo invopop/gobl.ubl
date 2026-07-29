@@ -18,15 +18,18 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Projects) > 0 ||
 		len(o.Contracts) > 0 ||
 		len(o.Tender) > 0 ||
-		len(o.Identities) > 0
+		len(o.Identities) > 0 ||
+		o.Issuer != nil
 }
 
-func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
+func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
 		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
 	}
+
+	ordering.Issuer = ui.goblOrderingIssuer(o)
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(ui.InvoicePeriod) > 0 {
@@ -139,6 +142,14 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	}
 
 	return nil
+}
+
+func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
+	sp := ui.AccountingSupplierParty.Party
+	if sp == nil || sp.ServiceProviderParty == nil {
+		return nil
+	}
+	return goblParty(sp.ServiceProviderParty.Party, o)
 }
 
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
