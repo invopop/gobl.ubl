@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4b46f9a01f0c0b693586695bf9bd6661b556126514db8715fc8dda4a0beb679b"
+			"val": "f60427433ca4a2847e9acfb919ca0a7483242899953d426d832fdd196e262a04"
 		}
 	},
 	"doc": {
@@ -207,7 +207,8 @@
 			}
 		],
 		"ordering": {
-			"code": "9392277012"
+			"code": "9392277012",
+			"cost": "ACC:COST:TC210"
 		},
 		"payment": {
 			"terms": {

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "adbbf8b25fb926adf10cbe23aafd86d1d69764a17a73983b441445c56b295db4"
+			"val": "ad41243490f35cb824f80aac462185ab837909e246f4db64b71d7210e8cb093d"
 		}
 	},
 	"doc": {
@@ -212,7 +212,8 @@
 			}
 		],
 		"ordering": {
-			"code": "0150abc"
+			"code": "0150abc",
+			"cost": "4025:123:4343"
 		},
 		"payment": {
 			"terms": {

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bed7c079ba1f06d65d5d80337e1f4518e4b8998c66577586a3e0d71b5b81e961"
+			"val": "60063072781fff478bbc252138ab8a495fdcbfd05769cb4b189ae74a1b67e9d4"
 		}
 	},
 	"doc": {
@@ -292,6 +292,7 @@
 		],
 		"ordering": {
 			"code": "123",
+			"cost": "67543",
 			"period": {
 				"start": "2013-03-10",
 				"end": "2013-04-10"

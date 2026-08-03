@@ -73,6 +73,11 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 			ui.BuyerReference = o.Code.String()
 		}
 
+		// BT-19: Buyer accounting reference
+		if o.Cost != "" {
+			ui.AccountingCost = o.Cost.String()
+		}
+
 		// If both ordering.seller and seller are present, the original seller is used
 		// as the tax representative.
 		if o.Seller != nil {

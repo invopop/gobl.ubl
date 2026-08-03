@@ -10,6 +10,7 @@ import (
 
 func hasOrderingData(o *bill.Ordering) bool {
 	return o.Code != "" ||
+		o.Cost != "" ||
 		o.Period != nil ||
 		len(o.Despatch) > 0 ||
 		len(o.Receiving) > 0 ||
@@ -27,6 +28,11 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 
 	if ui.BuyerReference != "" {
 		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
+	}
+
+	// BT-19: Buyer accounting reference
+	if ui.AccountingCost != "" {
+		ordering.Cost = cbc.Code(cleanString(ui.AccountingCost))
 	}
 
 	ordering.Issuer = ui.goblOrderingIssuer(o)

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7eabad06dcc6d005a8f5281151b235fb4a915e9feac06ffb86bce0ebea4b7512"
+			"val": "025b683de94c2d3a26b5c44551534279f24602ecbbfc09002ba52af6c12f7732"
 		}
 	},
 	"doc": {
@@ -298,6 +298,7 @@
 		],
 		"ordering": {
 			"code": "buyer reference or purchase order reference is recommended",
+			"cost": "23089",
 			"period": {
 				"start": "2025-07-29",
 				"end": "2025-08-28"
