@@ -123,31 +123,41 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 		}
 	}
 
-	if ui.AdditionalDocumentReference != nil {
-		for _, ref := range ui.AdditionalDocumentReference {
-			if ref.DocumentTypeCode == "130" {
-				if ordering.Identities == nil {
-					ordering.Identities = make([]*org.Identity, 0)
-				}
-				identity := &org.Identity{
-					Code: cbc.Code(ref.ID.Value),
-				}
-				if ref.ID.SchemeID != nil {
-					// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
-					identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(*ref.ID.SchemeID))
-				}
-				ordering.Identities = append(ordering.Identities, identity)
-			}
-
-			// Other document types not mapped to GOBL
-		}
-	}
+	ordering.Identities = goblAdditionalDocumentIdentities(ui.AdditionalDocumentReference)
 
 	if hasOrderingData(ordering) {
 		out.Ordering = ordering
 	}
 
 	return nil
+}
+
+// goblAdditionalDocumentIdentities maps AdditionalDocumentReference entries with
+// DocumentTypeCode "130" (product invoice data sheet) to GOBL identities.
+// Other document types are not mapped to GOBL.
+func goblAdditionalDocumentIdentities(refs []Reference) []*org.Identity {
+	if refs == nil {
+		return nil
+	}
+
+	var identities []*org.Identity
+	for _, ref := range refs {
+		if ref.DocumentTypeCode != "130" {
+			continue
+		}
+		if identities == nil {
+			identities = make([]*org.Identity, 0)
+		}
+		identity := &org.Identity{
+			Code: cbc.Code(ref.ID.Value),
+		}
+		if ref.ID.SchemeID != nil {
+			// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
+			identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(*ref.ID.SchemeID))
+		}
+		identities = append(identities, identity)
+	}
+	return identities
 }
 
 func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
