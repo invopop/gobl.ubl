@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "282d97abc8a84964422902cedce112870524853712a3f3aae77eeddf1998d769"
+			"val": "9d7140095ce4165c5e4db9d0649085575c3c6f0d95c2f4f7fe242cbd53dd6a00"
 		}
 	},
 	"doc": {
@@ -370,6 +370,7 @@
 			}
 		],
 		"ordering": {
+			"cost": "Project cost code 123",
 			"period": {
 				"start": "2013-06-01",
 				"end": "2013-06-30"
