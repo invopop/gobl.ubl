@@ -202,15 +202,18 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 	pfa := new(FinancialAccount)
 	if ct.IBAN != "" {
-		pfa.ID = &ct.IBAN
+		id := ct.IBAN.String()
+		pfa.ID = &id
 	} else if ct.Number != "" {
-		pfa.ID = &ct.Number
+		id := ct.Number.String()
+		pfa.ID = &id
 	}
 	if ct.Name != "" {
 		pfa.Name = &ct.Name
 	}
 	if ct.BIC != "" {
-		pfa.FinancialInstitutionBranch = &Branch{ID: &ct.BIC}
+		bic := ct.BIC.String()
+		pfa.FinancialInstitutionBranch = &Branch{ID: &bic}
 	}
 	return pfa
 }

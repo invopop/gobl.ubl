@@ -166,16 +166,16 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	if account.ID != nil {
 		id := cleanString(*account.ID)
 		if isIBAN(id) {
-			creditTransfer.IBAN = id
+			creditTransfer.IBAN = cbc.Code(id)
 		} else {
-			creditTransfer.Number = id
+			creditTransfer.Number = cbc.Code(id)
 		}
 	}
 	if account.Name != nil {
 		creditTransfer.Name = cleanString(*account.Name)
 	}
 	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
+		creditTransfer.BIC = cbc.Code(cleanString(*account.FinancialInstitutionBranch.ID))
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}
