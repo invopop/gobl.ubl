@@ -33,8 +33,8 @@ func TestParsePayment(t *testing.T) {
 		assert.Equal(t, cbc.Code("0003434323213231"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "NO9386011117947", payment.Instructions.CreditTransfer[0].IBAN)
-		assert.Equal(t, "DNBANOKK", payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, cbc.Code("NO9386011117947"), payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("DNBANOKK"), payment.Instructions.CreditTransfer[0].BIC)
 
 		// Check Terms
 		require.NotNil(t, payment.Terms)
@@ -95,8 +95,8 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Code("0003434323213231"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "NO9386011117947", payment.Instructions.CreditTransfer[0].IBAN)
-		assert.Equal(t, "DNBANOKK", payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, cbc.Code("NO9386011117947"), payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("DNBANOKK"), payment.Instructions.CreditTransfer[0].BIC)
 	})
 
 	t.Run("instructions with direct debit", func(t *testing.T) {
@@ -129,8 +129,8 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "SEXDABCD", payment.Instructions.CreditTransfer[0].BIC)
-		assert.Equal(t, "SE1212341234123412", payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("SEXDABCD"), payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, cbc.Code("SE1212341234123412"), payment.Instructions.CreditTransfer[0].IBAN)
 	})
 
 	t.Run("instructions with only IBAN", func(t *testing.T) {
@@ -147,7 +147,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Code("1100512149"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "NL28RBOS0420242228", payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("NL28RBOS0420242228"), payment.Instructions.CreditTransfer[0].IBAN)
 	})
 }
 
@@ -222,11 +222,11 @@ func TestPaymentRoundTrip(t *testing.T) {
 		require.Len(t, resultInv.Payment.Instructions.CreditTransfer, 1)
 
 		// The original has number, not IBAN
-		assert.Equal(t, "123456789", originalInv.Payment.Instructions.CreditTransfer[0].Number)
-		assert.Equal(t, "", originalInv.Payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("123456789"), originalInv.Payment.Instructions.CreditTransfer[0].Number)
+		assert.Equal(t, cbc.Code(""), originalInv.Payment.Instructions.CreditTransfer[0].IBAN)
 
 		// After round-trip, the number should still be in the number field, not IBAN
-		assert.Equal(t, "123456789", resultInv.Payment.Instructions.CreditTransfer[0].Number, "Account number should be preserved in Number field")
-		assert.Equal(t, "", resultInv.Payment.Instructions.CreditTransfer[0].IBAN, "IBAN should be empty when Number was used")
+		assert.Equal(t, cbc.Code("123456789"), resultInv.Payment.Instructions.CreditTransfer[0].Number, "Account number should be preserved in Number field")
+		assert.Equal(t, cbc.Code(""), resultInv.Payment.Instructions.CreditTransfer[0].IBAN, "IBAN should be empty when Number was used")
 	})
 }
