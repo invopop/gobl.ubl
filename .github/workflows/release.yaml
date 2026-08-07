@@ -10,6 +10,9 @@ on:
       - main
     paths-ignore:
       - "README.md"
+  # Manual escape hatch: re-fire the release when the push event is lost
+  # (e.g. dropped webhooks during a GitHub Actions incident).
+  workflow_dispatch:
 
 jobs:
   release:
