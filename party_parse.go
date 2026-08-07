@@ -57,17 +57,23 @@ func goblParty(party *Party, o *options) *org.Party {
 
 	if party.Contact != nil {
 		if party.Contact.Telephone != nil {
-			p.Telephones = []*org.Telephone{
-				{
-					Number: cleanString(*party.Contact.Telephone),
-				},
+			number := cleanString(*party.Contact.Telephone)
+			if number != "" {
+				p.Telephones = []*org.Telephone{
+					{
+						Number: number,
+					},
+				}
 			}
 		}
 		if party.Contact.ElectronicMail != nil {
-			p.Emails = []*org.Email{
-				{
-					Address: cleanString(*party.Contact.ElectronicMail),
-				},
+			address := cleanString(*party.Contact.ElectronicMail)
+			if address != "" {
+				p.Emails = []*org.Email{
+					{
+						Address: address,
+					},
+				}
 			}
 		}
 	}

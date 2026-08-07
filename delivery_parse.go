@@ -63,7 +63,9 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 		}
 	}
 
-	if ui.DeliveryTerms != nil {
+	// Terms with no ID carry only free text, and an identity with no code fails
+	// validation.
+	if ui.DeliveryTerms != nil && ui.DeliveryTerms.ID != "" {
 		d.Identities = []*org.Identity{
 			{
 				Code: cbc.Code(ui.DeliveryTerms.ID),
