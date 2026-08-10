@@ -174,8 +174,15 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	if account.Name != nil {
 		creditTransfer.Name = cleanString(*account.Name)
 	}
-	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cbc.Code(cleanString(*account.FinancialInstitutionBranch.ID))
+	// UBL carries the BIC either on the branch itself (BT-86) or nested inside
+	// its financial institution.
+	if branch := account.FinancialInstitutionBranch; branch != nil {
+		switch {
+		case branch.ID != nil:
+			creditTransfer.BIC = cbc.Code(cleanString(*branch.ID))
+		case branch.FinancialInstitution != nil && branch.FinancialInstitution.ID != nil:
+			creditTransfer.BIC = cbc.Code(cleanString(*branch.FinancialInstitution.ID))
+		}
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}

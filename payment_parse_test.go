@@ -149,6 +149,21 @@ func TestParsePaymentInstructions(t *testing.T) {
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
 		assert.Equal(t, cbc.Code("NL28RBOS0420242228"), payment.Instructions.CreditTransfer[0].IBAN)
 	})
+
+	t.Run("instructions with the BIC nested in the financial institution", func(t *testing.T) {
+		e := parseXMLInvoice(t, "peppol/nbio-stuck-ubl.xml")
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		payment := inv.Payment
+		require.NotNil(t, payment)
+
+		require.NotNil(t, payment.Instructions)
+		require.Len(t, payment.Instructions.CreditTransfer, 1)
+		assert.Equal(t, cbc.Code("BE68539007547034"), payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("GKCCBEBB"), payment.Instructions.CreditTransfer[0].BIC)
+	})
 }
 
 func TestParsePaymentTerms(t *testing.T) {
