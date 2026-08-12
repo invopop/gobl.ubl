@@ -121,7 +121,7 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 				if ui.OrderReference == nil {
 					// TODO: once we have a Peppol addon this should be delegated there
 					ui.OrderReference = &OrderReference{
-						ID: "NA",
+						ID: orderReferenceNotApplicable,
 					}
 				}
 				ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
