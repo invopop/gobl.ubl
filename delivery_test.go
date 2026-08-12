@@ -5,6 +5,10 @@ import (
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -41,6 +45,38 @@ func TestNewDelivery(t *testing.T) {
 		assert.Len(t, doc.Delivery, 1)
 		assert.Equal(t, "2024-02-10", *doc.Delivery[0].ActualDeliveryDate)
 		assert.Nil(t, doc.Delivery[0].DeliveryLocation)
+	})
+
+	t.Run("delivery location identity with iso scheme id propagates to SchemeID", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-without-buyers-tax-id.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Delivery.Identities = []*org.Identity{
+			{
+				Code: "6754238987643",
+				Ext:  tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0088"}),
+			},
+		}
+
+		require.NoError(t, env.Calculate())
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		require.NotNil(t, doc.Delivery[0].DeliveryLocation)
+		id := doc.Delivery[0].DeliveryLocation.ID
+		require.NotNil(t, id)
+		assert.Equal(t, "6754238987643", id.Value)
+		require.NotNil(t, id.SchemeID)
+		assert.Equal(t, "0088", *id.SchemeID)
+	})
+
+	t.Run("delivery location identity without iso scheme id leaves SchemeID unset", func(t *testing.T) {
+		doc := testInvoiceFrom(t, "invoice-without-buyers-tax-id.json")
+
+		id := doc.Delivery[0].DeliveryLocation.ID
+		require.NotNil(t, id)
+		assert.Nil(t, id.SchemeID)
 	})
 
 	t.Run("delivery with no date", func(t *testing.T) {

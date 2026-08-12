@@ -1,6 +1,9 @@
 package ubl
 
-import "github.com/invopop/gobl/bill"
+import (
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
+)
 
 // Delivery represents delivery information
 type Delivery struct {
@@ -49,7 +52,12 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 				Address: newAddress(del.Receiver.Addresses, ctx),
 			}
 		if len(del.Identities) > 0 {
-			out.DeliveryLocation.ID = &IDType{Value: del.Identities[0].Code.String()}
+			id := del.Identities[0]
+			idType := &IDType{Value: id.Code.String()}
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				idType.SchemeID = &s
+			}
+			out.DeliveryLocation.ID = idType
 		}
 	}
 
