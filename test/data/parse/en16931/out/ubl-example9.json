@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c12d80e01847c16ff11233e6b881c3e5fa562e9138de6a8e40458af48ab93cd8"
+			"val": "0deba789b07f893a31790244a0b310375d87f68098db9a1d93979302a720bffa"
 		}
 	},
 	"doc": {
@@ -73,7 +73,7 @@
 				"item": {
 					"name": "IExpress licentiekosten",
 					"price": "49.00",
-					"unit": "mon",
+					"unit": "MON",
 					"meta": {
 						"verbruikscategorie": "Start"
 					}

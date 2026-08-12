@@ -30,7 +30,7 @@ func TestParseLines(t *testing.T) {
 		line := lines[0]
 		assert.Equal(t, "PATAT FRITES 10MM 10KG", line.Item.Name)
 		assert.Equal(t, "2", line.Quantity.String())
-		assert.Equal(t, org.Unit("item"), line.Item.Unit)
+		assert.Equal(t, org.Unit("EA"), line.Item.Unit)
 		assert.Equal(t, "9.95", line.Item.Price.String())
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
 		assert.Equal(t, "6%", line.Taxes[0].Percent.String())
@@ -38,7 +38,7 @@ func TestParseLines(t *testing.T) {
 		line = lines[19]
 		assert.Equal(t, "FRITUUR VET 10 KG RETOUR", line.Item.Name)
 		assert.Equal(t, "6", line.Quantity.String())
-		assert.Equal(t, org.Unit("item"), line.Item.Unit)
+		assert.Equal(t, org.Unit("EA"), line.Item.Unit)
 		assert.Equal(t, "18.33", line.Item.Price.String())
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
 		assert.Equal(t, "6%", line.Taxes[0].Percent.String())
@@ -62,7 +62,7 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, "JB007", line.Item.Ref.String())
 		assert.Equal(t, "Scratch on box", line.Notes[0].Text)
 		assert.Equal(t, "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900", line.Item.Description)
-		assert.Equal(t, org.Unit("item"), line.Item.Unit)
+		assert.Equal(t, org.Unit("EA"), line.Item.Unit)
 		assert.Equal(t, l10n.ISOCountryCode("DE"), line.Item.Origin)
 		assert.Equal(t, "1273.00", line.Item.Price.String())
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
@@ -93,7 +93,7 @@ func TestParseLines(t *testing.T) {
 		line = lines[1]
 		assert.Equal(t, "Returned \"Advanced computing\" book", line.Item.Name)
 		assert.Equal(t, "-1", line.Quantity.String())
-		assert.Equal(t, org.Unit("item"), line.Item.Unit)
+		assert.Equal(t, org.Unit("EA"), line.Item.Unit)
 		assert.Equal(t, "3.96", line.Item.Price.String())
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
 		assert.Equal(t, "15%", line.Taxes[0].Percent.String())

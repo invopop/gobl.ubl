@@ -87,7 +87,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		}
 
 		if iq.UnitCode != "" {
-			line.Item.Unit = goblUnitFromUNECE(cbc.Code(iq.UnitCode))
+			line.Item.Unit = org.Unit(iq.UnitCode)
 		}
 	}
 

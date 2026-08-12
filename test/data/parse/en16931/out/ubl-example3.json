@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "50d4aa3a9e0cad86c0396a44879d4785c52d13d855be9060170820d2a1217927"
+			"val": "d4e7b0e2ff943424b49adc0bec2e3ceb9e02e910c5c879c41b2076eb6aee461b"
 		}
 	},
 	"doc": {
@@ -91,7 +91,7 @@
 					"name": "Paper subscription",
 					"description": "Subscription fee 1st quarter",
 					"price": "800.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "1600.00",
 				"taxes": [
@@ -113,7 +113,7 @@
 					"name": "Paper subscription",
 					"description": "Subscription fee 1st quarter",
 					"price": "800.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "1600.00",
 				"taxes": [

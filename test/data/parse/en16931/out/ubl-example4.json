@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fee953eea91eb485b83cc33c43aabf3b2e745d1add0ef8757dbfe1d3ace45fb1"
+			"val": "08f14e825b775c3a10db36ac42842c50cd1ddd044a12f1734f0ff883fa3d8fa8"
 		}
 	},
 	"doc": {
@@ -103,7 +103,7 @@
 					"name": "Printing paper",
 					"description": "Printing paper, 2mm",
 					"price": "1.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "1000.00",
 				"taxes": [
@@ -126,7 +126,7 @@
 					"name": "Parker Pen",
 					"description": "Parker Pen, Black, model Sansa",
 					"price": "5.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "500.00",
 				"taxes": [
@@ -148,7 +148,7 @@
 					"ref": "JB009",
 					"name": "American Cookies",
 					"price": "5.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "2500.00",
 				"taxes": [

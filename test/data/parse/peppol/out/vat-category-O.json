@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bd06e717055848fb99d5739861643d9ed753d76d7058e577e616242b7ed99386"
+			"val": "059b86bf60ff83bed9599b745e0b71a03a4838e32cd146ee90cdf131e80e5b3b"
 		}
 	},
 	"doc": {
@@ -84,7 +84,7 @@
 					"name": "Road tax",
 					"description": "Weight-based tax, vehicles \u003e3000 KGM",
 					"price": "3200.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "3200.00",
 				"taxes": [

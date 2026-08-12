@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6df1db84080525e4c2c557efdf79016f910d2492036c4b1373650761d7245db6"
+			"val": "cf4d804795c9fa53072fef76e6addf27bb1aa16ec1f604dea7bbd74488447e8d"
 		}
 	},
 	"doc": {
@@ -136,7 +136,7 @@
 					],
 					"description": "Description of item",
 					"price": "400.00",
-					"unit": "day",
+					"unit": "DAY",
 					"origin": "NO"
 				},
 				"sum": "2800.00",
@@ -172,7 +172,7 @@
 					],
 					"description": "Description 2",
 					"price": "500.00",
-					"unit": "day",
+					"unit": "DAY",
 					"origin": "NO"
 				},
 				"sum": "-1500.00",

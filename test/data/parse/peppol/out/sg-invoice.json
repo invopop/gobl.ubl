@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "025b683de94c2d3a26b5c44551534279f24602ecbbfc09002ba52af6c12f7732"
+			"val": "754bfcf8a6d998341d57e7d316433b838487998e722525f01861946f8bd50dd9"
 		}
 	},
 	"doc": {
@@ -161,7 +161,7 @@
 					],
 					"description": "Supply",
 					"price": "0.05735092",
-					"unit": "kwh",
+					"unit": "KWH",
 					"meta": {
 						"utilityconsumptionpoint": "871690930000222221",
 						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"
@@ -227,7 +227,7 @@
 					],
 					"description": "Supply",
 					"price": "0.827901924",
-					"unit": "kl",
+					"unit": "K6",
 					"meta": {
 						"utilityconsumptionpoint": "871690930000222221",
 						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"

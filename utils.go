@@ -30,16 +30,6 @@ func formatKey(key string) cbc.Key {
 	return cbc.Key(key)
 }
 
-// goblUnitFromUNECE maps UN/ECE code to GOBL equivalent.
-func goblUnitFromUNECE(unece cbc.Code) org.Unit {
-	for _, def := range org.UnitDefinitions {
-		if def.UNECE == unece {
-			return def.Unit
-		}
-	}
-	return org.Unit(unece)
-}
-
 // noteCodePattern matches the #CODE#text format used in UBL notes to encode
 // UNTDID 4451 text subject qualifier codes, e.g. "#AAI#some text".
 var noteCodePattern = regexp.MustCompile(`^#([A-Z0-9]+)#(.*)$`)

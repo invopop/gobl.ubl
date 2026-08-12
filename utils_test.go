@@ -139,27 +139,6 @@ func TestTagCodeParseZATCA(t *testing.T) {
 }
 
 // Define tests for the UnitFromUNECE function
-func TestUnitFromUNECE(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected string
-	}{
-		{"Known UNECE code", "HUR", "h"},
-		{"Known UNECE code", "SEC", "s"},
-		{"Known UNECE code", "MTR", "m"},
-		{"Known UNECE code", "GRM", "g"},
-		{"Unknown UNECE code", "XYZ", "XYZ"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := goblUnitFromUNECE(cbc.Code(tt.input))
-			assert.Equal(t, tt.expected, string(result))
-		})
-	}
-}
-
 // Define tests for the FormatKey function
 func TestFormatKey(t *testing.T) {
 	assert.Equal(t, cbc.Key("test"), formatKey("Test"))

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "132770d4f6e9291485fa849890307348c52b16e8abbc20790a0daa297042b462"
+			"val": "2876e64fc498a13f0808f2f26ece451affbfca79adbe11af4324be9530d53269"
 		},
 		"from": "iso6523-actorid-upis::0225:324872211",
 		"to": "iso6523-actorid-upis::0225:439368049"
@@ -176,7 +176,7 @@
 					"name": "REMBOURSEMENT",
 					"description": "Description du remboursement",
 					"price": "60.0000",
-					"unit": "one"
+					"unit": "C62"
 				},
 				"sum": "60.00",
 				"taxes": [
@@ -226,7 +226,7 @@
 					],
 					"description": "Description de l'article",
 					"price": "0.7000",
-					"unit": "one",
+					"unit": "C62",
 					"origin": "FR",
 					"meta": {
 						"co2g": "12"
@@ -292,7 +292,7 @@
 					],
 					"description": "Description du moule",
 					"price": "10.00000",
-					"unit": "one",
+					"unit": "C62",
 					"meta": {
 						"co2g": "30",
 						"couleur": "BLANC"
@@ -324,7 +324,7 @@
 					"name": "SUPPORT TEL",
 					"description": "Description de la prestation de support associée",
 					"price": "7.0000",
-					"unit": "h"
+					"unit": "HUR"
 				},
 				"sum": "14.00",
 				"taxes": [

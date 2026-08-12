@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "1f7094add9239bb4211c182763e2ec7b4cc8b6c2f09b60c8589314ce3b25992f"
+			"val": "007648a8d4a3429243461af497e327b531a971cfaf80491ab1f940ea6ed86d53"
 		}
 	},
 	"doc": {
@@ -51,7 +51,7 @@
 				"item": {
 					"name": "Printing paper",
 					"price": "1.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "1000.00",
 				"taxes": [
@@ -72,7 +72,7 @@
 				"item": {
 					"name": "Parker Pen",
 					"price": "5.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "500.00",
 				"taxes": [
@@ -93,7 +93,7 @@
 				"item": {
 					"name": "American Cookies",
 					"price": "5.00",
-					"unit": "item"
+					"unit": "EA"
 				},
 				"sum": "2500.00",
 				"taxes": [

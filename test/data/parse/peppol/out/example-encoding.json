@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6ec4f2539268d2d60895aee1cb49b684c76614699f4639e5ad336d63059f6ee9"
+			"val": "9cf03176bddc095b1ba6582b02d1b2a707475726be53266adbd26e071778bc3e"
 		}
 	},
 	"doc": {
@@ -88,7 +88,7 @@
 					"name": "Test Widget XL",
 					"description": "Widget with bad encoding character",
 					"price": "50.00",
-					"unit": "one"
+					"unit": "C62"
 				},
 				"sum": "100.00",
 				"taxes": [
