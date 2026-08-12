@@ -78,11 +78,15 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 		}
 	}
 
-	if ui.OrderReference != nil && ui.OrderReference.ID != "" {
-		ordering.Purchases = []*org.DocumentRef{
-			{
-				Code: cbc.Code(ui.OrderReference.ID),
-			},
+	if ui.OrderReference != nil {
+		// BT-13: "NA" is the agreed filler for "no purchase order" where the
+		// element is mandatory, so it is not an order reference.
+		if id := ui.OrderReference.ID; id != "" && id != orderReferenceNotApplicable {
+			ordering.Purchases = []*org.DocumentRef{
+				{
+					Code: cbc.Code(id),
+				},
+			}
 		}
 		// BT-14: Sales order reference
 		if ui.OrderReference.SalesOrderID != "" {
