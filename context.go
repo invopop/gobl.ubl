@@ -3,12 +3,16 @@ package ubl
 import (
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
-	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
+
+// AddonKeyXRechnung is the GOBL addon key XRechnung documents declare.
+// The addon itself lives in gobl.de.xinvoice; naming the key here avoids
+// importing that module, which would be a dependency cycle.
+const AddonKeyXRechnung cbc.Key = "de-xrechnung-v3"
 
 // Peppol Billing Profile IDs
 const (
@@ -196,7 +200,7 @@ var ContextPeppolSelfBilled = Context{
 var ContextXRechnung = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
-	Addons:          []cbc.Key{xrechnung.V3},
+	Addons:          []cbc.Key{AddonKeyXRechnung},
 	VESIDs: VESIDMapping{
 		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
 		CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",

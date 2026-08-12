@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
-	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
@@ -69,7 +68,7 @@ func TestContextXRechnung(t *testing.T) {
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
-		inv.SetAddons(xrechnung.V3)
+		inv.SetAddons(ubl.AddonKeyXRechnung)
 		require.NoError(t, inv.Calculate())
 
 		// Convert with XRechnung context
