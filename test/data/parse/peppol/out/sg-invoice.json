@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "025b683de94c2d3a26b5c44551534279f24602ecbbfc09002ba52af6c12f7732"
+			"val": "d58dde3a5cd334bcf218cc997c5df00f9a87a44b1f09890dba8adbfb5b976f81"
 		}
 	},
 	"doc": {
@@ -159,13 +159,19 @@
 							"code": "CCCCCCCC"
 						}
 					],
+					"attributes": [
+						{
+							"label": "UtilityConsumptionPoint",
+							"text": "871690930000222221"
+						},
+						{
+							"label": "UtilityConsumptionPointAddress",
+							"text": "VE HAZERSWOUDE-XXXXX"
+						}
+					],
 					"description": "Supply",
 					"price": "0.05735092",
-					"unit": "kwh",
-					"meta": {
-						"utilityconsumptionpoint": "871690930000222221",
-						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"
-					}
+					"unit": "kwh"
 				},
 				"sum": "3.67",
 				"discounts": [
@@ -225,13 +231,19 @@
 							"code": "CCCCCCCC"
 						}
 					],
+					"attributes": [
+						{
+							"label": "UtilityConsumptionPoint",
+							"text": "871690930000222221"
+						},
+						{
+							"label": "UtilityConsumptionPointAddress",
+							"text": "VE HAZERSWOUDE-XXXXX"
+						}
+					],
 					"description": "Supply",
 					"price": "0.827901924",
-					"unit": "kl",
-					"meta": {
-						"utilityconsumptionpoint": "871690930000222221",
-						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"
-					}
+					"unit": "kl"
 				},
 				"sum": "10.67",
 				"discounts": [

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "132770d4f6e9291485fa849890307348c52b16e8abbc20790a0daa297042b462"
+			"val": "130f34e10c4020a244e153f23d2bac3bf7a1dbe2c45c4e626c1c7b42f5248212"
 		},
 		"from": "iso6523-actorid-upis::0225:324872211",
 		"to": "iso6523-actorid-upis::0225:439368049"
@@ -224,13 +224,16 @@
 							"code": "SKU2578"
 						}
 					],
+					"attributes": [
+						{
+							"label": "CO2(g)",
+							"text": "12"
+						}
+					],
 					"description": "Description de l'article",
 					"price": "0.7000",
 					"unit": "one",
-					"origin": "FR",
-					"meta": {
-						"co2g": "12"
-					}
+					"origin": "FR"
 				},
 				"sum": "21.00",
 				"discounts": [
@@ -290,13 +293,19 @@
 							}
 						}
 					],
+					"attributes": [
+						{
+							"label": "COULEUR",
+							"text": "BLANC"
+						},
+						{
+							"label": "CO2(g)",
+							"text": "30"
+						}
+					],
 					"description": "Description du moule",
 					"price": "10.00000",
-					"unit": "one",
-					"meta": {
-						"co2g": "30",
-						"couleur": "BLANC"
-					}
+					"unit": "one"
 				},
 				"sum": "10.00",
 				"taxes": [

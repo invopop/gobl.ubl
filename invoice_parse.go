@@ -89,7 +89,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 	ui.applyExchangeRates(out)
 
-	if err := ui.goblAddLines(out); err != nil {
+	if err := ui.goblAddLines(out, o); err != nil {
 		return nil, err
 	}
 	if err := ui.goblAddPayment(out, o); err != nil {

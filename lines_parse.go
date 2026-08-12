@@ -15,7 +15,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
+func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options) error {
 	items := ui.InvoiceLines
 	if len(ui.CreditNoteLines) > 0 {
 		items = ui.CreditNoteLines
@@ -27,7 +27,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
 	for _, docLine := range items {
-		line, err := goblConvertLine(&docLine, taxCategoryMap)
+		line, err := goblConvertLine(&docLine, taxCategoryMap, o)
 		if err != nil {
 			return err
 		}
@@ -39,7 +39,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	return nil
 }
 
-func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo, o *options) (*bill.Line, error) {
 	if docLine.Price == nil {
 		// skip this line
 		return nil, nil
@@ -70,8 +70,13 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		},
 	}
 	if di := docLine.Item; di != nil {
-		goblConvertLineItem(di, line.Item)
+		if err := goblConvertLineItem(di, line.Item); err != nil {
+			return nil, err
+		}
 		goblConvertLineItemTaxes(di, line, taxCategoryMap)
+		if di.ManufacturerParty != nil {
+			line.Seller = goblParty(di.ManufacturerParty, o)
+		}
 	}
 
 	notes := make([]*org.Note, 0)
@@ -94,9 +99,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 	if len(docLine.Note) > 0 {
 		for _, note := range docLine.Note {
 			if note != "" {
-				notes = append(notes, &org.Note{
-					Text: cleanString(note),
-				})
+				notes = append(notes, parseNote(note))
 			}
 		}
 	}
@@ -162,7 +165,7 @@ func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
 	return priceExp + additionalDecimals
 }
 
-func goblConvertLineItem(di *Item, item *org.Item) {
+func goblConvertLineItem(di *Item, item *org.Item) error {
 	if di.Name != "" {
 		item.Name = cleanString(di.Name)
 	}
@@ -181,14 +184,44 @@ func goblConvertLineItem(di *Item, item *org.Item) {
 	item.Identities = goblItemIdentities(di)
 
 	if di.AdditionalItemProperty != nil {
-		item.Meta = make(cbc.Meta)
 		for _, property := range *di.AdditionalItemProperty {
-			if property.Name != "" && property.Value != "" {
-				key := formatKey(property.Name)
-				item.Meta[key] = cleanString(property.Value)
+			attr, err := goblItemAttribute(&property)
+			if err != nil {
+				return err
+			}
+			if attr != nil {
+				item.Attributes = append(item.Attributes, attr)
 			}
 		}
 	}
+
+	return nil
+}
+
+// goblItemAttribute converts a UBL AdditionalItemProperty into a GOBL
+// org.Attribute. NameCode isn't mapped: there's no corresponding slot on
+// org.Attribute for it alongside a text/quantity value.
+func goblItemAttribute(property *AdditionalItemProperty) (*org.Attribute, error) {
+	if property.Name == "" {
+		return nil, nil
+	}
+	attr := &org.Attribute{Label: cleanString(property.Name)}
+	switch {
+	case property.ValueQuantity != nil && property.ValueQuantity.Value != "":
+		amount, err := num.AmountFromString(normalizeNumericString(property.ValueQuantity.Value))
+		if err != nil {
+			return nil, err
+		}
+		attr.Amount = &amount
+		if property.ValueQuantity.UnitCode != "" {
+			attr.Unit = goblUnitFromUNECE(cbc.Code(property.ValueQuantity.UnitCode))
+		}
+	case property.Value != "":
+		attr.Text = cleanString(property.Value)
+	default:
+		return nil, nil
+	}
+	return attr, nil
 }
 
 func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[string]*taxCategoryInfo) {

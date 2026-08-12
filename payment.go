@@ -97,7 +97,25 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newPayeeParty(pymt.Payee)
+		ui.PayeeParty = newParty(pymt.Payee, ctx)
+		// UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress.
+		ui.PayeeParty.PostalAddress = nil
+		// UBL-CR-275: A UBL invoice should not include the PayeeParty
+		// PartyLegalEntity RegistrationName.
+		if le := ui.PayeeParty.PartyLegalEntity; le != nil {
+			le.RegistrationName = nil
+			if le.CompanyID == nil && le.CompanyLegalForm == nil {
+				ui.PayeeParty.PartyLegalEntity = nil
+			}
+		}
+		// UBL-SR-20 (fatal): Payee identifier shall occur maximum once, if the
+		// Payee is different from the Seller. Prefer an identifier that carries
+		// a scheme (e.g. an ISO 6523 ICD code) over an unscoped one.
+		if len(ui.PayeeParty.PartyIdentification) > 1 {
+			ui.PayeeParty.PartyIdentification = []Identification{
+				firstIdentificationWithScheme(ui.PayeeParty.PartyIdentification),
+			}
+		}
 	}
 
 	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
@@ -215,6 +233,17 @@ func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 		pfa.FinancialInstitutionBranch = &Branch{ID: &bic}
 	}
 	return pfa
+}
+
+// firstIdentificationWithScheme returns the first entry that carries a
+// SchemeID, or the first entry overall if none do.
+func firstIdentificationWithScheme(ids []Identification) Identification {
+	for _, id := range ids {
+		if id.ID != nil && id.ID.SchemeID != nil {
+			return id
+		}
+	}
+	return ids[0]
 }
 
 func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {

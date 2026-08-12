@@ -86,8 +86,9 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, cbc.Code("65434568"), line.Item.Identities[2].Code)
 		assert.Equal(t, "STI", line.Item.Identities[2].Label)
 
-		assert.Len(t, line.Item.Meta, 1)
-		assert.Equal(t, "Black", line.Item.Meta[cbc.Key("color")])
+		require.Len(t, line.Item.Attributes, 1)
+		assert.Equal(t, "Color", line.Item.Attributes[0].Label)
+		assert.Equal(t, "Black", line.Item.Attributes[0].Text)
 
 		// Check the second line
 		line = lines[1]

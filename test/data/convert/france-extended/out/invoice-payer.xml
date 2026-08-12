@@ -66,9 +66,6 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:PayeeParty>
-    <cac:PartyIdentification>
-      <cbc:ID schemeID="0002">391838042</cbc:ID>
-    </cac:PartyIdentification>
     <cac:PartyName>
       <cbc:Name>Bénéficiaire SARL</cbc:Name>
     </cac:PartyName>

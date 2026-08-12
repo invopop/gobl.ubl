@@ -148,9 +148,13 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		}
 
 		for _, contract := range o.Contracts {
-			ui.ContractDocumentReference = append(ui.ContractDocumentReference, Reference{
+			r := Reference{
 				ID: IDType{Value: string(contract.Code)},
-			})
+			}
+			if contract.Reason != "" {
+				r.DocumentType = contract.Reason
+			}
+			ui.ContractDocumentReference = append(ui.ContractDocumentReference, r)
 		}
 
 		for _, tender := range o.Tender {

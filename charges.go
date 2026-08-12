@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
@@ -22,18 +23,22 @@ func (ui *Invoice) addCharges(inv *bill.Invoice) {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return
 	}
+	var notes []*tax.Note
+	if inv.Tax != nil {
+		notes = inv.Tax.Notes
+	}
 	ui.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	// Use invoice sum (before discounts) as base amount for percentage calculations
 	baseAmount := inv.Totals.Sum
 	for i, ch := range inv.Charges {
-		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount, notes)
 	}
 	for i, d := range inv.Discounts {
-		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount, notes)
 	}
 }
 
-func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCharge {
+func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, notes []*tax.Note) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: true,
 		Amount: Amount{
@@ -58,13 +63,13 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 		}
 	}
 	if ch.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(ch.Taxes)
+		c.TaxCategory = makeTaxCategory(ch.Taxes, notes)
 	}
 
 	return c
 }
 
-func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) AllowanceCharge {
+func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, notes []*tax.Note) AllowanceCharge {
 	c := AllowanceCharge{
 		ChargeIndicator: false,
 		Amount: Amount{
@@ -89,13 +94,13 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) Allowance
 		}
 	}
 	if d.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(d.Taxes)
+		c.TaxCategory = makeTaxCategory(d.Taxes, notes)
 	}
 
 	return c
 }
 
-func makeTaxCategory(taxes tax.Set) []*TaxCategory {
+func makeTaxCategory(taxes tax.Set, notes []*tax.Note) []*TaxCategory {
 	set := []*TaxCategory{}
 	for _, t := range taxes {
 		category := TaxCategory{}
@@ -104,6 +109,13 @@ func makeTaxCategory(taxes tax.Set) []*TaxCategory {
 		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
 		if e != "" {
 			category.ID = &IDType{Value: e}
+		}
+
+		if v := t.Ext.Get(cef.ExtKeyVATEX).String(); v != "" {
+			category.TaxExemptionReasonCode = &v
+		}
+		if note := findTaxNote(notes, t.Category, t.Ext); note != nil {
+			category.TaxExemptionReason = &note.Text
 		}
 
 		// Set percent: required unless category is "O" (outside scope)

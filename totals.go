@@ -123,7 +123,7 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 				}
 
 				if inv.Tax != nil {
-					if note := findTaxNote(inv.Tax.Notes, cat.Code, r); note != nil {
+					if note := findTaxNote(inv.Tax.Notes, cat.Code, r.Ext); note != nil {
 						taxCat.TaxExemptionReason = &note.Text
 					}
 				}
@@ -194,14 +194,14 @@ func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
 	}
 }
 
-// findTaxNote finds a tax note that matches the given category code and rate total
-// by comparing category and the UNTDID tax category extension.
-func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
+// findTaxNote finds a tax note that matches the given category code and set of
+// extensions by comparing category and the UNTDID tax category extension.
+func findTaxNote(notes []*tax.Note, catCode cbc.Code, ext tax.Extensions) *tax.Note {
 	for _, n := range notes {
 		if n.Category != catCode {
 			continue
 		}
-		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != cbc.CodeEmpty && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != cbc.CodeEmpty && nc == ext.Get(untdid.ExtKeyTaxCategory) {
 			return n
 		}
 	}
