@@ -46,6 +46,10 @@ type ProjectReference struct {
 	ID string `xml:"cbc:ID,omitempty"`
 }
 
+// orderReferenceNotApplicable is the filler OIOUBL and Peppol accept when
+// there is no order reference to give.
+const orderReferenceNotApplicable = "NA"
+
 func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	if len(refs) == 0 {
 		return
@@ -117,7 +121,7 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 				if ui.OrderReference == nil {
 					// TODO: once we have a Peppol addon this should be delegated there
 					ui.OrderReference = &OrderReference{
-						ID: "NA",
+						ID: orderReferenceNotApplicable,
 					}
 				}
 				ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
@@ -182,6 +186,6 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		if ui.OrderReference == nil {
 			ui.OrderReference = &OrderReference{}
 		}
-		ui.OrderReference.ID = "NA"
+		ui.OrderReference.ID = orderReferenceNotApplicable
 	}
 }
