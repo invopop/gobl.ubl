@@ -138,7 +138,6 @@ func TestTagCodeParseZATCA(t *testing.T) {
 	}
 }
 
-// Define tests for the UnitFromUNECE function
 // Define tests for the FormatKey function
 func TestFormatKey(t *testing.T) {
 	assert.Equal(t, cbc.Key("test"), formatKey("Test"))
