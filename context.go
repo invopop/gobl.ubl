@@ -27,6 +27,8 @@ type VESIDMapping struct {
 	Invoice string
 	// CreditNote is the VESID for credit notes
 	CreditNote string
+	// Status is the VESID for status documents (UBL ApplicationResponses)
+	Status string
 }
 
 // Context is used to ensure that the generated UBL document
@@ -238,6 +240,18 @@ var ContextZATCA = Context{
 	},
 }
 
+// ContextPeppolInvoiceResponse defines the Peppol BIS Invoice Response context.
+// It is its own context (separate from the billing ContextPeppol) because the
+// Invoice Response declares a different CustomizationID, which is what
+// FindContext matches a parsed document against.
+var ContextPeppolInvoiceResponse = Context{
+	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
+	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
+	VESIDs: VESIDMapping{
+		Status: "eu.peppol.bis3:invoice-message-response:2026.5",
+	},
+}
+
 // contexts is used internally for reverse lookups during parsing.
 // When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA}
+var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextPeppolInvoiceResponse}
