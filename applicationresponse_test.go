@@ -89,7 +89,7 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 		Lines: []*bill.StatusLine{
 			{
 				Index:       1,
-				Key:         bill.StatusEventAccepted,
+				Key:         bill.StatusLineAccepted,
 				Date:        &effDate,
 				Description: "All good",
 				Doc:         &org.DocumentRef{Code: "INV-42"},
@@ -152,7 +152,7 @@ func TestConvertPeppolInvoiceResponseValidate(t *testing.T) {
 		Lines: []*bill.StatusLine{
 			{
 				Index:   1,
-				Key:     bill.StatusEventRejected,
+				Key:     bill.StatusLineRejected,
 				Doc:     &org.DocumentRef{Code: "INV-9"},
 				Reasons: []*bill.Reason{{Key: bill.ReasonKeyReferences, Description: "missing PO"}},
 			},
@@ -208,7 +208,7 @@ func TestConvertApplicationResponseUpdateFlipsDirection(t *testing.T) {
 		Supplier:  &org.Party{Name: "Seller Co"},
 		Customer:  &org.Party{Name: "Buyer Co"},
 		Lines: []*bill.StatusLine{
-			{Index: 1, Key: bill.StatusEventPaid, Doc: &org.DocumentRef{Code: "INV-1"}},
+			{Index: 1, Key: bill.StatusLinePaid, Doc: &org.DocumentRef{Code: "INV-1"}},
 		},
 	}
 	env, err := gobl.Envelop(st)
@@ -236,7 +236,7 @@ func TestConvertPeppolInvoiceResponse(t *testing.T) {
 		Lines: []*bill.StatusLine{
 			{
 				Index: 1,
-				Key:   bill.StatusEventRejected,
+				Key:   bill.StatusLineRejected,
 				Doc:   &org.DocumentRef{Code: "INV-9"},
 				Reasons: []*bill.Reason{
 					{Key: bill.ReasonKeyReferences, Description: "missing PO"},
@@ -295,7 +295,7 @@ func TestConvertPeppolInvoiceResponseErrorMapsToRejected(t *testing.T) {
 		Lines: []*bill.StatusLine{
 			{
 				Index:   1,
-				Key:     bill.StatusEventError,
+				Key:     bill.StatusLineError,
 				Doc:     &org.DocumentRef{Code: "INV-E"},
 				Reasons: []*bill.Reason{{Key: bill.ReasonKeyOther, Description: "system failure"}},
 			},
@@ -372,7 +372,7 @@ func TestParsePeppolConditionallyAccepted(t *testing.T) {
 
 	require.Len(t, st.Lines, 1)
 	// CA normalizes to accepted, carrying the conditions as reasons.
-	assert.Equal(t, bill.StatusEventAccepted, st.Lines[0].Key)
+	assert.Equal(t, bill.StatusLineAccepted, st.Lines[0].Key)
 	require.Len(t, st.Lines[0].Reasons, 1)
 	assert.Equal(t, bill.ReasonKeyPrices, st.Lines[0].Reasons[0].Key)
 	assert.Equal(t, "price to be confirmed", st.Lines[0].Reasons[0].Description)
@@ -390,7 +390,7 @@ func TestParsePeppolInvoiceResponse(t *testing.T) {
 	require.True(t, ok)
 
 	require.Len(t, st.Lines, 1)
-	assert.Equal(t, bill.StatusEventRejected, st.Lines[0].Key)
+	assert.Equal(t, bill.StatusLineRejected, st.Lines[0].Key)
 
 	require.Len(t, st.Lines[0].Reasons, 1)
 	assert.Equal(t, bill.ReasonKeyReferences, st.Lines[0].Reasons[0].Key)
@@ -437,12 +437,12 @@ func peppolRoundTrip(t *testing.T, st *bill.Status) *bill.Status {
 func TestPeppolResponseCodeRoundTrip(t *testing.T) {
 	// Every status event with a Peppol Invoice Response code must round-trip.
 	events := []cbc.Key{
-		bill.StatusEventAcknowledged,
-		bill.StatusEventProcessing,
-		bill.StatusEventQuerying,
-		bill.StatusEventRejected,
-		bill.StatusEventAccepted,
-		bill.StatusEventPaid,
+		bill.StatusLineAcknowledged,
+		bill.StatusLineProcessing,
+		bill.StatusLineQuerying,
+		bill.StatusLineRejected,
+		bill.StatusLineAccepted,
+		bill.StatusLinePaid,
 	}
 	for _, ev := range events {
 		t.Run(ev.String(), func(t *testing.T) {
@@ -478,7 +478,7 @@ func TestPeppolStatusReasonRoundTrip(t *testing.T) {
 	for _, rk := range reasons {
 		t.Run(rk.String(), func(t *testing.T) {
 			st := basePeppolStatus()
-			st.Lines[0].Key = bill.StatusEventRejected
+			st.Lines[0].Key = bill.StatusLineRejected
 			st.Lines[0].Reasons = []*bill.Reason{{Key: rk, Description: "d"}}
 			out := peppolRoundTrip(t, st)
 			require.Len(t, out.Lines, 1)
@@ -502,7 +502,7 @@ func TestPeppolStatusActionRoundTrip(t *testing.T) {
 	for _, ak := range actions {
 		t.Run(ak.String(), func(t *testing.T) {
 			st := basePeppolStatus()
-			st.Lines[0].Key = bill.StatusEventRejected
+			st.Lines[0].Key = bill.StatusLineRejected
 			st.Lines[0].Actions = []*bill.Action{{Key: ak, Description: "d"}}
 			out := peppolRoundTrip(t, st)
 			require.Len(t, out.Lines, 1)
@@ -514,7 +514,7 @@ func TestPeppolStatusActionRoundTrip(t *testing.T) {
 
 func TestPeppolInvoiceResponseRoundTripFull(t *testing.T) {
 	st := basePeppolStatus()
-	st.Lines[0].Key = bill.StatusEventRejected
+	st.Lines[0].Key = bill.StatusLineRejected
 	st.Lines[0].Doc.Type = bill.InvoiceTypeCreditNote
 	st.Lines[0].Reasons = []*bill.Reason{{Key: bill.ReasonKeyPrices, Description: "price off"}}
 	st.Lines[0].Actions = []*bill.Action{{Key: bill.ActionKeyReissue, Description: "redo"}}
@@ -523,7 +523,7 @@ func TestPeppolInvoiceResponseRoundTripFull(t *testing.T) {
 
 	require.Len(t, out.Lines, 1)
 	l := out.Lines[0]
-	assert.Equal(t, bill.StatusEventRejected, l.Key)
+	assert.Equal(t, bill.StatusLineRejected, l.Key)
 	// The credit-note document type round-trips via DocumentTypeCode 381.
 	require.NotNil(t, l.Doc)
 	assert.Equal(t, bill.InvoiceTypeCreditNote, l.Doc.Type)

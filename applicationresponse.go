@@ -70,19 +70,11 @@ type ResponseDocumentReference struct {
 }
 
 func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
-	// SenderParty is who sends the response, ReceiverParty who receives it. The
-	// base supplier/customer roles flip with the status type (a response travels
-	// customer->supplier, an update supplier->customer, e.g. towards a tax agency
-	// held as the recipient);
+	// SenderParty is who sends the response, ReceiverParty who receives it: a
+	// response travels customer->supplier, an update supplier->customer.
 	sender, receiver := st.Customer, st.Supplier
 	if st.Type == bill.StatusTypeUpdate {
 		sender, receiver = st.Supplier, st.Customer
-	}
-	if st.Issuer != nil {
-		sender = st.Issuer
-	}
-	if st.Recipient != nil {
-		receiver = st.Recipient
 	}
 
 	out := &ApplicationResponse{
@@ -94,8 +86,8 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		CustomizationID: o.context.CustomizationID,
 		ID:              invoiceNumber(st.Series, st.Code),
 		IssueDate:       formatDate(st.IssueDate),
-		SenderParty:     newParty(sender),
-		ReceiverParty:   newParty(receiver),
+		SenderParty:     newParty(sender, o.context),
+		ReceiverParty:   newParty(receiver, o.context),
 	}
 	if o.context.ProfileID != "" {
 		out.ProfileID = &IDType{Value: o.context.ProfileID}
@@ -191,13 +183,13 @@ const (
 // technical-reject code, so it falls back to RE with the detail carried in the
 // status clarification. "issued" is a pre-response state with no code.
 var peppolResponseCodes = map[cbc.Key]string{
-	bill.StatusEventAcknowledged: "AB",
-	bill.StatusEventProcessing:   "IP",
-	bill.StatusEventQuerying:     "UQ",
-	bill.StatusEventRejected:     "RE",
-	bill.StatusEventAccepted:     "AP",
-	bill.StatusEventPaid:         "PD",
-	bill.StatusEventError:        "RE",
+	bill.StatusLineAcknowledged: "AB",
+	bill.StatusLineProcessing:   "IP",
+	bill.StatusLineQuerying:     "UQ",
+	bill.StatusLineRejected:     "RE",
+	bill.StatusLineAccepted:     "AP",
+	bill.StatusLinePaid:         "PD",
+	bill.StatusLineError:        "RE",
 }
 
 // peppolResponseEvents reverses peppolResponseCodes for parsing. RE maps back to
@@ -205,13 +197,13 @@ var peppolResponseCodes = map[cbc.Key]string{
 // (conditionally accepted) normalizes to accepted, with the conditions carried
 // in the status line's reasons and actions.
 var peppolResponseEvents = map[string]cbc.Key{
-	"AB": bill.StatusEventAcknowledged,
-	"IP": bill.StatusEventProcessing,
-	"UQ": bill.StatusEventQuerying,
-	"RE": bill.StatusEventRejected,
-	"AP": bill.StatusEventAccepted,
-	"PD": bill.StatusEventPaid,
-	"CA": bill.StatusEventAccepted,
+	"AB": bill.StatusLineAcknowledged,
+	"IP": bill.StatusLineProcessing,
+	"UQ": bill.StatusLineQuerying,
+	"RE": bill.StatusLineRejected,
+	"AP": bill.StatusLineAccepted,
+	"PD": bill.StatusLinePaid,
+	"CA": bill.StatusLineAccepted,
 }
 
 // peppolStatusReasonCodes maps GOBL reason keys to OPStatusReason codes.

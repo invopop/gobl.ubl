@@ -41,8 +41,8 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 		Addons:   tax.Addons{List: o.context.Addons},
 		Type:     bill.StatusTypeResponse,
 		Code:     cbc.Code(ar.ID),
-		Supplier: goblParty(ar.ReceiverParty),
-		Customer: goblParty(ar.SenderParty),
+		Supplier: goblParty(ar.ReceiverParty, o),
+		Customer: goblParty(ar.SenderParty, o),
 	}
 
 	issueDate, err := parseDate(ar.IssueDate)
