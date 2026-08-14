@@ -166,7 +166,7 @@ func TestConvertPeppolInvoiceResponseValidate(t *testing.T) {
 	data, err := ubl.Bytes(doc)
 	require.NoError(t, err)
 
-	vesid := ubl.ContextPeppolInvoiceResponse.VESIDs.ApplicationResponse
+	vesid := ubl.ContextPeppolInvoiceResponse.VESIDs.Status
 	resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{Vesid: vesid, XmlContent: data})
 	require.NoError(t, err)
 	results, err := json.MarshalIndent(resp.Results, "", "  ")

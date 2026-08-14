@@ -27,8 +27,8 @@ type VESIDMapping struct {
 	Invoice string
 	// CreditNote is the VESID for credit notes
 	CreditNote string
-	// ApplicationResponse is the VESID for application responses
-	ApplicationResponse string
+	// Status is the VESID for status documents (UBL ApplicationResponses)
+	Status string
 }
 
 // Context is used to ensure that the generated UBL document
@@ -248,7 +248,7 @@ var ContextPeppolInvoiceResponse = Context{
 	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
 	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
 	VESIDs: VESIDMapping{
-		ApplicationResponse: "eu.peppol.bis3:invoice-message-response:2026.5",
+		Status: "eu.peppol.bis3:invoice-message-response:2026.5",
 	},
 }
 
