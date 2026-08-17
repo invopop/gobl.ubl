@@ -162,15 +162,14 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if len(instr.CreditTransfer) > 0 {
 		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0])
 	}
-	if instr.DirectDebit != nil {
-		// Skip the mandate without a reference; an empty <cbc:ID/> is rejected by Peppol.
+	if instr.DirectDebit != nil && (instr.DirectDebit.Ref != "" || instr.DirectDebit.Account != "") {
+		// BT-91 must go inside the mandate (BR-DE-31, UBL-CR-680).
+		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{}
 		if instr.DirectDebit.Ref != "" {
-			ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
-				ID: &IDType{Value: instr.DirectDebit.Ref},
-			}
+			ui.PaymentMeans[0].PaymentMandate.ID = &IDType{Value: instr.DirectDebit.Ref}
 		}
 		if instr.DirectDebit.Account != "" {
-			ui.PaymentMeans[0].PayerFinancialAccount = &FinancialAccount{
+			ui.PaymentMeans[0].PaymentMandate.PayerFinancialAccount = &FinancialAccount{
 				ID: &instr.DirectDebit.Account,
 			}
 		}
