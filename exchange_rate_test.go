@@ -57,4 +57,28 @@ func TestTaxExchangeRate(t *testing.T) {
 		require.NotNil(t, rate.At)
 		assert.Equal(t, "2024-06-13T00:00:00", rate.At.String())
 	})
+
+	t.Run("parse honors cac:TaxExchangeRate regardless of context", func(t *testing.T) {
+		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
+		require.NoError(t, err)
+		data, err := ubl.Bytes(doc)
+		require.NoError(t, err)
+
+		parsed, err := ubl.Parse(data)
+		require.NoError(t, err)
+		in, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		// Force a non-French-extended context on parse; the element should
+		// still be honored since the source document carries it explicitly.
+		env, err := in.Convert(ubl.WithContext(ubl.ContextPeppol))
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.Len(t, inv.ExchangeRates, 1)
+		rate := inv.ExchangeRates[0]
+		assert.Equal(t, "USD", rate.From.String())
+		assert.Equal(t, "EUR", rate.To.String())
+		assert.Equal(t, "0.92", rate.Amount.String())
+	})
 }
