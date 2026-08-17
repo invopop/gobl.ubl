@@ -87,7 +87,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	if err := ui.parseInvoiceDates(out); err != nil {
 		return nil, err
 	}
-	ui.applyExchangeRates(out)
+	ui.applyExchangeRates(out, o)
 
 	if err := ui.goblAddLines(out); err != nil {
 		return nil, err
@@ -182,7 +182,17 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 }
 
 // applyExchangeRates populates ExchangeRates when the tax currency differs from the document currency.
-func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
+func (ui *Invoice) applyExchangeRates(out *bill.Invoice, o *options) {
+	// BT-167/BT-167-1/BT-167-2/EXT-FR-FE-192: the French extended profile
+	// carries the VAT accounting currency exchange rate explicitly, so
+	// prefer it over the TaxTotal-derived heuristic below.
+	if o.context.Is(ContextPeppolFranceExtended) && ui.TaxExchangeRate != nil {
+		if rate := goblTaxExchangeRate(ui.TaxExchangeRate); rate != nil {
+			out.ExchangeRates = []*currency.ExchangeRate{rate}
+			return
+		}
+	}
+
 	if ui.TaxCurrencyCode != "" && ui.DocumentCurrencyCode != ui.TaxCurrencyCode {
 		out.ExchangeRates = goblExchangeRates(
 			currency.Code(ui.DocumentCurrencyCode),
