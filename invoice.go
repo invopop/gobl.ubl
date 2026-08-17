@@ -258,9 +258,6 @@ func (ui *Invoice) addTaxPoint(t *bill.Tax) {
 	ui.InvoicePeriod[0].DescriptionCode = code
 }
 
-// addTaxExchangeRate maps BT-167/BT-167-1/BT-167-2/EXT-FR-FE-192, the VAT
-// accounting currency exchange rate, from the rate already matched between
-// the document and tax accounting currencies.
 func (ui *Invoice) addTaxExchangeRate(from, to cur.Code, rate *cur.ExchangeRate) {
 	if from == to || rate == nil {
 		return
