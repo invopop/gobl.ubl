@@ -5,6 +5,8 @@ import (
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +38,7 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
 	})
 
-	t.Run("direct debit without mandate reference omits the mandate", func(t *testing.T) {
+	t.Run("direct debit without mandate reference omits the mandate ID", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
@@ -49,9 +51,10 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 
-		// No reference means no mandate element, otherwise we emit an empty <cbc:ID/>.
-		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate)
-		assert.Equal(t, "0667", *doc.PaymentMeans[0].PayerFinancialAccount.ID)
+		// No reference means the mandate has no ID.
+		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
+		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate.ID)
+		assert.Equal(t, "0667", *doc.PaymentMeans[0].PaymentMandate.PayerFinancialAccount.ID)
 	})
 
 	t.Run("direct debit with mandate reference includes the mandate", func(t *testing.T) {
@@ -69,6 +72,36 @@ func TestNewPayment(t *testing.T) {
 		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
 		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate.ID)
 		assert.Equal(t, "MANDATE-123", doc.PaymentMeans[0].PaymentMandate.ID.Value)
+	})
+
+	t.Run("direct debit places account inside mandate (BT-91)", func(t *testing.T) {
+		env := loadTestEnvelope(t, "xrechnung/invoice-xr-minimal.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Payment = &bill.PaymentDetails{
+			Instructions: &pay.Instructions{
+				Key: pay.MeansKeyDirectDebit,
+				DirectDebit: &pay.DirectDebit{
+					Ref:      "MAND-2024-001",
+					Creditor: "DE98ZZZ09999999999",
+					Account:  "DE89370400440532013000",
+				},
+				Ext: tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyPaymentMeans: "49"}),
+			},
+		}
+
+		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextXRechnung))
+		require.NoError(t, err)
+
+		pm := doc.PaymentMeans[0]
+		assert.Equal(t, "49", pm.PaymentMeansCode.Value)
+		assert.NotNil(t, pm.PaymentMandate)
+		require.NotNil(t, pm.PaymentMandate.ID)
+		assert.Equal(t, "MAND-2024-001", pm.PaymentMandate.ID.Value)
+		assert.NotNil(t, pm.PaymentMandate.PayerFinancialAccount)
+		assert.Equal(t, "DE89370400440532013000", *pm.PaymentMandate.PayerFinancialAccount.ID)
+		assert.Nil(t, pm.PayerFinancialAccount, "BT-91 must not appear at PaymentMeans level (UBL-CR-680)")
 	})
 
 	t.Run("card payment includes the network ID required by the schema", func(t *testing.T) {
