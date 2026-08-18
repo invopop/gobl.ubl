@@ -151,9 +151,17 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate
 	// is available. BT-111 is only added in that case and BR-53 requires
 	// BT-111 whenever BT-6 is present, so the two must be gated identically.
-	if taxCurrency := inv.RegimeDef().GetCurrency(); taxCurrency != inv.Currency &&
-		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
+	taxCurrency := inv.RegimeDef().GetCurrency()
+	taxExchangeRate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency)
+	if taxCurrency != inv.Currency && taxExchangeRate != nil {
 		out.TaxCurrencyCode = string(taxCurrency)
+	}
+
+	// BT-167/BT-167-1/BT-167-2/EXT-FR-FE-192: the VAT accounting currency
+	// exchange rate is only defined in the French extended profile, using
+	// the same rate gating BT-6/BT-111 above.
+	if o.context.Is(ContextPeppolFranceExtended) {
+		out.addTaxExchangeRate(inv.Currency, taxCurrency, taxExchangeRate)
 	}
 
 	docType := inv.Type
@@ -248,6 +256,25 @@ func (ui *Invoice) addTaxPoint(t *bill.Tax) {
 		ui.InvoicePeriod = []Period{{}}
 	}
 	ui.InvoicePeriod[0].DescriptionCode = code
+}
+
+func (ui *Invoice) addTaxExchangeRate(from, to cur.Code, rate *cur.ExchangeRate) {
+	if from == to || rate == nil {
+		return
+	}
+
+	source := string(from)
+	target := string(to)
+	calcRate := rate.Amount.String()
+	ui.TaxExchangeRate = &ExchangeRate{
+		SourceCurrencyCode: &source,
+		TargetCurrencyCode: &target,
+		CalculationRate:    &calcRate,
+	}
+	if rate.At != nil {
+		date := rate.At.Date().String()
+		ui.TaxExchangeRate.Date = &date
+	}
 }
 
 func invoiceNumber(series cbc.Code, code cbc.Code) string {

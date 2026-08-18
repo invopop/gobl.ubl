@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -232,4 +233,30 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 			Amount: rate,
 		},
 	}
+}
+
+// goblTaxExchangeRate parses cac:TaxExchangeRate (BT-167/BT-167-1/BT-167-2/
+// EXT-FR-FE-192) into a GOBL exchange rate.
+func goblTaxExchangeRate(er *ExchangeRate) *cur.ExchangeRate {
+	if er.SourceCurrencyCode == nil || er.TargetCurrencyCode == nil || er.CalculationRate == nil {
+		return nil
+	}
+
+	amount, err := num.AmountFromString(normalizeNumericString(*er.CalculationRate))
+	if err != nil {
+		return nil
+	}
+
+	rate := &cur.ExchangeRate{
+		From:   cur.Code(*er.SourceCurrencyCode),
+		To:     cur.Code(*er.TargetCurrencyCode),
+		Amount: amount,
+	}
+	if er.Date != nil {
+		if d, err := parseDate(*er.Date); err == nil {
+			dt := cal.MakeDateTime(d.Year, d.Month, d.Day, 0, 0, 0)
+			rate.At = &dt
+		}
+	}
+	return rate
 }

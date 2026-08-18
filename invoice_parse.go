@@ -183,6 +183,13 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 
 // applyExchangeRates populates ExchangeRates when the tax currency differs from the document currency.
 func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
+	if ui.TaxExchangeRate != nil && ui.taxExchangeRateMatchesDocument() {
+		if rate := goblTaxExchangeRate(ui.TaxExchangeRate); rate != nil {
+			out.ExchangeRates = []*currency.ExchangeRate{rate}
+			return
+		}
+	}
+
 	if ui.TaxCurrencyCode != "" && ui.DocumentCurrencyCode != ui.TaxCurrencyCode {
 		out.ExchangeRates = goblExchangeRates(
 			currency.Code(ui.DocumentCurrencyCode),
@@ -190,6 +197,20 @@ func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
 			ui.TaxTotal,
 		)
 	}
+}
+
+// taxExchangeRateMatchesDocument reports whether cac:TaxExchangeRate's
+// currency codes are consistent with the document's own currency codes,
+// so it isn't trusted when it carries unrelated data.
+func (ui *Invoice) taxExchangeRateMatchesDocument() bool {
+	er := ui.TaxExchangeRate
+	if er.SourceCurrencyCode == nil || *er.SourceCurrencyCode != ui.DocumentCurrencyCode {
+		return false
+	}
+	if ui.TaxCurrencyCode != "" && (er.TargetCurrencyCode == nil || *er.TargetCurrencyCode != ui.TaxCurrencyCode) {
+		return false
+	}
+	return true
 }
 
 // parseInvoiceNotes copies document-level notes into the GOBL invoice.
