@@ -160,10 +160,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 						prop.Value = attr.Amount.String()
 						if attr.Unit != "" {
 							prop.Value += " " + string(attr.Unit)
-						}
-						prop.ValueQuantity = &Quantity{
-							Value:    attr.Amount.String(),
-							UnitCode: string(attr.Unit.UNECE()),
+							prop.ValueQuantity = &Quantity{
+								Value:    attr.Amount.String(),
+								UnitCode: string(attr.Unit.UNECE()),
+							}
 						}
 					case attr.Text != "":
 						prop.Value = attr.Text
