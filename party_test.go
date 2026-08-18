@@ -35,9 +35,7 @@ func TestNewParty(t *testing.T) {
 			},
 		}
 
-		// Payee with a legal identity carrying iso scheme ID:
-		// exercises newParty's first-pass branch (payee is now mapped via
-		// the regular newParty, not a payee-specific minimal builder).
+		// Payee with a legal identity carrying an ISO scheme ID.
 		if inv.Payment == nil {
 			inv.Payment = &bill.PaymentDetails{}
 		}
@@ -63,9 +61,8 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "TEST-001", pid.ID.Value)
 
 		require.NotNil(t, doc.PayeeParty)
-		// The sole identity is the first legal one, so newParty consumes it
-		// into PartyLegalEntity.CompanyID and does not duplicate it into
-		// PartyIdentification.
+		// The sole identity lands in PartyLegalEntity.CompanyID without
+		// being duplicated into PartyIdentification (UBL-SR-20).
 		assert.Empty(t, doc.PayeeParty.PartyIdentification)
 		require.NotNil(t, doc.PayeeParty.PartyLegalEntity)
 		require.NotNil(t, doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)

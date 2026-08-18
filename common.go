@@ -112,10 +112,8 @@ type ClassifiedTaxCategory struct {
 
 // AdditionalItemProperty represents an additional property of an item
 type AdditionalItemProperty struct {
-	Name  string `xml:"cbc:Name"`
-	Value string `xml:"cbc:Value,omitempty"`
-	// ValueQuantity carries the property's value when it's a measurable
-	// amount with a unit (e.g. weight, volume), as an alternative to Value.
+	Name          string    `xml:"cbc:Name"`
+	Value         string    `xml:"cbc:Value,omitempty"`
 	ValueQuantity *Quantity `xml:"cbc:ValueQuantity,omitempty"`
 }
 
