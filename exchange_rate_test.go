@@ -81,4 +81,32 @@ func TestTaxExchangeRate(t *testing.T) {
 		assert.Equal(t, "EUR", rate.To.String())
 		assert.Equal(t, "0.92", rate.Amount.String())
 	})
+
+	t.Run("mismatched cac:TaxExchangeRate currencies are ignored", func(t *testing.T) {
+		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
+		require.NoError(t, err)
+		data, err := ubl.Bytes(doc)
+		require.NoError(t, err)
+
+		parsed, err := ubl.Parse(data)
+		require.NoError(t, err)
+		in, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+
+		// Corrupt the source currency so it no longer matches
+		// DocumentCurrencyCode; it should not be trusted.
+		mismatched := "GBP"
+		in.TaxExchangeRate.SourceCurrencyCode = &mismatched
+
+		env, err := in.Convert()
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.Len(t, inv.ExchangeRates, 1)
+		// Falls back to the TaxTotal-derived heuristic instead of the
+		// inconsistent element.
+		assert.Equal(t, "USD", inv.ExchangeRates[0].From.String())
+		assert.Equal(t, "EUR", inv.ExchangeRates[0].To.String())
+	})
 }
