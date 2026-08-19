@@ -284,10 +284,6 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			}
 			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
 				idType.SchemeID = &s
-			} else if id.Label != "" && len(id.Label) == 4 {
-				// Assume 4-digit labels are ISO 6523 ICD codes
-				label := id.Label
-				idType.SchemeID = &label
 			} else if id.Ext.IsZero() {
 				// ZATCA has very specific identities that do not
 				// require an ISO extension and are only described with type
