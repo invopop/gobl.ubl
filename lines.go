@@ -101,7 +101,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				EndDate:   formatDate(l.Period.End),
 			}
 			// BT-8: VAT point date code, same invoice-wide value as the header.
-			if inv.Tax != nil {
+			if context.Is(ContextPeppolFranceExtended) && inv.Tax != nil {
 				if code, ok := taxPointCodeMap[inv.Tax.Point]; ok {
 					invLine.InvoicePeriod.DescriptionCode = code
 				}

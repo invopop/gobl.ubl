@@ -101,11 +101,18 @@ func TestInvoiceHeaders(t *testing.T) {
 			End:   cal.MakeDate(2024, 1, 31),
 		}
 
-		out, err := ubl.ConvertInvoice(env)
+		out, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
 		require.NoError(t, err)
 
 		require.NotNil(t, out.InvoiceLines[0].InvoicePeriod)
 		assert.Equal(t, "35", out.InvoiceLines[0].InvoicePeriod.DescriptionCode)
+
+		// Outside the France extended context the line period carries no code.
+		out, err = ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		require.NotNil(t, out.InvoiceLines[0].InvoicePeriod)
+		assert.Empty(t, out.InvoiceLines[0].InvoicePeriod.DescriptionCode)
 	})
 
 	t.Run("tax point round trip", func(t *testing.T) {
