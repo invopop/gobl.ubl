@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ func TestNewPayment(t *testing.T) {
 	t.Run("self-billed-invoice", func(t *testing.T) {
 		doc := testInvoiceFrom(t, "peppol-self-billed/self-billed-invoice.json")
 
-		// PayeeParty should have PartyName (BR-17) but not RegistrationName (UBL-CR-275)
+		// PayeeParty should have PartyName (BR-17)
 		assert.Equal(t, "Ebeneser Scrooge AS", doc.PayeeParty.PartyName.Name)
 		assert.Equal(t, "2013-07-20", doc.DueDate)
 
@@ -141,6 +142,48 @@ func TestNewPayment(t *testing.T) {
 
 		_, err := ubl.ConvertInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
+	})
+
+	t.Run("payee inbox maps to EndpointID", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		if inv.Payment == nil {
+			inv.Payment = &bill.PaymentDetails{}
+		}
+		inv.Payment.Payee = &org.Party{
+			Name: "Test Payee",
+			Inboxes: []*org.Inbox{
+				{Email: "payee@example.com"},
+			},
+		}
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		require.NotNil(t, doc.PayeeParty)
+		require.NotNil(t, doc.PayeeParty.EndpointID)
+		assert.Equal(t, "EM", doc.PayeeParty.EndpointID.SchemeID)
+		assert.Equal(t, "payee@example.com", doc.PayeeParty.EndpointID.Value)
+
+		data, err := ubl.Bytes(doc)
+		require.NoError(t, err)
+
+		parsed, err := ubl.Parse(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		outEnv, err := out.Convert()
+		require.NoError(t, err)
+		outInv, ok := outEnv.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		require.NotNil(t, outInv.Payment)
+		require.NotNil(t, outInv.Payment.Payee)
+		require.NotEmpty(t, outInv.Payment.Payee.Inboxes)
+		assert.Equal(t, "payee@example.com", outInv.Payment.Payee.Inboxes[0].Email)
 	})
 }
 

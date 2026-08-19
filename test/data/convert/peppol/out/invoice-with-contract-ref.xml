@@ -9,6 +9,7 @@
   <cbc:BuyerReference>PO-2024-001</cbc:BuyerReference>
   <cac:ContractDocumentReference>
     <cbc:ID>CONTRACT-2024-001</cbc:ID>
+    <cbc:DocumentType>MARCHE</cbc:DocumentType>
   </cac:ContractDocumentReference>
   <cac:ProjectReference>
     <cbc:ID>PROJECT-DEV-123</cbc:ID>

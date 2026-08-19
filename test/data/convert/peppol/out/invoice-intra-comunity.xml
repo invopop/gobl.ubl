@@ -100,6 +100,7 @@
     <cac:TaxCategory>
       <cbc:ID>K</cbc:ID>
       <cbc:Percent>0</cbc:Percent>
+      <cbc:TaxExemptionReasonCode>VATEX-EU-IC</cbc:TaxExemptionReasonCode>
       <cac:TaxScheme>
         <cbc:ID>VAT</cbc:ID>
       </cac:TaxScheme>

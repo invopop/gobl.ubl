@@ -177,7 +177,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		Code: cbc.Code(ref.ID.Value),
 	}
 	if ref.DocumentType != "" {
-		docRef.Type = cbc.Key(ref.DocumentType)
+		docRef.Reason = cleanString(ref.DocumentType)
 	}
 	if ref.IssueDate != "" {
 		refDate, err := parseDate(ref.IssueDate)

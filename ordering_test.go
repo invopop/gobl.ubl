@@ -113,3 +113,28 @@ func TestOrderingCost(t *testing.T) {
 		assert.Equal(t, cbc.Code("1287:65464"), outInv.Ordering.Cost)
 	})
 }
+
+func TestContractReferenceType(t *testing.T) {
+	env := loadTestEnvelope(t, "peppol/invoice-with-contract-ref.json")
+
+	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+	require.NoError(t, err)
+
+	require.NotEmpty(t, doc.ContractDocumentReference)
+	assert.Equal(t, "MARCHE", doc.ContractDocumentReference[0].DocumentType)
+
+	data, err := ubl.Bytes(doc)
+	require.NoError(t, err)
+
+	parsed, err := ubl.Parse(data)
+	require.NoError(t, err)
+	out, ok := parsed.(*ubl.Invoice)
+	require.True(t, ok)
+	outEnv, err := out.Convert()
+	require.NoError(t, err)
+	outInv, ok := outEnv.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.NotEmpty(t, outInv.Ordering.Contracts)
+	assert.Equal(t, "MARCHE", outInv.Ordering.Contracts[0].Reason)
+}

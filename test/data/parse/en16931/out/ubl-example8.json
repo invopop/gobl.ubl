@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7738e5bd9fb0c96b979a0b1e5d734cf912ba5687379807483bdce0ec23810f09"
+			"val": "3b19810571bf5ea5e1f7af48991977724c27868db9478993264d51c81422e403"
 		}
 	},
 	"doc": {
@@ -74,14 +74,26 @@
 				"quantity": "16000",
 				"item": {
 					"name": "Getransporteerde kWh’s",
+					"attributes": [
+						{
+							"label": "contract transportvermogen",
+							"text": "132,00 kW"
+						},
+						{
+							"label": "transporttarief",
+							"text": "Netvlak MSD Enexis"
+						},
+						{
+							"label": "netvlak",
+							"text": "MS-D"
+						},
+						{
+							"label": "correctiefactor",
+							"text": "1,0130"
+						}
+					],
 					"price": "0.00880",
-					"unit": "kwh",
-					"meta": {
-						"contract-transportvermogen": "132,00 kW",
-						"correctiefactor": "1,0130",
-						"netvlak": "MS-D",
-						"transporttarief": "Netvlak MSD Enexis"
-					}
+					"unit": "kwh"
 				},
 				"sum": "140.80",
 				"taxes": [
@@ -101,14 +113,26 @@
 				"quantity": "16000",
 				"item": {
 					"name": "Systeemdiensten",
+					"attributes": [
+						{
+							"label": "contract transportvermogen",
+							"text": "132,00 kW"
+						},
+						{
+							"label": "transporttarief",
+							"text": "Netvlak MSD Enexis"
+						},
+						{
+							"label": "netvlak",
+							"text": "MS-D"
+						},
+						{
+							"label": "correctiefactor",
+							"text": "1,0130"
+						}
+					],
 					"price": "0.00101",
-					"unit": "kwh",
-					"meta": {
-						"contract-transportvermogen": "132,00 kW",
-						"correctiefactor": "1,0130",
-						"netvlak": "MS-D",
-						"transporttarief": "Netvlak MSD Enexis"
-					}
+					"unit": "kwh"
 				},
 				"sum": "16.16",
 				"taxes": [
@@ -128,14 +152,26 @@
 				"quantity": "132",
 				"item": {
 					"name": "Contract transportvermogen",
+					"attributes": [
+						{
+							"label": "contract transportvermogen",
+							"text": "132,00 kW"
+						},
+						{
+							"label": "transporttarief",
+							"text": "Netvlak MSD Enexis"
+						},
+						{
+							"label": "netvlak",
+							"text": "MS-D"
+						},
+						{
+							"label": "correctiefactor",
+							"text": "1,0130"
+						}
+					],
 					"price": "1.2700",
-					"unit": "KW",
-					"meta": {
-						"contract-transportvermogen": "132,00 kW",
-						"correctiefactor": "1,0130",
-						"netvlak": "MS-D",
-						"transporttarief": "Netvlak MSD Enexis"
-					}
+					"unit": "KW"
 				},
 				"sum": "167.64",
 				"taxes": [
@@ -155,14 +191,26 @@
 				"quantity": "58",
 				"item": {
 					"name": "Maximaal afgenomen vermogen",
+					"attributes": [
+						{
+							"label": "contract transportvermogen",
+							"text": "132,00 kW"
+						},
+						{
+							"label": "transporttarief",
+							"text": "Netvlak MSD Enexis"
+						},
+						{
+							"label": "netvlak",
+							"text": "MS-D"
+						},
+						{
+							"label": "correctiefactor",
+							"text": "1,0130"
+						}
+					],
 					"price": "1.53",
-					"unit": "KW",
-					"meta": {
-						"contract-transportvermogen": "132,00 kW",
-						"correctiefactor": "1,0130",
-						"netvlak": "MS-D",
-						"transporttarief": "Netvlak MSD Enexis"
-					}
+					"unit": "KW"
 				},
 				"sum": "88.74",
 				"taxes": [
@@ -182,14 +230,26 @@
 				"quantity": "1",
 				"item": {
 					"name": "Vastrecht Transportdienst",
+					"attributes": [
+						{
+							"label": "contract transportvermogen",
+							"text": "132,00 kW"
+						},
+						{
+							"label": "transporttarief",
+							"text": "Netvlak MSD Enexis"
+						},
+						{
+							"label": "netvlak",
+							"text": "MS-D"
+						},
+						{
+							"label": "correctiefactor",
+							"text": "1,0130"
+						}
+					],
 					"price": "36.7500",
-					"unit": "mon",
-					"meta": {
-						"contract-transportvermogen": "132,00 kW",
-						"correctiefactor": "1,0130",
-						"netvlak": "MS-D",
-						"transporttarief": "Netvlak MSD Enexis"
-					}
+					"unit": "mon"
 				},
 				"sum": "36.75",
 				"taxes": [
@@ -209,14 +269,26 @@
 				"quantity": "1",
 				"item": {
 					"name": "Vastrecht Aansluitdienst",
+					"attributes": [
+						{
+							"label": "contract transportvermogen",
+							"text": "132,00 kW"
+						},
+						{
+							"label": "transporttarief",
+							"text": "Netvlak MSD Enexis"
+						},
+						{
+							"label": "netvlak",
+							"text": "MS-D"
+						},
+						{
+							"label": "correctiefactor",
+							"text": "1,0130"
+						}
+					],
 					"price": "56.5000",
-					"unit": "mon",
-					"meta": {
-						"contract-transportvermogen": "132,00 kW",
-						"correctiefactor": "1,0130",
-						"netvlak": "MS-D",
-						"transporttarief": "Netvlak MSD Enexis"
-					}
+					"unit": "mon"
 				},
 				"sum": "56.50",
 				"taxes": [

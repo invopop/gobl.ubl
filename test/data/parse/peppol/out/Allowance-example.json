@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "74a156c1f38d94a0ec30c088473df4123820f90d2d4b0dfe5538ee48ec57d166"
+			"val": "de8013e17293a292ffdbc66259e057e902d23103878a30e8870fc46d9376686a"
 		}
 	},
 	"doc": {
@@ -205,12 +205,15 @@
 							"code": "86776"
 						}
 					],
+					"attributes": [
+						{
+							"label": "AdditionalItemName",
+							"text": "AdditionalItemValue"
+						}
+					],
 					"description": "Description of item",
 					"price": "100.00",
-					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
-					}
+					"unit": "one"
 				},
 				"sum": "1000.00",
 				"taxes": [
@@ -247,12 +250,15 @@
 							"code": "86776"
 						}
 					],
+					"attributes": [
+						{
+							"label": "AdditionalItemName",
+							"text": "AdditionalItemValue"
+						}
+					],
 					"description": "Description of item",
 					"price": "100.00",
-					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
-					}
+					"unit": "one"
 				},
 				"sum": "1000.00",
 				"discounts": [

@@ -90,6 +90,7 @@ type Item struct {
 	CommodityClassification    *[]CommodityClassification `xml:"cac:CommodityClassification"`
 	ClassifiedTaxCategory      *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
 	AdditionalItemProperty     *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
+	ManufacturerParty          *Party                     `xml:"cac:ManufacturerParty,omitempty"`
 }
 
 // ItemIdentification represents an item identification
@@ -111,8 +112,9 @@ type ClassifiedTaxCategory struct {
 
 // AdditionalItemProperty represents an additional property of an item
 type AdditionalItemProperty struct {
-	Name  string `xml:"cbc:Name"`
-	Value string `xml:"cbc:Value"`
+	Name          string    `xml:"cbc:Name"`
+	Value         string    `xml:"cbc:Value,omitempty"`
+	ValueQuantity *Quantity `xml:"cbc:ValueQuantity,omitempty"`
 }
 
 // Price represents the price of an item

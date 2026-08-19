@@ -74,7 +74,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				if note.Key == "buyer-accounting-ref" {
 					invLine.AccountingCost = &note.Text
 				} else {
-					notes = append(notes, note.Text)
+					notes = append(notes, formatNote(note))
 				}
 			}
 			if len(notes) > 0 {
@@ -99,6 +99,12 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			invLine.InvoicePeriod = &Period{
 				StartDate: formatDate(l.Period.Start),
 				EndDate:   formatDate(l.Period.End),
+			}
+			// BT-8: VAT point date code, same invoice-wide value as the header.
+			if context.Is(ContextPeppolFranceExtended) && inv.Tax != nil {
+				if code, ok := taxPointCodeMap[inv.Tax.Point]; ok {
+					invLine.InvoicePeriod.DescriptionCode = code
+				}
 			}
 		}
 
@@ -143,10 +149,26 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				}
 			}
 
-			if l.Item.Meta != nil {
+			if len(l.Item.Attributes) > 0 {
 				var properties []AdditionalItemProperty
-				for key, value := range l.Item.Meta {
-					properties = append(properties, AdditionalItemProperty{Name: key.String(), Value: value})
+				for _, attr := range l.Item.Attributes {
+					prop := AdditionalItemProperty{Name: attr.Label}
+					switch {
+					case attr.Amount != nil:
+						// BR-54 requires a plain Value even when a
+						// ValueQuantity is also provided.
+						prop.Value = attr.Amount.String()
+						if attr.Unit != "" {
+							prop.Value += " " + string(attr.Unit)
+							prop.ValueQuantity = &Quantity{
+								Value:    attr.Amount.String(),
+								UnitCode: string(attr.Unit.UNECE()),
+							}
+						}
+					case attr.Text != "":
+						prop.Value = attr.Text
+					}
+					properties = append(properties, prop)
 				}
 				it.AdditionalItemProperty = &properties
 			}
@@ -240,6 +262,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 						Value: l.Item.Ref.String(),
 					},
 				}
+			}
+
+			if l.Seller != nil {
+				invLine.Item.ManufacturerParty = newParty(l.Seller, context)
 			}
 		}
 

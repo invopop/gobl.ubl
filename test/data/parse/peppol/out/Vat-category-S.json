@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b9e98b35eb4f156a843e99ed1537e6a0fb10135364e8e74925ede20e55e77def"
+			"val": "105a4f245a6ff92bbcb4259fed253e827b321475781271cc63fb407191e70913"
 		}
 	},
 	"doc": {
@@ -217,12 +217,15 @@
 							"code": "86776"
 						}
 					],
+					"attributes": [
+						{
+							"label": "AdditionalItemName",
+							"text": "AdditionalItemValue"
+						}
+					],
 					"description": "Description of item",
 					"price": "90.00",
-					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
-					}
+					"unit": "one"
 				},
 				"sum": "900.00",
 				"taxes": [
