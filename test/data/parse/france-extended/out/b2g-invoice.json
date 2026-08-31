@@ -1,0 +1,305 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "e67b34c489aa10878015b405772179c62686dbae0e6c65b9ab7b8d8237c26cdf"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017",
+			"fr-facturx-v1"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "CPRO260831-SIMPLE",
+		"issue_date": "2026-08-31",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"point": "payment",
+			"ext": {
+				"fr-ctc-billing-mode": "M1",
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Fournisseur 34120006871491",
+			"tax_id": {
+				"country": "FR",
+				"code": "53341200068"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "341200068",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"code": "34120006871491",
+					"ext": {
+						"iso-scheme-id": "0009"
+					}
+				},
+				{
+					"code": "ROUTAGE_B2G",
+					"ext": {
+						"iso-scheme-id": "0224"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Serv. CLI"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "341200068"
+				}
+			],
+			"addresses": [
+				{
+					"street": "4 RUE DU MOULIN",
+					"street_extra": "Bis",
+					"locality": "B...",
+					"code": "02500",
+					"country": "FR"
+				}
+			],
+			"emails": [
+				{
+					"addr": "contact@madman.fr"
+				}
+			],
+			"telephones": [
+				{
+					"num": "03 22 37 22 37"
+				}
+			]
+		},
+		"customer": {
+			"name": "\u003eDestinataire 2 57201358347049",
+			"tax_id": {
+				"country": "FR",
+				"code": "84572013583"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "572013583",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				},
+				{
+					"code": "57201358347049",
+					"ext": {
+						"iso-scheme-id": "0009"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "IMMO"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"scheme": "0225",
+					"code": "572013583_57201358347049_SERVICE_PUBLIQUE_3_57201358347049"
+				}
+			],
+			"addresses": [
+				{
+					"street": "2 RUE DU CENTRE",
+					"street_extra": "Mairie",
+					"locality": "B...",
+					"code": "02500",
+					"country": "FR"
+				}
+			],
+			"emails": [
+				{
+					"addr": "contact@mairieB.fr"
+				}
+			],
+			"telephones": [
+				{
+					"num": "03 22 37 99 99"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "200.0000",
+				"order": "10",
+				"item": {
+					"name": "SERVICE_FOURNI1",
+					"description": "Description",
+					"price": "40.0000",
+					"unit": "h"
+				},
+				"sum": "8000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "10.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "8000.00"
+			},
+			{
+				"i": 2,
+				"quantity": "5.0000",
+				"order": "20",
+				"item": {
+					"name": "SERVICE_FOURNI2",
+					"description": "Description",
+					"price": "400.0000",
+					"unit": "day"
+				},
+				"sum": "2000.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "10.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "2000.00"
+			}
+		],
+		"ordering": {
+			"code": "SERVICE_PUBLIQUE_3_57201358347049",
+			"period": {
+				"start": "2026-01-05",
+				"end": "2026-01-31"
+			}
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-09-30",
+						"amount": "11000.00",
+						"percent": "100%"
+					}
+				],
+				"notes": "PAIEMENT 30 JOURS NET"
+			},
+			"advances": [
+				{
+					"description": "Prepaid Amount",
+					"amount": "0.00"
+				}
+			],
+			"instructions": {
+				"key": "credit-transfer",
+				"detail": "Virement",
+				"credit_transfer": [
+					{
+						"iban": "FR20 1254 2547 2569 8542 5874 698",
+						"bic": "CMCIFRPAXXX",
+						"name": "MON COMPTE BANCAIRE"
+					}
+				],
+				"ext": {
+					"untdid-payment-means": "30"
+				}
+			}
+		},
+		"totals": {
+			"sum": "10000.00",
+			"total": "10000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "10000.00",
+								"percent": "10.00%",
+								"amount": "1000.00"
+							}
+						],
+						"amount": "1000.00"
+					}
+				],
+				"sum": "1000.00"
+			},
+			"tax": "1000.00",
+			"total_with_tax": "11000.00",
+			"payable": "11000.00",
+			"advance": "0.00",
+			"due": "11000.00"
+		},
+		"notes": [
+			{
+				"text": "Fournisseur 34120006871491 SARL au capital de 1 000 EUR",
+				"ext": {
+					"untdid-text-subject": "REG"
+				}
+			},
+			{
+				"text": "RCS AMIENS 341200068",
+				"ext": {
+					"untdid-text-subject": "ABL"
+				}
+			},
+			{
+				"text": "4 RUE DU MOULIN,02500 B, FR – contact@madman.fr – N° TVA : FR53341200068",
+				"ext": {
+					"untdid-text-subject": "AAI"
+				}
+			},
+			{
+				"text": "Tout retard de paiement engendre une pénalité exigible à compter de la date d'échéance, calculée sur la base de trois fois le taux d'intérêt légal.",
+				"ext": {
+					"untdid-text-subject": "PMD"
+				}
+			},
+			{
+				"text": "Indemnité forfaitaire pour frais de recouvrement en cas de retard de paiement : 40 €.",
+				"ext": {
+					"untdid-text-subject": "PMT"
+				}
+			},
+			{
+				"text": "Les réglements reçus avant la date d'échéance ne donneront pas lieu à escompte.",
+				"ext": {
+					"untdid-text-subject": "AAB"
+				}
+			},
+			{
+				"text": "B2G",
+				"ext": {
+					"untdid-text-subject": "ADN"
+				}
+			}
+		]
+	}
+}

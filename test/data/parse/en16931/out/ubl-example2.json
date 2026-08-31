@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "22111b6836d61463862094889802681aca1ff8376015865cc8974dc998a3ed06"
+			"val": "e35eedd670db62deaa121ecefb8c6abbf0140447a1d4cb27339cbb4819405efa"
 		}
 	},
 	"doc": {
@@ -36,19 +36,53 @@
 			]
 		},
 		"supplier": {
-			"name": "Tax handling company AS",
+			"name": "Salescompany ltd.",
 			"tax_id": {
 				"country": "NO",
-				"code": "967611265MVA"
+				"code": "123456789MVA"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "123456789"
+				},
+				{
+					"code": "1238764941386",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Antonio Salesmacher"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"email": "seller@email.de"
+				}
+			],
 			"addresses": [
 				{
-					"street": "Regent street",
-					"street_extra": "Front door",
-					"locality": "Newtown",
-					"region": "RegionC",
-					"code": "202",
+					"street": "Main street 34",
+					"street_extra": "Suite 123",
+					"locality": "Big city",
+					"region": "RegionA",
+					"code": "303",
 					"country": "NO"
+				}
+			],
+			"emails": [
+				{
+					"addr": "antonio@salescompany.no"
+				}
+			],
+			"telephones": [
+				{
+					"num": "46211230"
 				}
 			]
 		},
@@ -382,53 +416,19 @@
 				"end": "2013-06-30"
 			},
 			"seller": {
-				"name": "Salescompany ltd.",
+				"name": "Tax handling company AS",
 				"tax_id": {
 					"country": "NO",
-					"code": "123456789MVA"
+					"code": "967611265MVA"
 				},
-				"identities": [
-					{
-						"scope": "legal",
-						"code": "123456789"
-					},
-					{
-						"code": "1238764941386",
-						"ext": {
-							"iso-scheme-id": "0088"
-						}
-					}
-				],
-				"people": [
-					{
-						"name": {
-							"given": "Antonio Salesmacher"
-						}
-					}
-				],
-				"inboxes": [
-					{
-						"email": "seller@email.de"
-					}
-				],
 				"addresses": [
 					{
-						"street": "Main street 34",
-						"street_extra": "Suite 123",
-						"locality": "Big city",
-						"region": "RegionA",
-						"code": "303",
+						"street": "Regent street",
+						"street_extra": "Front door",
+						"locality": "Newtown",
+						"region": "RegionC",
+						"code": "202",
 						"country": "NO"
-					}
-				],
-				"emails": [
-					{
-						"addr": "antonio@salescompany.no"
-					}
-				],
-				"telephones": [
-					{
-						"num": "46211230"
 					}
 				]
 			},
