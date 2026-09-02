@@ -166,11 +166,11 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for Peppol context
 		vesid := ubl.ContextPeppol.GetVESID(inv)
-		assert.Equal(t, "eu.peppol.bis3:invoice:2025.5", vesid)
+		assert.Equal(t, "eu.peppol.bis3:invoice:2026.5", vesid)
 
 		// Get VESID for EN16931 context
 		vesid = ubl.ContextEN16931.GetVESID(inv)
-		assert.Equal(t, "eu.cen.en16931:ubl:1.3.14-2", vesid)
+		assert.Equal(t, "eu.cen.en16931:ubl:1.3.16", vesid)
 
 		// Get VESID for XRechnung context
 		vesid = ubl.ContextXRechnung.GetVESID(inv)
@@ -188,11 +188,11 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for Peppol context
 		vesid := ubl.ContextPeppol.GetVESID(inv)
-		assert.Equal(t, "eu.peppol.bis3:creditnote:2025.5", vesid)
+		assert.Equal(t, "eu.peppol.bis3:creditnote:2026.5", vesid)
 
 		// Get VESID for EN16931 context
 		vesid = ubl.ContextEN16931.GetVESID(inv)
-		assert.Equal(t, "eu.cen.en16931:ubl-creditnote:1.3.15", vesid)
+		assert.Equal(t, "eu.cen.en16931:ubl-creditnote:1.3.16", vesid)
 	})
 
 	t.Run("self-billed invoice VESID", func(t *testing.T) {
@@ -203,7 +203,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for PeppolSelfBilled context
 		vesid := ubl.ContextPeppolSelfBilled.GetVESID(inv)
-		assert.Equal(t, "eu.peppol.bis3:invoice-self-billing:2026.3", vesid)
+		assert.Equal(t, "eu.peppol.bis3:invoice-self-billing:2026.5", vesid)
 	})
 
 	t.Run("France CIUS VESID", func(t *testing.T) {
@@ -214,7 +214,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for France CIUS context
 		vesid := ubl.ContextPeppolFranceCIUS.GetVESID(inv)
-		assert.Equal(t, "fr.ctc:ubl-invoice:1.3.1", vesid)
+		assert.Equal(t, "fr.ctc:ubl-invoice:1.4.0-03", vesid)
 	})
 
 	t.Run("France Extended VESID", func(t *testing.T) {
@@ -225,7 +225,7 @@ func TestGetVESID(t *testing.T) {
 
 		// Get VESID for France Extended context
 		vesid := ubl.ContextPeppolFranceExtended.GetVESID(inv)
-		assert.Equal(t, "fr.ctc:extended-ubl-invoice:1.3.1", vesid)
+		assert.Equal(t, "fr.ctc:extended-ubl-invoice:1.4.0-03", vesid)
 	})
 }
 

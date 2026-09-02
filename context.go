@@ -162,8 +162,8 @@ var ContextEN16931 = Context{
 	CustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:          []cbc.Key{en16931.V2017},
 	VESIDs: VESIDMapping{
-		Invoice:    "eu.cen.en16931:ubl:1.3.14-2",
-		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.15",
+		Invoice:    "eu.cen.en16931:ubl:1.3.16",
+		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.16",
 	},
 }
 
@@ -173,8 +173,8 @@ var ContextPeppol = Context{
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{en16931.V2017},
 	VESIDs: VESIDMapping{
-		Invoice:    "eu.peppol.bis3:invoice:2025.5",
-		CreditNote: "eu.peppol.bis3:creditnote:2025.5",
+		Invoice:    "eu.peppol.bis3:invoice:2026.5",
+		CreditNote: "eu.peppol.bis3:creditnote:2026.5",
 	},
 }
 
@@ -188,8 +188,8 @@ var ContextPeppolSelfBilled = Context{
 	// of releases, so the older ":2025.3" sets were dropped in phive-rules 4.3.x;
 	// ":2026.3" is the oldest still published and validates the same documents.
 	VESIDs: VESIDMapping{
-		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.3",
-		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.3",
+		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.5",
+		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.5",
 	},
 }
 
@@ -211,8 +211,8 @@ var ContextPeppolFranceCIUS = Context{
 	OutputCustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:                []cbc.Key{flow2.V1},
 	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:ubl-invoice:1.3.1",
-		CreditNote: "fr.ctc:ubl-creditnote:1.3.1",
+		Invoice:    "fr.ctc:ubl-invoice:1.4.0-03",
+		CreditNote: "fr.ctc:ubl-creditnote:1.4.0-03",
 	},
 }
 
@@ -223,8 +223,8 @@ var ContextPeppolFranceExtended = Context{
 	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
 	Addons:                []cbc.Key{flow2.V1},
 	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:extended-ubl-invoice:1.3.1",
-		CreditNote: "fr.ctc:extended-ubl-creditnote:1.3.1",
+		Invoice:    "fr.ctc:extended-ubl-invoice:1.4.0-03",
+		CreditNote: "fr.ctc:extended-ubl-creditnote:1.4.0-03",
 	},
 }
 
