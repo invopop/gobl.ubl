@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
+	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -21,39 +22,40 @@ func TestParseParty(t *testing.T) {
 
 		supplier := inv.Supplier
 		require.NotNil(t, supplier)
-		assert.Equal(t, "Tax handling company AS", supplier.Name)
-		assert.Equal(t, cbc.Code("967611265MVA"), supplier.TaxID.Code)
+		assert.Equal(t, "Salescompany ltd.", supplier.Name)
+		assert.Equal(t, cbc.Code("123456789MVA"), supplier.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), supplier.TaxID.Country)
-		assert.Equal(t, "Regent street", supplier.Addresses[0].Street)
-		assert.Equal(t, "Newtown", supplier.Addresses[0].Locality)
-		assert.Equal(t, "Front door", supplier.Addresses[0].StreetExtra)
-		assert.Equal(t, "RegionC", supplier.Addresses[0].Region)
-		assert.Equal(t, cbc.Code("202"), supplier.Addresses[0].Code)
+		require.Len(t, supplier.Identities, 2)
+		assert.Equal(t, cbc.Code("123456789"), supplier.Identities[0].Code)
+		assert.Equal(t, "0088", supplier.Identities[1].Ext.Get(iso.ExtKeySchemeID).String())
+		assert.Equal(t, cbc.Code("1238764941386"), supplier.Identities[1].Code)
+
+		assert.Equal(t, "Main street 34", supplier.Addresses[0].Street)
+		assert.Equal(t, "Suite 123", supplier.Addresses[0].StreetExtra)
+		assert.Equal(t, "Big city", supplier.Addresses[0].Locality)
+		assert.Equal(t, "RegionA", supplier.Addresses[0].Region)
+		assert.Equal(t, cbc.Code("303"), supplier.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), supplier.Addresses[0].Country)
 
+		require.Len(t, supplier.People, 1)
+		assert.Equal(t, "Antonio Salesmacher", supplier.People[0].Name.Given)
+		assert.Equal(t, "antonio@salescompany.no", supplier.Emails[0].Address)
+		assert.Equal(t, "46211230", supplier.Telephones[0].Number)
+		assert.Equal(t, "seller@email.de", supplier.Inboxes[0].Email)
+		assert.Equal(t, "", supplier.Inboxes[0].Scheme.String())
+
+		// BG-11 tax representative, the party liable for the tax.
 		seller := inv.Ordering.Seller
 		require.NotNil(t, seller)
-		assert.Equal(t, "Salescompany ltd.", seller.Name)
-		assert.Equal(t, cbc.Code("123456789MVA"), seller.TaxID.Code)
+		assert.Equal(t, "Tax handling company AS", seller.Name)
+		assert.Equal(t, cbc.Code("967611265MVA"), seller.TaxID.Code)
 		assert.Equal(t, l10n.TaxCountryCode("NO"), seller.TaxID.Country)
-		require.Len(t, seller.Identities, 2)
-		assert.Equal(t, cbc.Code("123456789"), seller.Identities[0].Code)
-		assert.Equal(t, "0088", seller.Identities[1].Ext.Get(iso.ExtKeySchemeID).String())
-		assert.Equal(t, cbc.Code("1238764941386"), seller.Identities[1].Code)
-
-		assert.Equal(t, "Main street 34", seller.Addresses[0].Street)
-		assert.Equal(t, "Suite 123", seller.Addresses[0].StreetExtra)
-		assert.Equal(t, "Big city", seller.Addresses[0].Locality)
-		assert.Equal(t, "RegionA", seller.Addresses[0].Region)
-		assert.Equal(t, cbc.Code("303"), seller.Addresses[0].Code)
+		assert.Equal(t, "Regent street", seller.Addresses[0].Street)
+		assert.Equal(t, "Newtown", seller.Addresses[0].Locality)
+		assert.Equal(t, "Front door", seller.Addresses[0].StreetExtra)
+		assert.Equal(t, "RegionC", seller.Addresses[0].Region)
+		assert.Equal(t, cbc.Code("202"), seller.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("NO"), seller.Addresses[0].Country)
-
-		require.Len(t, seller.People, 1)
-		assert.Equal(t, "Antonio Salesmacher", seller.People[0].Name.Given)
-		assert.Equal(t, "antonio@salescompany.no", seller.Emails[0].Address)
-		assert.Equal(t, "46211230", seller.Telephones[0].Number)
-		assert.Equal(t, "seller@email.de", seller.Inboxes[0].Email)
-		assert.Equal(t, "", seller.Inboxes[0].Scheme.String())
 
 		customer := inv.Customer
 		require.NotNil(t, customer)
@@ -130,4 +132,84 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, "99100100100", supplier.Inboxes[0].Code.String())
 
 	})
+}
+
+// TestParseSupplierIdentifiers checks that the supplier keeps its own BT-31
+// VAT number and BT-34 endpoint when the party carries extra identifiers and
+// the invoice names a BG-11 tax representative, as the French "assujetti
+// unique" (VAT group) invoices do.
+func TestParseSupplierIdentifiers(t *testing.T) {
+	tests := []struct {
+		name        string
+		file        string
+		taxID       cbc.Code
+		inboxScheme cbc.Code
+		inboxCode   cbc.Code
+		groupSIREN  cbc.Code // BT-29d, the 0231 VAT group identifier
+		repName     string   // BT-62, empty when there is no tax representative
+		repTaxID    cbc.Code // BT-63
+	}{
+		{
+			name:        "ordinary identifiers",
+			file:        "france-extended/b2g-invoice.xml",
+			taxID:       "53341200068",
+			inboxScheme: "0225",
+			inboxCode:   "341200068",
+		},
+		{
+			name:        "assujetti unique",
+			file:        "france-extended/b2g-assujetti-unique.xml",
+			taxID:       "53341200068",
+			inboxScheme: "0225",
+			inboxCode:   "341200068",
+			groupSIREN:  "123456789",
+			repName:     "Fournisseur 34120006871491 ASSUJETTI UNIQUE",
+			repTaxID:    "00123456789",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := parseXMLInvoice(t, tt.file)
+
+			inv, ok := e.Extract().(*bill.Invoice)
+			require.True(t, ok)
+
+			supplier := inv.Supplier
+			require.NotNil(t, supplier)
+			require.NotNil(t, supplier.TaxID)
+			assert.Equal(t, l10n.TaxCountryCode("FR"), supplier.TaxID.Country)
+			assert.Equal(t, tt.taxID, supplier.TaxID.Code)
+
+			require.Len(t, supplier.Inboxes, 1)
+			assert.Equal(t, tt.inboxScheme, supplier.Inboxes[0].Scheme)
+			assert.Equal(t, tt.inboxCode, supplier.Inboxes[0].Code)
+
+			assert.Equal(t, tt.groupSIREN, identityWithScheme(supplier, "0231"))
+
+			var rep *org.Party
+			if inv.Ordering != nil {
+				rep = inv.Ordering.Seller
+			}
+			if tt.repName == "" {
+				assert.Nil(t, rep)
+				return
+			}
+			require.NotNil(t, rep)
+			assert.Equal(t, tt.repName, rep.Name)
+			require.NotNil(t, rep.TaxID)
+			assert.Equal(t, tt.repTaxID, rep.TaxID.Code)
+		})
+	}
+}
+
+// identityWithScheme returns the code of the party identity issued under the
+// given ISO 6523 scheme, or an empty code when there is none.
+func identityWithScheme(party *org.Party, scheme cbc.Code) cbc.Code {
+	for _, id := range party.Identities {
+		if id.Ext.Get(iso.ExtKeySchemeID) == scheme {
+			return id.Code
+		}
+	}
+	return cbc.CodeEmpty
 }

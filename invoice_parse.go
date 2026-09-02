@@ -268,19 +268,17 @@ func (ui *Invoice) applyZATCAPrecedingReasons(out *bill.Invoice, o *options) {
 	}
 }
 
-// applyTaxRepresentative remaps Supplier when a TaxRepresentativeParty is present.
+// applyTaxRepresentative maps the BG-11 tax representative to
+// ordering.seller, the party liable for the tax when it is not the
+// supplier. The supplier keeps the BG-4 seller.
 func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice, o *options) {
 	if ui.TaxRepresentativeParty == nil {
 		return
 	}
-	// Move the original seller to the ordering.seller party
 	if out.Ordering == nil {
 		out.Ordering = &bill.Ordering{}
 	}
-	out.Ordering.Seller = out.Supplier
-
-	// Overwrite the seller field with the tax representative
-	out.Supplier = goblParty(ui.TaxRepresentativeParty, o)
+	out.Ordering.Seller = goblParty(ui.TaxRepresentativeParty, o)
 }
 
 // typeCodeParse maps the UBL document type code (UNTDID 1001) to its GOBL

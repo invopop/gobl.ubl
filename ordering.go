@@ -82,14 +82,10 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 			ui.AccountingCost = o.Cost.String()
 		}
 
-		// If both ordering.seller and seller are present, the original seller is used
-		// as the tax representative.
+		// The party liable for the tax, when not the supplier, is the
+		// BG-11 tax representative.
 		if o.Seller != nil {
-			p := ui.AccountingSupplierParty.Party
-			ui.TaxRepresentativeParty = p
-			ui.AccountingSupplierParty = SupplierParty{
-				Party: newParty(o.Seller, context),
-			}
+			ui.TaxRepresentativeParty = newParty(o.Seller, context)
 		}
 
 		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {

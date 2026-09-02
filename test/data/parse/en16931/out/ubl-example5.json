@@ -4,12 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "be110177fa0774b2fc85fcbd32824ce431fc045e058762371037a3577ded0508"
+			"val": "ade743b3818db6e8cdb6e2a40210dfb1863a3be5e6b67cf50dead18310f1ddec"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"$regime": "DK",
+		"$regime": "NL",
 		"$addons": [
 			"eu-en16931-v2017"
 		],
@@ -38,19 +38,60 @@
 			}
 		},
 		"supplier": {
-			"name": "Dick Panama",
+			"name": "SellerCompany",
+			"alias": "SelCo",
 			"tax_id": {
-				"country": "DK",
-				"code": "16356609"
+				"country": "NL",
+				"code": "16356706"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "NL16356706"
+				},
+				{
+					"scope": "tax",
+					"country": "NL",
+					"type": "LOC",
+					"code": "NL16356706"
+				},
+				{
+					"code": "5790000436101",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Anthon Larsen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"email": "info@selco.nl"
+				}
+			],
 			"addresses": [
 				{
-					"street": "Anystreet, Building 1",
-					"street_extra": "6th floor",
-					"locality": "Anytown",
-					"region": "Jutland",
-					"code": "101",
-					"country": "DK"
+					"street": "Hoofdstraat 4",
+					"street_extra": "Om de hoek",
+					"locality": "Grootstad",
+					"region": "Overijssel",
+					"code": "54321",
+					"country": "NL"
+				}
+			],
+			"emails": [
+				{
+					"addr": "Anthon@Selco.nl"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+3198989898"
 				}
 			]
 		},
@@ -301,60 +342,19 @@
 				"end": "2013-04-10"
 			},
 			"seller": {
-				"name": "SellerCompany",
-				"alias": "SelCo",
+				"name": "Dick Panama",
 				"tax_id": {
-					"country": "NL",
-					"code": "16356706"
+					"country": "DK",
+					"code": "16356609"
 				},
-				"identities": [
-					{
-						"scope": "legal",
-						"code": "NL16356706"
-					},
-					{
-						"scope": "tax",
-						"country": "NL",
-						"type": "LOC",
-						"code": "NL16356706"
-					},
-					{
-						"code": "5790000436101",
-						"ext": {
-							"iso-scheme-id": "0088"
-						}
-					}
-				],
-				"people": [
-					{
-						"name": {
-							"given": "Anthon Larsen"
-						}
-					}
-				],
-				"inboxes": [
-					{
-						"email": "info@selco.nl"
-					}
-				],
 				"addresses": [
 					{
-						"street": "Hoofdstraat 4",
-						"street_extra": "Om de hoek",
-						"locality": "Grootstad",
-						"region": "Overijssel",
-						"code": "54321",
-						"country": "NL"
-					}
-				],
-				"emails": [
-					{
-						"addr": "Anthon@Selco.nl"
-					}
-				],
-				"telephones": [
-					{
-						"num": "+3198989898"
+						"street": "Anystreet, Building 1",
+						"street_extra": "6th floor",
+						"locality": "Anytown",
+						"region": "Jutland",
+						"code": "101",
+						"country": "DK"
 					}
 				]
 			},
