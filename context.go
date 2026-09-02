@@ -5,7 +5,6 @@ import (
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
-	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 )
@@ -222,7 +221,7 @@ var ContextPeppolFranceExtended = Context{
 	CustomizationID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
 	ProfileID:             PeppolFranceProcessIDRegulated,
 	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
-	Addons:                []cbc.Key{facturx.V1},
+	Addons:                []cbc.Key{flow2.V1},
 	VESIDs: VESIDMapping{
 		Invoice:    "fr.ctc:extended-ubl-invoice:1.3.1",
 		CreditNote: "fr.ctc:extended-ubl-creditnote:1.3.1",
