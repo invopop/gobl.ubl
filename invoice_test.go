@@ -90,7 +90,7 @@ func TestInvoiceHeaders(t *testing.T) {
 	})
 
 	t.Run("line tax point conversion", func(t *testing.T) {
-		env := loadTestEnvelope(t, "invoice-complete.json")
+		env := loadTestEnvelope(t, "france-extended/invoice-standard.json")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)

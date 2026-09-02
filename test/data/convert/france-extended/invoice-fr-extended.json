@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "004d79df173676f9e56f16b764e1f731dd522cbb038c7b17858ebe0d5f419ba1"
+			"val": "9253b40ee9b51d666bde5fa66565ab7b5260f0e2a7bc2b03d8cf78431516d3c5"
 		},
 		"from": "iso6523-actorid-upis::9957:334175221",
 		"to": "iso6523-actorid-upis::9957:552100554"
@@ -14,7 +14,7 @@
 		"$regime": "FR",
 		"$addons": [
 			"eu-en16931-v2017",
-			"fr-facturx-v1"
+			"fr-ctc-flow2-v1"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
@@ -23,7 +23,9 @@
 		"issue_date": "2024-05-15",
 		"currency": "EUR",
 		"tax": {
+			"rounding": "currency",
 			"ext": {
+				"fr-ctc-billing-mode": "M1",
 				"untdid-document-type": "380"
 			}
 		},
@@ -33,6 +35,16 @@
 				"country": "FR",
 				"code": "23334175221"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"type": "SIREN",
+					"code": "334175221",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
 			"people": [
 				{
 					"name": {
@@ -48,6 +60,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "334175221"
 				}
@@ -78,6 +91,16 @@
 				"country": "FR",
 				"code": "96552100554"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"type": "SIREN",
+					"code": "552100554",
+					"ext": {
+						"iso-scheme-id": "0002"
+					}
+				}
+			],
 			"endpoints": [
 				{
 					"uri": "iso6523-actorid-upis::9957:552100554"
@@ -85,6 +108,7 @@
 			],
 			"inboxes": [
 				{
+					"key": "peppol",
 					"scheme": "0225",
 					"code": "552100554"
 				}
@@ -174,6 +198,29 @@
 			"tax": "360.00",
 			"total_with_tax": "2160.00",
 			"payable": "2160.00"
-		}
+		},
+		"notes": [
+			{
+				"key": "payment",
+				"text": "Conditions de paiement selon les conditions générales de vente.",
+				"ext": {
+					"untdid-text-subject": "PMT"
+				}
+			},
+			{
+				"key": "payment-method",
+				"text": "Pénalités et indemnités de retard applicables conformément aux conditions générales de vente.",
+				"ext": {
+					"untdid-text-subject": "PMD"
+				}
+			},
+			{
+				"key": "payment-term",
+				"text": "Aucun escompte n'est accordé pour paiement anticipé.",
+				"ext": {
+					"untdid-text-subject": "AAB"
+				}
+			}
+		]
 	}
 }
