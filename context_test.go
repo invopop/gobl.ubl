@@ -6,7 +6,6 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
-	"github.com/invopop/gobl/addons/fr/facturx"
 	"github.com/invopop/gobl/bill"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -112,13 +111,7 @@ func TestContextPeppolFranceCIUS(t *testing.T) {
 
 func TestContextPeppolFranceExtended(t *testing.T) {
 	t.Run("basic conversion", func(t *testing.T) {
-		env := loadTestEnvelope(t, "invoice-minimal.json")
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		inv.SetAddons(facturx.V1)
-		require.NoError(t, inv.Calculate())
+		env := loadTestEnvelope(t, "france-extended/invoice-standard.json")
 
 		// Convert with France Extended context
 		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
@@ -129,8 +122,8 @@ func TestContextPeppolFranceExtended(t *testing.T) {
 
 		// Verify OutputCustomizationID is used
 		assert.Equal(t, "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr", ublInv.CustomizationID)
-		// No billing mode extension in minimal invoice, so ProfileID falls back to context's Peppol process ID
-		assert.Equal(t, "urn:peppol:france:billing:regulated", ublInv.ProfileID.Value)
+		// Verify ProfileID comes from the fr-ctc-billing-mode extension
+		assert.Equal(t, "S1", ublInv.ProfileID.Value)
 	})
 
 	t.Run("external identification uses full CustomizationID", func(t *testing.T) {
