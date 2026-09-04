@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ade743b3818db6e8cdb6e2a40210dfb1863a3be5e6b67cf50dead18310f1ddec"
+			"val": "a7f166d415e324e4cdd3c73d480ef434f60b3f2b290d8d1ba5bdd08ba8a11b38"
 		}
 	},
 	"doc": {
@@ -52,7 +52,6 @@
 				{
 					"scope": "tax",
 					"country": "NL",
-					"type": "LOC",
 					"code": "NL16356706"
 				},
 				{

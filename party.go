@@ -2,9 +2,11 @@ package ubl
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -16,6 +18,10 @@ const SchemeIDEmail = "EM"
 
 // TaxSchemeVAT is the tax scheme code for VAT
 const TaxSchemeVAT = "VAT"
+
+// TaxSchemeTaxRegistration is the tax scheme code French documents use for
+// BT-32, the party's tax registration identifier.
+const TaxSchemeTaxRegistration = "LOC"
 
 // SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
@@ -253,14 +259,14 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			}
 		}
 
-		// Second pass: Handle tax scope identities -> PartyTaxScheme
+		// Second pass: Handle tax scope identities -> PartyTaxScheme (BT-32).
 		for _, id := range party.Identities {
 			if id.Scope == org.IdentityScopeTax {
 				code := id.Code.String()
 				taxScheme := PartyTaxScheme{
 					CompanyID: &IDType{Value: code},
 					TaxScheme: &TaxScheme{
-						ID: IDType{Value: id.Type.String()},
+						ID: IDType{Value: taxRegistrationScheme(id, ctx)},
 					},
 				}
 				p.PartyTaxScheme = append(p.PartyTaxScheme, taxScheme)
@@ -297,6 +303,19 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 	}
 	return p
+}
+
+// taxRegistrationScheme returns the tax scheme code for a BT-32 registration.
+// French documents pin it; elsewhere the identity's own type is used when it
+// has one.
+func taxRegistrationScheme(id *org.Identity, ctx Context) string {
+	if slices.Contains(ctx.Addons, flow2.V1) {
+		return TaxSchemeTaxRegistration
+	}
+	if id.Type != "" {
+		return id.Type.String()
+	}
+	return TaxSchemeTaxRegistration
 }
 
 // newDeliveryParty creates a Party structure for delivery parties
