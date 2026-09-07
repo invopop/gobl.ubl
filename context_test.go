@@ -1,8 +1,12 @@
 package ubl_test
 
 import (
+	"bytes"
+	"os"
+	"path/filepath"
 	"testing"
 
+	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
@@ -226,6 +230,61 @@ func TestGetVESID(t *testing.T) {
 		// Get VESID for France Extended context
 		vesid := ubl.ContextPeppolFranceExtended.GetVESID(inv)
 		assert.Equal(t, "fr.ctc:extended-ubl-invoice:1.4.0-03", vesid)
+	})
+}
+
+func TestFrenchBillingModeResolution(t *testing.T) {
+	// A French document is recognised by its billing mode in cbc:ProfileID; the
+	// CustomizationID then only picks CIUS or Extended. Senders differ on which
+	// identifier they put in the document: the one the profile emits, or the
+	// spec-level one that identifies the profile on the network. Both resolve.
+	const (
+		specCIUS     = "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0"
+		specExtended = "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0"
+		docCIUS      = "urn:cen.eu:en16931:2017"
+		docExtended  = "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr"
+	)
+
+	for _, tt := range []struct {
+		name            string
+		customizationID string
+		want            ubl.Context
+	}{
+		{"in-document CIUS", docCIUS, ubl.ContextPeppolFranceCIUS},
+		{"in-document Extended", docExtended, ubl.ContextPeppolFranceExtended},
+		{"spec-level CIUS", specCIUS, ubl.ContextPeppolFranceCIUS},
+		{"spec-level Extended", specExtended, ubl.ContextPeppolFranceExtended},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, mode := range []string{"B1", "S1", "M4"} {
+				ctx := ubl.FindContext(tt.customizationID, mode)
+				require.NotNil(t, ctx, "mode %s", mode)
+				assert.Equal(t, tt.want.CustomizationID, ctx.CustomizationID, "mode %s", mode)
+				assert.Equal(t, tt.want.VESIDs.Invoice, ctx.VESIDs.Invoice, "mode %s", mode)
+			}
+		})
+	}
+
+	t.Run("spec-level CustomizationID still carries the addon through Convert", func(t *testing.T) {
+		data, err := os.ReadFile(filepath.Join(getParsePath(), "france-cius", "b2b-reg.xml"))
+		require.NoError(t, err)
+		old := []byte("<cbc:CustomizationID>" + docCIUS + "</cbc:CustomizationID>")
+		require.Contains(t, string(data), string(old))
+		data = bytes.Replace(data, old, []byte("<cbc:CustomizationID>"+specCIUS+"</cbc:CustomizationID>"), 1)
+
+		doc, err := ubl.Parse(data)
+		require.NoError(t, err)
+		env, err := doc.(*ubl.Invoice).Convert()
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		assert.Contains(t, inv.GetAddons(), flow2.V1)
+	})
+
+	t.Run("unmodelled CustomizationID still parses best-effort", func(t *testing.T) {
+		ctx := ubl.FindContext("urn:peppol:pint:billing-1@sg-1", "B1")
+		assert.Nil(t, ctx)
 	})
 }
 

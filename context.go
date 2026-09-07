@@ -82,8 +82,20 @@ func FindContext(customizationID string, profileID string) *Context {
 	// CustomizationID as EN16931 but can be identified by their ProfileID
 	// containing a billing mode code (e.g., "B1", "S1", "M4").
 	if isFrenchBillingMode(profileID) {
+		// OutputCustomizationID first: it holds the value French documents carry
+		// in the XML, and it is the only thing separating CIUS from Extended. A
+		// pass over CustomizationID alone would match ContextEN16931 on the CIUS
+		// value and drop the addon.
 		for _, ctx := range contexts {
 			if ctx.OutputCustomizationID == customizationID {
+				return &ctx
+			}
+		}
+		// Then the spec-level identifier, for senders that put it in the document
+		// rather than in the SBDH. The billing mode already settled that this is
+		// a French document, so it only has to pick which French context.
+		for _, ctx := range contexts {
+			if ctx.CustomizationID == customizationID {
 				return &ctx
 			}
 		}
