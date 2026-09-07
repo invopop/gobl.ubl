@@ -4,10 +4,8 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "50e60f6679d65e40b146b99caefc666345eebbf25bbe9958048463ee3e72a8b7"
-		},
-		"from": "iso6523-actorid-upis::9930:282741168",
-		"to": "iso6523-actorid-upis::9930:111111125"
+			"val": "f7d1ce458d78c3bdccc865fae291baee81e206c1bf8052b5a89204d0bcc4362f"
+		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
@@ -15,18 +13,15 @@
 		"$addons": [
 			"eu-en16931-v2017"
 		],
-		"$tags": [
-			"self-billed"
-		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"series": "SAMPLE",
 		"code": "001",
-		"issue_date": "2024-02-13",
+		"issue_date": "2024-05-15",
 		"currency": "EUR",
 		"tax": {
 			"ext": {
-				"untdid-document-type": "389"
+				"untdid-document-type": "380"
 			}
 		},
 		"supplier": {
@@ -35,26 +30,6 @@
 				"country": "DE",
 				"code": "111111125"
 			},
-			"people": [
-				{
-					"name": {
-						"given": "John",
-						"surname": "Doe"
-					}
-				}
-			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::9930:111111125"
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "9930",
-					"code": "111111125"
-				}
-			],
 			"addresses": [
 				{
 					"num": "16",
@@ -68,11 +43,6 @@
 				{
 					"addr": "billing@example.com"
 				}
-			],
-			"telephones": [
-				{
-					"num": "+49100200300"
-				}
 			]
 		},
 		"customer": {
@@ -81,18 +51,6 @@
 				"country": "DE",
 				"code": "282741168"
 			},
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::9930:282741168"
-				}
-			],
-			"inboxes": [
-				{
-					"key": "peppol",
-					"scheme": "9930",
-					"code": "282741168"
-				}
-			],
 			"addresses": [
 				{
 					"num": "25",
@@ -112,8 +70,10 @@
 			{
 				"i": 1,
 				"quantity": "20",
+				"period": {
+					"start": "2024-05-12"
+				},
 				"item": {
-					"ref": "SERV-001",
 					"name": "Development services",
 					"price": "90.00",
 					"unit": "h"
@@ -123,7 +83,6 @@
 					{
 						"cat": "VAT",
 						"key": "standard",
-						"rate": "general",
 						"percent": "19%",
 						"ext": {
 							"untdid-tax-category": "S"
@@ -134,42 +93,13 @@
 			}
 		],
 		"ordering": {
-			"code": "XR-2024-2"
+			"period": {
+				"end": "2024-05-31"
+			}
 		},
 		"payment": {
-			"payee": {
-				"name": "Ebeneser Scrooge AS",
-				"identities": [
-					{
-						"label": "CompanyID",
-						"code": "989823401"
-					},
-					{
-						"code": "2298740918237",
-						"ext": {
-							"iso-scheme-id": "0088"
-						}
-					}
-				],
-				"addresses": [
-					{
-						"num": "4",
-						"street": "Christmas Street",
-						"locality": "London",
-						"code": "E1 6AN",
-						"country": "GB"
-					}
-				]
-			},
 			"terms": {
-				"due_dates": [
-					{
-						"date": "2013-07-20",
-						"amount": "2142.00",
-						"percent": "100%"
-					}
-				],
-				"notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
+				"notes": "on receipt within 30 days"
 			},
 			"instructions": {
 				"key": "credit-transfer",

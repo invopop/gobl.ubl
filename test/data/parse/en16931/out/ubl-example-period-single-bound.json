@@ -1,0 +1,502 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "3df2481688207606795387f1eeb793dc521b33e6b644e6708e415a5a5564c3c1"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "NL",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "TOSL110",
+		"issue_date": "2013-04-10",
+		"currency": "DKK",
+		"exchange_rates": [
+			{
+				"from": "DKK",
+				"to": "EUR",
+				"amount": "0.93"
+			}
+		],
+		"preceding": [
+			{
+				"issue_date": "2013-03-10",
+				"code": "TOSL109"
+			}
+		],
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "SellerCompany",
+			"alias": "SelCo",
+			"tax_id": {
+				"country": "NL",
+				"code": "16356706"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "NL16356706"
+				},
+				{
+					"scope": "tax",
+					"country": "NL",
+					"type": "LOC",
+					"code": "NL16356706"
+				},
+				{
+					"code": "5790000436101",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Anthon Larsen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"email": "info@selco.nl"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Hoofdstraat 4",
+					"street_extra": "Om de hoek",
+					"locality": "Grootstad",
+					"region": "Overijssel",
+					"code": "54321",
+					"country": "NL"
+				}
+			],
+			"emails": [
+				{
+					"addr": "Anthon@Selco.nl"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+3198989898"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyercompany ltd",
+			"alias": "Buyco",
+			"tax_id": {
+				"country": "DK",
+				"code": "16356607"
+			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "DK16356607"
+				},
+				{
+					"code": "5790000436057",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "John Hansen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"email": "info@buyercompany.dk"
+				}
+			],
+			"addresses": [
+				{
+					"street": "Anystreet, Building 1",
+					"street_extra": "5th floor",
+					"locality": "Anytown",
+					"region": "Jutland",
+					"code": "101",
+					"country": "DK"
+				}
+			],
+			"emails": [
+				{
+					"addr": "john.hansen@buyercompany.dk"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+4598989898"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "1000",
+				"identifier": {
+					"code": "Object2"
+				},
+				"period": {
+					"start": "2013-03-10"
+				},
+				"order": "1",
+				"cost": "ACC7654",
+				"item": {
+					"ref": "JB007",
+					"name": "Printing paper",
+					"identities": [
+						{
+							"code": "BUY123"
+						},
+						{
+							"code": "1234567890128",
+							"ext": {
+								"iso-scheme-id": "0088"
+							}
+						},
+						{
+							"label": "ZZZ",
+							"code": "12344321"
+						}
+					],
+					"attributes": [
+						{
+							"label": "Thickness",
+							"text": "2 mm"
+						}
+					],
+					"description": "Printing paper, 2mm",
+					"price": "1.00",
+					"unit": "item",
+					"origin": "NL"
+				},
+				"sum": "1000.00",
+				"discounts": [
+					{
+						"reason": "Loyal customer",
+						"base": "1000.00",
+						"percent": "10%",
+						"amount": "100.00",
+						"ext": {
+							"untdid-allowance": "100"
+						}
+					}
+				],
+				"charges": [
+					{
+						"reason": "Packaging",
+						"base": "1000.00",
+						"percent": "10%",
+						"amount": "100.00",
+						"ext": {
+							"untdid-charge": "ABL"
+						}
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1000.00",
+				"notes": [
+					{
+						"text": "first line"
+					}
+				]
+			},
+			{
+				"i": 2,
+				"quantity": "100",
+				"identifier": {
+					"code": "Object2"
+				},
+				"period": {
+					"start": "2013-03-10"
+				},
+				"order": "2",
+				"cost": "ACC7654",
+				"item": {
+					"ref": "JB008",
+					"name": "Parker Pen",
+					"description": "Parker Pen, Black, model Sansa",
+					"price": "5.00",
+					"unit": "item",
+					"origin": "NL"
+				},
+				"sum": "500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "500.00",
+				"notes": [
+					{
+						"text": "second line"
+					}
+				]
+			},
+			{
+				"i": 3,
+				"quantity": "500",
+				"item": {
+					"ref": "JB009",
+					"name": "American Cookies",
+					"price": "5.00",
+					"unit": "item"
+				},
+				"sum": "2500.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "12%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "2500.00"
+			}
+		],
+		"discounts": [
+			{
+				"i": 1,
+				"reason": "Loyal customer",
+				"base": "1500.00",
+				"percent": "10%",
+				"amount": "150.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"ext": {
+					"untdid-allowance": "100"
+				}
+			}
+		],
+		"charges": [
+			{
+				"i": 1,
+				"reason": "Packaging",
+				"base": "1500.00",
+				"percent": "10%",
+				"amount": "150.00",
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "25%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"ext": {
+					"untdid-charge": "ABL"
+				}
+			}
+		],
+		"ordering": {
+			"code": "123",
+			"cost": "67543",
+			"period": {
+				"end": "2013-04-10"
+			},
+			"seller": {
+				"name": "Dick Panama",
+				"tax_id": {
+					"country": "DK",
+					"code": "16356609"
+				},
+				"addresses": [
+					{
+						"street": "Anystreet, Building 1",
+						"street_extra": "6th floor",
+						"locality": "Anytown",
+						"region": "Jutland",
+						"code": "101",
+						"country": "DK"
+					}
+				]
+			},
+			"projects": [
+				{
+					"code": "Project345"
+				}
+			],
+			"contracts": [
+				{
+					"code": "2013-05"
+				}
+			],
+			"purchases": [
+				{
+					"code": "PO4711"
+				}
+			],
+			"sales": [
+				{
+					"code": "123"
+				}
+			],
+			"receiving": [
+				{
+					"code": "3544"
+				}
+			],
+			"despatch": [
+				{
+					"code": "5433"
+				}
+			],
+			"tender": [
+				{
+					"code": "Lot567"
+				}
+			]
+		},
+		"payment": {
+			"payee": {
+				"name": "Dagobert Duck",
+				"identities": [
+					{
+						"scope": "legal",
+						"code": "DK16356608"
+					},
+					{
+						"code": "DK16356608"
+					}
+				]
+			},
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "4675.00",
+						"percent": "100%"
+					}
+				],
+				"notes": "50% prepaid, 50% within one month"
+			},
+			"advances": [
+				{
+					"description": "Prepaid Amount",
+					"amount": "2337.50"
+				}
+			],
+			"instructions": {
+				"key": "direct-debit",
+				"ref": "Payref1",
+				"direct_debit": {
+					"ref": "123456",
+					"account": "DK1212341234123412"
+				},
+				"ext": {
+					"untdid-payment-means": "49"
+				}
+			}
+		},
+		"delivery": {
+			"receiver": {
+				"name": "Logistic service Ltd",
+				"addresses": [
+					{
+						"street": "Deliverystreet",
+						"street_extra": "Gate 15",
+						"locality": "Deliverycity",
+						"region": "Jutland",
+						"code": "9000",
+						"country": "DK"
+					}
+				]
+			},
+			"identities": [
+				{
+					"code": "5790000436068"
+				}
+			],
+			"date": "2013-04-15"
+		},
+		"totals": {
+			"sum": "4000.00",
+			"discount": "150.00",
+			"charge": "150.00",
+			"total": "4000.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1500.00",
+								"percent": "25%",
+								"amount": "375.00"
+							},
+							{
+								"key": "standard",
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "2500.00",
+								"percent": "12%",
+								"amount": "300.00"
+							}
+						],
+						"amount": "675.00"
+					}
+				],
+				"sum": "675.00"
+			},
+			"tax": "675.00",
+			"total_with_tax": "4675.00",
+			"payable": "4675.00",
+			"advance": "2337.50",
+			"due": "2337.50"
+		},
+		"notes": [
+			{
+				"text": "Ordered through our website#Ordering information"
+			}
+		]
+	}
+}
