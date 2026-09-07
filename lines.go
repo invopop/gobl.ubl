@@ -69,17 +69,17 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		}
 
 		if len(l.Notes) > 0 {
-			var notes []string
+			notes := make([]string, 0, len(l.Notes))
 			for _, note := range l.Notes {
-				if note.Key == "buyer-accounting-ref" {
-					invLine.AccountingCost = &note.Text
-				} else {
-					notes = append(notes, formatNote(note))
-				}
+				notes = append(notes, formatNote(note))
 			}
-			if len(notes) > 0 {
-				invLine.Note = notes
-			}
+			invLine.Note = notes
+		}
+
+		// BT-133: Line buyer accounting reference
+		if l.Cost != "" {
+			cost := l.Cost.String()
+			invLine.AccountingCost = &cost
 		}
 
 		// BT-128: Invoice line object identifier

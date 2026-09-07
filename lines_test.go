@@ -132,6 +132,34 @@ func TestLineNoteSubjectCodeRoundTrip(t *testing.T) {
 	assert.Equal(t, cbc.Code("AAI"), n.Ext.Get(untdid.ExtKeyTextSubject))
 }
 
+func TestLineAccountingCostRoundTrip(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	inv.Lines[0].Cost = "PROJ-123"
+
+	doc, err := ubl.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	require.NotNil(t, doc.InvoiceLines[0].AccountingCost)
+	assert.Equal(t, "PROJ-123", *doc.InvoiceLines[0].AccountingCost)
+
+	data, err := ubl.Bytes(doc)
+	require.NoError(t, err)
+
+	parsed, err := ubl.Parse(data)
+	require.NoError(t, err)
+	out, ok := parsed.(*ubl.Invoice)
+	require.True(t, ok)
+	outEnv, err := out.Convert()
+	require.NoError(t, err)
+	outInv, ok := outEnv.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	assert.Equal(t, cbc.Code("PROJ-123"), outInv.Lines[0].Cost)
+}
+
 func TestItemAttributeRoundTrip(t *testing.T) {
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 	inv, ok := env.Extract().(*bill.Invoice)
