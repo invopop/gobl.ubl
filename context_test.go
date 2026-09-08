@@ -234,10 +234,8 @@ func TestGetVESID(t *testing.T) {
 }
 
 func TestFrenchBillingModeResolution(t *testing.T) {
-	// A French document is recognised by its billing mode in cbc:ProfileID; the
-	// CustomizationID then only picks CIUS or Extended. Senders differ on which
-	// identifier they put in the document: the one the profile emits, or the
-	// spec-level one that identifies the profile on the network. Both resolve.
+	// Senders differ on which identifier they put in the document: the one the
+	// profile emits, or the spec-level one that names it on the network.
 	const (
 		specCIUS     = "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0"
 		specExtended = "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0"
