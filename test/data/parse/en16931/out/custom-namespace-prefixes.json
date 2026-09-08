@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9a859176b4b7400632a42a3805b0feada387215cd1a96760c6483ca0aa6aa72e"
+			"val": "3c2dd8bb68fdd6d15fed5f26f7033274abea4ecd4525f8c898d958e798d43c1e"
 		}
 	},
 	"doc": {
@@ -55,11 +55,13 @@
 		},
 		"customer": {
 			"name": "IYT Corporation",
-			"tax_id": {
-				"country": "GB",
-				"code": "12356478",
-				"scheme": "VAT"
-			},
+			"identities": [
+				{
+					"scope": "tax",
+					"country": "GB",
+					"code": "12356478"
+				}
+			],
 			"people": [
 				{
 					"name": {

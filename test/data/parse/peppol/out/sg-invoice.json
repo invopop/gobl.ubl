@@ -4,12 +4,11 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d58dde3a5cd334bcf218cc997c5df00f9a87a44b1f09890dba8adbfb5b976f81"
+			"val": "23ded262a704cc3bf4ac30a0ff676030a952a5f371f43ed99d172f44d7ef9445"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"$regime": "SG",
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "2025-08-28T14:18:51-4c42b50f",
@@ -26,10 +25,6 @@
 		},
 		"supplier": {
 			"name": "Test 0195 Identifier Storecove",
-			"tax_id": {
-				"country": "SG",
-				"code": "123457890SC"
-			},
 			"identities": [
 				{
 					"scope": "legal",
@@ -37,6 +32,11 @@
 					"ext": {
 						"iso-scheme-id": "0195"
 					}
+				},
+				{
+					"scope": "tax",
+					"country": "SG",
+					"code": "123457890SC"
 				},
 				{
 					"code": "123457890SC",

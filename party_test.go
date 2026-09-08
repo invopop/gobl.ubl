@@ -89,3 +89,63 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "NO923456783MVA", doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID.Value)
 	})
 }
+
+// TestNewPartyTaxRegistration pins BT-32: the tax scheme code is the French
+// one under a French context, and the identity's own type elsewhere.
+func TestNewPartyTaxRegistration(t *testing.T) {
+	convert := func(t *testing.T, fixture string, id *org.Identity, opts ...ubl.Option) []PartyTaxSchemeView {
+		t.Helper()
+		env := loadTestEnvelope(t, fixture)
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Supplier.Identities = []*org.Identity{id}
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ConvertInvoice(env, opts...)
+		require.NoError(t, err)
+
+		out := make([]PartyTaxSchemeView, 0)
+		for _, pts := range doc.AccountingSupplierParty.Party.PartyTaxScheme {
+			out = append(out, PartyTaxSchemeView{
+				Scheme: pts.TaxScheme.ID.Value,
+				Code:   pts.CompanyID.Value,
+			})
+		}
+		return out
+	}
+
+	t.Run("french context pins the scheme", func(t *testing.T) {
+		schemes := convert(t, "france-cius/invoice-fr-cius.json",
+			&org.Identity{Scope: org.IdentityScopeTax, Code: "483671517"},
+			ubl.WithContext(ubl.ContextPeppolFranceCIUS))
+
+		require.NotEmpty(t, schemes)
+		last := schemes[len(schemes)-1]
+		assert.Equal(t, "LOC", last.Scheme)
+		assert.Equal(t, "483671517", last.Code)
+	})
+
+	t.Run("elsewhere the identity type is used", func(t *testing.T) {
+		schemes := convert(t, "invoice-complete.json",
+			&org.Identity{Scope: org.IdentityScopeTax, Type: "TAX", Code: "Foretaksregisteret"})
+
+		require.NotEmpty(t, schemes)
+		last := schemes[len(schemes)-1]
+		assert.Equal(t, "TAX", last.Scheme)
+		assert.Equal(t, "Foretaksregisteret", last.Code)
+	})
+
+	t.Run("without a type the french code is the fallback", func(t *testing.T) {
+		schemes := convert(t, "invoice-complete.json",
+			&org.Identity{Scope: org.IdentityScopeTax, Code: "483671517"})
+
+		require.NotEmpty(t, schemes)
+		assert.Equal(t, "LOC", schemes[len(schemes)-1].Scheme)
+	})
+}
+
+// PartyTaxSchemeView flattens a PartyTaxScheme for the assertions above.
+type PartyTaxSchemeView struct {
+	Scheme string
+	Code   string
+}
