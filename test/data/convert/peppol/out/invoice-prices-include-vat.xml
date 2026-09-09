@@ -72,7 +72,7 @@
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">12.10</cbc:TaxAmount>
     <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="EUR">57.61</cbc:TaxableAmount>
+      <cbc:TaxableAmount currencyID="EUR">57.60</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="EUR">12.10</cbc:TaxAmount>
       <cac:TaxCategory>
         <cbc:ID>S</cbc:ID>
@@ -84,16 +84,15 @@
     </cac:TaxSubtotal>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">57.61</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">57.61</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="EUR">69.71</cbc:TaxInclusiveAmount>
-    <cbc:PayableRoundingAmount currencyID="EUR">-0.01</cbc:PayableRoundingAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">57.60</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">57.60</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">69.70</cbc:TaxInclusiveAmount>
     <cbc:PayableAmount currencyID="EUR">69.70</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
     <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">6.73</cbc:LineExtensionAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">6.7273</cbc:LineExtensionAmount>
     <cac:InvoicePeriod>
       <cbc:StartDate>2024-01-15</cbc:StartDate>
       <cbc:EndDate>2024-02-15</cbc:EndDate>
@@ -120,7 +119,7 @@
   <cac:InvoiceLine>
     <cbc:ID>2</cbc:ID>
     <cbc:InvoicedQuantity unitCode="C62">1</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">50.88</cbc:LineExtensionAmount>
+    <cbc:LineExtensionAmount currencyID="EUR">50.8760</cbc:LineExtensionAmount>
     <cac:InvoicePeriod>
       <cbc:StartDate>2024-01-15</cbc:StartDate>
       <cbc:EndDate>2024-02-15</cbc:EndDate>
