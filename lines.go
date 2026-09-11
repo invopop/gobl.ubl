@@ -6,7 +6,6 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
-	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 )
 
@@ -49,10 +48,9 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		invLine := InvoiceLine{
 			ID: strconv.Itoa(l.Index),
 
-			LineExtensionAmount: Amount{
-				CurrencyID: &ccy,
-				Value:      l.Total.String(),
-			},
+			// BT-131: the line net amount, capped at the currency's
+			// precision by BR-DEC-23.
+			LineExtensionAmount: newAmount(*l.Total, ccy),
 		}
 
 		// Always set quantity (mandatory field)
@@ -97,8 +95,8 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 
 		if l.Period != nil {
 			invLine.InvoicePeriod = &Period{
-				StartDate: formatDate(l.Period.Start),
-				EndDate:   formatDate(l.Period.End),
+				StartDate: formatDatePtr(l.Period.Start),
+				EndDate:   formatDatePtr(l.Period.End),
 			}
 			// BT-8: VAT point date code, same invoice-wide value as the header.
 			if context.Is(ContextPeppolFranceExtended) && inv.Tax != nil {
@@ -125,8 +123,8 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			roundingAmount := l.Total.Add(taxAmount)
 			invLine.TaxTotal = []TaxTotal{
 				{
-					TaxAmount:      Amount{Value: taxAmount.String(), CurrencyID: &ccy},
-					RoundingAmount: &Amount{Value: roundingAmount.String(), CurrencyID: &ccy},
+					TaxAmount:      newAmount(taxAmount, ccy),
+					RoundingAmount: newAmountPtr(roundingAmount, ccy),
 				},
 			}
 		}
@@ -248,11 +246,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			invLine.Item = it
 
 			if l.Item.Price != nil {
+				// BT-146: the item net price may carry more decimals than
+				// the currency, so it is written out as GOBL holds it.
 				invLine.Price = &Price{
-					PriceAmount: Amount{
-						CurrencyID: &ccy,
-						Value:      l.Item.Price.String(),
-					},
+					PriceAmount: newUnitAmount(*l.Item.Price, ccy),
 				}
 			}
 
@@ -278,16 +275,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 	}
 }
 
-// rescaleToCurrency rounds the amount to the natural precision of the given
-// currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
-// existing precision if the currency code is unknown.
-func rescaleToCurrency(a num.Amount, ccy string) string {
-	if def := currency.Code(ccy).Def(); def != nil {
-		return def.Rescale(a).String()
-	}
-	return a.String()
-}
-
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
 	var allowanceCharges []*AllowanceCharge
 	// BR-DEC-24 / UBL-DT-01: line allowance and charge amounts (BT-136/BT-141)
@@ -296,18 +283,12 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	// strips VAT from prices_include invoices — so round here at the boundary.
 	var base *Amount
 	if baseSum != nil {
-		base = &Amount{
-			Value:      rescaleToCurrency(*baseSum, ccy),
-			CurrencyID: &ccy,
-		}
+		base = newAmountPtr(*baseSum, ccy)
 	}
 	for _, ch := range charges {
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
-			Amount: Amount{
-				Value:      rescaleToCurrency(ch.Amount, ccy),
-				CurrencyID: &ccy,
-			},
+			Amount:          newAmount(ch.Amount, ccy),
 		}
 		if e := ch.Ext.Get(untdid.ExtKeyCharge).String(); e != "" {
 			ac.AllowanceChargeReasonCode = &e
@@ -327,10 +308,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	for _, d := range discounts {
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
-			Amount: Amount{
-				Value:      rescaleToCurrency(d.Amount, ccy),
-				CurrencyID: &ccy,
-			},
+			Amount:          newAmount(d.Amount, ccy),
 		}
 		if e := d.Ext.Get(untdid.ExtKeyAllowance).String(); e != "" {
 			ac.AllowanceChargeReasonCode = &e

@@ -25,7 +25,7 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 					return err
 				}
 				d.Date = &start
-				d.Period = &cal.Period{Start: start, End: end}
+				d.Period = &cal.Period{Start: &start, End: &end}
 			} else if del.ActualDeliveryDate != nil {
 				deliveryDate, err := parseDate(*del.ActualDeliveryDate)
 				if err != nil {
