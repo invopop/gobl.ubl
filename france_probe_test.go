@@ -66,10 +66,7 @@ func TestProbeFranceInvoices(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Bytes: %v", err)
 			}
-			problems, err := phormValidate(t, pc, vesid, data)
-			if err != nil {
-				t.Fatalf("phorm: %v", err)
-			}
+			problems := phormValidate(t, pc, vesid, data)
 			lines := make([]string, 0, len(problems))
 			for _, f := range problems {
 				lines = append(lines, f.String())

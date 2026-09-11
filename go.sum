@@ -33,8 +33,8 @@ github.com/invopop/gobl.sa.zatca v0.0.2 h1:qU2Y0LP+4mjvZkuG1TOUp/Zs0XxRAzkzQFHy3
 github.com/invopop/gobl.sa.zatca v0.0.2/go.mod h1:tmLCoaKb4X7sZ2zRU8LalA1sgxM2kQv/uqMzZslhE6A=
 github.com/invopop/jsonschema v0.14.0 h1:MHQqLhvpNUZfw+hM3AZDYK7jxO8FZoQeQM77g8iyZjg=
 github.com/invopop/jsonschema v0.14.0/go.mod h1:ygm6C2EaVNMBDPpaPlnOA2pFAxBnxGjFlMZABxm9n2I=
-github.com/invopop/phorm v0.1.4 h1:wRzXtNnBHqyfC6qLd4de6YNDouWDa4+HYKzYdge9660=
-github.com/invopop/phorm v0.1.4/go.mod h1:7GJMH9RwreocY9NX36ZnhmMcS/qE/NY4+Ro+YFdFHR8=
+github.com/invopop/phorm v0.1.5 h1:qzhDJgo1YaRFTRknD58cLbuTp5UAV/PhQTD9FFK0LIM=
+github.com/invopop/phorm v0.1.5/go.mod h1:7GJMH9RwreocY9NX36ZnhmMcS/qE/NY4+Ro+YFdFHR8=
 github.com/invopop/validation v0.8.0 h1:e5hXHGnONHImgJdonIpNbctg1hlWy1ncaHoVIQ0JWuw=
 github.com/invopop/validation v0.8.0/go.mod h1:nLLeXYPGwUNfdCdJo7/q3yaHO62LSx/3ri7JvgKR9vg=
 github.com/invopop/xmlctx v0.13.0 h1:ZNRMC0O/A5h8InoLVSA7tIjjrhJn/NDBYfByBUpSb+g=

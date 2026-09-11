@@ -1,12 +1,7 @@
 package ubl_test
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -30,20 +25,6 @@ const (
 	phormTokenEnv = "PHORM_TOKEN"
 )
 
-func phormURL() string {
-	if url := os.Getenv(phormURLEnv); url != "" {
-		return strings.TrimRight(url, "/")
-	}
-	return defaultPhormURL
-}
-
-func phormToken() string {
-	if token := os.Getenv(phormTokenEnv); token != "" {
-		return token
-	}
-	return phorm.DefaultToken
-}
-
 // phormClient returns a client for the validation service, skipping the test
 // when -validate was not requested. An empty token makes phorm fall back to its
 // stock development token.
@@ -53,7 +34,12 @@ func phormClient(t *testing.T) *phorm.Client {
 	if !*validate {
 		t.Skip("schematron validation not requested (use -validate)")
 	}
-	return phorm.New(phormURL(), os.Getenv(phormTokenEnv))
+
+	url := os.Getenv(phormURLEnv)
+	if url == "" {
+		url = defaultPhormURL
+	}
+	return phorm.New(url, os.Getenv(phormTokenEnv))
 }
 
 // finding is a single schematron error or warning.
@@ -66,7 +52,8 @@ type finding struct {
 
 func (f finding) String() string {
 	out := f.Level + ": " + f.Text
-	if f.Rule != "" {
+	// Most rule sets already open the message with the rule id.
+	if f.Rule != "" && !strings.Contains(f.Text, f.Rule) {
 		out += " [" + f.Rule + "]"
 	}
 	if f.Field != "" {
@@ -80,13 +67,10 @@ func (f finding) String() string {
 func validateXML(t *testing.T, pc *phorm.Client, vesid string, data []byte) {
 	t.Helper()
 
-	problems, err := phormValidate(t, pc, vesid, data)
-	require.NoError(t, err)
-
 	var errs []string
-	for _, p := range problems {
-		if p.Level == "ERROR" || p.Level == "FATAL_ERROR" {
-			errs = append(errs, p.String())
+	for _, f := range phormValidate(t, pc, vesid, data) {
+		if f.Level != "WARN" {
+			errs = append(errs, f.String())
 		}
 	}
 	if len(errs) > 0 {
@@ -95,97 +79,26 @@ func validateXML(t *testing.T, pc *phorm.Client, vesid string, data []byte) {
 }
 
 // phormValidate validates the document and returns every finding, errors and
-// warnings alike.
-//
-// phorm answers a failed validation with HTTP 400, and its Go client turns any
-// non-2xx status into an error after truncating the body, so a document that
-// breaks a rule arrives as a transport error with the findings cut out of it.
-// The report is therefore read straight off the HTTP API when the client
-// reports an error, and only a response that is not a validation report at all
-// is surfaced as a genuine failure.
-func phormValidate(t *testing.T, pc *phorm.Client, vesid string, data []byte) ([]finding, error) {
+// warnings alike. A document that simply breaks a rule is reported through the
+// response; an error means the validation never ran at all, which is fatal to
+// the test since nothing was checked.
+func phormValidate(t *testing.T, pc *phorm.Client, vesid string, data []byte) []finding {
 	t.Helper()
 
-	resp, clientErr := pc.ValidateXml(context.Background(), &phorm.ValidateXmlRequest{
+	resp, err := pc.ValidateXml(context.Background(), &phorm.ValidateXmlRequest{
 		Vesid:      vesid,
 		XmlContent: data,
 	})
-	if clientErr == nil {
-		var out []finding
-		for _, r := range resp.Results {
-			for _, e := range r.Errors {
-				out = append(out, finding{Level: "ERROR", Rule: e.TestId, Text: e.Message, Field: e.Xpath})
-			}
-			for _, w := range r.Warnings {
-				out = append(out, finding{Level: "WARN", Rule: w.TestId, Text: w.Message, Field: w.Xpath})
-			}
-		}
-		return out, nil
-	}
-
-	return phormReport(vesid, data)
-}
-
-// phormReport posts the document to phorm and decodes the validation report
-// whatever status code it comes back with.
-func phormReport(vesid string, data []byte) ([]finding, error) {
-	url := phormURL() + "/api/validate/" + vesid
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(data))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/xml")
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("X-Token", phormToken())
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("phorm unreachable at %s: %w", phormURL(), err)
-	}
-	defer res.Body.Close() //nolint:errcheck
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var report struct {
-		Results []struct {
-			Items []struct {
-				ErrorLevel     string `json:"errorLevel"`
-				ErrorText      string `json:"errorText"`
-				ErrorFieldName string `json:"errorFieldName"`
-				Test           string `json:"test"`
-			} `json:"items"`
-		} `json:"results"`
-	}
-	if err := json.Unmarshal(body, &report); err != nil {
-		return nil, fmt.Errorf("phorm returned %s for %s, not a validation report: %s",
-			res.Status, vesid, truncate(body))
-	}
-	if len(report.Results) == 0 {
-		return nil, fmt.Errorf("phorm returned %s for %s with no results: %s",
-			res.Status, vesid, truncate(body))
-	}
+	require.NoError(t, err, "validation did not run for %s", vesid)
 
 	var out []finding
-	for _, r := range report.Results {
-		for _, it := range r.Items {
-			out = append(out, finding{
-				Level: it.ErrorLevel,
-				Rule:  it.Test,
-				Text:  it.ErrorText,
-				Field: it.ErrorFieldName,
-			})
+	for _, r := range resp.Results {
+		for _, e := range r.Errors {
+			out = append(out, finding{Level: e.Level, Rule: e.ErrorID, Text: e.Message, Field: e.Xpath})
+		}
+		for _, w := range r.Warnings {
+			out = append(out, finding{Level: "WARN", Rule: w.ErrorID, Text: w.Message, Field: w.Xpath})
 		}
 	}
-	return out, nil
-}
-
-func truncate(b []byte) string {
-	const limit = 400
-	if len(b) <= limit {
-		return string(b)
-	}
-	return string(b[:limit]) + "…"
+	return out
 }

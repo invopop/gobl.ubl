@@ -197,12 +197,13 @@ fail:
 
 #### Notes
 
-- **A failed validation arrives as an HTTP 400**, not as a `success: false`
-  body, and the `invopop/phorm` client discards the response body on any
-  non-2xx status after truncating it to 512 bytes. Reading `resp.Success` alone
-  would therefore never see a failure, and the findings would be cut out of the
-  error. `phormValidate` in `phorm_test.go` re-reads the report straight off the
-  HTTP API in that case so the actual rule violations are reported.
+- **A failed validation is not an error.** phorm answers a document that breaks
+  a rule with an HTTP 400 carrying the report, which it also uses for a request
+  it rejects outright, so `invopop/phorm` separates the two by whether the body
+  is a validation report (fixed in v0.1.5). An error from `ValidateXml`
+  therefore means the validation never ran — unreachable service, rejected
+  token, unresolvable VESID, or a body that is not XML — and the tests treat it
+  as fatal, since nothing was checked.
 - **phorm normalises VESID versions**, so the `fr.ctc:ubl-invoice:1.4.0-03`
   spelling in `context.go` resolves to its published `fr.ctc:ubl-invoice:1.4-03`
   rule set. The resolved id comes back as `ves.vesid`, which is worth checking
