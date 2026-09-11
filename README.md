@@ -138,6 +138,80 @@ The library uses testify for testing. To run the tests, you can use the followin
 go test ./...
 ```
 
+### Schematron validation
+
+Beyond the golden-file comparisons, the generated XML can be pushed through the
+real EN 16931 / Peppol / XRechnung / French CTC / ZATCA schematron rule sets.
+Validation runs against [phorm](https://github.com/phax/phorm), the standalone
+validation service that replaced the now-archived `invopop/phive` gRPC wrapper,
+using the [`invopop/phorm`](https://github.com/invopop/phorm) HTTP client.
+
+Start a service locally:
+
+```bash
+docker run -d --name phorm -p 8080:8080 phelger/phorm
+```
+
+Use `phelger/phorm-arm64` on Apple Silicon. Note the image is `phelger/phorm`,
+**not** `phax/phorm` — the latter does not exist, despite what the
+`invopop/phorm` README says.
+
+It takes a few seconds to boot. It is ready once this returns HTTP 200:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H 'X-Token: phorm-dev-token' \
+  'http://localhost:8080/api/get/vesids?include-deprecated=true'
+```
+
+Then run the suite with `-validate`:
+
+```bash
+go test ./... -validate
+```
+
+Without `-validate` the validating tests are skipped, so the plain `go test
+./...` never needs a service and CI stays offline.
+
+#### Pointing somewhere else
+
+`PHORM_URL` and `PHORM_TOKEN` default to `http://localhost:8080` and phorm's
+stock development token. Override them for a shared instance, or when port 8080
+is already taken locally:
+
+```bash
+docker run -d --name phorm -p 8085:8080 phelger/phorm
+PHORM_URL=http://localhost:8085 go test ./... -validate
+```
+
+#### Known failures
+
+These fixtures do not currently pass schematron. They are long-standing gaps in
+the conversion rather than regressions, so a run is "clean" when only these
+fail:
+
+| Rule | Fixtures | Cause |
+| --- | --- | --- |
+| `BR-KSA-33` | all `zatca/` invoices | The invoice counter value (KSA-16) is never emitted: ZATCA needs an `ICV` `cac:AdditionalDocumentReference`. |
+| `PEPPOL-EN16931-R061` | `peppol/invoice-prices-include-vat.json` | The fixture pays by SEPA direct debit but carries no mandate reference (BT-89). |
+
+#### Notes
+
+- **A failed validation arrives as an HTTP 400**, not as a `success: false`
+  body, and the `invopop/phorm` client discards the response body on any
+  non-2xx status after truncating it to 512 bytes. Reading `resp.Success` alone
+  would therefore never see a failure, and the findings would be cut out of the
+  error. `phormValidate` in `phorm_test.go` re-reads the report straight off the
+  HTTP API in that case so the actual rule violations are reported.
+- **phorm normalises VESID versions**, so the `fr.ctc:ubl-invoice:1.4.0-03`
+  spelling in `context.go` resolves to its published `fr.ctc:ubl-invoice:1.4-03`
+  rule set. The resolved id comes back as `ves.vesid`, which is worth checking
+  when a rule set behaves unexpectedly.
+- **phive-rules keeps only a rolling window of releases.** VESIDs that pass
+  today are dropped a few releases later, so `context.go` needs periodic
+  updating; `GET /api/get/vesids?include-deprecated=true` lists what a given
+  phorm build actually carries, along with a `deprecated` flag.
+
 ## Considerations
 
 There are certain assumptions and lost information in the conversion from UBL to GOBL that should be considered:

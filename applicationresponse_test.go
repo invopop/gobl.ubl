@@ -1,8 +1,6 @@
 package ubl_test
 
 import (
-	"context"
-	"encoding/json"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -11,11 +9,8 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/phive"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const sampleApplicationResponse = `<?xml version="1.0" encoding="UTF-8"?>
@@ -135,13 +130,7 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 }
 
 func TestConvertPeppolInvoiceResponseValidate(t *testing.T) {
-	if !*validate {
-		t.Skip("phive validation not requested (use -validate)")
-	}
-	conn, err := grpc.NewClient("127.0.0.1:9091", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	require.NoError(t, err)
-	defer conn.Close() //nolint:errcheck
-	pc := phive.NewValidationServiceClient(conn)
+	pc := phormClient(t)
 
 	st := &bill.Status{
 		Type:      bill.StatusTypeResponse,
@@ -166,12 +155,7 @@ func TestConvertPeppolInvoiceResponseValidate(t *testing.T) {
 	data, err := ubl.Bytes(doc)
 	require.NoError(t, err)
 
-	vesid := ubl.ContextPeppolInvoiceResponse.VESIDs.Status
-	resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{Vesid: vesid, XmlContent: data})
-	require.NoError(t, err)
-	results, err := json.MarshalIndent(resp.Results, "", "  ")
-	require.NoError(t, err)
-	require.True(t, resp.Success, "Peppol Invoice Response should validate for %s: %s", vesid, string(results))
+	validateXML(t, pc, ubl.ContextPeppolInvoiceResponse.VESIDs.Status, data)
 }
 
 func TestConvertApplicationResponseFansOutLines(t *testing.T) {

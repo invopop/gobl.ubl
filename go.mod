@@ -14,11 +14,10 @@ require (
 	cloud.google.com/go v0.118.0
 	github.com/invopop/gobl.fr.ctc v0.0.7
 	github.com/invopop/gobl.sa.zatca v0.0.2
-	github.com/invopop/phive v0.17.0
+	github.com/invopop/phorm v0.1.4
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0
 	github.com/invopop/xmldsig v0.14.0
-	google.golang.org/grpc v1.79.3
 )
 
 require (
@@ -33,7 +32,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.14.0 // indirect
-	github.com/invopop/tasks v0.1.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
 	github.com/magefile/mage v1.15.0 // indirect
@@ -44,11 +42,7 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	go.yaml.in/yaml/v4 v4.0.0-rc.2 // indirect
 	golang.org/x/crypto v0.53.0 // indirect
-	golang.org/x/net v0.56.0 // indirect
-	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	software.sslmate.com/src/go-pkcs12 v0.7.0 // indirect
 )
