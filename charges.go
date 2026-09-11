@@ -39,12 +39,11 @@ func (ui *Invoice) addCharges(inv *bill.Invoice) {
 }
 
 func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, notes []*tax.Note) AllowanceCharge {
+	// BT-99/BT-100: the document level charge amount and its base, capped at
+	// the currency's precision by BR-DEC-05 and BR-DEC-06.
 	c := AllowanceCharge{
 		ChargeIndicator: true,
-		Amount: Amount{
-			Value:      ch.Amount.String(),
-			CurrencyID: &ccy,
-		},
+		Amount:          newAmount(ch.Amount, ccy),
 	}
 	if ch.Reason != "" {
 		c.AllowanceChargeReason = &ch.Reason
@@ -57,10 +56,7 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, notes []*tax
 		p := ch.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
 		// Add BaseAmount when percentage is provided
-		c.BaseAmount = &Amount{
-			Value:      baseAmount.String(),
-			CurrencyID: &ccy,
-		}
+		c.BaseAmount = newAmountPtr(baseAmount, ccy)
 	}
 	if ch.Taxes != nil {
 		c.TaxCategory = makeTaxCategory(ch.Taxes, notes)
@@ -70,12 +66,11 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, notes []*tax
 }
 
 func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, notes []*tax.Note) AllowanceCharge {
+	// BT-92/BT-93: the document level allowance amount and its base, capped
+	// at the currency's precision by BR-DEC-01 and BR-DEC-02.
 	c := AllowanceCharge{
 		ChargeIndicator: false,
-		Amount: Amount{
-			Value:      d.Amount.String(),
-			CurrencyID: &ccy,
-		},
+		Amount:          newAmount(d.Amount, ccy),
 	}
 	if d.Reason != "" {
 		c.AllowanceChargeReason = &d.Reason
@@ -88,10 +83,7 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, notes []*
 		p := d.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
 		// Add BaseAmount when percentage is provided
-		c.BaseAmount = &Amount{
-			Value:      baseAmount.String(),
-			CurrencyID: &ccy,
-		}
+		c.BaseAmount = newAmountPtr(baseAmount, ccy)
 	}
 	if d.Taxes != nil {
 		c.TaxCategory = makeTaxCategory(d.Taxes, notes)

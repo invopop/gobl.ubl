@@ -97,8 +97,8 @@ func TestInvoiceHeaders(t *testing.T) {
 
 		inv.Tax.Point = tax.PointDelivery
 		inv.Lines[0].Period = &cal.Period{
-			Start: cal.MakeDate(2024, 1, 1),
-			End:   cal.MakeDate(2024, 1, 31),
+			Start: cal.NewDate(2024, 1, 1),
+			End:   cal.NewDate(2024, 1, 31),
 		}
 
 		out, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))

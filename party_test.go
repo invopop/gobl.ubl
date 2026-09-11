@@ -149,3 +149,72 @@ type PartyTaxSchemeView struct {
 	Scheme string
 	Code   string
 }
+
+// TestNewPartyEndpointID covers BT-34 / BT-49, the party's electronic address.
+// GOBL v0.505 moved it to org.Endpoint and deprecated org.Inbox, so both models
+// have to be read: Peppol rejects a party without an address (BR-62, BR-63).
+func TestNewPartyEndpointID(t *testing.T) {
+	convert := func(t *testing.T, apply func(inv *bill.Invoice)) *ubl.Invoice {
+		t.Helper()
+		env := loadTestEnvelope(t, "peppol/invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		apply(inv)
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		require.NoError(t, err)
+		return doc
+	}
+
+	t.Run("endpoints only", func(t *testing.T) {
+		doc := convert(t, func(inv *bill.Invoice) {
+			inv.Supplier.Inboxes = nil
+			inv.Supplier.Endpoints = []*org.Endpoint{
+				{URI: "iso6523-actorid-upis::9930:111111125"},
+			}
+		})
+
+		eid := doc.AccountingSupplierParty.Party.EndpointID
+		require.NotNil(t, eid)
+		assert.Equal(t, "9930", eid.SchemeID)
+		assert.Equal(t, "111111125", eid.Value)
+	})
+
+	t.Run("mailto endpoint", func(t *testing.T) {
+		doc := convert(t, func(inv *bill.Invoice) {
+			inv.Supplier.Inboxes = nil
+			inv.Supplier.Endpoints = []*org.Endpoint{
+				{URI: "mailto:billing@example.com"},
+			}
+		})
+
+		eid := doc.AccountingSupplierParty.Party.EndpointID
+		require.NotNil(t, eid)
+		assert.Equal(t, ubl.SchemeIDEmail, eid.SchemeID)
+		assert.Equal(t, "billing@example.com", eid.Value)
+	})
+
+	t.Run("deprecated inboxes only", func(t *testing.T) {
+		doc := convert(t, func(inv *bill.Invoice) {
+			inv.Supplier.Endpoints = nil
+			inv.Supplier.Inboxes = []*org.Inbox{
+				{Scheme: "0088", Code: "7300010000001"},
+			}
+		})
+
+		eid := doc.AccountingSupplierParty.Party.EndpointID
+		require.NotNil(t, eid)
+		assert.Equal(t, "0088", eid.SchemeID)
+		assert.Equal(t, "7300010000001", eid.Value)
+	})
+
+	t.Run("no electronic address", func(t *testing.T) {
+		doc := convert(t, func(inv *bill.Invoice) {
+			inv.Supplier.Endpoints = nil
+			inv.Supplier.Inboxes = nil
+		})
+
+		assert.Nil(t, doc.AccountingSupplierParty.Party.EndpointID)
+	})
+}

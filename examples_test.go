@@ -2,7 +2,6 @@ package ubl_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"flag"
 	"io"
@@ -15,11 +14,9 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
-	"github.com/invopop/phive"
+	"github.com/invopop/phorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -32,21 +29,15 @@ const (
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
-// validate is a flag that enables Phive validation
-var validate = flag.Bool("validate", false, "Run Phive validation on generated XML")
+// validate is a flag that enables schematron validation against phorm
+var validate = flag.Bool("validate", false, "Run phorm schematron validation on generated XML")
 
 func TestConvertToInvoice(t *testing.T) {
-	var pc phive.ValidationServiceClient
+	var pc *phorm.Client
 
-	// Only connect to Phive if validation is requested
+	// Only connect to phorm if validation is requested
 	if *validate {
-		conn, err := grpc.NewClient(
-			"127.0.0.1:9090",
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
-		require.NoError(t, err)
-		defer conn.Close() //nolint:errcheck
-		pc = phive.NewValidationServiceClient(conn)
+		pc = phormClient(t)
 	}
 
 	// Define contexts to test
@@ -90,23 +81,15 @@ func TestConvertToInvoice(t *testing.T) {
 						require.NoError(t, err)
 					}
 
-					// Run Phive validation if requested
+					// Run schematron validation if requested
 					if *validate {
 						// Determine VESID based on document type
 						env, err := loadTestEnvelopeFromPath(example)
 						require.NoError(t, err)
 						inv, ok := env.Extract().(*bill.Invoice)
 						require.True(t, ok, "Document should be an invoice")
-						vesid := ctx.context.GetVESID(inv)
 
-						resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-							Vesid:      vesid,
-							XmlContent: data,
-						})
-						require.NoError(t, err)
-						results, err := json.MarshalIndent(resp.Results, "", "  ")
-						require.NoError(t, err)
-						require.True(t, resp.Success, "Generated XML should be valid for %s: %s", vesid, string(results))
+						validateXML(t, pc, ctx.context.GetVESID(inv), data)
 					}
 
 					output, err := os.ReadFile(outPath)

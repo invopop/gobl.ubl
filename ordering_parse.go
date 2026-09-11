@@ -212,14 +212,14 @@ func goblPeriodDates(invoicePeriod *Period) (*cal.Period, error) {
 		if err != nil {
 			return nil, err
 		}
-		period.Start = start
+		period.Start = &start
 	}
 	if invoicePeriod.EndDate != "" {
 		end, err := parseDate(invoicePeriod.EndDate)
 		if err != nil {
 			return nil, err
 		}
-		period.End = end
+		period.End = &end
 	}
 	return period, nil
 }

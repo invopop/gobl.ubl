@@ -16,6 +16,53 @@ import (
 // SchemeIDEmail is the EAS codelist value for email
 const SchemeIDEmail = "EM"
 
+// mailtoScheme is the URI scheme carrying an email address on an org.Endpoint.
+const mailtoScheme = "mailto"
+
+// newEndpointID builds the party's electronic address (BT-34, BT-49).
+//
+// GOBL v0.505 moved the electronic address to org.Endpoint, where the EN 16931
+// addon now validates it, and deprecated org.Inbox. Endpoints are read first,
+// falling back to the inboxes for documents that still only carry those --
+// Peppol requires the address (BR-62, BR-63), so neither model may be missed.
+func newEndpointID(party *org.Party) *EndpointID {
+	if e := party.Endpoint(iso.ActorIDScheme); e != nil {
+		// An ISO 6523 URI reads "iso6523-actorid-upis::<scheme>:<code>",
+		// leaving ":<scheme>:<code>" as the opaque part.
+		scheme, code, ok := strings.Cut(strings.TrimPrefix(e.URI.Opaque(), ":"), ":")
+		if scheme != "" && code != "" && ok {
+			return &EndpointID{
+				SchemeID: scheme,
+				Value:    code,
+			}
+		}
+	}
+	if e := party.Endpoint(mailtoScheme); e != nil {
+		if addr := e.URI.Opaque(); addr != "" {
+			return &EndpointID{
+				SchemeID: SchemeIDEmail,
+				Value:    addr,
+			}
+		}
+	}
+
+	for _, ib := range party.Inboxes {
+		if ib.Email != "" {
+			return &EndpointID{
+				SchemeID: SchemeIDEmail,
+				Value:    ib.Email,
+			}
+		}
+		if ib.Scheme != "" {
+			return &EndpointID{
+				SchemeID: ib.Scheme.String(),
+				Value:    ib.Code.String(),
+			}
+		}
+	}
+	return nil
+}
+
 // TaxSchemeVAT is the tax scheme code for VAT
 const TaxSchemeVAT = "VAT"
 
@@ -216,20 +263,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		p.Contact = contact
 	}
 
-	if len(party.Inboxes) > 0 {
-		ib := party.Inboxes[0]
-		if ib.Email != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: SchemeIDEmail,
-				Value:    ib.Email,
-			}
-		} else if ib.Scheme != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: ib.Scheme.String(),
-				Value:    ib.Code.String(),
-			}
-		}
-	}
+	p.EndpointID = newEndpointID(party)
 
 	if party.Alias != "" {
 		p.PartyName = &PartyName{

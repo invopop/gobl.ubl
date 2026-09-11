@@ -56,32 +56,35 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 	currency := inv.Currency.String()
 	rCurrency := inv.RegimeDef().GetCurrency().String()
 
+	// BT-106 to BT-115: the document totals, each capped at the currency's
+	// precision by BR-DEC-09 through BR-DEC-18.
 	ui.LegalMonetaryTotal = MonetaryTotal{
-		LineExtensionAmount: Amount{Value: t.Sum.String(), CurrencyID: &currency},
-		TaxExclusiveAmount:  Amount{Value: t.Total.String(), CurrencyID: &currency},
-		TaxInclusiveAmount:  Amount{Value: t.TotalWithTax.String(), CurrencyID: &currency},
-		PayableAmount:       &Amount{Value: t.Payable.String(), CurrencyID: &currency},
+		LineExtensionAmount: newAmount(t.Sum, currency),
+		TaxExclusiveAmount:  newAmount(t.Total, currency),
+		TaxInclusiveAmount:  newAmount(t.TotalWithTax, currency),
+		PayableAmount:       newAmountPtr(t.Payable, currency),
 	}
 
 	if t.Discount != nil {
-		ui.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: t.Discount.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.AllowanceTotalAmount = newAmountPtr(*t.Discount, currency)
 	}
 	if t.Charge != nil {
-		ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: t.Charge.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.ChargeTotalAmount = newAmountPtr(*t.Charge, currency)
 	}
 	if t.Rounding != nil {
-		ui.LegalMonetaryTotal.PayableRoundingAmount = &Amount{Value: t.Rounding.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PayableRoundingAmount = newAmountPtr(*t.Rounding, currency)
 	}
 	if t.Advances != nil {
-		ui.LegalMonetaryTotal.PrepaidAmount = &Amount{Value: t.Advances.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PrepaidAmount = newAmountPtr(*t.Advances, currency)
 	}
 	if t.Due != nil {
-		ui.LegalMonetaryTotal.PayableAmount = &Amount{Value: t.Due.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PayableAmount = newAmountPtr(*t.Due, currency)
 	}
 
+	// BT-110: the total VAT amount, capped by BR-DEC-13.
 	ui.TaxTotal = []TaxTotal{
 		{
-			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
+			TaxAmount: newAmount(t.Tax, currency),
 		},
 	}
 
@@ -90,28 +93,27 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().GetCurrency()); rate != nil {
 			taxInAccCurrency := rate.Convert(t.Tax)
 			accTaxTotal := TaxTotal{
-				TaxAmount: Amount{
-					Value:      taxInAccCurrency.String(),
-					CurrencyID: &rCurrency,
-				},
+				TaxAmount: newAmount(taxInAccCurrency, rCurrency),
 			}
 			ui.TaxTotal = append(ui.TaxTotal, accTaxTotal)
 		}
 	} else if ctx.Is(ContextZATCA) {
 		// BR-KSA-EN16931-09
 		ui.TaxTotal = append(ui.TaxTotal, TaxTotal{
-			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
+			TaxAmount: newAmount(t.Tax, currency),
 		})
 	}
 
 	if t.Taxes != nil && len(t.Taxes.Categories) > 0 {
 		for _, cat := range t.Taxes.Categories {
 			for _, r := range cat.Rates {
+				// BT-116/BT-117: the taxable base and tax amount per
+				// category, capped by BR-DEC-19 and BR-DEC-20.
 				subtotal := TaxSubtotal{
-					TaxAmount: Amount{Value: r.Amount.String(), CurrencyID: &currency},
+					TaxAmount: newAmount(r.Amount, currency),
 				}
 				if r.Base != (num.Amount{}) {
-					subtotal.TaxableAmount = Amount{Value: r.Base.String(), CurrencyID: &currency}
+					subtotal.TaxableAmount = newAmount(r.Base, currency)
 				}
 				taxCat := TaxCategory{}
 

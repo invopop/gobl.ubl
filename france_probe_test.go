@@ -1,16 +1,12 @@
 package ubl_test
 
 import (
-	"context"
 	"path/filepath"
 	"strings"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/phive"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 // franceProbe pins one Flow 2 invoice/credit-note fixture to the context
@@ -45,20 +41,10 @@ var franceProbes = []franceProbe{
 }
 
 // TestProbeFranceInvoices converts each Flow 2 fixture and pushes the
-// generated UBL through phive against the per-document-type French VESID,
+// generated UBL through phorm against the per-document-type French VESID,
 // failing on any error or warning.
 func TestProbeFranceInvoices(t *testing.T) {
-	if !*validate {
-		t.Skip("requires -validate and a running Phive gRPC service")
-	}
-
-	conn, err := grpc.NewClient("127.0.0.1:9091",
-		grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { _ = conn.Close() })
-	pc := phive.NewValidationServiceClient(conn)
+	pc := phormClient(t)
 
 	for _, p := range franceProbes {
 		t.Run(p.name, func(t *testing.T) {
@@ -80,25 +66,14 @@ func TestProbeFranceInvoices(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Bytes: %v", err)
 			}
-			resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-				Vesid:      vesid,
-				XmlContent: data,
-			})
-			if err != nil {
-				t.Fatalf("phive: %v", err)
-			}
-			var problems []string
-			for _, r := range resp.Results {
-				for _, e := range r.Errors {
-					problems = append(problems, "ERROR: "+e.Message)
-				}
-				for _, w := range r.Warnings {
-					problems = append(problems, "WARN:  "+w.Message)
-				}
+			problems := phormValidate(t, pc, vesid, data)
+			lines := make([]string, 0, len(problems))
+			for _, f := range problems {
+				lines = append(lines, f.String())
 			}
 			if len(problems) > 0 {
 				t.Errorf("[%s] %s: %d problem(s) (warnings are treated as errors):\n%s",
-					p.name, vesid, len(problems), strings.Join(problems, "\n\n"))
+					p.name, vesid, len(lines), strings.Join(lines, "\n\n"))
 			}
 		})
 	}
