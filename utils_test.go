@@ -4,8 +4,10 @@ import (
 	"testing"
 
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 )
@@ -138,26 +140,43 @@ func TestTagCodeParseZATCA(t *testing.T) {
 	}
 }
 
-// Define tests for the UnitFromUNECE function
-func TestUnitFromUNECE(t *testing.T) {
+// Define tests for the unit helpers
+func TestUnits(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		expected string
+		name  string
+		input string
+		unit  cbc.Key
+		code  cbc.Code
 	}{
-		{"Known UNECE code", "HUR", "h"},
-		{"Known UNECE code", "SEC", "s"},
-		{"Known UNECE code", "MTR", "m"},
-		{"Known UNECE code", "GRM", "g"},
-		{"Unknown UNECE code", "XYZ", "XYZ"},
+		{"Known UNTDID code", "HUR", "h", "HUR"},
+		{"Known UNTDID code", "SEC", "s", "SEC"},
+		{"Known UNTDID code", "MTR", "m", "MTR"},
+		{"Known UNTDID code", "GRM", "g", "GRM"},
+		{"Unknown UNTDID code", "XYZ", "", "XYZ"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := goblUnitFromUNECE(cbc.Code(tt.input))
-			assert.Equal(t, tt.expected, string(result))
+			ext, unit := goblUnit(tax.Extensions{}, cbc.Code(tt.input))
+			assert.Equal(t, tt.unit, unit)
+			assert.Equal(t, tt.code, ext.Get(untdid.ExtKeyUnit))
+			assert.Equal(t, tt.code, untdidUnit(ext, unit))
 		})
 	}
+
+	t.Run("without extension", func(t *testing.T) {
+		assert.Equal(t, cbc.Code("HUR"), untdidUnit(tax.Extensions{}, org.UnitHour))
+	})
+
+	t.Run("unit without UNTDID mapping", func(t *testing.T) {
+		assert.Equal(t, cbc.CodeEmpty, untdidUnit(tax.Extensions{}, org.UnitPortion))
+	})
+
+	t.Run("labels", func(t *testing.T) {
+		assert.Equal(t, "kg", unitLabel(org.UnitKilogram, "KGM"))
+		assert.Equal(t, "XYZ", unitLabel(cbc.KeyEmpty, "XYZ"))
+		assert.Equal(t, "", unitLabel(cbc.KeyEmpty, cbc.CodeEmpty))
+	})
 }
 
 // Define tests for the FormatKey function

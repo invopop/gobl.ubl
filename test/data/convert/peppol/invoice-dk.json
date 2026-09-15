@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "dd732440a514f0007fc0c730ff6709e1cbaed47e5b830a4564bf20319b913c04"
+			"val": "d1bc441ff5c59664608c5e7910de922e372160e7f77bb0ae7cfe692f324e4747"
 		},
 		"from": "iso6523-actorid-upis::0184:10000009",
 		"to": "iso6523-actorid-upis::0088:5790000000005"
@@ -123,7 +123,10 @@
 					"key": "services",
 					"name": "double room",
 					"price": "88.00",
-					"unit": "service"
+					"unit": "service",
+					"ext": {
+						"untdid-unit": "E48"
+					}
 				},
 				"sum": "88.00",
 				"taxes": [

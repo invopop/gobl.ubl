@@ -180,7 +180,75 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	assert.Equal(t, "Weight", outInv.Lines[0].Item.Attributes[1].Label)
 	require.NotNil(t, outInv.Lines[0].Item.Attributes[1].Amount)
 	assert.Equal(t, "2.5", outInv.Lines[0].Item.Attributes[1].Amount.String())
-	assert.Equal(t, org.Unit("kg"), outInv.Lines[0].Item.Attributes[1].Unit)
+	assert.Equal(t, cbc.Key("kg"), outInv.Lines[0].Item.Attributes[1].Unit)
+	assert.Equal(t, cbc.Code("KGM"), outInv.Lines[0].Item.Attributes[1].Ext.Get(untdid.ExtKeyUnit))
+}
+
+// TestItemAttributeUnmappedUnitRoundTrip covers a UNTDID unit code that GOBL
+// has no key for, which is preserved in the attribute's extensions.
+func TestItemAttributeUnmappedUnitRoundTrip(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	length := num.MakeAmount(25, 1) // 2.5
+	inv.Lines[0].Item.Attributes = []*org.Attribute{
+		{
+			Label:  "Length",
+			Amount: &length,
+			Ext:    tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyUnit: "X4G"}),
+		},
+	}
+	require.NoError(t, env.Calculate())
+
+	doc, err := ubl.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	props := *doc.InvoiceLines[0].Item.AdditionalItemProperty
+	require.Len(t, props, 1)
+	// With no GOBL key the raw code stands in as the presentation label.
+	assert.Equal(t, "2.5 X4G", props[0].Value)
+	require.NotNil(t, props[0].ValueQuantity)
+	assert.Equal(t, "X4G", props[0].ValueQuantity.UnitCode)
+
+	data, err := ubl.Bytes(doc)
+	require.NoError(t, err)
+
+	parsed, err := ubl.Parse(data)
+	require.NoError(t, err)
+	out, ok := parsed.(*ubl.Invoice)
+	require.True(t, ok)
+	outEnv, err := out.Convert()
+	require.NoError(t, err)
+	outInv, ok := outEnv.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	require.Len(t, outInv.Lines[0].Item.Attributes, 1)
+	attr := outInv.Lines[0].Item.Attributes[0]
+	assert.Equal(t, cbc.KeyEmpty, attr.Unit)
+	assert.Equal(t, cbc.Code("X4G"), attr.Ext.Get(untdid.ExtKeyUnit))
+}
+
+// TestItemAttributeUnitWithoutUNTDID covers a GOBL unit that has no UNTDID
+// equivalent, where a UBL quantity cannot be built.
+func TestItemAttributeUnitWithoutUNTDID(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	size := num.MakeAmount(25, 1) // 2.5
+	inv.Lines[0].Item.Attributes = []*org.Attribute{
+		{Label: "Serving", Amount: &size, Unit: org.UnitPortion},
+	}
+	require.NoError(t, env.Calculate())
+
+	doc, err := ubl.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	props := *doc.InvoiceLines[0].Item.AdditionalItemProperty
+	require.Len(t, props, 1)
+	assert.Equal(t, "2.5 portion", props[0].Value)
+	assert.Nil(t, props[0].ValueQuantity)
 }
 
 func TestLineSellerRoundTrip(t *testing.T) {

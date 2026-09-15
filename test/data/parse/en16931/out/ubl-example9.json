@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "357a791fd0cccbf9c892c69fc59f1910ed3eb62cba3ff025a3d4ce398bf4dc5c"
+			"val": "c4d97991f0170806a625f99c1846d39c3758526b68709e9b88ea5ea90084b6a5"
 		}
 	},
 	"doc": {
@@ -79,7 +79,10 @@
 						}
 					],
 					"price": "49.00",
-					"unit": "mon"
+					"unit": "mon",
+					"ext": {
+						"untdid-unit": "MON"
+					}
 				},
 				"sum": "147.00",
 				"taxes": [

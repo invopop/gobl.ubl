@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "00ecd2d389ed871616dbbe2a016072fa98c03ecd2f6dab6822e8bbe40b7a9b78"
+			"val": "6ba9a0b037062f1bf4708729f93826d5caacb151b1c6ec8987cf11bb56807567"
 		},
 		"from": "iso6523-actorid-upis::0208:0123456749",
 		"to": "iso6523-actorid-upis::0208:0987654394"
@@ -105,7 +105,10 @@
 					"name": "Theft Coverage Subscription",
 					"currency": "EUR",
 					"price": "9.90",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "9.90",
 				"discounts": [
@@ -138,7 +141,10 @@
 					"name": "Power Plus Subscription",
 					"currency": "EUR",
 					"price": "74.90",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "74.90",
 				"discounts": [
@@ -193,7 +199,7 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "57.61",
+								"base": "57.60",
 								"percent": "21.0%",
 								"amount": "12.10"
 							}

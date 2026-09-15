@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e2edf8eed651f4ad30ce06df45deb1a124fb60b6884b2b1cd462598c56a9dd00"
+			"val": "af6da38f3ee1a6fc262eeed829e3f34106558d6911c63ca470493ebfd82dc73d"
 		},
 		"from": "iso6523-actorid-upis::9930:111111125",
 		"to": "iso6523-actorid-upis::9930:282741168"
@@ -112,7 +112,10 @@
 				"item": {
 					"name": "Software Development",
 					"price": "150.00",
-					"unit": "h"
+					"unit": "h",
+					"ext": {
+						"untdid-unit": "HUR"
+					}
 				},
 				"sum": "1500.00",
 				"taxes": [
@@ -133,7 +136,10 @@
 				"item": {
 					"name": "Code Review",
 					"price": "200.00",
-					"unit": "h"
+					"unit": "h",
+					"ext": {
+						"untdid-unit": "HUR"
+					}
 				},
 				"sum": "1000.00",
 				"discounts": [
@@ -161,7 +167,10 @@
 				"item": {
 					"name": "Documentation",
 					"price": "80.00",
-					"unit": "h"
+					"unit": "h",
+					"ext": {
+						"untdid-unit": "HUR"
+					}
 				},
 				"sum": "1600.00",
 				"taxes": [
