@@ -167,10 +167,10 @@ func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
 
 func goblConvertLineItem(di *Item, item *org.Item) error {
 	if di.Name != "" {
-		item.Name = di.Name
+		item.Name = cleanString(di.Name)
 	}
 	if di.Description != nil {
-		item.Description = *di.Description
+		item.Description = cleanString(*di.Description)
 	}
 
 	if di.OriginCountry != nil {
@@ -205,7 +205,7 @@ func goblItemAttribute(property *AdditionalItemProperty) (*org.Attribute, error)
 	if property.Name == "" {
 		return nil, nil
 	}
-	attr := &org.Attribute{Label: property.Name}
+	attr := &org.Attribute{Label: cleanString(property.Name)}
 	switch {
 	case property.ValueQuantity != nil && property.ValueQuantity.Value != "":
 		amount, err := num.AmountFromString(normalizeNumericString(property.ValueQuantity.Value))
@@ -217,7 +217,7 @@ func goblItemAttribute(property *AdditionalItemProperty) (*org.Attribute, error)
 			attr.Unit = goblUnitFromUNECE(cbc.Code(property.ValueQuantity.UnitCode))
 		}
 	case property.Value != "":
-		attr.Text = property.Value
+		attr.Text = cleanString(property.Value)
 	default:
 		return nil, nil
 	}
@@ -314,7 +314,7 @@ func goblIdentity(id *IDType) *org.Identity {
 	}
 	for _, field := range []*string{id.SchemeID, id.ListID, id.ListVersionID, id.SchemeName, id.Name} {
 		if field != nil {
-			identity.Label = *field
+			identity.Label = cleanString(*field)
 			break
 		}
 	}

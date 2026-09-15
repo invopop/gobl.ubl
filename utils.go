@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -12,25 +11,11 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-// replacementCharRef matches the XML character references that decode to
-// U+FFFD. They are plain ASCII in the document, so they survive a byte-level
-// clean and only become the replacement character once the XML is decoded.
-var replacementCharRef = regexp.MustCompile(`&#(?:[xX]0*[fF][fF][fF][dD]|0*65533);`)
-
-// cleanString drops what a sender's broken encoding leaves behind: bytes that
-// are not valid UTF-8, which the XML decoder rejects, and U+FFFD, which gobl's
-// canonical JSON rejects, written literally or as a character reference.
-// Neither is recoverable. Applied to the whole document before decoding, and
-// idempotent.
-//
-// The U+FFFD half is a stopgap for invopop/gobl#975.
+// cleanString strips the Unicode replacement character (U+FFFD) which can
+// appear in badly-encoded XML documents and causes canonical JSON
+// serialization to fail.
 func cleanString(s string) string {
-	s = replacementCharRef.ReplaceAllString(s, "")
-	if utf8.ValidString(s) && !strings.ContainsRune(s, utf8.RuneError) {
-		return s
-	}
-	s = strings.ToValidUTF8(s, "")
-	return strings.ReplaceAll(s, string(utf8.RuneError), "")
+	return strings.ReplaceAll(s, "\uFFFD", "")
 }
 
 // formatKey formats a string to comply with GOBL key requirements.
@@ -62,6 +47,7 @@ var noteCodePattern = regexp.MustCompile(`^#([A-Z0-9]+)#(.*)$`)
 // parseNote converts a raw UBL note string into a GOBL Note. If the string
 // matches the #CODE#text format the code is stored as the untdid text-subject ext.
 func parseNote(text string) *org.Note {
+	text = cleanString(text)
 	if m := noteCodePattern.FindStringSubmatch(text); m != nil {
 		return &org.Note{
 			Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: cbc.Code(m[1])}),

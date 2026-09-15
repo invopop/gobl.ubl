@@ -17,7 +17,7 @@ func goblParty(party *Party, o *options) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
-		p.Name = *party.PartyLegalEntity.RegistrationName
+		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
 	}
 
 	if eID := party.EndpointID; eID != nil {
@@ -34,10 +34,10 @@ func goblParty(party *Party, o *options) *org.Party {
 
 	if party.PartyName != nil {
 		if p.Name == "" {
-			p.Name = party.PartyName.Name
+			p.Name = cleanString(party.PartyName.Name)
 		} else if party.PartyName.Name != p.Name {
 			// Only set alias if it's different from the name
-			p.Alias = party.PartyName.Name
+			p.Alias = cleanString(party.PartyName.Name)
 		}
 	}
 
@@ -45,7 +45,7 @@ func goblParty(party *Party, o *options) *org.Party {
 		p.People = []*org.Person{
 			{
 				Name: &org.Name{
-					Given: *party.Contact.Name,
+					Given: cleanString(*party.Contact.Name),
 				},
 			},
 		}
@@ -61,14 +61,14 @@ func goblParty(party *Party, o *options) *org.Party {
 		if party.Contact.Telephone != nil {
 			p.Telephones = []*org.Telephone{
 				{
-					Number: *party.Contact.Telephone,
+					Number: cleanString(*party.Contact.Telephone),
 				},
 			}
 		}
 		if party.Contact.ElectronicMail != nil {
 			p.Emails = []*org.Email{
 				{
-					Address: *party.Contact.ElectronicMail,
+					Address: cleanString(*party.Contact.ElectronicMail),
 				},
 			}
 		}
@@ -91,11 +91,11 @@ func goblDeliveryParty(party *Party) *org.Party {
 	p := &org.Party{}
 
 	if party.PartyLegalEntity != nil && party.PartyLegalEntity.RegistrationName != nil {
-		p.Name = *party.PartyLegalEntity.RegistrationName
+		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
 	}
 	if party.PartyName != nil {
 		if p.Name == "" {
-			p.Name = party.PartyName.Name
+			p.Name = cleanString(party.PartyName.Name)
 		}
 	}
 
@@ -115,27 +115,27 @@ func parseAddress(address *PostalAddress) *org.Address {
 		addr.Country = l10n.ISOCountryCode(address.Country.IdentificationCode)
 	}
 	if address.StreetName != nil {
-		addr.Street = *address.StreetName
+		addr.Street = cleanString(*address.StreetName)
 	}
 	if address.AdditionalStreetName != nil {
-		addr.StreetExtra = *address.AdditionalStreetName
+		addr.StreetExtra = cleanString(*address.AdditionalStreetName)
 	}
 	if address.CityName != nil {
-		addr.Locality = *address.CityName
+		addr.Locality = cleanString(*address.CityName)
 	}
 	if address.PostalZone != nil {
-		addr.Code = cbc.Code(*address.PostalZone)
+		addr.Code = cbc.Code(cleanString(*address.PostalZone))
 	}
 	if address.CountrySubentity != nil {
-		addr.Region = *address.CountrySubentity
+		addr.Region = cleanString(*address.CountrySubentity)
 	}
 	if address.BuildingNumber != nil {
-		addr.Number = *address.BuildingNumber
+		addr.Number = cleanString(*address.BuildingNumber)
 	}
 	// CitySubdivisionName is used by ZATCA to represent the district,
 	// which maps to StreetExtra in GOBL.
 	if address.CitySubdivisionName != nil && addr.StreetExtra == "" {
-		addr.StreetExtra = *address.CitySubdivisionName
+		addr.StreetExtra = cleanString(*address.CitySubdivisionName)
 	}
 	return addr
 }

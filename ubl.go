@@ -60,8 +60,6 @@ const Version = "2.1"
 //	    // ...
 //	}
 func Parse(data []byte) (any, error) {
-	data = []byte(cleanString(string(data)))
-
 	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err

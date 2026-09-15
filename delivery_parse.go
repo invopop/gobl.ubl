@@ -45,7 +45,7 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 					Code: cbc.Code(del.DeliveryLocation.ID.Value),
 				}
 				if del.DeliveryLocation.ID.SchemeID != nil {
-					id.Label = *del.DeliveryLocation.ID.SchemeID
+					id.Label = cleanString(*del.DeliveryLocation.ID.SchemeID)
 				}
 				d.Identities = []*org.Identity{id}
 			}
