@@ -57,8 +57,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		iq := &Quantity{
 			Value: l.Quantity.String(),
 		}
-		if l.Item != nil && l.Item.Unit != "" {
-			iq.UnitCode = string(l.Item.Unit.UNECE())
+		if l.Item != nil {
+			if code := unitCodeUNTDID(l.Item); code != "" {
+				iq.UnitCode = code
+			}
 		}
 		if invoiceType.In(bill.InvoiceTypeCreditNote) {
 			invLine.CreditedQuantity = iq
@@ -160,7 +162,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 							prop.Value += " " + string(attr.Unit)
 							prop.ValueQuantity = &Quantity{
 								Value:    attr.Amount.String(),
-								UnitCode: string(attr.Unit.UNECE()),
+								UnitCode: attrUnitCode(attr.Unit),
 							}
 						}
 					case attr.Text != "":

@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
@@ -30,14 +31,35 @@ func formatKey(key string) cbc.Key {
 	return cbc.Key(key)
 }
 
-// goblUnitFromUNECE maps UN/ECE code to GOBL equivalent.
-func goblUnitFromUNECE(unece cbc.Code) org.Unit {
-	for _, def := range org.UnitDefinitions {
-		if def.UNECE == unece {
-			return def.Unit
-		}
+// goblItemUnit records a UN/ECE unit code on the item. The raw code is kept
+// in the untdid-unit extension and mapped to a GOBL unit key when one exists.
+func goblItemUnit(item *org.Item, code cbc.Code) {
+	if code == cbc.CodeEmpty {
+		return
 	}
-	return org.Unit(unece)
+	item.Ext = item.Ext.Set(untdid.ExtKeyUnit, code)
+	if unit := en16931.UnitFromUNTDID(code); unit != cbc.KeyEmpty {
+		item.Unit = unit
+	}
+}
+
+// unitCodeUNTDID returns the UN/ECE unit code for an item, preferring the
+// untdid-unit extension set by the EN 16931 addon.
+func unitCodeUNTDID(item *org.Item) string {
+	code := item.Ext.Get(untdid.ExtKeyUnit)
+	if code == cbc.CodeEmpty {
+		code = en16931.UnitToUNTDID(item.Unit)
+	}
+	return code.String()
+}
+
+// attrUnitCode returns the UN/ECE unit code for an attribute unit, falling
+// back to "ZZ" (mutually defined) when GOBL has no mapping.
+func attrUnitCode(unit cbc.Key) string {
+	if code := en16931.UnitToUNTDID(unit); code != cbc.CodeEmpty {
+		return code.String()
+	}
+	return "ZZ"
 }
 
 // noteCodePattern matches the #CODE#text format used in UBL notes to encode

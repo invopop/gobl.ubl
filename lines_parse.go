@@ -4,6 +4,7 @@ import (
 	"math"
 	"strings"
 
+	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -91,9 +92,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 			return nil, err
 		}
 
-		if iq.UnitCode != "" {
-			line.Item.Unit = goblUnitFromUNECE(cbc.Code(iq.UnitCode))
-		}
+		goblItemUnit(line.Item, cbc.Code(iq.UnitCode))
 	}
 
 	if len(docLine.Note) > 0 {
@@ -214,7 +213,7 @@ func goblItemAttribute(property *AdditionalItemProperty) (*org.Attribute, error)
 		}
 		attr.Amount = &amount
 		if property.ValueQuantity.UnitCode != "" {
-			attr.Unit = goblUnitFromUNECE(cbc.Code(property.ValueQuantity.UnitCode))
+			attr.Unit = en16931.UnitFromUNTDID(cbc.Code(property.ValueQuantity.UnitCode))
 		}
 	case property.Value != "":
 		attr.Text = cleanString(property.Value)

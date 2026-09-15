@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "25f10f037d27ad49f30b4080cc1e575262336ef082f9f231955f4639edee5e24"
+			"val": "5578c77721a5d87210c36dca2641c7a066123da0065a278e278d65da024aabfb"
 		},
 		"to": "iso6523-actorid-upis::0208:0819258832"
 	},
@@ -105,7 +105,10 @@
 				"item": {
 					"name": "Groupe exemple 1",
 					"price": "32.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "32.00",
 				"taxes": [
@@ -126,7 +129,10 @@
 				"item": {
 					"name": "Groupe exemple 2",
 					"price": "32.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "32.00",
 				"taxes": [

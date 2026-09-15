@@ -4,8 +4,10 @@ import (
 	"testing"
 
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 )
@@ -138,26 +140,30 @@ func TestTagCodeParseZATCA(t *testing.T) {
 	}
 }
 
-// Define tests for the UnitFromUNECE function
-func TestUnitFromUNECE(t *testing.T) {
-	tests := []struct {
-		name     string
-		input    string
-		expected string
-	}{
-		{"Known UNECE code", "HUR", "h"},
-		{"Known UNECE code", "SEC", "s"},
-		{"Known UNECE code", "MTR", "m"},
-		{"Known UNECE code", "GRM", "g"},
-		{"Unknown UNECE code", "XYZ", "XYZ"},
-	}
+func TestGoblItemUnit(t *testing.T) {
+	t.Run("known code", func(t *testing.T) {
+		item := new(org.Item)
+		goblItemUnit(item, "HUR")
+		assert.Equal(t, org.UnitHour, item.Unit)
+		assert.Equal(t, cbc.Code("HUR"), item.Ext.Get(untdid.ExtKeyUnit))
+	})
+	t.Run("unknown code is kept in the extension", func(t *testing.T) {
+		item := new(org.Item)
+		goblItemUnit(item, "XYZ")
+		assert.Empty(t, item.Unit)
+		assert.Equal(t, cbc.Code("XYZ"), item.Ext.Get(untdid.ExtKeyUnit))
+	})
+	t.Run("empty code is ignored", func(t *testing.T) {
+		item := new(org.Item)
+		goblItemUnit(item, "")
+		assert.Empty(t, item.Unit)
+		assert.False(t, item.Ext.Has(untdid.ExtKeyUnit))
+	})
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := goblUnitFromUNECE(cbc.Code(tt.input))
-			assert.Equal(t, tt.expected, string(result))
-		})
-	}
+func TestAttrUnitCode(t *testing.T) {
+	assert.Equal(t, "KGM", attrUnitCode(org.UnitKilogram))
+	assert.Equal(t, "ZZ", attrUnitCode("unknown"))
 }
 
 // Define tests for the FormatKey function

@@ -180,7 +180,7 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	assert.Equal(t, "Weight", outInv.Lines[0].Item.Attributes[1].Label)
 	require.NotNil(t, outInv.Lines[0].Item.Attributes[1].Amount)
 	assert.Equal(t, "2.5", outInv.Lines[0].Item.Attributes[1].Amount.String())
-	assert.Equal(t, org.Unit("kg"), outInv.Lines[0].Item.Attributes[1].Unit)
+	assert.Equal(t, org.UnitKilogram, outInv.Lines[0].Item.Attributes[1].Unit)
 }
 
 func TestLineSellerRoundTrip(t *testing.T) {
