@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "6f03f8e7207611730b8fdbb9b0436856d77481813e45e6943cb90c2435dec03c"
+			"val": "03fddb33d678e04210d70ab7f207df3e928b8aafd5e8b2dac31d33d4e7a028b5"
 		},
 		"from": "iso6523-actorid-upis::9930:111111125",
 		"to": "iso6523-actorid-upis::9930:282741168"
@@ -112,10 +112,7 @@
 				"item": {
 					"name": "Standard rated service",
 					"price": "100.00",
-					"unit": "h",
-					"ext": {
-						"untdid-unit": "HUR"
-					}
+					"unit": "h"
 				},
 				"sum": "1000.00",
 				"taxes": [
@@ -136,10 +133,7 @@
 				"item": {
 					"name": "Reduced rated item",
 					"price": "50.00",
-					"unit": "unit",
-					"ext": {
-						"untdid-unit": "XUN"
-					}
+					"unit": "unit"
 				},
 				"sum": "250.00",
 				"taxes": [

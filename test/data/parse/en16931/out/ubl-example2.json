@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "42051d51b92e82e9291ea49cda8440b79a0612b1bab71605b3bbe19b53b8ef6f"
+			"val": "e35eedd670db62deaa121ecefb8c6abbf0140447a1d4cb27339cbb4819405efa"
 		}
 	},
 	"doc": {
@@ -170,10 +170,7 @@
 					"description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
 					"price": "1273.00",
 					"unit": "item",
-					"origin": "DE",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"origin": "DE"
 				},
 				"sum": "2546.00",
 				"discounts": [
@@ -230,10 +227,7 @@
 						}
 					],
 					"price": "3.96",
-					"unit": "item",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"unit": "item"
 				},
 				"sum": "-3.96",
 				"taxes": [
@@ -278,10 +272,7 @@
 						}
 					],
 					"price": "2.48",
-					"unit": "item",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"unit": "item"
 				},
 				"sum": "4.96",
 				"taxes": [
@@ -321,10 +312,7 @@
 						}
 					],
 					"price": "25.00",
-					"unit": "item",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"unit": "item"
 				},
 				"sum": "-25.00",
 				"taxes": [
@@ -368,10 +356,7 @@
 						}
 					],
 					"price": "0.75",
-					"unit": "m",
-					"ext": {
-						"untdid-unit": "MTR"
-					}
+					"unit": "m"
 				},
 				"sum": "187.50",
 				"taxes": [

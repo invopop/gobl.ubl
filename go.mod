@@ -3,7 +3,7 @@ module github.com/invopop/gobl.ubl
 go 1.25.0
 
 require (
-	github.com/invopop/gobl v0.506.1-0.20260915133908-f0ea1ebe7e41
+	github.com/invopop/gobl v0.506.1-0.20260915141113-02594d46ddb6
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1

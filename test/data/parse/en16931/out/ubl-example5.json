@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "01ec8e67368bf930fd6ee3b1d844ab9ac8b1ff3ab5946d36a3915d4574e679c5"
+			"val": "a7f166d415e324e4cdd3c73d480ef434f60b3f2b290d8d1ba5bdd08ba8a11b38"
 		}
 	},
 	"doc": {
@@ -186,10 +186,7 @@
 					"description": "Printing paper, 2mm",
 					"price": "1.00",
 					"unit": "item",
-					"origin": "NL",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"origin": "NL"
 				},
 				"sum": "1000.00",
 				"discounts": [
@@ -249,10 +246,7 @@
 					"description": "Parker Pen, Black, model Sansa",
 					"price": "5.00",
 					"unit": "item",
-					"origin": "NL",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"origin": "NL"
 				},
 				"sum": "500.00",
 				"taxes": [
@@ -279,10 +273,7 @@
 					"ref": "JB009",
 					"name": "American Cookies",
 					"price": "5.00",
-					"unit": "item",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"unit": "item"
 				},
 				"sum": "2500.00",
 				"taxes": [

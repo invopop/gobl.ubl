@@ -181,7 +181,7 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	require.NotNil(t, outInv.Lines[0].Item.Attributes[1].Amount)
 	assert.Equal(t, "2.5", outInv.Lines[0].Item.Attributes[1].Amount.String())
 	assert.Equal(t, cbc.Key("kg"), outInv.Lines[0].Item.Attributes[1].Unit)
-	assert.Equal(t, cbc.Code("KGM"), outInv.Lines[0].Item.Attributes[1].Ext.Get(untdid.ExtKeyUnit))
+	assert.True(t, outInv.Lines[0].Item.Attributes[1].Ext.IsZero(), "the key alone determines the code")
 }
 
 // TestItemAttributeUnmappedUnitRoundTrip covers a UNTDID unit code that GOBL

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "51f337ad7757ea0d628defd8f0e63a9b9eba0dd1accdc6b473f408d04bed1b2e"
+			"val": "017cdf49c380dccb8a14601b4daf92cc40de887a8e01cb2c6d9ae4342725910c"
 		},
 		"from": "iso6523-actorid-upis::9930:111111125",
 		"to": "iso6523-actorid-upis::9930:282741168"
@@ -120,10 +120,7 @@
 						}
 					],
 					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"untdid-unit": "HUR"
-					}
+					"unit": "h"
 				},
 				"sum": "1800.00",
 				"taxes": [

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "908456df1b1be24c169320990367ab4610d1a783ce0dbd9ac44f20725cb3f0c2"
+			"val": "7105bd91c95c222145f2bb83d7bb14c7fbaf3ffe203288a247df4362e258848a"
 		}
 	},
 	"doc": {
@@ -107,10 +107,7 @@
 					"name": "Road tax",
 					"description": "Weight-based tax, vehicles 3000 KGM",
 					"price": "2500.00",
-					"unit": "item",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"unit": "item"
 				},
 				"sum": "2500.00",
 				"taxes": [
@@ -132,10 +129,7 @@
 					"name": "Road Register fee",
 					"description": "Annual registration fee",
 					"price": "700.00",
-					"unit": "item",
-					"ext": {
-						"untdid-unit": "EA"
-					}
+					"unit": "item"
 				},
 				"sum": "700.00",
 				"taxes": [

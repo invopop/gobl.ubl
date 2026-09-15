@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "ab1b591bf930133068d6982a49107c63e28b0eb656ed263119809e02f47a899c"
+			"val": "daf26a9916b803448586edf454c800c2d268de7b4e6f6da82de5e8b9a99ce2a8"
 		}
 	},
 	"doc": {
@@ -93,10 +93,7 @@
 						}
 					],
 					"price": "0.00880",
-					"unit": "kwh",
-					"ext": {
-						"untdid-unit": "KWH"
-					}
+					"unit": "kwh"
 				},
 				"sum": "140.80",
 				"taxes": [
@@ -135,10 +132,7 @@
 						}
 					],
 					"price": "0.00101",
-					"unit": "kwh",
-					"ext": {
-						"untdid-unit": "KWH"
-					}
+					"unit": "kwh"
 				},
 				"sum": "16.16",
 				"taxes": [
@@ -177,7 +171,6 @@
 						}
 					],
 					"price": "1.2700",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "KW"
 					}
@@ -219,7 +212,6 @@
 						}
 					],
 					"price": "1.53",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "KW"
 					}
@@ -261,10 +253,7 @@
 						}
 					],
 					"price": "36.7500",
-					"unit": "mon",
-					"ext": {
-						"untdid-unit": "MON"
-					}
+					"unit": "mon"
 				},
 				"sum": "36.75",
 				"taxes": [
@@ -303,10 +292,7 @@
 						}
 					],
 					"price": "56.5000",
-					"unit": "mon",
-					"ext": {
-						"untdid-unit": "MON"
-					}
+					"unit": "mon"
 				},
 				"sum": "56.50",
 				"taxes": [
@@ -327,10 +313,7 @@
 				"item": {
 					"name": "Huur Transformatoren",
 					"price": "83.34",
-					"unit": "mon",
-					"ext": {
-						"untdid-unit": "MON"
-					}
+					"unit": "mon"
 				},
 				"sum": "83.34",
 				"taxes": [
@@ -351,10 +334,7 @@
 				"item": {
 					"name": "Huur Schakelinstallaties",
 					"price": "190.31",
-					"unit": "mon",
-					"ext": {
-						"untdid-unit": "MON"
-					}
+					"unit": "mon"
 				},
 				"sum": "190.31",
 				"taxes": [
@@ -375,10 +355,7 @@
 				"item": {
 					"name": "Huur Overige Apparaten",
 					"price": "64.21",
-					"unit": "mon",
-					"ext": {
-						"untdid-unit": "MON"
-					}
+					"unit": "mon"
 				},
 				"sum": "64.21",
 				"taxes": [
@@ -399,10 +376,7 @@
 				"item": {
 					"name": "Huur Meterdiensten",
 					"price": "64.46",
-					"unit": "mon",
-					"ext": {
-						"untdid-unit": "MON"
-					}
+					"unit": "mon"
 				},
 				"sum": "64.46",
 				"taxes": [

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9f3998e954f50ac917e30f706c691e4394a4e9f907015327b897ad6ce5009333"
+			"val": "6968a87ac491d40f74149e0a459419267bb899c63bd8a3df570dd09e41d1d3e1"
 		},
 		"from": "iso6523-actorid-upis::0225:341200068",
 		"to": "iso6523-actorid-upis::0225:572013583_57201358347049_SERVICE_PUBLIQUE_3_57201358347049"
@@ -169,10 +169,7 @@
 					"name": "SERVICE_FOURNI1",
 					"description": "Description",
 					"price": "40.0000",
-					"unit": "h",
-					"ext": {
-						"untdid-unit": "HUR"
-					}
+					"unit": "h"
 				},
 				"sum": "8000.00",
 				"taxes": [
@@ -194,10 +191,7 @@
 					"name": "SERVICE_FOURNI2",
 					"description": "Description",
 					"price": "400.0000",
-					"unit": "day",
-					"ext": {
-						"untdid-unit": "DAY"
-					}
+					"unit": "day"
 				},
 				"sum": "2000.00",
 				"taxes": [

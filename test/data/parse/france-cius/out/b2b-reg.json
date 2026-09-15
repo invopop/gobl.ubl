@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b4d3a1d87b7db960a95a09392a889bcc90a81f6738055567983e958bebdf7c14"
+			"val": "130f34e10c4020a244e153f23d2bac3bf7a1dbe2c45c4e626c1c7b42f5248212"
 		},
 		"from": "iso6523-actorid-upis::0225:324872211",
 		"to": "iso6523-actorid-upis::0225:439368049"
@@ -176,10 +176,7 @@
 					"name": "REMBOURSEMENT",
 					"description": "Description du remboursement",
 					"price": "60.0000",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "60.00",
 				"taxes": [
@@ -236,10 +233,7 @@
 					"description": "Description de l'article",
 					"price": "0.7000",
 					"unit": "one",
-					"origin": "FR",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"origin": "FR"
 				},
 				"sum": "21.00",
 				"discounts": [
@@ -311,10 +305,7 @@
 					],
 					"description": "Description du moule",
 					"price": "10.00000",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "10.00",
 				"taxes": [
@@ -342,10 +333,7 @@
 					"name": "SUPPORT TEL",
 					"description": "Description de la prestation de support associée",
 					"price": "7.0000",
-					"unit": "h",
-					"ext": {
-						"untdid-unit": "HUR"
-					}
+					"unit": "h"
 				},
 				"sum": "14.00",
 				"taxes": [

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "4fab4be354dfdbbbe6b094a04eea8e40133d5dea36234a13b3baea2715e8aad6"
+			"val": "919e125441380a4ffee381b9f80d13d148afeb894affd4ee3c8ef69db59f46c4"
 		},
 		"from": "iso6523-actorid-upis::9930:de111111125",
 		"to": "iso6523-actorid-upis::9938:lu98765432"
@@ -129,10 +129,7 @@
 					"name": "Software Subscription - Pro Plan",
 					"description": "Subscription 12345",
 					"price": "59.64",
-					"unit": "one",
-					"ext": {
-						"untdid-unit": "C62"
-					}
+					"unit": "one"
 				},
 				"sum": "59.64",
 				"taxes": [

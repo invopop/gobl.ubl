@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9b5d0bc2ffcd3019aab7cd7e5184d35327b2c19b1cc88bd421c5683f6fc8f2dc"
+			"val": "5244f6329bdaeeb1250619e91e82434247e5dae09a19b7dd39920811a5bcd7f4"
 		}
 	},
 	"doc": {
@@ -90,10 +90,7 @@
 						}
 					],
 					"price": "90.00",
-					"unit": "h",
-					"ext": {
-						"untdid-unit": "HUR"
-					}
+					"unit": "h"
 				},
 				"sum": "1800.00",
 				"discounts": [

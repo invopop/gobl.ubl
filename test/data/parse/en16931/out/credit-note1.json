@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d28a52b54bb66d645a8fb6c43cc2a5a035182c52e9226090dc40ffcce1668b3f"
+			"val": "3c2dd8bb68fdd6d15fed5f26f7033274abea4ecd4525f8c898d958e798d43c1e"
 		}
 	},
 	"doc": {
@@ -104,10 +104,7 @@
 					],
 					"description": "Acme beeswax",
 					"price": "1.00",
-					"unit": "kg",
-					"ext": {
-						"untdid-unit": "KGM"
-					}
+					"unit": "kg"
 				},
 				"sum": "100.00",
 				"total": "100.00",

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d14b566560b032be5513b67215136183f39ef4edc30068941c4df1fe524084f4"
+			"val": "c1987331138a7dbd7347e8833c823dba4b12be86f5f3d54b6a86f8c1789e7554"
 		}
 	},
 	"doc": {
@@ -70,7 +70,6 @@
 				"item": {
 					"name": "Medicine | الدواء",
 					"price": "50.00",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "PCE"
 					}
@@ -95,7 +94,6 @@
 				"item": {
 					"name": "Shampoo | شامبو",
 					"price": "21.74",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "PCE"
 					}

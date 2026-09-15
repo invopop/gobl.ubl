@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2dd83c5f901997ab6bfc53742a210db4b8c5cf851e61c27d95fe8fdafd5a4ece"
+			"val": "4b6ea8d0895a28e9ff12282bb179fa12da684f95c74ed5cca2cb52a26336ccfa"
 		}
 	},
 	"doc": {
@@ -89,7 +89,6 @@
 				"item": {
 					"name": "Work description 1",
 					"price": "50.00",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "LH"
 					}
@@ -113,7 +112,6 @@
 				"item": {
 					"name": "Work description 2",
 					"price": "98.00",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "LH"
 					}
@@ -137,7 +135,6 @@
 				"item": {
 					"name": "Work description 3",
 					"price": "66.00",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "LH"
 					}
@@ -161,7 +158,6 @@
 				"item": {
 					"name": "Work description 4",
 					"price": "57.00",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "LH"
 					}
@@ -185,7 +181,6 @@
 				"item": {
 					"name": "Work description 5",
 					"price": "69.00",
-					"unit": "one",
 					"ext": {
 						"untdid-unit": "LH"
 					}
