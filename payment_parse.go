@@ -46,7 +46,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 
 	if ui.PaymentTerms != nil {
 		payment.Terms = &pay.Terms{
-			Notes: cleanString(ui.PaymentTerms.Note),
+			Notes: ui.PaymentTerms.Note,
 		}
 	}
 
@@ -137,7 +137,7 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	}
 
 	if paymentMeans.PaymentMeansCode.Name != nil {
-		instructions.Detail = cleanString(*paymentMeans.PaymentMeansCode.Name)
+		instructions.Detail = *paymentMeans.PaymentMeansCode.Name
 	}
 
 	if paymentMeans.PaymentID != nil {
@@ -164,7 +164,7 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	account := paymentMeans.PayeeFinancialAccount
 
 	if account.ID != nil {
-		id := cleanString(*account.ID)
+		id := *account.ID
 		if isIBAN(id) {
 			creditTransfer.IBAN = cbc.Code(id)
 		} else {
@@ -172,10 +172,10 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 		}
 	}
 	if account.Name != nil {
-		creditTransfer.Name = cleanString(*account.Name)
+		creditTransfer.Name = *account.Name
 	}
 	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cbc.Code(cleanString(*account.FinancialInstitutionBranch.ID))
+		creditTransfer.BIC = cbc.Code(*account.FinancialInstitutionBranch.ID)
 	}
 
 	return []*pay.CreditTransfer{creditTransfer}

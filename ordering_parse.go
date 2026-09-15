@@ -27,12 +27,12 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
-		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
+		ordering.Code = cbc.Code(ui.BuyerReference)
 	}
 
 	// BT-19: Buyer accounting reference
 	if ui.AccountingCost != "" {
-		ordering.Cost = cbc.Code(cleanString(ui.AccountingCost))
+		ordering.Cost = cbc.Code(ui.AccountingCost)
 	}
 
 	ordering.Issuer = ui.goblOrderingIssuer(o)
@@ -177,7 +177,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		Code: cbc.Code(ref.ID.Value),
 	}
 	if ref.DocumentType != "" {
-		docRef.Reason = cleanString(ref.DocumentType)
+		docRef.Reason = ref.DocumentType
 	}
 	if ref.IssueDate != "" {
 		refDate, err := parseDate(ref.IssueDate)
@@ -190,7 +190,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.DocumentTypeCode))
 	}
 	if ref.DocumentDescription != "" {
-		docRef.Description = cleanString(ref.DocumentDescription)
+		docRef.Description = ref.DocumentDescription
 	}
 	if ref.ValidityPeriod != nil {
 		p, err := goblPeriodDates(ref.ValidityPeriod)
