@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2854af867387c4ee37c3f8442c5502683c70bcedf4e6a4ea94e7d0b99b06ccff"
+			"val": "b690a5d3f2d3f4c140b0efe383f3da01c429314829dffa19cfa2f4c19c863d7a"
 		}
 	},
 	"doc": {
@@ -133,7 +133,10 @@
 					"name": "service: example service",
 					"description": "\u003cp\u003eExample service description with HTML tags.\u003c/p\u003e",
 					"price": "195.0000",
-					"unit": "piece"
+					"unit": "piece",
+					"ext": {
+						"untdid-unit": "H87"
+					}
 				},
 				"sum": "195.00",
 				"taxes": [

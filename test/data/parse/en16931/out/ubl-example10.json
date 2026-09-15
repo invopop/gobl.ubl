@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "daf26a9916b803448586edf454c800c2d268de7b4e6f6da82de5e8b9a99ce2a8"
+			"val": "c680f6bf8f8fd2bd073782e923bd0c21b12f53a285bc8b0391ac6159dabbe20f"
 		}
 	},
 	"doc": {
@@ -93,7 +93,10 @@
 						}
 					],
 					"price": "0.00880",
-					"unit": "kwh"
+					"unit": "kwh",
+					"ext": {
+						"untdid-unit": "KWH"
+					}
 				},
 				"sum": "140.80",
 				"taxes": [
@@ -132,7 +135,10 @@
 						}
 					],
 					"price": "0.00101",
-					"unit": "kwh"
+					"unit": "kwh",
+					"ext": {
+						"untdid-unit": "KWH"
+					}
 				},
 				"sum": "16.16",
 				"taxes": [
@@ -253,7 +259,10 @@
 						}
 					],
 					"price": "36.7500",
-					"unit": "mon"
+					"unit": "mon",
+					"ext": {
+						"untdid-unit": "MON"
+					}
 				},
 				"sum": "36.75",
 				"taxes": [
@@ -292,7 +301,10 @@
 						}
 					],
 					"price": "56.5000",
-					"unit": "mon"
+					"unit": "mon",
+					"ext": {
+						"untdid-unit": "MON"
+					}
 				},
 				"sum": "56.50",
 				"taxes": [
@@ -313,7 +325,10 @@
 				"item": {
 					"name": "Huur Transformatoren",
 					"price": "83.34",
-					"unit": "mon"
+					"unit": "mon",
+					"ext": {
+						"untdid-unit": "MON"
+					}
 				},
 				"sum": "83.34",
 				"taxes": [
@@ -334,7 +349,10 @@
 				"item": {
 					"name": "Huur Schakelinstallaties",
 					"price": "190.31",
-					"unit": "mon"
+					"unit": "mon",
+					"ext": {
+						"untdid-unit": "MON"
+					}
 				},
 				"sum": "190.31",
 				"taxes": [
@@ -355,7 +373,10 @@
 				"item": {
 					"name": "Huur Overige Apparaten",
 					"price": "64.21",
-					"unit": "mon"
+					"unit": "mon",
+					"ext": {
+						"untdid-unit": "MON"
+					}
 				},
 				"sum": "64.21",
 				"taxes": [
@@ -376,7 +397,10 @@
 				"item": {
 					"name": "Huur Meterdiensten",
 					"price": "64.46",
-					"unit": "mon"
+					"unit": "mon",
+					"ext": {
+						"untdid-unit": "MON"
+					}
 				},
 				"sum": "64.46",
 				"taxes": [

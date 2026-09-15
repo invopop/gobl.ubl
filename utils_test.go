@@ -146,23 +146,21 @@ func TestUnits(t *testing.T) {
 		name  string
 		input string
 		unit  cbc.Key
-		// ext holds the code only when GOBL has no unit for it.
-		ext  cbc.Code
-		code cbc.Code
+		code  cbc.Code
 	}{
-		{"Known UNTDID code", "HUR", "h", "", "HUR"},
-		{"Known UNTDID code", "SEC", "s", "", "SEC"},
-		{"Known UNTDID code", "MTR", "m", "", "MTR"},
-		{"Known UNTDID code", "GRM", "g", "", "GRM"},
-		{"Unknown UNTDID code", "XYZ", "", "XYZ", "XYZ"},
+		{"Known UNTDID code", "HUR", "h", "HUR"},
+		{"Known UNTDID code", "SEC", "s", "SEC"},
+		{"Known UNTDID code", "MTR", "m", "MTR"},
+		{"Known UNTDID code", "GRM", "g", "GRM"},
+		{"Unknown UNTDID code", "XYZ", "", "XYZ"},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ext, unit := goblUnit(tax.Extensions{}, cbc.Code(tt.input))
 			assert.Equal(t, tt.unit, unit)
-			assert.Equal(t, tt.ext, ext.Get(untdid.ExtKeyUnit))
-			// The code converts back out either way.
+			// The code the document was written with is always recorded.
+			assert.Equal(t, tt.code, ext.Get(untdid.ExtKeyUnit))
 			assert.Equal(t, tt.code, untdidUnit(ext, unit))
 		})
 	}

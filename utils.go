@@ -30,11 +30,12 @@ func formatKey(key string) cbc.Key {
 	return cbc.Key(key)
 }
 
-// goblUnit converts a UNTDID unit code into the matching GOBL unit key,
-// leaving the code in the extensions only when GOBL has no unit for it.
+// goblUnit records the UNTDID unit code in the extensions and returns them
+// alongside the matching GOBL unit key, which is empty when GOBL has no unit
+// for the code. The code the document was written with is always kept, as GOBL
+// will preserve it rather than derive it back from the key.
 func goblUnit(ext tax.Extensions, code cbc.Code) (tax.Extensions, cbc.Key) {
-	unit, ext := untdid.NormalizeUnit(cbc.KeyEmpty, ext.Set(untdid.ExtKeyUnit, code))
-	return ext, unit
+	return ext.Set(untdid.ExtKeyUnit, code), untdid.UnitKey(code)
 }
 
 // untdidUnit returns the UNTDID unit code for a unit and its extensions,
