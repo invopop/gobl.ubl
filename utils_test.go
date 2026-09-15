@@ -168,8 +168,8 @@ func TestUnits(t *testing.T) {
 		assert.Equal(t, cbc.Code("HUR"), untdidUnit(tax.Extensions{}, org.UnitHour))
 	})
 
-	t.Run("unit without UNTDID mapping", func(t *testing.T) {
-		assert.Equal(t, cbc.CodeEmpty, untdidUnit(tax.Extensions{}, org.UnitPortion))
+	t.Run("no unit at all", func(t *testing.T) {
+		assert.Equal(t, cbc.CodeEmpty, untdidUnit(tax.Extensions{}, cbc.KeyEmpty))
 	})
 
 	t.Run("labels", func(t *testing.T) {
