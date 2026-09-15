@@ -5,7 +5,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
@@ -35,7 +34,7 @@ func formatKey(key string) cbc.Key {
 // them alongside the matching GOBL unit key, which is empty when the code has
 // no GOBL equivalent.
 func goblUnit(ext tax.Extensions, code cbc.Code) (tax.Extensions, cbc.Key) {
-	return ext.Set(untdid.ExtKeyUnit, code), en16931.UnitFromUNTDID(code)
+	return ext.Set(untdid.ExtKeyUnit, code), untdid.UnitKey(code)
 }
 
 // untdidUnit returns the UNTDID unit code for a unit and its extensions,
@@ -45,7 +44,7 @@ func untdidUnit(ext tax.Extensions, unit cbc.Key) cbc.Code {
 	if code := ext.Get(untdid.ExtKeyUnit); code != cbc.CodeEmpty {
 		return code
 	}
-	return en16931.UnitToUNTDID(unit)
+	return untdid.UnitCode(unit)
 }
 
 // unitLabel describes a unit for presentation, falling back to the UNTDID code
