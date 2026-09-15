@@ -60,7 +60,7 @@ const Version = "2.1"
 //	    // ...
 //	}
 func Parse(data []byte) (any, error) {
-	data = cleanXML(data)
+	data = []byte(cleanString(string(data)))
 
 	ns, err := extractRootNamespace(data)
 	if err != nil {
