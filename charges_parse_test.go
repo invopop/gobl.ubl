@@ -192,3 +192,38 @@ func TestBaseAmountErrorHandling(t *testing.T) {
 		assert.Contains(t, err.Error(), "invalid major number")
 	})
 }
+
+// TestParseLineAllowanceAmount covers BT-136/BT-141, the amount of a line
+// allowance or charge. EN 16931 makes it the authoritative value, so a
+// multiplier factor (BT-138) must never be allowed to overwrite it.
+func TestParseLineAllowanceAmount(t *testing.T) {
+	e := parseXMLInvoice(t, "en16931/line-allowance-amount.xml")
+	require.NoError(t, e.Calculate())
+
+	inv, ok := e.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, inv.Lines, 2)
+
+	// The first line declares a multiplier with no base amount. Applying it to
+	// the line sum would give 95.90, so the multiplier has to go.
+	line := inv.Lines[0]
+	require.Len(t, line.Discounts, 1)
+	assert.Equal(t, "532.27", line.Discounts[0].Amount.String())
+	assert.Nil(t, line.Discounts[0].Percent)
+	require.Len(t, line.Charges, 1)
+	assert.Equal(t, "21.87", line.Charges[0].Amount.String())
+	// 1620.00 - 532.27 + 21.87
+	assert.Equal(t, "1109.60", line.Total.String())
+
+	// The second line backs its multiplier with a base amount that reproduces
+	// the declared amount, so both survive and GOBL recalculates the same value.
+	line = inv.Lines[1]
+	require.Len(t, line.Discounts, 1)
+	assert.Equal(t, "486.94", line.Discounts[0].Amount.String())
+	require.NotNil(t, line.Discounts[0].Percent)
+	assert.Equal(t, "5.92%", line.Discounts[0].Percent.String())
+	require.NotNil(t, line.Discounts[0].Base)
+	assert.Equal(t, "8225.28", line.Discounts[0].Base.String())
+	// 8225.28 - 486.94 + 107.71
+	assert.Equal(t, "7846.05", line.Total.String())
+}
