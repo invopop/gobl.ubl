@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e35eedd670db62deaa121ecefb8c6abbf0140447a1d4cb27339cbb4819405efa"
+			"val": "88ac1232b11edb97f8b8f38f1b1bf9fa999a32aea0e0e2112229fefdf8d0c024"
 		}
 	},
 	"doc": {
@@ -168,23 +168,11 @@
 						}
 					],
 					"description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
-					"price": "1273.00",
+					"price": "636.500000",
 					"unit": "item",
 					"origin": "DE"
 				},
-				"sum": "2546.00",
-				"discounts": [
-					{
-						"reason": "Damage",
-						"amount": "12.00"
-					}
-				],
-				"charges": [
-					{
-						"reason": "Testing",
-						"amount": "12.00"
-					}
-				],
+				"sum": "1273.00",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -195,10 +183,18 @@
 						}
 					}
 				],
-				"total": "2546.00",
+				"total": "1273.00",
 				"notes": [
 					{
 						"text": "Scratch on box"
+					},
+					{
+						"key": "general",
+						"src": "reconciliation",
+						"text": "Line net amount as received: 1273.00. Price and quantity as sent gave 2546.00, absorbing an allowance of 12.00 and a charge of 12.00.",
+						"ext": {
+							"untdid-text-subject": "AAI"
+						}
 					}
 				]
 			},
@@ -458,7 +454,7 @@
 				"due_dates": [
 					{
 						"date": "2013-07-20",
-						"amount": "3393.03",
+						"amount": "1801.78",
 						"percent": "100%"
 					}
 				],
@@ -506,10 +502,10 @@
 			"date": "2013-06-15"
 		},
 		"totals": {
-			"sum": "2709.50",
+			"sum": "1436.50",
 			"discount": "100.00",
 			"charge": "100.00",
-			"total": "2709.50",
+			"total": "1436.50",
 			"taxes": {
 				"categories": [
 					{
@@ -520,9 +516,9 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "2733.50",
+								"base": "1460.50",
 								"percent": "25%",
-								"amount": "683.38"
+								"amount": "365.13"
 							},
 							{
 								"key": "standard",
@@ -542,16 +538,16 @@
 								"amount": "0.00"
 							}
 						],
-						"amount": "683.53"
+						"amount": "365.28"
 					}
 				],
-				"sum": "683.53"
+				"sum": "365.28"
 			},
-			"tax": "683.53",
-			"total_with_tax": "3393.03",
-			"payable": "3393.03",
+			"tax": "365.28",
+			"total_with_tax": "1801.78",
+			"payable": "1801.78",
 			"advance": "1000.00",
-			"due": "2393.03"
+			"due": "801.78"
 		},
 		"notes": [
 			{

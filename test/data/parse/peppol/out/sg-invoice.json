@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "23ded262a704cc3bf4ac30a0ff676030a952a5f371f43ed99d172f44d7ef9445"
+			"val": "a0ff11134245d7994002f4727192af2fb89a2170daacc368ad25a1ff39e9b778"
 		}
 	},
 	"doc": {
@@ -351,7 +351,7 @@
 				"due_dates": [
 					{
 						"date": "2025-09-27",
-						"amount": "24.57",
+						"amount": "24.59",
 						"percent": "100%"
 					}
 				],
@@ -425,9 +425,10 @@
 			},
 			"tax": "2.03",
 			"total_with_tax": "24.57",
-			"payable": "24.57",
+			"rounding": "0.02",
+			"payable": "24.59",
 			"advance": "1.00",
-			"due": "23.57"
+			"due": "23.59"
 		},
 		"notes": [
 			{
