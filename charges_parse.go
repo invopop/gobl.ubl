@@ -229,7 +229,9 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = *ac.AllowanceChargeReason
 	}
-	if ac.MultiplierFactorNumeric != nil {
+	// BT-137: a bare percent would mean "percent of the line sum", a different
+	// base, so only carry it with the one stated (PEPPOL-EN16931-R041).
+	if ac.MultiplierFactorNumeric != nil && ac.BaseAmount != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
 		if !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
@@ -239,15 +241,11 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 			return nil, err
 		}
 		ch.Percent = &percent
-
-		// Check if there is a base amount
-		if ac.BaseAmount != nil {
-			base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
-			if err != nil {
-				return nil, err
-			}
-			ch.Base = &base
+		base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+		if err != nil {
+			return nil, err
 		}
+		ch.Base = &base
 	}
 	return ch, nil
 }
@@ -268,7 +266,9 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = *ac.AllowanceChargeReason
 	}
-	if ac.MultiplierFactorNumeric != nil {
+	// BT-137: a bare percent would mean "percent of the line sum", a different
+	// base, so only carry it with the one stated (PEPPOL-EN16931-R041).
+	if ac.MultiplierFactorNumeric != nil && ac.BaseAmount != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
 		if !strings.HasSuffix(multiplier, "%") {
 			multiplier += "%"
@@ -278,15 +278,11 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 			return nil, err
 		}
 		d.Percent = &p
-
-		// Check if there is a base amount
-		if ac.BaseAmount != nil {
-			base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
-			if err != nil {
-				return nil, err
-			}
-			d.Base = &base
+		base, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+		if err != nil {
+			return nil, err
 		}
+		d.Base = &base
 	}
 	return d, nil
 }

@@ -119,6 +119,13 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	out.Attachments = ui.goblAddAttachments()
 	ui.goblAddTaxNotes(out)
 
+	if err := ui.addRounding(out); err != nil {
+		return nil, err
+	}
+	if err := ui.reconcileLines(out); err != nil {
+		return nil, err
+	}
+
 	return out, nil
 }
 

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0334798d68fe23fe2148ca221022ac2f972464186e027f8f287d343c5c13e26c"
+			"val": "593273dadb8bd379d0c78005d78fc272717d89c4506bfbcbc00d299d695731c1"
 		}
 	},
 	"doc": {
@@ -489,14 +489,14 @@
 			},
 			{
 				"i": 20,
-				"quantity": "6",
+				"quantity": "-6",
 				"item": {
 					"ref": "175137",
 					"name": "FRITUUR VET 10 KG RETOUR",
-					"price": "18.33",
+					"price": "18.330000",
 					"unit": "item"
 				},
-				"sum": "109.98",
+				"sum": "-109.98",
 				"taxes": [
 					{
 						"cat": "VAT",
@@ -507,7 +507,17 @@
 						}
 					}
 				],
-				"total": "109.98"
+				"total": "-109.98",
+				"notes": [
+					{
+						"key": "general",
+						"src": "reconciliation",
+						"text": "Line net amount as received: -109.98. Price and quantity as sent gave 109.98.",
+						"ext": {
+							"untdid-text-subject": "AAI"
+						}
+					}
+				]
 			}
 		],
 		"payment": {
@@ -515,7 +525,7 @@
 				"due_dates": [
 					{
 						"date": "2015-01-09",
-						"amount": "483.49",
+						"amount": "250.33",
 						"percent": "100%"
 					}
 				]
@@ -534,8 +544,8 @@
 			}
 		},
 		"totals": {
-			"sum": "449.56",
-			"total": "449.56",
+			"sum": "229.60",
+			"total": "229.60",
 			"taxes": {
 				"categories": [
 					{
@@ -546,9 +556,9 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "403.19",
+								"base": "183.23",
 								"percent": "6%",
-								"amount": "24.19"
+								"amount": "10.99"
 							},
 							{
 								"key": "standard",
@@ -560,14 +570,14 @@
 								"amount": "9.74"
 							}
 						],
-						"amount": "33.93"
+						"amount": "20.73"
 					}
 				],
-				"sum": "33.93"
+				"sum": "20.73"
 			},
-			"tax": "33.93",
-			"total_with_tax": "483.49",
-			"payable": "483.49"
+			"tax": "20.73",
+			"total_with_tax": "250.33",
+			"payable": "250.33"
 		},
 		"notes": [
 			{

@@ -35,11 +35,14 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
 		assert.Equal(t, "6%", line.Taxes[0].Percent.String())
 
+		// BT-131 is -109.98 against a positive quantity and price: a return,
+		// rebuilt from the stated amount with the sign on the quantity.
 		line = lines[19]
 		assert.Equal(t, "FRITUUR VET 10 KG RETOUR", line.Item.Name)
-		assert.Equal(t, "6", line.Quantity.String())
+		assert.Equal(t, "-6", line.Quantity.String())
 		assert.Equal(t, org.Unit("item"), line.Item.Unit)
-		assert.Equal(t, "18.33", line.Item.Price.String())
+		assert.Equal(t, "18.330000", line.Item.Price.String())
+		assert.Equal(t, "-109.98", line.Total.String())
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
 		assert.Equal(t, "6%", line.Taxes[0].Percent.String())
 	})
@@ -64,19 +67,15 @@ func TestParseLines(t *testing.T) {
 		assert.Equal(t, "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900", line.Item.Description)
 		assert.Equal(t, org.Unit("item"), line.Item.Unit)
 		assert.Equal(t, l10n.ISOCountryCode("DE"), line.Item.Origin)
-		assert.Equal(t, "1273.00", line.Item.Price.String())
+		assert.Equal(t, "636.500000", line.Item.Price.String())
+		assert.Equal(t, "1273.00", line.Total.String())
 		assert.Equal(t, cbc.Code("VAT"), line.Taxes[0].Category)
 		assert.Equal(t, "25%", line.Taxes[0].Percent.String())
 
-		assert.Len(t, line.Charges, 1)
-		charge := line.Charges[0]
-		assert.Equal(t, "12.00", charge.Amount.String())
-		assert.Equal(t, "Testing", charge.Reason)
-
-		assert.Len(t, line.Discounts, 1)
-		discount := line.Discounts[0]
-		assert.Equal(t, "12.00", discount.Amount.String())
-		assert.Equal(t, "Damage", discount.Reason)
+		assert.Empty(t, line.Charges)
+		assert.Empty(t, line.Discounts)
+		assert.Equal(t, ubl.NoteSrcReconciliation, line.Notes[1].Src)
+		assert.Contains(t, line.Notes[1].Text, "absorbing an allowance of 12.00 and a charge of 12.00")
 
 		assert.Len(t, line.Item.Identities, 3)
 		assert.Equal(t, cbc.Code("1234567890128"), line.Item.Identities[0].Code)

@@ -69,6 +69,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		if len(l.Notes) > 0 {
 			var notes []string
 			for _, note := range l.Notes {
+				// Ours, not the issuer's text; other Src values still apply.
+				if note.Src == NoteSrcReconciliation {
+					continue
+				}
 				if note.Key == "buyer-accounting-ref" {
 					invLine.AccountingCost = &note.Text
 				} else {

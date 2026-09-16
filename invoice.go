@@ -196,6 +196,10 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	if len(inv.Notes) > 0 {
 		var noteTexts []string
 		for _, note := range inv.Notes {
+			// Ours, not the issuer's text; other Src values still apply.
+			if note.Src == NoteSrcReconciliation {
+				continue
+			}
 			if text := formatNote(note); text != "" {
 				noteTexts = append(noteTexts, text)
 			}
