@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 )
 
@@ -57,8 +58,10 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 		iq := &Quantity{
 			Value: l.Quantity.String(),
 		}
-		if l.Item != nil && l.Item.Unit != "" {
-			iq.UnitCode = string(l.Item.Unit.UNECE())
+		if l.Item != nil {
+			if code := untdidUnit(l.Item.Ext, l.Item.Unit); code != cbc.CodeEmpty {
+				iq.UnitCode = string(code)
+			}
 		}
 		if invoiceType.In(bill.InvoiceTypeCreditNote) {
 			invLine.CreditedQuantity = iq
@@ -156,11 +159,16 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 						// BR-54 requires a plain Value even when a
 						// ValueQuantity is also provided.
 						prop.Value = attr.Amount.String()
-						if attr.Unit != "" {
-							prop.Value += " " + string(attr.Unit)
+						code := untdidUnit(attr.Ext, attr.Unit)
+						if label := unitLabel(attr.Unit, code); label != "" {
+							prop.Value += " " + label
+						}
+						// A UBL quantity always carries a unit code, so the
+						// value quantity is only useful with one.
+						if code != cbc.CodeEmpty {
 							prop.ValueQuantity = &Quantity{
 								Value:    attr.Amount.String(),
-								UnitCode: string(attr.Unit.UNECE()),
+								UnitCode: string(code),
 							}
 						}
 					case attr.Text != "":

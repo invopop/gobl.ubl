@@ -46,6 +46,30 @@ func TestCurrencyRounding(t *testing.T) {
 		assert.Equal(t, "10.555", doc.InvoiceLines[0].Price.PriceAmount.Value)
 	})
 
+	t.Run("a currency without subunits", func(t *testing.T) {
+		env := loadTestEnvelope(t, "peppol/invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		// JPY has no subunits, so hardcoding two decimals would be wrong.
+		inv.Currency = "JPY"
+		inv.Lines = inv.Lines[:1]
+		inv.Lines[0].Discounts = nil
+		inv.Lines[0].Charges = nil
+		price := num.MakeAmount(1000, 0)
+		inv.Lines[0].Item.Price = &price
+		inv.Lines[0].Item.Currency = ""
+		require.NoError(t, env.Calculate())
+		require.Equal(t, "20000", inv.Totals.Sum.String())
+
+		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		require.NoError(t, err)
+
+		assert.NotContains(t, doc.LegalMonetaryTotal.LineExtensionAmount.Value, ".",
+			"a currency without subunits must carry no decimals")
+		assert.NotContains(t, doc.InvoiceLines[0].LineExtensionAmount.Value, ".")
+	})
+
 	t.Run("prices include tax", func(t *testing.T) {
 		doc := testInvoiceFrom(t, "peppol/invoice-prices-include-vat.json")
 

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2986642675a9b9abe647b9dcc59fe3a9d431e13c15642bc0dd26b38f500d5c66"
+			"val": "89cef774d170c2a419b5c48cdd6b3d7c4ca7a85e09b7b5fb536d781433dfee50"
 		}
 	},
 	"doc": {
@@ -85,7 +85,10 @@
 				"item": {
 					"name": "Development services",
 					"price": "90.00",
-					"unit": "h"
+					"unit": "h",
+					"ext": {
+						"untdid-unit": "HUR"
+					}
 				},
 				"sum": "450.00",
 				"taxes": [
