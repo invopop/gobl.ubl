@@ -2,6 +2,7 @@ package ubl_test
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -190,4 +191,41 @@ func TestBytes(t *testing.T) {
 	assert.True(t, strings.HasPrefix(s, `<?xml version="1.0" encoding="UTF-8"?>`),
 		"output should start with the standard XML header")
 	assert.Contains(t, s, "<Invoice")
+}
+
+func TestBytesCompact(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+
+	doc, err := ubl.ConvertInvoice(env)
+	require.NoError(t, err)
+
+	compact, err := ubl.BytesCompact(doc)
+	require.NoError(t, err)
+
+	s := string(compact)
+	assert.True(t, strings.HasPrefix(s, `<?xml version="1.0" encoding="UTF-8"?>`),
+		"output should start with the standard XML header")
+	assert.Contains(t, s, "<Invoice")
+
+	// Same document, without the indentation Bytes adds.
+	indented, err := ubl.Bytes(doc)
+	require.NoError(t, err)
+	assert.NotContains(t, s, "\n  <cbc:ID>", "compact output should not be indented")
+	assert.Less(t, len(compact), len(indented), "compact output should be smaller")
+
+	// Both forms carry the same content once whitespace between tags is gone.
+	strip := func(b []byte) string {
+		return regexp.MustCompile(`>\s+<`).ReplaceAllString(string(b), "><")
+	}
+	assert.Equal(t, strip(indented), strip(compact))
+}
+
+func TestBytesRejectsUnmarshalableDocument(t *testing.T) {
+	// Channels cannot be marshalled, so both forms must surface the error
+	// rather than return a half-written document.
+	_, err := ubl.Bytes(make(chan int))
+	assert.Error(t, err)
+
+	_, err = ubl.BytesCompact(make(chan int))
+	assert.Error(t, err)
 }
