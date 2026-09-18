@@ -3,6 +3,7 @@ package ubl
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	cur "github.com/invopop/gobl/currency"
 	"github.com/stretchr/testify/assert"
@@ -94,6 +95,26 @@ func TestGoblReference(t *testing.T) {
 			ValidityPeriod: &Period{StartDate: "nonsense"},
 		})
 		assert.Error(t, err)
+	})
+}
+
+func TestGoblAddOrderingEmptyContract(t *testing.T) {
+	ui := &Invoice{
+		ContractDocumentReference: []Reference{{ID: IDType{Value: ""}}},
+	}
+
+	t.Run("dropped where the profile tolerates it", func(t *testing.T) {
+		out := new(bill.Invoice)
+		require.NoError(t, ui.goblAddOrdering(out, &options{context: ContextPeppolFranceCIUS}))
+		assert.Nil(t, out.Ordering)
+	})
+
+	t.Run("kept under Peppol BIS", func(t *testing.T) {
+		out := new(bill.Invoice)
+		require.NoError(t, ui.goblAddOrdering(out, &options{context: ContextPeppol}))
+		require.NotNil(t, out.Ordering)
+		require.Len(t, out.Ordering.Contracts, 1)
+		assert.Empty(t, out.Ordering.Contracts[0].Code)
 	})
 }
 
