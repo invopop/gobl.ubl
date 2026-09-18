@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -108,6 +110,9 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	if ui.ContractDocumentReference != nil {
 		ordering.Contracts = make([]*org.DocumentRef, 0)
 		for _, contractRef := range ui.ContractDocumentReference {
+			if strings.TrimSpace(contractRef.ID.Value) == "" && emptyContractRefTolerated(o) {
+				continue
+			}
 			docRef, err := goblReference(&contractRef)
 			if err != nil {
 				return err
@@ -170,6 +175,15 @@ func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
 		return nil
 	}
 	return goblParty(sp.ServiceProviderParty.Party, o)
+}
+
+// emptyContractRefTolerated reports whether the document's profile accepts an
+// empty contract reference. Plain EN 16931 and the French profiles do; Peppol
+// BIS bans empty elements (PEPPOL-EN16931-R008).
+func emptyContractRefTolerated(o *options) bool {
+	return o.context.Is(ContextEN16931) ||
+		o.context.Is(ContextPeppolFranceCIUS) ||
+		o.context.Is(ContextPeppolFranceExtended)
 }
 
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
