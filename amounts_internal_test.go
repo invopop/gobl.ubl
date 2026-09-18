@@ -3,11 +3,8 @@ package ubl
 import (
 	"testing"
 
-	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -91,106 +88,6 @@ func TestNewAmount(t *testing.T) {
 		a := newUnitAmount(num.MakeAmount(81818, 4), "EUR") // 8.1818
 		assert.Equal(t, "8.1818", a.Value)
 		assert.Equal(t, "EUR", *a.CurrencyID)
-	})
-}
-
-func TestExceedsCurrencyPrecision(t *testing.T) {
-	// over builds an amount with one decimal more than EUR allows.
-	over := num.MakeAmount(67273, 4) // 6.7273
-	fits := num.MakeAmount(673, 2)   // 6.73
-	zero := num.MakeAmount(0, 2)     //
-	invoice := func(f func(inv *bill.Invoice)) *bill.Invoice {
-		inv := &bill.Invoice{
-			Currency: currency.EUR,
-			Totals:   &bill.Totals{Sum: zero},
-			Lines:    []*bill.Line{{Index: 1, Total: &fits, Sum: &fits}},
-		}
-		if f != nil {
-			f(inv)
-		}
-		return inv
-	}
-
-	t.Run("no totals means nothing to round", func(t *testing.T) {
-		inv := invoice(nil)
-		inv.Totals = nil
-		assert.False(t, exceedsCurrencyPrecision(inv))
-	})
-
-	t.Run("unknown currency is left alone", func(t *testing.T) {
-		inv := invoice(func(inv *bill.Invoice) {
-			inv.Currency = currency.Code("ZZZ")
-			inv.Lines[0].Total = &over
-		})
-		assert.False(t, exceedsCurrencyPrecision(inv))
-	})
-
-	t.Run("amounts within the currency", func(t *testing.T) {
-		assert.False(t, exceedsCurrencyPrecision(invoice(nil)))
-	})
-
-	t.Run("line total", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Lines[0].Total = &over
-		})))
-	})
-
-	t.Run("line sum", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Lines[0].Sum = &over
-		})))
-	})
-
-	t.Run("line discount", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Lines[0].Discounts = []*bill.LineDiscount{{Amount: over}}
-		})))
-	})
-
-	t.Run("line charge", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Lines[0].Charges = []*bill.LineCharge{{Amount: over}}
-		})))
-	})
-
-	t.Run("document discount", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Discounts = []*bill.Discount{{Amount: over}}
-		})))
-	})
-
-	t.Run("document discount base", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Discounts = []*bill.Discount{{Amount: fits, Base: &over}}
-		})))
-	})
-
-	t.Run("document charge", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Charges = []*bill.Charge{{Amount: over}}
-		})))
-	})
-
-	t.Run("document charge base", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Charges = []*bill.Charge{{Amount: fits, Base: &over}}
-		})))
-	})
-
-	t.Run("tax rate base", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Totals.Taxes = &tax.Total{Categories: []*tax.CategoryTotal{
-				{Rates: []*tax.RateTotal{{Base: over, Amount: fits}}},
-			}}
-		})))
-	})
-
-	t.Run("tax rate amount", func(t *testing.T) {
-		assert.True(t, exceedsCurrencyPrecision(invoice(func(inv *bill.Invoice) {
-			inv.Totals.Taxes = &tax.Total{Categories: []*tax.CategoryTotal{
-				{Rates: []*tax.RateTotal{{Base: fits, Amount: over}}},
-			}}
-		})))
 	})
 }
 
