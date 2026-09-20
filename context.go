@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/addons/de/xrechnung"
@@ -76,6 +78,8 @@ func (c *Context) GetVESID(inv *bill.Invoice) string {
 //     OutputCustomizationID and then on CustomizationID
 //  2. Tries to match on the full CustomizationID (for external identification)
 //  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
+//  4. As a last resort, falls back to a French context when the ProfileID is a
+//     billing mode and the CustomizationID still looks French
 func FindContext(customizationID string, profileID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// CustomizationID as EN16931 but can be identified by their ProfileID
@@ -84,7 +88,7 @@ func FindContext(customizationID string, profileID string) *Context {
 		// OutputCustomizationID first: ContextEN16931 would otherwise match the
 		// plain EN16931 customization that CIUS documents carry.
 		for _, ctx := range contexts {
-			if ctx.OutputCustomizationID == customizationID {
+			if ctx.OutputCustomizationID != "" && ctx.OutputCustomizationID == customizationID {
 				return &ctx
 			}
 		}
@@ -113,7 +117,32 @@ func FindContext(customizationID string, profileID string) *Context {
 		}
 	}
 
+	// Nothing matched, but the billing mode says the document is French. The
+	// CTC schematron never checks BT-24, so mangled CustomizationIDs (a missing
+	// ":extended-ctc-fr" suffix, "urn.eu:" for "urn:cen.eu:") validate cleanly
+	// downstream; without this the document would lose every French rule.
+	if isFrenchBillingMode(profileID) && looksFrench(customizationID) {
+		ctx := ContextPeppolFranceCIUS
+		if strings.Contains(customizationID, "conformant") {
+			ctx = ContextPeppolFranceExtended
+		}
+		return &ctx
+	}
+
 	return nil
+}
+
+// looksFrench reports whether a CustomizationID that matched no known context
+// leaves the French billing mode as the best available signal: either it is
+// recognisably an EN 16931 / French CTC identifier, or it is absent entirely.
+// It keeps the fallback away from documents of another standard that happen to
+// carry a two-character ProfileID.
+func looksFrench(customizationID string) bool {
+	if customizationID == "" {
+		return true
+	}
+	id := strings.ToLower(customizationID)
+	return strings.Contains(id, "en16931") || strings.Contains(id, "cpro.gouv.fr")
 }
 
 // isFrenchBillingMode checks if the given profileID matches a known French

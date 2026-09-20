@@ -286,6 +286,81 @@ func TestFrenchBillingModeResolution(t *testing.T) {
 	})
 }
 
+// The French CTC schematron never validates BT-24, so a sender can ship a
+// mangled CustomizationID and still pass every downstream rule set. The
+// billing mode in BT-23 is then the only trustworthy French signal.
+func TestFrenchBillingModeFallback(t *testing.T) {
+	for _, tt := range []struct {
+		name            string
+		customizationID string
+		want            *ubl.Context
+	}{
+		{
+			// Seen in the wild: "urn.eu:" for "urn:cen.eu:", and no
+			// ":extended-ctc-fr" suffix.
+			"mangled extended URN",
+			"urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
+			&ubl.ContextPeppolFranceExtended,
+		},
+		{
+			"unsuffixed cpro URN",
+			"urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
+			&ubl.ContextPeppolFranceExtended,
+		},
+		{
+			"mangled EN16931 URN falls back to CIUS",
+			"urn.eu:en16931:2017",
+			&ubl.ContextPeppolFranceCIUS,
+		},
+		{
+			// Another standard's customization must not be dragged into a
+			// French context by a two-character ProfileID.
+			"foreign customization stays unmatched",
+			"urn:peppol:pint:billing-1@sg-1",
+			nil,
+		},
+		{
+			// BT-24 absent: the billing mode is all that is left to go on.
+			"absent customization",
+			"",
+			&ubl.ContextPeppolFranceCIUS,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := ubl.FindContext(tt.customizationID, "B2")
+			if tt.want == nil {
+				assert.Nil(t, ctx)
+				return
+			}
+			require.NotNil(t, ctx)
+			assert.Equal(t, tt.want.CustomizationID, ctx.CustomizationID)
+			assert.Equal(t, tt.want.Addons, ctx.Addons)
+		})
+	}
+
+	t.Run("no billing mode means no fallback", func(t *testing.T) {
+		ctx := ubl.FindContext("urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0", "")
+		assert.Nil(t, ctx)
+	})
+
+	t.Run("mangled URN carries the addon through Convert", func(t *testing.T) {
+		data, err := os.ReadFile(filepath.Join(getParsePath(), "france-cius", "b2b-reg.xml"))
+		require.NoError(t, err)
+		old := []byte("<cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>")
+		require.Contains(t, string(data), string(old))
+		data = bytes.Replace(data, old, []byte("<cbc:CustomizationID>urn.eu:en16931:2017</cbc:CustomizationID>"), 1)
+
+		doc, err := ubl.Parse(data)
+		require.NoError(t, err)
+		env, err := doc.(*ubl.Invoice).Convert()
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		assert.Contains(t, inv.GetAddons(), flow2.V1)
+	})
+}
+
 func TestFindContext(t *testing.T) {
 	t.Run("find EN16931 by CustomizationID", func(t *testing.T) {
 		ctx := ubl.FindContext("urn:cen.eu:en16931:2017", "")
