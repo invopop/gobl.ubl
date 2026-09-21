@@ -20,7 +20,8 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Contracts) > 0 ||
 		len(o.Tender) > 0 ||
 		len(o.Identities) > 0 ||
-		o.Issuer != nil
+		o.Issuer != nil ||
+		o.Buyer != nil
 }
 
 func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
@@ -36,6 +37,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	}
 
 	ordering.Issuer = ui.goblOrderingIssuer(o)
+	ordering.Buyer = ui.goblOrderingAddressee(o)
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(ui.InvoicePeriod) > 0 {
@@ -170,6 +172,19 @@ func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
 		return nil
 	}
 	return goblParty(sp.ServiceProviderParty.Party, o)
+}
+
+// goblOrderingAddressee reads EXT-FR-FE-BG-04, the party the invoice is
+// addressed to, which only the French extended profile defines.
+func (ui *Invoice) goblOrderingAddressee(o *options) *org.Party {
+	if !o.context.Is(ContextPeppolFranceExtended) {
+		return nil
+	}
+	cp := ui.AccountingCustomerParty.Party
+	if cp == nil || cp.ServiceProviderParty == nil {
+		return nil
+	}
+	return goblParty(cp.ServiceProviderParty.Party, o)
 }
 
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
