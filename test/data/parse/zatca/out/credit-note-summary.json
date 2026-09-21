@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "025465f8c39b7f13b74ceb25013c6add336a182ffcd68d0b20dff9af47cb4539"
+			"val": "9f877aad7c2b55f8d78c411c8afaf9188bbed3a54188ad6ee165b057f41db522"
 		}
 	},
 	"doc": {
@@ -122,7 +122,10 @@
 					"ref": "SVC-DEV-01",
 					"name": "Development services",
 					"price": "120.00",
-					"unit": "h"
+					"unit": "h",
+					"ext": {
+						"untdid-unit": "HUR"
+					}
 				},
 				"sum": "600.00",
 				"discounts": [
@@ -152,7 +155,10 @@
 					"ref": "ITM-DESK-01",
 					"name": "Office desk return",
 					"price": "850.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "850.00",
 				"taxes": [
@@ -174,7 +180,10 @@
 					"ref": "TRV-FLT-01",
 					"name": "Domestic flights for cancelled visit",
 					"price": "300.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "600.00",
 				"taxes": [

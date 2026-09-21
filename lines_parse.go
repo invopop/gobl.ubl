@@ -92,7 +92,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		}
 
 		if iq.UnitCode != "" {
-			line.Item.Unit = goblUnitFromUNECE(cbc.Code(cleanString(iq.UnitCode)))
+			line.Item.Ext, line.Item.Unit = goblUnit(line.Item.Ext, cbc.Code(iq.UnitCode))
 		}
 	}
 
@@ -106,17 +106,17 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 
 	if docLine.AccountingCost != nil {
 		// BT-133
-		line.Cost = cbc.Code(cleanString(*docLine.AccountingCost))
+		line.Cost = cbc.Code(*docLine.AccountingCost)
 	}
 
 	// BT-128: Invoice line object identifier
 	if docLine.DocumentReference != nil && docLine.DocumentReference.ID.Value != "" {
 		line.Identifier = &org.Identity{
-			Code: cbc.Code(cleanString(docLine.DocumentReference.ID.Value)),
+			Code: cbc.Code(docLine.DocumentReference.ID.Value),
 		}
 		if docLine.DocumentReference.ID.SchemeID != nil {
 			line.Identifier.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyReference: cbc.Code(cleanString(*docLine.DocumentReference.ID.SchemeID)),
+				untdid.ExtKeyReference: cbc.Code(*docLine.DocumentReference.ID.SchemeID),
 			})
 		}
 	}
@@ -129,7 +129,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 	}
 
 	if docLine.OrderLineReference != nil && docLine.OrderLineReference.LineID != "" {
-		line.Order = cbc.Code(cleanString(docLine.OrderLineReference.LineID))
+		line.Order = cbc.Code(docLine.OrderLineReference.LineID)
 	}
 
 	if docLine.AllowanceCharge != nil {
@@ -174,11 +174,11 @@ func goblConvertLineItem(di *Item, item *org.Item) error {
 	}
 
 	if di.OriginCountry != nil {
-		item.Origin = l10n.ISOCountryCode(cleanString(di.OriginCountry.IdentificationCode))
+		item.Origin = l10n.ISOCountryCode(di.OriginCountry.IdentificationCode)
 	}
 
 	if di.SellersItemIdentification != nil && di.SellersItemIdentification.ID != nil {
-		item.Ref = cbc.Code(cleanString(di.SellersItemIdentification.ID.Value))
+		item.Ref = cbc.Code(di.SellersItemIdentification.ID.Value)
 	}
 
 	item.Identities = goblItemIdentities(di)
@@ -214,7 +214,7 @@ func goblItemAttribute(property *AdditionalItemProperty) (*org.Attribute, error)
 		}
 		attr.Amount = &amount
 		if property.ValueQuantity.UnitCode != "" {
-			attr.Unit = goblUnitFromUNECE(cbc.Code(cleanString(property.ValueQuantity.UnitCode)))
+			attr.Ext, attr.Unit = goblUnit(attr.Ext, cbc.Code(property.ValueQuantity.UnitCode))
 		}
 	case property.Value != "":
 		attr.Text = cleanString(property.Value)
@@ -232,18 +232,18 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 
 	line.Taxes = tax.Set{
 		{
-			Category: cbc.Code(cleanString(ctc.TaxScheme.ID.Value)),
+			Category: cbc.Code(ctc.TaxScheme.ID.Value),
 		},
 	}
 	if ctc.ID != nil {
 		line.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyTaxCategory: cbc.Code(cleanString(ctc.ID.Value)),
+			untdid.ExtKeyTaxCategory: cbc.Code(ctc.ID.Value),
 		})
 
 		// Try to get exemption code from TaxTotal
-		key := buildTaxCategoryKey(cleanString(ctc.TaxScheme.ID.Value), cleanString(ctc.ID.Value), ctc.Percent)
+		key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value, ctc.Percent)
 		if info, ok := taxCategoryMap[key]; ok && info.exemptionReasonCode != "" {
-			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(cleanString(info.exemptionReasonCode)))
+			line.Taxes[0].Ext = line.Taxes[0].Ext.Set(cef.ExtKeyVATEX, cbc.Code(info.exemptionReasonCode))
 		}
 
 	}
@@ -284,9 +284,9 @@ func goblItemIdentities(di *Item) []*org.Identity {
 		s := *di.StandardItemIdentification.ID.SchemeID
 		id := &org.Identity{
 			Ext: tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(cleanString(s)),
+				iso.ExtKeySchemeID: cbc.Code(s),
 			}),
-			Code: cbc.Code(cleanString(di.StandardItemIdentification.ID.Value)),
+			Code: cbc.Code(di.StandardItemIdentification.ID.Value),
 		}
 
 		ids = append(ids, id)
@@ -310,7 +310,7 @@ func goblIdentity(id *IDType) *org.Identity {
 		return nil
 	}
 	identity := &org.Identity{
-		Code: cbc.Code(cleanString(id.Value)),
+		Code: cbc.Code(id.Value),
 	}
 	for _, field := range []*string{id.SchemeID, id.ListID, id.ListVersionID, id.SchemeName, id.Name} {
 		if field != nil {

@@ -20,22 +20,24 @@ func hasOrderingData(o *bill.Ordering) bool {
 		len(o.Contracts) > 0 ||
 		len(o.Tender) > 0 ||
 		len(o.Identities) > 0 ||
-		o.Issuer != nil
+		o.Issuer != nil ||
+		o.Buyer != nil
 }
 
 func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
-		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
+		ordering.Code = cbc.Code(ui.BuyerReference)
 	}
 
 	// BT-19: Buyer accounting reference
 	if ui.AccountingCost != "" {
-		ordering.Cost = cbc.Code(cleanString(ui.AccountingCost))
+		ordering.Cost = cbc.Code(ui.AccountingCost)
 	}
 
 	ordering.Issuer = ui.goblOrderingIssuer(o)
+	ordering.Buyer = ui.goblOrderingAddressee(o)
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(ui.InvoicePeriod) > 0 {
@@ -84,14 +86,14 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 		if id := ui.OrderReference.ID; id != "" && id != orderReferenceNotApplicable {
 			ordering.Purchases = []*org.DocumentRef{
 				{
-					Code: cbc.Code(cleanString(id)),
+					Code: cbc.Code(id),
 				},
 			}
 		}
 		// BT-14: Sales order reference
 		if ui.OrderReference.SalesOrderID != "" {
 			ordering.Sales = []*org.DocumentRef{
-				{Code: cbc.Code(cleanString(ui.OrderReference.SalesOrderID))},
+				{Code: cbc.Code(ui.OrderReference.SalesOrderID)},
 			}
 		}
 	}
@@ -100,7 +102,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	for _, proj := range ui.ProjectReference {
 		if proj.ID != "" {
 			ordering.Projects = append(ordering.Projects, &org.DocumentRef{
-				Code: cbc.Code(cleanString(proj.ID)),
+				Code: cbc.Code(proj.ID),
 			})
 		}
 	}
@@ -153,11 +155,11 @@ func goblAdditionalDocumentIdentities(refs []Reference) []*org.Identity {
 			identities = make([]*org.Identity, 0)
 		}
 		identity := &org.Identity{
-			Code: cbc.Code(cleanString(ref.ID.Value)),
+			Code: cbc.Code(ref.ID.Value),
 		}
 		if ref.ID.SchemeID != nil {
 			// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
-			identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(cleanString(*ref.ID.SchemeID)))
+			identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(*ref.ID.SchemeID))
 		}
 		identities = append(identities, identity)
 	}
@@ -172,9 +174,22 @@ func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
 	return goblParty(sp.ServiceProviderParty.Party, o)
 }
 
+// goblOrderingAddressee reads EXT-FR-FE-BG-04, the party the invoice is
+// addressed to, which only the French extended profile defines.
+func (ui *Invoice) goblOrderingAddressee(o *options) *org.Party {
+	if !o.context.Is(ContextPeppolFranceExtended) {
+		return nil
+	}
+	cp := ui.AccountingCustomerParty.Party
+	if cp == nil || cp.ServiceProviderParty == nil {
+		return nil
+	}
+	return goblParty(cp.ServiceProviderParty.Party, o)
+}
+
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
 	docRef := &org.DocumentRef{
-		Code: cbc.Code(cleanString(ref.ID.Value)),
+		Code: cbc.Code(ref.ID.Value),
 	}
 	if ref.DocumentType != "" {
 		docRef.Reason = cleanString(ref.DocumentType)
@@ -187,7 +202,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.IssueDate = &refDate
 	}
 	if ref.DocumentTypeCode != "" {
-		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(cleanString(ref.DocumentTypeCode)))
+		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.DocumentTypeCode))
 	}
 	if ref.DocumentDescription != "" {
 		docRef.Description = cleanString(ref.DocumentDescription)
