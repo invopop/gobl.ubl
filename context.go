@@ -1,8 +1,6 @@
 package ubl
 
 import (
-	"strings"
-
 	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/addons/de/xrechnung"
@@ -121,12 +119,12 @@ func FindContext(customizationID string, profileID string) *Context {
 	// it is the only field worth trusting here: the CTC schematron never
 	// checks BT-24, so mangled CustomizationIDs (a missing ":extended-ctc-fr"
 	// suffix, "urn.eu:" for "urn:cen.eu:") validate cleanly downstream.
-	// "conformant" is all that separates the Extended flavour from the CIUS.
+	//
+	// Extended rather than the CIUS because parsing only ever reads more
+	// under it -- the payer, the agent and the addressee are gated on it --
+	// and a CIUS document simply does not carry those elements.
 	if isFrenchBillingMode(profileID) {
-		ctx := ContextPeppolFranceCIUS
-		if strings.Contains(customizationID, "conformant") {
-			ctx = ContextPeppolFranceExtended
-		}
+		ctx := ContextPeppolFranceExtended
 		return &ctx
 	}
 

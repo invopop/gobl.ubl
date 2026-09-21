@@ -309,9 +309,9 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			&ubl.ContextPeppolFranceExtended,
 		},
 		{
-			"mangled EN16931 URN falls back to CIUS",
+			"mangled EN16931 URN",
 			"urn.eu:en16931:2017",
-			&ubl.ContextPeppolFranceCIUS,
+			&ubl.ContextPeppolFranceExtended,
 		},
 		{
 			// The billing mode is trusted outright, so even an unrelated
@@ -320,13 +320,13 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			// use long URNs.
 			"unrelated customization still follows the billing mode",
 			"urn:peppol:pint:billing-1@sg-1",
-			&ubl.ContextPeppolFranceCIUS,
+			&ubl.ContextPeppolFranceExtended,
 		},
 		{
 			// BT-24 absent: the billing mode is all that is left to go on.
 			"absent customization",
 			"",
-			&ubl.ContextPeppolFranceCIUS,
+			&ubl.ContextPeppolFranceExtended,
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
