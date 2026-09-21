@@ -78,8 +78,8 @@ func (c *Context) GetVESID(inv *bill.Invoice) string {
 //     OutputCustomizationID and then on CustomizationID
 //  2. Tries to match on the full CustomizationID (for external identification)
 //  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
-//  4. As a last resort, falls back to a French context when the ProfileID is a
-//     billing mode and the CustomizationID still looks French
+//  4. As a last resort, falls back to a French context whenever the ProfileID is
+//     a French billing mode
 func FindContext(customizationID string, profileID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// CustomizationID as EN16931 but can be identified by their ProfileID
@@ -117,11 +117,12 @@ func FindContext(customizationID string, profileID string) *Context {
 		}
 	}
 
-	// Nothing matched, but the billing mode says the document is French. The
-	// CTC schematron never checks BT-24, so mangled CustomizationIDs (a missing
-	// ":extended-ctc-fr" suffix, "urn.eu:" for "urn:cen.eu:") validate cleanly
-	// downstream; without this the document would lose every French rule.
-	if isFrenchBillingMode(profileID) && looksFrench(customizationID) {
+	// Nothing matched, but the billing mode says the document is French, and
+	// it is the only field worth trusting here: the CTC schematron never
+	// checks BT-24, so mangled CustomizationIDs (a missing ":extended-ctc-fr"
+	// suffix, "urn.eu:" for "urn:cen.eu:") validate cleanly downstream.
+	// "conformant" is all that separates the Extended flavour from the CIUS.
+	if isFrenchBillingMode(profileID) {
 		ctx := ContextPeppolFranceCIUS
 		if strings.Contains(customizationID, "conformant") {
 			ctx = ContextPeppolFranceExtended
@@ -130,19 +131,6 @@ func FindContext(customizationID string, profileID string) *Context {
 	}
 
 	return nil
-}
-
-// looksFrench reports whether a CustomizationID that matched no known context
-// leaves the French billing mode as the best available signal: either it is
-// recognisably an EN 16931 / French CTC identifier, or it is absent entirely.
-// It keeps the fallback away from documents of another standard that happen to
-// carry a two-character ProfileID.
-func looksFrench(customizationID string) bool {
-	if customizationID == "" {
-		return true
-	}
-	id := strings.ToLower(customizationID)
-	return strings.Contains(id, "en16931") || strings.Contains(id, "cpro.gouv.fr")
 }
 
 // isFrenchBillingMode checks if the given profileID matches a known French

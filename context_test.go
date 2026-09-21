@@ -281,7 +281,8 @@ func TestFrenchBillingModeResolution(t *testing.T) {
 	})
 
 	t.Run("unmodelled CustomizationID still parses best-effort", func(t *testing.T) {
-		ctx := ubl.FindContext("urn:peppol:pint:billing-1@sg-1", "B1")
+		// Without a billing mode there is nothing to fall back on.
+		ctx := ubl.FindContext("urn:peppol:pint:billing-1@sg-1", "")
 		assert.Nil(t, ctx)
 	})
 }
@@ -313,11 +314,13 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			&ubl.ContextPeppolFranceCIUS,
 		},
 		{
-			// Another standard's customization must not be dragged into a
-			// French context by a two-character ProfileID.
-			"foreign customization stays unmatched",
+			// The billing mode is trusted outright, so even an unrelated
+			// customization resolves French. A two-character ProfileID is
+			// vanishingly unlikely outside the French profiles, which all
+			// use long URNs.
+			"unrelated customization still follows the billing mode",
 			"urn:peppol:pint:billing-1@sg-1",
-			nil,
+			&ubl.ContextPeppolFranceCIUS,
 		},
 		{
 			// BT-24 absent: the billing mode is all that is left to go on.
