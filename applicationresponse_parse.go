@@ -60,7 +60,7 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	}
 
 	for _, n := range ar.Note {
-		out.Notes = append(out.Notes, &org.Note{Text: n})
+		out.Notes = append(out.Notes, &org.Note{Text: cleanString(n)})
 	}
 
 	for _, dr := range ar.DocumentResponse {
@@ -84,7 +84,7 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 
 	if r := dr.Response; r != nil {
 		if len(r.Description) > 0 {
-			line.Description = r.Description[0]
+			line.Description = cleanString(r.Description[0])
 		}
 		if r.EffectiveDate != "" {
 			d, err := parseDate(r.EffectiveDate)

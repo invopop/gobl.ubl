@@ -52,7 +52,7 @@ func (ui *Invoice) goblAddCharges(out *bill.Invoice) error {
 func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Charge, error) {
 	ch := &bill.Charge{}
 	if ac.AllowanceChargeReason != nil {
-		ch.Reason = *ac.AllowanceChargeReason
+		ch.Reason = cleanString(*ac.AllowanceChargeReason)
 	}
 	if ac.Amount.Value != "" {
 		a, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
@@ -134,7 +134,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Discount, error) {
 	d := &bill.Discount{}
 	if ac.AllowanceChargeReason != nil {
-		d.Reason = *ac.AllowanceChargeReason
+		d.Reason = cleanString(*ac.AllowanceChargeReason)
 	}
 	if ac.Amount.Value != "" {
 		a, err := num.AmountFromString(normalizeNumericString(ac.Amount.Value))
@@ -227,7 +227,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		})
 	}
 	if ac.AllowanceChargeReason != nil {
-		ch.Reason = *ac.AllowanceChargeReason
+		ch.Reason = cleanString(*ac.AllowanceChargeReason)
 	}
 	if ac.MultiplierFactorNumeric != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
@@ -266,7 +266,7 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		})
 	}
 	if ac.AllowanceChargeReason != nil {
-		d.Reason = *ac.AllowanceChargeReason
+		d.Reason = cleanString(*ac.AllowanceChargeReason)
 	}
 	if ac.MultiplierFactorNumeric != nil {
 		multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)

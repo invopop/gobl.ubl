@@ -314,7 +314,7 @@ func goblIdentity(id *IDType) *org.Identity {
 	}
 	for _, field := range []*string{id.SchemeID, id.ListID, id.ListVersionID, id.SchemeName, id.Name} {
 		if field != nil {
-			identity.Label = *field
+			identity.Label = cleanString(*field)
 			break
 		}
 	}

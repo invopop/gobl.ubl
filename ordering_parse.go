@@ -28,12 +28,12 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
-		ordering.Code = cbc.Code(cleanString(ui.BuyerReference))
+		ordering.Code = cbc.Code(ui.BuyerReference)
 	}
 
 	// BT-19: Buyer accounting reference
 	if ui.AccountingCost != "" {
-		ordering.Cost = cbc.Code(cleanString(ui.AccountingCost))
+		ordering.Cost = cbc.Code(ui.AccountingCost)
 	}
 
 	ordering.Issuer = ui.goblOrderingIssuer(o)

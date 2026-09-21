@@ -130,7 +130,7 @@ func parseAddress(address *PostalAddress) *org.Address {
 		addr.Locality = cleanString(*address.CityName)
 	}
 	if address.PostalZone != nil {
-		addr.Code = cbc.Code(cleanString(*address.PostalZone))
+		addr.Code = cbc.Code(*address.PostalZone)
 	}
 	if address.CountrySubentity != nil {
 		addr.Region = cleanString(*address.CountrySubentity)
