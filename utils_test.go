@@ -1,9 +1,15 @@
 package ubl
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+	"reflect"
+	"regexp"
+	"sort"
+	"strings"
 	"testing"
 
-	"fmt"
 	"github.com/invopop/gobl"
 	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -12,12 +18,6 @@ import (
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"path/filepath"
-	"reflect"
-	"regexp"
-	"sort"
-	"strings"
 )
 
 // Define tests for the ParseDate function
