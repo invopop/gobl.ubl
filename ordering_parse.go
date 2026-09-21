@@ -84,14 +84,14 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 		if id := ui.OrderReference.ID; id != "" && id != orderReferenceNotApplicable {
 			ordering.Purchases = []*org.DocumentRef{
 				{
-					Code: cbc.Code(id),
+					Code: cbc.Code(cleanString(id)),
 				},
 			}
 		}
 		// BT-14: Sales order reference
 		if ui.OrderReference.SalesOrderID != "" {
 			ordering.Sales = []*org.DocumentRef{
-				{Code: cbc.Code(ui.OrderReference.SalesOrderID)},
+				{Code: cbc.Code(cleanString(ui.OrderReference.SalesOrderID))},
 			}
 		}
 	}
@@ -100,7 +100,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 	for _, proj := range ui.ProjectReference {
 		if proj.ID != "" {
 			ordering.Projects = append(ordering.Projects, &org.DocumentRef{
-				Code: cbc.Code(proj.ID),
+				Code: cbc.Code(cleanString(proj.ID)),
 			})
 		}
 	}
@@ -153,11 +153,11 @@ func goblAdditionalDocumentIdentities(refs []Reference) []*org.Identity {
 			identities = make([]*org.Identity, 0)
 		}
 		identity := &org.Identity{
-			Code: cbc.Code(ref.ID.Value),
+			Code: cbc.Code(cleanString(ref.ID.Value)),
 		}
 		if ref.ID.SchemeID != nil {
 			// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
-			identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(*ref.ID.SchemeID))
+			identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(cleanString(*ref.ID.SchemeID)))
 		}
 		identities = append(identities, identity)
 	}
@@ -174,7 +174,7 @@ func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
 
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
 	docRef := &org.DocumentRef{
-		Code: cbc.Code(ref.ID.Value),
+		Code: cbc.Code(cleanString(ref.ID.Value)),
 	}
 	if ref.DocumentType != "" {
 		docRef.Reason = cleanString(ref.DocumentType)
@@ -187,7 +187,7 @@ func goblReference(ref *Reference) (*org.DocumentRef, error) {
 		docRef.IssueDate = &refDate
 	}
 	if ref.DocumentTypeCode != "" {
-		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(ref.DocumentTypeCode))
+		docRef.Ext = docRef.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(cleanString(ref.DocumentTypeCode)))
 	}
 	if ref.DocumentDescription != "" {
 		docRef.Description = cleanString(ref.DocumentDescription)

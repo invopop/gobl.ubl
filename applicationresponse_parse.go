@@ -18,7 +18,7 @@ func (ar *ApplicationResponse) Convert() (*gobl.Envelope, error) {
 	o := new(options)
 	profileID := ""
 	if ar.ProfileID != nil {
-		profileID = ar.ProfileID.Value
+		profileID = cleanString(ar.ProfileID.Value)
 	}
 	if ctx := FindContext(ar.CustomizationID, profileID); ctx != nil {
 		o.context = *ctx
@@ -40,7 +40,7 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	out := &bill.Status{
 		Addons:   tax.Addons{List: o.context.Addons},
 		Type:     bill.StatusTypeResponse,
-		Code:     cbc.Code(ar.ID),
+		Code:     cbc.Code(cleanString(ar.ID)),
 		Supplier: goblParty(ar.ReceiverParty, o),
 		Customer: goblParty(ar.SenderParty, o),
 	}
@@ -97,7 +97,7 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 
 	if ref := dr.DocumentReference; ref != nil {
 		doc := &org.DocumentRef{
-			Code: cbc.Code(ref.ID),
+			Code: cbc.Code(cleanString(ref.ID)),
 		}
 		if ref.UUID != "" {
 			doc.UUID = uuid.UUID(ref.UUID)

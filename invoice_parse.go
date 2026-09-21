@@ -70,8 +70,8 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 		Addons: tax.Addons{
 			List: o.context.Addons,
 		},
-		Code:     cbc.Code(ui.ID),
-		Currency: currency.Code(ui.DocumentCurrencyCode),
+		Code:     cbc.Code(cleanString(ui.ID)),
+		Currency: currency.Code(cleanString(ui.DocumentCurrencyCode)),
 		Tax: &bill.Tax{
 			// Always default to currency rounding for incoming invoices
 			// as this is the default for EN16931.
@@ -127,7 +127,7 @@ func (ui *Invoice) profileID() string {
 	if ui.ProfileID == nil {
 		return ""
 	}
-	return ui.ProfileID.Value
+	return cleanString(ui.ProfileID.Value)
 }
 
 // applyContextTaxExtensions sets tax extensions that depend on the active context.
@@ -137,7 +137,7 @@ func (ui *Invoice) applyContextTaxExtensions(out *bill.Invoice, o *options) {
 	}
 
 	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {
-		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceType, cbc.Code(*ui.InvoiceTypeCode.Name))
+		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceType, cbc.Code(cleanString(*ui.InvoiceTypeCode.Name)))
 	}
 }
 
@@ -192,8 +192,8 @@ func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
 
 	if ui.TaxCurrencyCode != "" && ui.DocumentCurrencyCode != ui.TaxCurrencyCode {
 		out.ExchangeRates = goblExchangeRates(
-			currency.Code(ui.DocumentCurrencyCode),
-			currency.Code(ui.TaxCurrencyCode),
+			currency.Code(cleanString(ui.DocumentCurrencyCode)),
+			currency.Code(cleanString(ui.TaxCurrencyCode)),
 			ui.TaxTotal,
 		)
 	}
@@ -303,7 +303,7 @@ func tagCodeParse(typeCode *IDType, ctx Context) []cbc.Key {
 	}
 
 	if ctx.Is(ContextZATCA) && typeCode.Name != nil {
-		it := zatca.ParseInvoiceType(cbc.Code(*typeCode.Name))
+		it := zatca.ParseInvoiceType(cbc.Code(cleanString(*typeCode.Name)))
 		if it.Simplified {
 			tags = append(tags, tax.TagSimplified)
 		}

@@ -60,7 +60,7 @@ func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 	}
 
 	att := &org.Attachment{
-		URL:  extRef.URI,
+		URL:  cleanString(extRef.URI),
 		MIME: extRef.MimeCode,
 	}
 
