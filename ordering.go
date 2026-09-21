@@ -88,9 +88,26 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 			ui.TaxRepresentativeParty = newParty(o.Seller, context)
 		}
 
+		// EXT-FR-FE-BG-05: the facturant, the service facturier raising the
+		// invoice on the seller's behalf.
 		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {
+			issuer := newParty(o.Issuer, context)
+			if context.Is(ContextPeppolFranceExtended) {
+				issuer.IndustryClassificationCode = partyRoleInvoicer
+			}
 			ui.AccountingSupplierParty.Party.ServiceProviderParty = &ServiceProviderParty{
-				Party: newParty(o.Issuer, context),
+				Party: issuer,
+			}
+		}
+
+		// EXT-FR-FE-BG-04: the party the invoice is addressed to, which sits
+		// under the buyer just as the facturant sits under the seller. Only
+		// the French extended profile defines it.
+		if o.Buyer != nil && ui.AccountingCustomerParty.Party != nil && context.Is(ContextPeppolFranceExtended) {
+			addressee := newParty(o.Buyer, context)
+			addressee.IndustryClassificationCode = partyRoleInvoicee
+			ui.AccountingCustomerParty.Party.ServiceProviderParty = &ServiceProviderParty{
+				Party: addressee,
 			}
 		}
 
