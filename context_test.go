@@ -287,9 +287,8 @@ func TestFrenchBillingModeResolution(t *testing.T) {
 	})
 }
 
-// The French CTC schematron never validates BT-24, so a sender can ship a
-// mangled CustomizationID and still pass every downstream rule set. The
-// billing mode in BT-23 is then the only trustworthy French signal.
+// BT-24 is never validated by the CTC schematron, so a mangled CustomizationID
+// leaves the BT-23 billing mode as the only French signal.
 func TestFrenchBillingModeFallback(t *testing.T) {
 	for _, tt := range []struct {
 		name            string
@@ -297,8 +296,7 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 		want            *ubl.Context
 	}{
 		{
-			// Seen in the wild: "urn.eu:" for "urn:cen.eu:", and no
-			// ":extended-ctc-fr" suffix.
+			// Seen in the wild: "urn.eu:" for "urn:cen.eu:", no suffix.
 			"mangled extended URN",
 			"urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
 			&ubl.ContextPeppolFranceExtended,
@@ -314,16 +312,13 @@ func TestFrenchBillingModeFallback(t *testing.T) {
 			&ubl.ContextPeppolFranceExtended,
 		},
 		{
-			// The billing mode is trusted outright, so even an unrelated
-			// customization resolves French. A two-character ProfileID is
-			// vanishingly unlikely outside the French profiles, which all
-			// use long URNs.
+			// Every other profile's ProfileID is a long URN.
 			"unrelated customization still follows the billing mode",
 			"urn:peppol:pint:billing-1@sg-1",
 			&ubl.ContextPeppolFranceExtended,
 		},
 		{
-			// BT-24 absent: the billing mode is all that is left to go on.
+			// BT-24 absent: the billing mode is all there is.
 			"absent customization",
 			"",
 			&ubl.ContextPeppolFranceExtended,
