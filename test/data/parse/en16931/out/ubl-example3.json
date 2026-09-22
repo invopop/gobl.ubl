@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "aa77cfbb3797506cac52a4fc9850571144afe435b221a3c28c3ed3393946e1c9"
+			"val": "a1077a725f911a10332de0fb287b679387770f869688024c1b043d1f5d3cfc25"
 		}
 	},
 	"doc": {
@@ -199,13 +199,7 @@
 								"base": "900.00",
 								"percent": "25%",
 								"amount": "225.00"
-							}
-						],
-						"amount": "225.00"
-					},
-					{
-						"code": "VAT",
-						"rates": [
+							},
 							{
 								"ext": {
 									"untdid-tax-category": "S"
@@ -215,7 +209,7 @@
 								"amount": "80.00"
 							}
 						],
-						"amount": "80.00"
+						"amount": "305.00"
 					}
 				],
 				"sum": "305.00"

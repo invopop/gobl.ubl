@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -330,10 +331,15 @@ func (ui *Invoice) goblDeclaredTaxBreakdown(exp uint32) *tax.Total {
 				Base:   base.RescaleUp(exp),
 				Amount: amount.RescaleUp(exp),
 			}
+			ext := make(cbc.CodeMap)
 			if st.TaxCategory.ID != nil {
-				rate.Ext = tax.ExtensionsOf(cbc.CodeMap{
-					untdid.ExtKeyTaxCategory: cbc.Code(st.TaxCategory.ID.Value),
-				})
+				ext[untdid.ExtKeyTaxCategory] = cbc.Code(st.TaxCategory.ID.Value)
+			}
+			if st.TaxCategory.TaxExemptionReasonCode != nil {
+				ext[cef.ExtKeyVATEX] = cbc.Code(*st.TaxCategory.TaxExemptionReasonCode)
+			}
+			if len(ext) > 0 {
+				rate.Ext = tax.ExtensionsOf(ext)
 			}
 			if st.TaxCategory.Percent != nil {
 				p, err := num.PercentageFromString(strings.TrimSuffix(normalizeNumericString(*st.TaxCategory.Percent), "%") + "%")
@@ -341,12 +347,9 @@ func (ui *Invoice) goblDeclaredTaxBreakdown(exp uint32) *tax.Total {
 					rate.Percent = &p
 				}
 			}
-			cat := cbc.Code(st.TaxCategory.TaxScheme.ID.Value)
-			total.Categories = append(total.Categories, &tax.CategoryTotal{
-				Code:   cat,
-				Rates:  []*tax.RateTotal{rate},
-				Amount: rate.Amount,
-			})
+			cat := goblCategoryTotal(total, cbc.Code(st.TaxCategory.TaxScheme.ID.Value))
+			cat.Rates = append(cat.Rates, rate)
+			cat.Amount = cat.Amount.MatchPrecision(rate.Amount).Add(rate.Amount)
 			total.Sum = total.Sum.MatchPrecision(rate.Amount).Add(rate.Amount)
 		}
 	}
@@ -373,4 +376,18 @@ func (ui *Invoice) applyPayableRounding(out *bill.Invoice) {
 		out.Totals = new(bill.Totals)
 	}
 	out.Totals.Rounding = &v
+}
+
+// goblCategoryTotal finds the running total for a tax category, adding one if
+// the category has not been seen yet. Each declared tax subtotal is a rate
+// within its category, not a category of its own.
+func goblCategoryTotal(total *tax.Total, code cbc.Code) *tax.CategoryTotal {
+	for _, c := range total.Categories {
+		if c.Code == code {
+			return c
+		}
+	}
+	cat := &tax.CategoryTotal{Code: code}
+	total.Categories = append(total.Categories, cat)
+	return cat
 }
