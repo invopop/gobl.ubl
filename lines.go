@@ -307,8 +307,6 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if ch.Percent != nil {
 			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			// PEPPOL-EN16931-R040: emit the basis the percentage was
-			// calculated on, not the line sum.
 			switch {
 			case ch.Base != nil:
 				ac.BaseAmount = newAmountPtr(*ch.Base, ccy)
@@ -332,8 +330,6 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if d.Percent != nil {
 			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			// PEPPOL-EN16931-R040: emit the basis the percentage was
-			// calculated on, not the line sum.
 			switch {
 			case d.Base != nil:
 				ac.BaseAmount = newAmountPtr(*d.Base, ccy)
