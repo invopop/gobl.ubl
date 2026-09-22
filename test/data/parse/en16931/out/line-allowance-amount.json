@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bad5ab06b1a467d6d836b6d2dfa91c278bad4074ed5a84ab58b143bd54f38d83"
+			"val": "7e599ef0a30b522cacf0659b368f35422574792e10661042544dceaa3213207a"
 		},
 		"from": "iso6523-actorid-upis::0225:381511039",
 		"to": "iso6523-actorid-upis::0225:820731115"
@@ -119,7 +119,10 @@
 						}
 					],
 					"price": "0.60",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "1620.00",
 				"discounts": [
@@ -167,7 +170,10 @@
 						}
 					],
 					"price": "0.42",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "8225.28",
 				"discounts": [

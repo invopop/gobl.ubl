@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "27cd6c5266412be9649f2cf057f6c2d6c3e701b81a922f3280a41b837186fdcf"
+			"val": "a1f084b90fe97cf11bede9d7e3ddb578582553e7705374f397ee026de58c55df"
 		}
 	},
 	"doc": {
@@ -65,7 +65,10 @@
 				"item": {
 					"name": "Widget",
 					"price": "10.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "2000.00",
 				"discounts": [

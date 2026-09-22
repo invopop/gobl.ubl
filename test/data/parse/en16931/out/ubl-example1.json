@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "3b88cd86539849cf1129fbef44e42eefc5d90d347f5ef3aebf244e006e4b8e47"
+			"val": "584d8a27b46bd6480bd6020be652c65841b90f0362915b47cfb93719799ccf9c"
 		}
 	},
 	"doc": {
@@ -79,7 +79,10 @@
 					"ref": "166022",
 					"name": "PATAT FRITES 10MM 10KG",
 					"price": "9.95",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "19.90",
 				"taxes": [
@@ -101,7 +104,10 @@
 					"ref": "661813",
 					"name": "PKAAS 50PL. JONG BEL. 1KG",
 					"price": "9.85",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "9.85",
 				"taxes": [
@@ -123,7 +129,10 @@
 					"ref": "438146",
 					"name": "POT KETCHUP 3 LT",
 					"price": "8.29",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "8.29",
 				"taxes": [
@@ -145,7 +154,10 @@
 					"ref": "438103",
 					"name": "FRITESSAUS 3 LRR",
 					"price": "7.23",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "14.46",
 				"taxes": [
@@ -167,7 +179,10 @@
 					"ref": "666955",
 					"name": "KOFFIE BLIK 3,5KG SNELF",
 					"price": "35.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "35.00",
 				"taxes": [
@@ -189,7 +204,10 @@
 					"ref": "664871",
 					"name": "KOFFIE 3.5 KG BLIK STAND",
 					"price": "35.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "35.00",
 				"taxes": [
@@ -211,7 +229,10 @@
 					"ref": "350257",
 					"name": "SUIKERKLONT",
 					"price": "10.65",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "10.65",
 				"taxes": [
@@ -233,7 +254,10 @@
 					"ref": "350258",
 					"name": "1 KG UL BLOKJES",
 					"price": "1.55",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "1.55",
 				"taxes": [
@@ -255,7 +279,10 @@
 					"ref": "999998",
 					"name": "BLOCKNOTE A5",
 					"price": "4.79",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "14.37",
 				"taxes": [
@@ -277,7 +304,10 @@
 					"ref": "740810",
 					"name": "CHIPS NAT KLEIN ZAKJES",
 					"price": "8.29",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "8.29",
 				"taxes": [
@@ -299,7 +329,10 @@
 					"ref": "740829",
 					"name": "CHIPS PAP KLEINE ZAKJES",
 					"price": "8.29",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "16.58",
 				"taxes": [
@@ -321,7 +354,10 @@
 					"ref": "740828",
 					"name": "TR KL PAKJES APPELSAP",
 					"price": "9.95",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "9.95",
 				"taxes": [
@@ -343,7 +379,10 @@
 					"ref": "740827",
 					"name": "PK CHOCOLADEMEL",
 					"price": "1.65",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "3.30",
 				"taxes": [
@@ -365,7 +404,10 @@
 					"ref": "999996",
 					"name": "KRAT BIER",
 					"price": "10.80",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "10.80",
 				"taxes": [
@@ -387,7 +429,10 @@
 					"ref": "999995",
 					"name": "STATIEGELD",
 					"price": "3.90",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "3.90",
 				"taxes": [
@@ -409,7 +454,10 @@
 					"ref": "102172",
 					"name": "BLEEK 3 X 750 ML",
 					"price": "3.80",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "7.60",
 				"taxes": [
@@ -431,7 +479,10 @@
 					"ref": "999994",
 					"name": "WC PAPIER",
 					"price": "4.67",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "9.34",
 				"taxes": [
@@ -453,7 +504,10 @@
 					"ref": "999993",
 					"name": "BALPENNEN 50 ST BLAUW",
 					"price": "18.63",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "18.63",
 				"taxes": [
@@ -475,7 +529,10 @@
 					"ref": "999992",
 					"name": "EM FRITUURVET",
 					"price": "17.02",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "102.12",
 				"taxes": [
@@ -497,7 +554,10 @@
 					"ref": "175137",
 					"name": "FRITUUR VET 10 KG RETOUR",
 					"price": "18.33",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "109.98",
 				"taxes": [
