@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "105a4f245a6ff92bbcb4259fed253e827b321475781271cc63fb407191e70913"
+			"val": "d0fcedaf203767ee3a0b8679f39641c898bebcaef519023ad7716fee795282a4"
 		}
 	},
 	"doc": {
@@ -142,7 +142,10 @@
 					"description": "Description of item",
 					"price": "400.00",
 					"unit": "one",
-					"origin": "NO"
+					"origin": "NO",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "4000.00",
 				"taxes": [
@@ -183,7 +186,10 @@
 					],
 					"description": "Description of item",
 					"price": "200.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "2000.00",
 				"taxes": [
@@ -225,7 +231,10 @@
 					],
 					"description": "Description of item",
 					"price": "90.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "900.00",
 				"taxes": [

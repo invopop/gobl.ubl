@@ -78,6 +78,12 @@ func goblParty(party *Party, o *options) *org.Party {
 	handlePartyTaxSchemes(party, p)
 	handlePartyIdentifications(party, p, o)
 
+	// EXT-FR-FE-BG-01/BG-03: the agent acting for the buyer or the seller,
+	// which only the French extended profile defines.
+	if party.AgentParty != nil && o.context.Is(ContextPeppolFranceExtended) {
+		p.Agent = goblParty(party.AgentParty, o)
+	}
+
 	return p
 }
 
@@ -124,7 +130,7 @@ func parseAddress(address *PostalAddress) *org.Address {
 		addr.Locality = cleanString(*address.CityName)
 	}
 	if address.PostalZone != nil {
-		addr.Code = cbc.Code(cleanString(*address.PostalZone))
+		addr.Code = cbc.Code(*address.PostalZone)
 	}
 	if address.CountrySubentity != nil {
 		addr.Region = cleanString(*address.CountrySubentity)

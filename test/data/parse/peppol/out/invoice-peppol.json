@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f60427433ca4a2847e9acfb919ca0a7483242899953d426d832fdd196e262a04"
+			"val": "4b6ea8d0895a28e9ff12282bb179fa12da684f95c74ed5cca2cb52a26336ccfa"
 		}
 	},
 	"doc": {
@@ -89,7 +89,9 @@
 				"item": {
 					"name": "Work description 1",
 					"price": "50.00",
-					"unit": "LH"
+					"ext": {
+						"untdid-unit": "LH"
+					}
 				},
 				"sum": "1300.00",
 				"taxes": [
@@ -110,7 +112,9 @@
 				"item": {
 					"name": "Work description 2",
 					"price": "98.00",
-					"unit": "LH"
+					"ext": {
+						"untdid-unit": "LH"
+					}
 				},
 				"sum": "980.00",
 				"taxes": [
@@ -131,7 +135,9 @@
 				"item": {
 					"name": "Work description 3",
 					"price": "66.00",
-					"unit": "LH"
+					"ext": {
+						"untdid-unit": "LH"
+					}
 				},
 				"sum": "1782.00",
 				"taxes": [
@@ -152,7 +158,9 @@
 				"item": {
 					"name": "Work description 4",
 					"price": "57.00",
-					"unit": "LH"
+					"ext": {
+						"untdid-unit": "LH"
+					}
 				},
 				"sum": "684.00",
 				"taxes": [
@@ -173,7 +181,9 @@
 				"item": {
 					"name": "Work description 5",
 					"price": "69.00",
-					"unit": "LH"
+					"ext": {
+						"untdid-unit": "LH"
+					}
 				},
 				"sum": "621.00",
 				"taxes": [

@@ -76,6 +76,7 @@ func (c *Context) GetVESID(inv *bill.Invoice) string {
 //     OutputCustomizationID and then on CustomizationID
 //  2. Tries to match on the full CustomizationID (for external identification)
 //  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
+//  4. Falls back to a French context when the ProfileID is a French billing mode
 func FindContext(customizationID string, profileID string) *Context {
 	// French billing mode check: France CIUS documents use the same
 	// CustomizationID as EN16931 but can be identified by their ProfileID
@@ -84,7 +85,7 @@ func FindContext(customizationID string, profileID string) *Context {
 		// OutputCustomizationID first: ContextEN16931 would otherwise match the
 		// plain EN16931 customization that CIUS documents carry.
 		for _, ctx := range contexts {
-			if ctx.OutputCustomizationID == customizationID {
+			if ctx.OutputCustomizationID != "" && ctx.OutputCustomizationID == customizationID {
 				return &ctx
 			}
 		}
@@ -111,6 +112,15 @@ func FindContext(customizationID string, profileID string) *Context {
 		if ctx.OutputCustomizationID != "" && ctx.OutputCustomizationID == customizationID {
 			return &ctx
 		}
+	}
+
+	// The CTC schematron never checks BT-24, so a mangled CustomizationID
+	// arrives validated and the billing mode is all that is left to trust.
+	// Extended because its extra mappings are additive: a CIUS document
+	// carries none of them.
+	if isFrenchBillingMode(profileID) {
+		ctx := ContextPeppolFranceExtended
+		return &ctx
 	}
 
 	return nil

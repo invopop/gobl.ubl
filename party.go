@@ -70,6 +70,14 @@ const TaxSchemeVAT = "VAT"
 // BT-32, the party's tax registration identifier.
 const TaxSchemeTaxRegistration = "LOC"
 
+// UNCL 3035 role codes the French extended profile pins on the parties it
+// adds: the facturant is the invoicer (EXT-FR-FE-113) and the party the
+// invoice is addressed to the invoicee (EXT-FR-FE-90).
+const (
+	partyRoleInvoicer = "II"
+	partyRoleInvoicee = "IV"
+)
+
 // SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
 	Party *Party `xml:"cac:Party"`
@@ -87,14 +95,16 @@ type ServiceProviderParty struct {
 
 // Party represents a party involved in a transaction
 type Party struct {
-	EndpointID           *EndpointID           `xml:"cbc:EndpointID"`
-	PartyIdentification  []Identification      `xml:"cac:PartyIdentification"`
-	PartyName            *PartyName            `xml:"cac:PartyName"`
-	PostalAddress        *PostalAddress        `xml:"cac:PostalAddress"`
-	PartyTaxScheme       []PartyTaxScheme      `xml:"cac:PartyTaxScheme"`
-	PartyLegalEntity     *PartyLegalEntity     `xml:"cac:PartyLegalEntity"`
-	Contact              *Contact              `xml:"cac:Contact"`
-	ServiceProviderParty *ServiceProviderParty `xml:"cac:ServiceProviderParty"`
+	EndpointID                 *EndpointID           `xml:"cbc:EndpointID"`
+	IndustryClassificationCode string                `xml:"cbc:IndustryClassificationCode,omitempty"`
+	PartyIdentification        []Identification      `xml:"cac:PartyIdentification"`
+	PartyName                  *PartyName            `xml:"cac:PartyName"`
+	PostalAddress              *PostalAddress        `xml:"cac:PostalAddress"`
+	PartyTaxScheme             []PartyTaxScheme      `xml:"cac:PartyTaxScheme"`
+	PartyLegalEntity           *PartyLegalEntity     `xml:"cac:PartyLegalEntity"`
+	Contact                    *Contact              `xml:"cac:Contact"`
+	AgentParty                 *Party                `xml:"cac:AgentParty"`
+	ServiceProviderParty       *ServiceProviderParty `xml:"cac:ServiceProviderParty"`
 }
 
 // EndpointID represents an endpoint identifier
@@ -264,6 +274,14 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	}
 
 	p.EndpointID = newEndpointID(party)
+
+	// EXT-FR-FE-BG-01/BG-03: the agent acting for the buyer or the seller,
+	// which UBL nests inside the party it acts for. Only the French extended
+	// profile defines it. GOBL forbids an agent of an agent, so this recurses
+	// at most once.
+	if party.Agent != nil && ctx.Is(ContextPeppolFranceExtended) {
+		p.AgentParty = newParty(party.Agent, ctx)
+	}
 
 	if party.Alias != "" {
 		p.PartyName = &PartyName{

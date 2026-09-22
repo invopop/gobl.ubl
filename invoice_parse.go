@@ -269,7 +269,7 @@ func (ui *Invoice) applyZATCAPrecedingReasons(out *bill.Invoice, o *options) {
 	}
 	for i, note := range ui.PaymentMeans[0].InstructionNote {
 		if i < len(out.Preceding) {
-			out.Preceding[i].Reason = note
+			out.Preceding[i].Reason = cleanString(note)
 		}
 	}
 }

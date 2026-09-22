@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "00ecd2d389ed871616dbbe2a016072fa98c03ecd2f6dab6822e8bbe40b7a9b78"
+			"val": "5f5d337ea77cb0c8e8d4e7f6fdbc00aeab5c6f2e813a6e2f1c7a054dc2139a36"
 		},
 		"from": "iso6523-actorid-upis::0208:0123456749",
 		"to": "iso6523-actorid-upis::0208:0987654394"
@@ -193,7 +193,7 @@
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "57.61",
+								"base": "57.60",
 								"percent": "21.0%",
 								"amount": "12.10"
 							}

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "932202df63b843c3d40076865bf5638e3175bc40b2f81f8e175217ac11e07a3b"
+			"val": "1588ccf5ee1172dee5ba506c5614e437b6d6ccbd08cc1464edd0333afe51505c"
 		},
 		"from": "iso6523-actorid-upis::0225:334175221",
 		"to": "iso6523-actorid-upis::0225:552100554"

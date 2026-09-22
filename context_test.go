@@ -281,8 +281,81 @@ func TestFrenchBillingModeResolution(t *testing.T) {
 	})
 
 	t.Run("unmodelled CustomizationID still parses best-effort", func(t *testing.T) {
-		ctx := ubl.FindContext("urn:peppol:pint:billing-1@sg-1", "B1")
+		// Without a billing mode there is nothing to fall back on.
+		ctx := ubl.FindContext("urn:peppol:pint:billing-1@sg-1", "")
 		assert.Nil(t, ctx)
+	})
+}
+
+// BT-24 is never validated by the CTC schematron, so a mangled CustomizationID
+// leaves the BT-23 billing mode as the only French signal.
+func TestFrenchBillingModeFallback(t *testing.T) {
+	for _, tt := range []struct {
+		name            string
+		customizationID string
+		want            *ubl.Context
+	}{
+		{
+			// Seen in the wild: "urn.eu:" for "urn:cen.eu:", no suffix.
+			"mangled extended URN",
+			"urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
+			&ubl.ContextPeppolFranceExtended,
+		},
+		{
+			"unsuffixed cpro URN",
+			"urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0",
+			&ubl.ContextPeppolFranceExtended,
+		},
+		{
+			"mangled EN16931 URN",
+			"urn.eu:en16931:2017",
+			&ubl.ContextPeppolFranceExtended,
+		},
+		{
+			// Every other profile's ProfileID is a long URN.
+			"unrelated customization still follows the billing mode",
+			"urn:peppol:pint:billing-1@sg-1",
+			&ubl.ContextPeppolFranceExtended,
+		},
+		{
+			// BT-24 absent: the billing mode is all there is.
+			"absent customization",
+			"",
+			&ubl.ContextPeppolFranceExtended,
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := ubl.FindContext(tt.customizationID, "B2")
+			if tt.want == nil {
+				assert.Nil(t, ctx)
+				return
+			}
+			require.NotNil(t, ctx)
+			assert.Equal(t, tt.want.CustomizationID, ctx.CustomizationID)
+			assert.Equal(t, tt.want.Addons, ctx.Addons)
+		})
+	}
+
+	t.Run("no billing mode means no fallback", func(t *testing.T) {
+		ctx := ubl.FindContext("urn.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0", "")
+		assert.Nil(t, ctx)
+	})
+
+	t.Run("mangled URN carries the addon through Convert", func(t *testing.T) {
+		data, err := os.ReadFile(filepath.Join(getParsePath(), "france-cius", "b2b-reg.xml"))
+		require.NoError(t, err)
+		old := []byte("<cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>")
+		require.Contains(t, string(data), string(old))
+		data = bytes.Replace(data, old, []byte("<cbc:CustomizationID>urn.eu:en16931:2017</cbc:CustomizationID>"), 1)
+
+		doc, err := ubl.Parse(data)
+		require.NoError(t, err)
+		env, err := doc.(*ubl.Invoice).Convert()
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		assert.Contains(t, inv.GetAddons(), flow2.V1)
 	})
 }
 

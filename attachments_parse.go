@@ -60,7 +60,7 @@ func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 	}
 
 	att := &org.Attachment{
-		URL:  extRef.URI,
+		URL:  cleanString(extRef.URI),
 		MIME: extRef.MimeCode,
 	}
 
@@ -71,7 +71,7 @@ func (ui *Invoice) processExternalAttachment(ref *Reference) *org.Attachment {
 		}
 	}
 
-	att.Code = cbc.Code(cleanString(ref.ID.Value))
+	att.Code = cbc.Code(ref.ID.Value)
 	att.Description = cleanString(ref.DocumentDescription)
 
 	return att

@@ -92,7 +92,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		}
 
 		if iq.UnitCode != "" {
-			line.Item.Unit = goblUnitFromUNECE(cbc.Code(iq.UnitCode))
+			line.Item.Ext, line.Item.Unit = goblUnit(line.Item.Ext, cbc.Code(iq.UnitCode))
 		}
 	}
 
@@ -214,7 +214,7 @@ func goblItemAttribute(property *AdditionalItemProperty) (*org.Attribute, error)
 		}
 		attr.Amount = &amount
 		if property.ValueQuantity.UnitCode != "" {
-			attr.Unit = goblUnitFromUNECE(cbc.Code(property.ValueQuantity.UnitCode))
+			attr.Ext, attr.Unit = goblUnit(attr.Ext, cbc.Code(property.ValueQuantity.UnitCode))
 		}
 	case property.Value != "":
 		attr.Text = cleanString(property.Value)
@@ -314,7 +314,7 @@ func goblIdentity(id *IDType) *org.Identity {
 	}
 	for _, field := range []*string{id.SchemeID, id.ListID, id.ListVersionID, id.SchemeName, id.Name} {
 		if field != nil {
-			identity.Label = *field
+			identity.Label = cleanString(*field)
 			break
 		}
 	}
