@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e35eedd670db62deaa121ecefb8c6abbf0140447a1d4cb27339cbb4819405efa"
+			"val": "afd95a2be7b0bf0c7ed0586436cd4cbe7ff06fea7360b8a34ff812e439c2e1ad"
 		}
 	},
 	"doc": {
@@ -12,6 +12,9 @@
 		"$regime": "NO",
 		"$addons": [
 			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"bypass"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
@@ -195,7 +198,7 @@
 						}
 					}
 				],
-				"total": "2546.00",
+				"total": "1273.00",
 				"notes": [
 					{
 						"text": "Scratch on box"
@@ -458,7 +461,7 @@
 				"due_dates": [
 					{
 						"date": "2013-07-20",
-						"amount": "3393.03",
+						"amount": "1801.78",
 						"percent": "100%"
 					}
 				],
@@ -506,52 +509,62 @@
 			"date": "2013-06-15"
 		},
 		"totals": {
-			"sum": "2709.50",
+			"sum": "1436.50",
 			"discount": "100.00",
 			"charge": "100.00",
-			"total": "2709.50",
+			"total": "1436.50",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "2733.50",
+								"base": "1460.50",
 								"percent": "25%",
-								"amount": "683.38"
-							},
+								"amount": "365.13"
+							}
+						],
+						"amount": "365.13"
+					},
+					{
+						"code": "VAT",
+						"rates": [
 							{
-								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
 								"base": "1.00",
 								"percent": "15%",
 								"amount": "0.15"
-							},
+							}
+						],
+						"amount": "0.15"
+					},
+					{
+						"code": "VAT",
+						"rates": [
 							{
-								"key": "exempt",
 								"ext": {
 									"untdid-tax-category": "E"
 								},
 								"base": "-25.00",
+								"percent": "0%",
 								"amount": "0.00"
 							}
 						],
-						"amount": "683.53"
+						"amount": "0.00"
 					}
 				],
-				"sum": "683.53"
+				"sum": "365.28"
 			},
-			"tax": "683.53",
-			"total_with_tax": "3393.03",
-			"payable": "3393.03",
+			"tax": "365.28",
+			"total_with_tax": "1801.78",
+			"payable": "1801.78",
 			"advance": "1000.00",
-			"due": "2393.03"
+			"due": "801.78"
 		},
 		"notes": [
 			{

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "8ad57cbc7e5a14110746a39b012994a74adffa899e531e25e39936921e9ad1ce"
+			"val": "bad5ab06b1a467d6d836b6d2dfa91c278bad4074ed5a84ab58b143bd54f38d83"
 		},
 		"from": "iso6523-actorid-upis::0225:381511039",
 		"to": "iso6523-actorid-upis::0225:820731115"
@@ -15,6 +15,9 @@
 		"$addons": [
 			"eu-en16931-v2017",
 			"fr-ctc-flow2-v1"
+		],
+		"$tags": [
+			"bypass"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
@@ -147,7 +150,7 @@
 						}
 					}
 				],
-				"total": "1109.60"
+				"total": "1614.87"
 			},
 			{
 				"i": 2,
@@ -197,7 +200,7 @@
 						}
 					}
 				],
-				"total": "7846.05"
+				"total": "8137.15"
 			}
 		],
 		"ordering": {
@@ -208,7 +211,7 @@
 				"due_dates": [
 					{
 						"date": "2026-11-06",
-						"amount": "9448.21",
+						"amount": "10288.38",
 						"percent": "100%"
 					}
 				]
@@ -226,31 +229,30 @@
 			}
 		},
 		"totals": {
-			"sum": "8955.65",
-			"total": "8955.65",
+			"sum": "9752.02",
+			"total": "9752.02",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "8955.65",
+								"base": "9752.02",
 								"percent": "5.50%",
-								"amount": "492.56"
+								"amount": "536.36"
 							}
 						],
-						"amount": "492.56"
+						"amount": "536.36"
 					}
 				],
-				"sum": "492.56"
+				"sum": "536.36"
 			},
-			"tax": "492.56",
-			"total_with_tax": "9448.21",
-			"payable": "9448.21"
+			"tax": "536.36",
+			"total_with_tax": "10288.38",
+			"payable": "10288.38"
 		},
 		"notes": [
 			{

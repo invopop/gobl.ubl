@@ -119,6 +119,12 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	out.Attachments = ui.goblAddAttachments()
 	ui.goblAddTaxNotes(out)
 
+	// Everything the document declares is now mapped, so the calculated
+	// amounts can be checked against the ones the sender stated.
+	if err := ui.reconcileTotals(out); err != nil {
+		return nil, err
+	}
+
 	return out, nil
 }
 
