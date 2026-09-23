@@ -307,7 +307,10 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if ch.Percent != nil {
 			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			if base != nil {
+			switch {
+			case ch.Base != nil:
+				ac.BaseAmount = newAmountPtr(*ch.Base, ccy)
+			case base != nil:
 				ac.BaseAmount = base
 			}
 		}
@@ -327,7 +330,10 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if d.Percent != nil {
 			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			if base != nil {
+			switch {
+			case d.Base != nil:
+				ac.BaseAmount = newAmountPtr(*d.Base, ccy)
+			case base != nil:
 				ac.BaseAmount = base
 			}
 		}

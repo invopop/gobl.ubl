@@ -1,0 +1,147 @@
+{
+	"$schema": "https://gobl.org/draft-0/envelope",
+	"head": {
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"dig": {
+			"alg": "sha256",
+			"val": "237e9e84b70fbbdd0d4f062ce18728fd7a5b73e2073d907a34ca47ecacf88c70"
+		}
+	},
+	"doc": {
+		"$schema": "https://gobl.org/draft-0/bill/invoice",
+		"$regime": "FR",
+		"$addons": [
+			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"bypass"
+		],
+		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
+		"type": "standard",
+		"code": "LINE-MISMATCH-1",
+		"issue_date": "2026-01-01",
+		"currency": "EUR",
+		"tax": {
+			"rounding": "currency",
+			"ext": {
+				"untdid-document-type": "380"
+			}
+		},
+		"supplier": {
+			"name": "Seller SA",
+			"tax_id": {
+				"country": "FR",
+				"code": "59381511039"
+			},
+			"inboxes": [
+				{
+					"scheme": "0002",
+					"code": "381511039"
+				}
+			],
+			"addresses": [
+				{
+					"locality": "Paris",
+					"country": "FR"
+				}
+			]
+		},
+		"customer": {
+			"name": "Buyer SA",
+			"inboxes": [
+				{
+					"scheme": "0002",
+					"code": "820731115"
+				}
+			],
+			"addresses": [
+				{
+					"locality": "Paris",
+					"country": "FR"
+				}
+			]
+		},
+		"lines": [
+			{
+				"i": 1,
+				"quantity": "2700.00",
+				"item": {
+					"name": "Widget",
+					"price": "0.60",
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
+				},
+				"sum": "1620.00",
+				"discounts": [
+					{
+						"amount": "532.27",
+						"ext": {
+							"untdid-allowance": "95"
+						}
+					}
+				],
+				"charges": [
+					{
+						"amount": "21.87",
+						"ext": {
+							"untdid-charge": "ZZZ"
+						}
+					}
+				],
+				"taxes": [
+					{
+						"cat": "VAT",
+						"key": "standard",
+						"percent": "20.00%",
+						"ext": {
+							"untdid-tax-category": "S"
+						}
+					}
+				],
+				"total": "1614.87"
+			}
+		],
+		"ordering": {
+			"code": "REF-1"
+		},
+		"payment": {
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-02-01",
+						"amount": "1937.84",
+						"percent": "100%"
+					}
+				]
+			}
+		},
+		"totals": {
+			"sum": "1614.87",
+			"total": "1614.87",
+			"taxes": {
+				"categories": [
+					{
+						"code": "VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "S"
+								},
+								"base": "1614.87",
+								"percent": "20.00%",
+								"amount": "322.97"
+							}
+						],
+						"amount": "322.97"
+					}
+				],
+				"sum": "322.97"
+			},
+			"tax": "322.97",
+			"total_with_tax": "1937.84",
+			"payable": "1937.84"
+		}
+	}
+}

@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "dbd7708da43ffc503d23c812f72eefdc467403e01dd69581fbf20443669338c4"
+			"val": "584d8a27b46bd6480bd6020be652c65841b90f0362915b47cfb93719799ccf9c"
 		}
 	},
 	"doc": {
@@ -12,6 +12,9 @@
 		"$regime": "NL",
 		"$addons": [
 			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"bypass"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
@@ -567,7 +570,7 @@
 						}
 					}
 				],
-				"total": "109.98"
+				"total": "-109.98"
 			}
 		],
 		"payment": {
@@ -575,7 +578,7 @@
 				"due_dates": [
 					{
 						"date": "2015-01-09",
-						"amount": "483.49",
+						"amount": "250.33",
 						"percent": "100%"
 					}
 				]
@@ -594,24 +597,22 @@
 			}
 		},
 		"totals": {
-			"sum": "449.56",
-			"total": "449.56",
+			"sum": "229.60",
+			"total": "229.60",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "403.19",
+								"base": "183.23",
 								"percent": "6%",
-								"amount": "24.19"
+								"amount": "10.99"
 							},
 							{
-								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -620,14 +621,14 @@
 								"amount": "9.74"
 							}
 						],
-						"amount": "33.93"
+						"amount": "20.73"
 					}
 				],
-				"sum": "33.93"
+				"sum": "20.73"
 			},
-			"tax": "33.93",
-			"total_with_tax": "483.49",
-			"payable": "483.49"
+			"tax": "20.73",
+			"total_with_tax": "250.33",
+			"payable": "250.33"
 		},
 		"notes": [
 			{

@@ -4,12 +4,15 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "d28a52b54bb66d645a8fb6c43cc2a5a035182c52e9226090dc40ffcce1668b3f"
+			"val": "053e02c88e9d0944f9b4592c14697e436b39b8840a7713da6c303ddea8b1c58b"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "GB",
+		"$tags": [
+			"bypass"
+		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "other",
 		"code": "CN758494",
@@ -120,10 +123,28 @@
 		],
 		"totals": {
 			"sum": "100.00",
-			"total": "100.00",
-			"tax": "0.00",
-			"total_with_tax": "100.00",
-			"payable": "100.00"
+			"total": "90.00",
+			"taxes": {
+				"categories": [
+					{
+						"code": "UK VAT",
+						"rates": [
+							{
+								"ext": {
+									"untdid-tax-category": "A"
+								},
+								"base": "100.00",
+								"amount": "17.50"
+							}
+						],
+						"amount": "17.50"
+					}
+				],
+				"sum": "17.50"
+			},
+			"tax": "17.50",
+			"total_with_tax": "107.50",
+			"payable": "107.50"
 		},
 		"notes": [
 			{
