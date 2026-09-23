@@ -68,6 +68,9 @@
   </cac:AccountingCustomerParty>
   <cac:PaymentMeans>
     <cbc:PaymentMeansCode name="SEPA Direct Debit">49</cbc:PaymentMeansCode>
+    <cac:PaymentMandate>
+      <cbc:ID>MANDATE-2024-001</cbc:ID>
+    </cac:PaymentMandate>
   </cac:PaymentMeans>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="EUR">12.10</cbc:TaxAmount>

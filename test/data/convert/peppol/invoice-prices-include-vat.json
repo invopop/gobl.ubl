@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "5f5d337ea77cb0c8e8d4e7f6fdbc00aeab5c6f2e813a6e2f1c7a054dc2139a36"
+			"val": "bb08f61ec81a0c3296688de8da4e0ed51cbc8e25d459216b36834d5c14f9b2c2"
 		},
 		"from": "iso6523-actorid-upis::0208:0123456749",
 		"to": "iso6523-actorid-upis::0208:0987654394"
@@ -174,6 +174,9 @@
 			"instructions": {
 				"key": "direct-debit",
 				"detail": "SEPA Direct Debit",
+				"direct_debit": {
+					"ref": "MANDATE-2024-001"
+				},
 				"ext": {
 					"untdid-payment-means": "49"
 				}
