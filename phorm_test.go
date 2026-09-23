@@ -64,14 +64,29 @@ func (f finding) String() string {
 
 // validateXML pushes the document through phorm and fails the test with every
 // error the rule set raises.
+// ignoredRules are schematron rules the converter cannot satisfy on its own,
+// mapped to the reason. Keep this list short and justified: every entry is a
+// rule real documents are still expected to meet.
+var ignoredRules = map[string]string{
+	// KSA-16, the ZATCA invoice counter, is stamped by the application when the
+	// document is submitted. It is not carried in GOBL, so a converted document
+	// never has one.
+	"BR-KSA-33": "invoice counter is applied downstream of the converter",
+}
+
 func validateXML(t *testing.T, pc *phorm.Client, vesid string, data []byte) {
 	t.Helper()
 
 	var errs []string
 	for _, f := range phormValidate(t, pc, vesid, data) {
-		if f.Level != "WARN" {
-			errs = append(errs, f.String())
+		if f.Level == "WARN" {
+			continue
 		}
+		if reason, ok := ignoredRules[f.Rule]; ok {
+			t.Logf("ignoring %s: %s", f.Rule, reason)
+			continue
+		}
+		errs = append(errs, f.String())
 	}
 	if len(errs) > 0 {
 		t.Errorf("%s: %d schematron error(s):\n%s", vesid, len(errs), strings.Join(errs, "\n"))
