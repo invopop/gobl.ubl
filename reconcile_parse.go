@@ -145,6 +145,35 @@ func (ui *Invoice) declaredTotalsAgree(out *bill.Invoice) bool {
 		}
 	}
 
+	// The optional total fields are preserved on bypass, so they have to be
+	// checked too: a document that disagrees on one of these would otherwise be
+	// re-exported with our figure rather than the sender's. An absent total on
+	// our side counts as zero.
+	optional := []struct {
+		declared *Amount
+		computed *num.Amount
+	}{
+		{mt.AllowanceTotalAmount, t.Discount},
+		{mt.ChargeTotalAmount, t.Charge},
+		{mt.PrepaidAmount, t.Advances},
+	}
+	for _, p := range optional {
+		if p.declared == nil {
+			continue
+		}
+		declared, ok := goblDeclaredAmount(*p.declared)
+		if !ok {
+			continue
+		}
+		computed := num.AmountZero
+		if p.computed != nil {
+			computed = *p.computed
+		}
+		if !declared.Equals(computed) {
+			return false
+		}
+	}
+
 	if declared, ok := goblDeclaredTaxTotal(ui.TaxTotal); ok && !declared.Equals(t.Tax) {
 		return false
 	}
