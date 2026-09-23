@@ -232,9 +232,10 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice) error {
 	if v, ok := declared(mt.TaxExclusiveAmount); ok {
 		t.Total = v
 	}
-	if v, ok := declared(mt.TaxInclusiveAmount); ok {
-		t.TotalWithTax = v
-		t.Payable = v
+	taxInclusive, hasTaxInclusive := declared(mt.TaxInclusiveAmount)
+	if hasTaxInclusive {
+		t.TotalWithTax = taxInclusive
+		t.Payable = taxInclusive
 	}
 	if mt.PrepaidAmount != nil {
 		if v, ok := declared(*mt.PrepaidAmount); ok {
@@ -258,6 +259,13 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice) error {
 	}
 	if v, ok := goblDeclaredTaxTotal(ui.TaxTotal); ok {
 		t.Tax = v.RescaleUp(exp)
+		// BT-112 is mandatory but not every document carries it. Without one,
+		// the calculated total would survive beside declared components it no
+		// longer agrees with, so derive it instead.
+		if !hasTaxInclusive {
+			t.TotalWithTax = t.Total.MatchPrecision(t.Tax).Add(t.Tax)
+			t.Payable = t.TotalWithTax
+		}
 		// The breakdown must come from the document too, or it contradicts
 		// the total just set.
 		t.Taxes = ui.goblDeclaredTaxBreakdown(exp)
@@ -283,12 +291,13 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice) error {
 	return out.Calculate()
 }
 
-// lines returns the document's lines, whichever element carries them.
-func (ui *Invoice) lines() []InvoiceLine {
+// lines returns the document lines that produced a converted line, in the same
+// order, so they pair index for index with out.Lines.
+func (ui *Invoice) lines() []*InvoiceLine {
 	if len(ui.CreditNoteLines) > 0 {
-		return ui.CreditNoteLines
+		return convertibleLines(ui.CreditNoteLines)
 	}
-	return ui.InvoiceLines
+	return convertibleLines(ui.InvoiceLines)
 }
 
 // goblDeclaredAmount parses a declared amount, reporting whether one was there.

@@ -26,8 +26,8 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options) error {
 	// Build tax category map from TaxTotal
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
-	for _, docLine := range items {
-		line, err := goblConvertLine(&docLine, taxCategoryMap, o)
+	for _, docLine := range convertibleLines(items) {
+		line, err := goblConvertLine(docLine, taxCategoryMap, o)
 		if err != nil {
 			return err
 		}
@@ -344,4 +344,19 @@ func goblLineCharges(allowances []*AllowanceCharge, line *bill.Line) (*bill.Line
 		}
 	}
 	return line, nil
+}
+
+// convertibleLines returns the document lines that produce a GOBL line. Lines
+// with no price are dropped during conversion, so anything pairing source lines
+// with converted ones has to drop them the same way or the two slices fall out
+// of step.
+func convertibleLines(items []InvoiceLine) []*InvoiceLine {
+	out := make([]*InvoiceLine, 0, len(items))
+	for i := range items {
+		if items[i].Price == nil {
+			continue
+		}
+		out = append(out, &items[i])
+	}
+	return out
 }

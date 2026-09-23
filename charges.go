@@ -55,8 +55,15 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, notes []*tax
 	if ch.Percent != nil {
 		p := ch.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
-		// Add BaseAmount when percentage is provided
-		c.BaseAmount = newAmountPtr(baseAmount, ccy)
+		// PEPPOL-EN16931-R040 wants the amount to equal base x percentage, so
+		// emit the basis the percentage was calculated on when the document
+		// named one, falling back to the invoice sum.
+		switch {
+		case ch.Base != nil:
+			c.BaseAmount = newAmountPtr(*ch.Base, ccy)
+		default:
+			c.BaseAmount = newAmountPtr(baseAmount, ccy)
+		}
 	}
 	if ch.Taxes != nil {
 		c.TaxCategory = makeTaxCategory(ch.Taxes, notes)
@@ -82,8 +89,15 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, notes []*
 	if d.Percent != nil {
 		p := d.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
-		// Add BaseAmount when percentage is provided
-		c.BaseAmount = newAmountPtr(baseAmount, ccy)
+		// PEPPOL-EN16931-R040 wants the amount to equal base x percentage, so
+		// emit the basis the percentage was calculated on when the document
+		// named one, falling back to the invoice sum.
+		switch {
+		case d.Base != nil:
+			c.BaseAmount = newAmountPtr(*d.Base, ccy)
+		default:
+			c.BaseAmount = newAmountPtr(baseAmount, ccy)
+		}
 	}
 	if d.Taxes != nil {
 		c.TaxCategory = makeTaxCategory(d.Taxes, notes)
