@@ -78,6 +78,7 @@ func Parse(data []byte) (any, error) {
 		})); err != nil {
 			return nil, err
 		}
+		cleanDocument(in)
 		return in, nil
 
 	case NamespaceUBLApplicationResponse:
@@ -89,6 +90,7 @@ func Parse(data []byte) (any, error) {
 		})); err != nil {
 			return nil, err
 		}
+		cleanDocument(ar)
 		return ar, nil
 
 	// Future document types can be added here
