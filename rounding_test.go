@@ -165,7 +165,6 @@ func TestTotalsArithmetic(t *testing.T) {
 		"xrechnung":          ubl.ContextXRechnung,
 		"france-cius":        ubl.ContextPeppolFranceCIUS,
 		"france-extended":    ubl.ContextPeppolFranceExtended,
-		"zatca":              ubl.ContextZATCA,
 	}
 
 	for dir, ctx := range contexts {

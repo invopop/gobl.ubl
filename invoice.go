@@ -7,7 +7,6 @@ import (
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
-	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	cur "github.com/invopop/gobl/currency"
@@ -164,23 +163,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.addTaxExchangeRate(inv.Currency, taxCurrency, taxExchangeRate)
 	}
 
-	docType := inv.Type
-	if o.context.Is(ContextZATCA) {
-		out.SchemaLocation = ""
-		// BR-KSA-03
-		out.UUID = string(inv.UUID)
-		// BR-KSA-70
-		out.IssueTime = inv.IssueTime.String()
-		// BR-KSA-70
-		out.TaxCurrencyCode = string(inv.RegimeDef().GetCurrency())
-		// BR-KSA-06
-		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceType).String()
-		out.InvoiceTypeCode.Name = &invType
-		// ZATCA treats all documents as invoices
-		docType = bill.InvoiceTypeStandard
-	}
-
-	if docType.In(bill.InvoiceTypeCreditNote) {
+	if inv.Type.In(bill.InvoiceTypeCreditNote) {
 		out.XMLName = xml.Name{Local: "CreditNote"}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
@@ -215,14 +198,14 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addOrdering(inv.Ordering, o.context)
 	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
-	out.addTotals(inv, o.context)
+	out.addTotals(inv)
 	out.addLines(inv, o.context)
 	out.AddAttachments(inv.Attachments)
 
 	if err = out.addPayment(inv, o.context); err != nil {
 		return nil, err
 	}
-	if d := newDelivery(inv.Delivery, o.context); d != nil {
+	if d := newDelivery(inv.Delivery); d != nil {
 		out.Delivery = []*Delivery{d}
 	}
 

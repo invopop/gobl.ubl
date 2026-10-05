@@ -119,19 +119,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
 		}
 
-		// Line VAT amount (KSA-11) is mandatory for tax
-		// invoice and associated credit notes and debit notes
-		if context.Is(ContextZATCA) && l.Total != nil && len(l.Taxes) > 0 && l.Taxes[0].Percent != nil {
-			taxAmount := l.Taxes[0].Percent.Of(*l.Total)
-			roundingAmount := l.Total.Add(taxAmount)
-			invLine.TaxTotal = []TaxTotal{
-				{
-					TaxAmount:      newAmount(taxAmount, ccy),
-					RoundingAmount: newAmountPtr(roundingAmount, ccy),
-				},
-			}
-		}
-
 		if l.Item != nil {
 			it := &Item{}
 

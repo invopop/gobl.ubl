@@ -205,7 +205,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		return nil
 	}
 	p := &Party{
-		PostalAddress: newAddress(party.Addresses, ctx),
+		PostalAddress: newAddress(party.Addresses),
 	}
 
 	// Only add PartyName if name is not empty
@@ -227,9 +227,6 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		// (PEPPOL-EN16931 NO-R-001), which GOBL normalization may strip.
 		if tID.Country.Code() == l10n.NO && !strings.HasSuffix(code, "MVA") {
 			code += "MVA"
-		}
-		if ctx.Is(ContextZATCA) {
-			code = code[2:]
 		}
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {
@@ -343,8 +340,8 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
 				idType.SchemeID = &s
 			} else if id.Ext.IsZero() {
-				// ZATCA has very specific identities that do not
-				// require an ISO extension and are only described with type
+				// An identity with no ISO scheme is described by its type
+				// alone, which some country profiles rely on.
 				if t := id.Type.String(); t != "" {
 					idType.SchemeID = &t
 				}
@@ -427,7 +424,7 @@ func newDeliveryParty(party *org.Party) *Party {
 	return p
 }
 
-func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
+func newAddress(addresses []*org.Address) *PostalAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
@@ -474,14 +471,6 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 			LatitudeDegreesMeasure:  &lat,
 			LongitudeDegreesMeasure: &lon,
 		}
-	}
-
-	if ctx.Is(ContextZATCA) {
-		l := a.LineTwo()
-		addr.CitySubdivisionName = &l
-		addr.AdditionalStreetName = nil
-
-		addr.BuildingNumber = &a.Number
 	}
 
 	return addr
