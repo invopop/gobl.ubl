@@ -128,17 +128,14 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		}
 
 		// BT-14: Sales order reference
-		// Does not apply to zatca
-		if !context.Is(ContextZATCA) {
-			if len(o.Sales) > 0 {
-				if ui.OrderReference == nil {
-					// TODO: once we have a Peppol addon this should be delegated there
-					ui.OrderReference = &OrderReference{
-						ID: orderReferenceNotApplicable,
-					}
+		if len(o.Sales) > 0 {
+			if ui.OrderReference == nil {
+				// TODO: once we have a Peppol addon this should be delegated there
+				ui.OrderReference = &OrderReference{
+					ID: orderReferenceNotApplicable,
 				}
-				ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 			}
+			ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 		}
 
 		// BT-11: Project reference

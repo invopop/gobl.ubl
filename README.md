@@ -141,7 +141,7 @@ go test ./...
 ### Schematron validation
 
 Beyond the golden-file comparisons, the generated XML can be pushed through the
-real EN 16931 / Peppol / XRechnung / French CTC / ZATCA schematron rule sets.
+real EN 16931 / Peppol / XRechnung / French CTC schematron rule sets.
 Validation runs against [phorm](https://github.com/phax/phorm), the standalone
 validation service that replaced the now-archived `invopop/phive` gRPC wrapper,
 using the [`invopop/phorm`](https://github.com/invopop/phorm) HTTP client.
@@ -192,7 +192,6 @@ fail:
 
 | Rule | Fixtures | Cause |
 | --- | --- | --- |
-| `BR-KSA-33` | all `zatca/` invoices | The invoice counter value (KSA-16) is never emitted: ZATCA needs an `ICV` `cac:AdditionalDocumentReference`. |
 | `PEPPOL-EN16931-R061` | `peppol/invoice-prices-include-vat.json` | The fixture pays by SEPA direct debit but carries no mandate reference (BT-89). |
 
 #### Notes

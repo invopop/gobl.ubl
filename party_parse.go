@@ -76,7 +76,7 @@ func goblParty(party *Party, o *options) *org.Party {
 
 	handleLegalEntityIdentity(party, p)
 	handlePartyTaxSchemes(party, p)
-	handlePartyIdentifications(party, p, o)
+	handlePartyIdentifications(party, p)
 
 	// EXT-FR-FE-BG-01/BG-03: the agent acting for the buyer or the seller,
 	// which only the French extended profile defines.
@@ -138,8 +138,8 @@ func parseAddress(address *PostalAddress) *org.Address {
 	if address.BuildingNumber != nil {
 		addr.Number = cleanString(*address.BuildingNumber)
 	}
-	// CitySubdivisionName is used by ZATCA to represent the district,
-	// which maps to StreetExtra in GOBL.
+	// CitySubdivisionName carries the district, which maps to StreetExtra
+	// in GOBL.
 	if address.CitySubdivisionName != nil && addr.StreetExtra == "" {
 		addr.StreetExtra = cleanString(*address.CitySubdivisionName)
 	}
@@ -231,21 +231,16 @@ func addTaxSchemeAsIdentity(pts PartyTaxScheme, p *org.Party, countryCode string
 	p.Identities = append(p.Identities, identity)
 }
 
-func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
+func handlePartyIdentifications(party *Party, p *org.Party) {
 	for _, partyID := range party.PartyIdentification {
 		if partyID.ID != nil {
 			identity := &org.Identity{
 				Code: cbc.Code(partyID.ID.Value),
 			}
 			if partyID.ID.SchemeID != nil {
-				s := *partyID.ID.SchemeID
-				if o.context.Is(ContextZATCA) {
-					identity.Type = cbc.Code(s)
-				} else {
-					identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-						iso.ExtKeySchemeID: cbc.Code(s),
-					})
-				}
+				identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
+					iso.ExtKeySchemeID: cbc.Code(*partyID.ID.SchemeID),
+				})
 			}
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)

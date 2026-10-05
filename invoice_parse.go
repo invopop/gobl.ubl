@@ -4,7 +4,6 @@ import (
 	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
-	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -82,7 +81,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 
 	ui.applyContextTaxExtensions(out, o)
-	ui.resolveInvoiceType(out, o)
+	ui.resolveInvoiceType(out)
 
 	if err := ui.parseInvoiceDates(out); err != nil {
 		return nil, err
@@ -107,7 +106,6 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	if err := ui.parseBillingReferences(out); err != nil {
 		return nil, err
 	}
-	ui.applyZATCAPrecedingReasons(out, o)
 	ui.applyTaxRepresentative(out, o)
 
 	if len(ui.AllowanceCharge) > 0 {
@@ -142,19 +140,16 @@ func (ui *Invoice) applyContextTaxExtensions(out *bill.Invoice, o *options) {
 		out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(ui.profileID()))
 	}
 
-	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {
-		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceType, cbc.Code(*ui.InvoiceTypeCode.Name))
-	}
 }
 
 // resolveInvoiceType derives the GOBL invoice type and tags from the UBL type code.
-func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
+func (ui *Invoice) resolveInvoiceType(out *bill.Invoice) {
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
 	out.Type = typeCodeParse(typeCode)
-	if tags := tagCodeParse(typeCode, o.context); len(tags) != 0 {
+	if tags := tagCodeParse(typeCode); len(tags) != 0 {
 		out.SetTags(tags...)
 	}
 }
@@ -261,19 +256,6 @@ func (ui *Invoice) parseBillingReferences(out *bill.Invoice) error {
 	return nil
 }
 
-// applyZATCAPrecedingReasons pairs ZATCA InstructionNote entries with Preceding refs by index.
-// BR-KSA-17: in ZATCA, preceding document reasons are stored in PaymentMeans InstructionNote.
-func (ui *Invoice) applyZATCAPrecedingReasons(out *bill.Invoice, o *options) {
-	if !o.context.Is(ContextZATCA) || len(out.Preceding) == 0 || len(ui.PaymentMeans) == 0 {
-		return
-	}
-	for i, note := range ui.PaymentMeans[0].InstructionNote {
-		if i < len(out.Preceding) {
-			out.Preceding[i].Reason = cleanString(note)
-		}
-	}
-}
-
 // applyTaxRepresentative maps the BG-11 tax representative to
 // ordering.seller, the party liable for the tax when it is not the
 // supplier. The supplier keeps the BG-4 seller.
@@ -288,8 +270,7 @@ func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice, o *options) {
 }
 
 // typeCodeParse maps the UBL document type code (UNTDID 1001) to its GOBL
-// invoice type. The ZATCA transaction-type flags carried in typeCode.Name are
-// are mapped to tags by tagCodeParse.
+// invoice type.
 // Source: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
 func typeCodeParse(typeCode *IDType) cbc.Key {
 	if typeCode == nil {
@@ -302,35 +283,9 @@ func typeCodeParse(typeCode *IDType) cbc.Key {
 }
 
 // tagCodeParse maps UBL invoice type to GOBL equivalent tax tag.
-func tagCodeParse(typeCode *IDType, ctx Context) []cbc.Key {
-	var tags []cbc.Key
+func tagCodeParse(typeCode *IDType) []cbc.Key {
 	if typeCode == nil {
-		return tags
+		return nil
 	}
-
-	if ctx.Is(ContextZATCA) && typeCode.Name != nil {
-		it := zatca.ParseInvoiceType(cbc.Code(*typeCode.Name))
-		if it.Simplified {
-			tags = append(tags, tax.TagSimplified)
-		}
-		if it.ThirdParty {
-			tags = append(tags, zatca.TagThirdParty)
-		}
-		if it.Nominal {
-			tags = append(tags, zatca.TagNominal)
-		}
-		if it.Export {
-			tags = append(tags, tax.TagExport)
-		}
-		if it.Summary {
-			tags = append(tags, zatca.TagSummary)
-		}
-		if it.SelfBilled {
-			tags = append(tags, tax.TagSelfBilled)
-		}
-
-	} else {
-		tags = InvoiceTagMap[typeCode.Value]
-	}
-	return tags
+	return InvoiceTagMap[typeCode.Value]
 }
