@@ -114,17 +114,6 @@ func TestNewPartyTaxRegistration(t *testing.T) {
 		return out
 	}
 
-	t.Run("french context pins the scheme", func(t *testing.T) {
-		schemes := convert(t, "france-cius/invoice-fr-cius.json",
-			&org.Identity{Scope: org.IdentityScopeTax, Code: "483671517"},
-			ubl.WithContext(ubl.ContextPeppolFranceCIUS))
-
-		require.NotEmpty(t, schemes)
-		last := schemes[len(schemes)-1]
-		assert.Equal(t, "LOC", last.Scheme)
-		assert.Equal(t, "483671517", last.Code)
-	})
-
 	t.Run("elsewhere the identity type is used", func(t *testing.T) {
 		schemes := convert(t, "invoice-complete.json",
 			&org.Identity{Scope: org.IdentityScopeTax, Type: "TAX", Code: "Foretaksregisteret"})
@@ -216,56 +205,5 @@ func TestNewPartyEndpointID(t *testing.T) {
 		})
 
 		assert.Nil(t, doc.AccountingSupplierParty.Party.EndpointID)
-	})
-}
-
-func TestPartyAgent(t *testing.T) {
-	const fixture = "france-extended/invoice-addressee.json"
-
-	t.Run("french extended nests the buyer and seller agents", func(t *testing.T) {
-		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
-		require.NoError(t, err)
-
-		// EXT-FR-FE-BG-03 sits under the seller, EXT-FR-FE-BG-01 under the buyer.
-		sellerAgent := doc.AccountingSupplierParty.Party.AgentParty
-		require.NotNil(t, sellerAgent)
-		assert.Equal(t, "Agent de Vendeur SAS", sellerAgent.PartyName.Name)
-		assert.Equal(t, "443061841", sellerAgent.PartyLegalEntity.CompanyID.Value)
-		assert.Equal(t, "0002", *sellerAgent.PartyLegalEntity.CompanyID.SchemeID)
-
-		buyerAgent := doc.AccountingCustomerParty.Party.AgentParty
-		require.NotNil(t, buyerAgent)
-		assert.Equal(t, "Agence Media SARL", buyerAgent.PartyName.Name)
-		assert.Equal(t, "FR96552100554", buyerAgent.PartyTaxScheme[0].CompanyID.Value)
-	})
-
-	t.Run("agents are ignored outside the french extended context", func(t *testing.T) {
-		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppol)
-		require.NoError(t, err)
-
-		assert.Nil(t, doc.AccountingSupplierParty.Party.AgentParty)
-		assert.Nil(t, doc.AccountingCustomerParty.Party.AgentParty)
-	})
-
-	t.Run("parse restores both agents", func(t *testing.T) {
-		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
-		require.NoError(t, err)
-		data, err := ubl.Bytes(doc)
-		require.NoError(t, err)
-
-		parsed, err := ubl.Parse(data)
-		require.NoError(t, err)
-		in, ok := parsed.(*ubl.Invoice)
-		require.True(t, ok)
-		outEnv, err := in.Convert()
-		require.NoError(t, err)
-		outInv, ok := outEnv.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		require.NotNil(t, outInv.Supplier.Agent)
-		assert.Equal(t, "Agent de Vendeur SAS", outInv.Supplier.Agent.Name)
-		assert.Nil(t, outInv.Supplier.Agent.Agent)
-		require.NotNil(t, outInv.Customer.Agent)
-		assert.Equal(t, "Agence Media SARL", outInv.Customer.Agent.Name)
 	})
 }

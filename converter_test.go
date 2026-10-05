@@ -25,17 +25,12 @@ func TestConverterContexts(t *testing.T) {
 		assert.Equal(t, cbc.Key("ubl"), ctx.Syntax)
 		assert.Empty(t, ctx.Countries)
 	}
-	assert.Len(t, convert.Contexts(), 5)
 
-	t.Run("regional contexts have no key", func(t *testing.T) {
-		for _, ctx := range []ubl.Context{
-			ubl.ContextXRechnung,
-			ubl.ContextPeppolFranceCIUS,
-			ubl.ContextPeppolFranceExtended,
-			ubl.ContextZATCA,
-		} {
-			assert.Empty(t, ctx.Key)
-		}
+	t.Run("layered keys", func(t *testing.T) {
+		assert.Equal(t, cbc.Key("ubl+en16931"), ubl.ContextEN16931.Key)
+		assert.Equal(t, cbc.Key("ubl+peppol"), ubl.ContextPeppol.Key)
+		assert.Equal(t, cbc.Key("ubl+peppol+self-billing"), ubl.ContextPeppolSelfBilled.Key)
+		assert.Equal(t, cbc.Key("ubl+peppol+invoice-response"), ubl.ContextPeppolInvoiceResponse.Key)
 	})
 }
 
@@ -58,19 +53,6 @@ func TestConverterDetect(t *testing.T) {
 			assert.Equal(t, tt.key, ctx.Key)
 		})
 	}
-
-	t.Run("regional", func(t *testing.T) {
-		for _, f := range []string{
-			"france-cius/b2b-reg.xml",
-			"france-extended/b2g-invoice.xml",
-			"zatca/standard-invoice.xml",
-		} {
-			data, err := testLoadXML(f)
-			require.NoError(t, err)
-			_, err = convert.Detect(data)
-			assert.ErrorIs(t, err, convert.ErrUnknownContext, f)
-		}
-	})
 
 	t.Run("not ubl", func(t *testing.T) {
 		for _, data := range []string{

@@ -5,7 +5,6 @@ import (
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -87,32 +86,6 @@ func TestInvoiceHeaders(t *testing.T) {
 			assert.Error(t, err)
 			assert.Nil(t, out)
 		})
-	})
-
-	t.Run("line tax point conversion", func(t *testing.T) {
-		env := loadTestEnvelope(t, "france-extended/invoice-standard.json")
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		inv.Tax.Point = tax.PointDelivery
-		inv.Lines[0].Period = &cal.Period{
-			Start: cal.NewDate(2024, 1, 1),
-			End:   cal.NewDate(2024, 1, 31),
-		}
-
-		out, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
-		require.NoError(t, err)
-
-		require.NotNil(t, out.InvoiceLines[0].InvoicePeriod)
-		assert.Equal(t, "35", out.InvoiceLines[0].InvoicePeriod.DescriptionCode)
-
-		// Outside the France extended context the line period carries no code.
-		out, err = ubl.ConvertInvoice(env)
-		require.NoError(t, err)
-
-		require.NotNil(t, out.InvoiceLines[0].InvoicePeriod)
-		assert.Empty(t, out.InvoiceLines[0].InvoicePeriod.DescriptionCode)
 	})
 
 	t.Run("tax point round trip", func(t *testing.T) {

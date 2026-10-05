@@ -140,7 +140,7 @@ func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
 		}
 		return ublInvoice(doc, o)
 	case *bill.Status:
-		return ublApplicationResponse(doc, o), nil
+		return ublApplicationResponse(doc, o)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}

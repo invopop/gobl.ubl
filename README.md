@@ -61,6 +61,25 @@ The `ubl` package also supports using specific of custom contexts that can be us
 doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
 ```
 
+#### Contexts and layers
+
+This package provides the base UBL conversion and the contexts that apply in any country:
+
+| Key | Context |
+| --- | --- |
+| `ubl+en16931` | `ContextEN16931` |
+| `ubl+peppol` | `ContextPeppol` |
+| `ubl+peppol+self-billing` | `ContextPeppolSelfBilled` |
+| `ubl+peppol+invoice-response` | `ContextPeppolInvoiceResponse` |
+
+The base conversion has no context-specific behavior. A context adds the rules of its specification with `Layers`, applied in order after the base conversion of each party and document. Regional contexts live in their own modules, which register them with `ubl.RegisterContexts` when imported, making them available to `FindContext`, `Parse`, and the GOBL `convert` register:
+
+| Key | Module |
+| --- | --- |
+| `ubl+peppol+fr-cius-v1`, `ubl+peppol+fr-extended-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/ubl"`) |
+| `ubl+sa-zatca-v1` | [gobl.sa.zatca](https://github.com/invopop/gobl.sa.zatca) (`_ "github.com/invopop/gobl.sa.zatca/ubl"`) |
+| `ubl+de-xrechnung-v3` | [gobl.de.xinvoice](https://github.com/invopop/gobl.de.xinvoice) |
+
 #### UBL to GOBL
 
 ```go
@@ -141,7 +160,7 @@ go test ./...
 ### Schematron validation
 
 Beyond the golden-file comparisons, the generated XML can be pushed through the
-real EN 16931 / Peppol / XRechnung / French CTC / ZATCA schematron rule sets.
+real EN 16931 / Peppol schematron rule sets.
 Validation runs against [phorm](https://github.com/phax/phorm), the standalone
 validation service that replaced the now-archived `invopop/phive` gRPC wrapper,
 using the [`invopop/phorm`](https://github.com/invopop/phorm) HTTP client.
@@ -192,7 +211,6 @@ fail:
 
 | Rule | Fixtures | Cause |
 | --- | --- | --- |
-| `BR-KSA-33` | all `zatca/` invoices | The invoice counter value (KSA-16) is never emitted: ZATCA needs an `ICV` `cac:AdditionalDocumentReference`. |
 | `PEPPOL-EN16931-R061` | `peppol/invoice-prices-include-vat.json` | The fixture pays by SEPA direct debit but carries no mandate reference (BT-89). |
 
 #### Notes

@@ -7,13 +7,11 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/note"
-	"github.com/invopop/gobl/rules"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -77,27 +75,6 @@ func TestConvertDefaultContext(t *testing.T) {
 }
 
 func TestConvertAutomaticallyAddsRequiredAddons(t *testing.T) {
-	t.Run("injects missing addon from context", func(t *testing.T) {
-		// Load a France CTC-shaped invoice, strip the ctc addon, and verify
-		// that Convert injects it back in before producing the UBL document.
-		env := loadTestEnvelope(t, "france-cius/invoice-fr-cius.json")
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		// Drop the ctc addon; keep the en16931 one. SetAddons replaces the list.
-		inv.SetAddons(en16931.V2017)
-		require.NotContains(t, inv.GetAddons(), flow2.V1,
-			"precondition: ctc addon must be absent before Convert runs")
-
-		_, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
-		require.NoError(t, err)
-
-		// After Convert the addon should have been appended in-place.
-		assert.Contains(t, inv.GetAddons(), flow2.V1)
-		// And the pre-existing addon must be preserved.
-		assert.Contains(t, inv.GetAddons(), en16931.V2017)
-	})
 
 	t.Run("no-op when addon is already present", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
@@ -113,49 +90,6 @@ func TestConvertAutomaticallyAddsRequiredAddons(t *testing.T) {
 		assert.Equal(t, before, inv.GetAddons(),
 			"addon list should be unchanged when all required addons are already set")
 	})
-}
-
-func TestConvertSurfacesValidationFaultsAfterAutoAddon(t *testing.T) {
-	// When Convert auto-injects a stricter addon, the resulting validation
-	// failure must be surfaced as a *gobl.Error whose cause is rules.Faults,
-	// so consumers can render the []*rules.Fault list (code, paths, message)
-	// instead of a flattened string.
-
-	// Minimal DE invoice doesn't satisfy the France CTC rule set. Convert
-	// with the France CIUS context to force ensureAddons to add flow2.V1
-	// and then fail validation.
-	env := loadTestEnvelope(t, "invoice-minimal.json")
-
-	_, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
-	require.Error(t, err)
-
-	// Must be the GOBL validation error — not wrapped in anything ubl-specific.
-	assert.ErrorIs(t, err, gobl.ErrValidation)
-
-	var ge *gobl.Error
-	require.ErrorAs(t, err, &ge, "error must be a *gobl.Error so faults survive")
-
-	faults := ge.Faults()
-	require.NotNil(t, faults, "cause must be rules.Faults, not a plain error")
-	require.Greater(t, faults.Len(), 0)
-
-	// Faults().List() returns []*rules.Fault — each fault keeps its
-	// structured code, paths, and message so it can be rendered by a client.
-	list := faults.List()
-	assert.IsType(t, []*rules.Fault{}, list)
-	require.NotEmpty(t, list)
-
-	first := list[0]
-	assert.NotEmpty(t, first.Code(), "fault must carry a rule code")
-	assert.NotEmpty(t, first.Message(), "fault must carry a message")
-	assert.NotEmpty(t, first.Paths(), "fault must carry at least one JSON path")
-
-	// The France CTC addon's "supplier inboxes are required for French B2B
-	// invoices" rule must be among the reported faults. (The billing-mode rule
-	// is now auto-satisfied by the addon's normalization, so a structural rule
-	// the minimal invoice cannot satisfy is used instead.)
-	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-11"),
-		"expected supplier-inboxes-required fault; got: %s", err)
 }
 
 func TestConvertUnsupportedDocumentType(t *testing.T) {

@@ -64,19 +64,22 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	}
 
 	for _, dr := range ar.DocumentResponse {
-		line, err := goblStatusLine(dr, o)
+		line, err := goblStatusLine(dr)
 		if err != nil {
 			return nil, err
 		}
 		out.Lines = append(out.Lines, line)
 	}
 
+	if err := o.context.parseStatus(ar, out); err != nil {
+		return nil, err
+	}
 	return out, nil
 }
 
 // goblStatusLine maps the generic parts of a single UBL DocumentResponse. The
 // response code and the status clarifications are context specific.
-func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) {
+func goblStatusLine(dr *DocumentResponse) (*bill.StatusLine, error) {
 	line := new(bill.StatusLine)
 	if dr == nil {
 		return line, nil
@@ -110,10 +113,6 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 			doc.IssueDate = &d
 		}
 		line.Doc = doc
-	}
-
-	if o.context.Is(ContextPeppolInvoiceResponse) {
-		applyPeppolStatusLine(line, dr)
 	}
 
 	return line, nil

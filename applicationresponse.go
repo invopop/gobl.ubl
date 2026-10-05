@@ -69,7 +69,7 @@ type ResponseDocumentReference struct {
 	DocumentTypeCode *IDType `xml:"cbc:DocumentTypeCode"`
 }
 
-func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
+func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, error) {
 	// SenderParty is who sends the response, ReceiverParty who receives it: a
 	// response travels customer->supplier, an update supplier->customer.
 	sender, receiver := st.Customer, st.Supplier
@@ -104,22 +104,10 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		}
 	}
 
-	if o.context.Is(ContextPeppolInvoiceResponse) {
-		// T111's data model omits these root elements and restricts the parties.
-		out.UBLVersionID = ""
-		out.UUID = ""
-		trimToResponseParty(out.SenderParty)
-		trimToResponseParty(out.ReceiverParty)
-	}
-
 	for _, line := range st.Lines {
 		dr := &DocumentResponse{Response: &Response{}}
-		// ReferenceID and Description are valid generic UBL but are not part of the
-		// Peppol Invoice Response Response, so they are only emitted off-profile.
-		if !o.context.Is(ContextPeppolInvoiceResponse) {
-			if desc := responseDescription(line); desc != "" {
-				dr.Response.Description = []string{desc}
-			}
+		if desc := responseDescription(line); desc != "" {
+			dr.Response.Description = []string{desc}
 		}
 		if line.Date != nil {
 			dr.Response.EffectiveDate = formatDate(*line.Date)
@@ -137,14 +125,13 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 			dr.DocumentReference = ref
 		}
 
-		if o.context.Is(ContextPeppolInvoiceResponse) {
-			applyPeppolDocumentResponse(dr, line)
-		}
-
 		out.DocumentResponse = append(out.DocumentResponse, dr)
 	}
 
-	return out
+	if err := o.context.convertStatus(st, out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 // responseDescription prefers the line description and falls back to the first

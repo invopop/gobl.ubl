@@ -76,15 +76,16 @@ func goblParty(party *Party, o *options) *org.Party {
 
 	handleLegalEntityIdentity(party, p)
 	handlePartyTaxSchemes(party, p)
-	handlePartyIdentifications(party, p, o)
+	handlePartyIdentifications(party, p)
 
-	// EXT-FR-FE-BG-01/BG-03: the agent acting for the buyer or the seller,
-	// which only the French extended profile defines.
-	if party.AgentParty != nil && o.context.Is(ContextPeppolFranceExtended) {
-		p.Agent = goblParty(party.AgentParty, o)
-	}
-
+	o.context.parseParty(party, p)
 	return p
+}
+
+// ParseParty converts the UBL party into a GOBL party, applying the context's
+// extensions. Extensions use it to convert the nested parties they read.
+func ParseParty(party *Party, ctx *Context) *org.Party {
+	return goblParty(party, &options{context: *ctx})
 }
 
 // goblDeliveryParty creates a GOBL party with only the BTs available
@@ -231,21 +232,16 @@ func addTaxSchemeAsIdentity(pts PartyTaxScheme, p *org.Party, countryCode string
 	p.Identities = append(p.Identities, identity)
 }
 
-func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
+func handlePartyIdentifications(party *Party, p *org.Party) {
 	for _, partyID := range party.PartyIdentification {
 		if partyID.ID != nil {
 			identity := &org.Identity{
 				Code: cbc.Code(partyID.ID.Value),
 			}
 			if partyID.ID.SchemeID != nil {
-				s := *partyID.ID.SchemeID
-				if o.context.Is(ContextZATCA) {
-					identity.Type = cbc.Code(s)
-				} else {
-					identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-						iso.ExtKeySchemeID: cbc.Code(s),
-					})
-				}
+				identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
+					iso.ExtKeySchemeID: cbc.Code(*partyID.ID.SchemeID),
+				})
 			}
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)

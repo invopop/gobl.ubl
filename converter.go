@@ -24,44 +24,41 @@ var (
 	statusSchema  = schema.Lookup(bill.Status{})
 )
 
-var convertContexts = []*convert.Context{
-	{
-		Key:    KeyUBL,
-		Name:   i18n.NewString("UBL"),
-		MIME:   mimeXML,
-		Syntax: "ubl",
-		Import: []schema.ID{invoiceSchema, statusSchema},
-	},
-	newConvertContext(ContextEN16931, "UBL EN 16931", invoiceSchema),
-	newConvertContext(ContextPeppol, "UBL Peppol BIS Billing 3", invoiceSchema),
-	newConvertContext(ContextPeppolSelfBilled, "UBL Peppol BIS Self-Billing 3", invoiceSchema),
-	newConvertContext(ContextPeppolInvoiceResponse, "UBL Peppol Invoice Response 3", statusSchema),
+// converter implements convert.Converter for a set of registered contexts.
+// The base converter also imports UBL documents that declare no known
+// specification.
+type converter struct {
+	contexts []Context
+	fallback bool
 }
 
-func newConvertContext(c Context, name string, s schema.ID) *convert.Context {
-	return &convert.Context{
-		Key:    c.Key,
-		Name:   i18n.NewString(name),
-		MIME:   mimeXML,
-		Syntax: "ubl",
-		Addons: c.Addons,
-		Import: []schema.ID{s},
-		Export: []schema.ID{s},
+func (c *converter) Contexts() []*convert.Context {
+	list := make([]*convert.Context, 0, len(c.contexts)+1)
+	if c.fallback {
+		list = append(list, &convert.Context{
+			Key:    KeyUBL,
+			Name:   i18n.NewString("UBL"),
+			MIME:   mimeXML,
+			Syntax: "ubl",
+			Import: []schema.ID{invoiceSchema, statusSchema},
+		})
 	}
+	for _, ctx := range c.contexts {
+		list = append(list, &convert.Context{
+			Key:       ctx.Key,
+			Name:      ctx.Name,
+			MIME:      mimeXML,
+			Syntax:    "ubl",
+			Countries: ctx.Countries,
+			Addons:    ctx.Addons,
+			Import:    ctx.Schemas,
+			Export:    ctx.Schemas,
+		})
+	}
+	return list
 }
 
-func init() {
-	convert.Register(converter{})
-}
-
-// converter implements convert.Converter for UBL documents.
-type converter struct{}
-
-func (converter) Contexts() []*convert.Context {
-	return convertContexts
-}
-
-func (converter) Detect(in *convert.Input) cbc.Key {
+func (c *converter) Detect(in *convert.Input) cbc.Key {
 	dc := ReadDocumentContext(in)
 	if dc.Err != nil {
 		return cbc.KeyEmpty
@@ -72,16 +69,20 @@ func (converter) Detect(in *convert.Input) cbc.Key {
 		return cbc.KeyEmpty
 	}
 	if ctx := FindContext(dc.CustomizationID, dc.ProfileID); ctx != nil {
-		// Regional contexts have no key here, and are detected by the
-		// packages that register them.
-		return ctx.Key
+		if c.context(ctx.Key) != nil {
+			return ctx.Key
+		}
+		return cbc.KeyEmpty
 	}
-	return KeyUBL
+	if c.fallback {
+		return KeyUBL
+	}
+	return cbc.KeyEmpty
 }
 
 // Import parses the data and converts it, determining the context from the
 // document in the same way as Detect.
-func (converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
+func (c *converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
 	doc, err := Parse(data)
 	if err != nil {
 		return nil, err
@@ -95,12 +96,12 @@ func (converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
 	return nil, ErrUnsupportedDocumentType
 }
 
-func (converter) Accepts(_ cbc.Key, _ *gobl.Envelope) bool {
+func (c *converter) Accepts(_ cbc.Key, _ *gobl.Envelope) bool {
 	return true
 }
 
-func (converter) Export(key cbc.Key, env *gobl.Envelope) ([]byte, error) {
-	ctx := contextForKey(key)
+func (c *converter) Export(key cbc.Key, env *gobl.Envelope) ([]byte, error) {
+	ctx := c.context(key)
 	if ctx == nil {
 		return nil, ErrUnsupportedDocumentType
 	}
@@ -111,8 +112,8 @@ func (converter) Export(key cbc.Key, env *gobl.Envelope) ([]byte, error) {
 	return Bytes(doc)
 }
 
-func contextForKey(key cbc.Key) *Context {
-	for _, ctx := range contexts {
+func (c *converter) context(key cbc.Key) *Context {
+	for _, ctx := range c.contexts {
 		if ctx.Key == key {
 			return &ctx
 		}

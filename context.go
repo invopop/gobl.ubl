@@ -1,23 +1,18 @@
 package ubl
 
 import (
-	"github.com/invopop/gobl.fr.ctc/addon/flow2"
-	zatca "github.com/invopop/gobl.sa.zatca/addon"
-	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/convert"
+	"github.com/invopop/gobl/i18n"
+	"github.com/invopop/gobl/l10n"
+	"github.com/invopop/gobl/schema"
 )
 
 // Peppol Billing Profile IDs
 const (
 	PeppolBillingProfileIDDefault = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
-)
-
-// Peppol France Process IDs
-const (
-	PeppolFranceProcessIDRegulated    = "urn:peppol:france:billing:regulated"
-	PeppolFranceProcessIDNonRegulated = "urn:peppol:france:billing:non-regulated"
 )
 
 // VESIDMapping maps document types to their corresponding VESID values.
@@ -32,19 +27,23 @@ type VESIDMapping struct {
 
 // Context is used to ensure that the generated UBL document
 // uses a specific CustomizationID and ProfileID when generating
-// the output document.
+// the output document, and to apply the layers of the specification it
+// represents on top of the base conversion.
 type Context struct {
-	// Key identifies the context in the GOBL convert register. Only the base
-	// contexts that apply in any country have a key: regional contexts are
-	// registered by their own packages.
+	// Key identifies the context in the GOBL convert register, with one layer
+	// for each specification it builds on, e.g. "ubl+peppol".
 	Key cbc.Key
+	// Name of the context.
+	Name i18n.String
+	// Countries where the context applies. Empty means no restriction.
+	Countries []l10n.Code
+	// Schemas of the GOBL documents the context converts, in both directions.
+	Schemas []schema.ID
 	// CustomizationID identifies specific characteristics in the
 	// document which need to be present for local differences.
 	CustomizationID string
 	// ProfileID determines the business process context or scenario
-	// for the exchange of the document. For contexts like French CIUS/Extended,
-	// this is the Peppol process ID used in the SBDH, while the UBL XML ProfileID
-	// is overridden by the billing mode from the GOBL invoice.
+	// for the exchange of the document.
 	ProfileID string
 	// OutputCustomizationID optionally specifies a different CustomizationID
 	// to use in the actual generated UBL XML document. If empty, CustomizationID
@@ -57,6 +56,14 @@ type Context struct {
 	// VESIDs contains the VESID (Validation Exchange Specification ID) mappings
 	// for different document types and scenarios within this context.
 	VESIDs VESIDMapping
+	// Match optionally identifies the context's documents before the
+	// CustomizationID and ProfileID are compared.
+	Match func(customizationID, profileID string) bool
+	// Fallback optionally claims documents that no context matched.
+	Fallback func(customizationID, profileID string) bool
+	// Layers add the behavior of the context's specifications, applied in
+	// order after the base conversion.
+	Layers []*Layer
 }
 
 // Is checks if two contexts are the same.
@@ -72,31 +79,18 @@ func (c *Context) GetVESID(inv *bill.Invoice) string {
 	return c.VESIDs.Invoice
 }
 
-// FindContext looks up a context by CustomizationID and optionally ProfileID.
-// Returns nil if no matching context is found.
+// FindContext looks up a registered context by CustomizationID and optionally
+// ProfileID. Returns nil if no matching context is found.
 //
 // The lookup logic works as follows:
-//  1. If the ProfileID is a French billing mode code, matches on
-//     OutputCustomizationID and then on CustomizationID
+//  1. Contexts whose Match function claims the document
 //  2. Tries to match on the full CustomizationID (for external identification)
 //  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
-//  4. Falls back to a French context when the ProfileID is a French billing mode
+//  4. Contexts whose Fallback function claims the document
 func FindContext(customizationID string, profileID string) *Context {
-	// French billing mode check: France CIUS documents use the same
-	// CustomizationID as EN16931 but can be identified by their ProfileID
-	// containing a billing mode code (e.g., "B1", "S1", "M4").
-	if isFrenchBillingMode(profileID) {
-		// OutputCustomizationID first: ContextEN16931 would otherwise match the
-		// plain EN16931 customization that CIUS documents carry.
-		for _, ctx := range contexts {
-			if ctx.OutputCustomizationID != "" && ctx.OutputCustomizationID == customizationID {
-				return &ctx
-			}
-		}
-		for _, ctx := range contexts {
-			if ctx.CustomizationID == customizationID {
-				return &ctx
-			}
+	for _, ctx := range contexts {
+		if ctx.Match != nil && ctx.Match(customizationID, profileID) {
+			return &ctx
 		}
 	}
 
@@ -118,30 +112,25 @@ func FindContext(customizationID string, profileID string) *Context {
 		}
 	}
 
-	// The CTC schematron never checks BT-24, so a mangled CustomizationID
-	// arrives validated and the billing mode is all that is left to trust.
-	// Extended because its extra mappings are additive: a CIUS document
-	// carries none of them.
-	if isFrenchBillingMode(profileID) {
-		ctx := ContextPeppolFranceExtended
-		return &ctx
+	for _, ctx := range contexts {
+		if ctx.Fallback != nil && ctx.Fallback(customizationID, profileID) {
+			return &ctx
+		}
 	}
 
 	return nil
 }
 
-// isFrenchBillingMode checks if the given profileID matches a known French
-// billing mode code pattern (e.g., "S1", "B1", "M4"). These codes consist of
-// a letter (B for goods, S for services, M for mixed) followed by a digit.
-func isFrenchBillingMode(profileID string) bool {
-	if len(profileID) != 2 {
-		return false
-	}
-	switch profileID[0] {
-	case 'B', 'S', 'M':
-		return profileID[1] >= '0' && profileID[1] <= '9'
-	}
-	return false
+// RegisterContexts makes the contexts available to FindContext, and registers
+// them with the GOBL convert register. Packages that implement regional
+// contexts call it from their init function.
+func RegisterContexts(ctxs ...Context) {
+	registerContexts(false, ctxs)
+}
+
+func registerContexts(fallback bool, ctxs []Context) {
+	contexts = append(contexts, ctxs...)
+	convert.Register(&converter{contexts: ctxs, fallback: fallback})
 }
 
 type options struct {
@@ -174,12 +163,11 @@ func WithRouting(from, to cbc.URI) Option {
 	}
 }
 
-// When adding new contexts, remember to add them to both the exported
-// variable definitions below AND the contexts slice.
-
 // ContextEN16931 is the default context for basic UBL documents.
 var ContextEN16931 = Context{
-	Key:             "ubl+eu-en16931-v2017",
+	Key:             "ubl+en16931",
+	Name:            i18n.NewString("UBL EN 16931"),
+	Schemas:         []schema.ID{invoiceSchema},
 	CustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:          []cbc.Key{en16931.V2017},
 	VESIDs: VESIDMapping{
@@ -190,7 +178,9 @@ var ContextEN16931 = Context{
 
 // ContextPeppol defines the default Peppol context.
 var ContextPeppol = Context{
-	Key:             "ubl+peppol-bis-billing-v3",
+	Key:             "ubl+peppol",
+	Name:            i18n.NewString("UBL Peppol BIS Billing 3"),
+	Schemas:         []schema.ID{invoiceSchema},
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{en16931.V2017},
@@ -198,11 +188,14 @@ var ContextPeppol = Context{
 		Invoice:    "eu.peppol.bis3:invoice:2026.5",
 		CreditNote: "eu.peppol.bis3:creditnote:2026.5",
 	},
+	Layers: []*Layer{LayerPeppolBilling},
 }
 
 // ContextPeppolSelfBilled defines the Peppol self-billed context.
 var ContextPeppolSelfBilled = Context{
-	Key:             "ubl+peppol-bis-self-billing-v3",
+	Key:             "ubl+peppol+self-billing",
+	Name:            i18n.NewString("UBL Peppol BIS Self-Billing 3"),
+	Schemas:         []schema.ID{invoiceSchema},
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
 	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
 	Addons:          []cbc.Key{en16931.V2017},
@@ -216,65 +209,30 @@ var ContextPeppolSelfBilled = Context{
 	},
 }
 
-// ContextXRechnung defines the main context to use for XRechnung UBL documents.
-var ContextXRechnung = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:xeinkauf.de:kosit:xrechnung_3.0",
-	ProfileID:       PeppolBillingProfileIDDefault,
-	Addons:          []cbc.Key{xrechnung.V3},
-	VESIDs: VESIDMapping{
-		Invoice:    "de.xrechnung:ubl-invoice:3.0.2",
-		CreditNote: "de.xrechnung:ubl-creditnote:3.0.2",
-	},
-}
-
-// ContextPeppolFranceCIUS defines the context for France UBL Invoice CIUS.
-var ContextPeppolFranceCIUS = Context{
-	CustomizationID:       "urn:cen.eu:en16931:2017#compliant#urn:peppol:france:billing:cius:1.0",
-	ProfileID:             PeppolFranceProcessIDRegulated,
-	OutputCustomizationID: "urn:cen.eu:en16931:2017",
-	Addons:                []cbc.Key{flow2.V1},
-	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:ubl-invoice:1.4.0-03",
-		CreditNote: "fr.ctc:ubl-creditnote:1.4.0-03",
-	},
-}
-
-// ContextPeppolFranceExtended defines the context for France UBL Invoice Extended.
-var ContextPeppolFranceExtended = Context{
-	CustomizationID:       "urn:cen.eu:en16931:2017#conformant#urn:peppol:france:billing:extended:1.0",
-	ProfileID:             PeppolFranceProcessIDRegulated,
-	OutputCustomizationID: "urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
-	Addons:                []cbc.Key{flow2.V1},
-	VESIDs: VESIDMapping{
-		Invoice:    "fr.ctc:extended-ubl-invoice:1.4.0-03",
-		CreditNote: "fr.ctc:extended-ubl-creditnote:1.4.0-03",
-	},
-}
-
-// ContextZATCA defines the context for Saudi Arabia ZATCA Phase 2 e-invoicing.
-var ContextZATCA = Context{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:zatca.gov.sa:e-invoicing:1.0",
-	ProfileID:       "reporting:1.0", // BT-23
-	Addons:          []cbc.Key{zatca.V1},
-	VESIDs: VESIDMapping{
-		Invoice:    "sa.zatca:ubl-invoice:2.3.8",
-		CreditNote: "sa.zatca:ubl-invoice:2.3.8",
-	},
-}
-
 // ContextPeppolInvoiceResponse defines the Peppol BIS Invoice Response context.
 // It is its own context (separate from the billing ContextPeppol) because the
 // Invoice Response declares a different CustomizationID, which is what
 // FindContext matches a parsed document against.
 var ContextPeppolInvoiceResponse = Context{
-	Key:             "ubl+peppol-invoice-response-v3",
+	Key:             "ubl+peppol+invoice-response",
+	Name:            i18n.NewString("UBL Peppol Invoice Response 3"),
+	Schemas:         []schema.ID{statusSchema},
 	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
 	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
 	VESIDs: VESIDMapping{
 		Status: "eu.peppol.bis3:invoice-message-response:2026.5",
 	},
+	Layers: []*Layer{LayerPeppolInvoiceResponse},
 }
 
-// contexts is used internally for reverse lookups during parsing.
-// When adding new contexts, remember to add them here AND as exported variables above.
-var contexts = []Context{ContextEN16931, ContextPeppol, ContextPeppolSelfBilled, ContextXRechnung, ContextPeppolFranceCIUS, ContextPeppolFranceExtended, ContextZATCA, ContextPeppolInvoiceResponse}
+// contexts holds every registered context for lookups during parsing.
+var contexts []Context
+
+func init() {
+	registerContexts(true, []Context{
+		ContextEN16931,
+		ContextPeppol,
+		ContextPeppolSelfBilled,
+		ContextPeppolInvoiceResponse,
+	})
+}
