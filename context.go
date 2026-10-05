@@ -34,6 +34,10 @@ type VESIDMapping struct {
 // uses a specific CustomizationID and ProfileID when generating
 // the output document.
 type Context struct {
+	// Key identifies the context in the GOBL convert register. Only the base
+	// contexts that apply in any country have a key: regional contexts are
+	// registered by their own packages.
+	Key cbc.Key
 	// CustomizationID identifies specific characteristics in the
 	// document which need to be present for local differences.
 	CustomizationID string
@@ -175,6 +179,7 @@ func WithRouting(from, to cbc.URI) Option {
 
 // ContextEN16931 is the default context for basic UBL documents.
 var ContextEN16931 = Context{
+	Key:             "ubl+eu-en16931-v2017",
 	CustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:          []cbc.Key{en16931.V2017},
 	VESIDs: VESIDMapping{
@@ -185,6 +190,7 @@ var ContextEN16931 = Context{
 
 // ContextPeppol defines the default Peppol context.
 var ContextPeppol = Context{
+	Key:             "ubl+peppol-bis-billing-v3",
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{en16931.V2017},
@@ -196,6 +202,7 @@ var ContextPeppol = Context{
 
 // ContextPeppolSelfBilled defines the Peppol self-billed context.
 var ContextPeppolSelfBilled = Context{
+	Key:             "ubl+peppol-bis-self-billing-v3",
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
 	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
 	Addons:          []cbc.Key{en16931.V2017},
@@ -260,6 +267,7 @@ var ContextZATCA = Context{
 // Invoice Response declares a different CustomizationID, which is what
 // FindContext matches a parsed document against.
 var ContextPeppolInvoiceResponse = Context{
+	Key:             "ubl+peppol-invoice-response-v3",
 	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
 	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
 	VESIDs: VESIDMapping{
