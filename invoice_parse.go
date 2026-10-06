@@ -89,7 +89,8 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 	ui.applyExchangeRates(out)
 
-	if err := ui.goblAddLines(out, o); err != nil {
+	srcs, err := ui.goblAddLines(out, o, nil)
+	if err != nil {
 		return nil, err
 	}
 	if err := ui.goblAddPayment(out, o); err != nil {
@@ -121,7 +122,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 
 	// Everything the document declares is now mapped, so the calculated
 	// amounts can be checked against the ones the sender stated.
-	if err := ui.reconcileTotals(out); err != nil {
+	if err := ui.reconcileTotals(out, o, srcs); err != nil {
 		return nil, err
 	}
 

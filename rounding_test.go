@@ -241,9 +241,13 @@ func assertTotalsAddUp(t *testing.T, doc *ubl.Invoice) {
 		lines = doc.CreditNoteLines
 	}
 
-	// BR-CO-10: the sum of line net amounts (BT-106) is the sum of BT-131.
+	// BR-CO-10: the sum of line net amounts (BT-106) is the sum of BT-131,
+	// leaving out GROUP and INFORMATION sub-invoice lines (BR-FREXT-CO-10).
 	sum := num.MakeAmount(0, 2)
 	for _, l := range lines {
+		if s := lineStatus(l); s == lineStatusGroup || s == lineStatusInformation {
+			continue
+		}
 		sum = sum.Add(amount(&l.LineExtensionAmount))
 	}
 	m := doc.LegalMonetaryTotal
