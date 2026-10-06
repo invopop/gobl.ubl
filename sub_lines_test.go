@@ -47,18 +47,27 @@ func breakdownEnvelope(t *testing.T) *gobl.Envelope {
 	return env
 }
 
+func lineHierarchy(l ubl.InvoiceLine) *ubl.LineBillingReference {
+	if len(l.BillingReference) == 0 {
+		return nil
+	}
+	return l.BillingReference[0]
+}
+
 func lineStatus(l ubl.InvoiceLine) string {
-	if l.BillingReference == nil || l.BillingReference.InvoiceDocumentReference == nil {
+	br := lineHierarchy(l)
+	if br == nil || br.InvoiceDocumentReference == nil {
 		return ""
 	}
-	return l.BillingReference.InvoiceDocumentReference.DocumentStatusCode
+	return br.InvoiceDocumentReference.DocumentStatusCode
 }
 
 func lineParent(l ubl.InvoiceLine) string {
-	if l.BillingReference == nil || l.BillingReference.BillingReferenceLine == nil {
+	br := lineHierarchy(l)
+	if br == nil || br.BillingReferenceLine == nil {
 		return ""
 	}
-	return l.BillingReference.BillingReferenceLine.ID.Value
+	return br.BillingReferenceLine.ID.Value
 }
 
 func TestSubLinesConvert(t *testing.T) {
@@ -73,7 +82,7 @@ func TestSubLinesConvert(t *testing.T) {
 		assert.Equal(t, "1", group.ID)
 		assert.Equal(t, lineStatusGroup, lineStatus(group))
 		assert.Empty(t, lineParent(group))
-		assert.Equal(t, "FAC-2024-001", group.BillingReference.InvoiceDocumentReference.ID.Value)
+		assert.Equal(t, "FAC-2024-001", lineHierarchy(group).InvoiceDocumentReference.ID.Value)
 		assert.Nil(t, group.Item.ClassifiedTaxCategory)
 		assert.Equal(t, "145.00", group.Price.PriceAmount.Value)
 		assert.Equal(t, "10", group.InvoicedQuantity.Value)
@@ -109,7 +118,7 @@ func TestSubLinesConvert(t *testing.T) {
 		doc, err := ubl.ConvertInvoice(breakdownEnvelope(t), ubl.WithContext(ubl.ContextPeppolFranceCIUS))
 		require.NoError(t, err)
 		require.Len(t, doc.InvoiceLines, 1)
-		assert.Nil(t, doc.InvoiceLines[0].BillingReference)
+		assert.Empty(t, doc.InvoiceLines[0].BillingReference)
 		assert.Equal(t, "1450.00", doc.InvoiceLines[0].LineExtensionAmount.Value)
 	})
 
@@ -343,4 +352,32 @@ func TestParseSubInvoiceLinesCycle(t *testing.T) {
 	inv := parseSubLines(t, xml)
 	assert.Len(t, inv.Lines, 5)
 	assert.Equal(t, "170.00", inv.Totals.Sum.String())
+}
+
+// TestParseSubInvoiceLinesOtherInvoice covers line billing references naming
+// another invoice: EXTENDED-CTC-FR only reads a line's type and parent from
+// the one naming the invoice itself.
+func TestParseSubInvoiceLinesOtherInvoice(t *testing.T) {
+	data, err := testLoadXML("sub-invoice-lines.xml")
+	require.NoError(t, err)
+	xml := string(data)
+
+	// The bundle's DETAIL line also refers to an earlier invoice.
+	other := "    <cac:BillingReference>\n      <cac:InvoiceDocumentReference>\n        <cbc:ID>FAC-2023-099</cbc:ID>\n      </cac:InvoiceDocumentReference>\n    </cac:BillingReference>\n"
+	i := strings.Index(xml, "<cbc:ID>5</cbc:ID>")
+	j := i + strings.Index(xml[i:], "    <cac:BillingReference>")
+	xml = xml[:j] + other + xml[j:]
+
+	// The INFORMATION status names another invoice, so the line is an ordinary
+	// one, and with no price it is not converted.
+	k := strings.LastIndex(xml, "<cbc:ID>FAC-2024-001</cbc:ID>")
+	xml = xml[:k] + "<cbc:ID>FAC-2023-099</cbc:ID>" + xml[k+len("<cbc:ID>FAC-2024-001</cbc:ID>"):]
+
+	inv := parseSubLines(t, xml)
+	require.Len(t, inv.Lines, 4)
+	bundle := inv.Lines[3]
+	assert.Equal(t, "Service bundle", bundle.Item.Name)
+	require.Len(t, bundle.Breakdown, 1)
+	assert.Equal(t, "Installation", bundle.Breakdown[0].Item.Name)
+	assert.False(t, inv.HasTags(tax.TagBypass))
 }

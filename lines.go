@@ -21,13 +21,19 @@ type InvoiceLine struct {
 	AccountingCost      *string             `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
-	// Sub-invoice lines (EXTENDED-CTC-FR): the line's type and its parent.
-	BillingReference  *LineBillingReference `xml:"cac:BillingReference,omitempty"`
-	DocumentReference *LineDocReference     `xml:"cac:DocumentReference,omitempty"`
-	AllowanceCharge   []*AllowanceCharge    `xml:"cac:AllowanceCharge"`
-	TaxTotal          []TaxTotal            `xml:"cac:TaxTotal,omitempty"`
-	Item              *Item                 `xml:"cac:Item"`
-	Price             *Price                `xml:"cac:Price"`
+	// Sub-invoice lines (EXTENDED-CTC-FR): the reference naming the invoice
+	// itself carries the line's type and its parent. Others name earlier
+	// invoices.
+	BillingReference  []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
+	DocumentReference *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
+	AllowanceCharge   []*AllowanceCharge      `xml:"cac:AllowanceCharge"`
+	TaxTotal          []TaxTotal              `xml:"cac:TaxTotal,omitempty"`
+	Item              *Item                   `xml:"cac:Item"`
+	Price             *Price                  `xml:"cac:Price"`
+
+	// hierarchy is the billing reference naming the invoice itself, found
+	// when the line is read.
+	hierarchy *LineBillingReference
 }
 
 // LineDocReference defines a document reference at line level (BT-128)
@@ -37,8 +43,8 @@ type LineDocReference struct {
 }
 
 // LineBillingReference carries a sub-invoice line's place in its hierarchy
-// under EXTENDED-CTC-FR: the document reference names the invoice itself and
-// the line's type (EXT-FR-FE-163), and the reference line its parent
+// under EXTENDED-CTC-FR: a document reference naming the invoice itself (BT-1)
+// gives the line's type (EXT-FR-FE-163), and the reference line its parent
 // (EXT-FR-FE-162).
 type LineBillingReference struct {
 	InvoiceDocumentReference *LineDocumentStatusReference `xml:"cac:InvoiceDocumentReference,omitempty"`
@@ -141,7 +147,7 @@ func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceTy
 	return lines
 }
 
-func newLineBillingReference(number, status, parent string) *LineBillingReference {
+func newLineBillingReference(number, status, parent string) []*LineBillingReference {
 	ref := &LineBillingReference{
 		InvoiceDocumentReference: &LineDocumentStatusReference{
 			ID:                 IDType{Value: number},
@@ -151,7 +157,7 @@ func newLineBillingReference(number, status, parent string) *LineBillingReferenc
 	if parent != "" {
 		ref.BillingReferenceLine = &BillingReferenceLine{ID: IDType{Value: parent}}
 	}
-	return ref
+	return []*LineBillingReference{ref}
 }
 
 // subLineAsLine presents a sub-line as a line of its own under its parent. A

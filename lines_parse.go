@@ -41,6 +41,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options, flat map[string]b
 	ids := make(map[string]bool)
 	for i := range items {
 		docs[i] = &items[i]
+		docs[i].hierarchy = goblLineHierarchy(docs[i], strings.TrimSpace(ui.ID))
 		if id := goblLineID(docs[i]); id != "" {
 			ids[id] = true
 		}
@@ -126,8 +127,19 @@ func goblLineID(it *InvoiceLine) string {
 	return strings.TrimSpace(it.ID)
 }
 
+// goblLineHierarchy finds the billing reference giving a line's type and
+// parent: the one naming the invoice itself, as EXTENDED-CTC-FR reads them.
+func goblLineHierarchy(it *InvoiceLine, self string) *LineBillingReference {
+	for _, br := range it.BillingReference {
+		if br != nil && br.InvoiceDocumentReference != nil && strings.TrimSpace(br.InvoiceDocumentReference.ID.Value) == self {
+			return br
+		}
+	}
+	return nil
+}
+
 func goblParentLineID(it *InvoiceLine) string {
-	br := it.BillingReference
+	br := it.hierarchy
 	if br == nil || br.BillingReferenceLine == nil {
 		return ""
 	}
@@ -135,7 +147,7 @@ func goblParentLineID(it *InvoiceLine) string {
 }
 
 func goblLineStatus(it *InvoiceLine) string {
-	br := it.BillingReference
+	br := it.hierarchy
 	if br == nil || br.InvoiceDocumentReference == nil {
 		return ""
 	}
