@@ -2,6 +2,8 @@ package main
 
 import (
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -66,4 +68,14 @@ func Test_version(t *testing.T) {
 	if serr, _ := io.ReadAll(stderr); !strings.Contains(string(serr), wantErr) {
 		t.Errorf("Unexpected STDERR: %s", serr)
 	}
+}
+
+func TestRunEnvError(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.Mkdir(filepath.Join(dir, ".env"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	t.Chdir(dir)
+	err := run()
+	assert.ErrorContains(t, err, "failed to load .env file")
 }

@@ -1,13 +1,18 @@
 package ubl_test
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/convert"
+	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -39,10 +44,11 @@ func testLayer(name string) *ubl.Layer {
 }
 
 var contextLayerTest = ubl.Context{
-	Key:             "ubl+layer-test",
-	Schemas:         ubl.ContextEN16931.Schemas,
-	CustomizationID: testCustomizationID,
-	Addons:          ubl.ContextEN16931.Addons,
+	Key:                   "ubl+layer-test",
+	Schemas:               ubl.ContextEN16931.Schemas,
+	CustomizationID:       testCustomizationID,
+	OutputCustomizationID: "urn:example:layer-test-output",
+	Addons:                ubl.ContextEN16931.Addons,
 	Match: func(_, profileID string) bool {
 		return profileID == testProfileID
 	},
@@ -53,7 +59,7 @@ var contextLayerTest = ubl.Context{
 }
 
 func init() {
-	ubl.RegisterContexts(contextLayerTest)
+	ubl.RegisterContexts(contextLayerTest, contextLayerErrors)
 }
 
 func TestLayers(t *testing.T) {
@@ -95,6 +101,11 @@ func TestFindContextMatching(t *testing.T) {
 		require.NotNil(t, ctx)
 		assert.Equal(t, contextLayerTest.Key, ctx.Key)
 	})
+	t.Run("output customization", func(t *testing.T) {
+		ctx := ubl.FindContext("urn:example:layer-test-output", "")
+		require.NotNil(t, ctx)
+		assert.Equal(t, contextLayerTest.Key, ctx.Key)
+	})
 	t.Run("fallback after customization", func(t *testing.T) {
 		ctx := ubl.FindContext("urn:example:layer-test-fallback", "")
 		require.NotNil(t, ctx)
@@ -108,4 +119,65 @@ func TestFindContextMatching(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, contextLayerTest.Key, ctx.Key)
 	})
+}
+
+var errLayer = errors.New("layer failed")
+
+// contextLayerErrors has layers that fail in every direction.
+var contextLayerErrors = ubl.Context{
+	Key:             "ubl+layer-errors",
+	CustomizationID: "urn:example:layer-errors",
+	Layers: []*ubl.Layer{{
+		ConvertInvoice: func(*ubl.Context, *bill.Invoice, *ubl.Invoice) error { return errLayer },
+		ConvertStatus: func(*ubl.Context, *bill.Status, *ubl.ApplicationResponse) error {
+			return errLayer
+		},
+		ParseInvoice: func(*ubl.Context, *ubl.Invoice, *bill.Invoice) error { return errLayer },
+		ParseStatus: func(*ubl.Context, *ubl.ApplicationResponse, *bill.Status) error {
+			return errLayer
+		},
+	}},
+}
+
+func TestLayerErrors(t *testing.T) {
+	ctx := contextLayerErrors
+
+	t.Run("convert invoice", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		_, err := ubl.ConvertInvoice(env, ubl.WithContext(ctx))
+		assert.ErrorIs(t, err, errLayer)
+	})
+	t.Run("convert status", func(t *testing.T) {
+		env, err := gobl.Envelop(basePeppolStatus())
+		require.NoError(t, err)
+		_, err = ubl.Convert(env, ubl.WithContext(ctx))
+		assert.ErrorIs(t, err, errLayer)
+	})
+	t.Run("parse invoice", func(t *testing.T) {
+		in := parsedFixture(t, "peppol/base-example.xml")
+		_, err := in.Convert(ubl.WithContext(ctx))
+		assert.ErrorIs(t, err, errLayer)
+	})
+	t.Run("parse status", func(t *testing.T) {
+		env, err := gobl.Envelop(basePeppolStatus())
+		require.NoError(t, err)
+		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+		require.NoError(t, err)
+		ar := doc.(*ubl.ApplicationResponse)
+		ar.CustomizationID = ctx.CustomizationID
+		ar.ProfileID = nil
+		_, err = ar.Convert()
+		assert.ErrorIs(t, err, errLayer)
+	})
+}
+
+func TestLayerHelpers(t *testing.T) {
+	assert.Equal(t, "2024-01-02", ubl.FormatDate(cal.MakeDate(2024, 1, 2)))
+	assert.Equal(t, "10.00", ubl.NewAmount(num.MakeAmount(10, 0), "EUR").Value)
+	code, ok := ubl.TaxPointCode(tax.PointDelivery)
+	assert.True(t, ok)
+	assert.Equal(t, "35", code)
+	_, ok = ubl.TaxPointCode("unknown")
+	assert.False(t, ok)
+	assert.Equal(t, "ab", ubl.CleanString("a\uFFFDb"))
 }
