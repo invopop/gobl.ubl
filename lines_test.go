@@ -108,20 +108,20 @@ func TestLineNoteSubjectCodeRoundTrip(t *testing.T) {
 		},
 	}
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotEmpty(t, doc.InvoiceLines[0].Note)
 	assert.Equal(t, "#AAI#Handle with care", doc.InvoiceLines[0].Note[0])
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -144,7 +144,7 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotNil(t, doc.InvoiceLines[0].Item.AdditionalItemProperty)
@@ -162,14 +162,14 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	assert.Equal(t, "2.5", props[1].ValueQuantity.Value)
 	assert.Equal(t, "KGM", props[1].ValueQuantity.UnitCode)
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -201,7 +201,7 @@ func TestItemAttributeUnmappedUnitRoundTrip(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	props := *doc.InvoiceLines[0].Item.AdditionalItemProperty
@@ -211,14 +211,14 @@ func TestItemAttributeUnmappedUnitRoundTrip(t *testing.T) {
 	require.NotNil(t, props[0].ValueQuantity)
 	assert.Equal(t, "X4G", props[0].ValueQuantity.UnitCode)
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -242,7 +242,7 @@ func TestItemAttributeWithoutUnit(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	props := *doc.InvoiceLines[0].Item.AdditionalItemProperty
@@ -263,7 +263,7 @@ func TestLineSellerRoundTrip(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotNil(t, doc.InvoiceLines[0].Item.ManufacturerParty)
@@ -271,14 +271,14 @@ func TestLineSellerRoundTrip(t *testing.T) {
 	assert.Equal(t, ubl.SchemeIDEmail, doc.InvoiceLines[0].Item.ManufacturerParty.EndpointID.SchemeID)
 	assert.Equal(t, "seller@example.com", doc.InvoiceLines[0].Item.ManufacturerParty.EndpointID.Value)
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)

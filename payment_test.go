@@ -48,7 +48,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer = nil
 		inv.Payment.Instructions.DirectDebit = &pay.DirectDebit{Account: "0667"}
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 
@@ -67,7 +67,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer = nil
 		inv.Payment.Instructions.DirectDebit = &pay.DirectDebit{Ref: "MANDATE-123", Account: "0667"}
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
@@ -76,7 +76,7 @@ func TestNewPayment(t *testing.T) {
 	})
 
 	t.Run("direct debit places account inside mandate (BT-91)", func(t *testing.T) {
-		env := loadTestEnvelope(t, "xrechnung/invoice-xr-minimal.json")
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
@@ -92,7 +92,7 @@ func TestNewPayment(t *testing.T) {
 			},
 		}
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextXRechnung))
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		pm := doc.PaymentMeans[0]
@@ -114,7 +114,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer = nil
 		inv.Payment.Instructions.Card = &pay.Card{Last4: "0312"}
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 
@@ -127,7 +127,7 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "NA", *card.NetworkID)
 		assert.Nil(t, card.HolderName)
 
-		data, err := ubl.Bytes(doc)
+		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 		assert.Contains(t, string(data), "<cac:CardAccount>\n      <cbc:PrimaryAccountNumberID>0312</cbc:PrimaryAccountNumberID>\n      <cbc:NetworkID>NA</cbc:NetworkID>\n    </cac:CardAccount>")
 	})
@@ -140,7 +140,7 @@ func TestNewPayment(t *testing.T) {
 
 		inv.Payment.Instructions.Ext = tax.MakeExtensions()
 
-		_, err := ubl.ConvertInvoice(env)
+		_, err := ubl.ExportInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 
@@ -160,7 +160,7 @@ func TestNewPayment(t *testing.T) {
 		}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		require.NotNil(t, doc.PayeeParty)
@@ -168,14 +168,14 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "EM", doc.PayeeParty.EndpointID.SchemeID)
 		assert.Equal(t, "payee@example.com", doc.PayeeParty.EndpointID.Value)
 
-		data, err := ubl.Bytes(doc)
+		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 
-		parsed, err := ubl.Parse(data)
+		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		out, ok := parsed.(*ubl.Invoice)
 		require.True(t, ok)
-		outEnv, err := out.Convert()
+		outEnv, err := ubl.Import(out)
 		require.NoError(t, err)
 		outInv, ok := outEnv.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -184,79 +184,5 @@ func TestNewPayment(t *testing.T) {
 		require.NotNil(t, outInv.Payment.Payee)
 		require.NotEmpty(t, outInv.Payment.Payee.Inboxes)
 		assert.Equal(t, "payee@example.com", outInv.Payment.Payee.Inboxes[0].Email)
-	})
-}
-
-func TestPaymentPayer(t *testing.T) {
-	const fixture = "france-extended/invoice-payer.json"
-
-	t.Run("french extended maps the payer to the payment mandate", func(t *testing.T) {
-		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
-		require.NoError(t, err)
-
-		require.NotEmpty(t, doc.PaymentMeans)
-		mandate := doc.PaymentMeans[0].PaymentMandate
-		require.NotNil(t, mandate)
-		payer := mandate.PayerParty
-		require.NotNil(t, payer)
-		assert.Equal(t, "Payeur SA", payer.PartyName.Name)
-		require.NotEmpty(t, payer.PartyIdentification)
-		assert.Equal(t, "39183804200003", payer.PartyIdentification[0].ID.Value)
-		assert.Equal(t, "0009", *payer.PartyIdentification[0].ID.SchemeID)
-		require.NotNil(t, payer.PartyLegalEntity)
-		assert.Equal(t, "391838042", payer.PartyLegalEntity.CompanyID.Value)
-		assert.Equal(t, "0002", *payer.PartyLegalEntity.CompanyID.SchemeID)
-
-		// The payee travels alongside the payer (BG-10).
-		require.NotNil(t, doc.PayeeParty)
-		assert.Equal(t, "Bénéficiaire SARL", doc.PayeeParty.PartyName.Name)
-	})
-
-	t.Run("payer without payment instructions synthesizes the payment means", func(t *testing.T) {
-		env := loadTestEnvelope(t, fixture)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-		inv.Payment.Instructions = nil
-
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
-		require.NoError(t, err)
-		require.NotEmpty(t, doc.PaymentMeans)
-		assert.Equal(t, "1", doc.PaymentMeans[0].PaymentMeansCode.Value)
-		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
-		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate.ID)
-		assert.NotNil(t, doc.PaymentMeans[0].PaymentMandate.PayerParty)
-	})
-
-	t.Run("payer is ignored outside the french extended context", func(t *testing.T) {
-		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppol)
-		require.NoError(t, err)
-
-		require.NotEmpty(t, doc.PaymentMeans)
-		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate)
-	})
-
-	t.Run("parse restores the payer without inventing a direct debit", func(t *testing.T) {
-		doc, err := testInvoiceFromContext(fixture, ubl.ContextPeppolFranceExtended)
-		require.NoError(t, err)
-		data, err := ubl.Bytes(doc)
-		require.NoError(t, err)
-
-		parsed, err := ubl.Parse(data)
-		require.NoError(t, err)
-		in, ok := parsed.(*ubl.Invoice)
-		require.True(t, ok)
-		env, err := in.Convert()
-		require.NoError(t, err)
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-		require.NotNil(t, inv.Payment)
-		require.NotNil(t, inv.Payment.Payer)
-		assert.Equal(t, "Payeur SA", inv.Payment.Payer.Name)
-		require.NotNil(t, inv.Payment.Payee)
-		assert.Equal(t, "Bénéficiaire SARL", inv.Payment.Payee.Name)
-		require.NotNil(t, inv.Payment.Instructions)
-		assert.Nil(t, inv.Payment.Instructions.DirectDebit)
 	})
 }

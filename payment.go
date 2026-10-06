@@ -80,14 +80,14 @@ type PrepaidPayment struct {
 const sepaSchemeID = "SEPA"
 const cardNetworkNotApplicable = "NA"
 
-func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
+func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
 	}
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		if err := ui.addPaymentInstructions(inv, ctx); err != nil {
+		if err := ui.addPaymentInstructions(inv); err != nil {
 			return err
 		}
 	}
@@ -97,7 +97,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newParty(pymt.Payee, ctx)
+		ui.PayeeParty = newParty(pymt.Payee)
 		// UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress.
 		ui.PayeeParty.PostalAddress = nil
 		// UBL-CR-275: A UBL invoice should not include the PayeeParty
@@ -116,23 +116,6 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 				firstIdentificationWithScheme(ui.PayeeParty.PartyIdentification),
 			}
 		}
-	}
-
-	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
-	// profile, which maps it to the PaymentMandate's PayerParty.
-	if pymt.Payer != nil && ctx.Is(ContextPeppolFranceExtended) {
-		if len(ui.PaymentMeans) == 0 {
-			// PaymentMeans requires a PaymentMeansCode, so when the invoice
-			// carries no payment instructions, fall back to UNTDID 4461 code
-			// "1" (instrument not defined).
-			ui.PaymentMeans = []PaymentMeans{
-				{PaymentMeansCode: IDType{Value: "1"}},
-			}
-		}
-		if ui.PaymentMeans[0].PaymentMandate == nil {
-			ui.PaymentMeans[0].PaymentMandate = new(PaymentMandate)
-		}
-		ui.PaymentMeans[0].PaymentMandate.PayerParty = newParty(pymt.Payer, ctx)
 	}
 
 	// BT-90: Bank assigned creditor identifier
@@ -155,7 +138,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	return nil
 }
 
-func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error {
+func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 	instr := inv.Payment.Instructions
 	if instr.Ext.IsZero() || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
@@ -205,13 +188,6 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if ui.CreditNoteTypeCode != nil && inv.Payment.Terms != nil && len(inv.Payment.Terms.DueDates) > 0 {
 		formattedDate := formatDate(*inv.Payment.Terms.DueDates[0].Date)
 		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
-	}
-	// BR-KSA-17: Debit and credit note must contain the
-	// reason for this invoice type issuing.
-	if inv.Preceding != nil && ctx.Is(ContextZATCA) {
-		for _, ref := range inv.Preceding {
-			ui.PaymentMeans[0].InstructionNote = append(ui.PaymentMeans[0].InstructionNote, ref.Reason)
-		}
 	}
 	return nil
 }

@@ -8,21 +8,19 @@ import (
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
 	"github.com/invopop/gobl/uuid"
 )
 
-// Convert turns a parsed UBL ApplicationResponse into a GOBL envelope wrapping a
-// bill.Status.
-func (ar *ApplicationResponse) Convert() (*gobl.Envelope, error) {
-	o := new(options)
+// importEnvelope converts the UBL application response into a GOBL envelope
+// wrapping a bill.Status.
+func (ar *ApplicationResponse) importEnvelope(opts []Option) (*gobl.Envelope, error) {
 	profileID := ""
 	if ar.ProfileID != nil {
 		profileID = ar.ProfileID.Value
 	}
-	if ctx := FindContext(ar.CustomizationID, profileID); ctx != nil {
-		o.context = *ctx
-	}
+	o := importOptions(ar.CustomizationID, profileID, opts)
 
 	st, err := ar.goblStatus(o)
 	if err != nil {
@@ -30,7 +28,14 @@ func (ar *ApplicationResponse) Convert() (*gobl.Envelope, error) {
 	}
 
 	env := gobl.NewEnvelope()
-	if err := env.Insert(st); err != nil {
+	setEnvelopeRouting(env, o)
+	if env.Document, err = schema.NewObject(st); err != nil {
+		return nil, err
+	}
+	if err := o.format.runImportFuncs(ar, env); err != nil {
+		return nil, err
+	}
+	if err := env.Calculate(); err != nil {
 		return nil, err
 	}
 	return env, nil
@@ -38,11 +43,11 @@ func (ar *ApplicationResponse) Convert() (*gobl.Envelope, error) {
 
 func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	out := &bill.Status{
-		Addons:   tax.Addons{List: o.context.Addons},
+		Addons:   tax.Addons{List: o.format.Addons},
 		Type:     bill.StatusTypeResponse,
 		Code:     cbc.Code(ar.ID),
-		Supplier: goblParty(ar.ReceiverParty, o),
-		Customer: goblParty(ar.SenderParty, o),
+		Supplier: goblParty(ar.ReceiverParty),
+		Customer: goblParty(ar.SenderParty),
 	}
 
 	issueDate, err := parseDate(ar.IssueDate)
@@ -64,7 +69,7 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	}
 
 	for _, dr := range ar.DocumentResponse {
-		line, err := goblStatusLine(dr, o)
+		line, err := goblStatusLine(dr)
 		if err != nil {
 			return nil, err
 		}
@@ -75,8 +80,8 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 }
 
 // goblStatusLine maps the generic parts of a single UBL DocumentResponse. The
-// response code and the status clarifications are context specific.
-func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) {
+// response code and the status clarifications are format specific.
+func goblStatusLine(dr *DocumentResponse) (*bill.StatusLine, error) {
 	line := new(bill.StatusLine)
 	if dr == nil {
 		return line, nil
@@ -110,10 +115,6 @@ func goblStatusLine(dr *DocumentResponse, o *options) (*bill.StatusLine, error) 
 			doc.IssueDate = &d
 		}
 		line.Doc = doc
-	}
-
-	if o.context.Is(ContextPeppolInvoiceResponse) {
-		applyPeppolStatusLine(line, dr)
 	}
 
 	return line, nil

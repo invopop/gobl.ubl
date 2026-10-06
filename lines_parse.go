@@ -15,7 +15,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options) error {
+func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
 	items := ui.InvoiceLines
 	if len(ui.CreditNoteLines) > 0 {
 		items = ui.CreditNoteLines
@@ -27,7 +27,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options) error {
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
 	for _, docLine := range convertibleLines(items) {
-		line, err := goblConvertLine(docLine, taxCategoryMap, o)
+		line, err := goblConvertLine(docLine, taxCategoryMap)
 		if err != nil {
 			return err
 		}
@@ -39,7 +39,7 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options) error {
 	return nil
 }
 
-func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo, o *options) (*bill.Line, error) {
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
 	if docLine.Price == nil {
 		// skip this line
 		return nil, nil
@@ -75,7 +75,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		}
 		goblConvertLineItemTaxes(di, line, taxCategoryMap)
 		if di.ManufacturerParty != nil {
-			line.Seller = goblParty(di.ManufacturerParty, o)
+			line.Seller = goblParty(di.ManufacturerParty)
 		}
 	}
 

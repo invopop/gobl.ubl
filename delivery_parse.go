@@ -71,7 +71,7 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 		}
 	}
 
-	if d.Receiver != nil || d.Date != nil || d.Identities != nil {
+	if d.Receiver != nil || d.Date != nil || d.Period != nil || d.Identities != nil {
 		out.Delivery = d
 	}
 	return nil

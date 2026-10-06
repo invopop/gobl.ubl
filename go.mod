@@ -3,7 +3,7 @@ module github.com/invopop/gobl.ubl
 go 1.25.0
 
 require (
-	github.com/invopop/gobl v0.507.0
+	github.com/invopop/gobl v0.507.1-0.20261006132023-671e20bf8e92
 	github.com/joho/godotenv v1.5.1
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
@@ -12,8 +12,6 @@ require (
 
 require (
 	cloud.google.com/go v0.118.0
-	github.com/invopop/gobl.fr.ctc v0.0.7
-	github.com/invopop/gobl.sa.zatca v0.0.2
 	github.com/invopop/phorm v0.1.5
 	github.com/invopop/validation v0.8.0
 	github.com/invopop/xmlctx v0.13.0

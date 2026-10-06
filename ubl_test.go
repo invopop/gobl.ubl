@@ -7,23 +7,21 @@ import (
 	"testing"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/note"
-	"github.com/invopop/gobl/rules"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestParse(t *testing.T) {
+func TestDecode(t *testing.T) {
 	t.Run("invoice namespace returns *Invoice", func(t *testing.T) {
 		data, err := testLoadXML("en16931/ubl-example1.xml")
 		require.NoError(t, err)
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
 
 		inv, ok := doc.(*ubl.Invoice)
@@ -35,7 +33,7 @@ func TestParse(t *testing.T) {
 		data, err := testLoadXML("en16931/credit-note1.xml")
 		require.NoError(t, err)
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
 
 		_, ok := doc.(*ubl.Invoice)
@@ -46,17 +44,17 @@ func TestParse(t *testing.T) {
 		data := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <Foo xmlns="urn:example:foo"><Bar/></Foo>`)
 
-		_, err := ubl.Parse(data)
+		_, err := ubl.Decode(data)
 		assert.ErrorIs(t, err, ubl.ErrUnknownDocumentType)
 	})
 
 	t.Run("empty input returns ErrUnknownDocumentType", func(t *testing.T) {
-		_, err := ubl.Parse(nil)
+		_, err := ubl.Decode(nil)
 		assert.ErrorIs(t, err, ubl.ErrUnknownDocumentType)
 	})
 
 	t.Run("malformed XML returns a parse error", func(t *testing.T) {
-		_, err := ubl.Parse([]byte("<not-closed"))
+		_, err := ubl.Decode([]byte("<not-closed"))
 		require.Error(t, err)
 		assert.False(t, errors.Is(err, ubl.ErrUnknownDocumentType))
 		assert.Contains(t, err.Error(), "error parsing XML")
@@ -64,40 +62,19 @@ func TestParse(t *testing.T) {
 }
 
 func TestConvertDefaultContext(t *testing.T) {
-	// Calling Convert without WithContext should fall back to EN16931.
+	// Calling Convert without WithFormat should fall back to EN16931.
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 
-	doc, err := ubl.Convert(env)
+	doc, err := ubl.Export(env)
 	require.NoError(t, err)
 
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
-	assert.Equal(t, ubl.ContextEN16931.CustomizationID, inv.CustomizationID)
+	assert.Equal(t, ubl.FormatEN16931.CustomizationID, inv.CustomizationID)
 	assert.Empty(t, inv.ProfileID)
 }
 
 func TestConvertAutomaticallyAddsRequiredAddons(t *testing.T) {
-	t.Run("injects missing addon from context", func(t *testing.T) {
-		// Load a France CTC-shaped invoice, strip the ctc addon, and verify
-		// that Convert injects it back in before producing the UBL document.
-		env := loadTestEnvelope(t, "france-cius/invoice-fr-cius.json")
-
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-
-		// Drop the ctc addon; keep the en16931 one. SetAddons replaces the list.
-		inv.SetAddons(en16931.V2017)
-		require.NotContains(t, inv.GetAddons(), flow2.V1,
-			"precondition: ctc addon must be absent before Convert runs")
-
-		_, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
-		require.NoError(t, err)
-
-		// After Convert the addon should have been appended in-place.
-		assert.Contains(t, inv.GetAddons(), flow2.V1)
-		// And the pre-existing addon must be preserved.
-		assert.Contains(t, inv.GetAddons(), en16931.V2017)
-	})
 
 	t.Run("no-op when addon is already present", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
@@ -107,55 +84,12 @@ func TestConvertAutomaticallyAddsRequiredAddons(t *testing.T) {
 		before := append([]cbc.Key(nil), inv.GetAddons()...)
 		require.Contains(t, before, en16931.V2017)
 
-		_, err := ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
+		_, err := ubl.Export(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		assert.Equal(t, before, inv.GetAddons(),
 			"addon list should be unchanged when all required addons are already set")
 	})
-}
-
-func TestConvertSurfacesValidationFaultsAfterAutoAddon(t *testing.T) {
-	// When Convert auto-injects a stricter addon, the resulting validation
-	// failure must be surfaced as a *gobl.Error whose cause is rules.Faults,
-	// so consumers can render the []*rules.Fault list (code, paths, message)
-	// instead of a flattened string.
-
-	// Minimal DE invoice doesn't satisfy the France CTC rule set. Convert
-	// with the France CIUS context to force ensureAddons to add flow2.V1
-	// and then fail validation.
-	env := loadTestEnvelope(t, "invoice-minimal.json")
-
-	_, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolFranceCIUS))
-	require.Error(t, err)
-
-	// Must be the GOBL validation error — not wrapped in anything ubl-specific.
-	assert.ErrorIs(t, err, gobl.ErrValidation)
-
-	var ge *gobl.Error
-	require.ErrorAs(t, err, &ge, "error must be a *gobl.Error so faults survive")
-
-	faults := ge.Faults()
-	require.NotNil(t, faults, "cause must be rules.Faults, not a plain error")
-	require.Greater(t, faults.Len(), 0)
-
-	// Faults().List() returns []*rules.Fault — each fault keeps its
-	// structured code, paths, and message so it can be rendered by a client.
-	list := faults.List()
-	assert.IsType(t, []*rules.Fault{}, list)
-	require.NotEmpty(t, list)
-
-	first := list[0]
-	assert.NotEmpty(t, first.Code(), "fault must carry a rule code")
-	assert.NotEmpty(t, first.Message(), "fault must carry a message")
-	assert.NotEmpty(t, first.Paths(), "fault must carry at least one JSON path")
-
-	// The France CTC addon's "supplier inboxes are required for French B2B
-	// invoices" rule must be among the reported faults. (The billing-mode rule
-	// is now auto-satisfied by the addon's normalization, so a structural rule
-	// the minimal invoice cannot satisfy is used instead.)
-	assert.True(t, faults.HasCode("GOBL-FR-CTC-FLOW2-BILL-INVOICE-11"),
-		"expected supplier-inboxes-required fault; got: %s", err)
 }
 
 func TestConvertUnsupportedDocumentType(t *testing.T) {
@@ -164,7 +98,7 @@ func TestConvertUnsupportedDocumentType(t *testing.T) {
 	env, err := gobl.Envelop(&note.Message{Content: "hello"})
 	require.NoError(t, err)
 
-	_, err = ubl.Convert(env, ubl.WithContext(ubl.Context{}))
+	_, err = ubl.Export(env, ubl.WithFormat(ubl.Format{}))
 	assert.ErrorIs(t, err, ubl.ErrUnsupportedDocumentType)
 }
 
@@ -173,18 +107,18 @@ func TestConvertRejectsUnsupportedDocument(t *testing.T) {
 	env, err := gobl.Envelop(&note.Message{Content: "hello"})
 	require.NoError(t, err)
 
-	_, err = ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
+	_, err = ubl.Export(env, ubl.WithFormat(ubl.FormatEN16931))
 	require.Error(t, err)
 	assert.ErrorIs(t, err, ubl.ErrUnsupportedDocumentType)
 }
 
-func TestBytes(t *testing.T) {
+func TestEncode(t *testing.T) {
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
-	out, err := ubl.Bytes(doc)
+	out, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
 	s := string(out)
@@ -193,13 +127,13 @@ func TestBytes(t *testing.T) {
 	assert.Contains(t, s, "<Invoice")
 }
 
-func TestBytesCompact(t *testing.T) {
+func TestEncodeCompact(t *testing.T) {
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
-	compact, err := ubl.BytesCompact(doc)
+	compact, err := ubl.EncodeCompact(doc)
 	require.NoError(t, err)
 
 	s := string(compact)
@@ -208,7 +142,7 @@ func TestBytesCompact(t *testing.T) {
 	assert.Contains(t, s, "<Invoice")
 
 	// Same document, without the indentation Bytes adds.
-	indented, err := ubl.Bytes(doc)
+	indented, err := ubl.Encode(doc)
 	require.NoError(t, err)
 	assert.NotContains(t, s, "\n  <cbc:ID>", "compact output should not be indented")
 	assert.Less(t, len(compact), len(indented), "compact output should be smaller")
@@ -218,14 +152,4 @@ func TestBytesCompact(t *testing.T) {
 		return regexp.MustCompile(`>\s+<`).ReplaceAllString(string(b), "><")
 	}
 	assert.Equal(t, strip(indented), strip(compact))
-}
-
-func TestBytesRejectsUnmarshalableDocument(t *testing.T) {
-	// Channels cannot be marshalled, so both forms must surface the error
-	// rather than return a half-written document.
-	_, err := ubl.Bytes(make(chan int))
-	assert.Error(t, err)
-
-	_, err = ubl.BytesCompact(make(chan int))
-	assert.Error(t, err)
 }

@@ -35,13 +35,13 @@ const sampleApplicationResponse = `<?xml version="1.0" encoding="UTF-8"?>
 </ApplicationResponse>`
 
 func TestParseApplicationResponse(t *testing.T) {
-	doc, err := ubl.Parse([]byte(sampleApplicationResponse))
+	doc, err := ubl.Decode([]byte(sampleApplicationResponse))
 	require.NoError(t, err)
 
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok, "parsed document should be an ApplicationResponse")
 
-	env, err := ar.Convert()
+	env, err := ubl.Import(ar)
 	require.NoError(t, err)
 
 	st, ok := env.Extract().(*bill.Status)
@@ -94,7 +94,7 @@ func TestConvertApplicationResponseSkeleton(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Convert(env)
+	doc, err := ubl.Export(env)
 	require.NoError(t, err)
 
 	ar, ok := doc.(*ubl.ApplicationResponse)
@@ -150,12 +150,12 @@ func TestConvertPeppolInvoiceResponseValidate(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
 	require.NoError(t, err)
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	validateXML(t, pc, ubl.ContextPeppolInvoiceResponse.VESIDs.Status, data)
+	validateXML(t, pc, ubl.FormatPeppolInvoiceResponse.VESIDs.Status, data)
 }
 
 func TestConvertApplicationResponseFansOutLines(t *testing.T) {
@@ -174,7 +174,7 @@ func TestConvertApplicationResponseFansOutLines(t *testing.T) {
 	require.NoError(t, err)
 
 	// Generic UBL fans every line into its own DocumentResponse in one response.
-	doc, err := ubl.Convert(env)
+	doc, err := ubl.Export(env)
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -198,7 +198,7 @@ func TestConvertApplicationResponseUpdateFlipsDirection(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Convert(env)
+	doc, err := ubl.Export(env)
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -234,7 +234,7 @@ func TestConvertPeppolInvoiceResponse(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -288,7 +288,7 @@ func TestConvertPeppolInvoiceResponseErrorMapsToRejected(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -344,12 +344,12 @@ const samplePeppolConditionallyAccepted = `<?xml version="1.0" encoding="UTF-8"?
 </ApplicationResponse>`
 
 func TestParsePeppolConditionallyAccepted(t *testing.T) {
-	doc, err := ubl.Parse([]byte(samplePeppolConditionallyAccepted))
+	doc, err := ubl.Decode([]byte(samplePeppolConditionallyAccepted))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
 
-	env, err := ar.Convert()
+	env, err := ubl.Import(ar)
 	require.NoError(t, err)
 	st, ok := env.Extract().(*bill.Status)
 	require.True(t, ok)
@@ -363,12 +363,12 @@ func TestParsePeppolConditionallyAccepted(t *testing.T) {
 }
 
 func TestParsePeppolInvoiceResponse(t *testing.T) {
-	doc, err := ubl.Parse([]byte(samplePeppolInvoiceResponse))
+	doc, err := ubl.Decode([]byte(samplePeppolInvoiceResponse))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
 
-	env, err := ar.Convert()
+	env, err := ubl.Import(ar)
 	require.NoError(t, err)
 	st, ok := env.Extract().(*bill.Status)
 	require.True(t, ok)
@@ -403,15 +403,15 @@ func peppolRoundTrip(t *testing.T, st *bill.Status) *bill.Status {
 	t.Helper()
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
-	doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
 	require.NoError(t, err)
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	ar, ok := parsed.(*ubl.ApplicationResponse)
 	require.True(t, ok)
-	env2, err := ar.Convert()
+	env2, err := ubl.Import(ar)
 	require.NoError(t, err)
 	out, ok := env2.Extract().(*bill.Status)
 	require.True(t, ok)
@@ -536,12 +536,12 @@ const sampleGenericMultiResponse = `<?xml version="1.0" encoding="UTF-8"?>
 </ApplicationResponse>`
 
 func TestParseApplicationResponseFansOutLines(t *testing.T) {
-	doc, err := ubl.Parse([]byte(sampleGenericMultiResponse))
+	doc, err := ubl.Decode([]byte(sampleGenericMultiResponse))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
 
-	env, err := ar.Convert()
+	env, err := ubl.Import(ar)
 	require.NoError(t, err)
 	st, ok := env.Extract().(*bill.Status)
 	require.True(t, ok)

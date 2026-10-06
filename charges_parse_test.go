@@ -182,13 +182,13 @@ func TestBaseAmountErrorHandling(t *testing.T) {
 		invalidXML := strings.ReplaceAll(string(data), `<cbc:BaseAmount currencyID="EUR">1000</cbc:BaseAmount>`, `<cbc:BaseAmount currencyID="EUR">invalid-amount</cbc:BaseAmount>`)
 
 		// Try to parse the modified XML - should fail due to invalid BaseAmount
-		doc, err := ubl.Parse([]byte(invalidXML))
+		doc, err := ubl.Decode([]byte(invalidXML))
 		assert.NoError(t, err)
 
 		inv, ok := doc.(*ubl.Invoice)
 		require.True(t, ok)
 
-		_, err = inv.Convert()
+		_, err = ubl.Import(inv)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid major number")
 	})

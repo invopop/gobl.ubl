@@ -33,7 +33,7 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyclo
+func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -101,12 +101,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 				StartDate: formatDatePtr(l.Period.Start),
 				EndDate:   formatDatePtr(l.Period.End),
 			}
-			// BT-8: VAT point date code, same invoice-wide value as the header.
-			if context.Is(ContextPeppolFranceExtended) && inv.Tax != nil {
-				if code, ok := taxPointCodeMap[inv.Tax.Point]; ok {
-					invLine.InvoicePeriod.DescriptionCode = code
-				}
-			}
 		}
 
 		if l.Order != "" {
@@ -117,19 +111,6 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 
 		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
 			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
-		}
-
-		// Line VAT amount (KSA-11) is mandatory for tax
-		// invoice and associated credit notes and debit notes
-		if context.Is(ContextZATCA) && l.Total != nil && len(l.Taxes) > 0 && l.Taxes[0].Percent != nil {
-			taxAmount := l.Taxes[0].Percent.Of(*l.Total)
-			roundingAmount := l.Total.Add(taxAmount)
-			invLine.TaxTotal = []TaxTotal{
-				{
-					TaxAmount:      newAmount(taxAmount, ccy),
-					RoundingAmount: newAmountPtr(roundingAmount, ccy),
-				},
-			}
 		}
 
 		if l.Item != nil {
@@ -270,7 +251,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			}
 
 			if l.Seller != nil {
-				invLine.Item.ManufacturerParty = newParty(l.Seller, context)
+				invLine.Item.ManufacturerParty = newParty(l.Seller)
 			}
 		}
 

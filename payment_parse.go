@@ -29,19 +29,11 @@ var (
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
 )
 
-func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
+func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 	payment := &bill.PaymentDetails{}
 
 	if ui.PayeeParty != nil {
-		payment.Payee = goblParty(ui.PayeeParty, o)
-	}
-
-	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
-	// profile, which maps it to the PaymentMandate's PayerParty.
-	if o.context.Is(ContextPeppolFranceExtended) && len(ui.PaymentMeans) > 0 {
-		if pm := ui.PaymentMeans[0].PaymentMandate; pm != nil && pm.PayerParty != nil {
-			payment.Payer = goblParty(pm.PayerParty, o)
-		}
+		payment.Payee = goblParty(ui.PayeeParty)
 	}
 
 	if ui.PaymentTerms != nil {

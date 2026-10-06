@@ -43,7 +43,7 @@ type DocumentResponse struct {
 
 // Response carries the response code and an optional human description. The
 // ResponseCode value and its code-list attributes are profile-specific and are
-// stamped by the matching context.
+// stamped by the matching format.
 type Response struct {
 	ReferenceID   string    `xml:"cbc:ReferenceID,omitempty"`
 	ResponseCode  *IDType   `xml:"cbc:ResponseCode"`
@@ -61,7 +61,7 @@ type Status struct {
 
 // ResponseDocumentReference identifies the document being responded to. The
 // DocumentTypeCode is profile-specific (drawn from a profile's code list) and is
-// stamped by the matching context; the generic mapping leaves it unset.
+// stamped by the matching format; the generic mapping leaves it unset.
 type ResponseDocumentReference struct {
 	ID               string  `xml:"cbc:ID"`
 	UUID             string  `xml:"cbc:UUID,omitempty"`
@@ -83,14 +83,14 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		CBCNamespace:    NamespaceCBC,
 		UBLNamespace:    NamespaceUBLApplicationResponse,
 		UBLVersionID:    Version,
-		CustomizationID: o.context.CustomizationID,
+		CustomizationID: o.format.CustomizationID,
 		ID:              invoiceNumber(st.Series, st.Code),
 		IssueDate:       formatDate(st.IssueDate),
-		SenderParty:     newParty(sender, o.context),
-		ReceiverParty:   newParty(receiver, o.context),
+		SenderParty:     newParty(sender),
+		ReceiverParty:   newParty(receiver),
 	}
-	if o.context.ProfileID != "" {
-		out.ProfileID = &IDType{Value: o.context.ProfileID}
+	if o.format.ProfileID != "" {
+		out.ProfileID = &IDType{Value: o.format.ProfileID}
 	}
 	if !st.UUID.IsZero() {
 		out.UUID = st.UUID.String()
@@ -104,22 +104,10 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		}
 	}
 
-	if o.context.Is(ContextPeppolInvoiceResponse) {
-		// T111's data model omits these root elements and restricts the parties.
-		out.UBLVersionID = ""
-		out.UUID = ""
-		trimToResponseParty(out.SenderParty)
-		trimToResponseParty(out.ReceiverParty)
-	}
-
 	for _, line := range st.Lines {
 		dr := &DocumentResponse{Response: &Response{}}
-		// ReferenceID and Description are valid generic UBL but are not part of the
-		// Peppol Invoice Response Response, so they are only emitted off-profile.
-		if !o.context.Is(ContextPeppolInvoiceResponse) {
-			if desc := responseDescription(line); desc != "" {
-				dr.Response.Description = []string{desc}
-			}
+		if desc := responseDescription(line); desc != "" {
+			dr.Response.Description = []string{desc}
 		}
 		if line.Date != nil {
 			dr.Response.EffectiveDate = formatDate(*line.Date)
@@ -135,10 +123,6 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 				ref.IssueDate = formatDate(*line.Doc.IssueDate)
 			}
 			dr.DocumentReference = ref
-		}
-
-		if o.context.Is(ContextPeppolInvoiceResponse) {
-			applyPeppolDocumentResponse(dr, line)
 		}
 
 		out.DocumentResponse = append(out.DocumentResponse, dr)
