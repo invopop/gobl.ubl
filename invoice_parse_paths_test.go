@@ -58,7 +58,19 @@ func TestParseDeliveryPaths(t *testing.T) {
 		assert.Equal(t, "2024-01-31", inv.Delivery.Period.End.String())
 	})
 
-	t.Run("estimated delivery period", func(t *testing.T) {
+	t.Run("estimated delivery period alone", func(t *testing.T) {
+		in := parsedFixture(t, "peppol/base-example.xml")
+		in.Delivery = []*ubl.Delivery{{
+			EstimatedDeliveryPeriod: &ubl.Period{StartDate: "2024-02-01", EndDate: "2024-02-29"},
+		}}
+		inv := convertParsed(t, in)
+		require.NotNil(t, inv.Delivery)
+		require.NotNil(t, inv.Delivery.Period)
+		assert.Equal(t, "2024-02-01", inv.Delivery.Period.Start.String())
+		assert.Equal(t, "2024-02-29", inv.Delivery.Period.End.String())
+	})
+
+	t.Run("estimated delivery period with party", func(t *testing.T) {
 		in := parsedFixture(t, "peppol/base-example.xml")
 		in.Delivery = []*ubl.Delivery{{
 			EstimatedDeliveryPeriod: &ubl.Period{StartDate: "2024-02-01", EndDate: "2024-02-29"},
