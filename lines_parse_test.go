@@ -323,3 +323,76 @@ func TestParseSubInvoiceLinesOtherInvoice(t *testing.T) {
 	assert.Equal(t, "Installation", bundle.Breakdown[0].Item.Name)
 	assert.False(t, inv.HasTags(tax.TagBypass))
 }
+
+// parseSubLinesXML parses a fixture after edit has changed its XML.
+func parseSubLinesXML(t *testing.T, name string, edit func(string) string) *bill.Invoice {
+	t.Helper()
+	data, err := testLoadXML(name)
+	require.NoError(t, err)
+	return parseSubLines(t, edit(string(data)))
+}
+
+func lineNames(inv *bill.Invoice) []string {
+	names := make([]string, len(inv.Lines))
+	for i, l := range inv.Lines {
+		names[i] = l.Item.Name
+	}
+	return names
+}
+
+// TestParseSubInvoiceLinesOrder covers DETAIL lines ahead of a GROUP line that
+// cannot hold them as a breakdown: read flat, the lines keep their order.
+func TestParseSubInvoiceLinesOrder(t *testing.T) {
+	const item = "<cac:InvoiceLine>"
+	inv := parseSubLinesXML(t, "sub-invoice-lines.xml", func(xml string) string {
+		// Move the mixed-rate GROUP line after its two DETAIL lines.
+		parts := strings.Split(xml, item)
+		parts[1], parts[2], parts[3] = parts[2], parts[3], parts[1]
+		return strings.Join(parts, item)
+	})
+	assert.Equal(t, []string{"Part A", "Part B", "Kit", "Service bundle", "Assembly instructions"}, lineNames(inv))
+	assert.Equal(t, "170.00", inv.Totals.Sum.String())
+}
+
+// TestParseSubInvoiceLinesInformationParent covers INFORMATION lines under a
+// line that does not count itself: there is nothing for them to describe, so
+// they are read flat.
+func TestParseSubInvoiceLinesInformationParent(t *testing.T) {
+	inv := parseSubLinesXML(t, "sub-invoice-lines-flat.xml", func(xml string) string {
+		i := strings.Index(xml, "<cbc:ID>5</cbc:ID>")
+		return xml[:i] + strings.Replace(xml[i:], "<cbc:DocumentStatusCode>DETAIL</cbc:DocumentStatusCode>", "<cbc:DocumentStatusCode>INFORMATION</cbc:DocumentStatusCode>", 1)
+	})
+	names := lineNames(inv)
+	require.Equal(t, []string{"Safety kit", "Helmet", "Goggles"}, names[len(names)-3:])
+	assert.Empty(t, inv.Lines[len(inv.Lines)-3].Breakdown)
+}
+
+// TestParseSubInvoiceLinesInformationQuantity covers an INFORMATION line whose
+// quantity does not divide by its parent's: no breakdown can hold it.
+func TestParseSubInvoiceLinesInformationQuantity(t *testing.T) {
+	inv := parseSubLinesXML(t, "sub-invoice-lines-flat.xml", func(xml string) string {
+		return strings.Replace(xml,
+			"<cbc:ID>5.1</cbc:ID>\n    <cbc:InvoicedQuantity unitCode=\"C62\">10</cbc:InvoicedQuantity>",
+			"<cbc:ID>5.1</cbc:ID>\n    <cbc:InvoicedQuantity unitCode=\"C62\">3</cbc:InvoicedQuantity>", 1)
+	})
+	names := lineNames(inv)
+	require.Equal(t, []string{"Safety kit", "Helmet", "Goggles"}, names[len(names)-3:])
+	assert.Empty(t, inv.Lines[len(inv.Lines)-3].Breakdown)
+	assert.Equal(t, "1170.00", inv.Totals.Sum.String())
+}
+
+// TestParseSubInvoiceLinesOtherProfile covers a document outside
+// EXTENDED-CTC-FR: its billing references carry no line hierarchy, so its
+// lines are read as they stand.
+func TestParseSubInvoiceLinesOtherProfile(t *testing.T) {
+	inv := parseSubLinesXML(t, "sub-invoice-lines.xml", func(xml string) string {
+		return strings.Replace(xml,
+			"urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
+			"urn:cen.eu:en16931:2017", 1)
+	})
+	// Lines without a price are dropped, as for any other line.
+	assert.Equal(t, []string{"Part A", "Part B", "Service bundle", "Installation"}, lineNames(inv))
+	for _, l := range inv.Lines {
+		assert.Empty(t, l.Breakdown, l.Item.Name)
+	}
+}

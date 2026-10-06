@@ -409,6 +409,27 @@ func TestSubLinesConvert(t *testing.T) {
 		require.Len(t, doc.InvoiceLines, 1)
 	})
 
+	t.Run("a line whose sub-lines round apart is written alone", func(t *testing.T) {
+		env := loadTestEnvelope(t, fixtureFRExtended)
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		// Each sub-line comes to 0.33 x 1.5 = 0.495, so 0.50 written, while
+		// the line is 0.66 x 1.5 = 0.99.
+		price := num.MakeAmount(33, 2)
+		inv.Lines[0].Quantity = num.MakeAmount(15, 1)
+		inv.Lines[0].Breakdown = []*bill.SubLine{
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Part A", Price: &price}},
+			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Part B", Price: &price}},
+		}
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
+		require.NoError(t, err)
+		require.Len(t, doc.InvoiceLines, 1)
+		assert.Empty(t, doc.InvoiceLines[0].BillingReference)
+		assert.Equal(t, "0.99", doc.InvoiceLines[0].LineExtensionAmount.Value)
+	})
+
 	t.Run("unpriced sub-lines describe a line that keeps its price", func(t *testing.T) {
 		env := loadTestEnvelope(t, fixtureFRExtended)
 		inv, ok := env.Extract().(*bill.Invoice)

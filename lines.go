@@ -135,12 +135,17 @@ func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceTy
 	}
 
 	if priced {
+		// BR-FREXT-08 makes a GROUP line's amount the sum of its DETAIL
+		// lines, and BR-CO-10 sums the DETAIL lines into BT-106. When their
+		// rounding no longer adds up to the line's own amount, both cannot
+		// hold, so the line is written alone.
+		if newAmount(sum, *ccy).Value != group.LineExtensionAmount.Value {
+			return []InvoiceLine{group}
+		}
 		lines[0].BillingReference = newLineBillingReference(number, lineStatusGroup, "")
 		if lines[0].Item != nil {
 			lines[0].Item.ClassifiedTaxCategory = nil
 		}
-		// BR-FREXT-08: a GROUP line's amount is the sum of its DETAIL lines.
-		lines[0].LineExtensionAmount = newAmount(sum, *ccy)
 	} else {
 		lines[0].BillingReference = newLineBillingReference(number, lineStatusDetail, "")
 	}

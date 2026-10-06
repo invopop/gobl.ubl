@@ -22,12 +22,12 @@ type lineSource struct {
 	children []*InvoiceLine
 }
 
-// goblAddLines reads the document's lines. Sub-invoice lines (EXTENDED-CTC-FR,
-// EXT-FR-FE-162/163) under a GROUP line become the GROUP line's breakdown when
-// GOBL can express them that way. Otherwise, and for every group named in
-// flat, the hierarchy is read flat, in document order: DETAIL lines become
-// lines carrying the amounts, and GROUP and INFORMATION lines are kept at a
-// zero price.
+// goblAddLines reads the document's lines, in document order. Sub-invoice
+// lines (EXTENDED-CTC-FR, EXT-FR-FE-162/163) under a GROUP line become the
+// GROUP line's breakdown when GOBL can express them that way, taking the GROUP
+// line's place. Otherwise, and for every group named in flat, they are read
+// flat: DETAIL lines become lines carrying the amounts, and GROUP and
+// INFORMATION lines are kept at a zero price.
 func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options, flat map[string]bool) ([]lineSource, error) {
 	items := ui.InvoiceLines
 	if len(ui.CreditNoteLines) > 0 {
@@ -37,11 +37,16 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options, flat map[string]b
 	// Build tax category map from TaxTotal
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
+	// Only EXTENDED-CTC-FR gives billing references this meaning.
+	extended := o.context.Is(ContextPeppolFranceExtended)
 	docs := make([]*InvoiceLine, len(items))
 	ids := make(map[string]bool)
 	for i := range items {
 		docs[i] = &items[i]
-		docs[i].hierarchy = goblLineHierarchy(docs[i], strings.TrimSpace(ui.ID))
+		docs[i].hierarchy = nil
+		if extended {
+			docs[i].hierarchy = goblLineHierarchy(docs[i], strings.TrimSpace(ui.ID))
+		}
 		if id := goblLineID(docs[i]); id != "" {
 			ids[id] = true
 		}
@@ -53,70 +58,55 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options, flat map[string]b
 		}
 	}
 
-	out.Lines = make([]*bill.Line, 0, len(items))
-	srcs := make([]lineSource, 0, len(items))
-	seen := make(map[*InvoiceLine]bool, len(items))
-	var addTree func(it *InvoiceLine) error
-	addTree = func(it *InvoiceLine) error {
-		if seen[it] {
-			return nil
-		}
-		seen[it] = true
-		line, err := goblConvertLine(it, taxCategoryMap, o)
-		if err != nil {
-			return err
-		}
-		if line != nil {
-			out.Lines = append(out.Lines, line)
-			srcs = append(srcs, lineSource{doc: it})
-		}
-		for _, c := range children[goblLineID(it)] {
-			if err := addTree(c); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
+	// Only a top-level line can take its sub-invoice lines as a breakdown,
+	// and each line is folded into one parent at most.
+	groups := make(map[*InvoiceLine][]*InvoiceLine)
+	folded := make(map[*InvoiceLine]bool)
 	for _, it := range docs {
 		if p := goblParentLineID(it); p != "" && ids[p] {
-			// Read along with its parent.
 			continue
 		}
 		id := goblLineID(it)
 		kids := children[id]
-		if len(kids) > 0 && !flat[id] && !seen[it] && !goblAnySeen(seen, kids) && goblCanFold(it, kids, taxCategoryMap) {
-			line, err := goblNewGroupLine(it, kids, taxCategoryMap, o)
-			if err != nil {
-				return nil, err
-			}
-			seen[it] = true
-			for _, k := range kids {
-				seen[k] = true
-			}
-			out.Lines = append(out.Lines, line)
-			srcs = append(srcs, lineSource{doc: it, children: kids})
+		if len(kids) == 0 || flat[id] || goblAnyFolded(folded, kids) || !goblCanFold(it, kids, taxCategoryMap) {
 			continue
 		}
-		if err := addTree(it); err != nil {
-			return nil, err
+		groups[it] = kids
+		for _, k := range kids {
+			folded[k] = true
 		}
 	}
 
-	// Lines whose parents never lead back to a top-level line, such as a
-	// cycle, are still read, flat.
+	out.Lines = make([]*bill.Line, 0, len(items))
+	srcs := make([]lineSource, 0, len(items))
 	for _, it := range docs {
-		if err := addTree(it); err != nil {
+		if folded[it] {
+			continue
+		}
+		var l *bill.Line
+		var err error
+		kids, ok := groups[it]
+		if ok {
+			l, err = goblNewGroupLine(it, kids, taxCategoryMap, o)
+		} else {
+			l, err = goblConvertLine(it, taxCategoryMap, o)
+		}
+		if err != nil {
 			return nil, err
 		}
+		if l == nil {
+			continue
+		}
+		out.Lines = append(out.Lines, l)
+		srcs = append(srcs, lineSource{doc: it, children: kids})
 	}
 
 	return srcs, nil
 }
 
-func goblAnySeen(seen map[*InvoiceLine]bool, lines []*InvoiceLine) bool {
+func goblAnyFolded(folded map[*InvoiceLine]bool, lines []*InvoiceLine) bool {
 	for _, l := range lines {
-		if seen[l] {
+		if folded[l] {
 			return true
 		}
 	}
@@ -170,14 +160,17 @@ func goblLineIsSummed(it *InvoiceLine) bool {
 // of the parent, so each quantity, allowance and charge must divide evenly by
 // the parent's quantity, and their declared amounts must add up to the
 // parent's. Nested groups are read flat, as are a GROUP line's own allowances
-// and charges, which no total counts. A parent that counts itself can only
-// carry INFORMATION lines, which then describe it.
+// and charges, which no total counts. A parent that is not a GROUP must count
+// itself and can only carry INFORMATION lines, which then describe it.
 func goblCanFold(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) bool {
 	group := goblLineStatus(parent) == lineStatusGroup
 	if group && len(parent.AllowanceCharge) > 0 {
 		return false
 	}
 	if !group && parent.Price == nil {
+		return false
+	}
+	if !group && !goblLineIsSummed(parent) {
 		return false
 	}
 	qty, ok := goblLineQuantity(parent)
@@ -189,6 +182,10 @@ func goblCanFold(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[st
 	detail := 0
 	sum := num.AmountZero
 	for _, k := range kids {
+		q, ok := goblLineQuantity(k)
+		if !ok || !goblDividesBy(q, qty) {
+			return false
+		}
 		switch goblLineStatus(k) {
 		case lineStatusGroup:
 			return false
@@ -205,10 +202,6 @@ func goblCanFold(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[st
 		}
 		taxKey = key
 
-		q, ok := goblLineQuantity(k)
-		if !ok || !goblDividesBy(q, qty) {
-			return false
-		}
 		for _, ac := range k.AllowanceCharge {
 			for _, a := range []*Amount{&ac.Amount, ac.BaseAmount} {
 				if a == nil {
