@@ -25,19 +25,18 @@ type VESIDMapping struct {
 	Status string
 }
 
-// Context is used to ensure that the generated UBL document
-// uses a specific CustomizationID and ProfileID when generating
-// the output document, and to apply the layers of the specification it
-// represents on top of the base conversion.
-type Context struct {
-	// Key identifies the context in the GOBL convert register, with one layer
+// Format defines a UBL format: the CustomizationID and ProfileID its
+// documents carry, and the functions that adjust the base import and export
+// for the specification it represents.
+type Format struct {
+	// Key identifies the format in the GOBL convert register, with one layer
 	// for each specification it builds on, e.g. "ubl+peppol".
 	Key cbc.Key
-	// Name of the context.
+	// Name of the format.
 	Name i18n.String
-	// Countries where the context applies. Empty means no restriction.
+	// Countries where the format applies. Empty means no restriction.
 	Countries []l10n.Code
-	// Schemas of the GOBL documents the context converts, in both directions.
+	// Schemas of the GOBL documents the format converts, in both directions.
 	Schemas []schema.ID
 	// CustomizationID identifies specific characteristics in the
 	// document which need to be present for local differences.
@@ -47,107 +46,110 @@ type Context struct {
 	ProfileID string
 	// OutputCustomizationID optionally specifies a different CustomizationID
 	// to use in the actual generated UBL XML document. If empty, CustomizationID
-	// is used. This allows the context to be identified by one ID externally while
+	// is used. This allows the format to be identified by one ID externally while
 	// generating different values in the XML output.
 	OutputCustomizationID string
 	// Addons contains the list of Addons required for this CustomizationID
 	// and ProfileID.
 	Addons []cbc.Key
 	// VESIDs contains the VESID (Validation Exchange Specification ID) mappings
-	// for different document types and scenarios within this context.
+	// for different document types and scenarios within this format.
 	VESIDs VESIDMapping
-	// Match optionally identifies the context's documents before the
+	// Match optionally identifies the format's documents before the
 	// CustomizationID and ProfileID are compared.
 	Match func(customizationID, profileID string) bool
-	// Fallback optionally claims documents that no context matched.
+	// Fallback optionally claims documents that no format matched.
 	Fallback func(customizationID, profileID string) bool
-	// Layers add the behavior of the context's specifications, applied in
-	// order after the base conversion.
-	Layers []*Layer
+	// ExportFuncs adjust the UBL document exported from GOBL, in order, after
+	// the base export.
+	ExportFuncs []ExportFunc
+	// ImportFuncs adjust the GOBL envelope imported from UBL, in order, after
+	// the base import and before the document is calculated.
+	ImportFuncs []ImportFunc
 }
 
-// Is checks if two contexts are the same.
-func (c *Context) Is(c2 Context) bool {
-	return c.CustomizationID == c2.CustomizationID && c.ProfileID == c2.ProfileID
+// Is checks if two formats are the same.
+func (f *Format) Is(f2 Format) bool {
+	return f.CustomizationID == f2.CustomizationID && f.ProfileID == f2.ProfileID
 }
 
 // GetVESID returns the appropriate VESID based on the invoice type.
-func (c *Context) GetVESID(inv *bill.Invoice) string {
+func (f *Format) GetVESID(inv *bill.Invoice) string {
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {
-		return c.VESIDs.CreditNote
+		return f.VESIDs.CreditNote
 	}
-	return c.VESIDs.Invoice
+	return f.VESIDs.Invoice
 }
 
-// FindContext looks up a registered context by CustomizationID and optionally
-// ProfileID. Returns nil if no matching context is found.
+// FindFormat looks up a registered format by CustomizationID and optionally
+// ProfileID. Returns nil if no matching format is found.
 //
 // The lookup logic works as follows:
-//  1. Contexts whose Match function claims the document
+//  1. Formats whose Match function claims the document
 //  2. Tries to match on the full CustomizationID (for external identification)
 //  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
-//  4. Contexts whose Fallback function claims the document
-func FindContext(customizationID string, profileID string) *Context {
-	for _, ctx := range contexts {
-		if ctx.Match != nil && ctx.Match(customizationID, profileID) {
-			return &ctx
+//  4. Formats whose Fallback function claims the document
+func FindFormat(customizationID string, profileID string) *Format {
+	for _, f := range formats {
+		if f.Match != nil && f.Match(customizationID, profileID) {
+			return &f
 		}
 	}
 
 	// First pass: try to match on full CustomizationID
-	for _, ctx := range contexts {
-		if ctx.CustomizationID == customizationID {
-			// If context has a ProfileID and one was provided, they must match
-			if ctx.ProfileID != "" && profileID != "" && ctx.ProfileID != profileID {
+	for _, f := range formats {
+		if f.CustomizationID == customizationID {
+			// If format has a ProfileID and one was provided, they must match
+			if f.ProfileID != "" && profileID != "" && f.ProfileID != profileID {
 				continue
 			}
-			return &ctx
+			return &f
 		}
 	}
 
 	// Second pass: try to match on OutputCustomizationID (for parsing incoming documents)
-	for _, ctx := range contexts {
-		if ctx.OutputCustomizationID != "" && ctx.OutputCustomizationID == customizationID {
-			return &ctx
+	for _, f := range formats {
+		if f.OutputCustomizationID != "" && f.OutputCustomizationID == customizationID {
+			return &f
 		}
 	}
 
-	for _, ctx := range contexts {
-		if ctx.Fallback != nil && ctx.Fallback(customizationID, profileID) {
-			return &ctx
+	for _, f := range formats {
+		if f.Fallback != nil && f.Fallback(customizationID, profileID) {
+			return &f
 		}
 	}
 
 	return nil
 }
 
-// RegisterContexts makes the contexts available to FindContext, and registers
+// RegisterFormats makes the formats available to FindFormat, and registers
 // them with the GOBL convert register. Packages that implement regional
-// contexts call it from their init function.
-func RegisterContexts(ctxs ...Context) {
-	registerContexts(false, ctxs)
+// formats call it from their init function.
+func RegisterFormats(fs ...Format) {
+	registerFormats(false, fs)
 }
 
-func registerContexts(fallback bool, ctxs []Context) {
-	contexts = append(contexts, ctxs...)
-	convert.Register(&converter{contexts: ctxs, fallback: fallback})
+func registerFormats(fallback bool, fs []Format) {
+	formats = append(formats, fs...)
+	convert.Register(&converter{formats: fs, fallback: fallback})
 }
 
 type options struct {
-	context Context
-	from    cbc.URI
-	to      cbc.URI
+	format Format
+	from   cbc.URI
+	to     cbc.URI
 }
 
 // Option is used to define configuration options to use during
 // conversion processes.
 type Option func(*options)
 
-// WithContext sets the context to use for the configuration
+// WithFormat sets the format to use for the configuration
 // and business profile.
-func WithContext(c Context) Option {
+func WithFormat(f Format) Option {
 	return func(o *options) {
-		o.context = c
+		o.format = f
 	}
 }
 
@@ -155,7 +157,7 @@ func WithContext(c Context) Option {
 // with (the Peppol SBD From / To — who sent the document, who received it).
 // They are recorded verbatim on the parsed envelope's Head.From / Head.To,
 // regardless of the document type, so a received document is never mislabelled
-// with GOBL's document-derived, outgoing-direction guess. See Invoice.Convert.
+// with GOBL's document-derived, outgoing-direction guess. See Import.
 func WithRouting(from, to cbc.URI) Option {
 	return func(o *options) {
 		o.from = from
@@ -163,8 +165,8 @@ func WithRouting(from, to cbc.URI) Option {
 	}
 }
 
-// ContextEN16931 is the default context for basic UBL documents.
-var ContextEN16931 = Context{
+// FormatEN16931 is the default format for basic UBL documents.
+var FormatEN16931 = Format{
 	Key:             "ubl+en16931",
 	Name:            i18n.NewString("UBL EN 16931"),
 	Schemas:         []schema.ID{invoiceSchema},
@@ -176,8 +178,8 @@ var ContextEN16931 = Context{
 	},
 }
 
-// ContextPeppol defines the default Peppol context.
-var ContextPeppol = Context{
+// FormatPeppol defines the default Peppol format.
+var FormatPeppol = Format{
 	Key:             "ubl+peppol",
 	Name:            i18n.NewString("UBL Peppol BIS Billing 3"),
 	Schemas:         []schema.ID{invoiceSchema},
@@ -188,11 +190,11 @@ var ContextPeppol = Context{
 		Invoice:    "eu.peppol.bis3:invoice:2026.5",
 		CreditNote: "eu.peppol.bis3:creditnote:2026.5",
 	},
-	Layers: []*Layer{LayerPeppolBilling},
+	ExportFuncs: []ExportFunc{exportPeppolBilling},
 }
 
-// ContextPeppolSelfBilled defines the Peppol self-billed context.
-var ContextPeppolSelfBilled = Context{
+// FormatPeppolSelfBilled defines the Peppol self-billed format.
+var FormatPeppolSelfBilled = Format{
 	Key:             "ubl+peppol+self-billing",
 	Name:            i18n.NewString("UBL Peppol BIS Self-Billing 3"),
 	Schemas:         []schema.ID{invoiceSchema},
@@ -209,11 +211,11 @@ var ContextPeppolSelfBilled = Context{
 	},
 }
 
-// ContextPeppolInvoiceResponse defines the Peppol BIS Invoice Response context.
-// It is its own context (separate from the billing ContextPeppol) because the
+// FormatPeppolInvoiceResponse defines the Peppol BIS Invoice Response format.
+// It is its own format (separate from the billing FormatPeppol) because the
 // Invoice Response declares a different CustomizationID, which is what
-// FindContext matches a parsed document against.
-var ContextPeppolInvoiceResponse = Context{
+// FindFormat matches a parsed document against.
+var FormatPeppolInvoiceResponse = Format{
 	Key:             "ubl+peppol+invoice-response",
 	Name:            i18n.NewString("UBL Peppol Invoice Response 3"),
 	Schemas:         []schema.ID{statusSchema},
@@ -222,17 +224,18 @@ var ContextPeppolInvoiceResponse = Context{
 	VESIDs: VESIDMapping{
 		Status: "eu.peppol.bis3:invoice-message-response:2026.5",
 	},
-	Layers: []*Layer{LayerPeppolInvoiceResponse},
+	ExportFuncs: []ExportFunc{exportPeppolInvoiceResponse},
+	ImportFuncs: []ImportFunc{importPeppolInvoiceResponse},
 }
 
-// contexts holds every registered context for lookups during parsing.
-var contexts []Context
+// formats holds every registered format for lookups during parsing.
+var formats []Format
 
 func init() {
-	registerContexts(true, []Context{
-		ContextEN16931,
-		ContextPeppol,
-		ContextPeppolSelfBilled,
-		ContextPeppolInvoiceResponse,
+	registerFormats(true, []Format{
+		FormatEN16931,
+		FormatPeppol,
+		FormatPeppolSelfBilled,
+		FormatPeppolInvoiceResponse,
 	})
 }

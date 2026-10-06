@@ -17,7 +17,7 @@ func parsedFixture(t *testing.T, name string) *ubl.Invoice {
 	t.Helper()
 	data, err := testLoadXML(name)
 	require.NoError(t, err)
-	doc, err := ubl.Parse(data)
+	doc, err := ubl.Decode(data)
 	require.NoError(t, err)
 	in, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
@@ -26,7 +26,7 @@ func parsedFixture(t *testing.T, name string) *ubl.Invoice {
 
 func convertParsed(t *testing.T, in *ubl.Invoice) *bill.Invoice {
 	t.Helper()
-	env, err := in.Convert()
+	env, err := ubl.Import(in)
 	require.NoError(t, err)
 	inv, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -234,7 +234,7 @@ func TestParseInvoiceErrors(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			in := parsedFixture(t, "peppol/base-example.xml")
 			mutate(in)
-			_, err := in.Convert()
+			_, err := ubl.Import(in)
 			assert.Error(t, err)
 		})
 	}

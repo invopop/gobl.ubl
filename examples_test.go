@@ -43,12 +43,12 @@ func TestConvertToInvoice(t *testing.T) {
 	// Define contexts to test
 	contexts := []struct {
 		name    string
-		context ubl.Context
+		context ubl.Format
 		dir     string
 	}{
-		{"EN16931", ubl.ContextEN16931, "en16931"},
-		{"Peppol", ubl.ContextPeppol, "peppol"},
-		{"PeppolSelfBilled", ubl.ContextPeppolSelfBilled, "peppol-self-billed"},
+		{"EN16931", ubl.FormatEN16931, "en16931"},
+		{"Peppol", ubl.FormatPeppol, "peppol"},
+		{"PeppolSelfBilled", ubl.FormatPeppolSelfBilled, "peppol-self-billed"},
 	}
 
 	for _, ctx := range contexts {
@@ -68,7 +68,7 @@ func TestConvertToInvoice(t *testing.T) {
 					doc, err := testInvoiceFromContext(filepath.Join(ctx.dir, inName), ctx.context)
 					require.NoError(t, err)
 
-					data, err := ubl.Bytes(doc)
+					data, err := ubl.Encode(doc)
 					require.NoError(t, err)
 
 					outPath := filepath.Join(getConvertPath(), ctx.dir, "out", outName)
@@ -127,11 +127,11 @@ func TestParseInvoice(t *testing.T) {
 					require.NoError(t, err)
 
 					// Convert UBL XML to GOBL
-					doc, err := ubl.Parse(xmlData)
+					doc, err := ubl.Decode(xmlData)
 					require.NoError(t, err)
 					inv, ok := doc.(*ubl.Invoice)
 					require.True(t, ok, "Document should be an invoice")
-					env, err := inv.Convert()
+					env, err := ubl.Import(inv)
 					require.NoError(t, err)
 
 					// Unfortunately, the sample UBL documents have lots of errors, including
@@ -199,18 +199,18 @@ func testInvoiceFrom(t *testing.T, name string) *ubl.Invoice {
 
 	env := loadTestEnvelope(t, name)
 
-	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 	return doc
 }
 
 // testInvoiceFromContext creates a UBL Invoice from a GOBL file with a specific context
-func testInvoiceFromContext(name string, ctx ubl.Context) (*ubl.Invoice, error) {
+func testInvoiceFromContext(name string, ctx ubl.Format) (*ubl.Invoice, error) {
 	env, err := loadTestEnvelopeFromPath(filepath.Join(getConvertPath(), name))
 	if err != nil {
 		return nil, err
 	}
-	return ubl.ConvertInvoice(env, ubl.WithContext(ctx))
+	return ubl.ExportInvoice(env, ubl.WithFormat(ctx))
 }
 
 // loadTestEnvelopeFromPath loads a GOBL envelope from a specific file path
@@ -282,13 +282,13 @@ func parseXMLInvoice(t *testing.T, name string) *gobl.Envelope {
 	data, err := testLoadXML(name)
 	require.NoError(t, err)
 
-	doc, err := ubl.Parse(data)
+	doc, err := ubl.Decode(data)
 	require.NoError(t, err)
 
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok, "document is not an invoice")
 
-	env, err := inv.Convert()
+	env, err := ubl.Import(inv)
 	require.NoError(t, err)
 	return env
 }

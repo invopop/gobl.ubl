@@ -40,24 +40,29 @@ var (
 // by this package.
 const Version = "2.1"
 
-// Parse parses a raw UBL document and returns the underlying Go struct.
-// The returned value should be type asserted to the appropriate type.
+// Document is a UBL document: an *Invoice, which also covers credit notes,
+// or an *ApplicationResponse.
+type Document interface {
+	ublDocument()
+}
+
+func (*Invoice) ublDocument()             {}
+func (*ApplicationResponse) ublDocument() {}
+
+// Decode reads raw UBL data into the Document it contains.
 //
 // Supported types:
 //   - *Invoice (for both Invoice and CreditNote documents)
+//   - *ApplicationResponse
 //
 // Example usage:
 //
-//	doc, err := ubl.Parse(xmlData)
+//	doc, err := ubl.Decode(data)
 //	if err != nil {
 //	    // handle error
 //	}
-//	if inv, ok := doc.(*ubl.Invoice); ok {
-//	    env, err := inv.Convert()
-//	    attachments := inv.ExtractBinaryAttachments()
-//	    // ...
-//	}
-func Parse(data []byte) (any, error) {
+//	env, err := ubl.Import(doc)
+func Decode(data []byte) (Document, error) {
 	ns, err := extractRootNamespace(data)
 	if err != nil {
 		return nil, err
@@ -91,59 +96,82 @@ func Parse(data []byte) (any, error) {
 		}
 		return ar, nil
 
-	// Future document types can be added here
-	// case NamespaceUBLOrder:
-	//     order := new(Order)
-	//     if err := xmlctx.Parse(data, order, xmlctx.WithNamespaces(map[string]string{
-	//         "cbc":  NamespaceCBC,
-	//         "cac":  NamespaceCAC,
-	//         "qdt":  NamespaceQDT,
-	//         "udt":  NamespaceUDT,
-	//         "ccts": NamespaceCCTS,
-	//         "xsi":  NamespaceXSI,
-	//         "ext":  "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2",
-	//     })); err != nil {
-	//         return nil, err
-	//     }
-	//     return order, nil
-
 	default:
 		return nil, ErrUnknownDocumentType
 	}
 }
 
-// Convert takes a GOBL envelope and converts to a UBL document of one
-// of the supported types.
+// Import converts the UBL document into a GOBL envelope. The format is
+// determined from the document's CustomizationID and ProfileID, unless a
+// WithFormat option is provided. Binary attachments are ignored - use
+// ExtractBinaryAttachments to retrieve them separately.
+func Import(doc Document, opts ...Option) (*gobl.Envelope, error) {
+	switch d := doc.(type) {
+	case *Invoice:
+		return d.importEnvelope(opts)
+	case *ApplicationResponse:
+		return d.importEnvelope(opts)
+	}
+	return nil, ErrUnsupportedDocumentType
+}
+
+// importOptions prepares the options for importing a document, starting from
+// the format its identifiers match.
+func importOptions(customizationID, profileID string, opts []Option) *options {
+	o := new(options)
+	if f := FindFormat(customizationID, profileID); f != nil {
+		o.format = *f
+	}
+	for _, opt := range opts {
+		if opt != nil {
+			opt(o)
+		}
+	}
+	return o
+}
+
+// Export converts the GOBL envelope into a UBL document of one of the
+// supported types.
 //
-// Add a WithContext option to specify the desired UBL Guideline and Profile ID.
-// If none is provided, EN16931 will be used by default.
-func Convert(env *gobl.Envelope, opts ...Option) (any, error) {
+// Add a WithFormat option to specify the desired UBL format. If none is
+// provided, EN 16931 will be used by default.
+func Export(env *gobl.Envelope, opts ...Option) (Document, error) {
 	o := &options{
-		context: ContextEN16931,
+		format: FormatEN16931,
 	}
 	for _, opt := range opts {
 		opt(o)
 	}
 
-	switch doc := env.Extract().(type) {
+	var doc Document
+	switch d := env.Extract().(type) {
 	case *bill.Invoice:
 		// Check and add missing addons
-		if err := ensureAddons(env, o.context.Addons); err != nil {
+		if err := ensureAddons(env, o.format.Addons); err != nil {
 			return nil, err
 		}
 		// Removes included taxes as they are not supported in UBL
-		if err := doc.RemoveIncludedTaxes(); err != nil {
+		if err := d.RemoveIncludedTaxes(); err != nil {
 			return nil, fmt.Errorf("cannot convert invoice with included taxes: %w", err)
 		}
-		if err := doc.RoundToCurrency(); err != nil {
+		if err := d.RoundToCurrency(); err != nil {
 			return nil, fmt.Errorf("cannot round invoice to currency precision: %w", err)
 		}
-		return ublInvoice(doc, o)
+		out, err := ublInvoice(d, o)
+		if err != nil {
+			return nil, err
+		}
+		doc = out
 	case *bill.Status:
-		return ublApplicationResponse(doc, o)
+		doc = ublApplicationResponse(d, o)
 	default:
 		return nil, ErrUnsupportedDocumentType
 	}
+
+	if err := o.format.runExportFuncs(env, doc); err != nil {
+		return nil, err
+	}
+	return doc, nil
 }
 
 // ensureAddons checks if the invoice has all required addons and adds missing ones
@@ -196,10 +224,10 @@ func extractRootNamespace(data []byte) (string, error) {
 	return "", ErrUnknownDocumentType
 }
 
-// Bytes returns the raw XML of the UBL document including
+// Encode returns the raw XML of the UBL document including
 // the XML Header.
-func Bytes(in any) ([]byte, error) {
-	b, err := xml.MarshalIndent(in, "", "  ")
+func Encode(doc Document) ([]byte, error) {
+	b, err := xml.MarshalIndent(doc, "", "  ")
 	if err != nil {
 		return nil, err
 	}
@@ -210,10 +238,10 @@ func Bytes(in any) ([]byte, error) {
 	return append([]byte(xml.Header), b...), nil
 }
 
-// BytesCompact returns the raw XML of the UBL document without
+// EncodeCompact returns the raw XML of the UBL document without
 // indentation, including the XML Header.
-func BytesCompact(in any) ([]byte, error) {
-	b, err := xml.Marshal(in)
+func EncodeCompact(doc Document) ([]byte, error) {
+	b, err := xml.Marshal(doc)
 	if err != nil {
 		return nil, err
 	}

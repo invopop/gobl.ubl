@@ -24,18 +24,18 @@ var (
 	statusSchema  = schema.Lookup(bill.Status{})
 )
 
-// converter implements convert.Converter for a set of registered contexts.
+// converter implements convert.Converter for a set of registered formats.
 // The base converter also imports UBL documents that declare no known
 // specification.
 type converter struct {
-	contexts []Context
+	formats  []Format
 	fallback bool
 }
 
-func (c *converter) Contexts() []*convert.Context {
-	list := make([]*convert.Context, 0, len(c.contexts)+1)
+func (c *converter) Formats() []*convert.Format {
+	list := make([]*convert.Format, 0, len(c.formats)+1)
 	if c.fallback {
-		list = append(list, &convert.Context{
+		list = append(list, &convert.Format{
 			Key:    KeyUBL,
 			Name:   i18n.NewString("UBL"),
 			MIME:   mimeXML,
@@ -43,34 +43,34 @@ func (c *converter) Contexts() []*convert.Context {
 			Import: []schema.ID{invoiceSchema, statusSchema},
 		})
 	}
-	for _, ctx := range c.contexts {
-		list = append(list, &convert.Context{
-			Key:       ctx.Key,
-			Name:      ctx.Name,
+	for _, f := range c.formats {
+		list = append(list, &convert.Format{
+			Key:       f.Key,
+			Name:      f.Name,
 			MIME:      mimeXML,
 			Syntax:    "ubl",
-			Countries: ctx.Countries,
-			Addons:    ctx.Addons,
-			Import:    ctx.Schemas,
-			Export:    ctx.Schemas,
+			Countries: f.Countries,
+			Addons:    f.Addons,
+			Import:    f.Schemas,
+			Export:    f.Schemas,
 		})
 	}
 	return list
 }
 
 func (c *converter) Detect(in *convert.Input) cbc.Key {
-	dc := ReadDocumentContext(in)
-	if dc.Err != nil {
+	h := ReadHeader(in)
+	if h.Err != nil {
 		return cbc.KeyEmpty
 	}
-	switch dc.Namespace {
+	switch h.Namespace {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote, NamespaceUBLApplicationResponse:
 	default:
 		return cbc.KeyEmpty
 	}
-	if ctx := FindContext(dc.CustomizationID, dc.ProfileID); ctx != nil {
-		if c.context(ctx.Key) != nil {
-			return ctx.Key
+	if f := FindFormat(h.CustomizationID, h.ProfileID); f != nil {
+		if c.format(f.Key) != nil {
+			return f.Key
 		}
 		return cbc.KeyEmpty
 	}
@@ -80,20 +80,14 @@ func (c *converter) Detect(in *convert.Input) cbc.Key {
 	return cbc.KeyEmpty
 }
 
-// Import parses the data and converts it, determining the context from the
+// Import decodes the data and imports it, determining the format from the
 // document in the same way as Detect.
 func (c *converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
-	doc, err := Parse(data)
+	doc, err := Decode(data)
 	if err != nil {
 		return nil, err
 	}
-	switch d := doc.(type) {
-	case *Invoice:
-		return d.Convert()
-	case *ApplicationResponse:
-		return d.Convert()
-	}
-	return nil, ErrUnsupportedDocumentType
+	return Import(doc)
 }
 
 func (c *converter) Accepts(_ cbc.Key, _ *gobl.Envelope) bool {
@@ -101,31 +95,31 @@ func (c *converter) Accepts(_ cbc.Key, _ *gobl.Envelope) bool {
 }
 
 func (c *converter) Export(key cbc.Key, env *gobl.Envelope) ([]byte, error) {
-	ctx := c.context(key)
-	if ctx == nil {
+	f := c.format(key)
+	if f == nil {
 		return nil, ErrUnsupportedDocumentType
 	}
-	doc, err := Convert(env, WithContext(*ctx))
+	doc, err := Export(env, WithFormat(*f))
 	if err != nil {
 		return nil, err
 	}
-	return Bytes(doc)
+	return Encode(doc)
 }
 
-func (c *converter) context(key cbc.Key) *Context {
-	for _, ctx := range c.contexts {
-		if ctx.Key == key {
-			return &ctx
+func (c *converter) format(key cbc.Key) *Format {
+	for _, f := range c.formats {
+		if f.Key == key {
+			return &f
 		}
 	}
 	return nil
 }
 
-type documentContextKey struct{}
+type headerKey struct{}
 
-// DocumentContext holds the identifiers at the start of a UBL document that
-// determine its context.
-type DocumentContext struct {
+// Header holds the identifiers at the start of a UBL document that
+// determine its format.
+type Header struct {
 	// Namespace of the root element.
 	Namespace string
 	// CustomizationID declares the specification the document follows.
@@ -136,42 +130,42 @@ type DocumentContext struct {
 	Err error
 }
 
-// ReadDocumentContext provides the root namespace and the specification and
+// ReadHeader provides the root namespace and the specification and
 // business process identifiers of the input, reading them only once for all
 // the converters that ask.
-func ReadDocumentContext(in *convert.Input) *DocumentContext {
-	if v, ok := in.Get(documentContextKey{}); ok {
-		return v.(*DocumentContext)
+func ReadHeader(in *convert.Input) *Header {
+	if v, ok := in.Get(headerKey{}); ok {
+		return v.(*Header)
 	}
-	dc := readDocumentContext(in.Data)
-	in.Set(documentContextKey{}, dc)
-	return dc
+	h := readHeader(in.Data)
+	in.Set(headerKey{}, h)
+	return h
 }
 
-// readDocumentContext reads the root element and the header elements that
+// readHeader reads the root element and the header elements that
 // precede the document ID, stopping at the first other element.
-func readDocumentContext(data []byte) *DocumentContext {
-	dc := new(DocumentContext)
+func readHeader(data []byte) *Header {
+	h := new(Header)
 	d := xml.NewDecoder(bytes.NewReader(data))
 	root := false
 	for {
 		tk, err := d.Token()
 		if err == io.EOF {
 			if !root {
-				dc.Err = ErrUnknownDocumentType
+				h.Err = ErrUnknownDocumentType
 			}
-			return dc
+			return h
 		}
 		if err != nil {
-			dc.Err = err
-			return dc
+			h.Err = err
+			return h
 		}
 		se, ok := tk.(xml.StartElement)
 		if !ok {
 			continue
 		}
 		if !root {
-			dc.Namespace = se.Name.Space
+			h.Namespace = se.Name.Space
 			root = true
 			continue
 		}
@@ -179,15 +173,15 @@ func readDocumentContext(data []byte) *DocumentContext {
 		case "UBLExtensions", "UBLVersionID":
 			err = d.Skip()
 		case "CustomizationID":
-			err = d.DecodeElement(&dc.CustomizationID, &se)
+			err = d.DecodeElement(&h.CustomizationID, &se)
 		case "ProfileID":
-			err = d.DecodeElement(&dc.ProfileID, &se)
+			err = d.DecodeElement(&h.ProfileID, &se)
 		default:
-			return dc
+			return h
 		}
 		if err != nil {
-			dc.Err = err
-			return dc
+			h.Err = err
+			return h
 		}
 	}
 }

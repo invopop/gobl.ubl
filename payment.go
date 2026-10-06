@@ -80,7 +80,7 @@ type PrepaidPayment struct {
 const sepaSchemeID = "SEPA"
 const cardNetworkNotApplicable = "NA"
 
-func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
+func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
 	}
@@ -97,7 +97,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newParty(pymt.Payee, ctx)
+		ui.PayeeParty = newParty(pymt.Payee)
 		// UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress.
 		ui.PayeeParty.PostalAddress = nil
 		// UBL-CR-275: A UBL invoice should not include the PayeeParty

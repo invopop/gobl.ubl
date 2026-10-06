@@ -10,7 +10,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func goblParty(party *Party, o *options) *org.Party {
+func goblParty(party *Party) *org.Party {
 	if party == nil {
 		return nil
 	}
@@ -78,14 +78,13 @@ func goblParty(party *Party, o *options) *org.Party {
 	handlePartyTaxSchemes(party, p)
 	handlePartyIdentifications(party, p)
 
-	o.context.parseParty(party, p)
 	return p
 }
 
-// ParseParty converts the UBL party into a GOBL party, applying the context's
-// extensions. Extensions use it to convert the nested parties they read.
-func ParseParty(party *Party, ctx *Context) *org.Party {
-	return goblParty(party, &options{context: *ctx})
+// ParseParty converts the UBL party into a GOBL party, without any format
+// specific adjustments.
+func ParseParty(party *Party) *org.Party {
+	return goblParty(party)
 }
 
 // goblDeliveryParty creates a GOBL party with only the BTs available

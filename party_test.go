@@ -51,7 +51,7 @@ func TestNewParty(t *testing.T) {
 		}
 
 		require.NoError(t, env.Calculate())
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		require.NotEmpty(t, doc.AccountingSupplierParty.Party.PartyIdentification)
@@ -76,7 +76,7 @@ func TestNewParty(t *testing.T) {
 
 		inv.Supplier.TaxID = &tax.Identity{Country: "NO", Code: "923456783"}
 		require.NoError(t, env.Calculate())
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		require.NotEmpty(t, doc.AccountingSupplierParty.Party.PartyTaxScheme)
@@ -84,7 +84,7 @@ func TestNewParty(t *testing.T) {
 
 		// An already-suffixed code must not be doubled.
 		inv.Supplier.TaxID.Code = "923456783MVA"
-		doc, err = ubl.ConvertInvoice(env)
+		doc, err = ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		assert.Equal(t, "NO923456783MVA", doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID.Value)
 	})
@@ -101,7 +101,7 @@ func TestNewPartyTaxRegistration(t *testing.T) {
 		inv.Supplier.Identities = []*org.Identity{id}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env, opts...)
+		doc, err := ubl.ExportInvoice(env, opts...)
 		require.NoError(t, err)
 
 		out := make([]PartyTaxSchemeView, 0)
@@ -151,7 +151,7 @@ func TestNewPartyEndpointID(t *testing.T) {
 		apply(inv)
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 		require.NoError(t, err)
 		return doc
 	}

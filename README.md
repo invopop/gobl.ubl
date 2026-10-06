@@ -20,7 +20,9 @@ Usage of the GOBL to UBL conversion library is straightforward and supports bidi
 
 Both conversion directions are supported, allowing you to seamlessly transform between GOBL and UBL XML formats as needed.
 
-#### Convert GOBL to UBL
+The package uses the same terms as GOBL's `convert` package: **export** maps a GOBL envelope into a UBL document and **import** maps it back, while **encode** and **decode** turn UBL documents into XML bytes and back.
+
+#### Export GOBL to UBL
 
 ```go
 package main
@@ -40,14 +42,14 @@ func main() {
         panic(err)
     }
 
-    // Prepare the UBL Invoice document
-    doc, err := ubl.ConvertInvoice(env)
+    // Export the UBL document
+    doc, err := ubl.Export(env)
     if err != nil {
         panic(err)
     }
 
-    // Create the XML output
-    out, err := doc.Bytes()
+    // Encode the XML output
+    out, err := ubl.Encode(doc)
     if err != nil {
         panic(err)
     }
@@ -55,24 +57,26 @@ func main() {
 }
 ```
 
-The `ubl` package also supports using specific of custom contexts that can be used to generate documents with specific customization and profile identifiers. To use something other than the default, add the options during conversion. For example:
+To export into a format other than the default EN 16931, add it as an option. `ExportInvoice` does the same when an invoice is expected:
 
 ```go
-doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 ```
 
-#### Contexts and layers
+#### Formats
 
-This package provides the base UBL conversion and the contexts that apply in any country:
+This package provides the base UBL import and export, and the formats that apply in any country:
 
-| Key | Context |
+| Key | Format |
 | --- | --- |
-| `ubl+en16931` | `ContextEN16931` |
-| `ubl+peppol` | `ContextPeppol` |
-| `ubl+peppol+self-billing` | `ContextPeppolSelfBilled` |
-| `ubl+peppol+invoice-response` | `ContextPeppolInvoiceResponse` |
+| `ubl+en16931` | `FormatEN16931` |
+| `ubl+peppol` | `FormatPeppol` |
+| `ubl+peppol+self-billing` | `FormatPeppolSelfBilled` |
+| `ubl+peppol+invoice-response` | `FormatPeppolInvoiceResponse` |
 
-The base conversion has no context-specific behavior. A context adds the rules of its specification with `Layers`, applied in order after the base conversion of each party and document. Regional contexts live in their own modules, which register them with `ubl.RegisterContexts` when imported, making them available to `FindContext`, `Parse`, and the GOBL `convert` register:
+The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported UBL document, and an import function the UBL document and the imported envelope, before it is calculated. `InvoiceParties` lists each GOBL party alongside its UBL party, for rules that apply to every party.
+
+Regional formats live in their own modules, which register them with `ubl.RegisterFormats` when imported, making them available to `FindFormat`, `Import`, and the GOBL `convert` register:
 
 | Key | Module |
 | --- | --- |
@@ -80,7 +84,7 @@ The base conversion has no context-specific behavior. A context adds the rules o
 | `ubl+sa-zatca-v1` | [gobl.sa.zatca](https://github.com/invopop/gobl.sa.zatca) (`_ "github.com/invopop/gobl.sa.zatca/ubl"`) |
 | `ubl+de-xrechnung-v3` | [gobl.de.xinvoice](https://github.com/invopop/gobl.de.xinvoice) |
 
-#### UBL to GOBL
+#### Import UBL to GOBL
 
 ```go
 package main
@@ -99,26 +103,22 @@ func main() {
         panic(err)
     }
 
-    // Parse the UBL document
-    doc, err := ubl.Parse(inData)
+    // Decode the UBL document
+    doc, err := ubl.Decode(inData)
     if err != nil {
         panic(err)
     }
 
-    // Type assert to the appropriate document type
-    inv, ok := doc.(*ubl.Invoice)
-    if !ok {
-        panic("expected an invoice document")
-    }
-
-    // Convert to GOBL envelope
-    env, err := inv.Convert()
+    // Import into a GOBL envelope
+    env, err := ubl.Import(doc)
     if err != nil {
         panic(err)
     }
 
     // Extract binary attachments if needed
-    attachments := inv.ExtractBinaryAttachments()
+    if inv, ok := doc.(*ubl.Invoice); ok {
+        attachments := inv.ExtractBinaryAttachments()
+    }
 
     // Marshal to JSON
     outputData, err := json.MarshalIndent(env, "", "  ")
@@ -222,12 +222,12 @@ fail:
   therefore means the validation never ran — unreachable service, rejected
   token, unresolvable VESID, or a body that is not XML — and the tests treat it
   as fatal, since nothing was checked.
-- **phorm normalises VESID versions**, so the `fr.ctc:ubl-invoice:1.4.0-03`
-  spelling in `context.go` resolves to its published `fr.ctc:ubl-invoice:1.4-03`
+- **phorm normalises VESID versions**, so a spelling such as
+  `fr.ctc:ubl-invoice:1.4.0-03` resolves to its published `fr.ctc:ubl-invoice:1.4-03`
   rule set. The resolved id comes back as `ves.vesid`, which is worth checking
   when a rule set behaves unexpectedly.
 - **phive-rules keeps only a rolling window of releases.** VESIDs that pass
-  today are dropped a few releases later, so `context.go` needs periodic
+  today are dropped a few releases later, so the VESIDs in `format.go` need periodic
   updating; `GET /api/get/vesids?include-deprecated=true` lists what a given
   phorm build actually carries, along with a `deprecated` flag.
 

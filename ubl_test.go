@@ -16,12 +16,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParse(t *testing.T) {
+func TestDecode(t *testing.T) {
 	t.Run("invoice namespace returns *Invoice", func(t *testing.T) {
 		data, err := testLoadXML("en16931/ubl-example1.xml")
 		require.NoError(t, err)
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
 
 		inv, ok := doc.(*ubl.Invoice)
@@ -33,7 +33,7 @@ func TestParse(t *testing.T) {
 		data, err := testLoadXML("en16931/credit-note1.xml")
 		require.NoError(t, err)
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
 
 		_, ok := doc.(*ubl.Invoice)
@@ -44,17 +44,17 @@ func TestParse(t *testing.T) {
 		data := []byte(`<?xml version="1.0" encoding="UTF-8"?>
 <Foo xmlns="urn:example:foo"><Bar/></Foo>`)
 
-		_, err := ubl.Parse(data)
+		_, err := ubl.Decode(data)
 		assert.ErrorIs(t, err, ubl.ErrUnknownDocumentType)
 	})
 
 	t.Run("empty input returns ErrUnknownDocumentType", func(t *testing.T) {
-		_, err := ubl.Parse(nil)
+		_, err := ubl.Decode(nil)
 		assert.ErrorIs(t, err, ubl.ErrUnknownDocumentType)
 	})
 
 	t.Run("malformed XML returns a parse error", func(t *testing.T) {
-		_, err := ubl.Parse([]byte("<not-closed"))
+		_, err := ubl.Decode([]byte("<not-closed"))
 		require.Error(t, err)
 		assert.False(t, errors.Is(err, ubl.ErrUnknownDocumentType))
 		assert.Contains(t, err.Error(), "error parsing XML")
@@ -62,15 +62,15 @@ func TestParse(t *testing.T) {
 }
 
 func TestConvertDefaultContext(t *testing.T) {
-	// Calling Convert without WithContext should fall back to EN16931.
+	// Calling Convert without WithFormat should fall back to EN16931.
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 
-	doc, err := ubl.Convert(env)
+	doc, err := ubl.Export(env)
 	require.NoError(t, err)
 
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
-	assert.Equal(t, ubl.ContextEN16931.CustomizationID, inv.CustomizationID)
+	assert.Equal(t, ubl.FormatEN16931.CustomizationID, inv.CustomizationID)
 	assert.Empty(t, inv.ProfileID)
 }
 
@@ -84,7 +84,7 @@ func TestConvertAutomaticallyAddsRequiredAddons(t *testing.T) {
 		before := append([]cbc.Key(nil), inv.GetAddons()...)
 		require.Contains(t, before, en16931.V2017)
 
-		_, err := ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
+		_, err := ubl.Export(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		assert.Equal(t, before, inv.GetAddons(),
@@ -98,7 +98,7 @@ func TestConvertUnsupportedDocumentType(t *testing.T) {
 	env, err := gobl.Envelop(&note.Message{Content: "hello"})
 	require.NoError(t, err)
 
-	_, err = ubl.Convert(env, ubl.WithContext(ubl.Context{}))
+	_, err = ubl.Export(env, ubl.WithFormat(ubl.Format{}))
 	assert.ErrorIs(t, err, ubl.ErrUnsupportedDocumentType)
 }
 
@@ -107,18 +107,18 @@ func TestConvertRejectsUnsupportedDocument(t *testing.T) {
 	env, err := gobl.Envelop(&note.Message{Content: "hello"})
 	require.NoError(t, err)
 
-	_, err = ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
+	_, err = ubl.Export(env, ubl.WithFormat(ubl.FormatEN16931))
 	require.Error(t, err)
 	assert.ErrorIs(t, err, ubl.ErrUnsupportedDocumentType)
 }
 
-func TestBytes(t *testing.T) {
+func TestEncode(t *testing.T) {
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
-	out, err := ubl.Bytes(doc)
+	out, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
 	s := string(out)
@@ -127,13 +127,13 @@ func TestBytes(t *testing.T) {
 	assert.Contains(t, s, "<Invoice")
 }
 
-func TestBytesCompact(t *testing.T) {
+func TestEncodeCompact(t *testing.T) {
 	env := loadTestEnvelope(t, "invoice-minimal.json")
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
-	compact, err := ubl.BytesCompact(doc)
+	compact, err := ubl.EncodeCompact(doc)
 	require.NoError(t, err)
 
 	s := string(compact)
@@ -142,7 +142,7 @@ func TestBytesCompact(t *testing.T) {
 	assert.Contains(t, s, "<Invoice")
 
 	// Same document, without the indentation Bytes adds.
-	indented, err := ubl.Bytes(doc)
+	indented, err := ubl.Encode(doc)
 	require.NoError(t, err)
 	assert.NotContains(t, s, "\n  <cbc:ID>", "compact output should not be indented")
 	assert.Less(t, len(compact), len(indented), "compact output should be smaller")
@@ -152,14 +152,4 @@ func TestBytesCompact(t *testing.T) {
 		return regexp.MustCompile(`>\s+<`).ReplaceAllString(string(b), "><")
 	}
 	assert.Equal(t, strip(indented), strip(compact))
-}
-
-func TestBytesRejectsUnmarshalableDocument(t *testing.T) {
-	// Channels cannot be marshalled, so both forms must surface the error
-	// rather than return a half-written document.
-	_, err := ubl.Bytes(make(chan int))
-	assert.Error(t, err)
-
-	_, err = ubl.BytesCompact(make(chan int))
-	assert.Error(t, err)
 }

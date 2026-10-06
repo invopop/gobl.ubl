@@ -29,7 +29,7 @@ func TestConvertDeliveryPeriod(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 	require.Len(t, doc.Delivery, 1)
 	assert.Equal(t, "2024-01-01", *doc.Delivery[0].ActualDeliveryDate)
@@ -46,7 +46,7 @@ func TestConvertTaxCurrencyTotal(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 	require.Len(t, doc.TaxTotal, 2)
 	assert.Equal(t, "EUR", *doc.TaxTotal[1].TaxAmount.CurrencyID)
@@ -84,18 +84,18 @@ func TestConvertAttachmentDetails(t *testing.T) {
 func TestConvertEnsureAddons(t *testing.T) {
 	t.Run("no required addons", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
-		_, err := ubl.Convert(env, ubl.WithContext(ubl.Context{CustomizationID: "urn:example"}))
+		_, err := ubl.Export(env, ubl.WithFormat(ubl.Format{CustomizationID: "urn:example"}))
 		assert.NoError(t, err)
 	})
 	t.Run("invoice fails the added addon's rules", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
-		_, err := ubl.Convert(env, ubl.WithContext(ubl.Context{Addons: []cbc.Key{xrechnung.V3}}))
+		_, err := ubl.Export(env, ubl.WithFormat(ubl.Format{Addons: []cbc.Key{xrechnung.V3}}))
 		assert.Error(t, err)
 	})
 	t.Run("unsupported document", func(t *testing.T) {
 		env, err := gobl.Envelop(&note.Message{Content: "hello"})
 		require.NoError(t, err)
-		_, err = ubl.Convert(env)
+		_, err = ubl.Export(env)
 		assert.ErrorIs(t, err, ubl.ErrUnsupportedDocumentType)
 	})
 }
@@ -105,7 +105,7 @@ func TestParseMalformed(t *testing.T) {
 		ubl.NamespaceUBLInvoice,
 		ubl.NamespaceUBLApplicationResponse,
 	} {
-		_, err := ubl.Parse([]byte(`<Root xmlns="` + ns + `"><cbc:ID>`))
+		_, err := ubl.Decode([]byte(`<Root xmlns="` + ns + `"><cbc:ID>`))
 		assert.Error(t, err, ns)
 	}
 }
@@ -120,7 +120,7 @@ func TestStatusPaths(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -130,9 +130,9 @@ func TestStatusPaths(t *testing.T) {
 	assert.Equal(t, "2026-05-01", ref.IssueDate)
 
 	t.Run("parse back", func(t *testing.T) {
-		data, err := ubl.Bytes(ar)
+		data, err := ubl.Encode(ar)
 		require.NoError(t, err)
-		parsed, err := ubl.Parse(data)
+		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		in := parsed.(*ubl.ApplicationResponse)
 		in.IssueTime = "10:20:30"
@@ -140,7 +140,7 @@ func TestStatusPaths(t *testing.T) {
 		in.DocumentResponse[0].Response.Status = append(in.DocumentResponse[0].Response.Status, nil)
 		in.DocumentResponse = append(in.DocumentResponse, nil, &ubl.DocumentResponse{})
 
-		out, err := in.Convert()
+		out, err := ubl.Import(in)
 		require.NoError(t, err)
 		st, ok := out.Extract().(*bill.Status)
 		require.True(t, ok)
@@ -151,7 +151,7 @@ func TestStatusPaths(t *testing.T) {
 	})
 
 	t.Run("parse errors", func(t *testing.T) {
-		data, err := ubl.Bytes(ar)
+		data, err := ubl.Encode(ar)
 		require.NoError(t, err)
 		for name, mutate := range map[string]func(in *ubl.ApplicationResponse){
 			"issue date": func(in *ubl.ApplicationResponse) { in.IssueDate = "bad" },
@@ -164,11 +164,11 @@ func TestStatusPaths(t *testing.T) {
 			},
 		} {
 			t.Run(name, func(t *testing.T) {
-				parsed, err := ubl.Parse(data)
+				parsed, err := ubl.Decode(data)
 				require.NoError(t, err)
 				in := parsed.(*ubl.ApplicationResponse)
 				mutate(in)
-				_, err = in.Convert()
+				_, err = ubl.Import(in)
 				assert.Error(t, err)
 			})
 		}
@@ -179,7 +179,7 @@ func TestConverterPaths(t *testing.T) {
 	t.Run("import application response", func(t *testing.T) {
 		env, err := gobl.Envelop(basePeppolStatus())
 		require.NoError(t, err)
-		out, err := convert.Export(env, ubl.ContextPeppolInvoiceResponse.Key)
+		out, err := convert.Export(env, ubl.FormatPeppolInvoiceResponse.Key)
 		require.NoError(t, err)
 
 		imported, err := convert.Import(out.Data)
@@ -201,30 +201,28 @@ func TestConverterPaths(t *testing.T) {
 		require.True(t, ok)
 		// Payment instructions need the UNTDID payment means code.
 		inv.Payment.Instructions.Ext = inv.Payment.Instructions.Ext.Delete("untdid-payment-means")
-		_, err := convert.Export(env, ubl.ContextEN16931.Key)
+		_, err := convert.Export(env, ubl.FormatEN16931.Key)
 		assert.ErrorIs(t, err, convert.ErrConversion)
 	})
 
 	t.Run("unreadable header", func(t *testing.T) {
-		dc := ubl.ReadDocumentContext(convert.NewInput([]byte(`<Invoice><UBLExtensions>`)))
+		dc := ubl.ReadHeader(convert.NewInput([]byte(`<Invoice><UBLExtensions>`)))
 		assert.Error(t, dc.Err)
 	})
 }
 
 func TestContextIs(t *testing.T) {
-	assert.True(t, ubl.ContextPeppol.Is(ubl.ContextPeppol))
-	assert.False(t, ubl.ContextPeppol.Is(ubl.ContextEN16931))
+	assert.True(t, ubl.FormatPeppol.Is(ubl.FormatPeppol))
+	assert.False(t, ubl.FormatPeppol.Is(ubl.FormatEN16931))
 }
 
 func TestFindContextProfileMismatch(t *testing.T) {
-	assert.Nil(t, ubl.FindContext(ubl.ContextPeppol.CustomizationID, "urn:example:other-process"))
+	assert.Nil(t, ubl.FindFormat(ubl.FormatPeppol.CustomizationID, "urn:example:other-process"))
 }
 
 func TestParsePartyPaths(t *testing.T) {
-	ctx := ubl.ContextEN16931
-
 	t.Run("nil party", func(t *testing.T) {
-		assert.Nil(t, ubl.ParseParty(nil, &ctx))
+		assert.Nil(t, ubl.ParseParty(nil))
 	})
 
 	t.Run("city subdivision fills the street extra", func(t *testing.T) {
@@ -235,7 +233,7 @@ func TestParsePartyPaths(t *testing.T) {
 				CitySubdivisionName: strPtr("Old Town"),
 				Country:             &ubl.Country{IdentificationCode: "DE"},
 			},
-		}, &ctx)
+		})
 		require.Len(t, p.Addresses, 1)
 		assert.Equal(t, "Old Town", p.Addresses[0].StreetExtra)
 	})
@@ -251,14 +249,14 @@ func TestParsePartyPaths(t *testing.T) {
 				}},
 			}
 		}
-		p := ubl.ParseParty(party(&ubl.TaxScheme{ID: ubl.IDType{Value: "vat"}}), &ctx)
+		p := ubl.ParseParty(party(&ubl.TaxScheme{ID: ubl.IDType{Value: "vat"}}))
 		require.NotNil(t, p.TaxID)
 		assert.Equal(t, cbc.Code("vat"), p.TaxID.Scheme)
 
 		p = ubl.ParseParty(party(&ubl.TaxScheme{
 			ID:          ubl.IDType{Value: "vat"},
 			TaxTypeCode: &ubl.IDType{Value: "GST"},
-		}), &ctx)
+		}))
 		require.NotNil(t, p.TaxID)
 		assert.Equal(t, cbc.Code("GST"), p.TaxID.Scheme)
 	})

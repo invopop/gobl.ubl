@@ -33,7 +33,7 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyclo
+func (ui *Invoice) addLines(inv *bill.Invoice) { //nolint:gocyclo
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -251,7 +251,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 			}
 
 			if l.Seller != nil {
-				invLine.Item.ManufacturerParty = newParty(l.Seller, context)
+				invLine.Item.ManufacturerParty = newParty(l.Seller)
 			}
 		}
 

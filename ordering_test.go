@@ -42,7 +42,7 @@ func TestOrderingIssuer(t *testing.T) {
 	}
 
 	t.Run("maps ordering issuer to supplier ServiceProviderParty", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(issuerEnv(t))
+		doc, err := ubl.ExportInvoice(issuerEnv(t))
 		require.NoError(t, err)
 
 		sp := doc.AccountingSupplierParty.Party.ServiceProviderParty
@@ -53,16 +53,16 @@ func TestOrderingIssuer(t *testing.T) {
 	})
 
 	t.Run("round-trips issuer back to GOBL ordering", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(issuerEnv(t))
+		doc, err := ubl.ExportInvoice(issuerEnv(t))
 		require.NoError(t, err)
-		data, err := ubl.Bytes(doc)
+		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 
-		parsed, err := ubl.Parse(data)
+		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		out, ok := parsed.(*ubl.Invoice)
 		require.True(t, ok)
-		outEnv, err := out.Convert()
+		outEnv, err := ubl.Import(out)
 		require.NoError(t, err)
 		outInv, ok := outEnv.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -96,7 +96,7 @@ func TestOrderingSeller(t *testing.T) {
 	}
 
 	t.Run("maps ordering seller to TaxRepresentativeParty", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(sellerEnv(t))
+		doc, err := ubl.ExportInvoice(sellerEnv(t))
 		require.NoError(t, err)
 
 		// The supplier keeps the BG-4 seller position.
@@ -112,16 +112,16 @@ func TestOrderingSeller(t *testing.T) {
 	})
 
 	t.Run("round-trips seller back to GOBL ordering", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(sellerEnv(t))
+		doc, err := ubl.ExportInvoice(sellerEnv(t))
 		require.NoError(t, err)
-		data, err := ubl.Bytes(doc)
+		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 
-		parsed, err := ubl.Parse(data)
+		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		out, ok := parsed.(*ubl.Invoice)
 		require.True(t, ok)
-		outEnv, err := out.Convert()
+		outEnv, err := ubl.Import(out)
 		require.NoError(t, err)
 		outInv, ok := outEnv.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -152,23 +152,23 @@ func TestOrderingCost(t *testing.T) {
 	}
 
 	t.Run("maps ordering cost to AccountingCost", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(costEnv(t))
+		doc, err := ubl.ExportInvoice(costEnv(t))
 		require.NoError(t, err)
 
 		assert.Equal(t, "1287:65464", doc.AccountingCost)
 	})
 
 	t.Run("round-trips accounting cost back to GOBL ordering", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(costEnv(t))
+		doc, err := ubl.ExportInvoice(costEnv(t))
 		require.NoError(t, err)
-		data, err := ubl.Bytes(doc)
+		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 
-		parsed, err := ubl.Parse(data)
+		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		out, ok := parsed.(*ubl.Invoice)
 		require.True(t, ok)
-		outEnv, err := out.Convert()
+		outEnv, err := ubl.Import(out)
 		require.NoError(t, err)
 		outInv, ok := outEnv.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -181,20 +181,20 @@ func TestOrderingCost(t *testing.T) {
 func TestContractReferenceType(t *testing.T) {
 	env := loadTestEnvelope(t, "peppol/invoice-with-contract-ref.json")
 
-	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 
 	require.NotEmpty(t, doc.ContractDocumentReference)
 	assert.Equal(t, "MARCHE", doc.ContractDocumentReference[0].DocumentType)
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)

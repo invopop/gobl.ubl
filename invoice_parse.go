@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -30,22 +31,9 @@ var InvoiceTagMap = map[string][]cbc.Key{
 	"261": {tax.TagSelfBilled},
 }
 
-// Convert converts the UBL Invoice to a GOBL envelope.
-// It automatically detects the context based on CustomizationID and ProfileID.
-// Binary attachments are ignored during conversion - use ExtractBinaryAttachments
-// to retrieve them separately.
-func (ui *Invoice) Convert(opts ...Option) (*gobl.Envelope, error) {
-	o := new(options)
-	// Detect the context from the invoice first; callers may then override it
-	// (and supply routing) via opts.
-	if ctx := FindContext(ui.CustomizationID, ui.profileID()); ctx != nil {
-		o.context = *ctx
-	}
-	for _, opt := range opts {
-		if opt != nil {
-			opt(o)
-		}
-	}
+// importEnvelope converts the UBL invoice into a GOBL envelope.
+func (ui *Invoice) importEnvelope(opts []Option) (*gobl.Envelope, error) {
+	o := importOptions(ui.CustomizationID, ui.profileID(), opts)
 
 	inv, err := ui.goblInvoice(o)
 	if err != nil {
@@ -56,17 +44,28 @@ func (ui *Invoice) Convert(opts ...Option) (*gobl.Envelope, error) {
 	// Received document: record the transport routing before calculation so
 	// GOBL respects it instead of deriving an outgoing-direction guess.
 	setEnvelopeRouting(env, o)
-	if err := env.Insert(inv); err != nil {
+	if env.Document, err = schema.NewObject(inv); err != nil {
+		return nil, err
+	}
+	if err := o.format.runImportFuncs(ui, env); err != nil {
 		return nil, err
 	}
 
+	// Everything the document declares is now mapped, so the calculated
+	// amounts can be checked against the ones the sender stated.
+	if err := ui.reconcileTotals(inv); err != nil {
+		return nil, err
+	}
+	if err := env.Calculate(); err != nil {
+		return nil, err
+	}
 	return env, nil
 }
 
 func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	out := &bill.Invoice{
 		Addons: tax.Addons{
-			List: o.context.Addons,
+			List: o.format.Addons,
 		},
 		Code:     cbc.Code(ui.ID),
 		Currency: currency.Code(ui.DocumentCurrencyCode),
@@ -75,8 +74,8 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 			// as this is the default for EN16931.
 			Rounding: tax.RoundingRuleCurrency,
 		},
-		Supplier: goblParty(ui.AccountingSupplierParty.Party, o),
-		Customer: goblParty(ui.AccountingCustomerParty.Party, o),
+		Supplier: goblParty(ui.AccountingSupplierParty.Party),
+		Customer: goblParty(ui.AccountingCustomerParty.Party),
 	}
 
 	ui.resolveInvoiceType(out)
@@ -86,13 +85,13 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	}
 	ui.applyExchangeRates(out)
 
-	if err := ui.goblAddLines(out, o); err != nil {
+	if err := ui.goblAddLines(out); err != nil {
 		return nil, err
 	}
-	if err := ui.goblAddPayment(out, o); err != nil {
+	if err := ui.goblAddPayment(out); err != nil {
 		return nil, err
 	}
-	if err := ui.goblAddOrdering(out, o); err != nil {
+	if err := ui.goblAddOrdering(out); err != nil {
 		return nil, err
 	}
 	if err := ui.goblAddDelivery(out); err != nil {
@@ -104,7 +103,7 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	if err := ui.parseBillingReferences(out); err != nil {
 		return nil, err
 	}
-	ui.applyTaxRepresentative(out, o)
+	ui.applyTaxRepresentative(out)
 
 	if len(ui.AllowanceCharge) > 0 {
 		if err := ui.goblAddCharges(out); err != nil {
@@ -114,16 +113,6 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 
 	out.Attachments = ui.goblAddAttachments()
 	ui.goblAddTaxNotes(out)
-
-	if err := o.context.parseInvoice(ui, out); err != nil {
-		return nil, err
-	}
-
-	// Everything the document declares is now mapped, so the calculated
-	// amounts can be checked against the ones the sender stated.
-	if err := ui.reconcileTotals(out); err != nil {
-		return nil, err
-	}
 
 	return out, nil
 }
@@ -253,14 +242,14 @@ func (ui *Invoice) parseBillingReferences(out *bill.Invoice) error {
 // applyTaxRepresentative maps the BG-11 tax representative to
 // ordering.seller, the party liable for the tax when it is not the
 // supplier. The supplier keeps the BG-4 seller.
-func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice, o *options) {
+func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice) {
 	if ui.TaxRepresentativeParty == nil {
 		return
 	}
 	if out.Ordering == nil {
 		out.Ordering = &bill.Ordering{}
 	}
-	out.Ordering.Seller = goblParty(ui.TaxRepresentativeParty, o)
+	out.Ordering.Seller = goblParty(ui.TaxRepresentativeParty)
 }
 
 // typeCodeParse maps the UBL document type code (UNTDID 1001) to its GOBL

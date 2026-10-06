@@ -190,21 +190,13 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-// NewParty converts the GOBL party into a UBL party, applying the context's
-// extensions. Extensions use it to convert the nested parties they add.
-func NewParty(party *org.Party, ctx *Context) *Party {
-	return newParty(party, *ctx)
+// NewParty converts the GOBL party into a UBL party, without any format
+// specific adjustments.
+func NewParty(party *org.Party) *Party {
+	return newParty(party)
 }
 
-func newParty(party *org.Party, ctx Context) *Party {
-	p := newBaseParty(party)
-	if p != nil {
-		ctx.convertParty(party, p)
-	}
-	return p
-}
-
-func newBaseParty(party *org.Party) *Party { //nolint:gocyclo
+func newParty(party *org.Party) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}

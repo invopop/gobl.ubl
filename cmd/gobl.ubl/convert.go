@@ -60,19 +60,19 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 		if err := json.Unmarshal(inData, env); err != nil {
 			return fmt.Errorf("parsing input as GOBL Envelope: %w", err)
 		}
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		if err != nil {
 			return fmt.Errorf("building UBL document: %w", err)
 		}
 
-		outputData, err = ubl.Bytes(doc)
+		outputData, err = ubl.Encode(doc)
 		if err != nil {
 			return fmt.Errorf("generating UBL xml: %w", err)
 		}
 	} else {
 		// Assume XML if not JSON
 
-		doc, err := ubl.Parse(inData)
+		doc, err := ubl.Decode(inData)
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}
@@ -82,7 +82,7 @@ func (c *convertOpts) runE(cmd *cobra.Command, args []string) error {
 			return fmt.Errorf("building GOBL envelope: %w", ubl.ErrUnsupportedDocumentType)
 		}
 
-		env, err := inv.Convert()
+		env, err := ubl.Import(inv)
 		if err != nil {
 			return fmt.Errorf("building GOBL envelope: %w", err)
 		}

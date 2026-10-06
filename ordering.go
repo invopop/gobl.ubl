@@ -71,7 +71,7 @@ func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	}
 }
 
-func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
+func (ui *Invoice) addOrdering(o *bill.Ordering) {
 	if o != nil {
 		if o.Code != "" {
 			ui.BuyerReference = o.Code.String()
@@ -85,13 +85,13 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		// The party liable for the tax, when not the supplier, is the
 		// BG-11 tax representative.
 		if o.Seller != nil {
-			ui.TaxRepresentativeParty = newParty(o.Seller, context)
+			ui.TaxRepresentativeParty = newParty(o.Seller)
 		}
 
 		// The issuer raising the invoice on the seller's behalf.
 		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {
 			ui.AccountingSupplierParty.Party.ServiceProviderParty = &ServiceProviderParty{
-				Party: newParty(o.Issuer, context),
+				Party: newParty(o.Issuer),
 			}
 		}
 

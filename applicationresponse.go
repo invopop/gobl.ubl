@@ -43,7 +43,7 @@ type DocumentResponse struct {
 
 // Response carries the response code and an optional human description. The
 // ResponseCode value and its code-list attributes are profile-specific and are
-// stamped by the matching context.
+// stamped by the matching format.
 type Response struct {
 	ReferenceID   string    `xml:"cbc:ReferenceID,omitempty"`
 	ResponseCode  *IDType   `xml:"cbc:ResponseCode"`
@@ -61,7 +61,7 @@ type Status struct {
 
 // ResponseDocumentReference identifies the document being responded to. The
 // DocumentTypeCode is profile-specific (drawn from a profile's code list) and is
-// stamped by the matching context; the generic mapping leaves it unset.
+// stamped by the matching format; the generic mapping leaves it unset.
 type ResponseDocumentReference struct {
 	ID               string  `xml:"cbc:ID"`
 	UUID             string  `xml:"cbc:UUID,omitempty"`
@@ -69,7 +69,7 @@ type ResponseDocumentReference struct {
 	DocumentTypeCode *IDType `xml:"cbc:DocumentTypeCode"`
 }
 
-func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, error) {
+func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 	// SenderParty is who sends the response, ReceiverParty who receives it: a
 	// response travels customer->supplier, an update supplier->customer.
 	sender, receiver := st.Customer, st.Supplier
@@ -83,14 +83,14 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		CBCNamespace:    NamespaceCBC,
 		UBLNamespace:    NamespaceUBLApplicationResponse,
 		UBLVersionID:    Version,
-		CustomizationID: o.context.CustomizationID,
+		CustomizationID: o.format.CustomizationID,
 		ID:              invoiceNumber(st.Series, st.Code),
 		IssueDate:       formatDate(st.IssueDate),
-		SenderParty:     newParty(sender, o.context),
-		ReceiverParty:   newParty(receiver, o.context),
+		SenderParty:     newParty(sender),
+		ReceiverParty:   newParty(receiver),
 	}
-	if o.context.ProfileID != "" {
-		out.ProfileID = &IDType{Value: o.context.ProfileID}
+	if o.format.ProfileID != "" {
+		out.ProfileID = &IDType{Value: o.format.ProfileID}
 	}
 	if !st.UUID.IsZero() {
 		out.UUID = st.UUID.String()
@@ -128,10 +128,7 @@ func ublApplicationResponse(st *bill.Status, o *options) (*ApplicationResponse, 
 		out.DocumentResponse = append(out.DocumentResponse, dr)
 	}
 
-	if err := o.context.convertStatus(st, out); err != nil {
-		return nil, err
-	}
-	return out, nil
+	return out
 }
 
 // responseDescription prefers the line description and falls back to the first

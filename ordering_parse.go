@@ -23,7 +23,7 @@ func hasOrderingData(o *bill.Ordering) bool {
 		o.Issuer != nil
 }
 
-func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
+func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	ordering := new(bill.Ordering)
 
 	if ui.BuyerReference != "" {
@@ -35,7 +35,7 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice, o *options) error {
 		ordering.Cost = cbc.Code(ui.AccountingCost)
 	}
 
-	ordering.Issuer = ui.goblOrderingIssuer(o)
+	ordering.Issuer = ui.goblOrderingIssuer()
 
 	// GOBL does not currently support multiple periods, so only the first one is taken
 	if len(ui.InvoicePeriod) > 0 {
@@ -156,7 +156,7 @@ func goblAdditionalDocumentIdentities(refs []Reference) []*org.Identity {
 			Code: cbc.Code(ref.ID.Value),
 		}
 		if ref.ID.SchemeID != nil {
-			// This is very EN specific, but we currently do not provide a way to identify by context how we should handle each case
+			// This is very EN specific, but we currently do not provide a way to identify by format how we should handle each case
 			identity.Ext = identity.Ext.Set(untdid.ExtKeyReference, cbc.Code(*ref.ID.SchemeID))
 		}
 		identities = append(identities, identity)
@@ -164,12 +164,12 @@ func goblAdditionalDocumentIdentities(refs []Reference) []*org.Identity {
 	return identities
 }
 
-func (ui *Invoice) goblOrderingIssuer(o *options) *org.Party {
+func (ui *Invoice) goblOrderingIssuer() *org.Party {
 	sp := ui.AccountingSupplierParty.Party
 	if sp == nil || sp.ServiceProviderParty == nil {
 		return nil
 	}
-	return goblParty(sp.ServiceProviderParty.Party, o)
+	return goblParty(sp.ServiceProviderParty.Party)
 }
 
 func goblReference(ref *Reference) (*org.DocumentRef, error) {

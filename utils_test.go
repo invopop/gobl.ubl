@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -454,19 +453,11 @@ func fixtures(t *testing.T) []string {
 }
 
 func parseFixture(raw []byte) (any, error) {
-	doc, err := Parse(raw)
+	doc, err := Decode(raw)
 	if err != nil {
 		return nil, err
 	}
-	var env *gobl.Envelope
-	switch d := doc.(type) {
-	case *Invoice:
-		env, err = d.Convert()
-	case *ApplicationResponse:
-		env, err = d.Convert()
-	default:
-		return nil, fmt.Errorf("unhandled document %T", doc)
-	}
+	env, err := Import(doc)
 	if err != nil {
 		return nil, err
 	}

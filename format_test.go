@@ -22,7 +22,7 @@ func TestContextEN16931(t *testing.T) {
 		require.NoError(t, inv.Calculate())
 
 		// Convert with EN16931 context
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextEN16931))
+		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		ublInv, ok := doc.(*ubl.Invoice)
@@ -47,7 +47,7 @@ func TestContextPeppol(t *testing.T) {
 		require.NoError(t, inv.Calculate())
 
 		// Convert with Peppol context
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppol))
+		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
 		require.NoError(t, err)
 
 		ublInv, ok := doc.(*ubl.Invoice)
@@ -71,7 +71,7 @@ func TestContextPeppolSelfBilled(t *testing.T) {
 		require.NoError(t, inv.Calculate())
 
 		// Convert directly with PeppolSelfBilled context
-		doc, err := ubl.Convert(env, ubl.WithContext(ubl.ContextPeppolSelfBilled))
+		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolSelfBilled))
 		require.NoError(t, err)
 
 		ublInv, ok := doc.(*ubl.Invoice)
@@ -91,11 +91,11 @@ func TestGetVESID(t *testing.T) {
 		require.True(t, ok)
 
 		// Get VESID for Peppol context
-		vesid := ubl.ContextPeppol.GetVESID(inv)
+		vesid := ubl.FormatPeppol.GetVESID(inv)
 		assert.Equal(t, "eu.peppol.bis3:invoice:2026.5", vesid)
 
 		// Get VESID for EN16931 context
-		vesid = ubl.ContextEN16931.GetVESID(inv)
+		vesid = ubl.FormatEN16931.GetVESID(inv)
 		assert.Equal(t, "eu.cen.en16931:ubl:1.3.16", vesid)
 	})
 
@@ -109,11 +109,11 @@ func TestGetVESID(t *testing.T) {
 		require.True(t, inv.Type.In(bill.InvoiceTypeCreditNote))
 
 		// Get VESID for Peppol context
-		vesid := ubl.ContextPeppol.GetVESID(inv)
+		vesid := ubl.FormatPeppol.GetVESID(inv)
 		assert.Equal(t, "eu.peppol.bis3:creditnote:2026.5", vesid)
 
 		// Get VESID for EN16931 context
-		vesid = ubl.ContextEN16931.GetVESID(inv)
+		vesid = ubl.FormatEN16931.GetVESID(inv)
 		assert.Equal(t, "eu.cen.en16931:ubl-creditnote:1.3.16", vesid)
 	})
 
@@ -124,47 +124,47 @@ func TestGetVESID(t *testing.T) {
 		require.True(t, ok)
 
 		// Get VESID for PeppolSelfBilled context
-		vesid := ubl.ContextPeppolSelfBilled.GetVESID(inv)
+		vesid := ubl.FormatPeppolSelfBilled.GetVESID(inv)
 		assert.Equal(t, "eu.peppol.bis3:invoice-self-billing:2026.5", vesid)
 	})
 }
 
 func TestFindContext(t *testing.T) {
 	t.Run("find EN16931 by CustomizationID", func(t *testing.T) {
-		ctx := ubl.FindContext("urn:cen.eu:en16931:2017", "")
+		ctx := ubl.FindFormat("urn:cen.eu:en16931:2017", "")
 		require.NotNil(t, ctx)
-		assert.Equal(t, ubl.ContextEN16931.CustomizationID, ctx.CustomizationID)
+		assert.Equal(t, ubl.FormatEN16931.CustomizationID, ctx.CustomizationID)
 	})
 
 	t.Run("find Peppol by CustomizationID and ProfileID", func(t *testing.T) {
-		ctx := ubl.FindContext("urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0", "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0")
+		ctx := ubl.FindFormat("urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0", "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0")
 		require.NotNil(t, ctx)
-		assert.Equal(t, ubl.ContextPeppol.CustomizationID, ctx.CustomizationID)
-		assert.Equal(t, ubl.ContextPeppol.ProfileID, ctx.ProfileID)
+		assert.Equal(t, ubl.FormatPeppol.CustomizationID, ctx.CustomizationID)
+		assert.Equal(t, ubl.FormatPeppol.ProfileID, ctx.ProfileID)
 	})
 
 	t.Run("find PeppolSelfBilled by CustomizationID and ProfileID", func(t *testing.T) {
-		ctx := ubl.FindContext("urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0", "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0")
+		ctx := ubl.FindFormat("urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0", "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0")
 		require.NotNil(t, ctx)
-		assert.Equal(t, ubl.ContextPeppolSelfBilled.CustomizationID, ctx.CustomizationID)
-		assert.Equal(t, ubl.ContextPeppolSelfBilled.ProfileID, ctx.ProfileID)
+		assert.Equal(t, ubl.FormatPeppolSelfBilled.CustomizationID, ctx.CustomizationID)
+		assert.Equal(t, ubl.FormatPeppolSelfBilled.ProfileID, ctx.ProfileID)
 	})
 
 	t.Run("find EN16931 when no ProfileID provided", func(t *testing.T) {
-		ctx := ubl.FindContext("urn:cen.eu:en16931:2017", "")
+		ctx := ubl.FindFormat("urn:cen.eu:en16931:2017", "")
 		require.NotNil(t, ctx)
-		assert.Equal(t, ubl.ContextEN16931.CustomizationID, ctx.CustomizationID)
+		assert.Equal(t, ubl.FormatEN16931.CustomizationID, ctx.CustomizationID)
 	})
 
 	t.Run("find EN16931 with non-billing-mode ProfileID", func(t *testing.T) {
 		// EN16931 documents may have arbitrary ProfileIDs that are not French billing modes
-		ctx := ubl.FindContext("urn:cen.eu:en16931:2017", "Invoicing on purchase order")
+		ctx := ubl.FindFormat("urn:cen.eu:en16931:2017", "Invoicing on purchase order")
 		require.NotNil(t, ctx)
-		assert.Equal(t, ubl.ContextEN16931.CustomizationID, ctx.CustomizationID)
+		assert.Equal(t, ubl.FormatEN16931.CustomizationID, ctx.CustomizationID)
 	})
 
 	t.Run("unknown CustomizationID returns nil", func(t *testing.T) {
-		ctx := ubl.FindContext("unknown:customization:id", "")
+		ctx := ubl.FindFormat("unknown:customization:id", "")
 		assert.Nil(t, ctx)
 	})
 }

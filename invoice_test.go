@@ -18,27 +18,27 @@ func TestInvoiceHeaders(t *testing.T) {
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
 
-		out, err := ubl.ConvertInvoice(env)
+		out, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		assert.NoError(t, err)
 		assert.Equal(t, "380", out.InvoiceTypeCode.Value)
 
 		inv.Tax = nil
-		_, err = ubl.ConvertInvoice(env)
+		_, err = ubl.ExportInvoice(env)
 		assert.ErrorContains(t, err, "tax: (ext: (untdid-document-type: required.).).")
 
 		inv.Tax = &bill.Tax{
 			Ext: tax.MakeExtensions(),
 		}
-		_, err = ubl.ConvertInvoice(env)
+		_, err = ubl.ExportInvoice(env)
 		assert.ErrorContains(t, err, "ext: (untdid-document-type: required.).")
 	})
 
 	t.Run("format date", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-complete.json")
 
-		out, err := ubl.ConvertInvoice(env)
+		out, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		assert.Equal(t, "2024-02-13", out.IssueDate)
 	})
@@ -62,7 +62,7 @@ func TestInvoiceHeaders(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				inv.Tax.Point = tt.key
-				out, err := ubl.ConvertInvoice(env)
+				out, err := ubl.ExportInvoice(env)
 				require.NoError(t, err)
 				require.Len(t, out.InvoicePeriod, 1)
 				assert.Equal(t, tt.code, out.InvoicePeriod[0].DescriptionCode)
@@ -71,7 +71,7 @@ func TestInvoiceHeaders(t *testing.T) {
 
 		t.Run("unknown key ignored", func(t *testing.T) {
 			inv.Tax.Point = "unknown"
-			out, err := ubl.ConvertInvoice(env)
+			out, err := ubl.ExportInvoice(env)
 			require.NoError(t, err)
 			// Period still present from ordering data, but no DescriptionCode
 			if len(out.InvoicePeriod) > 0 {
@@ -81,7 +81,7 @@ func TestInvoiceHeaders(t *testing.T) {
 
 		t.Run("nil tax", func(t *testing.T) {
 			inv.Tax = nil
-			out, err := ubl.ConvertInvoice(env)
+			out, err := ubl.ExportInvoice(env)
 			// Tax is required for document type, so this will error
 			assert.Error(t, err)
 			assert.Nil(t, out)
@@ -107,13 +107,13 @@ func TestInvoiceHeaders(t *testing.T) {
 				require.True(t, ok)
 
 				inv.Tax.Point = tt.key
-				out, err := ubl.ConvertInvoice(env)
+				out, err := ubl.ExportInvoice(env)
 				require.NoError(t, err)
 				require.Len(t, out.InvoicePeriod, 1)
 				assert.Equal(t, tt.code, out.InvoicePeriod[0].DescriptionCode)
 
 				// Parse back and verify round-trip
-				parsed, err := out.Convert()
+				parsed, err := ubl.Import(out)
 				require.NoError(t, err)
 				parsedInv, ok := parsed.Extract().(*bill.Invoice)
 				require.True(t, ok)
@@ -127,12 +127,12 @@ func TestInvoiceHeaders(t *testing.T) {
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		assert.True(t, ok)
-		out, err := ubl.ConvertInvoice(env)
+		out, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		assert.Equal(t, "SAMPLE-001", out.ID)
 
 		inv.Series = ""
-		out, err = ubl.ConvertInvoice(env)
+		out, err = ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		assert.Equal(t, "001", out.ID)
 	})
@@ -158,7 +158,7 @@ func TestConvertInvoiceUnregisteredRegime(t *testing.T) {
 	}
 
 	require.NotPanics(t, func() {
-		out, err := ubl.ConvertInvoice(env)
+		out, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		require.NotNil(t, out)
 		// With an unknown regime currency, no tax-accounting currency is emitted.

@@ -48,7 +48,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer = nil
 		inv.Payment.Instructions.DirectDebit = &pay.DirectDebit{Account: "0667"}
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 
@@ -67,7 +67,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer = nil
 		inv.Payment.Instructions.DirectDebit = &pay.DirectDebit{Ref: "MANDATE-123", Account: "0667"}
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
@@ -92,7 +92,7 @@ func TestNewPayment(t *testing.T) {
 			},
 		}
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		pm := doc.PaymentMeans[0]
@@ -114,7 +114,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer = nil
 		inv.Payment.Instructions.Card = &pay.Card{Last4: "0312"}
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		require.NotEmpty(t, doc.PaymentMeans)
 
@@ -127,7 +127,7 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "NA", *card.NetworkID)
 		assert.Nil(t, card.HolderName)
 
-		data, err := ubl.Bytes(doc)
+		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 		assert.Contains(t, string(data), "<cac:CardAccount>\n      <cbc:PrimaryAccountNumberID>0312</cbc:PrimaryAccountNumberID>\n      <cbc:NetworkID>NA</cbc:NetworkID>\n    </cac:CardAccount>")
 	})
@@ -140,7 +140,7 @@ func TestNewPayment(t *testing.T) {
 
 		inv.Payment.Instructions.Ext = tax.MakeExtensions()
 
-		_, err := ubl.ConvertInvoice(env)
+		_, err := ubl.ExportInvoice(env)
 		assert.ErrorContains(t, err, "instructions: (ext: (untdid-payment-means: required.).).")
 	})
 
@@ -160,7 +160,7 @@ func TestNewPayment(t *testing.T) {
 		}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		require.NotNil(t, doc.PayeeParty)
@@ -168,14 +168,14 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "EM", doc.PayeeParty.EndpointID.SchemeID)
 		assert.Equal(t, "payee@example.com", doc.PayeeParty.EndpointID.Value)
 
-		data, err := ubl.Bytes(doc)
+		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 
-		parsed, err := ubl.Parse(data)
+		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		out, ok := parsed.(*ubl.Invoice)
 		require.True(t, ok)
-		outEnv, err := out.Convert()
+		outEnv, err := ubl.Import(out)
 		require.NoError(t, err)
 		outInv, ok := outEnv.Extract().(*bill.Invoice)
 		require.True(t, ok)
