@@ -21,9 +21,7 @@ type InvoiceLine struct {
 	AccountingCost      *string             `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
-	// Sub-invoice lines (EXTENDED-CTC-FR): the reference naming the invoice
-	// itself carries the line's type and its parent. Others name earlier
-	// invoices.
+	// Only the reference naming the invoice itself carries the sub-line type and parent.
 	BillingReference  []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
 	DocumentReference *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
 	AllowanceCharge   []*AllowanceCharge      `xml:"cac:AllowanceCharge"`
@@ -31,8 +29,7 @@ type InvoiceLine struct {
 	Item              *Item                   `xml:"cac:Item"`
 	Price             *Price                  `xml:"cac:Price"`
 
-	// hierarchy is the billing reference naming the invoice itself, found
-	// when the line is read.
+	// hierarchy is that self-reference, set on parse.
 	hierarchy *LineBillingReference
 }
 
@@ -42,10 +39,7 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-// LineBillingReference carries a sub-invoice line's place in its hierarchy
-// under EXTENDED-CTC-FR: a document reference naming the invoice itself (BT-1)
-// gives the line's type (EXT-FR-FE-163), and the reference line its parent
-// (EXT-FR-FE-162).
+// LineBillingReference carries EXT-FR-FE-162/163 when its ID is the invoice's own (BT-1).
 type LineBillingReference struct {
 	InvoiceDocumentReference *LineDocumentStatusReference `xml:"cac:InvoiceDocumentReference,omitempty"`
 	BillingReferenceLine     *BillingReferenceLine        `xml:"cac:BillingReferenceLine,omitempty"`
@@ -62,9 +56,7 @@ type BillingReferenceLine struct {
 	ID IDType `xml:"cbc:ID"`
 }
 
-// Sub-invoice line types (EXT-FR-FE-163). Only DETAIL lines and lines without
-// a type count towards the totals: a GROUP line restates the sum of its
-// DETAIL lines, and an INFORMATION line is purely descriptive.
+// Sub-invoice line types (EXT-FR-FE-163).
 const (
 	lineStatusGroup       = "GROUP"
 	lineStatusDetail      = "DETAIL"
@@ -94,10 +86,7 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) {
 	}
 }
 
-// writesSubLines reports whether a line's breakdown is written out as
-// sub-invoice lines. Only EXTENDED-CTC-FR defines them, and a line's own
-// allowances or charges would be lost on a GROUP line, which no total counts;
-// such a line is written as a single line, as every other profile does.
+// A GROUP line's own allowances would count nowhere, so such a line is written alone.
 func writesSubLines(context Context, l *bill.Line) bool {
 	if len(l.Breakdown) == 0 || len(l.Discounts) > 0 || len(l.Charges) > 0 {
 		return false
@@ -105,11 +94,7 @@ func writesSubLines(context Context, l *bill.Line) bool {
 	return context.Is(ContextPeppolFranceExtended)
 }
 
-// newGroupLines writes a line with a breakdown as sub-invoice lines. When a
-// sub-line carries a price the line becomes a GROUP restating the sum of its
-// DETAIL lines, with no tax of its own. Otherwise its price stands and the
-// sub-lines only describe it. Sub-lines have no taxes, so each takes the
-// line's, and unpriced ones are INFORMATION lines that count towards nothing.
+// Without a priced sub-line the line keeps its own price and is not a GROUP.
 func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceType cbc.Key, context Context) []InvoiceLine {
 	ccy := group.LineExtensionAmount.CurrencyID
 	number := invoiceNumber(inv.Series, inv.Code)
@@ -135,10 +120,7 @@ func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceTy
 	}
 
 	if priced {
-		// BR-FREXT-08 makes a GROUP line's amount the sum of its DETAIL
-		// lines, and BR-CO-10 sums the DETAIL lines into BT-106. When their
-		// rounding no longer adds up to the line's own amount, both cannot
-		// hold, so the line is written alone.
+		// BR-FREXT-08 and BR-CO-10 cannot both hold once rounding diverges.
 		if newAmount(sum, *ccy).Value != group.LineExtensionAmount.Value {
 			return []InvoiceLine{group}
 		}
@@ -165,11 +147,7 @@ func newLineBillingReference(number, status, parent string) []*LineBillingRefere
 	return []*LineBillingReference{ref}
 }
 
-// subLineAsLine presents a sub-line as a line of its own under its parent. A
-// sub-line counts per unit of its parent, while a sub-invoice line states its
-// full quantity and amounts, so they are multiplied by the parent's quantity.
-// An unpriced sub-line still needs a price and an amount, so it states zero
-// for both, as the official examples do.
+// Sub-lines count per parent unit; the XML states full amounts, and zero for unpriced ones.
 func subLineAsLine(sl *bill.SubLine, parent *bill.Line, zero num.Amount) *bill.Line {
 	qty := parent.Quantity
 	item := *sl.Item
@@ -215,7 +193,6 @@ func subLineAsLine(sl *bill.SubLine, parent *bill.Line, zero num.Amount) *bill.L
 	return l
 }
 
-// newInvoiceLine writes a single line.
 func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.Key, context Context) InvoiceLine { //nolint:gocyclo
 	ccy := l.Item.Currency.String()
 	if ccy == "" {
