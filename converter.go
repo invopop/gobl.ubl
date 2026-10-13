@@ -50,7 +50,7 @@ func (c *converter) Formats() []*convert.Format {
 			MIME:      mimeXML,
 			Syntax:    "ubl",
 			Countries: f.Countries,
-			Addons:    f.Addons,
+			Addons:    f.commonAddons(),
 			Import:    f.Schemas,
 			Export:    f.Schemas,
 		})
@@ -90,7 +90,27 @@ func (c *converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
 	return Import(doc)
 }
 
-func (c *converter) Accepts(_ cbc.Key, _ *gobl.Envelope) bool {
+// Accepts checks the document includes the addons of the specification the
+// format exports it with.
+func (c *converter) Accepts(key cbc.Key, env *gobl.Envelope) bool {
+	f := c.format(key)
+	if f == nil {
+		return false
+	}
+	doc := env.Extract()
+	s := f.SpecificationFor(doc)
+	if len(s.Addons) == 0 {
+		return true
+	}
+	d, ok := doc.(interface{ GetAddons() []cbc.Key })
+	if !ok {
+		return false
+	}
+	for _, a := range s.Addons {
+		if !a.In(d.GetAddons()...) {
+			return false
+		}
+	}
 	return true
 }
 

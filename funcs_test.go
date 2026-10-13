@@ -145,7 +145,7 @@ func TestFormatFuncErrors(t *testing.T) {
 	t.Run("import status", func(t *testing.T) {
 		env, err := gobl.Envelop(basePeppolStatus())
 		require.NoError(t, err)
-		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
+		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
 		require.NoError(t, err)
 		ar := doc.(*ubl.ApplicationResponse)
 		ar.CustomizationID = f.CustomizationID

@@ -161,7 +161,7 @@ func TestTotalsArithmetic(t *testing.T) {
 	contexts := map[string]ubl.Format{
 		"en16931":            ubl.FormatEN16931,
 		"peppol":             ubl.FormatPeppol,
-		"peppol-self-billed": ubl.FormatPeppolSelfBilled,
+		"peppol-self-billed": ubl.FormatPeppol,
 	}
 
 	for dir, ctx := range contexts {

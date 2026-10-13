@@ -150,12 +150,12 @@ func TestConvertPeppolInvoiceResponseValidate(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	validateXML(t, pc, ubl.FormatPeppolInvoiceResponse.VESIDs.Status, data)
+	validateXML(t, pc, ubl.SpecificationPeppolInvoiceResponse.VESIDs.Status, data)
 }
 
 func TestConvertApplicationResponseFansOutLines(t *testing.T) {
@@ -234,7 +234,7 @@ func TestConvertPeppolInvoiceResponse(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -288,7 +288,7 @@ func TestConvertPeppolInvoiceResponseErrorMapsToRejected(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -403,7 +403,7 @@ func peppolRoundTrip(t *testing.T, st *bill.Status) *bill.Status {
 	t.Helper()
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 	data, err := ubl.Encode(doc)
 	require.NoError(t, err)

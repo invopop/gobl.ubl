@@ -43,7 +43,7 @@ func (ar *ApplicationResponse) importEnvelope(opts []Option) (*gobl.Envelope, er
 
 func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	out := &bill.Status{
-		Addons:   tax.Addons{List: o.format.Addons},
+		Addons:   tax.Addons{List: o.spec.Addons},
 		Type:     bill.StatusTypeResponse,
 		Code:     cbc.Code(ar.ID),
 		Supplier: goblParty(ar.ReceiverParty),

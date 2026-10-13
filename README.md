@@ -69,10 +69,16 @@ This package provides the base UBL import and export, and the formats that apply
 
 | Key | Format |
 | --- | --- |
-| `ubl+en16931` | `FormatEN16931` |
-| `ubl+peppol` | `FormatPeppol` |
-| `ubl+peppol+self-billing` | `FormatPeppolSelfBilled` |
-| `ubl+peppol+invoice-response` | `FormatPeppolInvoiceResponse` |
+| `ubl+en16931-v2017` | `FormatEN16931` |
+| `ubl+peppol+bis-v3` | `FormatPeppol` |
+
+A format can write documents for more than one specification, choosing from the GOBL document. Its own `CustomizationID`, `ProfileID`, `Addons` and `VESIDs` define its main specification, and `Specifications` lists the others, each with an `Applies` function. On export, the first specification that applies to the document is used, or else the main one; `SpecificationFor` and `VESID` provide them for a document. Every specification's identifiers are recognised on import. `FormatPeppol` writes:
+
+| GOBL document | Specification |
+| --- | --- |
+| `bill.Invoice` | Peppol BIS Billing 3.0 |
+| `bill.Invoice` with the `self-billed` tag | Peppol BIS Self-Billing 3.0 (`SpecificationPeppolSelfBilling`) |
+| `bill.Status` | Peppol Invoice Response 3 (`SpecificationPeppolInvoiceResponse`) |
 
 The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported UBL document, and an import function the UBL document and the imported envelope, before it is calculated. `InvoiceParties` lists each GOBL party alongside its UBL party, for rules that apply to every party.
 

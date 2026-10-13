@@ -104,12 +104,12 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	// Determine CustomizationID to use in output
-	customizationID := o.format.CustomizationID
-	if o.format.OutputCustomizationID != "" {
-		customizationID = o.format.OutputCustomizationID
+	customizationID := o.spec.CustomizationID
+	if o.spec.OutputCustomizationID != "" {
+		customizationID = o.spec.OutputCustomizationID
 	}
 
-	profileID := o.format.ProfileID
+	profileID := o.spec.ProfileID
 
 	// Create the UBL document
 	out := &Invoice{

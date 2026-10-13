@@ -8,6 +8,7 @@ import (
 	"github.com/invopop/gobl/i18n"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/schema"
+	"github.com/invopop/gobl/tax"
 )
 
 // Peppol Billing Profile IDs
@@ -25,12 +26,31 @@ type VESIDMapping struct {
 	Status string
 }
 
+// Specification defines the identifiers a UBL document carries for one
+// specification, and the GOBL documents it applies to.
+type Specification struct {
+	// CustomizationID identifies the specification.
+	CustomizationID string
+	// ProfileID identifies the business process.
+	ProfileID string
+	// OutputCustomizationID optionally specifies a different CustomizationID
+	// to write into the generated XML.
+	OutputCustomizationID string
+	// Addons required by the specification.
+	Addons []cbc.Key
+	// VESIDs used to validate the specification's documents.
+	VESIDs VESIDMapping
+	// Applies reports whether the specification applies to the GOBL
+	// document. Nil applies to any document.
+	Applies func(doc any) bool
+}
+
 // Format defines a UBL format: the CustomizationID and ProfileID its
 // documents carry, and the functions that adjust the base import and export
 // for the specification it represents.
 type Format struct {
 	// Key identifies the format in the GOBL convert register, with one layer
-	// for each specification it builds on, e.g. "ubl+peppol".
+	// for each specification it builds on, e.g. "ubl+peppol+bis-v3".
 	Key cbc.Key
 	// Name of the format.
 	Name i18n.String
@@ -66,6 +86,26 @@ type Format struct {
 	// ImportFuncs adjust the GOBL envelope imported from UBL, in order, after
 	// the base import and before the document is calculated.
 	ImportFuncs []ImportFunc
+	// Specifications lists the other specifications of the format, for GOBL
+	// documents its own identifiers do not cover. On export, the first that
+	// applies to the document is used, or else the format's own identifiers.
+	Specifications []Specification
+}
+
+// commonAddons lists the addons every specification of the format requires.
+func (f *Format) commonAddons() []cbc.Key {
+	specs := f.specifications()
+	var list []cbc.Key
+	for _, a := range specs[0].Addons {
+		common := true
+		for _, s := range specs[1:] {
+			common = common && a.In(s.Addons...)
+		}
+		if common {
+			list = append(list, a)
+		}
+	}
+	return list
 }
 
 // Is checks if two formats are the same.
@@ -73,12 +113,69 @@ func (f *Format) Is(f2 Format) bool {
 	return f.CustomizationID == f2.CustomizationID && f.ProfileID == f2.ProfileID
 }
 
-// GetVESID returns the appropriate VESID based on the invoice type.
-func (f *Format) GetVESID(inv *bill.Invoice) string {
-	if inv.Type.In(bill.InvoiceTypeCreditNote) {
-		return f.VESIDs.CreditNote
+// specifications provides the format's specifications, ending with the one
+// defined by its own identifiers.
+func (f *Format) specifications() []Specification {
+	return append(append([]Specification{}, f.Specifications...), Specification{
+		CustomizationID:       f.CustomizationID,
+		ProfileID:             f.ProfileID,
+		OutputCustomizationID: f.OutputCustomizationID,
+		Addons:                f.Addons,
+		VESIDs:                f.VESIDs,
+	})
+}
+
+// SpecificationFor provides the specification the format exports the GOBL
+// document with.
+func (f *Format) SpecificationFor(doc any) *Specification {
+	specs := f.specifications()
+	for i := range specs {
+		if specs[i].Applies == nil || specs[i].Applies(doc) {
+			return &specs[i]
+		}
 	}
-	return f.VESIDs.Invoice
+	return nil
+}
+
+// VESID provides the VESID to validate the UBL document exported from the
+// GOBL document with.
+func (f *Format) VESID(doc any) string {
+	s := f.SpecificationFor(doc)
+	switch d := doc.(type) {
+	case *bill.Invoice:
+		if d.Type.In(bill.InvoiceTypeCreditNote) {
+			return s.VESIDs.CreditNote
+		}
+		return s.VESIDs.Invoice
+	case *bill.Status:
+		return s.VESIDs.Status
+	}
+	return ""
+}
+
+// specificationFrom provides the specification a document with the
+// identifiers was written with, or the format's own if none declares them.
+func (f *Format) specificationFrom(customizationID, profileID string) Specification {
+	specs := f.specifications()
+	for _, s := range specs {
+		if s.matches(customizationID, profileID) {
+			return s
+		}
+	}
+	for _, s := range specs {
+		if s.OutputCustomizationID != "" && s.OutputCustomizationID == customizationID {
+			return s
+		}
+	}
+	return specs[len(specs)-1]
+}
+
+// matches checks the CustomizationID and, when both are set, the ProfileID.
+func (s Specification) matches(customizationID, profileID string) bool {
+	if s.CustomizationID != customizationID {
+		return false
+	}
+	return s.ProfileID == "" || profileID == "" || s.ProfileID == profileID
 }
 
 // FindFormat looks up a registered format by CustomizationID and optionally
@@ -86,7 +183,8 @@ func (f *Format) GetVESID(inv *bill.Invoice) string {
 //
 // The lookup logic works as follows:
 //  1. Formats whose Match function claims the document
-//  2. Tries to match on the full CustomizationID (for external identification)
+//  2. Tries to match on the full CustomizationID of any of the format's
+//     specifications (for external identification)
 //  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
 //  4. Formats whose Fallback function claims the document
 func FindFormat(customizationID string, profileID string) *Format {
@@ -98,19 +196,19 @@ func FindFormat(customizationID string, profileID string) *Format {
 
 	// First pass: try to match on full CustomizationID
 	for _, f := range formats {
-		if f.CustomizationID == customizationID {
-			// If format has a ProfileID and one was provided, they must match
-			if f.ProfileID != "" && profileID != "" && f.ProfileID != profileID {
-				continue
+		for _, s := range f.specifications() {
+			if s.matches(customizationID, profileID) {
+				return &f
 			}
-			return &f
 		}
 	}
 
 	// Second pass: try to match on OutputCustomizationID (for parsing incoming documents)
 	for _, f := range formats {
-		if f.OutputCustomizationID != "" && f.OutputCustomizationID == customizationID {
-			return &f
+		for _, s := range f.specifications() {
+			if s.OutputCustomizationID != "" && s.OutputCustomizationID == customizationID {
+				return &f
+			}
 		}
 	}
 
@@ -137,6 +235,7 @@ func registerFormats(fallback bool, fs []Format) {
 
 type options struct {
 	format Format
+	spec   Specification
 	from   cbc.URI
 	to     cbc.URI
 }
@@ -167,8 +266,8 @@ func WithRouting(from, to cbc.URI) Option {
 
 // FormatEN16931 is the default format for basic UBL documents.
 var FormatEN16931 = Format{
-	Key:             "ubl+en16931",
-	Name:            i18n.NewString("UBL EN 16931"),
+	Key:             "ubl+en16931-v2017",
+	Name:            i18n.NewString("UBL EN 16931:2017"),
 	Schemas:         []schema.ID{invoiceSchema},
 	CustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:          []cbc.Key{en16931.V2017},
@@ -178,11 +277,13 @@ var FormatEN16931 = Format{
 	},
 }
 
-// FormatPeppol defines the default Peppol format.
+// FormatPeppol is the Peppol BIS 3 format. Invoices are written with Peppol
+// BIS Billing 3.0, self-billed invoices with Peppol BIS Self-Billing 3.0,
+// and statuses with Peppol Invoice Response 3.
 var FormatPeppol = Format{
-	Key:             "ubl+peppol",
-	Name:            i18n.NewString("UBL Peppol BIS Billing 3"),
-	Schemas:         []schema.ID{invoiceSchema},
+	Key:             "ubl+peppol+bis-v3",
+	Name:            i18n.NewString("UBL Peppol BIS 3"),
+	Schemas:         []schema.ID{invoiceSchema, statusSchema},
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{en16931.V2017},
@@ -190,42 +291,44 @@ var FormatPeppol = Format{
 		Invoice:    "eu.peppol.bis3:invoice:2026.5",
 		CreditNote: "eu.peppol.bis3:creditnote:2026.5",
 	},
-	ExportFuncs: []ExportFunc{exportPeppolBilling},
+	Specifications: []Specification{
+		SpecificationPeppolSelfBilling,
+		SpecificationPeppolInvoiceResponse,
+	},
+	ExportFuncs: []ExportFunc{exportPeppolBilling, exportPeppolInvoiceResponse},
+	ImportFuncs: []ImportFunc{importPeppolInvoiceResponse},
 }
 
-// FormatPeppolSelfBilled defines the Peppol self-billed format.
-var FormatPeppolSelfBilled = Format{
-	Key:             "ubl+peppol+self-billing",
-	Name:            i18n.NewString("UBL Peppol BIS Self-Billing 3"),
-	Schemas:         []schema.ID{invoiceSchema},
+// SpecificationPeppolSelfBilling is Peppol BIS Self-Billing 3.0, used for
+// self-billed invoices.
+var SpecificationPeppolSelfBilling = Specification{
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
 	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
 	Addons:          []cbc.Key{en16931.V2017},
 	// The Peppol self-billing rule sets are versioned independently from the
-	// regular invoice/credit-note ones. phive-rules keeps only a rolling window
-	// of releases, so the older ":2025.3" sets were dropped in phive-rules 4.3.x;
-	// ":2026.3" is the oldest still published and validates the same documents.
+	// regular invoice/credit-note ones.
 	VESIDs: VESIDMapping{
 		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.5",
 		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.5",
 	},
+	Applies: func(doc any) bool {
+		inv, ok := doc.(*bill.Invoice)
+		return ok && inv.HasTags(tax.TagSelfBilled)
+	},
 }
 
-// FormatPeppolInvoiceResponse defines the Peppol BIS Invoice Response format.
-// It is its own format (separate from the billing FormatPeppol) because the
-// Invoice Response declares a different CustomizationID, which is what
-// FindFormat matches a parsed document against.
-var FormatPeppolInvoiceResponse = Format{
-	Key:             "ubl+peppol+invoice-response",
-	Name:            i18n.NewString("UBL Peppol Invoice Response 3"),
-	Schemas:         []schema.ID{statusSchema},
+// SpecificationPeppolInvoiceResponse is Peppol Invoice Response 3, used for
+// statuses.
+var SpecificationPeppolInvoiceResponse = Specification{
 	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
 	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
 	VESIDs: VESIDMapping{
 		Status: "eu.peppol.bis3:invoice-message-response:2026.5",
 	},
-	ExportFuncs: []ExportFunc{exportPeppolInvoiceResponse},
-	ImportFuncs: []ImportFunc{importPeppolInvoiceResponse},
+	Applies: func(doc any) bool {
+		_, ok := doc.(*bill.Status)
+		return ok
+	},
 }
 
 // formats holds every registered format for lookups during parsing.
@@ -235,7 +338,5 @@ func init() {
 	registerFormats(true, []Format{
 		FormatEN16931,
 		FormatPeppol,
-		FormatPeppolSelfBilled,
-		FormatPeppolInvoiceResponse,
 	})
 }

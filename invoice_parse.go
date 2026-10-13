@@ -65,7 +65,7 @@ func (ui *Invoice) importEnvelope(opts []Option) (*gobl.Envelope, error) {
 func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	out := &bill.Invoice{
 		Addons: tax.Addons{
-			List: o.format.Addons,
+			List: o.spec.Addons,
 		},
 		Code:     cbc.Code(ui.ID),
 		Currency: currency.Code(ui.DocumentCurrencyCode),

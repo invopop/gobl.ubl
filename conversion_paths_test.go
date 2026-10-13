@@ -120,7 +120,7 @@ func TestStatusPaths(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppolInvoiceResponse))
+	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -179,7 +179,7 @@ func TestConverterPaths(t *testing.T) {
 	t.Run("import application response", func(t *testing.T) {
 		env, err := gobl.Envelop(basePeppolStatus())
 		require.NoError(t, err)
-		out, err := convert.Export(env, ubl.FormatPeppolInvoiceResponse.Key)
+		out, err := convert.Export(env, ubl.FormatPeppol.Key)
 		require.NoError(t, err)
 
 		imported, err := convert.Import(out.Data)

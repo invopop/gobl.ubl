@@ -3,6 +3,7 @@ package ubl_test
 import (
 	"testing"
 
+	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/addons/eu/en16931"
 	"github.com/invopop/gobl/bill"
@@ -17,8 +18,6 @@ func TestConverterContexts(t *testing.T) {
 		ubl.KeyUBL,
 		ubl.FormatEN16931.Key,
 		ubl.FormatPeppol.Key,
-		ubl.FormatPeppolSelfBilled.Key,
-		ubl.FormatPeppolInvoiceResponse.Key,
 	} {
 		ctx := convert.FormatFor(k)
 		require.NotNil(t, ctx, k)
@@ -27,10 +26,8 @@ func TestConverterContexts(t *testing.T) {
 	}
 
 	t.Run("layered keys", func(t *testing.T) {
-		assert.Equal(t, cbc.Key("ubl+en16931"), ubl.FormatEN16931.Key)
-		assert.Equal(t, cbc.Key("ubl+peppol"), ubl.FormatPeppol.Key)
-		assert.Equal(t, cbc.Key("ubl+peppol+self-billing"), ubl.FormatPeppolSelfBilled.Key)
-		assert.Equal(t, cbc.Key("ubl+peppol+invoice-response"), ubl.FormatPeppolInvoiceResponse.Key)
+		assert.Equal(t, cbc.Key("ubl+en16931-v2017"), ubl.FormatEN16931.Key)
+		assert.Equal(t, cbc.Key("ubl+peppol+bis-v3"), ubl.FormatPeppol.Key)
 	})
 }
 
@@ -113,15 +110,24 @@ func TestConverterExport(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, ubl.FormatPeppol.Key, ctx.Key, "detected again")
 	})
-	t.Run("skips context for another schema", func(t *testing.T) {
-		env := loadTestEnvelope(t, "invoice-minimal.json")
-		out, err := convert.Export(env, ubl.FormatPeppolInvoiceResponse.Key, ubl.FormatEN16931.Key)
+	t.Run("skips format for another schema", func(t *testing.T) {
+		env, err := gobl.Envelop(basePeppolStatus())
 		require.NoError(t, err)
-		assert.Equal(t, ubl.FormatEN16931.Key, out.Format.Key)
+		out, err := convert.Export(env, ubl.FormatEN16931.Key, ubl.FormatPeppol.Key)
+		require.NoError(t, err)
+		assert.Equal(t, ubl.FormatPeppol.Key, out.Format.Key)
+		assert.Contains(t, string(out.Data), ubl.SpecificationPeppolInvoiceResponse.CustomizationID)
 	})
 	t.Run("not supported", func(t *testing.T) {
+		env, err := gobl.Envelop(basePeppolStatus())
+		require.NoError(t, err)
+		_, err = convert.Export(env, ubl.FormatEN16931.Key, ubl.KeyUBL)
+		assert.ErrorIs(t, err, convert.ErrNotSupported)
+	})
+	t.Run("missing specification addon", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
-		_, err := convert.Export(env, ubl.FormatPeppolInvoiceResponse.Key, ubl.KeyUBL)
+		env.Extract().(*bill.Invoice).SetAddons()
+		_, err := convert.Export(env, ubl.FormatPeppol.Key)
 		assert.ErrorIs(t, err, convert.ErrNotSupported)
 	})
 	t.Run("regional context not registered", func(t *testing.T) {

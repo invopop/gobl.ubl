@@ -48,7 +48,7 @@ func TestConvertToInvoice(t *testing.T) {
 	}{
 		{"EN16931", ubl.FormatEN16931, "en16931"},
 		{"Peppol", ubl.FormatPeppol, "peppol"},
-		{"PeppolSelfBilled", ubl.FormatPeppolSelfBilled, "peppol-self-billed"},
+		{"PeppolSelfBilled", ubl.FormatPeppol, "peppol-self-billed"},
 	}
 
 	for _, ctx := range contexts {
@@ -85,7 +85,7 @@ func TestConvertToInvoice(t *testing.T) {
 						inv, ok := env.Extract().(*bill.Invoice)
 						require.True(t, ok, "Document should be an invoice")
 
-						validateXML(t, pc, ctx.context.GetVESID(inv), data)
+						validateXML(t, pc, ctx.context.VESID(inv), data)
 					}
 
 					output, err := os.ReadFile(outPath)

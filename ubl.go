@@ -127,6 +127,7 @@ func importOptions(customizationID, profileID string, opts []Option) *options {
 			opt(o)
 		}
 	}
+	o.spec = o.format.specificationFrom(customizationID, profileID)
 	return o
 }
 
@@ -143,11 +144,13 @@ func Export(env *gobl.Envelope, opts ...Option) (Document, error) {
 		opt(o)
 	}
 
+	o.spec = *o.format.SpecificationFor(env.Extract())
+
 	var doc Document
 	switch d := env.Extract().(type) {
 	case *bill.Invoice:
 		// Check and add missing addons
-		if err := ensureAddons(env, o.format.Addons); err != nil {
+		if err := ensureAddons(env, o.spec.Addons); err != nil {
 			return nil, err
 		}
 		// Removes included taxes as they are not supported in UBL
