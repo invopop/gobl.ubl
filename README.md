@@ -86,7 +86,7 @@ Regional formats live in their own modules, which register them with `ubl.Regist
 
 | Key | Module |
 | --- | --- |
-| `ubl+peppol+fr-cius-v1`, `ubl+peppol+fr-extended-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/ubl"`) |
+| `ubl+fr-ctc-cius-v1`, `ubl+fr-ctc-extended-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/ubl"`) |
 | `ubl+sa-zatca-v1` | [gobl.sa.zatca](https://github.com/invopop/gobl.sa.zatca) (`_ "github.com/invopop/gobl.sa.zatca/ubl"`) |
 | `ubl+de-xrechnung-v3` | [gobl.de.xinvoice](https://github.com/invopop/gobl.de.xinvoice) |
 
