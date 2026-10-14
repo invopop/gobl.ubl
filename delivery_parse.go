@@ -48,7 +48,7 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 				}
 				// The scheme is the ISO 6523 ICD (BT-71-1), kept as the same
 				// extension party identifiers use so it is written back on convert.
-				if s := del.DeliveryLocation.ID.SchemeID; s != nil && *s != "" {
+				if s := del.DeliveryLocation.ID.SchemeID; s != nil {
 					id.Ext = tax.ExtensionsOf(cbc.CodeMap{
 						iso.ExtKeySchemeID: cbc.Code(*s),
 					})

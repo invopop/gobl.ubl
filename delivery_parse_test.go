@@ -1,6 +1,7 @@
 package ubl_test
 
 import (
+	"bytes"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
@@ -69,5 +70,35 @@ func TestParseDelivery(t *testing.T) {
 		require.NotNil(t, loc.ID)
 		require.NotNil(t, loc.ID.SchemeID)
 		assert.Equal(t, "0088", *loc.ID.SchemeID)
+	})
+
+	t.Run("empty location ID scheme is skipped", func(t *testing.T) {
+		data, err := testLoadXML("peppol/base-example.xml")
+		require.NoError(t, err)
+		data = bytes.Replace(data,
+			[]byte(`<cbc:ID schemeID="0088">9483759475923478</cbc:ID>`),
+			[]byte(`<cbc:ID schemeID="">9483759475923478</cbc:ID>`), 1)
+		require.Contains(t, string(data), `schemeID="">9483759475923478`)
+
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		e, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.NotNil(t, inv.Delivery)
+		require.Len(t, inv.Delivery.Identities, 1)
+		id := inv.Delivery.Identities[0]
+		assert.Equal(t, cbc.Code("9483759475923478"), id.Code)
+		assert.Empty(t, id.Ext)
+		assert.Empty(t, id.Label)
+
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+		require.Len(t, out.Delivery, 1)
+		require.NotNil(t, out.Delivery[0].DeliveryLocation)
+		require.NotNil(t, out.Delivery[0].DeliveryLocation.ID)
+		assert.Nil(t, out.Delivery[0].DeliveryLocation.ID.SchemeID)
 	})
 }
