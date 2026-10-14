@@ -3,8 +3,10 @@ package ubl
 import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
@@ -44,8 +46,12 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 				id := &org.Identity{
 					Code: cbc.Code(del.DeliveryLocation.ID.Value),
 				}
-				if del.DeliveryLocation.ID.SchemeID != nil {
-					id.Label = *del.DeliveryLocation.ID.SchemeID
+				// The scheme is the ISO 6523 ICD (BT-71-1), kept as the same
+				// extension party identifiers use so it is written back on convert.
+				if s := del.DeliveryLocation.ID.SchemeID; s != nil && *s != "" {
+					id.Ext = tax.ExtensionsOf(cbc.CodeMap{
+						iso.ExtKeySchemeID: cbc.Code(*s),
+					})
 				}
 				d.Identities = []*org.Identity{id}
 			}

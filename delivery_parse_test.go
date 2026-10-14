@@ -3,7 +3,9 @@ package ubl_test
 import (
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/stretchr/testify/assert"
@@ -43,5 +45,29 @@ func TestParseDelivery(t *testing.T) {
 		assert.Equal(t, "Jutland", inv.Delivery.Receiver.Addresses[0].Region)
 		assert.Equal(t, cbc.Code("9000"), inv.Delivery.Receiver.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("DK"), inv.Delivery.Receiver.Addresses[0].Country)
+	})
+
+	t.Run("location ID scheme is kept as the ISO 6523 extension", func(t *testing.T) {
+		e := parseXMLInvoice(t, "peppol/base-example.xml")
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		require.NotNil(t, inv.Delivery)
+		require.Len(t, inv.Delivery.Identities, 1)
+		id := inv.Delivery.Identities[0]
+		assert.Equal(t, cbc.Code("9483759475923478"), id.Code)
+		assert.Equal(t, cbc.Code("0088"), id.Ext.Get(iso.ExtKeySchemeID))
+		assert.Empty(t, id.Label)
+
+		// The scheme must survive a round trip back to UBL (BT-71-1).
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+		require.Len(t, out.Delivery, 1)
+		loc := out.Delivery[0].DeliveryLocation
+		require.NotNil(t, loc)
+		require.NotNil(t, loc.ID)
+		require.NotNil(t, loc.ID.SchemeID)
+		assert.Equal(t, "0088", *loc.ID.SchemeID)
 	})
 }
