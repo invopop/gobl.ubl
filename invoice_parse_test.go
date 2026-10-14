@@ -1,9 +1,13 @@
 package ubl_test
 
 import (
+	"bytes"
+	"slices"
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -175,4 +179,74 @@ func TestParseInvoiceTypeAndTagCombinations(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestParseInvoiceDocumentTypeCodes covers the UNTDID 1001 codes that the
+// EN 16931 addon only derives from a tag: the parsed type and tags must
+// regenerate the stated code, or the document type extension goes missing.
+func TestParseInvoiceDocumentTypeCodes(t *testing.T) {
+	const (
+		invoice380 = "<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>"
+		credit381  = "<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>"
+	)
+
+	tests := []struct {
+		name string
+		file string
+		from string
+		to   string
+		code cbc.Code
+		typ  cbc.Key
+		tag  cbc.Key
+	}{
+		{"prepayment invoice", "peppol/base-example.xml", invoice380, "<cbc:InvoiceTypeCode>386</cbc:InvoiceTypeCode>", "386", bill.InvoiceTypeStandard, tax.TagPrepayment},
+		{"factored invoice", "peppol/base-example.xml", invoice380, "<cbc:InvoiceTypeCode>393</cbc:InvoiceTypeCode>", "393", bill.InvoiceTypeStandard, tax.TagFactoring},
+		{"factored credit note", "peppol/base-creditnote-correction.xml", credit381, "<cbc:CreditNoteTypeCode>396</cbc:CreditNoteTypeCode>", "396", bill.InvoiceTypeCreditNote, tax.TagFactoring},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			inv := parseWithTypeCode(t, tt.file, tt.from, tt.to)
+
+			assert.Equal(t, tt.typ, inv.Type)
+			assert.True(t, inv.HasTags(tt.tag), "missing tag %s", tt.tag)
+			assert.Equal(t, tt.code, inv.Tax.Ext.Get(untdid.ExtKeyDocumentType))
+		})
+	}
+}
+
+// TestParseInvoiceTagsNotShared guards the type tags against changes made
+// to an earlier document: SetTags keeps the slice it is given.
+func TestParseInvoiceTagsNotShared(t *testing.T) {
+	// Restore the map should the copy regress, so other tests are unaffected.
+	tags := slices.Clone(ubl.InvoiceTagMap["393"])
+	t.Cleanup(func() { ubl.InvoiceTagMap["393"] = tags })
+
+	swap := func() *bill.Invoice {
+		return parseWithTypeCode(t, "peppol/base-example.xml",
+			"<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>",
+			"<cbc:InvoiceTypeCode>393</cbc:InvoiceTypeCode>")
+	}
+	first := swap()
+	require.Equal(t, []cbc.Key{tax.TagFactoring}, first.GetTags())
+	first.Tags.List[0] = tax.TagPrepayment
+
+	assert.Equal(t, []cbc.Key{tax.TagFactoring}, swap().GetTags())
+}
+
+// parseWithTypeCode imports a test file with its BT-3 element swapped.
+func parseWithTypeCode(t *testing.T, name, from, to string) *bill.Invoice {
+	t.Helper()
+
+	raw, err := testLoadXML(name)
+	require.NoError(t, err)
+	data := bytes.Replace(raw, []byte(from), []byte(to), 1)
+	require.NotEqual(t, string(raw), string(data), "BT-3 was not replaced")
+
+	doc, err := ubl.Decode(data)
+	require.NoError(t, err)
+	env, err := ubl.Import(doc)
+	require.NoError(t, err)
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	return inv
 }

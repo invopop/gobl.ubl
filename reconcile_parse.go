@@ -1,6 +1,7 @@
 package ubl
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -323,7 +324,12 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice, srcs []lineSource) err
 		out.Payment.Terms.CalculateDues(out.Currency.Def().Zero(), t.Payable)
 	}
 
-	out.SetTags(tax.TagBypass)
+	// Keep the tags parsed from BT-3 or set by the format: the scenarios
+	// regenerate the document type from them. Clipped, so the append never
+	// writes into a slice the tags were set from.
+	if !out.HasTags(tax.TagBypass) {
+		out.SetTags(append(slices.Clip(out.GetTags()), tax.TagBypass)...)
+	}
 	return out.Calculate()
 }
 
