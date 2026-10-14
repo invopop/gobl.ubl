@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "60df16daf7a7d6ef4ba9d2e311d54c9894bb6a78f2d7475b2c858cd4eb5fd67d"
+			"val": "c23ff76cc2af241736f121d2ab388894cba2a6555ca1df53ffed0912ea1a80cf"
 		}
 	},
 	"doc": {
@@ -170,7 +170,8 @@
 						}
 					],
 					"description": "Supply",
-					"price": "0.05735092",
+					"price": "0.1433773",
+					"per": "2.5",
 					"unit": "kwh",
 					"ext": {
 						"untdid-unit": "KWH"
@@ -245,7 +246,8 @@
 						}
 					],
 					"description": "Supply",
-					"price": "0.827901924",
+					"price": "2.30944245",
+					"per": "2.78951212",
 					"unit": "kl",
 					"ext": {
 						"untdid-unit": "K6"

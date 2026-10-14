@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f7493118f2a9e0a5b8b037417d9a86fd3847fcd3fb45a005307c889772047715"
+			"val": "19b5ab4616b16332b41ffd30cf76f2d00c8670ffc688e763739a04099d5c7d8e"
 		}
 	},
 	"doc": {
@@ -184,6 +184,8 @@
 						}
 					],
 					"description": "Printing paper, 2mm",
+					"list": "1.10",
+					"discount": "0.10",
 					"price": "1.00",
 					"unit": "item",
 					"origin": "NL",

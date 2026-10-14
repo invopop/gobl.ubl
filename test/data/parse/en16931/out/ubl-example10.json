@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c680f6bf8f8fd2bd073782e923bd0c21b12f53a285bc8b0391ac6159dabbe20f"
+			"val": "793af87f9ddd7ceefade3b22945c253c7c23386fa90e4b6eca5be9133c46481a"
 		}
 	},
 	"doc": {
@@ -176,7 +176,8 @@
 							"text": "1,0130"
 						}
 					],
-					"price": "1.2700",
+					"price": "15.24",
+					"per": "12",
 					"ext": {
 						"untdid-unit": "KW"
 					}
@@ -258,7 +259,8 @@
 							"text": "1,0130"
 						}
 					],
-					"price": "36.7500",
+					"price": "441.00",
+					"per": "12",
 					"unit": "mon",
 					"ext": {
 						"untdid-unit": "MON"
@@ -300,7 +302,8 @@
 							"text": "1,0130"
 						}
 					],
-					"price": "56.5000",
+					"price": "678.00",
+					"per": "12",
 					"unit": "mon",
 					"ext": {
 						"untdid-unit": "MON"

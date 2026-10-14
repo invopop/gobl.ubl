@@ -3,7 +3,9 @@ package ubl
 import (
 	"testing"
 
+	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGoblCanFold(t *testing.T) {
@@ -89,4 +91,91 @@ func TestGoblLineQuantity(t *testing.T) {
 
 	_, ok = goblLineQuantity(&InvoiceLine{InvoicedQuantity: &Quantity{Value: "x"}})
 	assert.False(t, ok)
+}
+
+func TestGoblLinePriceDetails(t *testing.T) {
+	read := func(p *Price) (*org.Item, error) {
+		price, err := goblLinePrice(p)
+		if err != nil {
+			return nil, err
+		}
+		item := &org.Item{Price: &price}
+		return item, goblLinePriceDetails(p, item)
+	}
+	price := func(amount string) *Price {
+		return &Price{PriceAmount: Amount{Value: amount}}
+	}
+	allowance := func(amount, base string) *AllowanceCharge {
+		return &AllowanceCharge{Amount: Amount{Value: amount}, BaseAmount: &Amount{Value: base}}
+	}
+
+	t.Run("a list price less the discount", func(t *testing.T) {
+		p := price("108.00")
+		p.AllowanceCharge = allowance("12.00", "120.00")
+		item, err := read(p)
+		require.NoError(t, err)
+		assert.Equal(t, "120.00", item.List.String())
+		assert.Equal(t, "12.00", item.Discount.String())
+	})
+	t.Run("a list price with no discount", func(t *testing.T) {
+		p := price("120.00")
+		p.AllowanceCharge = allowance("0.00", "120.00")
+		item, err := read(p)
+		require.NoError(t, err)
+		assert.Equal(t, "120.00", item.List.String())
+		assert.Nil(t, item.Discount)
+	})
+	t.Run("a list price that does not come to the net price", func(t *testing.T) {
+		p := price("100.00")
+		p.AllowanceCharge = allowance("12.00", "120.00")
+		item, err := read(p)
+		require.NoError(t, err)
+		assert.Nil(t, item.List)
+		assert.Nil(t, item.Discount)
+	})
+	t.Run("a price charge", func(t *testing.T) {
+		p := price("108.00")
+		p.AllowanceCharge = allowance("12.00", "120.00")
+		p.AllowanceCharge.ChargeIndicator = true
+		item, err := read(p)
+		require.NoError(t, err)
+		assert.Nil(t, item.List)
+	})
+	t.Run("a base quantity of one", func(t *testing.T) {
+		p := price("10.00")
+		p.BaseQuantity = &Quantity{Value: "1"}
+		item, err := read(p)
+		require.NoError(t, err)
+		assert.Nil(t, item.Per)
+	})
+	t.Run("invalid amounts", func(t *testing.T) {
+		p := price("10.00")
+		p.BaseQuantity = &Quantity{Value: "x"}
+		_, err := read(p)
+		assert.Error(t, err)
+
+		p = price("10.00")
+		p.AllowanceCharge = allowance("1", "x")
+		_, err = read(p)
+		assert.Error(t, err)
+
+		p = price("10.00")
+		p.AllowanceCharge = allowance("x", "11")
+		_, err = read(p)
+		assert.Error(t, err)
+
+		_, err = read(price("x"))
+		assert.Error(t, err)
+		assert.False(t, goblHasPriceDetails(price("x")))
+		p = price("10.00")
+		p.BaseQuantity = &Quantity{Value: "x"}
+		assert.False(t, goblHasPriceDetails(p))
+	})
+	t.Run("a parent with price details does not fold", func(t *testing.T) {
+		p := price("10.00")
+		p.BaseQuantity = &Quantity{Value: "10"}
+		assert.True(t, goblHasPriceDetails(p))
+		parent := &InvoiceLine{Price: p, InvoicedQuantity: &Quantity{Value: "1"}}
+		assert.False(t, goblCanFold(parent, nil, map[string]*taxCategoryInfo{}))
+	})
 }

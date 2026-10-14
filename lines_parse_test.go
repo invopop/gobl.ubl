@@ -124,7 +124,7 @@ func TestParseLines(t *testing.T) {
 	})
 
 	// Test BaseQuantity logic
-	t.Run("BaseQuantity price calculation", func(t *testing.T) {
+	t.Run("BaseQuantity is the number of units the price applies to", func(t *testing.T) {
 		e := parseXMLInvoice(t, "peppol/Allowance-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -134,15 +134,16 @@ func TestParseLines(t *testing.T) {
 		assert.NotNil(t, lines)
 		assert.Len(t, lines, 3)
 
-		// Check the second line which has BaseQuantity = 2 and PriceAmount = 200
-		// Expected unit price should be 200/2 = 100 (precision: 2 + ceil(log10(2)) = 2 + 1 = 3)
+		// The second line has a PriceAmount of 200 for a BaseQuantity of 2.
 		line := lines[1]
-		assert.Equal(t, "100.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (200/2=100)")
+		assert.Equal(t, "200.00", line.Item.Price.String())
+		require.NotNil(t, line.Item.Per)
+		assert.Equal(t, "2", line.Item.Per.String())
 
-		// Check the first line which has BaseQuantity = 1 and PriceAmount = 410
-		// Expected unit price should be 410/1 = 410 (precision: 2 + ceil(log10(1)) = 2 + 0 = 2)
+		// The first line's BaseQuantity of 1 is the default.
 		line = lines[0]
-		assert.Equal(t, "410.00", line.Item.Price.String(), "Price should be divided by BaseQuantity (410/1=410)")
+		assert.Equal(t, "410.00", line.Item.Price.String())
+		assert.Nil(t, line.Item.Per)
 
 		// Test the convert amount from String error handling
 		data, err := testLoadXML("peppol/Allowance-example.xml")

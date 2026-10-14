@@ -1,7 +1,6 @@
 package ubl
 
 import (
-	"math"
 	"strings"
 
 	"github.com/invopop/gobl/bill"
@@ -153,13 +152,7 @@ func goblLineIsSummed(it *InvoiceLine) bool {
 // goblCanFold checks what a breakdown can express: one tax, per-unit quantities, matching amounts.
 func goblCanFold(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) bool {
 	group := goblLineStatus(parent) == lineStatusGroup
-	if group && len(parent.AllowanceCharge) > 0 {
-		return false
-	}
-	if !group && parent.Price == nil {
-		return false
-	}
-	if !group && !goblLineIsSummed(parent) {
+	if !goblCanFoldParent(parent, group) {
 		return false
 	}
 	qty, ok := goblLineQuantity(parent)
@@ -214,6 +207,15 @@ func goblCanFold(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[st
 		return false
 	}
 	return true
+}
+
+// goblCanFoldParent checks that the parent line can hold a breakdown.
+func goblCanFoldParent(parent *InvoiceLine, group bool) bool {
+	if group {
+		return len(parent.AllowanceCharge) == 0
+	}
+	// GOBL keeps price details off a line with a breakdown.
+	return parent.Price != nil && goblLineIsSummed(parent) && !goblHasPriceDetails(parent.Price)
 }
 
 func goblDividesBy(a, qty num.Amount) bool {
@@ -328,6 +330,11 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 			Price: &price,
 		},
 	}
+	if summed {
+		if err := goblLinePriceDetails(docLine.Price, line.Item); err != nil {
+			return nil, err
+		}
+	}
 	if di := docLine.Item; di != nil {
 		if err := goblConvertLineItem(di, line.Item); err != nil {
 			return nil, err
@@ -407,45 +414,58 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 }
 
 func goblLinePrice(p *Price) (num.Amount, error) {
-	price, err := num.AmountFromString(normalizeNumericString(p.PriceAmount.Value))
-	if err != nil {
-		return price, err
-	}
-
-	if p.BaseQuantity != nil {
-		// Base quantity is the number of item units to which the price applies
-		baseQuantity, err := num.AmountFromString(normalizeNumericString(p.BaseQuantity.Value))
-		if err != nil {
-			return price, err
-		}
-		if !baseQuantity.IsZero() {
-			// Calculate required precision dynamically to avoid rounding errors
-			// Formula: price_decimals + ceil(log10(base_quantity))
-			precision := calculateRequiredPrecision(price, baseQuantity)
-			price = price.RescaleUp(precision).Divide(baseQuantity)
-		}
-	}
-	return price, nil
+	return num.AmountFromString(normalizeNumericString(p.PriceAmount.Value))
 }
 
-// calculateRequiredPrecision determines the decimal precision needed when
-// dividing a price by a base quantity to avoid rounding errors.
-// Formula: price_decimals + ceil(log10(base_quantity))
-// Example: price with 2 decimals divided by 100 needs 2 + 2 = 4 decimals
-func calculateRequiredPrecision(price, baseQuantity num.Amount) uint32 {
-	priceExp := price.Exp()
+// goblHasPriceDetails reports whether the price has details GOBL would keep.
+func goblHasPriceDetails(p *Price) bool {
+	price, err := goblLinePrice(p)
+	if err != nil {
+		return false
+	}
+	item := &org.Item{Price: &price}
+	if err := goblLinePriceDetails(p, item); err != nil {
+		return false
+	}
+	return item.Per != nil || item.List != nil
+}
 
-	// Convert baseQuantity to a whole number to calculate needed decimal places
-	baseQtyNormalized := baseQuantity.Rescale(0)
-	baseQtyFloat := math.Abs(float64(baseQtyNormalized.Value()))
-
-	additionalDecimals := uint32(0)
-	if baseQtyFloat > 1 {
-		// log10(100) = 2, log10(1000) = 3, etc.
-		additionalDecimals = uint32(math.Ceil(math.Log10(baseQtyFloat)))
+// goblLinePriceDetails reads the number of units the price applies to
+// (BT-149), and the list price and price discount (BT-148, BT-147) when they
+// come to the net price.
+func goblLinePriceDetails(p *Price, item *org.Item) error {
+	if p.BaseQuantity != nil && strings.TrimSpace(p.BaseQuantity.Value) != "" {
+		per, err := num.AmountFromString(normalizeNumericString(p.BaseQuantity.Value))
+		if err != nil {
+			return err
+		}
+		if per.IsPositive() && !per.Equals(num.MakeAmount(1, 0)) {
+			item.Per = &per
+		}
 	}
 
-	return priceExp + additionalDecimals
+	ac := p.AllowanceCharge
+	if ac == nil || ac.ChargeIndicator || ac.BaseAmount == nil || item.Price == nil {
+		return nil
+	}
+	list, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
+	if err != nil {
+		return err
+	}
+	discount := num.AmountZero
+	if strings.TrimSpace(ac.Amount.Value) != "" {
+		if discount, err = num.AmountFromString(normalizeNumericString(ac.Amount.Value)); err != nil {
+			return err
+		}
+	}
+	if !list.Subtract(discount).Equals(*item.Price) {
+		return nil
+	}
+	item.List = &list
+	if !discount.IsZero() {
+		item.Discount = &discount
+	}
+	return nil
 }
 
 func goblConvertLineItem(di *Item, item *org.Item) error {

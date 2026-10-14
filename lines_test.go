@@ -546,3 +546,36 @@ func TestSubLinesRoundTrip(t *testing.T) {
 		})
 	}
 }
+
+// TestPriceDetailsRoundTrip writes the item's list price, price discount and
+// per quantity out and reads them back.
+func TestPriceDetailsRoundTrip(t *testing.T) {
+	env := loadTestEnvelope(t, "en16931/invoice-price-details.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	data, err := ubl.Encode(mustExportInvoice(t, env))
+	require.NoError(t, err)
+	doc, err := ubl.Decode(data)
+	require.NoError(t, err)
+	penv, err := ubl.Import(doc)
+	require.NoError(t, err)
+	out, ok := penv.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	assert.False(t, out.HasTags(tax.TagBypass))
+	item := out.Lines[0].Item
+	assert.Equal(t, "120.00", item.List.String())
+	assert.Equal(t, "12.00", item.Discount.String())
+	assert.Equal(t, "108.00", item.Price.String())
+	assert.Equal(t, "100", item.Per.String())
+	assert.Equal(t, inv.Lines[0].Total.String(), out.Lines[0].Total.String())
+	assert.Equal(t, inv.Totals.Payable.String(), out.Totals.Payable.String())
+}
+
+func mustExportInvoice(t *testing.T, env *gobl.Envelope) *ubl.Invoice {
+	t.Helper()
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+	return doc
+}
