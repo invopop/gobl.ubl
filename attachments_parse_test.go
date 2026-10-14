@@ -60,53 +60,27 @@ func TestExtractBinaryAttachments(t *testing.T) {
 	})
 }
 
-func TestParseEmbeddedAndExternalAttachment(t *testing.T) {
-	load := func(t *testing.T, embedded string) *ubl.Invoice {
-		t.Helper()
-		data, err := testLoadXML("en16931/ubl-example2.xml")
-		require.NoError(t, err)
-		doc, err := ubl.Parse(data)
-		require.NoError(t, err)
-		inv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
+func TestParseEmbeddedOverExternalAttachment(t *testing.T) {
+	data, err := testLoadXML("en16931/ubl-example2.xml")
+	require.NoError(t, err)
+	doc, err := ubl.Parse(data)
+	require.NoError(t, err)
+	inv, ok := doc.(*ubl.Invoice)
+	require.True(t, ok)
 
-		// Doc2 carries both an embedded binary and an external URI
-		ref := &inv.AdditionalDocumentReference[1]
-		require.Equal(t, "Doc2", ref.ID.Value)
-		ref.Attachment.EmbeddedDocumentBinaryObject.Value = embedded
-		ref.Attachment.ExternalReference = &ubl.ExternalReference{URI: "https://example.com/doc2.pdf"}
-		return inv
-	}
+	// Doc2 carries both an embedded binary and an external URI
+	ref := &inv.AdditionalDocumentReference[1]
+	require.Equal(t, "Doc2", ref.ID.Value)
+	ref.Attachment.ExternalReference = &ubl.ExternalReference{URI: "https://example.com/doc2.pdf"}
 
-	t.Run("valid embedded is picked", func(t *testing.T) {
-		inv := load(t, "VGVzdGluZyBCYXNlNjQgZW5jb2Rpbmc=")
+	env, err := inv.Convert()
+	require.NoError(t, err)
+	gi, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, gi.Attachments, 1)
+	assert.Equal(t, cbc.Code("Doc1"), gi.Attachments[0].Code)
 
-		env, err := inv.Convert()
-		require.NoError(t, err)
-		gi, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-		require.Len(t, gi.Attachments, 1)
-		assert.Equal(t, cbc.Code("Doc1"), gi.Attachments[0].Code)
-
-		bins := inv.ExtractBinaryAttachments()
-		require.Len(t, bins, 1)
-		assert.Equal(t, "Doc2", bins[0].ID)
-		assert.Equal(t, []byte("Testing Base64 encoding"), bins[0].Data)
-	})
-
-	for name, embedded := range map[string]string{"empty": "", "corrupted": "!!not base64!!"} {
-		t.Run(name+" embedded falls back to URI", func(t *testing.T) {
-			inv := load(t, embedded)
-
-			env, err := inv.Convert()
-			require.NoError(t, err)
-			gi, ok := env.Extract().(*bill.Invoice)
-			require.True(t, ok)
-			require.Len(t, gi.Attachments, 2)
-			assert.Equal(t, cbc.Code("Doc2"), gi.Attachments[1].Code)
-			assert.Equal(t, "https://example.com/doc2.pdf", gi.Attachments[1].URL)
-
-			assert.Empty(t, inv.ExtractBinaryAttachments())
-		})
-	}
+	bins := inv.ExtractBinaryAttachments()
+	require.Len(t, bins, 1)
+	assert.Equal(t, "Doc2", bins[0].ID)
 }

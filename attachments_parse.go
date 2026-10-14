@@ -9,8 +9,6 @@ import (
 	"github.com/invopop/gobl/org"
 )
 
-var whitespaceRegex = regexp.MustCompile(`\s+`)
-
 // BinaryAttachment represents a binary attachment that can be extracted from
 // or added to a UBL invoice.
 type BinaryAttachment struct {
@@ -33,7 +31,7 @@ type BinaryAttachment struct {
 // goblAddAttachments processes all attachments from the UBL Invoice and returns
 // external reference attachments only.
 // Binary attachments are skipped - use ExtractBinaryAttachments to retrieve them.
-// When a reference has both, the external one is only used if the binary is unusable.
+// When a reference has both, the binary takes priority and the external one is ignored.
 func (ui *Invoice) goblAddAttachments() []*org.Attachment {
 	var attachments []*org.Attachment
 
@@ -43,7 +41,7 @@ func (ui *Invoice) goblAddAttachments() []*org.Attachment {
 		}
 
 		// Only process external reference attachments
-		if ref.Attachment.ExternalReference != nil && !ref.Attachment.hasEmbeddedData() {
+		if ref.Attachment.ExternalReference != nil && ref.Attachment.EmbeddedDocumentBinaryObject == nil {
 			att := ui.processExternalAttachment(&ref)
 			if att != nil {
 				attachments = append(attachments, att)
@@ -90,9 +88,20 @@ func (ui *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 		if ref.Attachment != nil && ref.Attachment.EmbeddedDocumentBinaryObject != nil {
 			binObj := ref.Attachment.EmbeddedDocumentBinaryObject
 
-			data, ok := binObj.decode()
-			if !ok {
-				continue
+			// Decode the base64 data
+			var data []byte
+			if binObj.Value != "" {
+				// Remove whitespace that may have been added by XML formatting
+				whitespaceRegex := regexp.MustCompile(`\s+`)
+				v := whitespaceRegex.ReplaceAllString(binObj.Value, "")
+
+				decoded, err := base64.StdEncoding.DecodeString(v)
+				if err != nil {
+					continue
+				}
+
+				data = decoded
+
 			}
 
 			attachment := BinaryAttachment{
@@ -119,27 +128,4 @@ func (ui *Invoice) ExtractBinaryAttachments() []BinaryAttachment {
 	}
 
 	return result
-}
-
-// hasEmbeddedData reports whether the attachment carries a usable embedded binary.
-func (a *Attachment) hasEmbeddedData() bool {
-	if a.EmbeddedDocumentBinaryObject == nil {
-		return false
-	}
-	_, ok := a.EmbeddedDocumentBinaryObject.decode()
-	return ok
-}
-
-// decode returns the binary data, or false if it is empty or not valid base64.
-func (bo *BinaryObject) decode() ([]byte, bool) {
-	// Remove whitespace that may have been added by XML formatting
-	v := whitespaceRegex.ReplaceAllString(bo.Value, "")
-	if v == "" {
-		return nil, false
-	}
-	data, err := base64.StdEncoding.DecodeString(v)
-	if err != nil {
-		return nil, false
-	}
-	return data, true
 }
