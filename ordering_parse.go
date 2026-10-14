@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
@@ -108,6 +110,9 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 	if ui.ContractDocumentReference != nil {
 		ordering.Contracts = make([]*org.DocumentRef, 0)
 		for _, contractRef := range ui.ContractDocumentReference {
+			if strings.TrimSpace(contractRef.ID.Value) == "" {
+				continue
+			}
 			docRef, err := goblReference(&contractRef)
 			if err != nil {
 				return err

@@ -15,51 +15,310 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func (ui *Invoice) goblAddLines(out *bill.Invoice) error {
+// lineSource pairs a parsed line with the document line(s) it came from.
+type lineSource struct {
+	doc      *InvoiceLine
+	children []*InvoiceLine
+}
+
+// Single-rate groups fold into breakdowns; anything else is read flat, in document order.
+func (ui *Invoice) goblAddLines(out *bill.Invoice, flat map[string]bool) ([]lineSource, error) {
 	items := ui.InvoiceLines
 	if len(ui.CreditNoteLines) > 0 {
 		items = ui.CreditNoteLines
 	}
 
-	out.Lines = make([]*bill.Line, 0, len(items))
-
 	// Build tax category map from TaxTotal
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
-	for _, docLine := range convertibleLines(items) {
-		line, err := goblConvertLine(docLine, taxCategoryMap)
-		if err != nil {
-			return err
+	docs := make([]*InvoiceLine, len(items))
+	ids := make(map[string]bool)
+	for i := range items {
+		docs[i] = &items[i]
+		if id := goblLineID(docs[i]); id != "" {
+			ids[id] = true
 		}
-		if line != nil {
-			out.Lines = append(out.Lines, line)
+	}
+	children := make(map[string][]*InvoiceLine)
+	for _, it := range docs {
+		if p := goblParentLineID(it); p != "" && ids[p] {
+			children[p] = append(children[p], it)
 		}
 	}
 
-	return nil
-}
-
-func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
-	if docLine.Price == nil {
-		// skip this line
-		return nil, nil
+	// Each child folds into one top-level parent at most.
+	groups := make(map[*InvoiceLine][]*InvoiceLine)
+	folded := make(map[*InvoiceLine]bool)
+	for _, it := range docs {
+		if p := goblParentLineID(it); p != "" && ids[p] {
+			continue
+		}
+		id := goblLineID(it)
+		kids := children[id]
+		if len(kids) == 0 || flat[id] || goblAnyFolded(folded, kids) || !goblCanFold(it, kids, taxCategoryMap) {
+			continue
+		}
+		groups[it] = kids
+		for _, k := range kids {
+			folded[k] = true
+		}
 	}
-	price, err := num.AmountFromString(normalizeNumericString(docLine.Price.PriceAmount.Value))
-	if err != nil {
-		return nil, err
-	}
 
-	if docLine.Price.BaseQuantity != nil {
-		// Base quantity is the number of item units to which the price applies
-		baseQuantity, err := num.AmountFromString(normalizeNumericString(docLine.Price.BaseQuantity.Value))
+	out.Lines = make([]*bill.Line, 0, len(items))
+	srcs := make([]lineSource, 0, len(items))
+	for _, it := range docs {
+		if folded[it] {
+			continue
+		}
+		var l *bill.Line
+		var err error
+		kids, ok := groups[it]
+		if ok {
+			l, err = goblNewGroupLine(it, kids, taxCategoryMap)
+		} else {
+			l, err = goblConvertLine(it, taxCategoryMap)
+		}
 		if err != nil {
 			return nil, err
 		}
-		if !baseQuantity.IsZero() {
-			// Calculate required precision dynamically to avoid rounding errors
-			// Formula: price_decimals + ceil(log10(base_quantity))
-			precision := calculateRequiredPrecision(price, baseQuantity)
-			price = price.RescaleUp(precision).Divide(baseQuantity)
+		if l == nil {
+			continue
+		}
+		out.Lines = append(out.Lines, l)
+		srcs = append(srcs, lineSource{doc: it, children: kids})
+	}
+
+	return srcs, nil
+}
+
+func goblAnyFolded(folded map[*InvoiceLine]bool, lines []*InvoiceLine) bool {
+	for _, l := range lines {
+		if folded[l] {
+			return true
+		}
+	}
+	return false
+}
+
+func goblLineID(it *InvoiceLine) string {
+	return strings.TrimSpace(it.ID)
+}
+
+// goblReadLineHierarchy reads the sub-invoice line type and parent of each line.
+func (ui *Invoice) goblReadLineHierarchy() {
+	self := strings.TrimSpace(ui.ID)
+	for i := range ui.InvoiceLines {
+		ui.InvoiceLines[i].hierarchy = goblLineHierarchy(&ui.InvoiceLines[i], self)
+	}
+	for i := range ui.CreditNoteLines {
+		ui.CreditNoteLines[i].hierarchy = goblLineHierarchy(&ui.CreditNoteLines[i], self)
+	}
+}
+
+// Only the reference naming the invoice itself (BT-1) carries the hierarchy.
+func goblLineHierarchy(it *InvoiceLine, self string) *LineBillingReference {
+	for _, br := range it.BillingReference {
+		if br != nil && br.InvoiceDocumentReference != nil && strings.TrimSpace(br.InvoiceDocumentReference.ID.Value) == self {
+			return br
+		}
+	}
+	return nil
+}
+
+func goblParentLineID(it *InvoiceLine) string {
+	br := it.hierarchy
+	if br == nil || br.BillingReferenceLine == nil {
+		return ""
+	}
+	return strings.TrimSpace(br.BillingReferenceLine.ID.Value)
+}
+
+func goblLineStatus(it *InvoiceLine) string {
+	br := it.hierarchy
+	if br == nil || br.InvoiceDocumentReference == nil {
+		return ""
+	}
+	return strings.ToUpper(strings.TrimSpace(br.InvoiceDocumentReference.DocumentStatusCode))
+}
+
+// Only DETAIL and untyped lines count towards the totals.
+func goblLineIsSummed(it *InvoiceLine) bool {
+	switch goblLineStatus(it) {
+	case lineStatusGroup, lineStatusInformation:
+		return false
+	}
+	return true
+}
+
+// goblCanFold checks what a breakdown can express: one tax, per-unit quantities, matching amounts.
+func goblCanFold(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) bool {
+	group := goblLineStatus(parent) == lineStatusGroup
+	if group && len(parent.AllowanceCharge) > 0 {
+		return false
+	}
+	if !group && parent.Price == nil {
+		return false
+	}
+	if !group && !goblLineIsSummed(parent) {
+		return false
+	}
+	qty, ok := goblLineQuantity(parent)
+	if !ok {
+		return false
+	}
+
+	taxKey := ""
+	detail := 0
+	sum := num.AmountZero
+	for _, k := range kids {
+		q, ok := goblLineQuantity(k)
+		if !ok || !goblDividesBy(q, qty) {
+			return false
+		}
+		switch goblLineStatus(k) {
+		case lineStatusGroup:
+			return false
+		case lineStatusInformation:
+			continue
+		}
+		if !group || k.Price == nil {
+			return false
+		}
+		detail++
+		key := goblLineTaxKey(k, taxCategoryMap)
+		if key == "" || (taxKey != "" && key != taxKey) {
+			return false
+		}
+		taxKey = key
+
+		for _, ac := range k.AllowanceCharge {
+			for _, a := range []*Amount{&ac.Amount, ac.BaseAmount} {
+				if a == nil {
+					continue
+				}
+				if v, ok := goblDeclaredAmount(*a); ok && !goblDividesBy(v, qty) {
+					return false
+				}
+			}
+		}
+		amount, ok := goblDeclaredAmount(k.LineExtensionAmount)
+		if !ok {
+			return false
+		}
+		sum = sum.MatchPrecision(amount).Add(amount)
+	}
+	if group && detail == 0 {
+		return false
+	}
+	if declared, ok := goblDeclaredAmount(parent.LineExtensionAmount); ok && group && !declared.Equals(sum) {
+		return false
+	}
+	return true
+}
+
+func goblDividesBy(a, qty num.Amount) bool {
+	return a.Divide(qty).Multiply(qty).Equals(a)
+}
+
+func goblLineQuantity(it *InvoiceLine) (num.Amount, bool) {
+	iq := it.InvoicedQuantity
+	if it.CreditedQuantity != nil {
+		iq = it.CreditedQuantity
+	}
+	if iq == nil || strings.TrimSpace(iq.Value) == "" {
+		return num.MakeAmount(1, 0), true
+	}
+	q, err := num.AmountFromString(normalizeNumericString(iq.Value))
+	if err != nil || q.IsZero() {
+		return q, false
+	}
+	return q, true
+}
+
+func goblLineTaxKey(it *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) string {
+	if it.Item == nil || it.Item.ClassifiedTaxCategory == nil || it.Item.ClassifiedTaxCategory.TaxScheme == nil {
+		return ""
+	}
+	ctc := it.Item.ClassifiedTaxCategory
+	cat := ""
+	if ctc.ID != nil {
+		cat = ctc.ID.Value
+	}
+	key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, cat, ctc.Percent)
+	exemption := ""
+	if info, ok := taxCategoryMap[key]; ok {
+		exemption = info.exemptionReasonCode
+	}
+	return key + ":" + normalizeTaxPercent(ctc.Percent) + ":" + exemption
+}
+
+// The inverse of newGroupLines.
+func goblNewGroupLine(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
+	l, err := goblConvertLine(parent, taxCategoryMap)
+	if err != nil {
+		return nil, err
+	}
+	qty := l.Quantity
+	group := goblLineStatus(parent) == lineStatusGroup
+	taxed := false
+
+	for _, k := range kids {
+		cl, err := goblConvertLine(k, taxCategoryMap)
+		if err != nil {
+			return nil, err
+		}
+		if cl == nil {
+			continue
+		}
+		sl := &bill.SubLine{
+			Quantity:   cl.Quantity.Divide(qty),
+			Identifier: cl.Identifier,
+			Period:     cl.Period,
+			Order:      cl.Order,
+			Cost:       cl.Cost,
+			Item:       cl.Item,
+			Discounts:  cl.Discounts,
+			Charges:    cl.Charges,
+			Notes:      cl.Notes,
+		}
+		for _, d := range sl.Discounts {
+			d.Amount = d.Amount.Divide(qty)
+			if d.Base != nil {
+				b := d.Base.Divide(qty)
+				d.Base = &b
+			}
+		}
+		for _, c := range sl.Charges {
+			c.Amount = c.Amount.Divide(qty)
+			if c.Base != nil {
+				b := c.Base.Divide(qty)
+				c.Base = &b
+			}
+		}
+		if !goblLineIsSummed(k) {
+			sl.Item.Price = nil
+		} else if group && !taxed {
+			l.Taxes = cl.Taxes
+			taxed = true
+		}
+		l.Breakdown = append(l.Breakdown, sl)
+	}
+	return l, nil
+}
+
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
+	// GOBL requires a price; the DETAIL lines carry the amounts.
+	summed := goblLineIsSummed(docLine)
+	price := num.AmountZero
+	if summed {
+		if docLine.Price == nil {
+			// skip this line
+			return nil, nil
+		}
+		var err error
+		price, err = goblLinePrice(docLine.Price)
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -81,6 +340,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 
 	notes := make([]*org.Note, 0)
 
+	var err error
 	iq := docLine.InvoicedQuantity
 	if docLine.CreditedQuantity != nil {
 		iq = docLine.CreditedQuantity
@@ -132,7 +392,8 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		line.Order = cbc.Code(docLine.OrderLineReference.LineID)
 	}
 
-	if docLine.AllowanceCharge != nil {
+	// Allowances on an uncounted line count nowhere either.
+	if docLine.AllowanceCharge != nil && summed {
 		line, err = goblLineCharges(docLine.AllowanceCharge, line)
 		if err != nil {
 			return nil, err
@@ -143,6 +404,28 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		line.Notes = notes
 	}
 	return line, nil
+}
+
+func goblLinePrice(p *Price) (num.Amount, error) {
+	price, err := num.AmountFromString(normalizeNumericString(p.PriceAmount.Value))
+	if err != nil {
+		return price, err
+	}
+
+	if p.BaseQuantity != nil {
+		// Base quantity is the number of item units to which the price applies
+		baseQuantity, err := num.AmountFromString(normalizeNumericString(p.BaseQuantity.Value))
+		if err != nil {
+			return price, err
+		}
+		if !baseQuantity.IsZero() {
+			// Calculate required precision dynamically to avoid rounding errors
+			// Formula: price_decimals + ceil(log10(base_quantity))
+			precision := calculateRequiredPrecision(price, baseQuantity)
+			price = price.RescaleUp(precision).Divide(baseQuantity)
+		}
+	}
+	return price, nil
 }
 
 // calculateRequiredPrecision determines the decimal precision needed when
@@ -344,19 +627,4 @@ func goblLineCharges(allowances []*AllowanceCharge, line *bill.Line) (*bill.Line
 		}
 	}
 	return line, nil
-}
-
-// convertibleLines returns the document lines that produce a GOBL line. Lines
-// with no price are dropped during conversion, so anything pairing source lines
-// with converted ones has to drop them the same way or the two slices fall out
-// of step.
-func convertibleLines(items []InvoiceLine) []*InvoiceLine {
-	out := make([]*InvoiceLine, 0, len(items))
-	for i := range items {
-		if items[i].Price == nil {
-			continue
-		}
-		out = append(out, &items[i])
-	}
-	return out
 }

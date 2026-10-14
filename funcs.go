@@ -75,9 +75,7 @@ func InvoiceParties(inv *bill.Invoice, doc *Invoice) []PartyPair {
 			add(p.Payer, doc.PaymentMeans[0].PaymentMandate.PayerParty)
 		}
 	}
-	// Imported lines without a price are skipped, so they are left out here
-	// too to keep the lines paired.
-	if lines := doc.lines(); len(lines) == len(inv.Lines) {
+	if lines := doc.partyLines(); len(lines) == len(inv.Lines) {
 		for i, l := range inv.Lines {
 			if lines[i].Item != nil {
 				add(l.Seller, lines[i].Item.ManufacturerParty)

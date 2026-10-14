@@ -178,7 +178,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
 	out.addTotals(inv)
-	out.addLines(inv)
+	out.addLines(inv, o.format.SubLines)
 	out.AddAttachments(inv.Attachments)
 
 	if err = out.addPayment(inv); err != nil {

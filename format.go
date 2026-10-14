@@ -80,6 +80,10 @@ type Format struct {
 	Match func(customizationID, profileID string) bool
 	// Fallback optionally claims documents that no format matched.
 	Fallback func(customizationID, profileID string) bool
+	// SubLines writes line breakdowns as EXTENDED-CTC-FR sub-invoice lines,
+	// and reads them back from the line billing references that name the
+	// invoice itself.
+	SubLines bool
 	// ExportFuncs adjust the UBL document exported from GOBL, in order, after
 	// the base export.
 	ExportFuncs []ExportFunc

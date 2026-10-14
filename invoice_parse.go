@@ -35,7 +35,7 @@ var InvoiceTagMap = map[string][]cbc.Key{
 func (ui *Invoice) importEnvelope(opts []Option) (*gobl.Envelope, error) {
 	o := importOptions(ui.CustomizationID, ui.profileID(), opts)
 
-	inv, err := ui.goblInvoice(o)
+	inv, srcs, err := ui.goblInvoice(o)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (ui *Invoice) importEnvelope(opts []Option) (*gobl.Envelope, error) {
 
 	// Everything the document declares is now mapped, so the calculated
 	// amounts can be checked against the ones the sender stated.
-	if err := ui.reconcileTotals(inv); err != nil {
+	if err := ui.reconcileTotals(inv, srcs); err != nil {
 		return nil, err
 	}
 	if err := env.Calculate(); err != nil {
@@ -62,7 +62,7 @@ func (ui *Invoice) importEnvelope(opts []Option) (*gobl.Envelope, error) {
 	return env, nil
 }
 
-func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
+func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, []lineSource, error) {
 	out := &bill.Invoice{
 		Addons: tax.Addons{
 			List: o.spec.Addons,
@@ -81,40 +81,44 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 	ui.resolveInvoiceType(out)
 
 	if err := ui.parseInvoiceDates(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ui.applyExchangeRates(out)
 
-	if err := ui.goblAddLines(out); err != nil {
-		return nil, err
+	if o.format.SubLines {
+		ui.goblReadLineHierarchy()
+	}
+	srcs, err := ui.goblAddLines(out, nil)
+	if err != nil {
+		return nil, nil, err
 	}
 	if err := ui.goblAddPayment(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := ui.goblAddOrdering(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := ui.goblAddDelivery(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ui.parseInvoiceNotes(out)
 
 	if err := ui.parseBillingReferences(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ui.applyTaxRepresentative(out)
 
 	if len(ui.AllowanceCharge) > 0 {
 		if err := ui.goblAddCharges(out); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	out.Attachments = ui.goblAddAttachments()
 	ui.goblAddTaxNotes(out)
 
-	return out, nil
+	return out, srcs, nil
 }
 
 // profileID returns the ProfileID value, or "" when absent.
