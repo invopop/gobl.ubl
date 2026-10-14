@@ -22,7 +22,7 @@ type lineSource struct {
 }
 
 // Single-rate groups fold into breakdowns; anything else is read flat, in document order.
-func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options, flat map[string]bool) ([]lineSource, error) {
+func (ui *Invoice) goblAddLines(out *bill.Invoice, flat map[string]bool) ([]lineSource, error) {
 	items := ui.InvoiceLines
 	if len(ui.CreditNoteLines) > 0 {
 		items = ui.CreditNoteLines
@@ -31,16 +31,10 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options, flat map[string]b
 	// Build tax category map from TaxTotal
 	taxCategoryMap := ui.buildTaxCategoryMap()
 
-	// Only EXTENDED-CTC-FR gives billing references this meaning.
-	extended := o.context.Is(ContextPeppolFranceExtended)
 	docs := make([]*InvoiceLine, len(items))
 	ids := make(map[string]bool)
 	for i := range items {
 		docs[i] = &items[i]
-		docs[i].hierarchy = nil
-		if extended {
-			docs[i].hierarchy = goblLineHierarchy(docs[i], strings.TrimSpace(ui.ID))
-		}
 		if id := goblLineID(docs[i]); id != "" {
 			ids[id] = true
 		}
@@ -80,9 +74,9 @@ func (ui *Invoice) goblAddLines(out *bill.Invoice, o *options, flat map[string]b
 		var err error
 		kids, ok := groups[it]
 		if ok {
-			l, err = goblNewGroupLine(it, kids, taxCategoryMap, o)
+			l, err = goblNewGroupLine(it, kids, taxCategoryMap)
 		} else {
-			l, err = goblConvertLine(it, taxCategoryMap, o)
+			l, err = goblConvertLine(it, taxCategoryMap)
 		}
 		if err != nil {
 			return nil, err
@@ -108,6 +102,17 @@ func goblAnyFolded(folded map[*InvoiceLine]bool, lines []*InvoiceLine) bool {
 
 func goblLineID(it *InvoiceLine) string {
 	return strings.TrimSpace(it.ID)
+}
+
+// goblReadLineHierarchy reads the sub-invoice line type and parent of each line.
+func (ui *Invoice) goblReadLineHierarchy() {
+	self := strings.TrimSpace(ui.ID)
+	for i := range ui.InvoiceLines {
+		ui.InvoiceLines[i].hierarchy = goblLineHierarchy(&ui.InvoiceLines[i], self)
+	}
+	for i := range ui.CreditNoteLines {
+		ui.CreditNoteLines[i].hierarchy = goblLineHierarchy(&ui.CreditNoteLines[i], self)
+	}
 }
 
 // Only the reference naming the invoice itself (BT-1) carries the hierarchy.
@@ -248,8 +253,8 @@ func goblLineTaxKey(it *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo)
 }
 
 // The inverse of newGroupLines.
-func goblNewGroupLine(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo, o *options) (*bill.Line, error) {
-	l, err := goblConvertLine(parent, taxCategoryMap, o)
+func goblNewGroupLine(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
+	l, err := goblConvertLine(parent, taxCategoryMap)
 	if err != nil {
 		return nil, err
 	}
@@ -258,7 +263,7 @@ func goblNewGroupLine(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap m
 	taxed := false
 
 	for _, k := range kids {
-		cl, err := goblConvertLine(k, taxCategoryMap, o)
+		cl, err := goblConvertLine(k, taxCategoryMap)
 		if err != nil {
 			return nil, err
 		}
@@ -301,7 +306,7 @@ func goblNewGroupLine(parent *InvoiceLine, kids []*InvoiceLine, taxCategoryMap m
 	return l, nil
 }
 
-func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo, o *options) (*bill.Line, error) {
+func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategoryInfo) (*bill.Line, error) {
 	// GOBL requires a price; the DETAIL lines carry the amounts.
 	summed := goblLineIsSummed(docLine)
 	price := num.AmountZero
@@ -329,7 +334,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 		}
 		goblConvertLineItemTaxes(di, line, taxCategoryMap)
 		if di.ManufacturerParty != nil {
-			line.Seller = goblParty(di.ManufacturerParty, o)
+			line.Seller = goblParty(di.ManufacturerParty)
 		}
 	}
 

@@ -36,7 +36,7 @@ func TestExtractBinaryAttachments(t *testing.T) {
 		data, err := testLoadXML("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
 
 		inv, ok := doc.(*ubl.Invoice)

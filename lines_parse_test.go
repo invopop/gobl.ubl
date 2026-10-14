@@ -1,9 +1,12 @@
 package ubl_test
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -145,29 +148,41 @@ func TestParseLines(t *testing.T) {
 		data, err := testLoadXML("peppol/Allowance-example.xml")
 		require.NoError(t, err)
 		invalidXML := strings.ReplaceAll(string(data), `<cbc:BaseAmount currencyID="EUR">1000</cbc:BaseAmount>`, `<cbc:BaseAmount currencyID="EUR">invalid-amount</cbc:BaseAmount>`)
-		doc, err := ubl.Parse([]byte(invalidXML))
+		doc, err := ubl.Decode([]byte(invalidXML))
 		assert.NoError(t, err)
 
 		ui, ok := doc.(*ubl.Invoice)
 		require.True(t, ok)
 
-		_, err = ui.Convert()
+		_, err = ubl.Import(ui)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid major number")
 	})
 }
 
+// importSubLines imports the XML with the given format.
+func importSubLines(t *testing.T, xml string, f ubl.Format) *gobl.Envelope {
+	t.Helper()
+	doc, err := ubl.Decode([]byte(xml))
+	require.NoError(t, err)
+	env, err := ubl.Import(doc, ubl.WithFormat(f))
+	require.NoError(t, err)
+	return env
+}
+
 func parseSubLines(t *testing.T, xml string) *bill.Invoice {
 	t.Helper()
-	doc, err := ubl.Parse([]byte(xml))
-	require.NoError(t, err)
-	ui, ok := doc.(*ubl.Invoice)
-	require.True(t, ok)
-	env, err := ui.Convert()
-	require.NoError(t, err)
-	inv, ok := env.Extract().(*bill.Invoice)
+	inv, ok := importSubLines(t, xml, formatSubLines).Extract().(*bill.Invoice)
 	require.True(t, ok)
 	return inv
+}
+
+// loadSubLinesXML loads a sub-invoice line example.
+func loadSubLinesXML(t *testing.T, name string) string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join("test", "data", "sub-lines", name))
+	require.NoError(t, err)
+	return string(data)
 }
 
 // TestParseSubInvoiceLines covers the sub-invoice lines of EXTENDED-CTC-FR.
@@ -175,7 +190,7 @@ func parseSubLines(t *testing.T, xml string) *bill.Invoice {
 // of its DETAIL lines and an INFORMATION line carries no amount. GROUP and
 // INFORMATION lines may come without a price or a tax category.
 func TestParseSubInvoiceLines(t *testing.T) {
-	e := parseXMLInvoice(t, "sub-invoice-lines.xml")
+	e := importSubLines(t, loadSubLinesXML(t, "sub-invoice-lines.xml"), formatSubLines)
 	inv, ok := e.Extract().(*bill.Invoice)
 	require.True(t, ok)
 	require.Len(t, inv.Lines, 5)
@@ -212,7 +227,7 @@ func TestParseSubInvoiceLines(t *testing.T) {
 // TestParseSubInvoiceLinesFlat covers the groups a breakdown cannot hold, which
 // are read flat, next to the ones it can.
 func TestParseSubInvoiceLinesFlat(t *testing.T) {
-	e := parseXMLInvoice(t, "sub-invoice-lines-flat.xml")
+	e := importSubLines(t, loadSubLinesXML(t, "sub-invoice-lines-flat.xml"), formatSubLines)
 	inv, ok := e.Extract().(*bill.Invoice)
 	require.True(t, ok)
 
@@ -267,10 +282,9 @@ func TestParseSubInvoiceLinesFlat(t *testing.T) {
 // declare amounts their prices do not produce: the breakdown would not come to
 // the declared amount, so the group is read flat.
 func TestParseSubInvoiceLinesUnreconciled(t *testing.T) {
-	data, err := testLoadXML("sub-invoice-lines.xml")
-	require.NoError(t, err)
+	data := loadSubLinesXML(t, "sub-invoice-lines.xml")
 	// The bundle's only DETAIL line declares 25.00 at a 20.00 price.
-	xml := strings.Replace(string(data),
+	xml := strings.Replace(data,
 		`<cbc:LineExtensionAmount currencyID="EUR">20.00</cbc:LineExtensionAmount>`,
 		`<cbc:LineExtensionAmount currencyID="EUR">25.00</cbc:LineExtensionAmount>`, 2)
 
@@ -284,9 +298,7 @@ func TestParseSubInvoiceLinesUnreconciled(t *testing.T) {
 // TestParseSubInvoiceLinesCycle covers lines naming each other as parents,
 // which never lead back to a top-level line: they are still read.
 func TestParseSubInvoiceLinesCycle(t *testing.T) {
-	data, err := testLoadXML("sub-invoice-lines.xml")
-	require.NoError(t, err)
-	xml := strings.Replace(string(data),
+	xml := strings.Replace(loadSubLinesXML(t, "sub-invoice-lines.xml"),
 		"<cbc:DocumentStatusCode>GROUP</cbc:DocumentStatusCode>\n      </cac:InvoiceDocumentReference>\n",
 		"<cbc:DocumentStatusCode>GROUP</cbc:DocumentStatusCode>\n      </cac:InvoiceDocumentReference>\n      <cac:BillingReferenceLine>\n        <cbc:ID>2</cbc:ID>\n      </cac:BillingReferenceLine>\n", 1)
 	require.Contains(t, xml, "<cbc:ID>2</cbc:ID>\n      </cac:BillingReferenceLine>")
@@ -300,9 +312,7 @@ func TestParseSubInvoiceLinesCycle(t *testing.T) {
 // another invoice: EXTENDED-CTC-FR only reads a line's type and parent from
 // the one naming the invoice itself.
 func TestParseSubInvoiceLinesOtherInvoice(t *testing.T) {
-	data, err := testLoadXML("sub-invoice-lines.xml")
-	require.NoError(t, err)
-	xml := string(data)
+	xml := loadSubLinesXML(t, "sub-invoice-lines.xml")
 
 	// The bundle's DETAIL line also refers to an earlier invoice.
 	other := "    <cac:BillingReference>\n      <cac:InvoiceDocumentReference>\n        <cbc:ID>FAC-2023-099</cbc:ID>\n      </cac:InvoiceDocumentReference>\n    </cac:BillingReference>\n"
@@ -327,9 +337,7 @@ func TestParseSubInvoiceLinesOtherInvoice(t *testing.T) {
 // parseSubLinesXML parses a fixture after edit has changed its XML.
 func parseSubLinesXML(t *testing.T, name string, edit func(string) string) *bill.Invoice {
 	t.Helper()
-	data, err := testLoadXML(name)
-	require.NoError(t, err)
-	return parseSubLines(t, edit(string(data)))
+	return parseSubLines(t, edit(loadSubLinesXML(t, name)))
 }
 
 func lineNames(inv *bill.Invoice) []string {
@@ -381,15 +389,13 @@ func TestParseSubInvoiceLinesInformationQuantity(t *testing.T) {
 	assert.Equal(t, "1170.00", inv.Totals.Sum.String())
 }
 
-// TestParseSubInvoiceLinesOtherProfile covers a document outside
-// EXTENDED-CTC-FR: its billing references carry no line hierarchy, so its
-// lines are read as they stand.
-func TestParseSubInvoiceLinesOtherProfile(t *testing.T) {
-	inv := parseSubLinesXML(t, "sub-invoice-lines.xml", func(xml string) string {
-		return strings.Replace(xml,
-			"urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr",
-			"urn:cen.eu:en16931:2017", 1)
-	})
+// TestParseSubInvoiceLinesOtherFormat covers a format without sub-invoice
+// lines: its billing references carry no line hierarchy, so its lines are read
+// as they stand.
+func TestParseSubInvoiceLinesOtherFormat(t *testing.T) {
+	env := importSubLines(t, loadSubLinesXML(t, "sub-invoice-lines.xml"), ubl.FormatEN16931)
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
 	// Lines without a price are dropped, as for any other line.
 	assert.Equal(t, []string{"Part A", "Part B", "Service bundle", "Installation"}, lineNames(inv))
 	for _, l := range inv.Lines {

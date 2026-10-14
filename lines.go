@@ -3,6 +3,7 @@ package ubl
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
@@ -63,7 +64,7 @@ const (
 	lineStatusInformation = "INFORMATION"
 )
 
-func (ui *Invoice) addLines(inv *bill.Invoice, context Context) {
+func (ui *Invoice) addLines(inv *bill.Invoice, subLines bool) {
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -72,12 +73,12 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) {
 	invoiceType := ui.getInvoiceTypeBasedOnXMLName()
 
 	for _, l := range inv.Lines {
-		invLine := newInvoiceLine(l, strconv.Itoa(l.Index), inv, invoiceType, context)
-		if !writesSubLines(context, l) {
+		invLine := newInvoiceLine(l, strconv.Itoa(l.Index), inv, invoiceType)
+		if !subLines || !writesSubLines(l) {
 			lines = append(lines, invLine)
 			continue
 		}
-		lines = append(lines, newGroupLines(l, invLine, inv, invoiceType, context)...)
+		lines = append(lines, newGroupLines(l, invLine, inv, invoiceType)...)
 	}
 	if invoiceType.In(bill.InvoiceTypeCreditNote) {
 		ui.CreditNoteLines = lines
@@ -86,16 +87,37 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) {
 	}
 }
 
-// A GROUP line's own allowances would count nowhere, so such a line is written alone.
-func writesSubLines(context Context, l *bill.Line) bool {
-	if len(l.Breakdown) == 0 || len(l.Discounts) > 0 || len(l.Charges) > 0 {
-		return false
+// partyLines provides the document lines that pair with GOBL lines: those
+// with a price, or typed as GROUP or INFORMATION, which are imported without
+// one, leaving out sub-invoice lines.
+func (ui *Invoice) partyLines() []*InvoiceLine {
+	items := ui.InvoiceLines
+	if len(ui.CreditNoteLines) > 0 {
+		items = ui.CreditNoteLines
 	}
-	return context.Is(ContextPeppolFranceExtended)
+	self := strings.TrimSpace(ui.ID)
+	out := make([]*InvoiceLine, 0, len(items))
+	for i := range items {
+		it := &items[i]
+		br := goblLineHierarchy(it, self)
+		if br != nil && br.BillingReferenceLine != nil {
+			continue
+		}
+		if it.Price == nil && (br == nil || br.InvoiceDocumentReference == nil || br.InvoiceDocumentReference.DocumentStatusCode == lineStatusDetail) {
+			continue
+		}
+		out = append(out, it)
+	}
+	return out
+}
+
+// A GROUP line's own allowances would count nowhere, so such a line is written alone.
+func writesSubLines(l *bill.Line) bool {
+	return len(l.Breakdown) > 0 && len(l.Discounts) == 0 && len(l.Charges) == 0
 }
 
 // Without a priced sub-line the line keeps its own price and is not a GROUP.
-func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceType cbc.Key, context Context) []InvoiceLine {
+func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceType cbc.Key) []InvoiceLine {
 	ccy := group.LineExtensionAmount.CurrencyID
 	number := invoiceNumber(inv.Series, inv.Code)
 	priced := false
@@ -109,7 +131,7 @@ func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceTy
 		if sl.Item.Price == nil || sl.Total == nil {
 			status = lineStatusInformation
 		}
-		child := newInvoiceLine(subLineAsLine(sl, l, inv.Currency.Def().Zero()), fmt.Sprintf("%s.%d", group.ID, i+1), inv, invoiceType, context)
+		child := newInvoiceLine(subLineAsLine(sl, l, inv.Currency.Def().Zero()), fmt.Sprintf("%s.%d", group.ID, i+1), inv, invoiceType)
 		child.BillingReference = newLineBillingReference(number, status, group.ID)
 		if status == lineStatusDetail {
 			priced = true
@@ -193,7 +215,7 @@ func subLineAsLine(sl *bill.SubLine, parent *bill.Line, zero num.Amount) *bill.L
 	return l
 }
 
-func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.Key, context Context) InvoiceLine { //nolint:gocyclo
+func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.Key) InvoiceLine { //nolint:gocyclo
 	ccy := l.Item.Currency.String()
 	if ccy == "" {
 		ccy = inv.Currency.String()
@@ -253,12 +275,6 @@ func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.
 			StartDate: formatDatePtr(l.Period.Start),
 			EndDate:   formatDatePtr(l.Period.End),
 		}
-		// BT-8: VAT point date code, same invoice-wide value as the header.
-		if context.Is(ContextPeppolFranceExtended) && inv.Tax != nil {
-			if code, ok := taxPointCodeMap[inv.Tax.Point]; ok {
-				invLine.InvoicePeriod.DescriptionCode = code
-			}
-		}
 	}
 
 	if l.Order != "" {
@@ -269,19 +285,6 @@ func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.
 
 	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
 		invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
-	}
-
-	// Line VAT amount (KSA-11) is mandatory for tax
-	// invoice and associated credit notes and debit notes
-	if context.Is(ContextZATCA) && l.Total != nil && len(l.Taxes) > 0 && l.Taxes[0].Percent != nil {
-		taxAmount := l.Taxes[0].Percent.Of(*l.Total)
-		roundingAmount := l.Total.Add(taxAmount)
-		invLine.TaxTotal = []TaxTotal{
-			{
-				TaxAmount:      newAmount(taxAmount, ccy),
-				RoundingAmount: newAmountPtr(roundingAmount, ccy),
-			},
-		}
 	}
 
 	if l.Item != nil {
@@ -422,7 +425,7 @@ func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.
 		}
 
 		if l.Seller != nil {
-			invLine.Item.ManufacturerParty = newParty(l.Seller, context)
+			invLine.Item.ManufacturerParty = newParty(l.Seller)
 		}
 	}
 

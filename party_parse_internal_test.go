@@ -37,7 +37,7 @@ func TestGoblPartyTaxRegistration(t *testing.T) {
 			"cac": NamespaceCAC,
 			"cbc": NamespaceCBC,
 		})))
-		return goblParty(party, &options{context: ContextEN16931})
+		return goblParty(party)
 	}
 
 	t.Run("alongside a VAT identifier", func(t *testing.T) {

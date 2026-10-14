@@ -16,7 +16,7 @@ import (
 // BR-CO-13), while BT-149 is optional and in no rule, so BT-131 decides between
 // them. What reconciles under no reading is tagged for bypass and recorded as
 // sent.
-func (ui *Invoice) reconcileTotals(out *bill.Invoice, o *options, srcs []lineSource) error {
+func (ui *Invoice) reconcileTotals(out *bill.Invoice, srcs []lineSource) error {
 	ui.applyPayableRounding(out)
 
 	if err := out.Calculate(); err != nil {
@@ -26,7 +26,7 @@ func (ui *Invoice) reconcileTotals(out *bill.Invoice, o *options, srcs []lineSou
 	// A breakdown that misses its declared amount is re-read flat.
 	if flat := goblUnreconciledGroups(out, srcs); len(flat) > 0 {
 		var err error
-		if srcs, err = ui.goblAddLines(out, o, flat); err != nil {
+		if srcs, err = ui.goblAddLines(out, flat); err != nil {
 			return err
 		}
 		if err := out.Calculate(); err != nil {

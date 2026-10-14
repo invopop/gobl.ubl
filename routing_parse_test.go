@@ -16,7 +16,7 @@ func TestConvertRoutingFromArgs(t *testing.T) {
 	require.NoError(t, err)
 	parse := func(t *testing.T) *ubl.Invoice {
 		t.Helper()
-		doc, err := ubl.Parse(xmlData)
+		doc, err := ubl.Decode(xmlData)
 		require.NoError(t, err)
 		inv, ok := doc.(*ubl.Invoice)
 		require.True(t, ok)
@@ -26,7 +26,7 @@ func TestConvertRoutingFromArgs(t *testing.T) {
 	t.Run("routing args are recorded verbatim on Head.From/To", func(t *testing.T) {
 		// The routing layer supplies fully-qualified participant URIs; Convert
 		// records them verbatim rather than deriving From/To from the document.
-		env, err := parse(t).Convert(ubl.WithRouting(
+		env, err := ubl.Import(parse(t), ubl.WithRouting(
 			"iso6523-actorid-upis::0192:sender",
 			"iso6523-actorid-upis::0192:receiver",
 		))

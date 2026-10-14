@@ -3,6 +3,7 @@ package ubl_test
 import (
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
@@ -209,7 +210,7 @@ func TestPaymentRoundTrip(t *testing.T) {
 		doc := testInvoiceFrom(t, "invoice-account-number.json")
 
 		// Convert back to GOBL
-		resultEnv, err := doc.Convert()
+		resultEnv, err := ubl.Import(doc)
 		require.NoError(t, err)
 
 		resultInv, ok := resultEnv.Extract().(*bill.Invoice)

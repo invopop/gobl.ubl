@@ -67,12 +67,12 @@ func edgeInvoice(t *testing.T, taxTotal, monetaryTotal string, lines ...string) 
 	}
 	body += "\n</Invoice>"
 
-	doc, err := ubl.Parse([]byte(body))
+	doc, err := ubl.Decode([]byte(body))
 	require.NoError(t, err)
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
 
-	env, err := inv.Convert()
+	env, err := ubl.Import(inv)
 	require.NoError(t, err)
 	out, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -218,11 +218,11 @@ func TestDocumentChargeBaseRoundTrip(t *testing.T) {
 	data, err := os.ReadFile("test/data/parse/peppol/Allowance-example.xml")
 	require.NoError(t, err)
 
-	doc, err := ubl.Parse(data)
+	doc, err := ubl.Decode(data)
 	require.NoError(t, err)
 	in, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
-	env, err := in.Convert()
+	env, err := ubl.Import(in)
 	require.NoError(t, err)
 
 	inv, ok := env.Extract().(*bill.Invoice)
@@ -237,7 +237,7 @@ func TestDocumentChargeBaseRoundTrip(t *testing.T) {
 	}
 	require.NotNil(t, withBase, "the example should carry a charge with its own base")
 
-	out, err := ubl.ConvertInvoice(env)
+	out, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	var found bool

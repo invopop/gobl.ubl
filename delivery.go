@@ -26,7 +26,7 @@ type DeliveryTerms struct {
 	ID string `xml:"cbc:ID"`
 }
 
-func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
+func newDelivery(del *bill.DeliveryDetails) *Delivery {
 	if del == nil {
 		return nil
 	}
@@ -52,7 +52,7 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 		out.DeliveryParty = newDeliveryParty(del.Receiver)
 		out.DeliveryLocation =
 			&Location{
-				Address: newAddress(del.Receiver.Addresses, ctx),
+				Address: newAddress(del.Receiver.Addresses),
 			}
 		if len(del.Identities) > 0 {
 			id := del.Identities[0]

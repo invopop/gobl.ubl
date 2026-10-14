@@ -109,20 +109,20 @@ func TestLineNoteSubjectCodeRoundTrip(t *testing.T) {
 		},
 	}
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotEmpty(t, doc.InvoiceLines[0].Note)
 	assert.Equal(t, "#AAI#Handle with care", doc.InvoiceLines[0].Note[0])
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -145,7 +145,7 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotNil(t, doc.InvoiceLines[0].Item.AdditionalItemProperty)
@@ -163,14 +163,14 @@ func TestItemAttributeRoundTrip(t *testing.T) {
 	assert.Equal(t, "2.5", props[1].ValueQuantity.Value)
 	assert.Equal(t, "KGM", props[1].ValueQuantity.UnitCode)
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -202,7 +202,7 @@ func TestItemAttributeUnmappedUnitRoundTrip(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	props := *doc.InvoiceLines[0].Item.AdditionalItemProperty
@@ -212,14 +212,14 @@ func TestItemAttributeUnmappedUnitRoundTrip(t *testing.T) {
 	require.NotNil(t, props[0].ValueQuantity)
 	assert.Equal(t, "X4G", props[0].ValueQuantity.UnitCode)
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -243,7 +243,7 @@ func TestItemAttributeWithoutUnit(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	props := *doc.InvoiceLines[0].Item.AdditionalItemProperty
@@ -264,7 +264,7 @@ func TestLineSellerRoundTrip(t *testing.T) {
 	}
 	require.NoError(t, env.Calculate())
 
-	doc, err := ubl.ConvertInvoice(env)
+	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	require.NotNil(t, doc.InvoiceLines[0].Item.ManufacturerParty)
@@ -272,14 +272,14 @@ func TestLineSellerRoundTrip(t *testing.T) {
 	assert.Equal(t, ubl.SchemeIDEmail, doc.InvoiceLines[0].Item.ManufacturerParty.EndpointID.SchemeID)
 	assert.Equal(t, "seller@example.com", doc.InvoiceLines[0].Item.ManufacturerParty.EndpointID.Value)
 
-	data, err := ubl.Bytes(doc)
+	data, err := ubl.Encode(doc)
 	require.NoError(t, err)
 
-	parsed, err := ubl.Parse(data)
+	parsed, err := ubl.Decode(data)
 	require.NoError(t, err)
 	out, ok := parsed.(*ubl.Invoice)
 	require.True(t, ok)
-	outEnv, err := out.Convert()
+	outEnv, err := ubl.Import(out)
 	require.NoError(t, err)
 	outInv, ok := outEnv.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -294,16 +294,40 @@ const (
 	lineStatusDetail      = "DETAIL"
 	lineStatusInformation = "INFORMATION"
 
-	fixtureFRExtended = "france-extended/invoice-standard.json"
-	amountZero        = "0.00"
+	fixtureSubLines = "en16931/invoice-minimal.json"
+	amountZero      = "0.00"
 )
 
-// breakdownEnvelope loads the French extended fixture and gives its line a
+// formatSubLines is EN 16931 with sub-invoice lines.
+var formatSubLines = func() ubl.Format {
+	f := ubl.FormatEN16931
+	f.Key = "ubl+test-sub-lines"
+	f.SubLines = true
+	return f
+}()
+
+// subLinesEnvelope loads the fixture with a single line of ten units.
+func subLinesEnvelope(t *testing.T) *gobl.Envelope {
+	t.Helper()
+	return subLinesEnvelopeFrom(t, fixtureSubLines)
+}
+
+func subLinesEnvelopeFrom(t *testing.T, name string) *gobl.Envelope {
+	t.Helper()
+	env := loadTestEnvelope(t, name)
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, inv.Lines, 1)
+	inv.Lines[0].Quantity = num.MakeAmount(10, 0)
+	return env
+}
+
+// breakdownEnvelope loads the fixture and gives its line a
 // breakdown: two priced sub-lines, one of them discounted, and one without a
 // price.
 func breakdownEnvelope(t *testing.T) *gobl.Envelope {
 	t.Helper()
-	env := loadTestEnvelope(t, fixtureFRExtended)
+	env := subLinesEnvelope(t)
 	inv, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)
 
@@ -346,8 +370,8 @@ func lineParent(l ubl.InvoiceLine) string {
 }
 
 func TestSubLinesConvert(t *testing.T) {
-	t.Run("extended profile writes sub-invoice lines", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(breakdownEnvelope(t), ubl.WithContext(ubl.ContextPeppolFranceExtended))
+	t.Run("a format with sub-lines writes sub-invoice lines", func(t *testing.T) {
+		doc, err := ubl.ExportInvoice(breakdownEnvelope(t), ubl.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		lines := doc.InvoiceLines
 		require.Len(t, lines, 4)
@@ -357,7 +381,7 @@ func TestSubLinesConvert(t *testing.T) {
 		assert.Equal(t, "1", group.ID)
 		assert.Equal(t, lineStatusGroup, lineStatus(group))
 		assert.Empty(t, lineParent(group))
-		assert.Equal(t, "FAC-2024-001", lineHierarchy(group).InvoiceDocumentReference.ID.Value)
+		assert.Equal(t, "SAMPLE-001", lineHierarchy(group).InvoiceDocumentReference.ID.Value)
 		assert.Nil(t, group.Item.ClassifiedTaxCategory)
 		assert.Equal(t, "145.00", group.Price.PriceAmount.Value)
 		assert.Equal(t, "10", group.InvoicedQuantity.Value)
@@ -389,8 +413,8 @@ func TestSubLinesConvert(t *testing.T) {
 		assert.Equal(t, amountZero, info.LineExtensionAmount.Value)
 	})
 
-	t.Run("other profiles write the line alone", func(t *testing.T) {
-		doc, err := ubl.ConvertInvoice(breakdownEnvelope(t), ubl.WithContext(ubl.ContextPeppolFranceCIUS))
+	t.Run("other formats write the line alone", func(t *testing.T) {
+		doc, err := ubl.ExportInvoice(breakdownEnvelope(t), ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.Len(t, doc.InvoiceLines, 1)
 		assert.Empty(t, doc.InvoiceLines[0].BillingReference)
@@ -404,13 +428,13 @@ func TestSubLinesConvert(t *testing.T) {
 		inv.Lines[0].Discounts = []*bill.LineDiscount{{Amount: num.MakeAmount(1000, 2), Reason: "Loyalty"}}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		require.Len(t, doc.InvoiceLines, 1)
 	})
 
 	t.Run("a line whose sub-lines round apart is written alone", func(t *testing.T) {
-		env := loadTestEnvelope(t, fixtureFRExtended)
+		env := subLinesEnvelope(t)
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 		// Each sub-line comes to 0.33 x 1.5 = 0.495, so 0.50 written, while
@@ -423,7 +447,7 @@ func TestSubLinesConvert(t *testing.T) {
 		}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		require.Len(t, doc.InvoiceLines, 1)
 		assert.Empty(t, doc.InvoiceLines[0].BillingReference)
@@ -431,15 +455,17 @@ func TestSubLinesConvert(t *testing.T) {
 	})
 
 	t.Run("unpriced sub-lines describe a line that keeps its price", func(t *testing.T) {
-		env := loadTestEnvelope(t, fixtureFRExtended)
+		env := subLinesEnvelope(t)
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
+		price := num.MakeAmount(10000, 2)
+		inv.Lines[0].Item.Price = &price
 		inv.Lines[0].Breakdown = []*bill.SubLine{
 			{Quantity: num.MakeAmount(1, 0), Item: &org.Item{Name: "Helmet"}},
 		}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(formatSubLines))
 		require.NoError(t, err)
 		lines := doc.InvoiceLines
 		require.Len(t, lines, 2)
@@ -457,10 +483,22 @@ func TestSubLinesRoundTrip(t *testing.T) {
 		name string
 		env  func(t *testing.T) *gobl.Envelope
 	}{
-		{"invoice-sub-lines", func(t *testing.T) *gobl.Envelope {
-			return loadTestEnvelope(t, "france-extended/invoice-sub-lines.json")
-		}},
 		{"breakdown", breakdownEnvelope},
+		{"credit note", func(t *testing.T) *gobl.Envelope {
+			env := subLinesEnvelopeFrom(t, "en16931/credit-note-simple.json")
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok)
+			price := num.MakeAmount(5000, 2)
+			pct := num.MakePercentage(10, 2)
+			inv.Lines[0].Breakdown = []*bill.SubLine{{
+				Quantity:  num.MakeAmount(2, 0),
+				Item:      &org.Item{Name: "Part", Price: &price},
+				Discounts: []*bill.LineDiscount{{Percent: &pct, Reason: "Promotion"}},
+				Charges:   []*bill.LineCharge{{Percent: &pct, Reason: "Handling"}},
+			}}
+			require.NoError(t, env.Calculate())
+			return env
+		}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -468,16 +506,14 @@ func TestSubLinesRoundTrip(t *testing.T) {
 			inv, ok := env.Extract().(*bill.Invoice)
 			require.True(t, ok)
 
-			doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppolFranceExtended))
+			doc, err := ubl.ExportInvoice(env, ubl.WithFormat(formatSubLines))
 			require.NoError(t, err)
-			data, err := ubl.Bytes(doc)
+			data, err := ubl.Encode(doc)
 			require.NoError(t, err)
 
-			parsed, err := ubl.Parse(data)
+			parsed, err := ubl.Decode(data)
 			require.NoError(t, err)
-			pd, ok := parsed.(*ubl.Invoice)
-			require.True(t, ok)
-			penv, err := pd.Convert()
+			penv, err := ubl.Import(parsed, ubl.WithFormat(formatSubLines))
 			require.NoError(t, err)
 			out, ok := penv.Extract().(*bill.Invoice)
 			require.True(t, ok)

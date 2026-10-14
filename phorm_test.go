@@ -67,12 +67,7 @@ func (f finding) String() string {
 // ignoredRules are schematron rules the converter cannot satisfy on its own,
 // mapped to the reason. Keep this list short and justified: every entry is a
 // rule real documents are still expected to meet.
-var ignoredRules = map[string]string{
-	// KSA-16, the ZATCA invoice counter, is stamped by the application when the
-	// document is submitted. It is not carried in GOBL, so a converted document
-	// never has one.
-	"BR-KSA-33": "invoice counter is applied downstream of the converter",
-}
+var ignoredRules = map[string]string{}
 
 func validateXML(t *testing.T, pc *phorm.Client, vesid string, data []byte) {
 	t.Helper()

@@ -103,17 +103,9 @@ func TestGoblAddOrderingEmptyContract(t *testing.T) {
 		ContractDocumentReference: []Reference{{ID: IDType{Value: ""}}},
 	}
 
-	t.Run("dropped under the French CIUS", func(t *testing.T) {
-		out := new(bill.Invoice)
-		require.NoError(t, ui.goblAddOrdering(out, &options{context: ContextPeppolFranceCIUS}))
-		assert.Nil(t, out.Ordering)
-	})
-
-	t.Run("dropped under Peppol BIS", func(t *testing.T) {
-		out := new(bill.Invoice)
-		require.NoError(t, ui.goblAddOrdering(out, &options{context: ContextPeppol}))
-		assert.Nil(t, out.Ordering)
-	})
+	out := new(bill.Invoice)
+	require.NoError(t, ui.goblAddOrdering(out))
+	assert.Nil(t, out.Ordering)
 }
 
 func TestGoblExchangeRates(t *testing.T) {

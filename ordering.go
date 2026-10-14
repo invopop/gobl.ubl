@@ -46,9 +46,9 @@ type ProjectReference struct {
 	ID string `xml:"cbc:ID,omitempty"`
 }
 
-// orderReferenceNotApplicable is the filler OIOUBL and Peppol accept when
+// OrderReferenceNotApplicable is the filler OIOUBL and Peppol accept when
 // there is no order reference to give.
-const orderReferenceNotApplicable = "NA"
+const OrderReferenceNotApplicable = "NA"
 
 func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	if len(refs) == 0 {
@@ -71,7 +71,7 @@ func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	}
 }
 
-func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
+func (ui *Invoice) addOrdering(o *bill.Ordering) {
 	if o != nil {
 		if o.Code != "" {
 			ui.BuyerReference = o.Code.String()
@@ -85,29 +85,13 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		// The party liable for the tax, when not the supplier, is the
 		// BG-11 tax representative.
 		if o.Seller != nil {
-			ui.TaxRepresentativeParty = newParty(o.Seller, context)
+			ui.TaxRepresentativeParty = newParty(o.Seller)
 		}
 
-		// EXT-FR-FE-BG-05: the facturant, the service facturier raising the
-		// invoice on the seller's behalf.
+		// The issuer raising the invoice on the seller's behalf.
 		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {
-			issuer := newParty(o.Issuer, context)
-			if context.Is(ContextPeppolFranceExtended) {
-				issuer.IndustryClassificationCode = partyRoleInvoicer
-			}
 			ui.AccountingSupplierParty.Party.ServiceProviderParty = &ServiceProviderParty{
-				Party: issuer,
-			}
-		}
-
-		// EXT-FR-FE-BG-04: the party the invoice is addressed to, which sits
-		// under the buyer just as the facturant sits under the seller. Only
-		// the French extended profile defines it.
-		if o.Buyer != nil && ui.AccountingCustomerParty.Party != nil && context.Is(ContextPeppolFranceExtended) {
-			addressee := newParty(o.Buyer, context)
-			addressee.IndustryClassificationCode = partyRoleInvoicee
-			ui.AccountingCustomerParty.Party.ServiceProviderParty = &ServiceProviderParty{
-				Party: addressee,
+				Party: newParty(o.Issuer),
 			}
 		}
 
@@ -128,17 +112,13 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		}
 
 		// BT-14: Sales order reference
-		// Does not apply to zatca
-		if !context.Is(ContextZATCA) {
-			if len(o.Sales) > 0 {
-				if ui.OrderReference == nil {
-					// TODO: once we have a Peppol addon this should be delegated there
-					ui.OrderReference = &OrderReference{
-						ID: orderReferenceNotApplicable,
-					}
+		if len(o.Sales) > 0 {
+			if ui.OrderReference == nil {
+				ui.OrderReference = &OrderReference{
+					ID: OrderReferenceNotApplicable,
 				}
-				ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 			}
+			ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 		}
 
 		// BT-11: Project reference
@@ -203,6 +183,6 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		if ui.OrderReference == nil {
 			ui.OrderReference = &OrderReference{}
 		}
-		ui.OrderReference.ID = orderReferenceNotApplicable
+		ui.OrderReference.ID = OrderReferenceNotApplicable
 	}
 }

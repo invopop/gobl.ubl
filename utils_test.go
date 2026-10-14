@@ -10,8 +10,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/invopop/gobl"
-	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -90,7 +88,7 @@ func TestTagCodeParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tagCodeParse(&IDType{Value: tt.input}, Context{})
+			result := InvoiceTagMap[tt.input]
 			assert.Equal(t, tt.expected, result)
 		})
 	}
@@ -116,34 +114,6 @@ func TestTypeCodeParseZATCA(t *testing.T) {
 			code := tt.code
 			result := typeCodeParse(&IDType{Value: tt.value, Name: &code})
 			assert.Equal(t, tt.expected, string(result))
-		})
-	}
-}
-
-// TestTagCodeParseZATCA confirms every KSA-2 transaction-type flag is restored
-// as its tag, mirroring the addon's normalizeInvoiceType (the convert direction).
-func TestTagCodeParseZATCA(t *testing.T) {
-	tests := []struct {
-		name     string
-		code     string
-		expected []cbc.Key
-	}{
-		{"Standard - no flags", "0100000", nil},
-		{"Simplified", "0200000", []cbc.Key{tax.TagSimplified}},
-		{"Summary", "0100010", []cbc.Key{zatca.TagSummary}},
-		{"Export", "0100100", []cbc.Key{tax.TagExport}},
-		{"Third-party, nominal, self-billed", "0111001", []cbc.Key{zatca.TagThirdParty, zatca.TagNominal, tax.TagSelfBilled}},
-		{"Simplified, export, summary", "0200110", []cbc.Key{tax.TagSimplified, tax.TagExport, zatca.TagSummary}},
-		{"All flags set", "0211111", []cbc.Key{tax.TagSimplified, zatca.TagThirdParty, zatca.TagNominal, tax.TagExport, zatca.TagSummary, tax.TagSelfBilled}},
-		{"Empty code - no tags", "", nil},
-		{"Malformed short code - no tags", "010000", nil},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			code := tt.code
-			result := tagCodeParse(&IDType{Name: &code}, ContextZATCA)
-			assert.Equal(t, tt.expected, result)
 		})
 	}
 }
@@ -483,19 +453,11 @@ func fixtures(t *testing.T) []string {
 }
 
 func parseFixture(raw []byte) (any, error) {
-	doc, err := Parse(raw)
+	doc, err := Decode(raw)
 	if err != nil {
 		return nil, err
 	}
-	var env *gobl.Envelope
-	switch d := doc.(type) {
-	case *Invoice:
-		env, err = d.Convert()
-	case *ApplicationResponse:
-		env, err = d.Convert()
-	default:
-		return nil, fmt.Errorf("unhandled document %T", doc)
-	}
+	env, err := Import(doc)
 	if err != nil {
 		return nil, err
 	}
