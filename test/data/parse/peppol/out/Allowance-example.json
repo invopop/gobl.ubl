@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "078c8c8d4c5ce1ecfaadc18ca1eca6ce429e07356f9c03a7751c619f145c1624"
+			"val": "3754c6968cb60a88c55b9b8839743ca8423af0494dd55b31d4a122c015eeebfc"
 		}
 	},
 	"doc": {
@@ -372,22 +372,22 @@
 			]
 		},
 		"payment": {
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2017-12-01",
-						"amount": "7125.00",
-						"percent": "100%"
-					}
-				],
-				"notes": "Payment within 10 days, 2% discount"
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "1000.00"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2017-12-01",
+						"amount": "6125.00",
+						"percent": "100%"
+					}
+				],
+				"notes": "Payment within 10 days, 2% discount"
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"detail": "Credit transfer",

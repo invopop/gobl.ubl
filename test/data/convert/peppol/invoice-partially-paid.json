@@ -132,9 +132,6 @@
 			"code": "PO-2024-001"
 		},
 		"payment": {
-			"terms": {
-				"notes": "on receipt within 30 days"
-			},
 			"advances": [
 				{
 					"date": "2024-05-10",
@@ -142,6 +139,9 @@
 					"amount": "1000.00"
 				}
 			],
+			"terms": {
+				"notes": "on receipt within 30 days"
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",

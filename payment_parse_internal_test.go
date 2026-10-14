@@ -93,7 +93,7 @@ func TestGoblInvoiceDirectDebit(t *testing.T) {
 			},
 		})
 		require.NotNil(t, dd)
-		assert.Equal(t, "MANDATE-1", dd.Ref)
+		assert.Equal(t, cbc.Code("MANDATE-1"), dd.Ref)
 		assert.Equal(t, account, dd.Account)
 		assert.Empty(t, dd.Creditor)
 	})

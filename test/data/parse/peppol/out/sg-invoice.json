@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0448a656082d9270127e5f3bad5f9ad19ca39c61eddd1e450792c0b880027ac6"
+			"val": "60df16daf7a7d6ef4ba9d2e311d54c9894bb6a78f2d7475b2c858cd4eb5fd67d"
 		}
 	},
 	"doc": {
@@ -353,22 +353,22 @@
 			]
 		},
 		"payment": {
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2025-09-27",
-						"amount": "24.59",
-						"percent": "100%"
-					}
-				],
-				"notes": "For payment terms, only a note is supported by Peppol currently."
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "1.00"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-09-27",
+						"amount": "23.59",
+						"percent": "100%"
+					}
+				],
+				"notes": "For payment terms, only a note is supported by Peppol currently."
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "44556677",
