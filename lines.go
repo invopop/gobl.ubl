@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 )
 
 // InvoiceLine represents a line item in an invoice and credit note
@@ -411,9 +412,7 @@ func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.
 		if l.Item.Price != nil {
 			// BT-146: the item net price may carry more decimals than
 			// the currency, so it is written out as GOBL holds it.
-			invLine.Price = &Price{
-				PriceAmount: newUnitAmount(*l.Item.Price, ccy),
-			}
+			invLine.Price = newPrice(l.Item, iq.UnitCode, ccy)
 		}
 
 		if l.Item.Ref != "" {
@@ -489,4 +488,33 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		allowanceCharges = append(allowanceCharges, ac)
 	}
 	return allowanceCharges
+}
+
+// newPrice writes the item's price details: the net price (BT-146), the list
+// price and price discount (BT-148, BT-147), and the number of units the
+// prices apply to (BT-149), in the line quantity's unit (BT-150).
+func newPrice(it *org.Item, unitCode, ccy string) *Price {
+	p := &Price{
+		PriceAmount: newUnitAmount(*it.Price, ccy),
+	}
+	if it.Per != nil {
+		p.BaseQuantity = &Quantity{Value: it.Per.String(), UnitCode: unitCode}
+	}
+	if it.List != nil {
+		discount := num.AmountZero.MatchPrecision(*it.List)
+		if it.Discount != nil {
+			discount = *it.Discount
+		}
+		p.AllowanceCharge = &AllowanceCharge{
+			ChargeIndicator: false,
+			Amount:          newUnitAmount(discount, ccy),
+			BaseAmount:      newUnitAmountPtr(*it.List, ccy),
+		}
+	}
+	return p
+}
+
+func newUnitAmountPtr(a num.Amount, ccy string) *Amount {
+	amount := newUnitAmount(a, ccy)
+	return &amount
 }

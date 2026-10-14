@@ -113,7 +113,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Key("direct-debit"), payment.Instructions.Key)
 		assert.Equal(t, cbc.Code("Payref1"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.DirectDebit)
-		assert.Equal(t, "123456", payment.Instructions.DirectDebit.Ref)
+		assert.Equal(t, cbc.Code("123456"), payment.Instructions.DirectDebit.Ref)
 		assert.Equal(t, "DK1212341234123412", payment.Instructions.DirectDebit.Account)
 	})
 

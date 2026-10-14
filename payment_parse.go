@@ -186,7 +186,7 @@ func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.
 	directDebit := &pay.DirectDebit{}
 
 	if paymentMeans.PaymentMandate.ID != nil {
-		directDebit.Ref = paymentMeans.PaymentMandate.ID.Value
+		directDebit.Ref = cbc.Code(paymentMeans.PaymentMandate.ID.Value)
 	}
 	if paymentMeans.PaymentMandate.PayerFinancialAccount != nil && paymentMeans.PaymentMandate.PayerFinancialAccount.ID != nil {
 		directDebit.Account = *paymentMeans.PaymentMandate.PayerFinancialAccount.ID

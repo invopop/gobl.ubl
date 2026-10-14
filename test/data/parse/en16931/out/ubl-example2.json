@@ -472,6 +472,12 @@
 					}
 				]
 			},
+			"advances": [
+				{
+					"description": "Prepaid Amount",
+					"amount": "1000.00"
+				}
+			],
 			"terms": {
 				"due_dates": [
 					{
@@ -482,12 +488,6 @@
 				],
 				"notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
 			},
-			"advances": [
-				{
-					"description": "Prepaid Amount",
-					"amount": "1000.00"
-				}
-			],
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",

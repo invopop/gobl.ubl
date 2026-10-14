@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "01ec8e67368bf930fd6ee3b1d844ab9ac8b1ff3ab5946d36a3915d4574e679c5"
+			"val": "19b5ab4616b16332b41ffd30cf76f2d00c8670ffc688e763739a04099d5c7d8e"
 		}
 	},
 	"doc": {
@@ -184,6 +184,8 @@
 						}
 					],
 					"description": "Printing paper, 2mm",
+					"list": "1.10",
+					"discount": "0.10",
 					"price": "1.00",
 					"unit": "item",
 					"origin": "NL",
@@ -415,22 +417,22 @@
 					}
 				]
 			},
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2013-05-10",
-						"amount": "4675.00",
-						"percent": "100%"
-					}
-				],
-				"notes": "50% prepaid, 50% within one month"
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "2337.50"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "2337.50",
+						"percent": "100%"
+					}
+				],
+				"notes": "50% prepaid, 50% within one month"
+			},
 			"instructions": {
 				"key": "direct-debit",
 				"ref": "Payref1",

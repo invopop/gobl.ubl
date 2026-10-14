@@ -167,7 +167,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 		// BT-91 must go inside the mandate (BR-DE-31, UBL-CR-680).
 		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{}
 		if instr.DirectDebit.Ref != "" {
-			ui.PaymentMeans[0].PaymentMandate.ID = &IDType{Value: instr.DirectDebit.Ref}
+			ui.PaymentMeans[0].PaymentMandate.ID = &IDType{Value: instr.DirectDebit.Ref.String()}
 		}
 		if instr.DirectDebit.Account != "" {
 			ui.PaymentMeans[0].PaymentMandate.PayerFinancialAccount = &FinancialAccount{
