@@ -72,6 +72,8 @@ This package provides the base UBL import and export, and the formats that apply
 | `ubl+en16931-v2017` | `FormatEN16931` |
 | `ubl+peppol+bis-v3` | `FormatPeppol` |
 
+A format lists the GOBL schemas it imports into and exports from in `Import` and `Export`. Formats without `Import` schemas are export-only and never detected, as is needed for formats whose documents only differ from another format's by their container.
+
 A format can write documents for more than one specification, choosing from the GOBL document. Its own `CustomizationID`, `ProfileID`, `Addons` and `VESIDs` define its main specification, and `Specifications` lists the others, each with an `Applies` function. On export, the first specification that applies to the document is used, or else the main one; `SpecificationFor` and `VESID` provide them for a document. Every specification's identifiers are recognised on import. The GOBL `convert` register only exports documents that include the addons of the specification they are exported with, and otherwise refuses them with a fault on `$addons`, such as `UBL-PEPPOL-BIS-V3-BILL-INVOICE-01`. `FormatPeppol` writes:
 
 | GOBL document | Specification |

@@ -63,7 +63,7 @@ func TestExtractBinaryAttachments(t *testing.T) {
 func TestParseEmbeddedOverExternalAttachment(t *testing.T) {
 	data, err := testLoadXML("en16931/ubl-example2.xml")
 	require.NoError(t, err)
-	doc, err := ubl.Parse(data)
+	doc, err := ubl.Decode(data)
 	require.NoError(t, err)
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
@@ -73,7 +73,7 @@ func TestParseEmbeddedOverExternalAttachment(t *testing.T) {
 	require.Equal(t, "Doc2", ref.ID.Value)
 	ref.Attachment.ExternalReference = &ubl.ExternalReference{URI: "https://example.com/doc2.pdf"}
 
-	env, err := inv.Convert()
+	env, err := ubl.Import(inv)
 	require.NoError(t, err)
 	gi, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)

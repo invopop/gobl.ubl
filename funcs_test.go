@@ -58,7 +58,8 @@ func testImport(name string) ubl.ImportFunc {
 
 var formatFuncsTest = ubl.Format{
 	Key:                   "ubl+funcs-test",
-	Schemas:               ubl.FormatEN16931.Schemas,
+	Import:                ubl.FormatEN16931.Import,
+	Export:                ubl.FormatEN16931.Export,
 	CustomizationID:       testCustomizationID,
 	OutputCustomizationID: "urn:example:funcs-test-output",
 	Addons:                ubl.FormatEN16931.Addons,
@@ -77,6 +78,8 @@ var errFuncs = errors.New("format func failed")
 // formatFuncsErrors has functions that fail in both directions.
 var formatFuncsErrors = ubl.Format{
 	Key:             "ubl+funcs-errors",
+	Import:          ubl.FormatEN16931.Import,
+	Export:          ubl.FormatEN16931.Export,
 	CustomizationID: "urn:example:funcs-errors",
 	ExportFuncs: []ubl.ExportFunc{
 		func(*ubl.Format, *gobl.Envelope, ubl.Document) error { return errFuncs },
@@ -86,8 +89,15 @@ var formatFuncsErrors = ubl.Format{
 	},
 }
 
+// formatExportOnly lists no import schemas, so it is never detected.
+var formatExportOnly = ubl.Format{
+	Key:             "ubl+export-only-test",
+	Export:          ubl.FormatEN16931.Export,
+	CustomizationID: "urn:example:export-only",
+}
+
 func init() {
-	ubl.RegisterFormats(formatFuncsTest, formatFuncsErrors)
+	ubl.RegisterFormats(formatFuncsTest, formatFuncsErrors, formatExportOnly)
 }
 
 func TestFormatFuncs(t *testing.T) {
@@ -170,6 +180,13 @@ func TestFindFormatMatching(t *testing.T) {
 		f := ubl.FindFormat("urn:example:funcs-test-fallback", "")
 		require.NotNil(t, f)
 		assert.Equal(t, formatFuncsTest.Key, f.Key)
+	})
+	t.Run("export only", func(t *testing.T) {
+		assert.Nil(t, ubl.FindFormat("urn:example:export-only", ""))
+		f := convert.FormatFor(formatExportOnly.Key)
+		require.NotNil(t, f)
+		assert.Empty(t, f.Import)
+		assert.Equal(t, formatExportOnly.Export, f.Export)
 	})
 	t.Run("registered converter detects its own format", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
