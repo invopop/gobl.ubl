@@ -41,10 +41,6 @@ func TestGoblCard(t *testing.T) {
 			wantLast4:  "1234",
 			wantHolder: "Jane Sample",
 		},
-		{
-			name: "no card details at all",
-			card: CardAccount{},
-		},
 	}
 
 	for _, tt := range tests {
@@ -55,6 +51,11 @@ func TestGoblCard(t *testing.T) {
 			assert.Equal(t, tt.wantHolder, got.Holder)
 		})
 	}
+
+	t.Run("no card details at all", func(t *testing.T) {
+		assert.Nil(t, goblCard(&PaymentMeans{CardAccount: &CardAccount{}}))
+		assert.Nil(t, goblCard(&PaymentMeans{CardAccount: &CardAccount{PrimaryAccountNumberID: ptr(""), HolderName: ptr("")}}))
+	})
 }
 
 func TestGoblPaymentMeansCode(t *testing.T) {

@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
-	"github.com/invopop/gobl/tax"
 )
 
 var (
@@ -36,7 +35,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 		payment.Payee = goblParty(ui.PayeeParty)
 	}
 
-	if ui.PaymentTerms != nil {
+	if ui.PaymentTerms != nil && ui.PaymentTerms.Note != "" {
 		payment.Terms = &pay.Terms{
 			Notes: cleanString(ui.PaymentTerms.Note),
 		}
@@ -100,7 +99,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 			}
 	*/
 
-	if ui.LegalMonetaryTotal.PrepaidAmount != nil {
+	if ui.LegalMonetaryTotal.PrepaidAmount != nil && ui.LegalMonetaryTotal.PrepaidAmount.Value != "" {
 		totalPrepaid, err := num.AmountFromString(normalizeNumericString(ui.LegalMonetaryTotal.PrepaidAmount.Value))
 		if err != nil {
 			return err
@@ -123,10 +122,8 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
 		Key: goblPaymentMeansCode(paymentMeans.PaymentMeansCode.Value),
-		Ext: tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyPaymentMeans: cbc.Code(paymentMeans.PaymentMeansCode.Value),
-		}),
 	}
+	instructions.Ext = instructions.Ext.Set(untdid.ExtKeyPaymentMeans, cbc.Code(paymentMeans.PaymentMeansCode.Value))
 
 	if paymentMeans.PaymentMeansCode.Name != nil {
 		instructions.Detail = cleanString(*paymentMeans.PaymentMeansCode.Name)
@@ -170,6 +167,9 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 		creditTransfer.BIC = cbc.Code(*account.FinancialInstitutionBranch.ID)
 	}
 
+	if creditTransfer.IBAN == "" && creditTransfer.Number == "" && creditTransfer.Name == "" && creditTransfer.BIC == "" {
+		return nil
+	}
 	return []*pay.CreditTransfer{creditTransfer}
 }
 
@@ -224,6 +224,9 @@ func goblCard(paymentMeans *PaymentMeans) *pay.Card {
 	}
 	if paymentMeans.CardAccount.HolderName != nil {
 		card.Holder = *paymentMeans.CardAccount.HolderName
+	}
+	if card.Last4 == "" && card.Holder == "" {
+		return nil
 	}
 	return card
 }

@@ -40,7 +40,7 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 				}
 				d.Period = p
 			}
-			if del.DeliveryLocation != nil && del.DeliveryLocation.ID != nil {
+			if del.DeliveryLocation != nil && del.DeliveryLocation.ID != nil && del.DeliveryLocation.ID.Value != "" {
 				id := &org.Identity{
 					Code: cbc.Code(del.DeliveryLocation.ID.Value),
 				}
@@ -63,7 +63,7 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 		}
 	}
 
-	if ui.DeliveryTerms != nil {
+	if ui.DeliveryTerms != nil && ui.DeliveryTerms.ID != "" {
 		d.Identities = []*org.Identity{
 			{
 				Code: cbc.Code(ui.DeliveryTerms.ID),
