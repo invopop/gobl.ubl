@@ -56,8 +56,13 @@ type Format struct {
 	Name i18n.String
 	// Countries where the format applies. Empty means no restriction.
 	Countries []l10n.Code
-	// Schemas of the GOBL documents the format converts, in both directions.
-	Schemas []schema.ID
+	// Import lists the schemas of the GOBL documents the format's documents
+	// are imported into. Formats without any are never detected, such as
+	// those whose documents only differ from another format's by their
+	// container.
+	Import []schema.ID
+	// Export lists the schemas of the GOBL documents the format exports.
+	Export []schema.ID
 	// CustomizationID identifies specific characteristics in the
 	// document which need to be present for local differences.
 	CustomizationID string
@@ -167,7 +172,8 @@ func (s Specification) matches(customizationID, profileID string) bool {
 }
 
 // FindFormat looks up a registered format by CustomizationID and optionally
-// ProfileID. Returns nil if no matching format is found.
+// ProfileID, among those with Import schemas. Returns nil if no matching
+// format is found.
 //
 // The lookup logic works as follows:
 //  1. Formats whose Match function claims the document
@@ -176,33 +182,40 @@ func (s Specification) matches(customizationID, profileID string) bool {
 //  3. If not found, tries to match on OutputCustomizationID (for parsing incoming documents)
 //  4. Formats whose Fallback function claims the document
 func FindFormat(customizationID string, profileID string) *Format {
-	for _, f := range formats {
+	list := make([]*Format, 0, len(formats))
+	for i := range formats {
+		if len(formats[i].Import) > 0 {
+			list = append(list, &formats[i])
+		}
+	}
+
+	for _, f := range list {
 		if f.Match != nil && f.Match(customizationID, profileID) {
-			return &f
+			return f
 		}
 	}
 
 	// First pass: try to match on full CustomizationID
-	for _, f := range formats {
+	for _, f := range list {
 		for _, s := range f.specifications() {
 			if s.matches(customizationID, profileID) {
-				return &f
+				return f
 			}
 		}
 	}
 
 	// Second pass: try to match on OutputCustomizationID (for parsing incoming documents)
-	for _, f := range formats {
+	for _, f := range list {
 		for _, s := range f.specifications() {
 			if s.OutputCustomizationID != "" && s.OutputCustomizationID == customizationID {
-				return &f
+				return f
 			}
 		}
 	}
 
-	for _, f := range formats {
+	for _, f := range list {
 		if f.Fallback != nil && f.Fallback(customizationID, profileID) {
-			return &f
+			return f
 		}
 	}
 
@@ -256,7 +269,8 @@ func WithRouting(from, to cbc.URI) Option {
 var FormatEN16931 = Format{
 	Key:             "ubl+en16931-v2017",
 	Name:            i18n.NewString("UBL EN 16931:2017"),
-	Schemas:         []schema.ID{invoiceSchema},
+	Import:          []schema.ID{invoiceSchema},
+	Export:          []schema.ID{invoiceSchema},
 	CustomizationID: "urn:cen.eu:en16931:2017",
 	Addons:          []cbc.Key{en16931.V2017},
 	VESIDs: VESIDMapping{
@@ -271,7 +285,8 @@ var FormatEN16931 = Format{
 var FormatPeppol = Format{
 	Key:             "ubl+peppol+bis-v3",
 	Name:            i18n.NewString("UBL Peppol BIS 3"),
-	Schemas:         []schema.ID{invoiceSchema, statusSchema},
+	Import:          []schema.ID{invoiceSchema, statusSchema},
+	Export:          []schema.ID{invoiceSchema, statusSchema},
 	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
 	ProfileID:       PeppolBillingProfileIDDefault,
 	Addons:          []cbc.Key{en16931.V2017},

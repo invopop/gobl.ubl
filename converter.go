@@ -51,8 +51,8 @@ func (c *converter) Formats() []*convert.Format {
 			MIME:      mimeXML,
 			Syntax:    "ubl",
 			Countries: f.Countries,
-			Import:    f.Schemas,
-			Export:    f.Schemas,
+			Import:    f.Import,
+			Export:    f.Export,
 		})
 	}
 	return list
