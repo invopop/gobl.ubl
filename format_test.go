@@ -217,9 +217,9 @@ func TestFormatPeppolSpecifications(t *testing.T) {
 				require.NoError(t, err)
 				assert.Equal(t, ubl.FormatPeppol.Key, f.Key)
 
-				env, err := convert.Import(out.Data)
+				res, err := convert.Import(out.Data)
 				require.NoError(t, err)
-				doc := env.Extract().(interface{ GetAddons() []cbc.Key })
+				doc := res.Envelope.Extract().(interface{ GetAddons() []cbc.Key })
 				if tc.addons {
 					assert.Contains(t, doc.GetAddons(), en16931.V2017)
 				} else {

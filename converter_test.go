@@ -92,11 +92,25 @@ func TestReadDocumentContext(t *testing.T) {
 func TestConverterImport(t *testing.T) {
 	data, err := testLoadXML("peppol/base-example.xml")
 	require.NoError(t, err)
-	env, err := convert.Import(data)
+	res, err := convert.Import(data)
 	require.NoError(t, err)
-	inv, ok := env.Extract().(*bill.Invoice)
+	assert.Equal(t, ubl.FormatPeppol.Key, res.Format.Key)
+	inv, ok := res.Envelope.Extract().(*bill.Invoice)
 	require.True(t, ok)
 	assert.Contains(t, inv.GetAddons(), en16931.V2017)
+}
+
+func TestConverterImportAttachments(t *testing.T) {
+	data, err := testLoadXML("en16931/ubl-example2.xml")
+	require.NoError(t, err)
+	res, err := convert.Import(data)
+	require.NoError(t, err)
+	require.Len(t, res.Attachments, 1)
+	a := res.Attachments[0]
+	assert.Equal(t, "Doc2", a.ID)
+	assert.Equal(t, "test.pdf", a.Name)
+	assert.Equal(t, "application/pdf", a.MIME)
+	assert.Equal(t, []byte("Testing Base64 encoding"), a.Data, "decoded")
 }
 
 func TestConverterExport(t *testing.T) {
@@ -169,6 +183,13 @@ func TestConverterExportAttachments(t *testing.T) {
 		assert.Equal(t, "invoice.pdf", atts[0].Filename)
 		assert.Equal(t, []byte("%PDF-1.7"), atts[0].Data)
 		assert.Equal(t, "lines.csv", atts[1].ID, "named by the file without an ID")
+
+		res, err := convert.Import(out.Data)
+		require.NoError(t, err)
+		require.Len(t, res.Attachments, 2)
+		assert.Equal(t, pdf, res.Attachments[0], "imported again")
+		assert.Equal(t, "lines.csv", res.Attachments[1].Name)
+		assert.Equal(t, []byte("a,b"), res.Attachments[1].Data)
 	})
 	t.Run("not embedded in statuses", func(t *testing.T) {
 		env, err := gobl.Envelop(basePeppolStatus())
