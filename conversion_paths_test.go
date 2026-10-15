@@ -5,7 +5,6 @@ import (
 
 	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
-	"github.com/invopop/gobl/addons/fr/choruspro"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -89,8 +88,8 @@ func TestConvertEnsureAddons(t *testing.T) {
 	})
 	t.Run("invoice fails the added addon's rules", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
-		_, err := ubl.Export(env, ubl.WithFormat(ubl.Format{Addons: []cbc.Key{choruspro.V1}}))
-		assert.ErrorContains(t, err, "GOBL-FR-CHORUSPRO-BILL-INVOICE-01")
+		_, err := ubl.Export(env, ubl.WithFormat(ubl.Format{Addons: []cbc.Key{testAddon}}))
+		assert.ErrorContains(t, err, "GOBL-TEST-UBL-BILL-INVOICE-01")
 	})
 	t.Run("unsupported document", func(t *testing.T) {
 		env, err := gobl.Envelop(&note.Message{Content: "hello"})
