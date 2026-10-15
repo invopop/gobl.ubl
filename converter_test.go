@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/convert"
+	"github.com/invopop/gobl/rules"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -129,6 +130,13 @@ func TestConverterExport(t *testing.T) {
 		env.Extract().(*bill.Invoice).SetAddons()
 		_, err := convert.Export(env, ubl.FormatPeppol.Key)
 		assert.ErrorIs(t, err, convert.ErrNotSupported)
+		var ge *gobl.Error
+		require.ErrorAs(t, err, &ge)
+		require.NotNil(t, ge.Faults())
+		f := ge.Faults().First()
+		assert.Equal(t, rules.Code("UBL-PEPPOL-BIS-V3-BILL-INVOICE-01"), f.Code())
+		assert.Equal(t, []string{"$.$addons"}, f.Paths())
+		assert.Equal(t, "requires addon eu-en16931-v2017", f.Message())
 	})
 	t.Run("regional context not registered", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
