@@ -183,7 +183,8 @@ func TestConverterPaths(t *testing.T) {
 
 		imported, err := convert.Import(out.Data)
 		require.NoError(t, err)
-		_, ok := imported.Extract().(*bill.Status)
+		_, ok := imported.Envelope.Extract().(*bill.Status)
+		assert.Empty(t, imported.Attachments)
 		assert.True(t, ok)
 	})
 
