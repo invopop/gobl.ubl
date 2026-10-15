@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
 )
@@ -210,7 +211,7 @@ func (ui *Invoice) declaredTotalsAgree(out *bill.Invoice, srcs []lineSource) boo
 		}
 	}
 
-	if declared, ok := goblDeclaredTaxTotal(ui.TaxTotal); ok && !declared.Equals(t.Tax) {
+	if declared, ok := ui.goblDeclaredTaxTotal(out.Currency); ok && !declared.Equals(t.Tax) {
 		return false
 	}
 	return true
@@ -293,7 +294,7 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice, srcs []lineSource) err
 			}
 		}
 	}
-	if v, ok := goblDeclaredTaxTotal(ui.TaxTotal); ok {
+	if v, ok := ui.goblDeclaredTaxTotal(out.Currency); ok {
 		t.Tax = v.RescaleUp(exp)
 		// BT-112 is mandatory but not every document carries it. Without one,
 		// the calculated total would survive beside declared components it no
@@ -339,14 +340,28 @@ func goblDeclaredAmount(a Amount) (num.Amount, bool) {
 	return v, true
 }
 
-// goblDeclaredTaxTotal picks out BT-110, stated in the document's own currency.
-func goblDeclaredTaxTotal(totals []TaxTotal) (num.Amount, bool) {
-	for _, tt := range totals {
-		if v, ok := goblDeclaredAmount(tt.TaxAmount); ok {
-			return v, true
+// goblDeclaredTaxTotal reads BT-110, the VAT total in the invoice currency.
+func (ui *Invoice) goblDeclaredTaxTotal(cur currency.Code) (num.Amount, bool) {
+	doc, _ := ui.goblTaxTotals(cur)
+	if doc == nil {
+		return num.AmountZero, false
+	}
+	return goblDeclaredAmount(doc.TaxAmount)
+}
+
+// goblTaxTotals splits the VAT totals by currency: BT-110 is the one in the
+// invoice currency (BT-5), and any other is BT-111, in the VAT accounting
+// currency.
+func (ui *Invoice) goblTaxTotals(cur currency.Code) (doc, acc *TaxTotal) {
+	for i := range ui.TaxTotal {
+		tt := &ui.TaxTotal[i]
+		if tt.TaxAmount.CurrencyID != nil && currency.Code(*tt.TaxAmount.CurrencyID) == cur {
+			doc = tt
+		} else {
+			acc = tt
 		}
 	}
-	return num.AmountZero, false
+	return doc, acc
 }
 
 // goblDeclaredTaxBreakdown rebuilds BG-23 from the document's own tax subtotals,
