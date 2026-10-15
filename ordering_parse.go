@@ -65,7 +65,9 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 			if err != nil {
 				return err
 			}
-			ordering.Despatch = append(ordering.Despatch, docRef)
+			if docRef != nil {
+				ordering.Despatch = append(ordering.Despatch, docRef)
+			}
 		}
 	}
 
@@ -76,7 +78,9 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 			if err != nil {
 				return err
 			}
-			ordering.Receiving = append(ordering.Receiving, docRef)
+			if docRef != nil {
+				ordering.Receiving = append(ordering.Receiving, docRef)
+			}
 		}
 	}
 
@@ -117,7 +121,9 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 			if err != nil {
 				return err
 			}
-			ordering.Contracts = append(ordering.Contracts, docRef)
+			if docRef != nil {
+				ordering.Contracts = append(ordering.Contracts, docRef)
+			}
 		}
 	}
 
@@ -128,7 +134,9 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 			if err != nil {
 				return err
 			}
-			ordering.Tender = append(ordering.Tender, docRef)
+			if docRef != nil {
+				ordering.Tender = append(ordering.Tender, docRef)
+			}
 		}
 	}
 
@@ -151,7 +159,7 @@ func goblAdditionalDocumentIdentities(refs []Reference) []*org.Identity {
 
 	var identities []*org.Identity
 	for _, ref := range refs {
-		if ref.DocumentTypeCode != "130" {
+		if ref.DocumentTypeCode != "130" || ref.ID.Value == "" {
 			continue
 		}
 		if identities == nil {
@@ -178,6 +186,9 @@ func (ui *Invoice) goblOrderingIssuer() *org.Party {
 }
 
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
+	if ref.ID.Value == "" {
+		return nil, nil
+	}
 	docRef := &org.DocumentRef{
 		Code: cbc.Code(ref.ID.Value),
 	}

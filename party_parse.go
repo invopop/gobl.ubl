@@ -20,7 +20,7 @@ func goblParty(party *Party) *org.Party {
 		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
 	}
 
-	if eID := party.EndpointID; eID != nil {
+	if eID := party.EndpointID; eID != nil && eID.Value != "" {
 		oi := new(org.Inbox)
 		switch eID.SchemeID {
 		case "EM": // email
@@ -41,7 +41,7 @@ func goblParty(party *Party) *org.Party {
 		}
 	}
 
-	if party.Contact != nil && party.Contact.Name != nil {
+	if party.Contact != nil && party.Contact.Name != nil && *party.Contact.Name != "" {
 		p.People = []*org.Person{
 			{
 				Name: &org.Name{
@@ -58,14 +58,14 @@ func goblParty(party *Party) *org.Party {
 	}
 
 	if party.Contact != nil {
-		if party.Contact.Telephone != nil {
+		if party.Contact.Telephone != nil && *party.Contact.Telephone != "" {
 			p.Telephones = []*org.Telephone{
 				{
 					Number: cleanString(*party.Contact.Telephone),
 				},
 			}
 		}
-		if party.Contact.ElectronicMail != nil {
+		if party.Contact.ElectronicMail != nil && *party.Contact.ElectronicMail != "" {
 			p.Emails = []*org.Email{
 				{
 					Address: cleanString(*party.Contact.ElectronicMail),
@@ -147,7 +147,7 @@ func parseAddress(address *PostalAddress) *org.Address {
 }
 
 func handleLegalEntityIdentity(party *Party, p *org.Party) {
-	if party.PartyLegalEntity == nil || party.PartyLegalEntity.CompanyID == nil {
+	if party.PartyLegalEntity == nil || party.PartyLegalEntity.CompanyID == nil || party.PartyLegalEntity.CompanyID.Value == "" {
 		return
 	}
 
@@ -159,9 +159,7 @@ func handleLegalEntityIdentity(party *Party, p *org.Party) {
 		Scope: org.IdentityScopeLegal,
 	}
 	if party.PartyLegalEntity.CompanyID.SchemeID != nil {
-		identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			iso.ExtKeySchemeID: cbc.Code(*party.PartyLegalEntity.CompanyID.SchemeID),
-		})
+		identity.Ext = identity.Ext.Set(iso.ExtKeySchemeID, cbc.Code(*party.PartyLegalEntity.CompanyID.SchemeID))
 	}
 	p.Identities = append(p.Identities, identity)
 }
@@ -253,14 +251,12 @@ func addTaxSchemeAsIdentity(pts PartyTaxScheme, p *org.Party, countryCode string
 
 func handlePartyIdentifications(party *Party, p *org.Party) {
 	for _, partyID := range party.PartyIdentification {
-		if partyID.ID != nil {
+		if partyID.ID != nil && partyID.ID.Value != "" {
 			identity := &org.Identity{
 				Code: cbc.Code(partyID.ID.Value),
 			}
 			if partyID.ID.SchemeID != nil {
-				identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-					iso.ExtKeySchemeID: cbc.Code(*partyID.ID.SchemeID),
-				})
+				identity.Ext = identity.Ext.Set(iso.ExtKeySchemeID, cbc.Code(*partyID.ID.SchemeID))
 			}
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)

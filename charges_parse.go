@@ -62,9 +62,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 		ch.Amount = a
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		ch.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
-		})
+		ch.Ext = ch.Ext.Set(untdid.ExtKeyCharge, cbc.Code(*ac.AllowanceChargeReasonCode))
 	}
 	base, percent, err := goblACBasis(ac, ch.Amount)
 	if err != nil {
@@ -79,7 +77,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 		}
 
 		// Add tax category ID to extensions
-		if ac.TaxCategory[0].ID != nil {
+		if ac.TaxCategory[0].ID != nil && ac.TaxCategory[0].ID.Value != "" {
 			ch.Taxes[0].Ext = ch.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
@@ -89,7 +87,7 @@ func goblCharge(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInfo)
 			}
 		}
 
-		if ac.TaxCategory[0].Percent != nil {
+		if ac.TaxCategory[0].Percent != nil && *ac.TaxCategory[0].Percent != "" {
 			percent := normalizeNumericString(*ac.TaxCategory[0].Percent)
 			if !strings.HasSuffix(percent, "%") {
 				percent += "%"
@@ -122,9 +120,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		d.Amount = a
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
-		})
+		d.Ext = d.Ext.Set(untdid.ExtKeyAllowance, cbc.Code(*ac.AllowanceChargeReasonCode))
 	}
 	base, percent, err := goblACBasis(ac, d.Amount)
 	if err != nil {
@@ -139,7 +135,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 		}
 
 		// Add tax category ID to extensions
-		if ac.TaxCategory[0].ID != nil {
+		if ac.TaxCategory[0].ID != nil && ac.TaxCategory[0].ID.Value != "" {
 			d.Taxes[0].Ext = d.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ac.TaxCategory[0].ID.Value))
 
 			// Look up exemption code from TaxTotal
@@ -149,7 +145,7 @@ func goblDiscount(ac *AllowanceCharge, taxCategoryMap map[string]*taxCategoryInf
 			}
 		}
 
-		if ac.TaxCategory[0].Percent != nil {
+		if ac.TaxCategory[0].Percent != nil && *ac.TaxCategory[0].Percent != "" {
 			percentStr := normalizeNumericString(*ac.TaxCategory[0].Percent)
 			if !strings.HasSuffix(percentStr, "%") {
 				percentStr += "%"
@@ -178,9 +174,7 @@ func goblLineCharge(ac *AllowanceCharge) (*bill.LineCharge, error) {
 		Amount: amount,
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		ch.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyCharge: cbc.Code(*ac.AllowanceChargeReasonCode),
-		})
+		ch.Ext = ch.Ext.Set(untdid.ExtKeyCharge, cbc.Code(*ac.AllowanceChargeReasonCode))
 	}
 	if ac.AllowanceChargeReason != nil {
 		ch.Reason = cleanString(*ac.AllowanceChargeReason)
@@ -202,9 +196,7 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 		Amount: a,
 	}
 	if ac.AllowanceChargeReasonCode != nil {
-		d.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyAllowance: cbc.Code(*ac.AllowanceChargeReasonCode),
-		})
+		d.Ext = d.Ext.Set(untdid.ExtKeyAllowance, cbc.Code(*ac.AllowanceChargeReasonCode))
 	}
 	if ac.AllowanceChargeReason != nil {
 		d.Reason = cleanString(*ac.AllowanceChargeReason)
@@ -221,7 +213,7 @@ func goblLineDiscount(ac *AllowanceCharge) (*bill.LineDiscount, error) {
 // level) and decides if the multiplier can be used alongside the declared amount.
 func goblACBasis(ac *AllowanceCharge, amount num.Amount) (*num.Amount, *num.Percentage, error) {
 	var base *num.Amount
-	if ac.BaseAmount != nil {
+	if ac.BaseAmount != nil && ac.BaseAmount.Value != "" {
 		b, err := num.AmountFromString(normalizeNumericString(ac.BaseAmount.Value))
 		if err != nil {
 			return nil, nil, err
@@ -230,7 +222,7 @@ func goblACBasis(ac *AllowanceCharge, amount num.Amount) (*num.Amount, *num.Perc
 	}
 	// GOBL requires a percentage wherever a base is set, and without one the
 	// base has nothing to apply to, so they are only ever returned together.
-	if ac.MultiplierFactorNumeric == nil {
+	if ac.MultiplierFactorNumeric == nil || *ac.MultiplierFactorNumeric == "" {
 		return nil, nil, nil
 	}
 	multiplier := normalizeNumericString(*ac.MultiplierFactorNumeric)
