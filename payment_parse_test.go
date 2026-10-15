@@ -96,9 +96,9 @@ func TestParsePaymentPayee(t *testing.T) {
 `), anchor...), 1)
 		require.NotEqual(t, string(raw), string(data), "payee tax scheme was not inserted")
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
-		env, err := doc.(*ubl.Invoice).Convert()
+		env, err := ubl.Import(doc)
 		require.NoError(t, err)
 
 		payee := env.Extract().(*bill.Invoice).Payment.Payee
@@ -265,12 +265,12 @@ func TestPaymentRoundTrip(t *testing.T) {
 		inv.Payment.Payee.TaxID = &tax.Identity{Country: "FR", Code: "53341200068"}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 		require.NoError(t, err)
 		require.NotNil(t, doc.PayeeParty)
 		require.Nil(t, doc.PayeeParty.PostalAddress, "UBL-CR-272 drops the payee address")
 
-		resultEnv, err := doc.Convert()
+		resultEnv, err := ubl.Import(doc)
 		require.NoError(t, err)
 
 		payee := resultEnv.Extract().(*bill.Invoice).Payment.Payee
