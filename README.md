@@ -63,6 +63,31 @@ To export into a format other than the default EN 16931, add it as an option. `E
 doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 ```
 
+To embed files in an invoice, such as a PDF version of it, add them with `WithAttachments`. Each is written as an `AdditionalDocumentReference` with an `EmbeddedDocumentBinaryObject`. Other documents, such as Invoice Responses, cannot embed files and return `ErrUnsupportedAttachments`:
+
+```go
+doc, err := ubl.Export(env,
+    ubl.WithFormat(ubl.FormatPeppol),
+    ubl.WithAttachments(ubl.BinaryAttachment{
+        ID:          "INV-001-PDF",
+        Description: "Invoice INV-001",
+        Data:        pdf,
+        MimeCode:    "application/pdf",
+        Filename:    "INV-001.pdf",
+    }),
+)
+```
+
+Through the GOBL `convert` register, pass them with `convert.WithAttachments`. Every UBL format embeds them, using the attachment's name as its ID when it has none:
+
+```go
+out, err := convert.Export(env, "ubl+peppol+bis-v3", convert.WithAttachments(&convert.Attachment{
+    Name: "INV-001.pdf",
+    MIME: "application/pdf",
+    Data: pdf,
+}))
+```
+
 #### Formats
 
 This package provides the base UBL import and export, and the formats that apply in any country:
