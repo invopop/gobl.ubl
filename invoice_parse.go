@@ -179,10 +179,11 @@ func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
 	}
 
 	if ui.TaxCurrencyCode != "" && ui.DocumentCurrencyCode != ui.TaxCurrencyCode {
+		doc, acc := ui.goblTaxTotals(currency.Code(ui.DocumentCurrencyCode))
 		out.ExchangeRates = goblExchangeRates(
 			currency.Code(ui.DocumentCurrencyCode),
 			currency.Code(ui.TaxCurrencyCode),
-			ui.TaxTotal,
+			doc, acc,
 		)
 	}
 }

@@ -205,23 +205,27 @@ func findTaxNote(notes []*tax.Note, catCode cbc.Code, ext tax.Extensions) *tax.N
 	return nil
 }
 
-// goblExchangeRates derives the exchange rate from two TaxTotal blocks
-// when DocumentCurrencyCode differs from TaxCurrencyCode.
-func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) []*cur.ExchangeRate {
-	if len(taxTotals) < 2 {
+// exchangeRatePrecision is the number of decimals kept when deriving a rate
+// from two rounded totals, so converting BT-110 gives back BT-111.
+const exchangeRatePrecision = 6
+
+// goblExchangeRates derives the exchange rate from BT-111 / BT-110 when
+// DocumentCurrencyCode differs from TaxCurrencyCode.
+func goblExchangeRates(docCurrency, taxCurrency cur.Code, doc, acc *TaxTotal) []*cur.ExchangeRate {
+	if doc == nil || acc == nil {
 		return nil
 	}
 
-	docAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[0].TaxAmount.Value))
+	docAmount, err := num.AmountFromString(normalizeNumericString(doc.TaxAmount.Value))
 	if err != nil || docAmount.IsZero() {
 		return nil
 	}
-	taxAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[1].TaxAmount.Value))
+	taxAmount, err := num.AmountFromString(normalizeNumericString(acc.TaxAmount.Value))
 	if err != nil {
 		return nil
 	}
 
-	rate := taxAmount.Divide(docAmount)
+	rate := taxAmount.RescaleUp(exchangeRatePrecision).Divide(docAmount)
 
 	return []*cur.ExchangeRate{
 		{
