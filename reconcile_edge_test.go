@@ -216,7 +216,7 @@ func TestDeclaredAmountWinsWithoutLeavingABase(t *testing.T) {
 // equal its base times its percentage, so the basis the sender calculated on
 // has to survive the round trip rather than being replaced by the invoice sum.
 func TestDocumentChargeBaseRoundTrip(t *testing.T) {
-	data, err := os.ReadFile("test/data/parse/peppol/Allowance-example.xml")
+	data, err := os.ReadFile("test/data/parse/Allowance-example.xml")
 	require.NoError(t, err)
 
 	doc, err := ubl.Decode(data)

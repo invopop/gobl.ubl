@@ -110,7 +110,7 @@ func TestParseMalformed(t *testing.T) {
 }
 
 func TestStatusPaths(t *testing.T) {
-	st := basePeppolStatus()
+	st := baseStatus()
 	st.IssueTime = cal.NewTime(10, 20, 30)
 	st.Lines[0].Doc.UUID = uuid.UUID("0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2")
 	st.Lines[0].Doc.IssueDate = cal.NewDate(2026, 5, 1)
@@ -119,7 +119,7 @@ func TestStatusPaths(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
+	doc, err := ubl.Export(env)
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -176,9 +176,9 @@ func TestStatusPaths(t *testing.T) {
 
 func TestConverterPaths(t *testing.T) {
 	t.Run("import application response", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		out, err := convert.Export(env, ubl.FormatPeppol.Key)
+		out, err := convert.Export(env, formatSpecsTest.Key)
 		require.NoError(t, err)
 
 		imported, err := convert.Import(out.Data)
@@ -211,12 +211,12 @@ func TestConverterPaths(t *testing.T) {
 }
 
 func TestContextIs(t *testing.T) {
-	assert.True(t, ubl.FormatPeppol.Is(ubl.FormatPeppol))
-	assert.False(t, ubl.FormatPeppol.Is(ubl.FormatEN16931))
+	assert.True(t, formatSpecsTest.Is(formatSpecsTest))
+	assert.False(t, formatSpecsTest.Is(ubl.FormatEN16931))
 }
 
 func TestFindContextProfileMismatch(t *testing.T) {
-	assert.Nil(t, ubl.FindFormat(ubl.FormatPeppol.CustomizationID, "urn:example:other-process"))
+	assert.Nil(t, ubl.FindFormat(formatSpecsTest.CustomizationID, "urn:example:other-process"))
 }
 
 func TestParsePartyPaths(t *testing.T) {

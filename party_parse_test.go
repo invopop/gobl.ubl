@@ -111,8 +111,8 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, l10n.ISOCountryCode("DK"), customer.Addresses[0].Country)
 	})
 
-	t.Run("invoice-peppol.xml", func(t *testing.T) {
-		e := parseXMLInvoice(t, "peppol/invoice-peppol.xml")
+	t.Run("invoice-endpoint-id.xml", func(t *testing.T) {
+		e := parseXMLInvoice(t, "invoice-endpoint-id.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)

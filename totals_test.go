@@ -11,8 +11,8 @@ import (
 )
 
 func TestNewTotals(t *testing.T) {
-	t.Run("peppol-1-advance.json", func(t *testing.T) {
-		doc := testInvoiceFrom(t, "peppol/peppol-1-advance.json")
+	t.Run("invoice-advance.json", func(t *testing.T) {
+		doc := testInvoiceFrom(t, "invoice-advance.json")
 
 		assert.Equal(t, "1620.00", doc.LegalMonetaryTotal.LineExtensionAmount.Value)
 		assert.Equal(t, "1620.00", doc.LegalMonetaryTotal.TaxExclusiveAmount.Value)
@@ -28,7 +28,7 @@ func TestNewTotals(t *testing.T) {
 	})
 
 	t.Run("standard_invoice_no_exemption_reason", func(t *testing.T) {
-		doc := testInvoiceFrom(t, "peppol/invoice-minimal.json")
+		doc := testInvoiceFrom(t, "invoice-minimal.json")
 
 		require.Len(t, doc.TaxTotal, 1)
 		require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
@@ -38,7 +38,7 @@ func TestNewTotals(t *testing.T) {
 	})
 
 	t.Run("reverse_charge_exemption_from_tax_notes", func(t *testing.T) {
-		doc := testInvoiceFrom(t, "peppol/peppol-reverse-charge.json")
+		doc := testInvoiceFrom(t, "invoice-reverse-charge.json")
 
 		require.Len(t, doc.TaxTotal, 1)
 		require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
@@ -55,7 +55,7 @@ func TestNewTotals(t *testing.T) {
 
 func TestParseTaxNotes(t *testing.T) {
 	t.Run("reverse_charge", func(t *testing.T) {
-		env := parseXMLInvoice(t, "peppol/nbio-stuck-ubl.xml")
+		env := parseXMLInvoice(t, "nbio-stuck-ubl.xml")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -71,7 +71,7 @@ func TestParseTaxNotes(t *testing.T) {
 	})
 
 	t.Run("standard_no_tax_notes", func(t *testing.T) {
-		env := parseXMLInvoice(t, "peppol/base-example.xml")
+		env := parseXMLInvoice(t, "base-example.xml")
 
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
