@@ -47,7 +47,7 @@ func TestParseOrdering(t *testing.T) {
 
 func TestParseOrderingNotApplicable(t *testing.T) {
 	t.Run("NA is not a purchase order", func(t *testing.T) {
-		e := parseXMLInvoice(t, "peppol/sales-order-example.xml")
+		e := parseXMLInvoice(t, "sales-order-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -57,7 +57,7 @@ func TestParseOrderingNotApplicable(t *testing.T) {
 	})
 
 	t.Run("a sales order alongside NA survives", func(t *testing.T) {
-		e := parseXMLInvoice(t, "peppol/sales-order-example.xml")
+		e := parseXMLInvoice(t, "sales-order-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -70,7 +70,7 @@ func TestParseOrderingNotApplicable(t *testing.T) {
 	t.Run("an invoice with no ordering gains none on a round trip", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.Equal(t, "NA", doc.OrderReference.ID)
 

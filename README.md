@@ -57,10 +57,10 @@ func main() {
 }
 ```
 
-To export into a format other than the default EN 16931, add it as an option. `ExportInvoice` does the same when an invoice is expected:
+To export into a format other than the default EN 16931, such as one registered by another module, add it as an option. `ExportInvoice` does the same when an invoice is expected:
 
 ```go
-doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+doc, err := ubl.ExportInvoice(env, ubl.WithFormat(format))
 ```
 
 #### Formats
@@ -70,24 +70,18 @@ This package provides the base UBL import and export, and the formats that apply
 | Key | Format |
 | --- | --- |
 | `ubl+en16931-v2017` | `FormatEN16931` |
-| `ubl+peppol+bis-v3` | `FormatPeppol` |
 
 A format lists the GOBL schemas it imports into and exports from in `Import` and `Export`. Formats without `Import` schemas are export-only and never detected, as is needed for formats whose documents only differ from another format's by their container.
 
-A format can write documents for more than one specification, choosing from the GOBL document. Its own `CustomizationID`, `ProfileID`, `Addons` and `VESIDs` define its main specification, and `Specifications` lists the others, each with an `Applies` function. On export, the first specification that applies to the document is used, or else the main one; `SpecificationFor` and `VESID` provide them for a document. Every specification's identifiers are recognised on import. The GOBL `convert` register only exports documents that include the addons of the specification they are exported with, and otherwise refuses them with a fault on `$addons`, such as `UBL-PEPPOL-BIS-V3-BILL-INVOICE-01`. `FormatPeppol` writes:
-
-| GOBL document | Specification |
-| --- | --- |
-| `bill.Invoice` | Peppol BIS Billing 3.0 |
-| `bill.Invoice` with the `self-billed` tag | Peppol BIS Self-Billing 3.0 (`SpecificationPeppolSelfBilling`) |
-| `bill.Status` | Peppol Invoice Response 3 (`SpecificationPeppolInvoiceResponse`) |
+A format can write documents for more than one specification, choosing from the GOBL document. Its own `CustomizationID`, `ProfileID`, `Addons` and `VESIDs` define its main specification, and `Specifications` lists the others, each with an `Applies` function. On export, the first specification that applies to the document is used, or else the main one; `SpecificationFor` and `VESID` provide them for a document. Every specification's identifiers are recognised on import. The GOBL `convert` register only exports documents that include the addons of the specification they are exported with, and otherwise refuses them with a fault on `$addons`, such as `UBL-EN16931-V2017-BILL-INVOICE-01`.
 
 The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported UBL document, and an import function the UBL document and the imported envelope, before it is calculated. `InvoiceParties` lists each GOBL party alongside its UBL party, for rules that apply to every party. Formats that allow sub-invoice lines, such as EXTENDED-CTC-FR, set `SubLines`: line breakdowns are then written as sub-invoice lines, and read back from the line billing references that name the invoice itself.
 
-Regional formats live in their own modules, which register them with `ubl.RegisterFormats` when imported, making them available to `FindFormat`, `Import`, and the GOBL `convert` register:
+Peppol and regional formats live in their own modules, which register them with `ubl.RegisterFormats` when imported, making them available to `FindFormat`, `Import`, and the GOBL `convert` register. The Peppol formats (BIS Billing 3.0, BIS Self-Billing 3.0, Invoice Response 3 and PINT) are provided by the `ubl` package of [gobl.peppol](https://github.com/invopop/gobl.peppol):
 
 | Key | Module |
 | --- | --- |
+| `ubl+peppol+bis-v3`, Peppol PINT | [gobl.peppol](https://github.com/invopop/gobl.peppol) (`_ "github.com/invopop/gobl.peppol/ubl"`) |
 | `ubl+fr-ctc-cius-v1`, `ubl+fr-ctc-extended-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/ubl"`) |
 | `ubl+sa-zatca-v1` | [gobl.sa.zatca](https://github.com/invopop/gobl.sa.zatca) (`_ "github.com/invopop/gobl.sa.zatca/ubl"`) |
 | `ubl+de-xrechnung-v3` | [gobl.de.xinvoice](https://github.com/invopop/gobl.de.xinvoice) |
@@ -161,7 +155,7 @@ go test ./...
 ### Schematron validation
 
 Beyond the golden-file comparisons, the generated XML can be pushed through the
-real EN 16931 / Peppol schematron rule sets.
+real EN 16931 schematron rule sets.
 Validation runs against [phorm](https://github.com/phax/phorm), the standalone
 validation service that replaced the now-archived `invopop/phive` gRPC wrapper,
 using the [`invopop/phorm`](https://github.com/invopop/phorm) HTTP client.
@@ -203,16 +197,6 @@ is already taken locally:
 docker run -d --name phorm -p 8085:8080 phelger/phorm
 PHORM_URL=http://localhost:8085 go test ./... -validate
 ```
-
-#### Known failures
-
-These fixtures do not currently pass schematron. They are long-standing gaps in
-the conversion rather than regressions, so a run is "clean" when only these
-fail:
-
-| Rule | Fixtures | Cause |
-| --- | --- | --- |
-| `PEPPOL-EN16931-R061` | `peppol/invoice-prices-include-vat.json` | The fixture pays by SEPA direct debit but carries no mandate reference (BT-89). |
 
 #### Notes
 

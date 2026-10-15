@@ -45,7 +45,7 @@ func TestParseInvoiceDates(t *testing.T) {
 
 func TestParseDeliveryPaths(t *testing.T) {
 	t.Run("actual and latest dates form a period", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		in.Delivery = []*ubl.Delivery{{
 			ActualDeliveryDate: strPtr("2024-01-01"),
 			LatestDeliveryDate: strPtr("2024-01-31"),
@@ -59,7 +59,7 @@ func TestParseDeliveryPaths(t *testing.T) {
 	})
 
 	t.Run("estimated delivery period alone", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		in.Delivery = []*ubl.Delivery{{
 			EstimatedDeliveryPeriod: &ubl.Period{StartDate: "2024-02-01", EndDate: "2024-02-29"},
 		}}
@@ -71,7 +71,7 @@ func TestParseDeliveryPaths(t *testing.T) {
 	})
 
 	t.Run("estimated delivery period with party", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		in.Delivery = []*ubl.Delivery{{
 			EstimatedDeliveryPeriod: &ubl.Period{StartDate: "2024-02-01", EndDate: "2024-02-29"},
 			DeliveryParty: &ubl.Party{
@@ -88,7 +88,7 @@ func TestParseDeliveryPaths(t *testing.T) {
 	})
 
 	t.Run("unnamed delivery party is dropped", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		in.Delivery = []*ubl.Delivery{{
 			ActualDeliveryDate: strPtr("2024-01-01"),
 			DeliveryParty: &ubl.Party{
@@ -101,7 +101,7 @@ func TestParseDeliveryPaths(t *testing.T) {
 	})
 
 	t.Run("delivery terms", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		in.DeliveryTerms = &ubl.DeliveryTerms{ID: "EXW"}
 		inv := convertParsed(t, in)
 		require.NotNil(t, inv.Delivery)
@@ -111,7 +111,7 @@ func TestParseDeliveryPaths(t *testing.T) {
 }
 
 func TestParseBillingReferences(t *testing.T) {
-	in := parsedFixture(t, "peppol/base-example.xml")
+	in := parsedFixture(t, "base-example.xml")
 	in.BillingReference = []*ubl.BillingReference{
 		{SelfBilledInvoiceDocumentReference: &ubl.Reference{ID: ubl.IDType{Value: "SB-1"}}},
 		{CreditNoteDocumentReference: &ubl.Reference{ID: ubl.IDType{Value: "CN-1"}}},
@@ -136,7 +136,7 @@ func TestParseTaxExchangeRate(t *testing.T) {
 	}
 
 	t.Run("matching rate is used", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		in.TaxCurrencyCode = "USD"
 		in.TaxExchangeRate = rate(in.DocumentCurrencyCode, "USD", "1.10")
 		inv := convertParsed(t, in)
@@ -158,7 +158,7 @@ func TestParseTaxExchangeRate(t *testing.T) {
 		},
 	} {
 		t.Run(name+" is ignored", func(t *testing.T) {
-			in := parsedFixture(t, "peppol/base-example.xml")
+			in := parsedFixture(t, "base-example.xml")
 			in.TaxCurrencyCode = "USD"
 			in.TaxExchangeRate = er(in)
 			inv := convertParsed(t, in)
@@ -170,7 +170,7 @@ func TestParseTaxExchangeRate(t *testing.T) {
 }
 
 func TestParseSkipsLinesWithoutPrice(t *testing.T) {
-	in := parsedFixture(t, "peppol/base-example.xml")
+	in := parsedFixture(t, "base-example.xml")
 	require.Greater(t, len(in.InvoiceLines), 1)
 	in.InvoiceLines[0].Price = nil
 	inv := convertParsed(t, in)
@@ -232,7 +232,7 @@ func TestParseInvoiceErrors(t *testing.T) {
 	}
 	for name, mutate := range tests {
 		t.Run(name, func(t *testing.T) {
-			in := parsedFixture(t, "peppol/base-example.xml")
+			in := parsedFixture(t, "base-example.xml")
 			mutate(in)
 			_, err := ubl.Import(in)
 			assert.Error(t, err)
@@ -250,7 +250,7 @@ func TestParseDeclaredTotalsBypass(t *testing.T) {
 	}
 
 	t.Run("records the declared rounding and tax breakdown", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		bypass(in)
 		require.NotEmpty(t, in.TaxTotal[0].TaxSubtotal)
 		st := &in.TaxTotal[0].TaxSubtotal[0]
@@ -281,7 +281,7 @@ func TestParseDeclaredTotalsBypass(t *testing.T) {
 	})
 
 	t.Run("without usable subtotals", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		bypass(in)
 		for i := range in.TaxTotal {
 			in.TaxTotal[i].TaxSubtotal = nil
@@ -292,7 +292,7 @@ func TestParseDeclaredTotalsBypass(t *testing.T) {
 	})
 
 	t.Run("without declared amounts", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		bypass(in)
 		in.LegalMonetaryTotal.TaxExclusiveAmount = ubl.Amount{}
 		in.InvoiceLines[0].LineExtensionAmount = ubl.Amount{}
@@ -306,7 +306,7 @@ func TestParseDeclaredTotalsBypass(t *testing.T) {
 	})
 
 	t.Run("declared tax total disagrees", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		in.TaxTotal[0].TaxAmount.Value = "1.00"
 		inv := convertParsed(t, in)
 		assert.Contains(t, inv.GetTags(), tax.TagBypass)

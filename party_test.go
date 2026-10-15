@@ -145,13 +145,13 @@ type PartyTaxSchemeView struct {
 func TestNewPartyEndpointID(t *testing.T) {
 	convert := func(t *testing.T, apply func(inv *bill.Invoice)) *ubl.Invoice {
 		t.Helper()
-		env := loadTestEnvelope(t, "peppol/invoice-complete.json")
+		env := loadTestEnvelope(t, "invoice-complete.json")
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 		apply(inv)
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		return doc
 	}

@@ -8,12 +8,6 @@ import (
 	"github.com/invopop/gobl/i18n"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/schema"
-	"github.com/invopop/gobl/tax"
-)
-
-// Peppol Billing Profile IDs
-const (
-	PeppolBillingProfileIDDefault = "urn:fdc:peppol.eu:2017:poacc:billing:01:1.0"
 )
 
 // VESIDMapping maps document types to their corresponding VESID values.
@@ -50,7 +44,7 @@ type Specification struct {
 // for the specification it represents.
 type Format struct {
 	// Key identifies the format in the GOBL convert register, with one layer
-	// for each specification it builds on, e.g. "ubl+peppol+bis-v3".
+	// for each specification it builds on, e.g. "ubl+en16931-v2017".
 	Key cbc.Key
 	// Name of the format.
 	Name i18n.String
@@ -279,67 +273,11 @@ var FormatEN16931 = Format{
 	},
 }
 
-// FormatPeppol is the Peppol BIS 3 format. Invoices are written with Peppol
-// BIS Billing 3.0, self-billed invoices with Peppol BIS Self-Billing 3.0,
-// and statuses with Peppol Invoice Response 3.
-var FormatPeppol = Format{
-	Key:             "ubl+peppol+bis-v3",
-	Name:            i18n.NewString("UBL Peppol BIS 3"),
-	Import:          []schema.ID{invoiceSchema, statusSchema},
-	Export:          []schema.ID{invoiceSchema, statusSchema},
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0",
-	ProfileID:       PeppolBillingProfileIDDefault,
-	Addons:          []cbc.Key{en16931.V2017},
-	VESIDs: VESIDMapping{
-		Invoice:    "eu.peppol.bis3:invoice:2026.5",
-		CreditNote: "eu.peppol.bis3:creditnote:2026.5",
-	},
-	Specifications: []Specification{
-		SpecificationPeppolSelfBilling,
-		SpecificationPeppolInvoiceResponse,
-	},
-	ExportFuncs: []ExportFunc{exportPeppolBilling, exportPeppolInvoiceResponse},
-	ImportFuncs: []ImportFunc{importPeppolInvoiceResponse},
-}
-
-// SpecificationPeppolSelfBilling is Peppol BIS Self-Billing 3.0, used for
-// self-billed invoices.
-var SpecificationPeppolSelfBilling = Specification{
-	CustomizationID: "urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0",
-	ProfileID:       "urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0",
-	Addons:          []cbc.Key{en16931.V2017},
-	// The Peppol self-billing rule sets are versioned independently from the
-	// regular invoice/credit-note ones.
-	VESIDs: VESIDMapping{
-		Invoice:    "eu.peppol.bis3:invoice-self-billing:2026.5",
-		CreditNote: "eu.peppol.bis3:creditnote-self-billing:2026.5",
-	},
-	Applies: func(doc any) bool {
-		inv, ok := doc.(*bill.Invoice)
-		return ok && inv.HasTags(tax.TagSelfBilled)
-	},
-}
-
-// SpecificationPeppolInvoiceResponse is Peppol Invoice Response 3, used for
-// statuses.
-var SpecificationPeppolInvoiceResponse = Specification{
-	CustomizationID: "urn:fdc:peppol.eu:poacc:trns:invoice_response:3",
-	ProfileID:       "urn:fdc:peppol.eu:poacc:bis:invoice_response:3",
-	VESIDs: VESIDMapping{
-		Status: "eu.peppol.bis3:invoice-message-response:2026.5",
-	},
-	Applies: func(doc any) bool {
-		_, ok := doc.(*bill.Status)
-		return ok
-	},
-}
-
 // formats holds every registered format for lookups during parsing.
 var formats []Format
 
 func init() {
 	registerFormats(true, []Format{
 		FormatEN16931,
-		FormatPeppol,
 	})
 }

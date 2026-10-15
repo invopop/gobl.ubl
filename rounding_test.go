@@ -21,7 +21,7 @@ import (
 // before writing it out.
 func TestCurrencyRounding(t *testing.T) {
 	t.Run("line total with more decimals than the currency", func(t *testing.T) {
-		env := loadTestEnvelope(t, "peppol/invoice-complete.json")
+		env := loadTestEnvelope(t, "invoice-complete.json")
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
@@ -35,7 +35,7 @@ func TestCurrencyRounding(t *testing.T) {
 		require.NoError(t, env.Calculate())
 		require.Equal(t, "31.665", inv.Lines[0].Total.String())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		// BT-131 / BR-DEC-23
@@ -47,7 +47,7 @@ func TestCurrencyRounding(t *testing.T) {
 	})
 
 	t.Run("a currency without subunits", func(t *testing.T) {
-		env := loadTestEnvelope(t, "peppol/invoice-complete.json")
+		env := loadTestEnvelope(t, "invoice-complete.json")
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
 
@@ -62,7 +62,7 @@ func TestCurrencyRounding(t *testing.T) {
 		require.NoError(t, env.Calculate())
 		require.Equal(t, "20000", inv.Totals.Sum.String())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		assert.NotContains(t, doc.LegalMonetaryTotal.LineExtensionAmount.Value, ".",
@@ -71,7 +71,7 @@ func TestCurrencyRounding(t *testing.T) {
 	})
 
 	t.Run("prices include tax", func(t *testing.T) {
-		doc := testInvoiceFrom(t, "peppol/invoice-prices-include-vat.json")
+		doc := testInvoiceFrom(t, "invoice-prices-include-vat.json")
 
 		require.Len(t, doc.InvoiceLines, 2)
 		assert.Equal(t, "6.73", doc.InvoiceLines[0].LineExtensionAmount.Value)
@@ -89,10 +89,10 @@ func TestCurrencyRounding(t *testing.T) {
 
 	t.Run("every constrained amount fits the currency", func(t *testing.T) {
 		for _, name := range []string{
-			"peppol/invoice-prices-include-vat.json",
-			"peppol/invoice-complete.json",
-			"peppol/peppol-1-advance.json",
-			"peppol/invoice-minimal.json",
+			"invoice-prices-include-vat.json",
+			"invoice-complete.json",
+			"invoice-advance.json",
+			"invoice-minimal.json",
 		} {
 			t.Run(name, func(t *testing.T) {
 				assertAmountsFitCurrency(t, testInvoiceFrom(t, name))
@@ -159,9 +159,8 @@ func assertAmountsFitCurrency(t *testing.T, doc *ubl.Invoice) {
 // out without breaking BR-CO-10.
 func TestTotalsArithmetic(t *testing.T) {
 	contexts := map[string]ubl.Format{
-		"en16931":            ubl.FormatEN16931,
-		"peppol":             ubl.FormatPeppol,
-		"peppol-self-billed": ubl.FormatPeppol,
+		".":       ubl.FormatEN16931,
+		"en16931": ubl.FormatEN16931,
 	}
 
 	for dir, ctx := range contexts {
@@ -186,7 +185,7 @@ func TestTotalsArithmetic(t *testing.T) {
 func TestTotalsArithmeticManyLines(t *testing.T) {
 	for _, lines := range []int{1, 10, 50, 200} {
 		t.Run(strconv.Itoa(lines)+" lines", func(t *testing.T) {
-			env := loadTestEnvelope(t, "peppol/invoice-prices-include-vat.json")
+			env := loadTestEnvelope(t, "invoice-prices-include-vat.json")
 			inv, ok := env.Extract().(*bill.Invoice)
 			require.True(t, ok)
 
@@ -205,7 +204,7 @@ func TestTotalsArithmeticManyLines(t *testing.T) {
 			require.NoError(t, env.Calculate())
 			payable := inv.Totals.Payable
 
-			doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+			doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 			require.NoError(t, err)
 
 			assertTotalsAddUp(t, doc)
