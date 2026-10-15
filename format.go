@@ -96,22 +96,6 @@ type Format struct {
 	Specifications []Specification
 }
 
-// commonAddons lists the addons every specification of the format requires.
-func (f *Format) commonAddons() []cbc.Key {
-	specs := f.specifications()
-	var list []cbc.Key
-	for _, a := range specs[0].Addons {
-		common := true
-		for _, s := range specs[1:] {
-			common = common && a.In(s.Addons...)
-		}
-		if common {
-			list = append(list, a)
-		}
-	}
-	return list
-}
-
 // Is checks if two formats are the same.
 func (f *Format) Is(f2 Format) bool {
 	return f.CustomizationID == f2.CustomizationID && f.ProfileID == f2.ProfileID

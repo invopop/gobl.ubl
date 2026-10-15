@@ -10,6 +10,7 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/convert"
 	"github.com/invopop/gobl/i18n"
+	"github.com/invopop/gobl/rules"
 	"github.com/invopop/gobl/schema"
 )
 
@@ -50,7 +51,6 @@ func (c *converter) Formats() []*convert.Format {
 			MIME:      mimeXML,
 			Syntax:    "ubl",
 			Countries: f.Countries,
-			Addons:    f.commonAddons(),
 			Import:    f.Schemas,
 			Export:    f.Schemas,
 		})
@@ -92,26 +92,21 @@ func (c *converter) Import(_ cbc.Key, data []byte) (*gobl.Envelope, error) {
 
 // Accepts checks the document includes the addons of the specification the
 // format exports it with.
-func (c *converter) Accepts(key cbc.Key, env *gobl.Envelope) bool {
+func (c *converter) Accepts(key cbc.Key, env *gobl.Envelope) error {
 	f := c.format(key)
 	if f == nil {
-		return false
+		return ErrUnsupportedDocumentType
 	}
 	doc := env.Extract()
 	s := f.SpecificationFor(doc)
 	if len(s.Addons) == 0 {
-		return true
+		return nil
 	}
-	d, ok := doc.(interface{ GetAddons() []cbc.Key })
-	if !ok {
-		return false
+	set := convert.Rules(f.Key, rules.For(doc, convert.RequireAddons("01", s.Addons...)))
+	if fs := set.Validate(doc); fs != nil {
+		return fs
 	}
-	for _, a := range s.Addons {
-		if !a.In(d.GetAddons()...) {
-			return false
-		}
-	}
-	return true
+	return nil
 }
 
 func (c *converter) Export(key cbc.Key, env *gobl.Envelope) ([]byte, error) {

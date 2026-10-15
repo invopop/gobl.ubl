@@ -72,7 +72,7 @@ This package provides the base UBL import and export, and the formats that apply
 | `ubl+en16931-v2017` | `FormatEN16931` |
 | `ubl+peppol+bis-v3` | `FormatPeppol` |
 
-A format can write documents for more than one specification, choosing from the GOBL document. Its own `CustomizationID`, `ProfileID`, `Addons` and `VESIDs` define its main specification, and `Specifications` lists the others, each with an `Applies` function. On export, the first specification that applies to the document is used, or else the main one; `SpecificationFor` and `VESID` provide them for a document. Every specification's identifiers are recognised on import. `FormatPeppol` writes:
+A format can write documents for more than one specification, choosing from the GOBL document. Its own `CustomizationID`, `ProfileID`, `Addons` and `VESIDs` define its main specification, and `Specifications` lists the others, each with an `Applies` function. On export, the first specification that applies to the document is used, or else the main one; `SpecificationFor` and `VESID` provide them for a document. Every specification's identifiers are recognised on import. The GOBL `convert` register only exports documents that include the addons of the specification they are exported with, and otherwise refuses them with a fault on `$addons`, such as `UBL-PEPPOL-BIS-V3-BILL-INVOICE-01`. `FormatPeppol` writes:
 
 | GOBL document | Specification |
 | --- | --- |
@@ -136,21 +136,14 @@ func main() {
 
 ## Command Line
 
-The GOBL to UBL tool includes a command-line helper. You can install it manually in your Go environment with:
+This package no longer includes a command-line tool. The `gobl` CLI from [gobl.dev](https://github.com/invopop/gobl.dev) converts between GOBL and every format registered with the GOBL `convert` register, including UBL:
 
 ```bash
-go install ./cmd/gobl.ubl
-```
+go install github.com/invopop/gobl.dev/cmd/gobl@latest
 
-Once installed, usage is straightforward. The tool automatically detects the input file type and performs the appropriate conversion:
-
-- If the input is a JSON file (GOBL format), it will convert it to UBL XML.
-- If the input is an XML file (UBL format), it will convert it to GOBL JSON.
-
-For example:
-
-```bash
-gobl.ubl convert ./test/data/invoice-sample.json
+gobl convert invoice.json invoice.xml --to ubl+en16931-v2017   # export
+gobl convert invoice.xml                                       # import, format detected
+gobl convert --list                                            # registered formats
 ```
 
 ## Testing
