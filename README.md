@@ -136,21 +136,14 @@ func main() {
 
 ## Command Line
 
-The GOBL to UBL tool includes a command-line helper. You can install it manually in your Go environment with:
+This package no longer includes a command-line tool. The `gobl` CLI from [gobl.dev](https://github.com/invopop/gobl.dev) converts between GOBL and every format registered with the GOBL `convert` register, including UBL:
 
 ```bash
-go install ./cmd/gobl.ubl
-```
+go install github.com/invopop/gobl.dev/cmd/gobl@latest
 
-Once installed, usage is straightforward. The tool automatically detects the input file type and performs the appropriate conversion:
-
-- If the input is a JSON file (GOBL format), it will convert it to UBL XML.
-- If the input is an XML file (UBL format), it will convert it to GOBL JSON.
-
-For example:
-
-```bash
-gobl.ubl convert ./test/data/invoice-sample.json
+gobl convert invoice.json invoice.xml --to ubl+en16931-v2017   # export
+gobl convert invoice.xml                                       # import, format detected
+gobl convert --list                                            # registered formats
 ```
 
 ## Testing
