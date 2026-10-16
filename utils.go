@@ -84,3 +84,11 @@ func formatNote(note *org.Note) string {
 	}
 	return note.Text
 }
+
+// joinNotes concatenates several notes into one, separated by a blank line.
+func joinNotes(notes []string) []string {
+	if len(notes) <= 1 {
+		return notes
+	}
+	return []string{strings.Join(notes, "\n\n")}
+}

@@ -286,6 +286,7 @@ var FormatEN16931 = Format{
 		Invoice:    "eu.cen.en16931:ubl:1.3.16",
 		CreditNote: "eu.cen.en16931:ubl-creditnote:1.3.16",
 	},
+	ExportFuncs: []ExportFunc{FoldToCore},
 }
 
 // FormatPeppol is the Peppol BIS 3 format. Invoices are written with Peppol
@@ -307,7 +308,7 @@ var FormatPeppol = Format{
 		SpecificationPeppolSelfBilling,
 		SpecificationPeppolInvoiceResponse,
 	},
-	ExportFuncs: []ExportFunc{exportPeppolBilling, exportPeppolInvoiceResponse},
+	ExportFuncs: []ExportFunc{exportPeppolBilling, exportPeppolInvoiceResponse, FoldToCore},
 	ImportFuncs: []ImportFunc{importPeppolInvoiceResponse},
 }
 
