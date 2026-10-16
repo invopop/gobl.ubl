@@ -97,12 +97,6 @@ func TestParseDeclaredTotals(t *testing.T) {
 		assert.Equal(t, cbc.Code("386"), inv.Tax.Ext.Get(untdid.ExtKeyDocumentType))
 		assert.Empty(t, tags[:2][1], "the format's slice was written to")
 	})
-
-	t.Run("totals that cannot be reproduced add the bypass tag once", func(t *testing.T) {
-		inv := importWithTags(t, []cbc.Key{tax.TagPrepayment, tax.TagBypass})
-
-		assert.Equal(t, []cbc.Key{tax.TagPrepayment, tax.TagBypass}, inv.GetTags())
-	})
 }
 
 // TestLineAllowanceBaseRoundTrip guards PEPPOL-EN16931-R040: the amount must

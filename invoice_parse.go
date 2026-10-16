@@ -1,12 +1,11 @@
 package ubl
 
 import (
-	"slices"
-
 	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
@@ -137,16 +136,24 @@ func (ui *Invoice) profileID() string {
 	return ui.ProfileID.Value
 }
 
-// resolveInvoiceType derives the GOBL invoice type and tags from the UBL type code.
+// resolveInvoiceType derives the GOBL invoice type and tags from the UBL type
+// code. A code with no mapping keeps its value in the document type extension,
+// so it is not lost; the root element decides whether it is a credit note.
 func (ui *Invoice) resolveInvoiceType(out *bill.Invoice) {
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
+	code := typeCodeValue(typeCode)
 	out.Type = typeCodeParse(typeCode)
-	if tags := InvoiceTagMap[typeCodeValue(typeCode)]; len(tags) != 0 {
-		// A copy, as SetTags keeps the slice and the map is shared.
-		out.SetTags(slices.Clone(tags)...)
+	if tags := InvoiceTagMap[code]; len(tags) != 0 {
+		out.SetTags(tags...)
+	}
+	if out.Type == bill.InvoiceTypeOther && code != "" {
+		if ui.CreditNoteTypeCode != nil {
+			out.Type = bill.InvoiceTypeCreditNote
+		}
+		out.Tax.Ext = out.Tax.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(code))
 	}
 }
 

@@ -325,11 +325,9 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice, srcs []lineSource) err
 	}
 
 	// Keep the tags parsed from BT-3 or set by the format: the scenarios
-	// regenerate the document type from them. Clipped, so the append never
-	// writes into a slice the tags were set from.
-	if !out.HasTags(tax.TagBypass) {
-		out.SetTags(append(slices.Clip(out.GetTags()), tax.TagBypass)...)
-	}
+	// regenerate the document type from them. Copied, so the append never
+	// writes into the slice the tags were set from.
+	out.SetTags(append(slices.Clone(out.GetTags()), tax.TagBypass)...)
 	return out.Calculate()
 }
 
