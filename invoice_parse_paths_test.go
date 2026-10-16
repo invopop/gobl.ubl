@@ -6,6 +6,7 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -105,8 +106,10 @@ func TestParseDeliveryPaths(t *testing.T) {
 		in.DeliveryTerms = &ubl.DeliveryTerms{ID: "EXW"}
 		inv := convertParsed(t, in)
 		require.NotNil(t, inv.Delivery)
-		require.Len(t, inv.Delivery.Identities, 1)
-		assert.Equal(t, "EXW", inv.Delivery.Identities[0].Code.String())
+		require.Len(t, inv.Delivery.Identities, 2)
+		assert.Equal(t, "0088", inv.Delivery.Identities[0].Ext.Get(iso.ExtKeySchemeID).String())
+		assert.Equal(t, "delivery-terms", inv.Delivery.Identities[1].Key.String())
+		assert.Equal(t, "EXW", inv.Delivery.Identities[1].Code.String())
 	})
 }
 

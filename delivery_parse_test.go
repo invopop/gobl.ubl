@@ -101,4 +101,56 @@ func TestParseDelivery(t *testing.T) {
 		require.NotNil(t, out.Delivery[0].DeliveryLocation.ID)
 		assert.Nil(t, out.Delivery[0].DeliveryLocation.ID.SchemeID)
 	})
+
+	t.Run("delivery terms are not written as the location ID", func(t *testing.T) {
+		data, err := testLoadXML("peppol/base-example.xml")
+		require.NoError(t, err)
+		data = bytes.Replace(data,
+			[]byte("</cac:Delivery>"),
+			[]byte("</cac:Delivery><cac:DeliveryTerms><cbc:ID>DAP</cbc:ID></cac:DeliveryTerms>"), 1)
+
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		e, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.NotNil(t, inv.Delivery)
+		require.Len(t, inv.Delivery.Identities, 2)
+		assert.Equal(t, cbc.Code("9483759475923478"), inv.Delivery.Identities[0].Code)
+		assert.Equal(t, cbc.Key("delivery-terms"), inv.Delivery.Identities[1].Key)
+		assert.Equal(t, cbc.Code("DAP"), inv.Delivery.Identities[1].Code)
+
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+		require.Len(t, out.Delivery, 1)
+		loc := out.Delivery[0].DeliveryLocation
+		require.NotNil(t, loc)
+		require.NotNil(t, loc.ID)
+		assert.Equal(t, "9483759475923478", loc.ID.Value)
+		require.NotNil(t, loc.ID.SchemeID)
+		assert.Equal(t, "0088", *loc.ID.SchemeID)
+	})
+
+	t.Run("delivery terms alone leave the location ID empty", func(t *testing.T) {
+		data, err := testLoadXML("peppol/base-example.xml")
+		require.NoError(t, err)
+		data = bytes.Replace(data,
+			[]byte(`<cbc:ID schemeID="0088">9483759475923478</cbc:ID>`), nil, 1)
+		data = bytes.Replace(data,
+			[]byte("</cac:Delivery>"),
+			[]byte("</cac:Delivery><cac:DeliveryTerms><cbc:ID>DAP</cbc:ID></cac:DeliveryTerms>"), 1)
+
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		e, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+		require.Len(t, out.Delivery, 1)
+		require.NotNil(t, out.Delivery[0].DeliveryLocation)
+		assert.Nil(t, out.Delivery[0].DeliveryLocation.ID)
+	})
 }
