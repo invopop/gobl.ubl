@@ -87,6 +87,7 @@ func Decode(data []byte) (Document, error) {
 		})); err != nil {
 			return nil, err
 		}
+		cleanDocument(in)
 		return in, nil
 
 	case NamespaceUBLApplicationResponse:
@@ -98,6 +99,7 @@ func Decode(data []byte) (Document, error) {
 		})); err != nil {
 			return nil, err
 		}
+		cleanDocument(ar)
 		return ar, nil
 
 	default:
