@@ -5,7 +5,10 @@ import (
 
 	ubl "github.com/invopop/gobl.ubl"
 
+	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,6 +45,57 @@ func TestParseDeclaredTotals(t *testing.T) {
 		assert.Equal(t, "1614.87", inv.Lines[0].Total.String())
 		assert.Equal(t, "1614.87", inv.Totals.Sum.String())
 		assert.Equal(t, "1937.84", inv.Totals.Payable.String())
+	})
+
+	// The type tags are what regenerate BT-3, so bypassing the totals must
+	// not drop them, or the document type quietly falls back to 380.
+	for _, tt := range []struct {
+		code cbc.Code
+		tag  cbc.Key
+	}{
+		{"389", tax.TagSelfBilled},
+		{"393", tax.TagFactoring},
+	} {
+		t.Run("totals that cannot be reproduced keep "+tt.code.String(), func(t *testing.T) {
+			inv := parseWithTypeCode(t, "en16931/line-totals-mismatch.xml",
+				"<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>",
+				"<cbc:InvoiceTypeCode>"+tt.code.String()+"</cbc:InvoiceTypeCode>")
+
+			assert.True(t, inv.HasTags(tax.TagBypass))
+			assert.True(t, inv.HasTags(tt.tag), "missing tag %s", tt.tag)
+			assert.Equal(t, tt.code, inv.Tax.Ext.Get(untdid.ExtKeyDocumentType))
+		})
+	}
+
+	// Format import funcs run before the totals are reconciled, so the tags
+	// they set must survive the bypass too.
+	importWithTags := func(t *testing.T, tags []cbc.Key) *bill.Invoice {
+		t.Helper()
+		f := ubl.FormatEN16931
+		f.ImportFuncs = []ubl.ImportFunc{
+			func(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
+				env.Extract().(*bill.Invoice).SetTags(tags...)
+				return nil
+			},
+		}
+		data, err := testLoadXML("en16931/line-totals-mismatch.xml")
+		require.NoError(t, err)
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		env, err := ubl.Import(doc, ubl.WithFormat(f))
+		require.NoError(t, err)
+		return env.Extract().(*bill.Invoice)
+	}
+
+	t.Run("totals that cannot be reproduced keep a format's tags", func(t *testing.T) {
+		// Spare capacity: adding the bypass tag must not write into it.
+		tags := make([]cbc.Key, 1, 4)
+		tags[0] = tax.TagPrepayment
+		inv := importWithTags(t, tags)
+
+		assert.Equal(t, []cbc.Key{tax.TagPrepayment, tax.TagBypass}, inv.GetTags())
+		assert.Equal(t, cbc.Code("386"), inv.Tax.Ext.Get(untdid.ExtKeyDocumentType))
+		assert.Empty(t, tags[:2][1], "the format's slice was written to")
 	})
 }
 
