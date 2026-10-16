@@ -3,7 +3,13 @@ package ubl
 import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 )
+
+// identityKeyDeliveryTerms marks the delivery identity read from the UBL
+// DeliveryTerms ID, so it is never written back as the delivery location ID (BT-71).
+const identityKeyDeliveryTerms cbc.Key = "delivery-terms"
 
 // Delivery represents delivery information
 type Delivery struct {
@@ -54,15 +60,24 @@ func newDelivery(del *bill.DeliveryDetails) *Delivery {
 			&Location{
 				Address: newAddress(del.Receiver.Addresses),
 			}
-		if len(del.Identities) > 0 {
-			id := del.Identities[0]
-			idType := &IDType{Value: id.Code.String()}
-			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
-				idType.SchemeID = &s
-			}
-			out.DeliveryLocation.ID = idType
-		}
+		out.DeliveryLocation.ID = newDeliveryLocationID(del.Identities)
 	}
 
 	return out
+}
+
+// newDeliveryLocationID builds the delivery location ID (BT-71) and its scheme
+// (BT-71-1) from the first identity that does not hold the delivery terms.
+func newDeliveryLocationID(ids []*org.Identity) *IDType {
+	for _, id := range ids {
+		if id == nil || id.Key == identityKeyDeliveryTerms {
+			continue
+		}
+		out := &IDType{Value: id.Code.String()}
+		if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+			out.SchemeID = &s
+		}
+		return out
+	}
+	return nil
 }
