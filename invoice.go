@@ -3,6 +3,7 @@ package ubl
 import (
 	"encoding/xml"
 	"fmt"
+	"slices"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
@@ -163,9 +164,13 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	if len(inv.Notes) > 0 {
 		var noteTexts []string
 		for _, note := range inv.Notes {
-			if text := formatNote(note); text != "" {
-				noteTexts = append(noteTexts, text)
+			text := formatNote(note)
+			// A subject-less note whose text already starts with "#CODE#" encodes the
+			// same as a coded one, so repeats are dropped to avoid duplicate subjects.
+			if text == "" || slices.Contains(noteTexts, text) {
+				continue
 			}
+			noteTexts = append(noteTexts, text)
 		}
 
 		if len(noteTexts) > 0 {
