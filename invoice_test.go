@@ -5,7 +5,9 @@ import (
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -163,5 +165,47 @@ func TestConvertInvoiceUnregisteredRegime(t *testing.T) {
 		require.NotNil(t, out)
 		// With an unknown regime currency, no tax-accounting currency is emitted.
 		assert.Empty(t, out.TaxCurrencyCode)
+	})
+}
+
+func TestInvoiceNotesDuplicateSubject(t *testing.T) {
+	t.Run("prefixed text matching a coded note is emitted once", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Notes = []*org.Note{
+			{Text: "#PMT#Recovery fee applies to late payments."},
+			{
+				Text: "Recovery fee applies to late payments.",
+				Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: "PMT"}),
+			},
+			{
+				Text: "Late payment penalties apply.",
+				Ext:  tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: "PMD"}),
+			},
+		}
+
+		out, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, []string{
+			"#PMT#Recovery fee applies to late payments.",
+			"#PMD#Late payment penalties apply.",
+		}, out.Note)
+	})
+
+	t.Run("distinct notes are kept", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Notes = []*org.Note{
+			{Text: "First general note."},
+			{Text: "Second general note."},
+		}
+
+		out, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"First general note.", "Second general note."}, out.Note)
 	})
 }
