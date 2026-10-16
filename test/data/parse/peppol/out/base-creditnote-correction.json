@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "fade20df97269fdce4e033ce5468061d624fdd8df93bb54f4137eec164700e92"
+			"val": "d1b9dfcd3e8eb42e94ea42aa88ef75dc0337e62970149be7b4e621c5091d34c0"
 		}
 	},
 	"doc": {
@@ -253,8 +253,10 @@
 			},
 			"identities": [
 				{
-					"label": "0088",
-					"code": "9483759475923478"
+					"code": "9483759475923478",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
 				}
 			],
 			"date": "2017-11-01"
