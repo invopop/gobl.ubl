@@ -107,3 +107,28 @@ func TaxPointCode(point cbc.Key) (string, bool) {
 func CleanString(s string) string {
 	return cleanString(s)
 }
+
+// FoldToCore keeps what the EN 16931 core model allows once and a conformant
+// extension may repeat: one buyer identifier (BT-46, UBL-SR-16), one payee
+// identifier besides the SEPA creditor identifier (BT-60, UBL-SR-20) and one
+// note per line (BT-127, UBL-SR-34). Formats that restrict the core, such as
+// a CIUS, list it last in their ExportFuncs so it also covers what the others
+// add.
+func FoldToCore(_ *Format, _ *gobl.Envelope, doc Document) error {
+	ui, ok := doc.(*Invoice)
+	if !ok {
+		return nil
+	}
+	if p := ui.AccountingCustomerParty.Party; p != nil {
+		p.PartyIdentification = foldIdentifications(p.PartyIdentification)
+	}
+	if p := ui.PayeeParty; p != nil {
+		p.PartyIdentification = foldIdentifications(p.PartyIdentification)
+	}
+	for _, lines := range [][]InvoiceLine{ui.InvoiceLines, ui.CreditNoteLines} {
+		for i := range lines {
+			lines[i].Note = joinNotes(lines[i].Note)
+		}
+	}
+	return nil
+}

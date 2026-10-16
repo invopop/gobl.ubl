@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -478,4 +479,48 @@ func contactName(n *org.Name) string {
 	}
 
 	return fmt.Sprintf("%s %s", given, surname)
+}
+
+// icdSchemePattern matches an ISO 6523 ICD code, as GOBL's iso-scheme-id
+// extension defines it.
+var icdSchemePattern = regexp.MustCompile(`^\d{4}$`)
+
+// foldIdentifications keeps one identification besides the SEPA creditor
+// identifier: the first with an ISO 6523 ICD scheme, the only kind the core
+// accepts (BR-CL-10), or else the first with any scheme, or else the first.
+func foldIdentifications(ids []Identification) []Identification {
+	var kept, sepa []Identification
+	for _, id := range ids {
+		switch {
+		case strings.EqualFold(schemeID(id), sepaSchemeID):
+			sepa = append(sepa, id)
+		case len(kept) == 0:
+			kept = append(kept, id)
+		case schemeRank(id) > schemeRank(kept[0]):
+			kept[0] = id
+		}
+	}
+	if len(kept)+len(sepa) == len(ids) {
+		return ids
+	}
+	return append(kept, sepa...)
+}
+
+// schemeRank orders identifications by how well the core accepts their
+// scheme: an ISO 6523 ICD code, over any other scheme, over none.
+func schemeRank(id Identification) int {
+	switch s := schemeID(id); {
+	case s == "":
+		return 0
+	case icdSchemePattern.MatchString(s):
+		return 2
+	}
+	return 1
+}
+
+func schemeID(id Identification) string {
+	if id.ID == nil || id.ID.SchemeID == nil {
+		return ""
+	}
+	return *id.ID.SchemeID
 }

@@ -8,10 +8,13 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/convert"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -241,4 +244,91 @@ func TestFormatHelpers(t *testing.T) {
 	_, ok = ubl.TaxPointCode("unknown")
 	assert.False(t, ok)
 	assert.Equal(t, "ab", ubl.CleanString("a�b"))
+}
+
+// TestFoldToCore pins what happens to a document that repeats what the EN
+// 16931 core model allows once, such as one imported from a conformant
+// extension: formats listing FoldToCore keep one buyer identifier
+// (UBL-SR-16), one payee identifier besides SEPA (UBL-SR-20) and one note
+// per line (UBL-SR-34), while the others keep them all.
+func TestFoldToCore(t *testing.T) {
+	extended := func(t *testing.T) *gobl.Envelope {
+		t.Helper()
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Customer.Identities = []*org.Identity{
+			{Code: "726697736", Ext: tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "SE"})},
+			{Code: "73269773600017", Ext: tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0009"})},
+			{Code: "CUST-1"},
+		}
+		inv.Payment.Payee.Identities = []*org.Identity{
+			{Code: "PAYEE-1"},
+			{Code: "2298740918237", Ext: tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0088"})},
+		}
+		inv.Payment.Instructions = &pay.Instructions{
+			Key: pay.MeansKeyDirectDebit,
+			DirectDebit: &pay.DirectDebit{
+				Ref:      "MANDATE-1",
+				Creditor: "NO98ZZZ09999999999",
+			},
+			Ext: tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyPaymentMeans: "59"}),
+		}
+		inv.Lines[0].Notes = []*org.Note{
+			{Text: "Delivered on Monday"},
+			{Ext: tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTextSubject: "AAI"}), Text: "Handle with care"},
+		}
+		require.NoError(t, env.Calculate())
+		return env
+	}
+
+	t.Run("core formats keep one of each", func(t *testing.T) {
+		env := extended(t)
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+
+		ids := doc.AccountingCustomerParty.Party.PartyIdentification
+		require.Len(t, ids, 1)
+		assert.Equal(t, "73269773600017", ids[0].ID.Value, "the buyer identifier with an ISO 6523 ICD scheme wins")
+		assert.Equal(t, "0009", *ids[0].ID.SchemeID)
+
+		ids = doc.PayeeParty.PartyIdentification
+		require.Len(t, ids, 2)
+		assert.Equal(t, "2298740918237", ids[0].ID.Value)
+		assert.Equal(t, "0088", *ids[0].ID.SchemeID)
+		assert.Equal(t, "SEPA", *ids[1].ID.SchemeID, "the SEPA creditor identifier is kept alongside")
+
+		assert.Equal(t, []string{"Delivered on Monday\n\n#AAI#Handle with care"}, doc.InvoiceLines[0].Note)
+
+		if *validate {
+			inv, ok := env.Extract().(*bill.Invoice)
+			require.True(t, ok)
+			data, err := ubl.Encode(doc)
+			require.NoError(t, err)
+			validateXML(t, phormClient(t), ubl.FormatEN16931.VESID(inv), data)
+		}
+	})
+
+	t.Run("credit note lines fold too", func(t *testing.T) {
+		env := loadTestEnvelope(t, "credit-note.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Lines[0].Notes = []*org.Note{{Text: "first"}, {Text: "second"}}
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, []string{"first\n\nsecond"}, doc.CreditNoteLines[0].Note)
+	})
+
+	t.Run("formats without the fold keep them all", func(t *testing.T) {
+		f := ubl.FormatEN16931
+		f.ExportFuncs = nil
+		doc, err := ubl.ExportInvoice(extended(t), ubl.WithFormat(f))
+		require.NoError(t, err)
+
+		assert.Len(t, doc.AccountingCustomerParty.Party.PartyIdentification, 3)
+		assert.Len(t, doc.PayeeParty.PartyIdentification, 3)
+		assert.Len(t, doc.InvoiceLines[0].Note, 2)
+	})
 }
