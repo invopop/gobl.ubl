@@ -5,7 +5,6 @@ import (
 
 	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
-	"github.com/invopop/gobl/addons/de/xrechnung"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
@@ -89,8 +88,8 @@ func TestConvertEnsureAddons(t *testing.T) {
 	})
 	t.Run("invoice fails the added addon's rules", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
-		_, err := ubl.Export(env, ubl.WithFormat(ubl.Format{Addons: []cbc.Key{xrechnung.V3}}))
-		assert.Error(t, err)
+		_, err := ubl.Export(env, ubl.WithFormat(ubl.Format{Addons: []cbc.Key{testAddon}}))
+		assert.ErrorContains(t, err, "GOBL-TEST-UBL-BILL-INVOICE-01")
 	})
 	t.Run("unsupported document", func(t *testing.T) {
 		env, err := gobl.Envelop(&note.Message{Content: "hello"})
@@ -184,7 +183,8 @@ func TestConverterPaths(t *testing.T) {
 
 		imported, err := convert.Import(out.Data)
 		require.NoError(t, err)
-		_, ok := imported.Extract().(*bill.Status)
+		_, ok := imported.Envelope.Extract().(*bill.Status)
+		assert.Empty(t, imported.Attachments)
 		assert.True(t, ok)
 	})
 

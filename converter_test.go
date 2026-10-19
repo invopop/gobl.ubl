@@ -88,11 +88,25 @@ func TestReadDocumentContext(t *testing.T) {
 func TestConverterImport(t *testing.T) {
 	data, err := testLoadXML("en16931/ubl-example1.xml")
 	require.NoError(t, err)
-	env, err := convert.Import(data)
+	res, err := convert.Import(data)
 	require.NoError(t, err)
-	inv, ok := env.Extract().(*bill.Invoice)
+	assert.Equal(t, ubl.FormatEN16931.Key, res.Format.Key)
+	inv, ok := res.Envelope.Extract().(*bill.Invoice)
 	require.True(t, ok)
 	assert.Contains(t, inv.GetAddons(), en16931.V2017)
+}
+
+func TestConverterImportAttachments(t *testing.T) {
+	data, err := testLoadXML("en16931/ubl-example2.xml")
+	require.NoError(t, err)
+	res, err := convert.Import(data)
+	require.NoError(t, err)
+	require.Len(t, res.Attachments, 1)
+	a := res.Attachments[0]
+	assert.Equal(t, "Doc2", a.ID)
+	assert.Equal(t, "test.pdf", a.Name)
+	assert.Equal(t, "application/pdf", a.MIME)
+	assert.Equal(t, []byte("Testing Base64 encoding"), a.Data, "decoded")
 }
 
 func TestConverterExport(t *testing.T) {
@@ -110,7 +124,7 @@ func TestConverterExport(t *testing.T) {
 	t.Run("skips format for another schema", func(t *testing.T) {
 		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		out, err := convert.Export(env, ubl.FormatEN16931.Key, formatSpecsTest.Key)
+		out, err := convert.Export(env, ubl.FormatEN16931.Key, convert.WithAlternatives(formatSpecsTest.Key))
 		require.NoError(t, err)
 		assert.Equal(t, formatSpecsTest.Key, out.Format.Key)
 		assert.Contains(t, string(out.Data), specStatusTest.CustomizationID)
@@ -118,7 +132,7 @@ func TestConverterExport(t *testing.T) {
 	t.Run("not supported", func(t *testing.T) {
 		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		_, err = convert.Export(env, ubl.FormatEN16931.Key, ubl.KeyUBL)
+		_, err = convert.Export(env, ubl.FormatEN16931.Key, convert.WithAlternatives(ubl.KeyUBL))
 		assert.ErrorIs(t, err, convert.ErrNotSupported)
 	})
 	t.Run("missing specification addon", func(t *testing.T) {
@@ -138,5 +152,50 @@ func TestConverterExport(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 		_, err := convert.Export(env, "ubl+de-xrechnung-v3")
 		assert.ErrorIs(t, err, convert.ErrUnknownFormat)
+	})
+}
+
+func TestConverterExportAttachments(t *testing.T) {
+	pdf := &convert.Attachment{
+		ID:          "INV-PDF",
+		Name:        "invoice.pdf",
+		Description: "Invoice PDF",
+		MIME:        "application/pdf",
+		Data:        []byte("%PDF-1.7"),
+	}
+	t.Run("embedded in invoices", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		csv := &convert.Attachment{Name: "lines.csv", MIME: "text/csv", Data: []byte("a,b")}
+		out, err := convert.Export(env, ubl.FormatEN16931.Key, convert.WithAttachments(pdf, csv))
+		require.NoError(t, err)
+
+		doc, err := ubl.Decode(out.Data)
+		require.NoError(t, err)
+		atts := doc.(*ubl.Invoice).ExtractBinaryAttachments()
+		require.Len(t, atts, 2)
+		assert.Equal(t, "INV-PDF", atts[0].ID)
+		assert.Equal(t, "Invoice PDF", atts[0].Description)
+		assert.Equal(t, "application/pdf", atts[0].MimeCode)
+		assert.Equal(t, "invoice.pdf", atts[0].Filename)
+		assert.Equal(t, []byte("%PDF-1.7"), atts[0].Data)
+		assert.Equal(t, "lines.csv", atts[1].ID, "named by the file without an ID")
+
+		res, err := convert.Import(out.Data)
+		require.NoError(t, err)
+		require.Len(t, res.Attachments, 2)
+		assert.Equal(t, pdf, res.Attachments[0], "imported again")
+		assert.Equal(t, "lines.csv", res.Attachments[1].Name)
+		assert.Equal(t, []byte("a,b"), res.Attachments[1].Data)
+	})
+	t.Run("not embedded in statuses", func(t *testing.T) {
+		env, err := gobl.Envelop(baseStatus())
+		require.NoError(t, err)
+		_, err = convert.Export(env, formatSpecsTest.Key, convert.WithAttachments(pdf))
+		assert.ErrorIs(t, err, convert.ErrConversion)
+		assert.ErrorContains(t, err, ubl.ErrUnsupportedAttachments.Error())
+	})
+	t.Run("formats embed them", func(t *testing.T) {
+		assert.True(t, convert.FormatFor(ubl.FormatEN16931.Key).Attachments)
+		assert.False(t, convert.FormatFor(ubl.KeyUBL).Attachments)
 	})
 }
