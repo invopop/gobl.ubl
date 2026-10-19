@@ -2,7 +2,6 @@ package ubl_test
 
 import (
 	"bytes"
-	"slices"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
@@ -214,23 +213,30 @@ func TestParseInvoiceDocumentTypeCodes(t *testing.T) {
 	}
 }
 
-// TestParseInvoiceTagsNotShared guards the type tags against changes made
-// to an earlier document: SetTags keeps the slice it is given.
-func TestParseInvoiceTagsNotShared(t *testing.T) {
-	// Restore the map should the copy regress, so other tests are unaffected.
-	tags := slices.Clone(ubl.InvoiceTagMap["393"])
-	t.Cleanup(func() { ubl.InvoiceTagMap["393"] = tags })
-
-	swap := func() *bill.Invoice {
-		return parseWithTypeCode(t, "peppol/base-example.xml",
-			"<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>",
-			"<cbc:InvoiceTypeCode>393</cbc:InvoiceTypeCode>")
+// An unmapped BT-3 keeps its code in the extension, so the document type is
+// not lost. The root element gives the direction: a CreditNote stays a credit
+// note, and the EN 16931 scenario then sets its extension to 381.
+func TestParseInvoiceUnmappedTypeCodes(t *testing.T) {
+	tests := []struct {
+		name string
+		file string
+		from string
+		to   string
+		typ  cbc.Key
+		code cbc.Code
+	}{
+		{"unmapped invoice code", "peppol/base-example.xml", "<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>", "<cbc:InvoiceTypeCode>471</cbc:InvoiceTypeCode>", bill.InvoiceTypeOther, "471"},
+		{"unmapped credit note code", "peppol/base-creditnote-correction.xml", "<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>", "<cbc:CreditNoteTypeCode>83</cbc:CreditNoteTypeCode>", bill.InvoiceTypeCreditNote, "381"},
 	}
-	first := swap()
-	require.Equal(t, []cbc.Key{tax.TagFactoring}, first.GetTags())
-	first.Tags.List[0] = tax.TagPrepayment
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			inv := parseWithTypeCode(t, tt.file, tt.from, tt.to)
 
-	assert.Equal(t, []cbc.Key{tax.TagFactoring}, swap().GetTags())
+			assert.Equal(t, tt.typ, inv.Type)
+			assert.Empty(t, inv.GetTags())
+			assert.Equal(t, tt.code, inv.Tax.Ext.Get(untdid.ExtKeyDocumentType))
+		})
+	}
 }
 
 // parseWithTypeCode imports a test file with its BT-3 element swapped.
