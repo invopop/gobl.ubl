@@ -1,6 +1,7 @@
 package ubl_test
 
 import (
+	"bytes"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
@@ -42,6 +43,21 @@ func TestParseDeclaredTotals(t *testing.T) {
 		assert.Equal(t, "1614.87", inv.Lines[0].Total.String())
 		assert.Equal(t, "1614.87", inv.Totals.Sum.String())
 		assert.Equal(t, "1937.84", inv.Totals.Payable.String())
+	})
+
+	// The bypass tag joins the tags the type code set rather than replacing them.
+	t.Run("self-billed totals that cannot be reproduced", func(t *testing.T) {
+		data, err := testLoadXML("en16931/line-totals-mismatch.xml")
+		require.NoError(t, err)
+		data = bytes.Replace(data, []byte("<cbc:InvoiceTypeCode>380<"), []byte("<cbc:InvoiceTypeCode>389<"), 1)
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		env, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		assert.True(t, inv.HasTags(tax.TagBypass, tax.TagSelfBilled))
 	})
 }
 

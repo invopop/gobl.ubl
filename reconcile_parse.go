@@ -323,7 +323,7 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice, srcs []lineSource) err
 		out.Payment.Terms.CalculateDues(out.Currency.Def().Zero(), t.Payable)
 	}
 
-	out.SetTags(tax.TagBypass)
+	out.SetTags(append(out.GetTags(), tax.TagBypass)...)
 	return out.Calculate()
 }
 
