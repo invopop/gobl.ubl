@@ -67,7 +67,7 @@ To embed files in an invoice, such as a PDF version of it, add them with `WithAt
 
 ```go
 doc, err := ubl.Export(env,
-    ubl.WithFormat(ubl.FormatPeppol),
+    ubl.WithFormat(format),
     ubl.WithAttachments(ubl.BinaryAttachment{
         ID:          "INV-001-PDF",
         Description: "Invoice INV-001",
@@ -81,7 +81,7 @@ doc, err := ubl.Export(env,
 Through the GOBL `convert` register, pass them with `convert.WithAttachments`. Every UBL format embeds them, using the attachment's name as its ID when it has none:
 
 ```go
-out, err := convert.Export(env, "ubl+peppol+bis-v3", convert.WithAttachments(&convert.Attachment{
+out, err := convert.Export(env, "ubl+en16931-v2017", convert.WithAttachments(&convert.Attachment{
     Name: "INV-001.pdf",
     MIME: "application/pdf",
     Data: pdf,
