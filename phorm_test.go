@@ -64,12 +64,21 @@ func (f finding) String() string {
 
 // validateXML pushes the document through phorm and fails the test with every
 // error the rule set raises.
+// ignoredRules are schematron rules the converter cannot satisfy on its own,
+// mapped to the reason. Keep this list short and justified: every entry is a
+// rule real documents are still expected to meet.
+var ignoredRules = map[string]string{}
+
 func validateXML(t *testing.T, pc *phorm.Client, vesid string, data []byte) {
 	t.Helper()
 
 	var errs []string
 	for _, f := range phormValidate(t, pc, vesid, data) {
 		if f.Level == "WARN" {
+			continue
+		}
+		if reason, ok := ignoredRules[f.Rule]; ok {
+			t.Logf("ignoring %s: %s", f.Rule, reason)
 			continue
 		}
 		errs = append(errs, f.String())

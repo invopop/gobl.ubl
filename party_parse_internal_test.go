@@ -37,7 +37,7 @@ func TestGoblPartyTaxRegistration(t *testing.T) {
 			"cac": NamespaceCAC,
 			"cbc": NamespaceCBC,
 		})))
-		return goblParty(party, &options{context: ContextEN16931})
+		return goblParty(party)
 	}
 
 	t.Run("alongside a VAT identifier", func(t *testing.T) {
@@ -87,4 +87,51 @@ func TestGoblPartyTaxRegistration(t *testing.T) {
 		assert.Equal(t, org.IdentityScopeTax, p.Identities[0].Scope)
 		assert.Equal(t, cbc.Code("123457890SC"), p.Identities[0].Code)
 	})
+}
+
+// TestGoblPartyVATCountry covers BT-31 on a party with no postal address, such
+// as the payee (UBL-CR-272 forbids its address): the tax ID country can only
+// come from the ISO prefix BR-CO-09 requires on the VAT identifier.
+func TestGoblPartyVATCountry(t *testing.T) {
+	const partyTemplate = `<cac:Party xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+		<cac:PartyTaxScheme>
+			<cbc:CompanyID>%s</cbc:CompanyID>
+			<cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+		</cac:PartyTaxScheme>
+	</cac:Party>`
+
+	parse := func(t *testing.T, code string) *org.Party {
+		t.Helper()
+		party := new(Party)
+		require.NoError(t, xmlctx.Unmarshal(fmt.Appendf(nil, partyTemplate, code), party, xmlctx.WithNamespaces(map[string]string{
+			"cac": NamespaceCAC,
+			"cbc": NamespaceCBC,
+		})))
+		return goblParty(party)
+	}
+
+	tests := []struct {
+		name    string
+		code    string
+		country l10n.TaxCountryCode
+	}{
+		{"takes the VAT prefix", "FR53341200068", "FR"},
+		{"takes a tax-only prefix", "EL094259216", "EL"},
+		{"takes a lower-case prefix", "fr53341200068", "FR"},
+		// BR-CO-09 makes the prefix mandatory, so a code without a usable one
+		// keeps an empty country and still fails validation.
+		{"no prefix", "123456789", ""},
+		{"an unknown prefix", "ZZ123456789", ""},
+		{"only a prefix", "FR", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := parse(t, tt.code)
+
+			require.NotNil(t, p.TaxID)
+			assert.Equal(t, tt.country, p.TaxID.Country)
+			assert.Equal(t, cbc.Code(tt.code), p.TaxID.Code)
+			assert.Empty(t, p.Identities)
+		})
+	}
 }

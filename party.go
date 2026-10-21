@@ -2,11 +2,9 @@ package ubl
 
 import (
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 
-	"github.com/invopop/gobl.fr.ctc/addon/flow2"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -66,17 +64,9 @@ func newEndpointID(party *org.Party) *EndpointID {
 // TaxSchemeVAT is the tax scheme code for VAT
 const TaxSchemeVAT = "VAT"
 
-// TaxSchemeTaxRegistration is the tax scheme code French documents use for
-// BT-32, the party's tax registration identifier.
+// TaxSchemeTaxRegistration is the default tax scheme code for BT-32, the
+// party's tax registration identifier.
 const TaxSchemeTaxRegistration = "LOC"
-
-// UNCL 3035 role codes the French extended profile pins on the parties it
-// adds: the facturant is the invoicer (EXT-FR-FE-113) and the party the
-// invoice is addressed to the invoicee (EXT-FR-FE-90).
-const (
-	partyRoleInvoicer = "II"
-	partyRoleInvoicee = "IV"
-)
 
 // SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
@@ -200,7 +190,13 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
+// NewParty converts the GOBL party into a UBL party, without any format
+// specific adjustments.
+func NewParty(party *org.Party) *Party {
+	return newParty(party)
+}
+
+func newParty(party *org.Party) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}
@@ -272,14 +268,6 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 
 	p.EndpointID = newEndpointID(party)
 
-	// EXT-FR-FE-BG-01/BG-03: the agent acting for the buyer or the seller,
-	// which UBL nests inside the party it acts for. Only the French extended
-	// profile defines it. GOBL forbids an agent of an agent, so this recurses
-	// at most once.
-	if party.Agent != nil && ctx.Is(ContextPeppolFranceExtended) {
-		p.AgentParty = newParty(party.Agent, ctx)
-	}
-
 	if party.Alias != "" {
 		p.PartyName = &PartyName{
 			Name: party.Alias,
@@ -315,7 +303,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 				taxScheme := PartyTaxScheme{
 					CompanyID: &IDType{Value: code},
 					TaxScheme: &TaxScheme{
-						ID: IDType{Value: taxRegistrationScheme(id, ctx)},
+						ID: IDType{Value: taxRegistrationScheme(id)},
 					},
 				}
 				p.PartyTaxScheme = append(p.PartyTaxScheme, taxScheme)
@@ -354,13 +342,9 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 	return p
 }
 
-// taxRegistrationScheme returns the tax scheme code for a BT-32 registration.
-// French documents pin it; elsewhere the identity's own type is used when it
-// has one.
-func taxRegistrationScheme(id *org.Identity, ctx Context) string {
-	if slices.Contains(ctx.Addons, flow2.V1) {
-		return TaxSchemeTaxRegistration
-	}
+// taxRegistrationScheme returns the tax scheme code for a BT-32 registration:
+// the identity's own type when it has one.
+func taxRegistrationScheme(id *org.Identity) string {
 	if id.Type != "" {
 		return id.Type.String()
 	}

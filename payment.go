@@ -80,7 +80,7 @@ type PrepaidPayment struct {
 const sepaSchemeID = "SEPA"
 const cardNetworkNotApplicable = "NA"
 
-func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
+func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
 	}
@@ -97,7 +97,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newParty(pymt.Payee, ctx)
+		ui.PayeeParty = newParty(pymt.Payee)
 		// UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress.
 		ui.PayeeParty.PostalAddress = nil
 		// UBL-CR-275: A UBL invoice should not include the PayeeParty
@@ -116,23 +116,6 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 				firstIdentificationWithScheme(ui.PayeeParty.PartyIdentification),
 			}
 		}
-	}
-
-	// The payer (EXT-FR-FE-BG-02) is only defined in the French extended
-	// profile, which maps it to the PaymentMandate's PayerParty.
-	if pymt.Payer != nil && ctx.Is(ContextPeppolFranceExtended) {
-		if len(ui.PaymentMeans) == 0 {
-			// PaymentMeans requires a PaymentMeansCode, so when the invoice
-			// carries no payment instructions, fall back to UNTDID 4461 code
-			// "1" (instrument not defined).
-			ui.PaymentMeans = []PaymentMeans{
-				{PaymentMeansCode: IDType{Value: "1"}},
-			}
-		}
-		if ui.PaymentMeans[0].PaymentMandate == nil {
-			ui.PaymentMeans[0].PaymentMandate = new(PaymentMandate)
-		}
-		ui.PaymentMeans[0].PaymentMandate.PayerParty = newParty(pymt.Payer, ctx)
 	}
 
 	// BT-90: Bank assigned creditor identifier
@@ -184,7 +167,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 		// BT-91 must go inside the mandate (BR-DE-31, UBL-CR-680).
 		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{}
 		if instr.DirectDebit.Ref != "" {
-			ui.PaymentMeans[0].PaymentMandate.ID = &IDType{Value: instr.DirectDebit.Ref}
+			ui.PaymentMeans[0].PaymentMandate.ID = &IDType{Value: instr.DirectDebit.Ref.String()}
 		}
 		if instr.DirectDebit.Account != "" {
 			ui.PaymentMeans[0].PaymentMandate.PayerFinancialAccount = &FinancialAccount{

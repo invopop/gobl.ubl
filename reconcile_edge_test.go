@@ -3,6 +3,7 @@ package ubl_test
 import (
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
@@ -67,12 +68,12 @@ func edgeInvoice(t *testing.T, taxTotal, monetaryTotal string, lines ...string) 
 	}
 	body += "\n</Invoice>"
 
-	doc, err := ubl.Parse([]byte(body))
+	doc, err := ubl.Decode([]byte(body))
 	require.NoError(t, err)
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
 
-	env, err := inv.Convert()
+	env, err := ubl.Import(inv)
 	require.NoError(t, err)
 	out, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)
@@ -218,11 +219,11 @@ func TestDocumentChargeBaseRoundTrip(t *testing.T) {
 	data, err := os.ReadFile("test/data/parse/peppol/Allowance-example.xml")
 	require.NoError(t, err)
 
-	doc, err := ubl.Parse(data)
+	doc, err := ubl.Decode(data)
 	require.NoError(t, err)
 	in, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
-	env, err := in.Convert()
+	env, err := ubl.Import(in)
 	require.NoError(t, err)
 
 	inv, ok := env.Extract().(*bill.Invoice)
@@ -237,7 +238,7 @@ func TestDocumentChargeBaseRoundTrip(t *testing.T) {
 	}
 	require.NotNil(t, withBase, "the example should carry a charge with its own base")
 
-	out, err := ubl.ConvertInvoice(env)
+	out, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 
 	var found bool
@@ -253,4 +254,45 @@ func TestDocumentChargeBaseRoundTrip(t *testing.T) {
 			"the declared basis must be emitted, not the invoice sum")
 	}
 	assert.True(t, found, "the charge should round-trip with its multiplier")
+}
+
+// edgeTotals declares a 100.00 net amount at 20% VAT.
+const (
+	edgeTaxTotal = `
+  <cac:TaxTotal><cbc:TaxAmount currencyID="EUR">20.00</cbc:TaxAmount>
+    <cac:TaxSubtotal><cbc:TaxableAmount currencyID="EUR">100.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">20.00</cbc:TaxAmount>
+      <cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Percent>20.00</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>`
+	edgeMonetaryTotal = `
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">100.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">100.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">120.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">120.00</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>`
+)
+
+// edgeBaseQuantityLine is a line of 10 units at a price for 10 units.
+func edgeBaseQuantityLine(amount string) string {
+	return strings.Replace(edgeLine("1", "10", amount, "100.00"),
+		`</cbc:PriceAmount></cac:Price>`,
+		`</cbc:PriceAmount><cbc:BaseQuantity unitCode="EA">10</cbc:BaseQuantity></cac:Price>`, 1)
+}
+
+// A sender may state the unit price with a base quantity it did not apply:
+// the line amount then only matches without it, so it is dropped.
+func TestReconcileDropsUnappliedBaseQuantity(t *testing.T) {
+	inv := edgeInvoice(t, edgeTaxTotal, edgeMonetaryTotal, edgeBaseQuantityLine("1000.00"))
+	require.Len(t, inv.Lines, 1)
+	assert.Nil(t, inv.Lines[0].Item.Per)
+	assert.Equal(t, "1000.00", inv.Lines[0].Total.String())
+}
+
+// A line amount matching neither reading keeps the base quantity.
+func TestReconcileKeepsBaseQuantityMatchingNeither(t *testing.T) {
+	inv := edgeInvoice(t, edgeTaxTotal, edgeMonetaryTotal, edgeBaseQuantityLine("55.00"))
+	require.Len(t, inv.Lines, 1)
+	require.NotNil(t, inv.Lines[0].Item.Per)
+	assert.Equal(t, "10", inv.Lines[0].Item.Per.String())
 }

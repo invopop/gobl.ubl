@@ -16,87 +16,122 @@ import (
 // BR-CO-13), while BT-149 is optional and in no rule, so BT-131 decides between
 // them. What reconciles under no reading is tagged for bypass and recorded as
 // sent.
-func (ui *Invoice) reconcileTotals(out *bill.Invoice) error {
+func (ui *Invoice) reconcileTotals(out *bill.Invoice, srcs []lineSource) error {
 	ui.applyPayableRounding(out)
 
 	if err := out.Calculate(); err != nil {
 		return err
 	}
 
-	if swaps := ui.dropConflictingBaseQuantities(out); len(swaps) > 0 {
+	// A breakdown that misses its declared amount is re-read flat.
+	if flat := goblUnreconciledGroups(out, srcs); len(flat) > 0 {
+		var err error
+		if srcs, err = ui.goblAddLines(out, flat); err != nil {
+			return err
+		}
+		if err := out.Calculate(); err != nil {
+			return err
+		}
+	}
+
+	if swaps := dropConflictingBaseQuantities(out, srcs); len(swaps) > 0 {
 		if err := out.Calculate(); err != nil {
 			return err
 		}
 		// A line matching neither reading keeps the standard one.
-		if ui.restoreBaseQuantities(out, swaps) {
+		if restoreBaseQuantities(out, srcs, swaps) {
 			if err := out.Calculate(); err != nil {
 				return err
 			}
 		}
 	}
 
-	if ui.declaredTotalsAgree(out) {
+	if ui.declaredTotalsAgree(out, srcs) {
 		return nil
 	}
-	return ui.applyDeclaredTotals(out)
+	return ui.applyDeclaredTotals(out, srcs)
+}
+
+func goblUnreconciledGroups(out *bill.Invoice, srcs []lineSource) map[string]bool {
+	var flat map[string]bool
+	for i, src := range srcs {
+		if len(src.children) == 0 || i >= len(out.Lines) {
+			continue
+		}
+		line := out.Lines[i]
+		if line == nil || line.Total == nil {
+			continue
+		}
+		sum := num.AmountZero
+		found := false
+		for _, c := range src.children {
+			if !goblLineIsSummed(c) {
+				continue
+			}
+			if v, ok := goblDeclaredAmount(c.LineExtensionAmount); ok {
+				sum = sum.MatchPrecision(v).Add(v)
+				found = true
+			}
+		}
+		if !found || sum.Equals(*line.Total) {
+			continue
+		}
+		if flat == nil {
+			flat = make(map[string]bool)
+		}
+		flat[goblLineID(src.doc)] = true
+	}
+	return flat
 }
 
 // priceSwap records a dropped base quantity so it can be put back.
 type priceSwap struct {
 	index int
-	price num.Amount
+	per   num.Amount
 }
 
 // dropConflictingBaseQuantities removes the base quantity from any line that only
 // matches its declared amount (BT-131) without it. Lines matching either way keep
 // it, dividing being the reading the standard describes.
-func (ui *Invoice) dropConflictingBaseQuantities(out *bill.Invoice) []priceSwap {
+func dropConflictingBaseQuantities(out *bill.Invoice, srcs []lineSource) []priceSwap {
 	var swaps []priceSwap
-	for i, docLine := range ui.lines() {
+	for i, src := range srcs {
 		if i >= len(out.Lines) {
 			break
 		}
 		line := out.Lines[i]
-		if line == nil || line.Item == nil || line.Item.Price == nil || line.Total == nil {
+		if line == nil || line.Item == nil || line.Item.Per == nil || line.Total == nil {
 			continue
 		}
-		if docLine.Price == nil || docLine.Price.BaseQuantity == nil {
-			continue
-		}
-		declared, ok := goblDeclaredAmount(docLine.LineExtensionAmount)
+		declared, ok := goblDeclaredAmount(src.doc.LineExtensionAmount)
 		if !ok || declared.Equals(*line.Total) {
 			continue
 		}
 		// Retry without the base quantity, the only other reading available.
-		price, err := num.AmountFromString(normalizeNumericString(docLine.Price.PriceAmount.Value))
-		if err != nil {
-			continue
-		}
-		swaps = append(swaps, priceSwap{index: i, price: *line.Item.Price})
-		line.Item.Price = &price
+		swaps = append(swaps, priceSwap{index: i, per: *line.Item.Per})
+		line.Item.Per = nil
 	}
 	return swaps
 }
 
 // restoreBaseQuantities restores the standard price reading on swapped lines that
 // still do not match.
-func (ui *Invoice) restoreBaseQuantities(out *bill.Invoice, swaps []priceSwap) bool {
-	lines := ui.lines()
+func restoreBaseQuantities(out *bill.Invoice, srcs []lineSource, swaps []priceSwap) bool {
 	restored := false
 	for _, s := range swaps {
-		if s.index >= len(out.Lines) || s.index >= len(lines) {
+		if s.index >= len(out.Lines) || s.index >= len(srcs) {
 			continue
 		}
 		line := out.Lines[s.index]
 		if line == nil || line.Item == nil || line.Total == nil {
 			continue
 		}
-		declared, ok := goblDeclaredAmount(lines[s.index].LineExtensionAmount)
+		declared, ok := goblDeclaredAmount(srcs[s.index].doc.LineExtensionAmount)
 		if ok && declared.Equals(*line.Total) {
 			continue
 		}
-		price := s.price
-		line.Item.Price = &price
+		per := s.per
+		line.Item.Per = &per
 		restored = true
 	}
 	return restored
@@ -104,16 +139,17 @@ func (ui *Invoice) restoreBaseQuantities(out *bill.Invoice, swaps []priceSwap) b
 
 // declaredTotalsAgree reports whether the calculated amounts reproduce every
 // declared one: BT-131 per line, then BT-106, BT-109, BT-110, BT-112 and BT-115.
-func (ui *Invoice) declaredTotalsAgree(out *bill.Invoice) bool {
-	for i, docLine := range ui.lines() {
+func (ui *Invoice) declaredTotalsAgree(out *bill.Invoice, srcs []lineSource) bool {
+	for i, src := range srcs {
 		if i >= len(out.Lines) {
 			return false
 		}
 		line := out.Lines[i]
-		if line == nil || line.Total == nil {
+		// GROUP and INFORMATION lines are not counted.
+		if line == nil || line.Total == nil || !goblLineIsSummed(src.doc) {
 			continue
 		}
-		declared, ok := goblDeclaredAmount(docLine.LineExtensionAmount)
+		declared, ok := goblDeclaredAmount(src.doc.LineExtensionAmount)
 		if ok && !declared.Equals(*line.Total) {
 			return false
 		}
@@ -192,7 +228,7 @@ func goblPayableAmount(t *bill.Totals) num.Amount {
 // applyDeclaredTotals records the sender's figures and tags the document so GOBL
 // leaves them alone. Calculation stops under the tag, so every amount the
 // document would otherwise derive is supplied here.
-func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice) error {
+func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice, srcs []lineSource) error {
 	// Align the sender's precision with the currency's.
 	exp := out.Currency.Def().Zero().Exp()
 	declared := func(a Amount) (num.Amount, bool) {
@@ -203,15 +239,15 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice) error {
 		return v.RescaleUp(exp), true
 	}
 
-	for i, docLine := range ui.lines() {
+	for i, src := range srcs {
 		if i >= len(out.Lines) {
 			break
 		}
 		line := out.Lines[i]
-		if line == nil {
+		if line == nil || !goblLineIsSummed(src.doc) {
 			continue
 		}
-		v, ok := declared(docLine.LineExtensionAmount)
+		v, ok := declared(src.doc.LineExtensionAmount)
 		if !ok {
 			continue
 		}
@@ -291,15 +327,6 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice) error {
 	return out.Calculate()
 }
 
-// lines returns the document lines that produced a converted line, in the same
-// order, so they pair index for index with out.Lines.
-func (ui *Invoice) lines() []*InvoiceLine {
-	if len(ui.CreditNoteLines) > 0 {
-		return convertibleLines(ui.CreditNoteLines)
-	}
-	return convertibleLines(ui.InvoiceLines)
-}
-
 // goblDeclaredAmount parses a declared amount, reporting whether one was there.
 func goblDeclaredAmount(a Amount) (num.Amount, bool) {
 	if a.Value == "" {
@@ -344,10 +371,10 @@ func (ui *Invoice) goblDeclaredTaxBreakdown(exp uint32) *tax.Total {
 				Amount: amount.RescaleUp(exp),
 			}
 			ext := make(cbc.CodeMap)
-			if st.TaxCategory.ID != nil {
+			if st.TaxCategory.ID != nil && st.TaxCategory.ID.Value != "" {
 				ext[untdid.ExtKeyTaxCategory] = cbc.Code(st.TaxCategory.ID.Value)
 			}
-			if st.TaxCategory.TaxExemptionReasonCode != nil {
+			if st.TaxCategory.TaxExemptionReasonCode != nil && *st.TaxCategory.TaxExemptionReasonCode != "" {
 				ext[cef.ExtKeyVATEX] = cbc.Code(*st.TaxCategory.TaxExemptionReasonCode)
 			}
 			if len(ext) > 0 {

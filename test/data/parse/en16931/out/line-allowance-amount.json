@@ -4,17 +4,14 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7e599ef0a30b522cacf0659b368f35422574792e10661042544dceaa3213207a"
-		},
-		"from": "iso6523-actorid-upis::0225:381511039",
-		"to": "iso6523-actorid-upis::0225:820731115"
+			"val": "1437a9ce286bb9e6a941b94994db2d1675ade54a7d65aa817e5418f07d716e8b"
+		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
 		"$regime": "FR",
 		"$addons": [
-			"eu-en16931-v2017",
-			"fr-ctc-flow2-v1"
+			"eu-en16931-v2017"
 		],
 		"$tags": [
 			"bypass"
@@ -27,7 +24,6 @@
 		"tax": {
 			"rounding": "currency",
 			"ext": {
-				"fr-ctc-billing-mode": "B1",
 				"untdid-document-type": "380"
 			}
 		},
@@ -46,14 +42,8 @@
 					}
 				}
 			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0225:381511039"
-				}
-			],
 			"inboxes": [
 				{
-					"key": "peppol",
 					"scheme": "0225",
 					"code": "381511039"
 				}
@@ -82,14 +72,8 @@
 					}
 				}
 			],
-			"endpoints": [
-				{
-					"uri": "iso6523-actorid-upis::0225:820731115"
-				}
-			],
 			"inboxes": [
 				{
-					"key": "peppol",
 					"scheme": "0225",
 					"code": "820731115"
 				}

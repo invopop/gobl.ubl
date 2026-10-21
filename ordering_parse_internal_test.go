@@ -3,6 +3,7 @@ package ubl
 import (
 	"testing"
 
+	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	cur "github.com/invopop/gobl/currency"
 	"github.com/stretchr/testify/assert"
@@ -95,6 +96,16 @@ func TestGoblReference(t *testing.T) {
 		})
 		assert.Error(t, err)
 	})
+}
+
+func TestGoblAddOrderingEmptyContract(t *testing.T) {
+	ui := &Invoice{
+		ContractDocumentReference: []Reference{{ID: IDType{Value: ""}}},
+	}
+
+	out := new(bill.Invoice)
+	require.NoError(t, ui.goblAddOrdering(out))
+	assert.Nil(t, out.Ordering)
 }
 
 func TestGoblExchangeRates(t *testing.T) {

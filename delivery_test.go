@@ -38,7 +38,7 @@ func TestNewDelivery(t *testing.T) {
 
 		inv.Delivery.Receiver = nil
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		assert.NotNil(t, doc.Delivery)
@@ -60,7 +60,7 @@ func TestNewDelivery(t *testing.T) {
 		}
 
 		require.NoError(t, env.Calculate())
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		require.NotNil(t, doc.Delivery[0].DeliveryLocation)
@@ -86,7 +86,7 @@ func TestNewDelivery(t *testing.T) {
 
 		inv.Delivery.Date = nil
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		assert.NotNil(t, doc.Delivery)

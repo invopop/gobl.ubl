@@ -7,7 +7,6 @@ import (
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
-	"github.com/invopop/gobl/org"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -132,84 +131,4 @@ func TestParseParty(t *testing.T) {
 		assert.Equal(t, "99100100100", supplier.Inboxes[0].Code.String())
 
 	})
-}
-
-// TestParseSupplierIdentifiers checks that the supplier keeps its own BT-31
-// VAT number and BT-34 endpoint when the party carries extra identifiers and
-// the invoice names a BG-11 tax representative, as the French "assujetti
-// unique" (VAT group) invoices do.
-func TestParseSupplierIdentifiers(t *testing.T) {
-	tests := []struct {
-		name        string
-		file        string
-		taxID       cbc.Code
-		inboxScheme cbc.Code
-		inboxCode   cbc.Code
-		groupSIREN  cbc.Code // BT-29d, the 0231 VAT group identifier
-		repName     string   // BT-62, empty when there is no tax representative
-		repTaxID    cbc.Code // BT-63
-	}{
-		{
-			name:        "ordinary identifiers",
-			file:        "france-extended/b2g-invoice.xml",
-			taxID:       "53341200068",
-			inboxScheme: "0225",
-			inboxCode:   "341200068",
-		},
-		{
-			name:        "assujetti unique",
-			file:        "france-extended/b2g-assujetti-unique.xml",
-			taxID:       "53341200068",
-			inboxScheme: "0225",
-			inboxCode:   "341200068",
-			groupSIREN:  "123456789",
-			repName:     "Fournisseur 34120006871491 ASSUJETTI UNIQUE",
-			repTaxID:    "00123456789",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			e := parseXMLInvoice(t, tt.file)
-
-			inv, ok := e.Extract().(*bill.Invoice)
-			require.True(t, ok)
-
-			supplier := inv.Supplier
-			require.NotNil(t, supplier)
-			require.NotNil(t, supplier.TaxID)
-			assert.Equal(t, l10n.TaxCountryCode("FR"), supplier.TaxID.Country)
-			assert.Equal(t, tt.taxID, supplier.TaxID.Code)
-
-			require.Len(t, supplier.Inboxes, 1)
-			assert.Equal(t, tt.inboxScheme, supplier.Inboxes[0].Scheme)
-			assert.Equal(t, tt.inboxCode, supplier.Inboxes[0].Code)
-
-			assert.Equal(t, tt.groupSIREN, identityWithScheme(supplier, "0231"))
-
-			var rep *org.Party
-			if inv.Ordering != nil {
-				rep = inv.Ordering.Seller
-			}
-			if tt.repName == "" {
-				assert.Nil(t, rep)
-				return
-			}
-			require.NotNil(t, rep)
-			assert.Equal(t, tt.repName, rep.Name)
-			require.NotNil(t, rep.TaxID)
-			assert.Equal(t, tt.repTaxID, rep.TaxID.Code)
-		})
-	}
-}
-
-// identityWithScheme returns the code of the party identity issued under the
-// given ISO 6523 scheme, or an empty code when there is none.
-func identityWithScheme(party *org.Party, scheme cbc.Code) cbc.Code {
-	for _, id := range party.Identities {
-		if id.Ext.Get(iso.ExtKeySchemeID) == scheme {
-			return id.Code
-		}
-	}
-	return cbc.CodeEmpty
 }

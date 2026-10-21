@@ -3,10 +3,8 @@ package ubl
 import (
 	"encoding/xml"
 	"fmt"
-	"strings"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	cur "github.com/invopop/gobl/currency"
@@ -106,19 +104,12 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	// Determine CustomizationID to use in output
-	customizationID := o.context.CustomizationID
-	if o.context.OutputCustomizationID != "" {
-		customizationID = o.context.OutputCustomizationID
+	customizationID := o.spec.CustomizationID
+	if o.spec.OutputCustomizationID != "" {
+		customizationID = o.spec.OutputCustomizationID
 	}
 
-	// Determine ProfileID to use in output
-	// First check meta field, then fall back to context
-	profileID := o.context.ProfileID
-	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		if profile := inv.Tax.GetExt(dgfip.ExtKeyBillingMode); profile != cbc.CodeEmpty {
-			profileID = profile.String()
-		}
-	}
+	profileID := o.spec.ProfileID
 
 	// Create the UBL document
 	out := &Invoice{
@@ -137,8 +128,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		IssueDate:               formatDate(inv.IssueDate),
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
-		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
+		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
+		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
 	}
 
 	// ProfileID is omitted when empty; when present it only carries a value here
@@ -154,13 +145,6 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	taxExchangeRate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency)
 	if taxCurrency != inv.Currency && taxExchangeRate != nil {
 		out.TaxCurrencyCode = string(taxCurrency)
-	}
-
-	// BT-167/BT-167-1/BT-167-2/EXT-FR-FE-192: the VAT accounting currency
-	// exchange rate is only defined in the French extended profile, using
-	// the same rate gating BT-6/BT-111 above.
-	if o.context.Is(ContextPeppolFranceExtended) {
-		out.addTaxExchangeRate(inv.Currency, taxCurrency, taxExchangeRate)
 	}
 
 	if inv.Type.In(bill.InvoiceTypeCreditNote) {
@@ -185,24 +169,19 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		}
 
 		if len(noteTexts) > 0 {
-			if o.context.Is(ContextPeppol) {
-				// Peppol only allows one note, so concatenate all notes
-				out.Note = []string{strings.Join(noteTexts, "\n\n")}
-			} else {
-				out.Note = noteTexts
-			}
+			out.Note = noteTexts
 		}
 	}
 
 	out.addPreceding(inv.Preceding)
-	out.addOrdering(inv.Ordering, o.context)
+	out.addOrdering(inv.Ordering)
 	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
 	out.addTotals(inv)
-	out.addLines(inv, o.context)
+	out.addLines(inv, o.format.SubLines)
 	out.AddAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv, o.context); err != nil {
+	if err = out.addPayment(inv); err != nil {
 		return nil, err
 	}
 	if d := newDelivery(inv.Delivery); d != nil {
@@ -241,25 +220,6 @@ func (ui *Invoice) addTaxPoint(t *bill.Tax) {
 	ui.InvoicePeriod[0].DescriptionCode = code
 }
 
-func (ui *Invoice) addTaxExchangeRate(from, to cur.Code, rate *cur.ExchangeRate) {
-	if from == to || rate == nil {
-		return
-	}
-
-	source := string(from)
-	target := string(to)
-	calcRate := rate.Amount.String()
-	ui.TaxExchangeRate = &ExchangeRate{
-		SourceCurrencyCode: &source,
-		TargetCurrencyCode: &target,
-		CalculationRate:    &calcRate,
-	}
-	if rate.At != nil {
-		date := rate.At.Date().String()
-		ui.TaxExchangeRate.Date = &date
-	}
-}
-
 func invoiceNumber(series cbc.Code, code cbc.Code) string {
 	if series == "" {
 		return code.String()
@@ -267,10 +227,10 @@ func invoiceNumber(series cbc.Code, code cbc.Code) string {
 	return fmt.Sprintf("%s-%s", series, code)
 }
 
-// ConvertInvoice is a convenience function that converts a GOBL envelope
+// ExportInvoice is a convenience function that exports a GOBL envelope
 // containing an invoice into a UBL Invoice or CreditNote document.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
+func ExportInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Export(env, opts...)
 	if err != nil {
 		return nil, err
 	}

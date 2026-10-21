@@ -63,7 +63,7 @@ func TestLineAllowanceBaseRoundTrip(t *testing.T) {
 	assert.Equal(t, "10.00%", d.Percent.String())
 	assert.Equal(t, "100.00", d.Amount.String())
 
-	out, err := ubl.ConvertInvoice(e)
+	out, err := ubl.ExportInvoice(e)
 	require.NoError(t, err)
 	require.Len(t, out.InvoiceLines, 1)
 	require.Len(t, out.InvoiceLines[0].AllowanceCharge, 1)

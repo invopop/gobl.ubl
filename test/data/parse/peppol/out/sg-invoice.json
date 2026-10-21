@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "0448a656082d9270127e5f3bad5f9ad19ca39c61eddd1e450792c0b880027ac6"
+			"val": "4b59623fa5a17d59cecd2e2368ff386dfe522ecc6bacc51759f3bd668b63e6fe"
 		}
 	},
 	"doc": {
@@ -170,7 +170,8 @@
 						}
 					],
 					"description": "Supply",
-					"price": "0.05735092",
+					"price": "0.1433773",
+					"per": "2.5",
 					"unit": "kwh",
 					"ext": {
 						"untdid-unit": "KWH"
@@ -245,7 +246,8 @@
 						}
 					],
 					"description": "Supply",
-					"price": "0.827901924",
+					"price": "2.30944245",
+					"per": "2.78951212",
 					"unit": "kl",
 					"ext": {
 						"untdid-unit": "K6"
@@ -353,22 +355,22 @@
 			]
 		},
 		"payment": {
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2025-09-27",
-						"amount": "24.59",
-						"percent": "100%"
-					}
-				],
-				"notes": "For payment terms, only a note is supported by Peppol currently."
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "1.00"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-09-27",
+						"amount": "23.59",
+						"percent": "100%"
+					}
+				],
+				"notes": "For payment terms, only a note is supported by Peppol currently."
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "44556677",
@@ -398,8 +400,10 @@
 			},
 			"identities": [
 				{
-					"label": "0088",
-					"code": "871690930000478611"
+					"code": "871690930000478611",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
 				}
 			],
 			"date": "2025-08-27"

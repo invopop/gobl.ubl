@@ -35,7 +35,7 @@ func TestCurrencyRounding(t *testing.T) {
 		require.NoError(t, env.Calculate())
 		require.Equal(t, "31.665", inv.Lines[0].Total.String())
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 		require.NoError(t, err)
 
 		// BT-131 / BR-DEC-23
@@ -62,7 +62,7 @@ func TestCurrencyRounding(t *testing.T) {
 		require.NoError(t, env.Calculate())
 		require.Equal(t, "20000", inv.Totals.Sum.String())
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 		require.NoError(t, err)
 
 		assert.NotContains(t, doc.LegalMonetaryTotal.LineExtensionAmount.Value, ".",
@@ -158,13 +158,10 @@ func assertAmountsFitCurrency(t *testing.T, doc *ubl.Invoice) {
 // freedom left, so the converter cannot round amounts independently on the way
 // out without breaking BR-CO-10.
 func TestTotalsArithmetic(t *testing.T) {
-	contexts := map[string]ubl.Context{
-		"en16931":            ubl.ContextEN16931,
-		"peppol":             ubl.ContextPeppol,
-		"peppol-self-billed": ubl.ContextPeppolSelfBilled,
-		"xrechnung":          ubl.ContextXRechnung,
-		"france-cius":        ubl.ContextPeppolFranceCIUS,
-		"france-extended":    ubl.ContextPeppolFranceExtended,
+	contexts := map[string]ubl.Format{
+		"en16931":            ubl.FormatEN16931,
+		"peppol":             ubl.FormatPeppol,
+		"peppol-self-billed": ubl.FormatPeppol,
 	}
 
 	for dir, ctx := range contexts {
@@ -208,7 +205,7 @@ func TestTotalsArithmeticManyLines(t *testing.T) {
 			require.NoError(t, env.Calculate())
 			payable := inv.Totals.Payable
 
-			doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+			doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 			require.NoError(t, err)
 
 			assertTotalsAddUp(t, doc)
@@ -240,9 +237,13 @@ func assertTotalsAddUp(t *testing.T, doc *ubl.Invoice) {
 		lines = doc.CreditNoteLines
 	}
 
-	// BR-CO-10: the sum of line net amounts (BT-106) is the sum of BT-131.
+	// BR-CO-10: the sum of line net amounts (BT-106) is the sum of BT-131,
+	// leaving out GROUP and INFORMATION sub-invoice lines (BR-FREXT-CO-10).
 	sum := num.MakeAmount(0, 2)
 	for _, l := range lines {
+		if s := lineStatus(l); s == lineStatusGroup || s == lineStatusInformation {
+			continue
+		}
 		sum = sum.Add(amount(&l.LineExtensionAmount))
 	}
 	m := doc.LegalMonetaryTotal

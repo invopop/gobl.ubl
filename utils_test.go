@@ -10,10 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
-	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -89,8 +87,32 @@ func TestTagCodeParse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := tagCodeParse(&IDType{Value: tt.input})
+			result := InvoiceTagMap[tt.input]
 			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+// TestTypeCodeParseZATCA confirms the document type is derived from the UNTDID
+// value alone: the KSA-2 transaction-type flags carried in Name never change it.
+func TestTypeCodeParseZATCA(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    string
+		code     string
+		expected string
+	}{
+		{"Standard, plain code", "388", "0100000", "standard"},
+		{"Standard with third-party/nominal/self-billed flags", "388", "0111001", "standard"},
+		{"Simplified standard", "388", "0200000", "standard"},
+		{"Credit note with flags", "381", "0210001", "credit-note"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			code := tt.code
+			result := typeCodeParse(&IDType{Value: tt.value, Name: &code})
+			assert.Equal(t, tt.expected, string(result))
 		})
 	}
 }
@@ -143,88 +165,6 @@ func TestFormatKey(t *testing.T) {
 	assert.Equal(t, cbc.Key("numbers-123"), formatKey("Numbers 123"))
 	assert.Equal(t, cbc.Key("trailing-space"), formatKey("Trailing Space  "))
 	assert.Equal(t, cbc.Key("mixed-case-with-123-numbers"), formatKey("MiXeD cAsE wItH 123 NuMbErS"))
-}
-
-func TestCalculateRequiredPrecision(t *testing.T) {
-	tests := []struct {
-		name         string
-		price        string
-		baseQuantity string
-		expected     uint32
-	}{
-		{
-			name:         "base quantity of 1",
-			price:        "100.00",
-			baseQuantity: "1",
-			expected:     2, // 2 + 0 (log10(1) = 0)
-		},
-		{
-			name:         "base quantity of 2",
-			price:        "200.00",
-			baseQuantity: "2",
-			expected:     3, // 2 + ceil(log10(2)) = 2 + 1
-		},
-		{
-			name:         "base quantity of 10",
-			price:        "100.00",
-			baseQuantity: "10",
-			expected:     3, // 2 + ceil(log10(10)) = 2 + 1
-		},
-		{
-			name:         "base quantity of 100",
-			price:        "100.00",
-			baseQuantity: "100",
-			expected:     4, // 2 + ceil(log10(100)) = 2 + 2
-		},
-		{
-			name:         "base quantity of 1000",
-			price:        "100.00",
-			baseQuantity: "1000",
-			expected:     5, // 2 + ceil(log10(1000)) = 2 + 3
-		},
-		{
-			name:         "price with more decimals",
-			price:        "100.12345",
-			baseQuantity: "100",
-			expected:     7, // 5 + ceil(log10(100)) = 5 + 2
-		},
-		{
-			name:         "price with no decimals",
-			price:        "100",
-			baseQuantity: "100",
-			expected:     2, // 0 + ceil(log10(100)) = 0 + 2
-		},
-		{
-			name:         "fractional base quantity less than 1",
-			price:        "100.00",
-			baseQuantity: "0.5",
-			expected:     2, // 2 + 0 (baseQtyFloat <= 1 after Rescale(0))
-		},
-		{
-			name:         "non-power-of-10 base quantity",
-			price:        "100.00",
-			baseQuantity: "3",
-			expected:     3, // 2 + ceil(log10(3)) = 2 + 1
-		},
-		{
-			name:         "large base quantity",
-			price:        "100.00",
-			baseQuantity: "10000",
-			expected:     6, // 2 + ceil(log10(10000)) = 2 + 4
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			price, err := num.AmountFromString(tt.price)
-			assert.NoError(t, err)
-			baseQty, err := num.AmountFromString(tt.baseQuantity)
-			assert.NoError(t, err)
-
-			result := calculateRequiredPrecision(price, baseQty)
-			assert.Equal(t, tt.expected, result)
-		})
-	}
 }
 
 func TestCleanString(t *testing.T) {
@@ -430,19 +370,11 @@ func fixtures(t *testing.T) []string {
 }
 
 func parseFixture(raw []byte) (any, error) {
-	doc, err := Parse(raw)
+	doc, err := Decode(raw)
 	if err != nil {
 		return nil, err
 	}
-	var env *gobl.Envelope
-	switch d := doc.(type) {
-	case *Invoice:
-		env, err = d.Convert()
-	case *ApplicationResponse:
-		env, err = d.Convert()
-	default:
-		return nil, fmt.Errorf("unhandled document %T", doc)
-	}
+	env, err := Import(doc)
 	if err != nil {
 		return nil, err
 	}
