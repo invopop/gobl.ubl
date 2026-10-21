@@ -138,7 +138,7 @@ func (ui *Invoice) profileID() string {
 
 // resolveInvoiceType derives the GOBL invoice type and tags from the UBL type
 // code. A code with no mapping keeps its value in the document type extension,
-// so it is not lost; the root element decides whether it is a credit note.
+// so it is not lost.
 func (ui *Invoice) resolveInvoiceType(out *bill.Invoice) {
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == nil {
@@ -150,9 +150,6 @@ func (ui *Invoice) resolveInvoiceType(out *bill.Invoice) {
 		out.SetTags(tags...)
 	}
 	if out.Type == bill.InvoiceTypeOther && code != "" {
-		if ui.CreditNoteTypeCode != nil {
-			out.Type = bill.InvoiceTypeCreditNote
-		}
 		out.Tax.Ext = out.Tax.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(code))
 	}
 }

@@ -214,8 +214,7 @@ func TestParseInvoiceDocumentTypeCodes(t *testing.T) {
 }
 
 // An unmapped BT-3 keeps its code in the extension, so the document type is
-// not lost. The root element gives the direction: a CreditNote stays a credit
-// note, and the EN 16931 scenario then sets its extension to 381.
+// not lost, whether the root element is an Invoice or a CreditNote.
 func TestParseInvoiceUnmappedTypeCodes(t *testing.T) {
 	tests := []struct {
 		name string
@@ -226,7 +225,7 @@ func TestParseInvoiceUnmappedTypeCodes(t *testing.T) {
 		code cbc.Code
 	}{
 		{"unmapped invoice code", "peppol/base-example.xml", "<cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>", "<cbc:InvoiceTypeCode>471</cbc:InvoiceTypeCode>", bill.InvoiceTypeOther, "471"},
-		{"unmapped credit note code", "peppol/base-creditnote-correction.xml", "<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>", "<cbc:CreditNoteTypeCode>83</cbc:CreditNoteTypeCode>", bill.InvoiceTypeCreditNote, "381"},
+		{"unmapped credit note code", "peppol/base-creditnote-correction.xml", "<cbc:CreditNoteTypeCode>381</cbc:CreditNoteTypeCode>", "<cbc:CreditNoteTypeCode>83</cbc:CreditNoteTypeCode>", bill.InvoiceTypeOther, "83"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
