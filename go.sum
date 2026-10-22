@@ -32,6 +32,8 @@ github.com/invopop/validation v0.8.0 h1:e5hXHGnONHImgJdonIpNbctg1hlWy1ncaHoVIQ0J
 github.com/invopop/validation v0.8.0/go.mod h1:nLLeXYPGwUNfdCdJo7/q3yaHO62LSx/3ri7JvgKR9vg=
 github.com/invopop/xmlctx v0.13.0 h1:ZNRMC0O/A5h8InoLVSA7tIjjrhJn/NDBYfByBUpSb+g=
 github.com/invopop/xmlctx v0.13.0/go.mod h1:xZ3Bdf0jq2GcjN6QNroUa+l37kyXDXmDEEKiBj9NAl0=
+github.com/invopop/xmlctx v0.13.1-0.20260925144053-6859b81b4ecc h1:AkVg2B13AI1xc+ttTKeCbL8VCFJ8H+0WL7zlGuMuTWE=
+github.com/invopop/xmlctx v0.13.1-0.20260925144053-6859b81b4ecc/go.mod h1:xZ3Bdf0jq2GcjN6QNroUa+l37kyXDXmDEEKiBj9NAl0=
 github.com/invopop/xmldsig v0.14.0 h1:ROwf32DZtX2EekrrOSjLLiY0s2kPEcqHZculITlZfAw=
 github.com/invopop/xmldsig v0.14.0/go.mod h1:oWDotOqdKbbwmfA1B057TVsNZW/V1XgoXsRgrW5by18=
 github.com/invopop/yaml v0.3.1 h1:f0+ZpmhfBSS4MhG+4HYseMdJhoeeopbSKbq5Rpeelso=

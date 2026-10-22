@@ -11,7 +11,7 @@ require (
 	cloud.google.com/go v0.118.0
 	github.com/invopop/phorm v0.1.5
 	github.com/invopop/validation v0.8.0
-	github.com/invopop/xmlctx v0.13.0
+	github.com/invopop/xmlctx v0.13.1-0.20260925144053-6859b81b4ecc
 	github.com/invopop/xmldsig v0.14.0
 )
 
