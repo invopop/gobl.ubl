@@ -5,6 +5,7 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
@@ -22,6 +23,9 @@ var invoiceTypeMap = map[string]cbc.Key{
 	"389": bill.InvoiceTypeStandard,
 	"326": bill.InvoiceTypeStandard,
 	"261": bill.InvoiceTypeCreditNote,
+	"386": bill.InvoiceTypeStandard,
+	"393": bill.InvoiceTypeStandard,
+	"396": bill.InvoiceTypeCreditNote,
 }
 
 // InvoiceTagMap maps UBL invoice type codes to GOBL tax tags.
@@ -29,6 +33,9 @@ var InvoiceTagMap = map[string][]cbc.Key{
 	"389": {tax.TagSelfBilled},
 	"326": {tax.TagPartial},
 	"261": {tax.TagSelfBilled},
+	"386": {tax.TagPrepayment},
+	"393": {tax.TagFactoring},
+	"396": {tax.TagFactoring},
 }
 
 // importEnvelope converts the UBL invoice into a GOBL envelope.
@@ -129,15 +136,21 @@ func (ui *Invoice) profileID() string {
 	return ui.ProfileID.Value
 }
 
-// resolveInvoiceType derives the GOBL invoice type and tags from the UBL type code.
+// resolveInvoiceType derives the GOBL invoice type and tags from the UBL type
+// code. A code with no mapping keeps its value in the document type extension,
+// so it is not lost.
 func (ui *Invoice) resolveInvoiceType(out *bill.Invoice) {
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
+	code := typeCodeValue(typeCode)
 	out.Type = typeCodeParse(typeCode)
-	if tags := InvoiceTagMap[typeCodeValue(typeCode)]; len(tags) != 0 {
+	if tags := InvoiceTagMap[code]; len(tags) != 0 {
 		out.SetTags(tags...)
+	}
+	if out.Type == bill.InvoiceTypeOther && code != "" {
+		out.Tax.Ext = out.Tax.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(code))
 	}
 }
 
