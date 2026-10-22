@@ -382,9 +382,7 @@ func goblConvertLine(docLine *InvoiceLine, taxCategoryMap map[string]*taxCategor
 			Code: cbc.Code(docLine.DocumentReference.ID.Value),
 		}
 		if docLine.DocumentReference.ID.SchemeID != nil {
-			line.Identifier.Ext = tax.ExtensionsOf(cbc.CodeMap{
-				untdid.ExtKeyReference: cbc.Code(*docLine.DocumentReference.ID.SchemeID),
-			})
+			line.Identifier.Ext = line.Identifier.Ext.Set(untdid.ExtKeyReference, cbc.Code(*docLine.DocumentReference.ID.SchemeID))
 		}
 	}
 
@@ -538,10 +536,8 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 			Category: cbc.Code(ctc.TaxScheme.ID.Value),
 		},
 	}
-	if ctc.ID != nil {
-		line.Taxes[0].Ext = tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyTaxCategory: cbc.Code(ctc.ID.Value),
-		})
+	if ctc.ID != nil && ctc.ID.Value != "" {
+		line.Taxes[0].Ext = line.Taxes[0].Ext.Set(untdid.ExtKeyTaxCategory, cbc.Code(ctc.ID.Value))
 
 		// Try to get exemption code from TaxTotal
 		key := buildTaxCategoryKey(ctc.TaxScheme.ID.Value, ctc.ID.Value, ctc.Percent)
@@ -550,7 +546,7 @@ func goblConvertLineItemTaxes(di *Item, line *bill.Line, taxCategoryMap map[stri
 		}
 
 	}
-	if ctc.Percent != nil {
+	if ctc.Percent != nil && *ctc.Percent != "" {
 		percentStr := normalizeNumericString(*ctc.Percent)
 		if !strings.HasSuffix(percentStr, "%") {
 			percentStr += "%"
@@ -583,14 +579,13 @@ func goblItemIdentities(di *Item) []*org.Identity {
 
 	if di.StandardItemIdentification != nil &&
 		di.StandardItemIdentification.ID != nil &&
-		di.StandardItemIdentification.ID.SchemeID != nil {
+		di.StandardItemIdentification.ID.SchemeID != nil &&
+		di.StandardItemIdentification.ID.Value != "" {
 		s := *di.StandardItemIdentification.ID.SchemeID
 		id := &org.Identity{
-			Ext: tax.ExtensionsOf(cbc.CodeMap{
-				iso.ExtKeySchemeID: cbc.Code(s),
-			}),
 			Code: cbc.Code(di.StandardItemIdentification.ID.Value),
 		}
+		id.Ext = id.Ext.Set(iso.ExtKeySchemeID, cbc.Code(s))
 
 		ids = append(ids, id)
 
@@ -609,14 +604,14 @@ func goblItemIdentities(di *Item) []*org.Identity {
 }
 
 func goblIdentity(id *IDType) *org.Identity {
-	if id == nil {
+	if id == nil || id.Value == "" {
 		return nil
 	}
 	identity := &org.Identity{
 		Code: cbc.Code(id.Value),
 	}
 	for _, field := range []*string{id.SchemeID, id.ListID, id.ListVersionID, id.SchemeName, id.Name} {
-		if field != nil {
+		if field != nil && *field != "" {
 			identity.Label = cleanString(*field)
 			break
 		}

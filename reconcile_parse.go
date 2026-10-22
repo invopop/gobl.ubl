@@ -386,10 +386,10 @@ func (ui *Invoice) goblDeclaredTaxBreakdown(exp uint32) *tax.Total {
 				Amount: amount.RescaleUp(exp),
 			}
 			ext := make(cbc.CodeMap)
-			if st.TaxCategory.ID != nil {
+			if st.TaxCategory.ID != nil && st.TaxCategory.ID.Value != "" {
 				ext[untdid.ExtKeyTaxCategory] = cbc.Code(st.TaxCategory.ID.Value)
 			}
-			if st.TaxCategory.TaxExemptionReasonCode != nil {
+			if st.TaxCategory.TaxExemptionReasonCode != nil && *st.TaxCategory.TaxExemptionReasonCode != "" {
 				ext[cef.ExtKeyVATEX] = cbc.Code(*st.TaxCategory.TaxExemptionReasonCode)
 			}
 			if len(ext) > 0 {

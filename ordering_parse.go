@@ -58,26 +58,15 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 		}
 	}
 
-	if ui.DespatchDocumentReference != nil {
-		ordering.Despatch = make([]*org.DocumentRef, 0)
-		for _, despatchRef := range ui.DespatchDocumentReference {
-			docRef, err := goblReference(&despatchRef)
-			if err != nil {
-				return err
-			}
-			ordering.Despatch = append(ordering.Despatch, docRef)
-		}
+	var err error
+	ordering.Despatch, err = goblReferences(ui.DespatchDocumentReference)
+	if err != nil {
+		return err
 	}
 
-	if ui.ReceiptDocumentReference != nil {
-		ordering.Receiving = make([]*org.DocumentRef, 0)
-		for _, receiptRef := range ui.ReceiptDocumentReference {
-			docRef, err := goblReference(&receiptRef)
-			if err != nil {
-				return err
-			}
-			ordering.Receiving = append(ordering.Receiving, docRef)
-		}
+	ordering.Receiving, err = goblReferences(ui.ReceiptDocumentReference)
+	if err != nil {
+		return err
 	}
 
 	if ui.OrderReference != nil {
@@ -117,19 +106,15 @@ func (ui *Invoice) goblAddOrdering(out *bill.Invoice) error {
 			if err != nil {
 				return err
 			}
-			ordering.Contracts = append(ordering.Contracts, docRef)
+			if docRef != nil {
+				ordering.Contracts = append(ordering.Contracts, docRef)
+			}
 		}
 	}
 
-	if ui.OriginatorDocumentReference != nil {
-		ordering.Tender = make([]*org.DocumentRef, 0)
-		for _, tenderRef := range ui.OriginatorDocumentReference {
-			docRef, err := goblReference(&tenderRef)
-			if err != nil {
-				return err
-			}
-			ordering.Tender = append(ordering.Tender, docRef)
-		}
+	ordering.Tender, err = goblReferences(ui.OriginatorDocumentReference)
+	if err != nil {
+		return err
 	}
 
 	ordering.Identities = goblAdditionalDocumentIdentities(ui.AdditionalDocumentReference)
@@ -151,7 +136,7 @@ func goblAdditionalDocumentIdentities(refs []Reference) []*org.Identity {
 
 	var identities []*org.Identity
 	for _, ref := range refs {
-		if ref.DocumentTypeCode != "130" {
+		if ref.DocumentTypeCode != "130" || ref.ID.Value == "" {
 			continue
 		}
 		if identities == nil {
@@ -177,7 +162,24 @@ func (ui *Invoice) goblOrderingIssuer() *org.Party {
 	return goblParty(sp.ServiceProviderParty.Party)
 }
 
+func goblReferences(refs []Reference) ([]*org.DocumentRef, error) {
+	var out []*org.DocumentRef
+	for _, ref := range refs {
+		docRef, err := goblReference(&ref)
+		if err != nil {
+			return nil, err
+		}
+		if docRef != nil {
+			out = append(out, docRef)
+		}
+	}
+	return out, nil
+}
+
 func goblReference(ref *Reference) (*org.DocumentRef, error) {
+	if ref.ID.Value == "" {
+		return nil, nil
+	}
 	docRef := &org.DocumentRef{
 		Code: cbc.Code(ref.ID.Value),
 	}

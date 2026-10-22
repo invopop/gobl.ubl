@@ -34,6 +34,10 @@ var (
 	// ErrUnsupportedDocumentType is returned when the document type
 	// is not supported for conversion.
 	ErrUnsupportedDocumentType = fmt.Errorf("unsupported document type")
+
+	// ErrUnsupportedAttachments is returned when attachments are given for a
+	// document that cannot embed them.
+	ErrUnsupportedAttachments = fmt.Errorf("attachments are only embedded in invoices")
 )
 
 // Version is the version of UBL documents that will be generated
@@ -164,8 +168,14 @@ func Export(env *gobl.Envelope, opts ...Option) (Document, error) {
 		if err != nil {
 			return nil, err
 		}
+		for _, a := range o.attachments {
+			out.AddBinaryAttachment(a)
+		}
 		doc = out
 	case *bill.Status:
+		if len(o.attachments) > 0 {
+			return nil, ErrUnsupportedAttachments
+		}
 		doc = ublApplicationResponse(d, o)
 	default:
 		return nil, ErrUnsupportedDocumentType
@@ -210,7 +220,7 @@ func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 }
 
 func extractRootNamespace(data []byte) (string, error) {
-	dc := xml.NewDecoder(bytes.NewReader(data))
+	dc := xmlctx.NewXMLDecoder(bytes.NewReader(data))
 	for {
 		tk, err := dc.Token()
 		if err == io.EOF {

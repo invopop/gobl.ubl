@@ -235,10 +235,11 @@ func registerFormats(fallback bool, fs []Format) {
 }
 
 type options struct {
-	format Format
-	spec   Specification
-	from   cbc.URI
-	to     cbc.URI
+	format      Format
+	spec        Specification
+	from        cbc.URI
+	to          cbc.URI
+	attachments []BinaryAttachment
 }
 
 // Option is used to define configuration options to use during
@@ -262,6 +263,14 @@ func WithRouting(from, to cbc.URI) Option {
 	return func(o *options) {
 		o.from = from
 		o.to = to
+	}
+}
+
+// WithAttachments embeds files, such as a PDF version of the invoice, in
+// an exported invoice. Other documents cannot embed them.
+func WithAttachments(atts ...BinaryAttachment) Option {
+	return func(o *options) {
+		o.attachments = append(o.attachments, atts...)
 	}
 }
 
