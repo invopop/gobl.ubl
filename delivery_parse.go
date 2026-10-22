@@ -69,14 +69,6 @@ func (ui *Invoice) goblAddDelivery(out *bill.Invoice) error {
 		}
 	}
 
-	if ui.DeliveryTerms != nil && ui.DeliveryTerms.ID != "" {
-		d.Identities = []*org.Identity{
-			{
-				Code: cbc.Code(ui.DeliveryTerms.ID),
-			},
-		}
-	}
-
 	if d.Receiver != nil || d.Date != nil || d.Period != nil || d.Identities != nil {
 		out.Delivery = d
 	}
