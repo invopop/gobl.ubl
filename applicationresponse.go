@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cbc"
 )
 
 // NamespaceUBLApplicationResponse is the UBL 2.1 ApplicationResponse root namespace.
@@ -35,7 +34,7 @@ type ApplicationResponse struct {
 
 // DocumentResponse pairs one Response with the document it concerns. An
 // ApplicationResponse may carry several (generic UBL allows one per status
-// line); the Peppol Invoice Response is restricted to one per message.
+// line); profiles such as the Peppol Invoice Response restrict it to one.
 type DocumentResponse struct {
 	Response          *Response                  `xml:"cac:Response"`
 	DocumentReference *ResponseDocumentReference `xml:"cac:DocumentReference"`
@@ -143,132 +142,4 @@ func responseDescription(line *bill.StatusLine) string {
 		}
 	}
 	return ""
-}
-
-// Peppol BIS Invoice Response specifics follow.
-
-// Peppol Invoice Response code-list identifiers for the StatusReasonCode.
-const (
-	peppolStatusReasonListID = "OPStatusReason"
-	peppolStatusActionListID = "OPStatusAction"
-)
-
-// Peppol Invoice Response document-type codes (UNCL1001) for the referenced
-// document; DocumentTypeCode is mandatory under T111.
-const (
-	documentTypeCodeListID     = "UNCL1001"
-	documentTypeCodeInvoice    = "380"
-	documentTypeCodeCreditNote = "381"
-)
-
-// peppolResponseCodes maps GOBL status events to the Peppol Invoice Response
-// status codes (UNCL4343 subset, transaction T111). A technical "error" properly
-// belongs in the Message Level Response (T71), but the Invoice Response has no
-// technical-reject code, so it falls back to RE with the detail carried in the
-// status clarification. "issued" is a pre-response state with no code.
-var peppolResponseCodes = map[cbc.Key]string{
-	bill.StatusLineAcknowledged: "AB",
-	bill.StatusLineProcessing:   "IP",
-	bill.StatusLineQuerying:     "UQ",
-	bill.StatusLineRejected:     "RE",
-	bill.StatusLineAccepted:     "AP",
-	bill.StatusLinePaid:         "PD",
-	bill.StatusLineError:        "RE",
-}
-
-// peppolResponseEvents reverses peppolResponseCodes for parsing. RE maps back to
-// the business rejection (the error fallback is send-side only); CA
-// (conditionally accepted) normalizes to accepted, with the conditions carried
-// in the status line's reasons and actions.
-var peppolResponseEvents = map[string]cbc.Key{
-	"AB": bill.StatusLineAcknowledged,
-	"IP": bill.StatusLineProcessing,
-	"UQ": bill.StatusLineQuerying,
-	"RE": bill.StatusLineRejected,
-	"AP": bill.StatusLineAccepted,
-	"PD": bill.StatusLinePaid,
-	"CA": bill.StatusLineAccepted,
-}
-
-// peppolStatusReasonCodes maps GOBL reason keys to OPStatusReason codes.
-var peppolStatusReasonCodes = map[cbc.Key]string{
-	bill.ReasonKeyNone:            "NON",
-	bill.ReasonKeyReferences:      "REF",
-	bill.ReasonKeyLegal:           "LEG",
-	bill.ReasonKeyUnknownReceiver: "REC",
-	bill.ReasonKeyQuality:         "QUA",
-	bill.ReasonKeyDelivery:        "DEL",
-	bill.ReasonKeyPrices:          "PRI",
-	bill.ReasonKeyQuantity:        "QTY",
-	bill.ReasonKeyItems:           "ITM",
-	bill.ReasonKeyPaymentTerms:    "PAY",
-	bill.ReasonKeyNotRecognized:   "UNR",
-	bill.ReasonKeyFinanceTerms:    "FIN",
-	bill.ReasonKeyPartial:         "PPD",
-	bill.ReasonKeyOther:           "OTH",
-}
-
-// peppolStatusActionCodes maps GOBL action keys to OPStatusAction codes.
-var peppolStatusActionCodes = map[cbc.Key]string{
-	bill.ActionKeyNone:          "NOA",
-	bill.ActionKeyProvide:       "PIN",
-	bill.ActionKeyReissue:       "NIN",
-	bill.ActionKeyCreditFull:    "CNF",
-	bill.ActionKeyCreditPartial: "CNP",
-	bill.ActionKeyCreditAmount:  "CNA",
-	bill.ActionKeyOther:         "OTH",
-}
-
-// applyPeppolDocumentResponse stamps the Peppol Invoice Response specifics onto
-// a single DocumentResponse: the UNCL4343 response code, and one cac:Status per
-// reason and action carrying the OPStatusReason / OPStatusAction clarification.
-func applyPeppolDocumentResponse(dr *DocumentResponse, line *bill.StatusLine) {
-	resp := dr.Response
-	if code := peppolResponseCodes[line.Key]; code != "" {
-		resp.ResponseCode = &IDType{Value: code}
-	}
-	for _, r := range line.Reasons {
-		if r == nil {
-			continue
-		}
-		if rc := peppolStatusReasonCodes[r.Key]; rc != "" {
-			resp.Status = append(resp.Status, peppolStatus(peppolStatusReasonListID, rc, r.Description))
-		}
-	}
-	for _, a := range line.Actions {
-		if a == nil {
-			continue
-		}
-		if ac := peppolStatusActionCodes[a.Key]; ac != "" {
-			resp.Status = append(resp.Status, peppolStatus(peppolStatusActionListID, ac, a.Description))
-		}
-	}
-	if dr.DocumentReference != nil {
-		docType := documentTypeCodeInvoice
-		if line.Doc != nil && line.Doc.Type == bill.InvoiceTypeCreditNote {
-			docType = documentTypeCodeCreditNote
-		}
-		listID := documentTypeCodeListID
-		dr.DocumentReference.DocumentTypeCode = &IDType{ListID: &listID, Value: docType}
-	}
-}
-
-// trimToResponseParty reduces a party to the elements the Peppol Invoice
-// Response (T111) permits on SenderParty/ReceiverParty: EndpointID,
-// PartyIdentification, PartyLegalEntity and Contact. The CIUS forbids the rest.
-func trimToResponseParty(p *Party) {
-	if p == nil {
-		return
-	}
-	p.PartyName = nil
-	p.PostalAddress = nil
-	p.PartyTaxScheme = nil
-}
-
-func peppolStatus(listID, code, reason string) *Status {
-	s := &Status{StatusReasonCode: &IDType{ListID: &listID, Value: code}}
-	if reason != "" {
-		s.StatusReason = []string{reason}
-	}
-	return s
 }

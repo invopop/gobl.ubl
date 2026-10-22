@@ -16,7 +16,7 @@ import (
 
 func TestNewPayment(t *testing.T) {
 	t.Run("self-billed-invoice", func(t *testing.T) {
-		doc := testInvoiceFrom(t, "peppol-self-billed/self-billed-invoice.json")
+		doc := testInvoiceFrom(t, "self-billed-invoice.json")
 
 		// PayeeParty should have PartyName (BR-17)
 		assert.Equal(t, "Ebeneser Scrooge AS", doc.PayeeParty.PartyName.Name)

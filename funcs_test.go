@@ -142,20 +142,20 @@ func TestFormatFuncErrors(t *testing.T) {
 		assert.ErrorIs(t, err, errFuncs)
 	})
 	t.Run("export status", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
 		_, err = ubl.Export(env, ubl.WithFormat(f))
 		assert.ErrorIs(t, err, errFuncs)
 	})
 	t.Run("import invoice", func(t *testing.T) {
-		in := parsedFixture(t, "peppol/base-example.xml")
+		in := parsedFixture(t, "base-example.xml")
 		_, err := ubl.Import(in, ubl.WithFormat(f))
 		assert.ErrorIs(t, err, errFuncs)
 	})
 	t.Run("import status", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.Export(env)
 		require.NoError(t, err)
 		ar := doc.(*ubl.ApplicationResponse)
 		ar.CustomizationID = f.CustomizationID

@@ -105,7 +105,7 @@ func TestParseLines(t *testing.T) {
 
 	// Test OrderLineReference parsing
 	t.Run("partial-invoice.xml with OrderLineReference", func(t *testing.T) {
-		e := parseXMLInvoice(t, "peppol/partial-invoice.xml")
+		e := parseXMLInvoice(t, "partial-invoice.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -125,7 +125,7 @@ func TestParseLines(t *testing.T) {
 
 	// Test BaseQuantity logic
 	t.Run("BaseQuantity is the number of units the price applies to", func(t *testing.T) {
-		e := parseXMLInvoice(t, "peppol/Allowance-example.xml")
+		e := parseXMLInvoice(t, "Allowance-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -146,7 +146,7 @@ func TestParseLines(t *testing.T) {
 		assert.Nil(t, line.Item.Per)
 
 		// Test the convert amount from String error handling
-		data, err := testLoadXML("peppol/Allowance-example.xml")
+		data, err := testLoadXML("Allowance-example.xml")
 		require.NoError(t, err)
 		invalidXML := strings.ReplaceAll(string(data), `<cbc:BaseAmount currencyID="EUR">1000</cbc:BaseAmount>`, `<cbc:BaseAmount currencyID="EUR">invalid-amount</cbc:BaseAmount>`)
 		doc, err := ubl.Decode([]byte(invalidXML))

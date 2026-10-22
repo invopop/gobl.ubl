@@ -47,8 +47,6 @@ func TestConvertToInvoice(t *testing.T) {
 		dir     string
 	}{
 		{"EN16931", ubl.FormatEN16931, "en16931"},
-		{"Peppol", ubl.FormatPeppol, "peppol"},
-		{"PeppolSelfBilled", ubl.FormatPeppol, "peppol-self-billed"},
 	}
 
 	for _, ctx := range contexts {
@@ -104,8 +102,6 @@ func TestParseInvoice(t *testing.T) {
 		dir  string
 	}{
 		{"EN16931", "en16931"},
-		{"Peppol", "peppol"},
-		{"PeppolSelfBilled", "peppol-self-billed"},
 	}
 
 	for _, ctx := range contexts {
@@ -199,7 +195,7 @@ func testInvoiceFrom(t *testing.T, name string) *ubl.Invoice {
 
 	env := loadTestEnvelope(t, name)
 
-	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 	require.NoError(t, err)
 	return doc
 }

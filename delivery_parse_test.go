@@ -49,7 +49,7 @@ func TestParseDelivery(t *testing.T) {
 	})
 
 	t.Run("location ID scheme is kept as the ISO 6523 extension", func(t *testing.T) {
-		e := parseXMLInvoice(t, "peppol/base-example.xml")
+		e := parseXMLInvoice(t, "base-example.xml")
 
 		inv, ok := e.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -62,7 +62,7 @@ func TestParseDelivery(t *testing.T) {
 		assert.Empty(t, id.Label)
 
 		// The scheme must survive a round trip back to UBL (BT-71-1).
-		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.Len(t, out.Delivery, 1)
 		loc := out.Delivery[0].DeliveryLocation
@@ -73,7 +73,7 @@ func TestParseDelivery(t *testing.T) {
 	})
 
 	t.Run("empty location ID scheme is skipped", func(t *testing.T) {
-		data, err := testLoadXML("peppol/base-example.xml")
+		data, err := testLoadXML("base-example.xml")
 		require.NoError(t, err)
 		data = bytes.Replace(data,
 			[]byte(`<cbc:ID schemeID="0088">9483759475923478</cbc:ID>`),
@@ -94,7 +94,7 @@ func TestParseDelivery(t *testing.T) {
 		assert.Empty(t, id.Ext)
 		assert.Empty(t, id.Label)
 
-		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.Len(t, out.Delivery, 1)
 		require.NotNil(t, out.Delivery[0].DeliveryLocation)
