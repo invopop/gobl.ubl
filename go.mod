@@ -3,7 +3,7 @@ module github.com/invopop/gobl.ubl
 go 1.25.0
 
 require (
-	github.com/invopop/gobl v0.510.0
+	github.com/invopop/gobl v0.510.1-0.20261022112841-9a41ee678fd0
 	github.com/stretchr/testify v1.11.1
 )
 

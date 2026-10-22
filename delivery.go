@@ -18,12 +18,14 @@ type Delivery struct {
 // Location represents a location
 type Location struct {
 	ID      *IDType        `xml:"cbc:ID"`
+	Name    *string        `xml:"cbc:Name,omitempty"`
 	Address *PostalAddress `xml:"cac:Address"`
 }
 
 // DeliveryTerms represents the terms of delivery
 type DeliveryTerms struct {
-	ID string `xml:"cbc:ID"`
+	ID               string    `xml:"cbc:ID"`
+	DeliveryLocation *Location `xml:"cac:DeliveryLocation,omitempty"`
 }
 
 func newDelivery(del *bill.DeliveryDetails) *Delivery {
