@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f1a1aa239a54364209e5ac0991105031d43b7a713b31a45d6c865b1a638730fe"
+			"val": "dbaf58495e23c1d5e9d59cc877518b5428c3eacb9600aa11f71d3ea10c1dfc74"
 		}
 	},
 	"doc": {
@@ -145,7 +145,10 @@
 					"description": "Description of item",
 					"price": "400.00",
 					"unit": "one",
-					"origin": "NO"
+					"origin": "NO",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "4000.00",
 				"taxes": [
@@ -186,7 +189,10 @@
 					],
 					"description": "Description of item",
 					"price": "200.00",
-					"unit": "one"
+					"unit": "one",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "2000.00",
 				"taxes": [
@@ -220,11 +226,17 @@
 							"code": "86776"
 						}
 					],
+					"attributes": [
+						{
+							"label": "AdditionalItemName",
+							"text": "AdditionalItemValue"
+						}
+					],
 					"description": "Description of item",
 					"price": "90.00",
 					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
+					"ext": {
+						"untdid-unit": "C62"
 					}
 				},
 				"sum": "900.00",
@@ -276,7 +288,8 @@
 			}
 		],
 		"ordering": {
-			"code": "0150abc"
+			"code": "0150abc",
+			"cost": "4025:123:4343"
 		},
 		"payment": {
 			"terms": {
@@ -321,8 +334,10 @@
 			},
 			"identities": [
 				{
-					"label": "0088",
-					"code": "7300010000001"
+					"code": "7300010000001",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
 				}
 			],
 			"date": "2017-11-01"

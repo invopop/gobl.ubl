@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c12d80e01847c16ff11233e6b881c3e5fa562e9138de6a8e40458af48ab93cd8"
+			"val": "c4d97991f0170806a625f99c1846d39c3758526b68709e9b88ea5ea90084b6a5"
 		}
 	},
 	"doc": {
@@ -72,10 +72,16 @@
 				"quantity": "3",
 				"item": {
 					"name": "IExpress licentiekosten",
+					"attributes": [
+						{
+							"label": "Verbruikscategorie",
+							"text": "Start"
+						}
+					],
 					"price": "49.00",
 					"unit": "mon",
-					"meta": {
-						"verbruikscategorie": "Start"
+					"ext": {
+						"untdid-unit": "MON"
 					}
 				},
 				"sum": "147.00",

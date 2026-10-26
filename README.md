@@ -20,7 +20,9 @@ Usage of the GOBL to UBL conversion library is straightforward and supports bidi
 
 Both conversion directions are supported, allowing you to seamlessly transform between GOBL and UBL XML formats as needed.
 
-#### Convert GOBL to UBL
+The package uses the same terms as GOBL's `convert` package: **export** maps a GOBL envelope into a UBL document and **import** maps it back, while **encode** and **decode** turn UBL documents into XML bytes and back.
+
+#### Export GOBL to UBL
 
 ```go
 package main
@@ -40,14 +42,14 @@ func main() {
         panic(err)
     }
 
-    // Prepare the UBL Invoice document
-    doc, err := ubl.ConvertInvoice(env)
+    // Export the UBL document
+    doc, err := ubl.Export(env)
     if err != nil {
         panic(err)
     }
 
-    // Create the XML output
-    out, err := doc.Bytes()
+    // Encode the XML output
+    out, err := ubl.Encode(doc)
     if err != nil {
         panic(err)
     }
@@ -55,13 +57,67 @@ func main() {
 }
 ```
 
-The `ubl` package also supports using specific of custom contexts that can be used to generate documents with specific customization and profile identifiers. To use something other than the default, add the options during conversion. For example:
+To export into a format other than the default EN 16931, add it as an option. `ExportInvoice` does the same when an invoice is expected:
 
 ```go
-doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 ```
 
-#### UBL to GOBL
+To embed files in an invoice, such as a PDF version of it, add them with `WithAttachments`. Each is written as an `AdditionalDocumentReference` with an `EmbeddedDocumentBinaryObject`. Other documents, such as Invoice Responses, cannot embed files and return `ErrUnsupportedAttachments`:
+
+```go
+doc, err := ubl.Export(env,
+    ubl.WithFormat(ubl.FormatPeppol),
+    ubl.WithAttachments(ubl.BinaryAttachment{
+        ID:          "INV-001-PDF",
+        Description: "Invoice INV-001",
+        Data:        pdf,
+        MimeCode:    "application/pdf",
+        Filename:    "INV-001.pdf",
+    }),
+)
+```
+
+Through the GOBL `convert` register, pass them with `convert.WithAttachments`. Every UBL format embeds them, using the attachment's name as its ID when it has none:
+
+```go
+out, err := convert.Export(env, "ubl+peppol+bis-v3", convert.WithAttachments(&convert.Attachment{
+    Name: "INV-001.pdf",
+    MIME: "application/pdf",
+    Data: pdf,
+}))
+```
+
+#### Formats
+
+This package provides the base UBL import and export, and the formats that apply in any country:
+
+| Key | Format |
+| --- | --- |
+| `ubl+en16931-v2017` | `FormatEN16931` |
+| `ubl+peppol+bis-v3` | `FormatPeppol` |
+
+A format lists the GOBL schemas it imports into and exports from in `Import` and `Export`. Formats without `Import` schemas are export-only and never detected, as is needed for formats whose documents only differ from another format's by their container.
+
+A format can write documents for more than one specification, choosing from the GOBL document. Its own `CustomizationID`, `ProfileID`, `Addons` and `VESIDs` define its main specification, and `Specifications` lists the others, each with an `Applies` function. On export, the first specification that applies to the document is used, or else the main one; `SpecificationFor` and `VESID` provide them for a document. Every specification's identifiers are recognised on import. The GOBL `convert` register only exports documents that include the addons of the specification they are exported with, and otherwise refuses them with a fault on `$addons`, such as `UBL-PEPPOL-BIS-V3-BILL-INVOICE-01`. `FormatPeppol` writes:
+
+| GOBL document | Specification |
+| --- | --- |
+| `bill.Invoice` | Peppol BIS Billing 3.0 |
+| `bill.Invoice` with the `self-billed` tag | Peppol BIS Self-Billing 3.0 (`SpecificationPeppolSelfBilling`) |
+| `bill.Status` | Peppol Invoice Response 3 (`SpecificationPeppolInvoiceResponse`) |
+
+The base import and export have no format-specific behavior. A format adds the rules of its specification with `ExportFuncs` and `ImportFuncs`, which adjust the finished document in order: an export function receives the GOBL envelope and the exported UBL document, and an import function the UBL document and the imported envelope, before it is calculated. `InvoiceParties` lists each GOBL party alongside its UBL party, for rules that apply to every party. Formats that allow sub-invoice lines, such as EXTENDED-CTC-FR, set `SubLines`: line breakdowns are then written as sub-invoice lines, and read back from the line billing references that name the invoice itself.
+
+Regional formats live in their own modules, which register them with `ubl.RegisterFormats` when imported, making them available to `FindFormat`, `Import`, and the GOBL `convert` register:
+
+| Key | Module |
+| --- | --- |
+| `ubl+fr-ctc-cius-v1`, `ubl+fr-ctc-extended-v1` | [gobl.fr.ctc](https://github.com/invopop/gobl.fr.ctc) (`_ "github.com/invopop/gobl.fr.ctc/ubl"`) |
+| `ubl+sa-zatca-v1` | [gobl.sa.zatca](https://github.com/invopop/gobl.sa.zatca) (`_ "github.com/invopop/gobl.sa.zatca/ubl"`) |
+| `ubl+de-xrechnung-v3` | [gobl.de.xinvoice](https://github.com/invopop/gobl.de.xinvoice) |
+
+#### Import UBL to GOBL
 
 ```go
 package main
@@ -80,26 +136,22 @@ func main() {
         panic(err)
     }
 
-    // Parse the UBL document
-    doc, err := ubl.Parse(inData)
+    // Decode the UBL document
+    doc, err := ubl.Decode(inData)
     if err != nil {
         panic(err)
     }
 
-    // Type assert to the appropriate document type
-    inv, ok := doc.(*ubl.Invoice)
-    if !ok {
-        panic("expected an invoice document")
-    }
-
-    // Convert to GOBL envelope
-    env, err := inv.Convert()
+    // Import into a GOBL envelope
+    env, err := ubl.Import(doc)
     if err != nil {
         panic(err)
     }
 
     // Extract binary attachments if needed
-    attachments := inv.ExtractBinaryAttachments()
+    if inv, ok := doc.(*ubl.Invoice); ok {
+        attachments := inv.ExtractBinaryAttachments()
+    }
 
     // Marshal to JSON
     outputData, err := json.MarshalIndent(env, "", "  ")
@@ -109,23 +161,25 @@ func main() {
 }
 ```
 
-## Command Line
+Through the GOBL `convert` register, `convert.Import` returns the files embedded in an invoice as `Attachments`, alongside the envelope:
 
-The GOBL to UBL tool includes a command-line helper. You can install it manually in your Go environment with:
-
-```bash
-go install ./cmd/gobl.ubl
+```go
+res, err := convert.Import(data)
+for _, a := range res.Attachments {
+    // store a.Data as a.Name
+}
 ```
 
-Once installed, usage is straightforward. The tool automatically detects the input file type and performs the appropriate conversion:
+## Command Line
 
-- If the input is a JSON file (GOBL format), it will convert it to UBL XML.
-- If the input is an XML file (UBL format), it will convert it to GOBL JSON.
-
-For example:
+This package no longer includes a command-line tool. The `gobl` CLI from [gobl.dev](https://github.com/invopop/gobl.dev) converts between GOBL and every format registered with the GOBL `convert` register, including UBL:
 
 ```bash
-gobl.ubl convert ./test/data/invoice-sample.json
+go install github.com/invopop/gobl.dev/cmd/gobl@latest
+
+gobl convert invoice.json invoice.xml --to ubl+en16931-v2017   # export
+gobl convert invoice.xml                                       # import, format detected
+gobl convert --list                                            # registered formats
 ```
 
 ## Testing
@@ -137,6 +191,80 @@ The library uses testify for testing. To run the tests, you can use the followin
 ```bash
 go test ./...
 ```
+
+### Schematron validation
+
+Beyond the golden-file comparisons, the generated XML can be pushed through the
+real EN 16931 / Peppol schematron rule sets.
+Validation runs against [phorm](https://github.com/phax/phorm), the standalone
+validation service that replaced the now-archived `invopop/phive` gRPC wrapper,
+using the [`invopop/phorm`](https://github.com/invopop/phorm) HTTP client.
+
+Start a service locally:
+
+```bash
+docker run -d --name phorm -p 8080:8080 phelger/phorm
+```
+
+Use `phelger/phorm-arm64` on Apple Silicon. Note the image is `phelger/phorm`,
+**not** `phax/phorm` — the latter does not exist, despite what the
+`invopop/phorm` README says.
+
+It takes a few seconds to boot. It is ready once this returns HTTP 200:
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' \
+  -H 'X-Token: phorm-dev-token' \
+  'http://localhost:8080/api/get/vesids?include-deprecated=true'
+```
+
+Then run the suite with `-validate`:
+
+```bash
+go test ./... -validate
+```
+
+Without `-validate` the validating tests are skipped, so the plain `go test
+./...` never needs a service and CI stays offline.
+
+#### Pointing somewhere else
+
+`PHORM_URL` and `PHORM_TOKEN` default to `http://localhost:8080` and phorm's
+stock development token. Override them for a shared instance, or when port 8080
+is already taken locally:
+
+```bash
+docker run -d --name phorm -p 8085:8080 phelger/phorm
+PHORM_URL=http://localhost:8085 go test ./... -validate
+```
+
+#### Known failures
+
+These fixtures do not currently pass schematron. They are long-standing gaps in
+the conversion rather than regressions, so a run is "clean" when only these
+fail:
+
+| Rule | Fixtures | Cause |
+| --- | --- | --- |
+| `PEPPOL-EN16931-R061` | `peppol/invoice-prices-include-vat.json` | The fixture pays by SEPA direct debit but carries no mandate reference (BT-89). |
+
+#### Notes
+
+- **A failed validation is not an error.** phorm answers a document that breaks
+  a rule with an HTTP 400 carrying the report, which it also uses for a request
+  it rejects outright, so `invopop/phorm` separates the two by whether the body
+  is a validation report (fixed in v0.1.5). An error from `ValidateXml`
+  therefore means the validation never ran — unreachable service, rejected
+  token, unresolvable VESID, or a body that is not XML — and the tests treat it
+  as fatal, since nothing was checked.
+- **phorm normalises VESID versions**, so a spelling such as
+  `fr.ctc:ubl-invoice:1.4.0-03` resolves to its published `fr.ctc:ubl-invoice:1.4-03`
+  rule set. The resolved id comes back as `ves.vesid`, which is worth checking
+  when a rule set behaves unexpectedly.
+- **phive-rules keeps only a rolling window of releases.** VESIDs that pass
+  today are dropped a few releases later, so the VESIDs in `format.go` need periodic
+  updating; `GET /api/get/vesids?include-deprecated=true` lists what a given
+  phorm build actually carries, along with a `deprecated` flag.
 
 ## Considerations
 

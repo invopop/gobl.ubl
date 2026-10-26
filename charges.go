@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/tax"
@@ -22,24 +23,27 @@ func (ui *Invoice) addCharges(inv *bill.Invoice) {
 	if inv.Charges == nil && inv.Discounts == nil {
 		return
 	}
+	var notes []*tax.Note
+	if inv.Tax != nil {
+		notes = inv.Tax.Notes
+	}
 	ui.AllowanceCharge = make([]AllowanceCharge, len(inv.Charges)+len(inv.Discounts))
 	// Use invoice sum (before discounts) as base amount for percentage calculations
 	baseAmount := inv.Totals.Sum
 	for i, ch := range inv.Charges {
-		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i] = makeCharge(ch, string(inv.Currency), baseAmount, notes)
 	}
 	for i, d := range inv.Discounts {
-		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount)
+		ui.AllowanceCharge[i+len(inv.Charges)] = makeDiscount(d, string(inv.Currency), baseAmount, notes)
 	}
 }
 
-func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCharge {
+func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount, notes []*tax.Note) AllowanceCharge {
+	// BT-99/BT-100: the document level charge amount and its base, capped at
+	// the currency's precision by BR-DEC-05 and BR-DEC-06.
 	c := AllowanceCharge{
 		ChargeIndicator: true,
-		Amount: Amount{
-			Value:      ch.Amount.String(),
-			CurrencyID: &ccy,
-		},
+		Amount:          newAmount(ch.Amount, ccy),
 	}
 	if ch.Reason != "" {
 		c.AllowanceChargeReason = &ch.Reason
@@ -51,26 +55,29 @@ func makeCharge(ch *bill.Charge, ccy string, baseAmount num.Amount) AllowanceCha
 	if ch.Percent != nil {
 		p := ch.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
-		// Add BaseAmount when percentage is provided
-		c.BaseAmount = &Amount{
-			Value:      baseAmount.String(),
-			CurrencyID: &ccy,
+		// PEPPOL-EN16931-R040 wants the amount to equal base x percentage, so
+		// emit the basis the percentage was calculated on when the document
+		// named one, falling back to the invoice sum.
+		switch {
+		case ch.Base != nil:
+			c.BaseAmount = newAmountPtr(*ch.Base, ccy)
+		default:
+			c.BaseAmount = newAmountPtr(baseAmount, ccy)
 		}
 	}
 	if ch.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(ch.Taxes)
+		c.TaxCategory = makeTaxCategory(ch.Taxes, notes)
 	}
 
 	return c
 }
 
-func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) AllowanceCharge {
+func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount, notes []*tax.Note) AllowanceCharge {
+	// BT-92/BT-93: the document level allowance amount and its base, capped
+	// at the currency's precision by BR-DEC-01 and BR-DEC-02.
 	c := AllowanceCharge{
 		ChargeIndicator: false,
-		Amount: Amount{
-			Value:      d.Amount.String(),
-			CurrencyID: &ccy,
-		},
+		Amount:          newAmount(d.Amount, ccy),
 	}
 	if d.Reason != "" {
 		c.AllowanceChargeReason = &d.Reason
@@ -82,35 +89,46 @@ func makeDiscount(d *bill.Discount, ccy string, baseAmount num.Amount) Allowance
 	if d.Percent != nil {
 		p := d.Percent.StringWithoutSymbol()
 		c.MultiplierFactorNumeric = &p
-		// Add BaseAmount when percentage is provided
-		c.BaseAmount = &Amount{
-			Value:      baseAmount.String(),
-			CurrencyID: &ccy,
+		// PEPPOL-EN16931-R040 wants the amount to equal base x percentage, so
+		// emit the basis the percentage was calculated on when the document
+		// named one, falling back to the invoice sum.
+		switch {
+		case d.Base != nil:
+			c.BaseAmount = newAmountPtr(*d.Base, ccy)
+		default:
+			c.BaseAmount = newAmountPtr(baseAmount, ccy)
 		}
 	}
 	if d.Taxes != nil {
-		c.TaxCategory = makeTaxCategory(d.Taxes)
+		c.TaxCategory = makeTaxCategory(d.Taxes, notes)
 	}
 
 	return c
 }
 
-func makeTaxCategory(taxes tax.Set) []*TaxCategory {
+func makeTaxCategory(taxes tax.Set, notes []*tax.Note) []*TaxCategory {
 	set := []*TaxCategory{}
 	for _, t := range taxes {
 		category := TaxCategory{}
-		category.TaxScheme = &TaxScheme{ID: t.Category.String()}
+		category.TaxScheme = &TaxScheme{ID: IDType{Value: t.Category.String()}}
 
 		e := t.Ext.Get(untdid.ExtKeyTaxCategory).String()
 		if e != "" {
-			category.ID = &e
+			category.ID = &IDType{Value: e}
+		}
+
+		if v := t.Ext.Get(cef.ExtKeyVATEX).String(); v != "" {
+			category.TaxExemptionReasonCode = &v
+		}
+		if note := findTaxNote(notes, t.Category, t.Ext); note != nil {
+			category.TaxExemptionReason = &note.Text
 		}
 
 		// Set percent: required unless category is "O" (outside scope)
 		if t.Percent != nil {
 			p := t.Percent.StringWithoutSymbol()
 			category.Percent = &p
-		} else if category.ID == nil || *category.ID != "O" {
+		} else if category.ID == nil || category.ID.Value != "O" {
 			// Default to 0% when not outside scope
 			zero := "0"
 			category.Percent = &zero

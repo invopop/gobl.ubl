@@ -46,6 +46,10 @@ type ProjectReference struct {
 	ID string `xml:"cbc:ID,omitempty"`
 }
 
+// OrderReferenceNotApplicable is the filler OIOUBL and Peppol accept when
+// there is no order reference to give.
+const OrderReferenceNotApplicable = "NA"
+
 func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	if len(refs) == 0 {
 		return
@@ -67,27 +71,35 @@ func (ui *Invoice) addPreceding(refs []*org.DocumentRef) {
 	}
 }
 
-func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
+func (ui *Invoice) addOrdering(o *bill.Ordering) {
 	if o != nil {
 		if o.Code != "" {
 			ui.BuyerReference = o.Code.String()
 		}
 
-		// If both ordering.seller and seller are present, the original seller is used
-		// as the tax representative.
+		// BT-19: Buyer accounting reference
+		if o.Cost != "" {
+			ui.AccountingCost = o.Cost.String()
+		}
+
+		// The party liable for the tax, when not the supplier, is the
+		// BG-11 tax representative.
 		if o.Seller != nil {
-			p := ui.AccountingSupplierParty.Party
-			ui.TaxRepresentativeParty = p
-			ui.AccountingSupplierParty = SupplierParty{
-				Party: newParty(o.Seller, context),
+			ui.TaxRepresentativeParty = newParty(o.Seller)
+		}
+
+		// The issuer raising the invoice on the seller's behalf.
+		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {
+			ui.AccountingSupplierParty.Party.ServiceProviderParty = &ServiceProviderParty{
+				Party: newParty(o.Issuer),
 			}
 		}
 
 		if o.Period != nil {
 			ui.InvoicePeriod = []Period{
 				{
-					StartDate: formatDate(o.Period.Start),
-					EndDate:   formatDate(o.Period.End),
+					StartDate: formatDatePtr(o.Period.Start),
+					EndDate:   formatDatePtr(o.Period.End),
 				},
 			}
 		}
@@ -100,17 +112,13 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		}
 
 		// BT-14: Sales order reference
-		// Does not apply to zatca
-		if !context.Is(ContextZATCA) {
-			if len(o.Sales) > 0 {
-				if ui.OrderReference == nil {
-					// TODO: once we have a Peppol addon this should be delegated there
-					ui.OrderReference = &OrderReference{
-						ID: "NA",
-					}
+		if len(o.Sales) > 0 {
+			if ui.OrderReference == nil {
+				ui.OrderReference = &OrderReference{
+					ID: OrderReferenceNotApplicable,
 				}
-				ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 			}
+			ui.OrderReference.SalesOrderID = o.Sales[0].Code.String()
 		}
 
 		// BT-11: Project reference
@@ -133,9 +141,13 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		}
 
 		for _, contract := range o.Contracts {
-			ui.ContractDocumentReference = append(ui.ContractDocumentReference, Reference{
+			r := Reference{
 				ID: IDType{Value: string(contract.Code)},
-			})
+			}
+			if contract.Reason != "" {
+				r.DocumentType = contract.Reason
+			}
+			ui.ContractDocumentReference = append(ui.ContractDocumentReference, r)
 		}
 
 		for _, tender := range o.Tender {
@@ -171,6 +183,6 @@ func (ui *Invoice) addOrdering(o *bill.Ordering, context Context) {
 		if ui.OrderReference == nil {
 			ui.OrderReference = &OrderReference{}
 		}
-		ui.OrderReference.ID = "NA"
+		ui.OrderReference.ID = OrderReferenceNotApplicable
 	}
 }

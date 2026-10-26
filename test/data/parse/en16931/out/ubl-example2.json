@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "a8111d5b3ddd689bc88e3f018cb0f6c8c5f49664e87bb811210071359e7134d8"
+			"val": "15c20251b8fef8c5be943a70c5eeca3101baffb49a5c7c1c0ab1f2f5e1ecbffd"
 		}
 	},
 	"doc": {
@@ -12,6 +12,9 @@
 		"$regime": "NO",
 		"$addons": [
 			"eu-en16931-v2017"
+		],
+		"$tags": [
+			"bypass"
 		],
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
@@ -36,19 +39,53 @@
 			]
 		},
 		"supplier": {
-			"name": "Tax handling company AS",
+			"name": "Salescompany ltd.",
 			"tax_id": {
 				"country": "NO",
-				"code": "967611265"
+				"code": "123456789MVA"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "123456789"
+				},
+				{
+					"code": "1238764941386",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Antonio Salesmacher"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"email": "seller@email.de"
+				}
+			],
 			"addresses": [
 				{
-					"street": "Regent street",
-					"street_extra": "Front door",
-					"locality": "Newtown",
-					"region": "RegionC",
-					"code": "202",
+					"street": "Main street 34",
+					"street_extra": "Suite 123",
+					"locality": "Big city",
+					"region": "RegionA",
+					"code": "303",
 					"country": "NO"
+				}
+			],
+			"emails": [
+				{
+					"addr": "antonio@salescompany.no"
+				}
+			],
+			"telephones": [
+				{
+					"num": "46211230"
 				}
 			]
 		},
@@ -56,7 +93,7 @@
 			"name": "The Buyercompany",
 			"tax_id": {
 				"country": "NO",
-				"code": "987654321"
+				"code": "987654321MVA"
 			},
 			"identities": [
 				{
@@ -127,12 +164,18 @@
 							"code": "65434568"
 						}
 					],
+					"attributes": [
+						{
+							"label": "Color",
+							"text": "Black"
+						}
+					],
 					"description": "Processor: Intel Core 2 Duo SU9400 LV (1.4GHz). RAM: 3MB. Screen 1440x900",
 					"price": "1273.00",
 					"unit": "item",
 					"origin": "DE",
-					"meta": {
-						"color": "Black"
+					"ext": {
+						"untdid-unit": "EA"
 					}
 				},
 				"sum": "2546.00",
@@ -158,7 +201,7 @@
 						}
 					}
 				],
-				"total": "2546.00",
+				"total": "1273.00",
 				"notes": [
 					{
 						"text": "Scratch on box"
@@ -190,7 +233,10 @@
 						}
 					],
 					"price": "3.96",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "-3.96",
 				"taxes": [
@@ -235,7 +281,10 @@
 						}
 					],
 					"price": "2.48",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "4.96",
 				"taxes": [
@@ -275,7 +324,10 @@
 						}
 					],
 					"price": "25.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "-25.00",
 				"taxes": [
@@ -312,10 +364,16 @@
 							"code": "65434564"
 						}
 					],
+					"attributes": [
+						{
+							"label": "Type",
+							"text": "Cat5"
+						}
+					],
 					"price": "0.75",
 					"unit": "m",
-					"meta": {
-						"type": "Cat5"
+					"ext": {
+						"untdid-unit": "MTR"
 					}
 				},
 				"sum": "187.50",
@@ -370,58 +428,25 @@
 			}
 		],
 		"ordering": {
+			"cost": "Project cost code 123",
 			"period": {
 				"start": "2013-06-01",
 				"end": "2013-06-30"
 			},
 			"seller": {
-				"name": "Salescompany ltd.",
+				"name": "Tax handling company AS",
 				"tax_id": {
 					"country": "NO",
-					"code": "123456789"
+					"code": "967611265MVA"
 				},
-				"identities": [
-					{
-						"scope": "legal",
-						"code": "123456789"
-					},
-					{
-						"code": "1238764941386",
-						"ext": {
-							"iso-scheme-id": "0088"
-						}
-					}
-				],
-				"people": [
-					{
-						"name": {
-							"given": "Antonio Salesmacher"
-						}
-					}
-				],
-				"inboxes": [
-					{
-						"email": "seller@email.de"
-					}
-				],
 				"addresses": [
 					{
-						"street": "Main street 34",
-						"street_extra": "Suite 123",
-						"locality": "Big city",
-						"region": "RegionA",
-						"code": "303",
+						"street": "Regent street",
+						"street_extra": "Front door",
+						"locality": "Newtown",
+						"region": "RegionC",
+						"code": "202",
 						"country": "NO"
-					}
-				],
-				"emails": [
-					{
-						"addr": "antonio@salescompany.no"
-					}
-				],
-				"telephones": [
-					{
-						"num": "46211230"
 					}
 				]
 			},
@@ -447,22 +472,22 @@
 					}
 				]
 			},
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2013-07-20",
-						"amount": "3393.03",
-						"percent": "100%"
-					}
-				],
-				"notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "1000.00"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-07-20",
+						"amount": "1801.78",
+						"percent": "100%"
+					}
+				],
+				"notes": "2 % discount if paid within 2 days\n            Penalty percentage 10% from due date"
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "0003434323213231",
@@ -492,33 +517,33 @@
 			},
 			"identities": [
 				{
-					"label": "0088",
-					"code": "6754238987643"
+					"code": "6754238987643",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
 				}
 			],
 			"date": "2013-06-15"
 		},
 		"totals": {
-			"sum": "2709.50",
+			"sum": "1436.50",
 			"discount": "100.00",
 			"charge": "100.00",
-			"total": "2709.50",
+			"total": "1436.50",
 			"taxes": {
 				"categories": [
 					{
 						"code": "VAT",
 						"rates": [
 							{
-								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
-								"base": "2733.50",
+								"base": "1460.50",
 								"percent": "25%",
-								"amount": "683.38"
+								"amount": "365.13"
 							},
 							{
-								"key": "standard",
 								"ext": {
 									"untdid-tax-category": "S"
 								},
@@ -527,24 +552,24 @@
 								"amount": "0.15"
 							},
 							{
-								"key": "exempt",
 								"ext": {
 									"untdid-tax-category": "E"
 								},
 								"base": "-25.00",
+								"percent": "0%",
 								"amount": "0.00"
 							}
 						],
-						"amount": "683.53"
+						"amount": "365.28"
 					}
 				],
-				"sum": "683.53"
+				"sum": "365.28"
 			},
-			"tax": "683.53",
-			"total_with_tax": "3393.03",
-			"payable": "3393.03",
+			"tax": "365.28",
+			"total_with_tax": "1801.78",
+			"payable": "1801.78",
 			"advance": "1000.00",
-			"due": "2393.03"
+			"due": "801.78"
 		},
 		"notes": [
 			{

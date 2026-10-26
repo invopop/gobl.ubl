@@ -13,18 +13,21 @@ import (
 type PaymentMeans struct {
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
 	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
+	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
 	PaymentID             *string           `xml:"cbc:PaymentID"`
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
+	CreditAccount         *CreditAccount    `xml:"cac:CreditAccount"`
 	PaymentMandate        *PaymentMandate   `xml:"cac:PaymentMandate"`
 }
 
 // PaymentMandate represents a payment mandate
 type PaymentMandate struct {
-	ID                    IDType            `xml:"cbc:ID"`
+	ID                    *IDType           `xml:"cbc:ID"`
+	PayerParty            *Party            `xml:"cac:PayerParty"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 }
 
@@ -45,13 +48,25 @@ type FinancialAccount struct {
 
 // Branch represents a branch of a financial institution
 type Branch struct {
-	ID   *string `xml:"cbc:ID"`
-	Name *string `xml:"cbc:Name"`
+	ID                   *string               `xml:"cbc:ID"`
+	Name                 *string               `xml:"cbc:Name"`
+	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
+}
+
+// FinancialInstitution identifies a financial institution by its BIC in cbc:ID.
+type FinancialInstitution struct {
+	ID *string `xml:"cbc:ID"`
+}
+
+// CreditAccount represents a credit account (e.g. the Danish Giro/FIK account)
+type CreditAccount struct {
+	AccountID string `xml:"cbc:AccountID"`
 }
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	Note string `xml:"cbc:Note"`
+	Note   string  `xml:"cbc:Note,omitempty"`
+	Amount *Amount `xml:"cbc:Amount,omitempty"`
 }
 
 // PrepaidPayment represents a prepaid payment
@@ -63,15 +78,16 @@ type PrepaidPayment struct {
 }
 
 const sepaSchemeID = "SEPA"
+const cardNetworkNotApplicable = "NA"
 
-func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
+func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
 	}
 	pymt := inv.Payment
 
 	if pymt.Instructions != nil {
-		if err := ui.addPaymentInstructions(inv, ctx); err != nil {
+		if err := ui.addPaymentInstructions(inv); err != nil {
 			return err
 		}
 	}
@@ -81,7 +97,25 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newPayeeParty(pymt.Payee)
+		ui.PayeeParty = newParty(pymt.Payee)
+		// UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress.
+		ui.PayeeParty.PostalAddress = nil
+		// UBL-CR-275: A UBL invoice should not include the PayeeParty
+		// PartyLegalEntity RegistrationName.
+		if le := ui.PayeeParty.PartyLegalEntity; le != nil {
+			le.RegistrationName = nil
+			if le.CompanyID == nil && le.CompanyLegalForm == nil {
+				ui.PayeeParty.PartyLegalEntity = nil
+			}
+		}
+		// UBL-SR-20 (fatal): Payee identifier shall occur maximum once, if the
+		// Payee is different from the Seller. Prefer an identifier that carries
+		// a scheme (e.g. an ISO 6523 ICD code) over an unscoped one.
+		if len(ui.PayeeParty.PartyIdentification) > 1 {
+			ui.PayeeParty.PartyIdentification = []Identification{
+				firstIdentificationWithScheme(ui.PayeeParty.PartyIdentification),
+			}
+		}
 	}
 
 	// BT-90: Bank assigned creditor identifier
@@ -104,7 +138,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice, ctx Context) error {
 	return nil
 }
 
-func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error {
+func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 	instr := inv.Payment.Instructions
 	if instr.Ext.IsZero() || instr.Ext.Get(untdid.ExtKeyPaymentMeans).String() == "" {
 		return validation.Errors{
@@ -129,22 +163,23 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 	if len(instr.CreditTransfer) > 0 {
 		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0])
 	}
-	if instr.DirectDebit != nil {
-		// Skip the mandate without a reference; an empty <cbc:ID/> is rejected by Peppol.
+	if instr.DirectDebit != nil && (instr.DirectDebit.Ref != "" || instr.DirectDebit.Account != "") {
+		// BT-91 must go inside the mandate (BR-DE-31, UBL-CR-680).
+		ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{}
 		if instr.DirectDebit.Ref != "" {
-			ui.PaymentMeans[0].PaymentMandate = &PaymentMandate{
-				ID: IDType{Value: instr.DirectDebit.Ref},
-			}
+			ui.PaymentMeans[0].PaymentMandate.ID = &IDType{Value: instr.DirectDebit.Ref.String()}
 		}
 		if instr.DirectDebit.Account != "" {
-			ui.PaymentMeans[0].PayerFinancialAccount = &FinancialAccount{
+			ui.PaymentMeans[0].PaymentMandate.PayerFinancialAccount = &FinancialAccount{
 				ID: &instr.DirectDebit.Account,
 			}
 		}
 	}
 	if instr.Card != nil {
+		network := cardNetworkNotApplicable
 		ui.PaymentMeans[0].CardAccount = &CardAccount{
 			PrimaryAccountNumberID: &instr.Card.Last4,
+			NetworkID:              &network,
 		}
 		if instr.Card.Holder != "" {
 			ui.PaymentMeans[0].CardAccount.HolderName = &instr.Card.Holder
@@ -154,30 +189,37 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice, ctx Context) error 
 		formattedDate := formatDate(*inv.Payment.Terms.DueDates[0].Date)
 		ui.PaymentMeans[0].PaymentDueDate = &formattedDate
 	}
-	// BR-KSA-17: Debit and credit note must contain the
-	// reason for this invoice type issuing.
-	if inv.Preceding != nil && ctx.Is(ContextZATCA) {
-		for _, ref := range inv.Preceding {
-			ui.PaymentMeans[0].InstructionNote = append(ui.PaymentMeans[0].InstructionNote, ref.Reason)
-		}
-	}
 	return nil
 }
 
 func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
 	pfa := new(FinancialAccount)
 	if ct.IBAN != "" {
-		pfa.ID = &ct.IBAN
+		id := ct.IBAN.String()
+		pfa.ID = &id
 	} else if ct.Number != "" {
-		pfa.ID = &ct.Number
+		id := ct.Number.String()
+		pfa.ID = &id
 	}
 	if ct.Name != "" {
 		pfa.Name = &ct.Name
 	}
 	if ct.BIC != "" {
-		pfa.FinancialInstitutionBranch = &Branch{ID: &ct.BIC}
+		bic := ct.BIC.String()
+		pfa.FinancialInstitutionBranch = &Branch{ID: &bic}
 	}
 	return pfa
+}
+
+// firstIdentificationWithScheme returns the first entry that carries a
+// SchemeID, or the first entry overall if none do.
+func firstIdentificationWithScheme(ids []Identification) Identification {
+	for _, id := range ids {
+		if id.ID != nil && id.ID.SchemeID != nil {
+			return id
+		}
+	}
+	return ids[0]
 }
 
 func (ui *Invoice) addPaymentTerms(pymt *bill.PaymentDetails) {

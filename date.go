@@ -23,3 +23,12 @@ func parseDate(date string) (cal.Date, error) {
 
 	return cal.MakeDate(t.Year(), t.Month(), t.Day()), nil
 }
+
+// formatDatePtr formats an optional date, returning an empty string when not
+// set. cal.Period start and end dates are optional, only one is required.
+func formatDatePtr(date *cal.Date) string {
+	if date == nil {
+		return ""
+	}
+	return formatDate(*date)
+}

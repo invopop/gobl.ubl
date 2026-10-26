@@ -36,7 +36,7 @@ func TestExtractBinaryAttachments(t *testing.T) {
 		data, err := testLoadXML("en16931/ubl-example2.xml")
 		require.NoError(t, err)
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
 
 		inv, ok := doc.(*ubl.Invoice)
@@ -58,4 +58,29 @@ func TestExtractBinaryAttachments(t *testing.T) {
 		expectedData := []byte("Testing Base64 encoding")
 		assert.Equal(t, expectedData, att.Data)
 	})
+}
+
+func TestParseEmbeddedOverExternalAttachment(t *testing.T) {
+	data, err := testLoadXML("en16931/ubl-example2.xml")
+	require.NoError(t, err)
+	doc, err := ubl.Decode(data)
+	require.NoError(t, err)
+	inv, ok := doc.(*ubl.Invoice)
+	require.True(t, ok)
+
+	// Doc2 carries both an embedded binary and an external URI
+	ref := &inv.AdditionalDocumentReference[1]
+	require.Equal(t, "Doc2", ref.ID.Value)
+	ref.Attachment.ExternalReference = &ubl.ExternalReference{URI: "https://example.com/doc2.pdf"}
+
+	env, err := ubl.Import(inv)
+	require.NoError(t, err)
+	gi, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	require.Len(t, gi.Attachments, 1)
+	assert.Equal(t, cbc.Code("Doc1"), gi.Attachments[0].Code)
+
+	bins := inv.ExtractBinaryAttachments()
+	require.Len(t, bins, 1)
+	assert.Equal(t, "Doc2", bins[0].ID)
 }

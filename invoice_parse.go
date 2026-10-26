@@ -3,13 +3,13 @@ package ubl
 import (
 	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
-	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -23,6 +23,9 @@ var invoiceTypeMap = map[string]cbc.Key{
 	"389": bill.InvoiceTypeStandard,
 	"326": bill.InvoiceTypeStandard,
 	"261": bill.InvoiceTypeCreditNote,
+	"386": bill.InvoiceTypeStandard,
+	"393": bill.InvoiceTypeStandard,
+	"396": bill.InvoiceTypeCreditNote,
 }
 
 // InvoiceTagMap maps UBL invoice type codes to GOBL tax tags.
@@ -30,38 +33,46 @@ var InvoiceTagMap = map[string][]cbc.Key{
 	"389": {tax.TagSelfBilled},
 	"326": {tax.TagPartial},
 	"261": {tax.TagSelfBilled},
+	"386": {tax.TagPrepayment},
+	"393": {tax.TagFactoring},
+	"396": {tax.TagFactoring},
 }
 
-// Convert converts the UBL Invoice to a GOBL envelope.
-// It automatically detects the context based on CustomizationID and ProfileID.
-// Binary attachments are ignored during conversion - use ExtractBinaryAttachments
-// to retrieve them separately.
-func (ui *Invoice) Convert() (*gobl.Envelope, error) {
-	o := new(options)
+// importEnvelope converts the UBL invoice into a GOBL envelope.
+func (ui *Invoice) importEnvelope(opts []Option) (*gobl.Envelope, error) {
+	o := importOptions(ui.CustomizationID, ui.profileID(), opts)
 
-	// Detect context from the invoice
-	ctx := FindContext(ui.CustomizationID, ui.ProfileID)
-	if ctx != nil {
-		o.context = *ctx
-	}
-
-	inv, err := ui.goblInvoice(o)
+	inv, srcs, err := ui.goblInvoice(o)
 	if err != nil {
 		return nil, err
 	}
 
 	env := gobl.NewEnvelope()
-	if err := env.Insert(inv); err != nil {
+	// Received document: record the transport routing before calculation so
+	// GOBL respects it instead of deriving an outgoing-direction guess.
+	setEnvelopeRouting(env, o)
+	if env.Document, err = schema.NewObject(inv); err != nil {
+		return nil, err
+	}
+	if err := o.format.runImportFuncs(ui, env); err != nil {
 		return nil, err
 	}
 
+	// Everything the document declares is now mapped, so the calculated
+	// amounts can be checked against the ones the sender stated.
+	if err := ui.reconcileTotals(inv, srcs); err != nil {
+		return nil, err
+	}
+	if err := env.Calculate(); err != nil {
+		return nil, err
+	}
 	return env, nil
 }
 
-func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
+func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, []lineSource, error) {
 	out := &bill.Invoice{
 		Addons: tax.Addons{
-			List: o.context.Addons,
+			List: o.spec.Addons,
 		},
 		Code:     cbc.Code(ui.ID),
 		Currency: currency.Code(ui.DocumentCurrencyCode),
@@ -70,71 +81,76 @@ func (ui *Invoice) goblInvoice(o *options) (*bill.Invoice, error) {
 			// as this is the default for EN16931.
 			Rounding: tax.RoundingRuleCurrency,
 		},
-		Supplier: goblParty(ui.AccountingSupplierParty.Party, o),
-		Customer: goblParty(ui.AccountingCustomerParty.Party, o),
+		Supplier: goblParty(ui.AccountingSupplierParty.Party),
+		Customer: goblParty(ui.AccountingCustomerParty.Party),
 	}
 
-	ui.applyContextTaxExtensions(out, o)
-	ui.resolveInvoiceType(out, o)
+	ui.resolveInvoiceType(out)
 
 	if err := ui.parseInvoiceDates(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ui.applyExchangeRates(out)
 
-	if err := ui.goblAddLines(out); err != nil {
-		return nil, err
+	if o.format.SubLines {
+		ui.goblReadLineHierarchy()
 	}
-	if err := ui.goblAddPayment(out, o); err != nil {
-		return nil, err
+	srcs, err := ui.goblAddLines(out, nil)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err := ui.goblAddPayment(out); err != nil {
+		return nil, nil, err
 	}
 	if err := ui.goblAddOrdering(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err := ui.goblAddDelivery(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ui.parseInvoiceNotes(out)
 
 	if err := ui.parseBillingReferences(out); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	ui.applyZATCAPrecedingReasons(out, o)
-	ui.applyTaxRepresentative(out, o)
+	ui.applyTaxRepresentative(out)
 
 	if len(ui.AllowanceCharge) > 0 {
 		if err := ui.goblAddCharges(out); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	out.Attachments = ui.goblAddAttachments()
 	ui.goblAddTaxNotes(out)
 
-	return out, nil
+	return out, srcs, nil
 }
 
-// applyContextTaxExtensions sets tax extensions that depend on the active context.
-func (ui *Invoice) applyContextTaxExtensions(out *bill.Invoice, o *options) {
-	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		out.Tax.Ext = out.Tax.Ext.Set(dgfip.ExtKeyBillingMode, cbc.Code(ui.ProfileID))
+// profileID returns the ProfileID value, or "" when absent.
+func (ui *Invoice) profileID() string {
+	if ui.ProfileID == nil {
+		return ""
 	}
-
-	if o.context.Is(ContextZATCA) && ui.InvoiceTypeCode != nil && ui.InvoiceTypeCode.Name != nil {
-		out.Tax.Ext = out.Tax.Ext.Set(zatca.ExtKeyInvoiceType, cbc.Code(*ui.InvoiceTypeCode.Name))
-	}
+	return ui.ProfileID.Value
 }
 
-// resolveInvoiceType derives the GOBL invoice type and tags from the UBL type code.
-func (ui *Invoice) resolveInvoiceType(out *bill.Invoice, o *options) {
+// resolveInvoiceType derives the GOBL invoice type and tags from the UBL type
+// code. A code with no mapping keeps its value in the document type extension,
+// so it is not lost.
+func (ui *Invoice) resolveInvoiceType(out *bill.Invoice) {
 	typeCode := ui.InvoiceTypeCode
 	if typeCode == nil {
 		typeCode = ui.CreditNoteTypeCode
 	}
+	code := typeCodeValue(typeCode)
 	out.Type = typeCodeParse(typeCode)
-	if tags := tagCodeParse(typeCode, o.context); len(tags) != 0 {
+	if tags := InvoiceTagMap[code]; len(tags) != 0 {
 		out.SetTags(tags...)
+	}
+	if out.Type == bill.InvoiceTypeOther && code != "" {
+		out.Tax.Ext = out.Tax.Ext.Set(untdid.ExtKeyDocumentType, cbc.Code(code))
 	}
 }
 
@@ -168,13 +184,35 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 
 // applyExchangeRates populates ExchangeRates when the tax currency differs from the document currency.
 func (ui *Invoice) applyExchangeRates(out *bill.Invoice) {
+	if ui.TaxExchangeRate != nil && ui.taxExchangeRateMatchesDocument() {
+		if rate := goblTaxExchangeRate(ui.TaxExchangeRate); rate != nil {
+			out.ExchangeRates = []*currency.ExchangeRate{rate}
+			return
+		}
+	}
+
 	if ui.TaxCurrencyCode != "" && ui.DocumentCurrencyCode != ui.TaxCurrencyCode {
+		doc, acc := ui.goblTaxTotals(currency.Code(ui.DocumentCurrencyCode))
 		out.ExchangeRates = goblExchangeRates(
 			currency.Code(ui.DocumentCurrencyCode),
 			currency.Code(ui.TaxCurrencyCode),
-			ui.TaxTotal,
+			doc, acc,
 		)
 	}
+}
+
+// taxExchangeRateMatchesDocument reports whether cac:TaxExchangeRate's
+// currency codes are consistent with the document's own currency codes,
+// so it isn't trusted when it carries unrelated data.
+func (ui *Invoice) taxExchangeRateMatchesDocument() bool {
+	er := ui.TaxExchangeRate
+	if er.SourceCurrencyCode == nil || *er.SourceCurrencyCode != ui.DocumentCurrencyCode {
+		return false
+	}
+	if ui.TaxCurrencyCode != "" && (er.TargetCurrencyCode == nil || *er.TargetCurrencyCode != ui.TaxCurrencyCode) {
+		return false
+	}
+	return true
 }
 
 // parseInvoiceNotes copies document-level notes into the GOBL invoice.
@@ -184,6 +222,9 @@ func (ui *Invoice) parseInvoiceNotes(out *bill.Invoice) {
 	}
 	out.Notes = make([]*org.Note, 0, len(ui.Note))
 	for _, note := range ui.Note {
+		if note == "" {
+			continue
+		}
 		out.Notes = append(out.Notes, parseNote(note))
 	}
 }
@@ -219,37 +260,21 @@ func (ui *Invoice) parseBillingReferences(out *bill.Invoice) error {
 	return nil
 }
 
-// applyZATCAPrecedingReasons pairs ZATCA InstructionNote entries with Preceding refs by index.
-// BR-KSA-17: in ZATCA, preceding document reasons are stored in PaymentMeans InstructionNote.
-func (ui *Invoice) applyZATCAPrecedingReasons(out *bill.Invoice, o *options) {
-	if !o.context.Is(ContextZATCA) || len(out.Preceding) == 0 || len(ui.PaymentMeans) == 0 {
-		return
-	}
-	for i, note := range ui.PaymentMeans[0].InstructionNote {
-		if i < len(out.Preceding) {
-			out.Preceding[i].Reason = note
-		}
-	}
-}
-
-// applyTaxRepresentative remaps Supplier when a TaxRepresentativeParty is present.
-func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice, o *options) {
+// applyTaxRepresentative maps the BG-11 tax representative to
+// ordering.seller, the party liable for the tax when it is not the
+// supplier. The supplier keeps the BG-4 seller.
+func (ui *Invoice) applyTaxRepresentative(out *bill.Invoice) {
 	if ui.TaxRepresentativeParty == nil {
 		return
 	}
-	// Move the original seller to the ordering.seller party
 	if out.Ordering == nil {
 		out.Ordering = &bill.Ordering{}
 	}
-	out.Ordering.Seller = out.Supplier
-
-	// Overwrite the seller field with the tax representative
-	out.Supplier = goblParty(ui.TaxRepresentativeParty, o)
+	out.Ordering.Seller = goblParty(ui.TaxRepresentativeParty)
 }
 
 // typeCodeParse maps the UBL document type code (UNTDID 1001) to its GOBL
-// invoice type. The ZATCA transaction-type flags carried in typeCode.Name are
-// are mapped to tags by tagCodeParse.
+// invoice type.
 // Source: https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred1001.htm
 func typeCodeParse(typeCode *IDType) cbc.Key {
 	if typeCode == nil {
@@ -261,36 +286,10 @@ func typeCodeParse(typeCode *IDType) cbc.Key {
 	return bill.InvoiceTypeOther
 }
 
-// tagCodeParse maps UBL invoice type to GOBL equivalent tax tag.
-func tagCodeParse(typeCode *IDType, ctx Context) []cbc.Key {
-	var tags []cbc.Key
+// typeCodeValue provides the code of the type code, if any.
+func typeCodeValue(typeCode *IDType) string {
 	if typeCode == nil {
-		return tags
+		return ""
 	}
-
-	if ctx.Is(ContextZATCA) && typeCode.Name != nil {
-		it := zatca.ParseInvoiceType(cbc.Code(*typeCode.Name))
-		if it.Simplified {
-			tags = append(tags, tax.TagSimplified)
-		}
-		if it.ThirdParty {
-			tags = append(tags, zatca.TagThirdParty)
-		}
-		if it.Nominal {
-			tags = append(tags, zatca.TagNominal)
-		}
-		if it.Export {
-			tags = append(tags, tax.TagExport)
-		}
-		if it.Summary {
-			tags = append(tags, zatca.TagSummary)
-		}
-		if it.SelfBilled {
-			tags = append(tags, tax.TagSelfBilled)
-		}
-
-	} else {
-		tags = InvoiceTagMap[typeCode.Value]
-	}
-	return tags
+	return typeCode.Value
 }

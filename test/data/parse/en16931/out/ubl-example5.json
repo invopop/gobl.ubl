@@ -4,12 +4,12 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "c3c224719103d2feff58506fd5f98288784e6e7f6bcd6a5a00b729b7eb9c874f"
+			"val": "a94b2f57755e9e8f14976448485b8084993e5e3c01ce7e408e6e7a0c95ac4b8c"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"$regime": "DK",
+		"$regime": "NL",
 		"$addons": [
 			"eu-en16931-v2017"
 		],
@@ -22,7 +22,7 @@
 			{
 				"from": "DKK",
 				"to": "EUR",
-				"amount": "0.93"
+				"amount": "0.931289"
 			}
 		],
 		"preceding": [
@@ -38,21 +38,64 @@
 			}
 		},
 		"supplier": {
-			"name": "Dick Panama",
+			"name": "SellerCompany",
+			"alias": "SelCo",
 			"tax_id": {
-				"country": "DK",
-				"code": "16356609"
+				"country": "NL",
+				"code": "16356706"
 			},
+			"identities": [
+				{
+					"scope": "legal",
+					"code": "NL16356706"
+				},
+				{
+					"scope": "tax",
+					"country": "NL",
+					"code": "NL16356706"
+				},
+				{
+					"code": "5790000436101",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
+				}
+			],
+			"people": [
+				{
+					"name": {
+						"given": "Anthon Larsen"
+					}
+				}
+			],
+			"inboxes": [
+				{
+					"email": "info@selco.nl"
+				}
+			],
 			"addresses": [
 				{
-					"street": "Anystreet, Building 1",
-					"street_extra": "6th floor",
-					"locality": "Anytown",
-					"region": "Jutland",
-					"code": "101",
-					"country": "DK"
+					"street": "Hoofdstraat 4",
+					"street_extra": "Om de hoek",
+					"locality": "Grootstad",
+					"region": "Overijssel",
+					"code": "54321",
+					"country": "NL"
 				}
-			]
+			],
+			"emails": [
+				{
+					"addr": "Anthon@Selco.nl"
+				}
+			],
+			"telephones": [
+				{
+					"num": "+3198989898"
+				}
+			],
+			"registration": {
+				"other": "Export"
+			}
 		},
 		"customer": {
 			"name": "Buyercompany ltd",
@@ -137,12 +180,20 @@
 							"code": "12344321"
 						}
 					],
+					"attributes": [
+						{
+							"label": "Thickness",
+							"text": "2 mm"
+						}
+					],
 					"description": "Printing paper, 2mm",
+					"list": "1.10",
+					"discount": "0.10",
 					"price": "1.00",
 					"unit": "item",
 					"origin": "NL",
-					"meta": {
-						"thickness": "2 mm"
+					"ext": {
+						"untdid-unit": "EA"
 					}
 				},
 				"sum": "1000.00",
@@ -203,7 +254,10 @@
 					"description": "Parker Pen, Black, model Sansa",
 					"price": "5.00",
 					"unit": "item",
-					"origin": "NL"
+					"origin": "NL",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "500.00",
 				"taxes": [
@@ -230,7 +284,10 @@
 					"ref": "JB009",
 					"name": "American Cookies",
 					"price": "5.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "2500.00",
 				"taxes": [
@@ -292,70 +349,27 @@
 		],
 		"ordering": {
 			"code": "123",
+			"cost": "67543",
 			"period": {
 				"start": "2013-03-10",
 				"end": "2013-04-10"
 			},
 			"seller": {
-				"name": "SellerCompany",
-				"alias": "SelCo",
+				"name": "Dick Panama",
 				"tax_id": {
-					"country": "NL",
-					"code": "16356706"
+					"country": "DK",
+					"code": "16356609"
 				},
-				"identities": [
-					{
-						"scope": "legal",
-						"code": "NL16356706"
-					},
-					{
-						"scope": "tax",
-						"country": "NL",
-						"type": "LOC",
-						"code": "NL16356706"
-					},
-					{
-						"code": "5790000436101",
-						"ext": {
-							"iso-scheme-id": "0088"
-						}
-					}
-				],
-				"people": [
-					{
-						"name": {
-							"given": "Anthon Larsen"
-						}
-					}
-				],
-				"inboxes": [
-					{
-						"email": "info@selco.nl"
-					}
-				],
 				"addresses": [
 					{
-						"street": "Hoofdstraat 4",
-						"street_extra": "Om de hoek",
-						"locality": "Grootstad",
-						"region": "Overijssel",
-						"code": "54321",
-						"country": "NL"
+						"street": "Anystreet, Building 1",
+						"street_extra": "6th floor",
+						"locality": "Anytown",
+						"region": "Jutland",
+						"code": "101",
+						"country": "DK"
 					}
-				],
-				"emails": [
-					{
-						"addr": "Anthon@Selco.nl"
-					}
-				],
-				"telephones": [
-					{
-						"num": "+3198989898"
-					}
-				],
-				"registration": {
-					"other": "Export"
-				}
+				]
 			},
 			"projects": [
 				{
@@ -406,22 +420,22 @@
 					}
 				]
 			},
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2013-05-10",
-						"amount": "4675.00",
-						"percent": "100%"
-					}
-				],
-				"notes": "50% prepaid, 50% within one month"
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "2337.50"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2013-05-10",
+						"amount": "2337.50",
+						"percent": "100%"
+					}
+				],
+				"notes": "50% prepaid, 50% within one month"
+			},
 			"instructions": {
 				"key": "direct-debit",
 				"ref": "Payref1",

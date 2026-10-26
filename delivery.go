@@ -1,12 +1,16 @@
 package ubl
 
-import "github.com/invopop/gobl/bill"
+import (
+	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
+)
 
 // Delivery represents delivery information
 type Delivery struct {
 	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
 	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
 	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
+	RequestedDeliveryPeriod *Period   `xml:"cac:RequestedDeliveryPeriod"`
 	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
 }
@@ -22,7 +26,7 @@ type DeliveryTerms struct {
 	ID string `xml:"cbc:ID"`
 }
 
-func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
+func newDelivery(del *bill.DeliveryDetails) *Delivery {
 	if del == nil {
 		return nil
 	}
@@ -35,20 +39,28 @@ func newDelivery(del *bill.DeliveryDetails, ctx Context) *Delivery {
 	}
 
 	if del.Period != nil {
-		end := formatDate(del.Period.End)
-		start := formatDate(del.Period.Start)
-		out.LatestDeliveryDate = &end
-		out.ActualDeliveryDate = &start
+		// Period start and end are both optional, only set the dates we have.
+		if end := formatDatePtr(del.Period.End); end != "" {
+			out.LatestDeliveryDate = &end
+		}
+		if start := formatDatePtr(del.Period.Start); start != "" {
+			out.ActualDeliveryDate = &start
+		}
 	}
 
 	if del.Receiver != nil {
 		out.DeliveryParty = newDeliveryParty(del.Receiver)
 		out.DeliveryLocation =
 			&Location{
-				Address: newAddress(del.Receiver.Addresses, ctx),
+				Address: newAddress(del.Receiver.Addresses),
 			}
 		if len(del.Identities) > 0 {
-			out.DeliveryLocation.ID = &IDType{Value: del.Identities[0].Code.String()}
+			id := del.Identities[0]
+			idType := &IDType{Value: id.Code.String()}
+			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
+				idType.SchemeID = &s
+			}
+			out.DeliveryLocation.ID = idType
 		}
 	}
 

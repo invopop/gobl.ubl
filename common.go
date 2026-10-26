@@ -7,6 +7,8 @@ import (
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
+	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/num"
 	"github.com/invopop/validation"
 )
 
@@ -30,12 +32,14 @@ const (
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
-	ListID        *string `xml:"listID,attr"`
-	ListVersionID *string `xml:"listVersionID,attr"`
-	SchemeID      *string `xml:"schemeID,attr"`
-	SchemeName    *string `xml:"schemeName,attr"`
-	Name          *string `xml:"name,attr"`
-	Value         string  `xml:",chardata"`
+	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
+	ListAgencyID   *string `xml:"listAgencyID,attr"`
+	ListID         *string `xml:"listID,attr"`
+	ListVersionID  *string `xml:"listVersionID,attr"`
+	SchemeID       *string `xml:"schemeID,attr"`
+	SchemeName     *string `xml:"schemeName,attr"`
+	Name           *string `xml:"name,attr"`
+	Value          string  `xml:",chardata"`
 }
 
 // ExchangeRate represents an exchange rate
@@ -50,6 +54,44 @@ type ExchangeRate struct {
 type Amount struct {
 	CurrencyID *string `xml:"currencyID,attr"`
 	Value      string  `xml:",chardata"`
+}
+
+// newAmount builds a monetary amount rounded to the natural precision of the
+// given currency code (2 for EUR, 0 for JPY). EN 16931's BR-DEC-* rules and
+// UBL-DT-01 cap almost every amount in the document at that precision, while
+// GOBL may hold more decimals internally, so amounts are rounded here on the
+// way out. Unit prices (BT-146, BT-148), which are allowed more decimals, use
+// newUnitAmount instead.
+func newAmount(a num.Amount, ccy string) Amount {
+	return Amount{
+		CurrencyID: &ccy,
+		Value:      rescaleToCurrency(a, ccy),
+	}
+}
+
+// newAmountPtr is newAmount for the optional elements.
+func newAmountPtr(a num.Amount, ccy string) *Amount {
+	amount := newAmount(a, ccy)
+	return &amount
+}
+
+// newUnitAmount builds a monetary amount keeping the precision GOBL holds it
+// at, for the unit price fields that EN 16931 exempts from the BR-DEC rules.
+func newUnitAmount(a num.Amount, ccy string) Amount {
+	return Amount{
+		CurrencyID: &ccy,
+		Value:      a.String(),
+	}
+}
+
+// rescaleToCurrency rounds the amount to the natural precision of the given
+// currency code. Falls back to the amount's existing precision if the currency
+// code is unknown.
+func rescaleToCurrency(a num.Amount, ccy string) string {
+	if def := currency.Code(ccy).Def(); def != nil {
+		return def.Rescale(a).String()
+	}
+	return a.String()
 }
 
 // Signature represents a digital signature
@@ -88,6 +130,7 @@ type Item struct {
 	CommodityClassification    *[]CommodityClassification `xml:"cac:CommodityClassification"`
 	ClassifiedTaxCategory      *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
 	AdditionalItemProperty     *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
+	ManufacturerParty          *Party                     `xml:"cac:ManufacturerParty,omitempty"`
 }
 
 // ItemIdentification represents an item identification
@@ -102,22 +145,24 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        *string    `xml:"cbc:ID,omitempty"`
+	ID        *IDType    `xml:"cbc:ID,omitempty"`
 	Percent   *string    `xml:"cbc:Percent,omitempty"`
 	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
 type AdditionalItemProperty struct {
-	Name  string `xml:"cbc:Name"`
-	Value string `xml:"cbc:Value"`
+	Name          string    `xml:"cbc:Name"`
+	Value         string    `xml:"cbc:Value,omitempty"`
+	ValueQuantity *Quantity `xml:"cbc:ValueQuantity,omitempty"`
 }
 
 // Price represents the price of an item
 type Price struct {
-	PriceAmount     Amount           `xml:"cbc:PriceAmount"`
-	BaseQuantity    *Quantity        `xml:"cbc:BaseQuantity,omitempty"`
-	AllowanceCharge *AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
+	PriceAmount             Amount           `xml:"cbc:PriceAmount"`
+	BaseQuantity            *Quantity        `xml:"cbc:BaseQuantity,omitempty"`
+	OrderableUnitFactorRate *string          `xml:"cbc:OrderableUnitFactorRate,omitempty"`
+	AllowanceCharge         *AllowanceCharge `xml:"cac:AllowanceCharge,omitempty"`
 }
 
 func getTypeCode(inv *bill.Invoice) (string, error) {

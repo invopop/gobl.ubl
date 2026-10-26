@@ -9,7 +9,6 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/pay"
-	"github.com/invopop/gobl/tax"
 )
 
 var (
@@ -29,14 +28,14 @@ var (
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
 )
 
-func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
+func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
 	payment := &bill.PaymentDetails{}
 
 	if ui.PayeeParty != nil {
-		payment.Payee = goblParty(ui.PayeeParty, o)
+		payment.Payee = goblParty(ui.PayeeParty)
 	}
 
-	if ui.PaymentTerms != nil {
+	if ui.PaymentTerms != nil && ui.PaymentTerms.Note != "" {
 		payment.Terms = &pay.Terms{
 			Notes: cleanString(ui.PaymentTerms.Note),
 		}
@@ -100,7 +99,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 			}
 	*/
 
-	if ui.LegalMonetaryTotal.PrepaidAmount != nil {
+	if ui.LegalMonetaryTotal.PrepaidAmount != nil && ui.LegalMonetaryTotal.PrepaidAmount.Value != "" {
 		totalPrepaid, err := num.AmountFromString(normalizeNumericString(ui.LegalMonetaryTotal.PrepaidAmount.Value))
 		if err != nil {
 			return err
@@ -114,7 +113,7 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 
 	}
 
-	if payment.Payee != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
+	if payment.Payee != nil || payment.Payer != nil || payment.Terms != nil || payment.Instructions != nil || len(payment.Advances) > 0 {
 		out.Payment = payment
 	}
 	return nil
@@ -123,10 +122,8 @@ func (ui *Invoice) goblAddPayment(out *bill.Invoice, o *options) error {
 func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.Instructions {
 	instructions := &pay.Instructions{
 		Key: goblPaymentMeansCode(paymentMeans.PaymentMeansCode.Value),
-		Ext: tax.ExtensionsOf(cbc.CodeMap{
-			untdid.ExtKeyPaymentMeans: cbc.Code(paymentMeans.PaymentMeansCode.Value),
-		}),
 	}
+	instructions.Ext = instructions.Ext.Set(untdid.ExtKeyPaymentMeans, cbc.Code(paymentMeans.PaymentMeansCode.Value))
 
 	if paymentMeans.PaymentMeansCode.Name != nil {
 		instructions.Detail = cleanString(*paymentMeans.PaymentMeansCode.Name)
@@ -139,7 +136,9 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	if paymentMeans.PayeeFinancialAccount != nil {
 		instructions.CreditTransfer = goblCreditTransfer(paymentMeans)
 	}
-	if paymentMeans.PaymentMandate != nil {
+	// A mandate holding only the extended-profile PayerParty is not a
+	// direct-debit arrangement.
+	if pm := paymentMeans.PaymentMandate; pm != nil && (pm.ID != nil || pm.PayerFinancialAccount != nil) {
 		instructions.DirectDebit = goblInvoiceDirectDebit(out, paymentMeans)
 	}
 	if paymentMeans.CardAccount != nil {
@@ -154,20 +153,23 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	account := paymentMeans.PayeeFinancialAccount
 
 	if account.ID != nil {
-		id := cleanString(*account.ID)
+		id := *account.ID
 		if isIBAN(id) {
-			creditTransfer.IBAN = id
+			creditTransfer.IBAN = cbc.Code(id)
 		} else {
-			creditTransfer.Number = id
+			creditTransfer.Number = cbc.Code(id)
 		}
 	}
 	if account.Name != nil {
 		creditTransfer.Name = cleanString(*account.Name)
 	}
 	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cleanString(*account.FinancialInstitutionBranch.ID)
+		creditTransfer.BIC = cbc.Code(*account.FinancialInstitutionBranch.ID)
 	}
 
+	if creditTransfer.IBAN == "" && creditTransfer.Number == "" && creditTransfer.Name == "" && creditTransfer.BIC == "" {
+		return nil
+	}
 	return []*pay.CreditTransfer{creditTransfer}
 }
 
@@ -183,7 +185,9 @@ func isIBAN(s string) bool {
 func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.DirectDebit {
 	directDebit := &pay.DirectDebit{}
 
-	directDebit.Ref = paymentMeans.PaymentMandate.ID.Value
+	if paymentMeans.PaymentMandate.ID != nil {
+		directDebit.Ref = cbc.Code(paymentMeans.PaymentMandate.ID.Value)
+	}
 	if paymentMeans.PaymentMandate.PayerFinancialAccount != nil && paymentMeans.PaymentMandate.PayerFinancialAccount.ID != nil {
 		directDebit.Account = *paymentMeans.PaymentMandate.PayerFinancialAccount.ID
 	}
@@ -220,6 +224,9 @@ func goblCard(paymentMeans *PaymentMeans) *pay.Card {
 	}
 	if paymentMeans.CardAccount.HolderName != nil {
 		card.Holder = *paymentMeans.CardAccount.HolderName
+	}
+	if card.Last4 == "" && card.Holder == "" {
+		return nil
 	}
 	return card
 }

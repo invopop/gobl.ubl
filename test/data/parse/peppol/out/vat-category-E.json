@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "e12091060fc0ba82123f38741589480120e4a8443f57df206e0a00ebb717a316"
+			"val": "1f5af31076a49842698bc51c2fdb7601326ad16d9cb2ffce6ba861b37f5e5064"
 		}
 	},
 	"doc": {
@@ -85,7 +85,10 @@
 						}
 					],
 					"price": "120.00",
-					"unit": "item"
+					"unit": "item",
+					"ext": {
+						"untdid-unit": "EA"
+					}
 				},
 				"sum": "1200.00",
 				"taxes": [

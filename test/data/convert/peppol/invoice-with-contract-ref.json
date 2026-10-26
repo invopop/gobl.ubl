@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "9028464236ccc426bd546610724f7b763ba6ed26ab8f9408df0f283c95aeeb92"
+			"val": "7bca8b821caa2b5e6830d861a96732a45c4bdc572c269e10030d58c6da771060"
 		},
 		"from": "iso6523-actorid-upis::9930:111111125",
 		"to": "iso6523-actorid-upis::9930:282741168"
@@ -137,7 +137,8 @@
 			],
 			"contracts": [
 				{
-					"code": "CONTRACT-2024-001"
+					"code": "CONTRACT-2024-001",
+					"reason": "MARCHE"
 				}
 			]
 		},

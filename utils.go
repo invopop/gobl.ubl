@@ -30,14 +30,31 @@ func formatKey(key string) cbc.Key {
 	return cbc.Key(key)
 }
 
-// goblUnitFromUNECE maps UN/ECE code to GOBL equivalent.
-func goblUnitFromUNECE(unece cbc.Code) org.Unit {
-	for _, def := range org.UnitDefinitions {
-		if def.UNECE == unece {
-			return def.Unit
-		}
+// goblUnit records the UNTDID unit code in the extensions and returns them
+// alongside the matching GOBL unit key, which is empty when GOBL has no unit
+// for the code. The code the document was written with is always kept, as GOBL
+// will preserve it rather than derive it back from the key.
+func goblUnit(ext tax.Extensions, code cbc.Code) (tax.Extensions, cbc.Key) {
+	return ext.Set(untdid.ExtKeyUnit, code), untdid.UnitKey(code)
+}
+
+// untdidUnit returns the UNTDID unit code for a unit and its extensions,
+// preferring the code preserved in the extensions over the mapping from the
+// GOBL unit key.
+func untdidUnit(ext tax.Extensions, unit cbc.Key) cbc.Code {
+	if code := ext.Get(untdid.ExtKeyUnit); code != cbc.CodeEmpty {
+		return code
 	}
-	return org.Unit(unece)
+	return untdid.UnitCode(unit)
+}
+
+// unitLabel describes a unit for presentation, falling back to the UNTDID code
+// when the unit has no GOBL key.
+func unitLabel(unit cbc.Key, code cbc.Code) string {
+	if unit != cbc.KeyEmpty {
+		return unit.String()
+	}
+	return code.String()
 }
 
 // noteCodePattern matches the #CODE#text format used in UBL notes to encode

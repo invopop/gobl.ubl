@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "2c12a5fb0ae6183d8d1943bc13ab4280ef57a02a992ed08ae54f6e510f285f95"
+			"val": "b690a5d3f2d3f4c140b0efe383f3da01c429314829dffa19cfa2f4c19c863d7a"
 		}
 	},
 	"doc": {
@@ -133,7 +133,10 @@
 					"name": "service: example service",
 					"description": "\u003cp\u003eExample service description with HTML tags.\u003c/p\u003e",
 					"price": "195.0000",
-					"unit": "piece"
+					"unit": "piece",
+					"ext": {
+						"untdid-unit": "H87"
+					}
 				},
 				"sum": "195.00",
 				"taxes": [
@@ -149,14 +152,15 @@
 			}
 		],
 		"ordering": {
-			"code": "John Doe",
-			"purchases": [
-				{
-					"code": "NA"
-				}
-			]
+			"code": "John Doe"
 		},
 		"payment": {
+			"advances": [
+				{
+					"description": "Prepaid Amount",
+					"amount": "0.00"
+				}
+			],
 			"terms": {
 				"due_dates": [
 					{
@@ -166,12 +170,6 @@
 					}
 				]
 			},
-			"advances": [
-				{
-					"description": "Prepaid Amount",
-					"amount": "0.00"
-				}
-			],
 			"instructions": {
 				"key": "debit-transfer",
 				"ref": "020250000001",

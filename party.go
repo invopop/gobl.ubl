@@ -14,8 +14,59 @@ import (
 // SchemeIDEmail is the EAS codelist value for email
 const SchemeIDEmail = "EM"
 
+// mailtoScheme is the URI scheme carrying an email address on an org.Endpoint.
+const mailtoScheme = "mailto"
+
+// newEndpointID builds the party's electronic address (BT-34, BT-49).
+//
+// GOBL v0.505 moved the electronic address to org.Endpoint, where the EN 16931
+// addon now validates it, and deprecated org.Inbox. Endpoints are read first,
+// falling back to the inboxes for documents that still only carry those --
+// Peppol requires the address (BR-62, BR-63), so neither model may be missed.
+func newEndpointID(party *org.Party) *EndpointID {
+	if e := party.Endpoint(iso.ActorIDScheme); e != nil {
+		// An ISO 6523 URI reads "iso6523-actorid-upis::<scheme>:<code>",
+		// leaving ":<scheme>:<code>" as the opaque part.
+		scheme, code, ok := strings.Cut(strings.TrimPrefix(e.URI.Opaque(), ":"), ":")
+		if scheme != "" && code != "" && ok {
+			return &EndpointID{
+				SchemeID: scheme,
+				Value:    code,
+			}
+		}
+	}
+	if e := party.Endpoint(mailtoScheme); e != nil {
+		if addr := e.URI.Opaque(); addr != "" {
+			return &EndpointID{
+				SchemeID: SchemeIDEmail,
+				Value:    addr,
+			}
+		}
+	}
+
+	for _, ib := range party.Inboxes {
+		if ib.Email != "" {
+			return &EndpointID{
+				SchemeID: SchemeIDEmail,
+				Value:    ib.Email,
+			}
+		}
+		if ib.Scheme != "" {
+			return &EndpointID{
+				SchemeID: ib.Scheme.String(),
+				Value:    ib.Code.String(),
+			}
+		}
+	}
+	return nil
+}
+
 // TaxSchemeVAT is the tax scheme code for VAT
 const TaxSchemeVAT = "VAT"
+
+// TaxSchemeTaxRegistration is the default tax scheme code for BT-32, the
+// party's tax registration identifier.
+const TaxSchemeTaxRegistration = "LOC"
 
 // SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
@@ -27,15 +78,23 @@ type CustomerParty struct {
 	Party *Party `xml:"cac:Party"`
 }
 
+// ServiceProviderParty represents a service provider party in a transaction
+type ServiceProviderParty struct {
+	Party *Party `xml:"cac:Party"`
+}
+
 // Party represents a party involved in a transaction
 type Party struct {
-	EndpointID          *EndpointID       `xml:"cbc:EndpointID"`
-	PartyIdentification []Identification  `xml:"cac:PartyIdentification"`
-	PartyName           *PartyName        `xml:"cac:PartyName"`
-	PostalAddress       *PostalAddress    `xml:"cac:PostalAddress"`
-	PartyTaxScheme      []PartyTaxScheme  `xml:"cac:PartyTaxScheme"`
-	PartyLegalEntity    *PartyLegalEntity `xml:"cac:PartyLegalEntity"`
-	Contact             *Contact          `xml:"cac:Contact"`
+	EndpointID                 *EndpointID           `xml:"cbc:EndpointID"`
+	IndustryClassificationCode string                `xml:"cbc:IndustryClassificationCode,omitempty"`
+	PartyIdentification        []Identification      `xml:"cac:PartyIdentification"`
+	PartyName                  *PartyName            `xml:"cac:PartyName"`
+	PostalAddress              *PostalAddress        `xml:"cac:PostalAddress"`
+	PartyTaxScheme             []PartyTaxScheme      `xml:"cac:PartyTaxScheme"`
+	PartyLegalEntity           *PartyLegalEntity     `xml:"cac:PartyLegalEntity"`
+	Contact                    *Contact              `xml:"cac:Contact"`
+	AgentParty                 *Party                `xml:"cac:AgentParty"`
+	ServiceProviderParty       *ServiceProviderParty `xml:"cac:ServiceProviderParty"`
 }
 
 // EndpointID represents an endpoint identifier
@@ -56,6 +115,9 @@ type PartyName struct {
 
 // PostalAddress represents a postal address
 type PostalAddress struct {
+	ID                   *IDType             `xml:"cbc:ID,omitempty"`
+	AddressFormatCode    *IDType             `xml:"cbc:AddressFormatCode"`
+	Postbox              *string             `xml:"cbc:Postbox,omitempty"`
 	StreetName           *string             `xml:"cbc:StreetName"`
 	AdditionalStreetName *string             `xml:"cbc:AdditionalStreetName"`
 	BuildingNumber       *string             `xml:"cbc:BuildingNumber,omitempty"`
@@ -64,6 +126,8 @@ type PostalAddress struct {
 	CityName             *string             `xml:"cbc:CityName"`
 	PostalZone           *string             `xml:"cbc:PostalZone"`
 	CountrySubentity     *string             `xml:"cbc:CountrySubentity"`
+	Region               *string             `xml:"cbc:Region,omitempty"`
+	District             *string             `xml:"cbc:District,omitempty"`
 	AddressLine          []AddressLine       `xml:"cac:AddressLine"`
 	Country              *Country            `xml:"cac:Country"`
 	LocationCoordinate   *LocationCoordinate `xml:"cac:LocationCoordinate"`
@@ -89,14 +153,15 @@ type Country struct {
 
 // PartyTaxScheme represents a party's tax scheme
 type PartyTaxScheme struct {
-	CompanyID *string    `xml:"cbc:CompanyID"`
+	CompanyID *IDType    `xml:"cbc:CompanyID"`
 	TaxScheme *TaxScheme `xml:"cac:TaxScheme"`
 }
 
 // TaxScheme represents a tax scheme
 type TaxScheme struct {
-	ID          string `xml:"cbc:ID"`
-	TaxTypeCode string `xml:"cbc:TaxTypeCode,omitempty"`
+	ID          IDType  `xml:"cbc:ID"`
+	Name        *string `xml:"cbc:Name"`
+	TaxTypeCode *IDType `xml:"cbc:TaxTypeCode,omitempty"`
 }
 
 // PartyLegalEntity represents the legal entity of a party
@@ -108,6 +173,7 @@ type PartyLegalEntity struct {
 
 // Contact represents contact information
 type Contact struct {
+	ID             *string `xml:"cbc:ID"`
 	Name           *string `xml:"cbc:Name"`
 	Telephone      *string `xml:"cbc:Telephone"`
 	ElectronicMail *string `xml:"cbc:ElectronicMail"`
@@ -124,12 +190,18 @@ func (p *Party) CountryCode() string {
 	return ""
 }
 
-func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
+// NewParty converts the GOBL party into a UBL party, without any format
+// specific adjustments.
+func NewParty(party *org.Party) *Party {
+	return newParty(party)
+}
+
+func newParty(party *org.Party) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}
 	p := &Party{
-		PostalAddress: newAddress(party.Addresses, ctx),
+		PostalAddress: newAddress(party.Addresses),
 	}
 
 	// Only add PartyName if name is not empty
@@ -160,9 +232,6 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		if tID.Country.Code() == l10n.NO && !strings.HasSuffix(code, "MVA") {
 			code += "MVA"
 		}
-		if ctx.Is(ContextZATCA) {
-			code = code[2:]
-		}
 		id := tID.GetScheme()
 		if id == cbc.CodeEmpty {
 			// Peppol default
@@ -170,9 +239,9 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 
 		taxScheme := PartyTaxScheme{
-			CompanyID: &code,
+			CompanyID: &IDType{Value: code},
 			TaxScheme: &TaxScheme{
-				ID: id.String(),
+				ID: IDType{Value: id.String()},
 			},
 		}
 
@@ -205,20 +274,7 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		p.Contact = contact
 	}
 
-	if len(party.Inboxes) > 0 {
-		ib := party.Inboxes[0]
-		if ib.Email != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: SchemeIDEmail,
-				Value:    ib.Email,
-			}
-		} else if ib.Scheme != "" {
-			p.EndpointID = &EndpointID{
-				SchemeID: ib.Scheme.String(),
-				Value:    ib.Code.String(),
-			}
-		}
-	}
+	p.EndpointID = newEndpointID(party)
 
 	if party.Alias != "" {
 		p.PartyName = &PartyName{
@@ -248,14 +304,14 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 			}
 		}
 
-		// Second pass: Handle tax scope identities -> PartyTaxScheme
+		// Second pass: Handle tax scope identities -> PartyTaxScheme (BT-32).
 		for _, id := range party.Identities {
 			if id.Scope == org.IdentityScopeTax {
 				code := id.Code.String()
 				taxScheme := PartyTaxScheme{
-					CompanyID: &code,
+					CompanyID: &IDType{Value: code},
 					TaxScheme: &TaxScheme{
-						ID: id.Type.String(),
+						ID: IDType{Value: taxRegistrationScheme(id)},
 					},
 				}
 				p.PartyTaxScheme = append(p.PartyTaxScheme, taxScheme)
@@ -292,6 +348,15 @@ func newParty(party *org.Party, ctx Context) *Party { //nolint:gocyclo
 		}
 	}
 	return p
+}
+
+// taxRegistrationScheme returns the tax scheme code for a BT-32 registration:
+// the identity's own type when it has one.
+func taxRegistrationScheme(id *org.Identity) string {
+	if id.Type != "" {
+		return id.Type.String()
+	}
+	return TaxSchemeTaxRegistration
 }
 
 // newDeliveryParty creates a Party structure for delivery parties
@@ -351,70 +416,7 @@ func newDeliveryParty(party *org.Party) *Party {
 	return p
 }
 
-// newPayeeParty creates a minimal Party structure for the Payee
-// according to UBL rules which state:
-// - BR-17: The Payee name shall be provided
-// - UBL-SR-20: Payee identifier shall occur maximum once
-// - UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress
-// - UBL-CR-275: A UBL invoice should not include the PayeeParty PartyLegalEntity RegistrationName
-func newPayeeParty(party *org.Party) *Party {
-	if party == nil {
-		return nil
-	}
-	p := &Party{
-		PartyName: &PartyName{
-			Name: party.Name,
-		},
-	}
-
-	// Add only the first identity with a valid scheme as PartyIdentification (UBL-SR-20: maximum once)
-	// Prefer identities with Ext[iso.ExtKeySchemeID] or 4-digit labels (ISO 6523 ICD codes)
-	if len(party.Identities) > 0 {
-		for _, id := range party.Identities {
-			var schemeID *string
-			// First check if there's an explicit scheme in Ext
-			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
-				schemeID = &s
-			}
-			// If no Ext scheme, check if label looks like a valid ICD code (4 digits)
-			if schemeID == nil && id.Label != "" && len(id.Label) == 4 {
-				// Assume 4-digit labels are ISO 6523 ICD codes
-				schemeID = &id.Label
-			}
-			// Only add the identity if we have a valid scheme
-			if schemeID != nil {
-				code := id.Code.String()
-				p.PartyIdentification = []Identification{
-					{ID: &IDType{
-						Value:    code,
-						SchemeID: schemeID,
-					}},
-				}
-				break
-			}
-		}
-	}
-
-	// Only add PartyLegalEntity if there's a legal identity, but without RegistrationName
-	for _, id := range party.Identities {
-		if id.Scope == org.IdentityScopeLegal {
-			code := id.Code.String()
-			p.PartyLegalEntity = &PartyLegalEntity{
-				CompanyID: &IDType{
-					Value: code,
-				},
-			}
-			if s := id.Ext.Get(iso.ExtKeySchemeID).String(); s != "" {
-				p.PartyLegalEntity.CompanyID.SchemeID = &s
-			}
-			break
-		}
-	}
-
-	return p
-}
-
-func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
+func newAddress(addresses []*org.Address) *PostalAddress {
 	if len(addresses) == 0 {
 		return nil
 	}
@@ -463,18 +465,13 @@ func newAddress(addresses []*org.Address, ctx Context) *PostalAddress {
 		}
 	}
 
-	if ctx.Is(ContextZATCA) {
-		l := a.LineTwo()
-		addr.CitySubdivisionName = &l
-		addr.AdditionalStreetName = nil
-
-		addr.BuildingNumber = &a.Number
-	}
-
 	return addr
 }
 
 func contactName(n *org.Name) string {
+	if n == nil {
+		return ""
+	}
 	given := n.Given
 	surname := n.Surname
 

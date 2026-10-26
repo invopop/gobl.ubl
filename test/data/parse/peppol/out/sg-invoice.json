@@ -4,12 +4,11 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "7eabad06dcc6d005a8f5281151b235fb4a915e9feac06ffb86bce0ebea4b7512"
+			"val": "4b59623fa5a17d59cecd2e2368ff386dfe522ecc6bacc51759f3bd668b63e6fe"
 		}
 	},
 	"doc": {
 		"$schema": "https://gobl.org/draft-0/bill/invoice",
-		"$regime": "SG",
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"type": "standard",
 		"code": "2025-08-28T14:18:51-4c42b50f",
@@ -26,10 +25,6 @@
 		},
 		"supplier": {
 			"name": "Test 0195 Identifier Storecove",
-			"tax_id": {
-				"country": "SG",
-				"code": "123457890SC"
-			},
 			"identities": [
 				{
 					"scope": "legal",
@@ -37,6 +32,11 @@
 					"ext": {
 						"iso-scheme-id": "0195"
 					}
+				},
+				{
+					"scope": "tax",
+					"country": "SG",
+					"code": "123457890SC"
 				},
 				{
 					"code": "123457890SC",
@@ -159,12 +159,22 @@
 							"code": "CCCCCCCC"
 						}
 					],
+					"attributes": [
+						{
+							"label": "UtilityConsumptionPoint",
+							"text": "871690930000222221"
+						},
+						{
+							"label": "UtilityConsumptionPointAddress",
+							"text": "VE HAZERSWOUDE-XXXXX"
+						}
+					],
 					"description": "Supply",
-					"price": "0.05735092",
+					"price": "0.1433773",
+					"per": "2.5",
 					"unit": "kwh",
-					"meta": {
-						"utilityconsumptionpoint": "871690930000222221",
-						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"
+					"ext": {
+						"untdid-unit": "KWH"
 					}
 				},
 				"sum": "3.67",
@@ -225,12 +235,22 @@
 							"code": "CCCCCCCC"
 						}
 					],
+					"attributes": [
+						{
+							"label": "UtilityConsumptionPoint",
+							"text": "871690930000222221"
+						},
+						{
+							"label": "UtilityConsumptionPointAddress",
+							"text": "VE HAZERSWOUDE-XXXXX"
+						}
+					],
 					"description": "Supply",
-					"price": "0.827901924",
+					"price": "2.30944245",
+					"per": "2.78951212",
 					"unit": "kl",
-					"meta": {
-						"utilityconsumptionpoint": "871690930000222221",
-						"utilityconsumptionpointaddress": "VE HAZERSWOUDE-XXXXX"
+					"ext": {
+						"untdid-unit": "K6"
 					}
 				},
 				"sum": "10.67",
@@ -298,6 +318,7 @@
 		],
 		"ordering": {
 			"code": "buyer reference or purchase order reference is recommended",
+			"cost": "23089",
 			"period": {
 				"start": "2025-07-29",
 				"end": "2025-08-28"
@@ -334,22 +355,22 @@
 			]
 		},
 		"payment": {
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2025-09-27",
-						"amount": "24.57",
-						"percent": "100%"
-					}
-				],
-				"notes": "For payment terms, only a note is supported by Peppol currently."
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "1.00"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-09-27",
+						"amount": "23.59",
+						"percent": "100%"
+					}
+				],
+				"notes": "For payment terms, only a note is supported by Peppol currently."
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"ref": "44556677",
@@ -379,8 +400,10 @@
 			},
 			"identities": [
 				{
-					"label": "0088",
-					"code": "871690930000478611"
+					"code": "871690930000478611",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
 				}
 			],
 			"date": "2025-08-27"
@@ -412,9 +435,10 @@
 			},
 			"tax": "2.03",
 			"total_with_tax": "24.57",
-			"payable": "24.57",
+			"rounding": "0.02",
+			"payable": "24.59",
 			"advance": "1.00",
-			"due": "23.57"
+			"due": "23.59"
 		},
 		"notes": [
 			{

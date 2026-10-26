@@ -1,13 +1,16 @@
 package ubl
 
 import (
+	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
-	"github.com/invopop/gobl/currency"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
+	"github.com/invopop/gobl/org"
 )
 
 // InvoiceLine represents a line item in an invoice and credit note
@@ -20,11 +23,16 @@ type InvoiceLine struct {
 	AccountingCost      *string             `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
-	DocumentReference   *LineDocReference   `xml:"cac:DocumentReference,omitempty"`
-	AllowanceCharge     []*AllowanceCharge  `xml:"cac:AllowanceCharge"`
-	TaxTotal            []TaxTotal          `xml:"cac:TaxTotal,omitempty"`
-	Item                *Item               `xml:"cac:Item"`
-	Price               *Price              `xml:"cac:Price"`
+	// Only the reference naming the invoice itself carries the sub-line type and parent.
+	BillingReference  []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
+	DocumentReference *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
+	AllowanceCharge   []*AllowanceCharge      `xml:"cac:AllowanceCharge"`
+	TaxTotal          []TaxTotal              `xml:"cac:TaxTotal,omitempty"`
+	Item              *Item                   `xml:"cac:Item"`
+	Price             *Price                  `xml:"cac:Price"`
+
+	// hierarchy is that self-reference, set on parse.
+	hierarchy *LineBillingReference
 }
 
 // LineDocReference defines a document reference at line level (BT-128)
@@ -33,7 +41,31 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyclo
+// LineBillingReference carries EXT-FR-FE-162/163 when its ID is the invoice's own (BT-1).
+type LineBillingReference struct {
+	InvoiceDocumentReference *LineDocumentStatusReference `xml:"cac:InvoiceDocumentReference,omitempty"`
+	BillingReferenceLine     *BillingReferenceLine        `xml:"cac:BillingReferenceLine,omitempty"`
+}
+
+// LineDocumentStatusReference names the invoice and the line's type.
+type LineDocumentStatusReference struct {
+	ID                 IDType `xml:"cbc:ID"`
+	DocumentStatusCode string `xml:"cbc:DocumentStatusCode,omitempty"`
+}
+
+// BillingReferenceLine names a sub-invoice line's parent.
+type BillingReferenceLine struct {
+	ID IDType `xml:"cbc:ID"`
+}
+
+// Sub-invoice line types (EXT-FR-FE-163).
+const (
+	lineStatusGroup       = "GROUP"
+	lineStatusDetail      = "DETAIL"
+	lineStatusInformation = "INFORMATION"
+)
+
+func (ui *Invoice) addLines(inv *bill.Invoice, subLines bool) {
 	if len(inv.Lines) == 0 {
 		return
 	}
@@ -42,208 +74,12 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 	invoiceType := ui.getInvoiceTypeBasedOnXMLName()
 
 	for _, l := range inv.Lines {
-		ccy := l.Item.Currency.String()
-		if ccy == "" {
-			ccy = inv.Currency.String()
+		invLine := newInvoiceLine(l, strconv.Itoa(l.Index), inv, invoiceType)
+		if !subLines || !writesSubLines(l) {
+			lines = append(lines, invLine)
+			continue
 		}
-		invLine := InvoiceLine{
-			ID: strconv.Itoa(l.Index),
-
-			LineExtensionAmount: Amount{
-				CurrencyID: &ccy,
-				Value:      l.Total.String(),
-			},
-		}
-
-		// Always set quantity (mandatory field)
-		iq := &Quantity{
-			Value: l.Quantity.String(),
-		}
-		if l.Item != nil && l.Item.Unit != "" {
-			iq.UnitCode = string(l.Item.Unit.UNECE())
-		}
-		if invoiceType.In(bill.InvoiceTypeCreditNote) {
-			invLine.CreditedQuantity = iq
-		} else {
-			invLine.InvoicedQuantity = iq
-		}
-
-		if len(l.Notes) > 0 {
-			var notes []string
-			for _, note := range l.Notes {
-				if note.Key == "buyer-accounting-ref" {
-					invLine.AccountingCost = &note.Text
-				} else {
-					notes = append(notes, note.Text)
-				}
-			}
-			if len(notes) > 0 {
-				invLine.Note = notes
-			}
-		}
-
-		// BT-128: Invoice line object identifier
-		if l.Identifier != nil {
-			typeCode := "130"
-			ref := &LineDocReference{
-				ID:               IDType{Value: l.Identifier.Code.String()},
-				DocumentTypeCode: &typeCode,
-			}
-			if s := l.Identifier.Ext.Get(untdid.ExtKeyReference).String(); s != "" {
-				ref.ID.SchemeID = &s
-			}
-			invLine.DocumentReference = ref
-		}
-
-		if l.Period != nil {
-			invLine.InvoicePeriod = &Period{
-				StartDate: formatDate(l.Period.Start),
-				EndDate:   formatDate(l.Period.End),
-			}
-		}
-
-		if l.Order != "" {
-			invLine.OrderLineReference = &OrderLineReference{
-				LineID: l.Order.String(),
-			}
-		}
-
-		if len(l.Charges) > 0 || len(l.Discounts) > 0 {
-			invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
-		}
-
-		// Line VAT amount (KSA-11) is mandatory for tax
-		// invoice and associated credit notes and debit notes
-		if context.Is(ContextZATCA) && l.Total != nil && len(l.Taxes) > 0 && l.Taxes[0].Percent != nil {
-			taxAmount := l.Taxes[0].Percent.Of(*l.Total)
-			roundingAmount := l.Total.Add(taxAmount)
-			invLine.TaxTotal = []TaxTotal{
-				{
-					TaxAmount:      Amount{Value: taxAmount.String(), CurrencyID: &ccy},
-					RoundingAmount: &Amount{Value: roundingAmount.String(), CurrencyID: &ccy},
-				},
-			}
-		}
-
-		if l.Item != nil {
-			it := &Item{}
-
-			if l.Item.Description != "" {
-				d := l.Item.Description
-				it.Description = &d
-			}
-
-			if l.Item.Name != "" {
-				it.Name = l.Item.Name
-			}
-
-			if l.Item.Origin != "" {
-				it.OriginCountry = &Country{
-					IdentificationCode: l.Item.Origin.String(),
-				}
-			}
-
-			if l.Item.Meta != nil {
-				var properties []AdditionalItemProperty
-				for key, value := range l.Item.Meta {
-					properties = append(properties, AdditionalItemProperty{Name: key.String(), Value: value})
-				}
-				it.AdditionalItemProperty = &properties
-			}
-
-			if len(l.Taxes) > 0 && l.Taxes[0].Category != "" {
-				it.ClassifiedTaxCategory = &ClassifiedTaxCategory{
-					TaxScheme: &TaxScheme{
-						ID: l.Taxes[0].Category.String(),
-					},
-				}
-
-				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
-					it.ClassifiedTaxCategory.ID = &rate
-				}
-
-				// Set percent: required unless category is "O" (outside scope)
-				if l.Taxes[0].Percent != nil {
-					p := l.Taxes[0].Percent.StringWithoutSymbol()
-					it.ClassifiedTaxCategory.Percent = &p
-				} else if it.ClassifiedTaxCategory.ID == nil || *it.ClassifiedTaxCategory.ID != "O" {
-					// Default to 0% when not outside scope
-					p := "0"
-					it.ClassifiedTaxCategory.Percent = &p
-				}
-
-				if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
-					it.ClassifiedTaxCategory.ID = &rate
-				}
-			}
-
-			if len(l.Item.Identities) > 0 {
-				for _, id := range l.Item.Identities {
-					// BT-158/159: Item classification (Label holds the listID)
-					if id.Label != "" && !id.Ext.Has(iso.ExtKeySchemeID) {
-						listID := id.Label
-						if it.CommodityClassification == nil {
-							it.CommodityClassification = &[]CommodityClassification{}
-						}
-						*it.CommodityClassification = append(*it.CommodityClassification, CommodityClassification{
-							ItemClassificationCode: &IDType{
-								Value:  id.Code.String(),
-								ListID: &listID,
-							},
-						})
-						continue
-					}
-
-					if it.BuyersItemIdentification != nil && it.StandardItemIdentification != nil {
-						break
-					}
-
-					// Map first identity without extension to BuyersItemIdentification
-					s := id.Ext.Get(iso.ExtKeySchemeID).String()
-					if s == "" {
-						if it.BuyersItemIdentification == nil {
-							it.BuyersItemIdentification = &ItemIdentification{
-								ID: &IDType{
-									Value: id.Code.String(),
-								},
-							}
-						}
-						continue
-					}
-
-					// Map first identity with extension to StandardItemIdentification
-					if it.StandardItemIdentification == nil {
-						it.StandardItemIdentification = &ItemIdentification{
-							ID: &IDType{
-								SchemeID: &s,
-								Value:    id.Code.String(),
-							},
-						}
-					}
-				}
-			}
-
-			invLine.Item = it
-
-			if l.Item.Price != nil {
-				invLine.Price = &Price{
-					PriceAmount: Amount{
-						CurrencyID: &ccy,
-						Value:      l.Item.Price.String(),
-					},
-				}
-			}
-
-			if l.Item.Ref != "" {
-				invLine.Item.SellersItemIdentification = &ItemIdentification{
-					ID: &IDType{
-						Value: l.Item.Ref.String(),
-					},
-				}
-			}
-		}
-
-		lines = append(lines, invLine)
+		lines = append(lines, newGroupLines(l, invLine, inv, invoiceType)...)
 	}
 	if invoiceType.In(bill.InvoiceTypeCreditNote) {
 		ui.CreditNoteLines = lines
@@ -252,14 +88,347 @@ func (ui *Invoice) addLines(inv *bill.Invoice, context Context) { //nolint:gocyc
 	}
 }
 
-// rescaleToCurrency rounds the amount to the natural precision of the given
-// currency code (e.g. 2 for EUR, 0 for JPY). Falls back to the amount's
-// existing precision if the currency code is unknown.
-func rescaleToCurrency(a num.Amount, ccy string) string {
-	if def := currency.Code(ccy).Def(); def != nil {
-		return def.Rescale(a).String()
+// partyLines provides the document lines that pair with GOBL lines: those
+// with a price, or typed as GROUP or INFORMATION, which are imported without
+// one, leaving out sub-invoice lines.
+func (ui *Invoice) partyLines() []*InvoiceLine {
+	items := ui.InvoiceLines
+	if len(ui.CreditNoteLines) > 0 {
+		items = ui.CreditNoteLines
 	}
-	return a.String()
+	self := strings.TrimSpace(ui.ID)
+	out := make([]*InvoiceLine, 0, len(items))
+	for i := range items {
+		it := &items[i]
+		br := goblLineHierarchy(it, self)
+		if br != nil && br.BillingReferenceLine != nil {
+			continue
+		}
+		if it.Price == nil && (br == nil || br.InvoiceDocumentReference == nil || br.InvoiceDocumentReference.DocumentStatusCode == lineStatusDetail) {
+			continue
+		}
+		out = append(out, it)
+	}
+	return out
+}
+
+// A GROUP line's own allowances would count nowhere, so such a line is written alone.
+func writesSubLines(l *bill.Line) bool {
+	return len(l.Breakdown) > 0 && len(l.Discounts) == 0 && len(l.Charges) == 0
+}
+
+// Without a priced sub-line the line keeps its own price and is not a GROUP.
+func newGroupLines(l *bill.Line, group InvoiceLine, inv *bill.Invoice, invoiceType cbc.Key) []InvoiceLine {
+	ccy := group.LineExtensionAmount.CurrencyID
+	number := invoiceNumber(inv.Series, inv.Code)
+	priced := false
+	lines := []InvoiceLine{group}
+	sum := num.AmountZero
+	for i, sl := range l.Breakdown {
+		if sl == nil || sl.Item == nil {
+			continue
+		}
+		status := lineStatusDetail
+		if sl.Item.Price == nil || sl.Total == nil {
+			status = lineStatusInformation
+		}
+		child := newInvoiceLine(subLineAsLine(sl, l, inv.Currency.Def().Zero()), fmt.Sprintf("%s.%d", group.ID, i+1), inv, invoiceType)
+		child.BillingReference = newLineBillingReference(number, status, group.ID)
+		if status == lineStatusDetail {
+			priced = true
+			amount, _ := num.AmountFromString(child.LineExtensionAmount.Value)
+			sum = sum.MatchPrecision(amount).Add(amount)
+		}
+		lines = append(lines, child)
+	}
+
+	if priced {
+		// BR-FREXT-08 and BR-CO-10 cannot both hold once rounding diverges.
+		if newAmount(sum, *ccy).Value != group.LineExtensionAmount.Value {
+			return []InvoiceLine{group}
+		}
+		lines[0].BillingReference = newLineBillingReference(number, lineStatusGroup, "")
+		if lines[0].Item != nil {
+			lines[0].Item.ClassifiedTaxCategory = nil
+		}
+	} else {
+		lines[0].BillingReference = newLineBillingReference(number, lineStatusDetail, "")
+	}
+	return lines
+}
+
+func newLineBillingReference(number, status, parent string) []*LineBillingReference {
+	ref := &LineBillingReference{
+		InvoiceDocumentReference: &LineDocumentStatusReference{
+			ID:                 IDType{Value: number},
+			DocumentStatusCode: status,
+		},
+	}
+	if parent != "" {
+		ref.BillingReferenceLine = &BillingReferenceLine{ID: IDType{Value: parent}}
+	}
+	return []*LineBillingReference{ref}
+}
+
+// Sub-lines count per parent unit; the XML states full amounts, and zero for unpriced ones.
+func subLineAsLine(sl *bill.SubLine, parent *bill.Line, zero num.Amount) *bill.Line {
+	qty := parent.Quantity
+	item := *sl.Item
+	l := &bill.Line{
+		Quantity:   sl.Quantity.Multiply(qty),
+		Identifier: sl.Identifier,
+		Period:     sl.Period,
+		Order:      sl.Order,
+		Cost:       sl.Cost,
+		Item:       &item,
+		Taxes:      parent.Taxes,
+		Notes:      sl.Notes,
+	}
+	if sl.Item.Price == nil || sl.Total == nil {
+		l.Item.Price = &zero
+		l.Total = &zero
+		return l
+	}
+	total := sl.Total.Multiply(qty)
+	l.Total = &total
+	if sl.Sum != nil {
+		sum := sl.Sum.Multiply(qty)
+		l.Sum = &sum
+	}
+	for _, c := range sl.Charges {
+		sc := *c
+		sc.Amount = c.Amount.Multiply(qty)
+		if c.Base != nil {
+			b := c.Base.Multiply(qty)
+			sc.Base = &b
+		}
+		l.Charges = append(l.Charges, &sc)
+	}
+	for _, d := range sl.Discounts {
+		sd := *d
+		sd.Amount = d.Amount.Multiply(qty)
+		if d.Base != nil {
+			b := d.Base.Multiply(qty)
+			sd.Base = &b
+		}
+		l.Discounts = append(l.Discounts, &sd)
+	}
+	return l
+}
+
+func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.Key) InvoiceLine { //nolint:gocyclo
+	ccy := l.Item.Currency.String()
+	if ccy == "" {
+		ccy = inv.Currency.String()
+	}
+	invLine := InvoiceLine{
+		ID: id,
+
+		// BT-131: the line net amount, capped at the currency's
+		// precision by BR-DEC-23.
+		LineExtensionAmount: newAmount(*l.Total, ccy),
+	}
+
+	// Always set quantity (mandatory field)
+	iq := &Quantity{
+		Value: l.Quantity.String(),
+	}
+	if l.Item != nil {
+		if code := untdidUnit(l.Item.Ext, l.Item.Unit); code != cbc.CodeEmpty {
+			iq.UnitCode = string(code)
+		}
+	}
+	if invoiceType.In(bill.InvoiceTypeCreditNote) {
+		invLine.CreditedQuantity = iq
+	} else {
+		invLine.InvoicedQuantity = iq
+	}
+
+	if len(l.Notes) > 0 {
+		var notes []string
+		for _, note := range l.Notes {
+			if note.Key == "buyer-accounting-ref" {
+				invLine.AccountingCost = &note.Text
+			} else {
+				notes = append(notes, formatNote(note))
+			}
+		}
+		if len(notes) > 0 {
+			invLine.Note = notes
+		}
+	}
+
+	// BT-128: Invoice line object identifier
+	if l.Identifier != nil {
+		typeCode := "130"
+		ref := &LineDocReference{
+			ID:               IDType{Value: l.Identifier.Code.String()},
+			DocumentTypeCode: &typeCode,
+		}
+		if s := l.Identifier.Ext.Get(untdid.ExtKeyReference).String(); s != "" {
+			ref.ID.SchemeID = &s
+		}
+		invLine.DocumentReference = ref
+	}
+
+	if l.Period != nil {
+		invLine.InvoicePeriod = &Period{
+			StartDate: formatDatePtr(l.Period.Start),
+			EndDate:   formatDatePtr(l.Period.End),
+		}
+	}
+
+	if l.Order != "" {
+		invLine.OrderLineReference = &OrderLineReference{
+			LineID: l.Order.String(),
+		}
+	}
+
+	if len(l.Charges) > 0 || len(l.Discounts) > 0 {
+		invLine.AllowanceCharge = makeLineCharges(l.Charges, l.Discounts, ccy, l.Sum)
+	}
+
+	if l.Item != nil {
+		it := &Item{}
+
+		if l.Item.Description != "" {
+			d := l.Item.Description
+			it.Description = &d
+		}
+
+		if l.Item.Name != "" {
+			it.Name = l.Item.Name
+		}
+
+		if l.Item.Origin != "" {
+			it.OriginCountry = &Country{
+				IdentificationCode: l.Item.Origin.String(),
+			}
+		}
+
+		if len(l.Item.Attributes) > 0 {
+			var properties []AdditionalItemProperty
+			for _, attr := range l.Item.Attributes {
+				prop := AdditionalItemProperty{Name: attr.Label}
+				switch {
+				case attr.Amount != nil:
+					// BR-54 requires a plain Value even when a
+					// ValueQuantity is also provided.
+					prop.Value = attr.Amount.String()
+					code := untdidUnit(attr.Ext, attr.Unit)
+					if label := unitLabel(attr.Unit, code); label != "" {
+						prop.Value += " " + label
+					}
+					// A UBL quantity always carries a unit code, so the
+					// value quantity is only useful with one.
+					if code != cbc.CodeEmpty {
+						prop.ValueQuantity = &Quantity{
+							Value:    attr.Amount.String(),
+							UnitCode: string(code),
+						}
+					}
+				case attr.Text != "":
+					prop.Value = attr.Text
+				}
+				properties = append(properties, prop)
+			}
+			it.AdditionalItemProperty = &properties
+		}
+
+		if len(l.Taxes) > 0 && l.Taxes[0].Category != "" {
+			it.ClassifiedTaxCategory = &ClassifiedTaxCategory{
+				TaxScheme: &TaxScheme{
+					ID: IDType{Value: l.Taxes[0].Category.String()},
+				},
+			}
+
+			if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
+				it.ClassifiedTaxCategory.ID = &IDType{Value: rate}
+			}
+
+			// Set percent: required unless category is "O" (outside scope)
+			if l.Taxes[0].Percent != nil {
+				p := l.Taxes[0].Percent.StringWithoutSymbol()
+				it.ClassifiedTaxCategory.Percent = &p
+			} else if it.ClassifiedTaxCategory.ID == nil || it.ClassifiedTaxCategory.ID.Value != "O" {
+				// Default to 0% when not outside scope
+				p := "0"
+				it.ClassifiedTaxCategory.Percent = &p
+			}
+
+			if rate := l.Taxes[0].Ext.Get(untdid.ExtKeyTaxCategory).String(); rate != "" {
+				it.ClassifiedTaxCategory.ID = &IDType{Value: rate}
+			}
+		}
+
+		if len(l.Item.Identities) > 0 {
+			for _, id := range l.Item.Identities {
+				// BT-158/159: Item classification (Label holds the listID)
+				if id.Label != "" && !id.Ext.Has(iso.ExtKeySchemeID) {
+					listID := id.Label
+					if it.CommodityClassification == nil {
+						it.CommodityClassification = &[]CommodityClassification{}
+					}
+					*it.CommodityClassification = append(*it.CommodityClassification, CommodityClassification{
+						ItemClassificationCode: &IDType{
+							Value:  id.Code.String(),
+							ListID: &listID,
+						},
+					})
+					continue
+				}
+
+				if it.BuyersItemIdentification != nil && it.StandardItemIdentification != nil {
+					break
+				}
+
+				// Map first identity without extension to BuyersItemIdentification
+				s := id.Ext.Get(iso.ExtKeySchemeID).String()
+				if s == "" {
+					if it.BuyersItemIdentification == nil {
+						it.BuyersItemIdentification = &ItemIdentification{
+							ID: &IDType{
+								Value: id.Code.String(),
+							},
+						}
+					}
+					continue
+				}
+
+				// Map first identity with extension to StandardItemIdentification
+				if it.StandardItemIdentification == nil {
+					it.StandardItemIdentification = &ItemIdentification{
+						ID: &IDType{
+							SchemeID: &s,
+							Value:    id.Code.String(),
+						},
+					}
+				}
+			}
+		}
+
+		invLine.Item = it
+
+		if l.Item.Price != nil {
+			// BT-146: the item net price may carry more decimals than
+			// the currency, so it is written out as GOBL holds it.
+			invLine.Price = newPrice(l.Item, iq.UnitCode, ccy)
+		}
+
+		if l.Item.Ref != "" {
+			invLine.Item.SellersItemIdentification = &ItemIdentification{
+				ID: &IDType{
+					Value: l.Item.Ref.String(),
+				},
+			}
+		}
+
+		if l.Seller != nil {
+			invLine.Item.ManufacturerParty = newParty(l.Seller)
+		}
+	}
+
+	return invLine
 }
 
 func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount, ccy string, baseSum *num.Amount) []*AllowanceCharge {
@@ -270,18 +439,12 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	// strips VAT from prices_include invoices — so round here at the boundary.
 	var base *Amount
 	if baseSum != nil {
-		base = &Amount{
-			Value:      rescaleToCurrency(*baseSum, ccy),
-			CurrencyID: &ccy,
-		}
+		base = newAmountPtr(*baseSum, ccy)
 	}
 	for _, ch := range charges {
 		ac := &AllowanceCharge{
 			ChargeIndicator: true,
-			Amount: Amount{
-				Value:      rescaleToCurrency(ch.Amount, ccy),
-				CurrencyID: &ccy,
-			},
+			Amount:          newAmount(ch.Amount, ccy),
 		}
 		if e := ch.Ext.Get(untdid.ExtKeyCharge).String(); e != "" {
 			ac.AllowanceChargeReasonCode = &e
@@ -292,7 +455,10 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if ch.Percent != nil {
 			p := ch.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			if base != nil {
+			switch {
+			case ch.Base != nil:
+				ac.BaseAmount = newAmountPtr(*ch.Base, ccy)
+			case base != nil:
 				ac.BaseAmount = base
 			}
 		}
@@ -301,10 +467,7 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 	for _, d := range discounts {
 		ac := &AllowanceCharge{
 			ChargeIndicator: false,
-			Amount: Amount{
-				Value:      rescaleToCurrency(d.Amount, ccy),
-				CurrencyID: &ccy,
-			},
+			Amount:          newAmount(d.Amount, ccy),
 		}
 		if e := d.Ext.Get(untdid.ExtKeyAllowance).String(); e != "" {
 			ac.AllowanceChargeReasonCode = &e
@@ -315,11 +478,43 @@ func makeLineCharges(charges []*bill.LineCharge, discounts []*bill.LineDiscount,
 		if d.Percent != nil {
 			p := d.Percent.StringWithoutSymbol()
 			ac.MultiplierFactorNumeric = &p
-			if base != nil {
+			switch {
+			case d.Base != nil:
+				ac.BaseAmount = newAmountPtr(*d.Base, ccy)
+			case base != nil:
 				ac.BaseAmount = base
 			}
 		}
 		allowanceCharges = append(allowanceCharges, ac)
 	}
 	return allowanceCharges
+}
+
+// newPrice writes the item's price details: the net price (BT-146), the list
+// price and price discount (BT-148, BT-147), and the number of units the
+// prices apply to (BT-149), in the line quantity's unit (BT-150).
+func newPrice(it *org.Item, unitCode, ccy string) *Price {
+	p := &Price{
+		PriceAmount: newUnitAmount(*it.Price, ccy),
+	}
+	if it.Per != nil {
+		p.BaseQuantity = &Quantity{Value: it.Per.String(), UnitCode: unitCode}
+	}
+	if it.List != nil {
+		discount := num.AmountZero.MatchPrecision(*it.List)
+		if it.Discount != nil {
+			discount = *it.Discount
+		}
+		p.AllowanceCharge = &AllowanceCharge{
+			ChargeIndicator: false,
+			Amount:          newUnitAmount(discount, ccy),
+			BaseAmount:      newUnitAmountPtr(*it.List, ccy),
+		}
+	}
+	return p
+}
+
+func newUnitAmountPtr(a num.Amount, ccy string) *Amount {
+	amount := newUnitAmount(a, ccy)
+	return &amount
 }

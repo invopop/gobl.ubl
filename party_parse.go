@@ -1,6 +1,8 @@
 package ubl
 
 import (
+	"strings"
+
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
@@ -8,7 +10,7 @@ import (
 	"github.com/invopop/gobl/tax"
 )
 
-func goblParty(party *Party, o *options) *org.Party {
+func goblParty(party *Party) *org.Party {
 	if party == nil {
 		return nil
 	}
@@ -25,7 +27,7 @@ func goblParty(party *Party, o *options) *org.Party {
 		}
 	}
 
-	if eID := party.EndpointID; eID != nil {
+	if eID := party.EndpointID; eID != nil && eID.Value != "" {
 		oi := new(org.Inbox)
 		switch eID.SchemeID {
 		case "EM": // email
@@ -46,7 +48,7 @@ func goblParty(party *Party, o *options) *org.Party {
 		}
 	}
 
-	if party.Contact != nil && party.Contact.Name != nil {
+	if party.Contact != nil && party.Contact.Name != nil && *party.Contact.Name != "" {
 		p.People = []*org.Person{
 			{
 				Name: &org.Name{
@@ -63,14 +65,14 @@ func goblParty(party *Party, o *options) *org.Party {
 	}
 
 	if party.Contact != nil {
-		if party.Contact.Telephone != nil {
+		if party.Contact.Telephone != nil && *party.Contact.Telephone != "" {
 			p.Telephones = []*org.Telephone{
 				{
 					Number: cleanString(*party.Contact.Telephone),
 				},
 			}
 		}
-		if party.Contact.ElectronicMail != nil {
+		if party.Contact.ElectronicMail != nil && *party.Contact.ElectronicMail != "" {
 			p.Emails = []*org.Email{
 				{
 					Address: cleanString(*party.Contact.ElectronicMail),
@@ -81,9 +83,15 @@ func goblParty(party *Party, o *options) *org.Party {
 
 	handleLegalEntityIdentity(party, p)
 	handlePartyTaxSchemes(party, p)
-	handlePartyIdentifications(party, p, o)
+	handlePartyIdentifications(party, p)
 
 	return p
+}
+
+// ParseParty converts the UBL party into a GOBL party, without any format
+// specific adjustments.
+func ParseParty(party *Party) *org.Party {
+	return goblParty(party)
 }
 
 // goblDeliveryParty creates a GOBL party with only the BTs available
@@ -129,7 +137,7 @@ func parseAddress(address *PostalAddress) *org.Address {
 		addr.Locality = cleanString(*address.CityName)
 	}
 	if address.PostalZone != nil {
-		addr.Code = cbc.Code(cleanString(*address.PostalZone))
+		addr.Code = cbc.Code(*address.PostalZone)
 	}
 	if address.CountrySubentity != nil {
 		addr.Region = cleanString(*address.CountrySubentity)
@@ -146,7 +154,7 @@ func parseAddress(address *PostalAddress) *org.Address {
 }
 
 func handleLegalEntityIdentity(party *Party, p *org.Party) {
-	if party.PartyLegalEntity == nil || party.PartyLegalEntity.CompanyID == nil {
+	if party.PartyLegalEntity == nil || party.PartyLegalEntity.CompanyID == nil || party.PartyLegalEntity.CompanyID.Value == "" {
 		return
 	}
 
@@ -158,9 +166,7 @@ func handleLegalEntityIdentity(party *Party, p *org.Party) {
 		Scope: org.IdentityScopeLegal,
 	}
 	if party.PartyLegalEntity.CompanyID.SchemeID != nil {
-		identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-			iso.ExtKeySchemeID: cbc.Code(*party.PartyLegalEntity.CompanyID.SchemeID),
-		})
+		identity.Ext = identity.Ext.Set(iso.ExtKeySchemeID, cbc.Code(*party.PartyLegalEntity.CompanyID.SchemeID))
 	}
 	p.Identities = append(p.Identities, identity)
 }
@@ -170,19 +176,28 @@ func handlePartyTaxSchemes(party *Party, p *org.Party) {
 		return
 	}
 
-	validSchemes := extractValidTaxSchemes(party.PartyTaxScheme)
-
-	if len(validSchemes) == 1 {
-		setTaxIDFromScheme(validSchemes[0], p, party.CountryCode())
-	} else if len(validSchemes) > 1 {
-		handleMultipleTaxSchemes(validSchemes, p, party.CountryCode())
+	countryCode := party.CountryCode()
+	for _, pts := range extractValidTaxSchemes(party.PartyTaxScheme) {
+		// Only a VAT scheme is BT-31. Every other entry is a BT-32 tax
+		// registration, whatever code it carries.
+		if p.TaxID == nil && isVATScheme(pts) {
+			setTaxIDFromScheme(pts, p, countryCode)
+			continue
+		}
+		addTaxSchemeAsIdentity(pts, p, countryCode)
 	}
+}
+
+// isVATScheme reports whether the entry is BT-31, the party's VAT
+// identifier.
+func isVATScheme(pts PartyTaxScheme) bool {
+	return strings.EqualFold(strings.TrimSpace(pts.TaxScheme.ID.Value), TaxSchemeVAT)
 }
 
 func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 	validSchemes := make([]PartyTaxScheme, 0)
 	for _, pts := range schemes {
-		if pts.CompanyID != nil && *pts.CompanyID != "" && pts.TaxScheme != nil {
+		if pts.CompanyID != nil && pts.CompanyID.Value != "" && pts.TaxScheme != nil {
 			validSchemes = append(validSchemes, pts)
 		}
 	}
@@ -190,83 +205,65 @@ func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 }
 
 func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
-	p.TaxID = &tax.Identity{
-		Country: l10n.TaxCountryCode(countryCode),
-		Code:    cbc.Code(*pts.CompanyID),
+	country := l10n.TaxCountryCode(countryCode)
+	if country.Empty() {
+		country = taxCountryFromVATCode(pts.CompanyID.Value)
 	}
-	sc := cbc.Code(pts.TaxScheme.ID)
+	p.TaxID = &tax.Identity{
+		Country: country,
+		Code:    cbc.Code(pts.CompanyID.Value),
+	}
+	sc := cbc.Code(pts.TaxScheme.ID.Value)
 	if p.TaxID.GetScheme() != sc {
 		var scheme cbc.Code
-		if pts.TaxScheme.TaxTypeCode != "" {
-			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode)
+		if pts.TaxScheme.TaxTypeCode != nil && pts.TaxScheme.TaxTypeCode.Value != "" {
+			scheme = cbc.Code(pts.TaxScheme.TaxTypeCode.Value)
 		} else {
-			scheme = cbc.Code(pts.TaxScheme.ID)
+			scheme = cbc.Code(pts.TaxScheme.ID.Value)
 		}
 		p.TaxID.Scheme = scheme
 	}
 }
 
-func handleMultipleTaxSchemes(validSchemes []PartyTaxScheme, p *org.Party, countryCode string) {
-	// Multiple tax schemes: look for VAT, otherwise use first
-	vatIdx := findVATSchemeIndex(validSchemes)
-
-	// Use VAT if found, otherwise first one
-	taxIDIdx := 0
-	if vatIdx != -1 {
-		taxIDIdx = vatIdx
+// taxCountryFromVATCode extracts the ISO country prefix that BR-CO-09 requires
+// on a VAT identifier. It is the only hint left when the party carries no
+// postal address, as is the case for the payee (UBL-CR-272). A code without a
+// usable prefix gives no country, so validation still rejects it.
+func taxCountryFromVATCode(code string) l10n.TaxCountryCode {
+	code = strings.ToUpper(strings.TrimSpace(code))
+	if len(code) < 3 {
+		return ""
 	}
-
-	// Set TaxID from chosen scheme
-	setTaxIDFromScheme(validSchemes[taxIDIdx], p, countryCode)
-
-	// Rest become identities with tax scope
-	addRemainingTaxSchemesAsIdentities(validSchemes, taxIDIdx, p, countryCode)
+	country := l10n.TaxCountryCode(code[:2])
+	if country.Validate() != nil {
+		return ""
+	}
+	return country
 }
 
-func findVATSchemeIndex(schemes []PartyTaxScheme) int {
-	for i, pts := range schemes {
-		if pts.TaxScheme.ID == TaxSchemeVAT {
-			return i
-		}
+// addTaxSchemeAsIdentity turns a PartyTaxScheme into a tax scoped identity,
+// dropping the scheme code.
+func addTaxSchemeAsIdentity(pts PartyTaxScheme, p *org.Party, countryCode string) {
+	identity := &org.Identity{
+		Country: l10n.ISOCountryCode(countryCode),
+		Code:    cbc.Code(pts.CompanyID.Value),
+		Scope:   org.IdentityScopeTax,
 	}
-	return -1
+
+	if p.Identities == nil {
+		p.Identities = make([]*org.Identity, 0)
+	}
+	p.Identities = append(p.Identities, identity)
 }
 
-func addRemainingTaxSchemesAsIdentities(validSchemes []PartyTaxScheme, taxIDIdx int, p *org.Party, countryCode string) {
-	for i, pts := range validSchemes {
-		if i == taxIDIdx {
-			continue
-		}
-
-		identity := &org.Identity{
-			Country: l10n.ISOCountryCode(countryCode),
-			Code:    cbc.Code(*pts.CompanyID),
-			Scope:   org.IdentityScopeTax,
-			Type:    cbc.Code(pts.TaxScheme.ID),
-		}
-
-		if p.Identities == nil {
-			p.Identities = make([]*org.Identity, 0)
-		}
-		p.Identities = append(p.Identities, identity)
-	}
-}
-
-func handlePartyIdentifications(party *Party, p *org.Party, o *options) {
+func handlePartyIdentifications(party *Party, p *org.Party) {
 	for _, partyID := range party.PartyIdentification {
-		if partyID.ID != nil {
+		if partyID.ID != nil && partyID.ID.Value != "" {
 			identity := &org.Identity{
 				Code: cbc.Code(partyID.ID.Value),
 			}
 			if partyID.ID.SchemeID != nil {
-				s := *partyID.ID.SchemeID
-				if o.context.Is(ContextZATCA) {
-					identity.Type = cbc.Code(s)
-				} else {
-					identity.Ext = tax.ExtensionsOf(cbc.CodeMap{
-						iso.ExtKeySchemeID: cbc.Code(s),
-					})
-				}
+				identity.Ext = identity.Ext.Set(iso.ExtKeySchemeID, cbc.Code(*partyID.ID.SchemeID))
 			}
 			if p.Identities == nil {
 				p.Identities = make([]*org.Identity, 0)

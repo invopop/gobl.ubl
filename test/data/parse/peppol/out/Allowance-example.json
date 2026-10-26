@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "76724bc2486df928a94003df9b3d9ef63d69ea2c553ec758dd05cc1296576f8b"
+			"val": "2ac7756b37527bdb78d4162d8299a74c4a3f5139ef22446415cab69975670eb6"
 		}
 	},
 	"doc": {
@@ -23,7 +23,7 @@
 			{
 				"from": "EUR",
 				"to": "SEK",
-				"amount": "7.61"
+				"amount": "7.611429"
 			}
 		],
 		"tax": {
@@ -148,9 +148,14 @@
 						}
 					],
 					"description": "Description of item",
+					"list": "450",
+					"discount": "40",
 					"price": "410.00",
 					"unit": "one",
-					"origin": "NO"
+					"origin": "NO",
+					"ext": {
+						"untdid-unit": "C62"
+					}
 				},
 				"sum": "4100.00",
 				"discounts": [
@@ -208,11 +213,18 @@
 							"code": "86776"
 						}
 					],
+					"attributes": [
+						{
+							"label": "AdditionalItemName",
+							"text": "AdditionalItemValue"
+						}
+					],
 					"description": "Description of item",
-					"price": "100.00",
+					"price": "200.00",
+					"per": "2",
 					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
+					"ext": {
+						"untdid-unit": "C62"
 					}
 				},
 				"sum": "1000.00",
@@ -250,11 +262,17 @@
 							"code": "86776"
 						}
 					],
+					"attributes": [
+						{
+							"label": "AdditionalItemName",
+							"text": "AdditionalItemValue"
+						}
+					],
 					"description": "Description of item",
 					"price": "100.00",
 					"unit": "one",
-					"meta": {
-						"additionalitemname": "AdditionalItemValue"
+					"ext": {
+						"untdid-unit": "C62"
 					}
 				},
 				"sum": "1000.00",
@@ -348,6 +366,7 @@
 					}
 				}
 			],
+			"cost": "4025:123:4343",
 			"period": {
 				"start": "2017-12-01",
 				"end": "2017-12-31"
@@ -359,22 +378,22 @@
 			]
 		},
 		"payment": {
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2017-12-01",
-						"amount": "7125.00",
-						"percent": "100%"
-					}
-				],
-				"notes": "Payment within 10 days, 2% discount"
-			},
 			"advances": [
 				{
 					"description": "Prepaid Amount",
 					"amount": "1000.00"
 				}
 			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2017-12-01",
+						"amount": "6125.00",
+						"percent": "100%"
+					}
+				],
+				"notes": "Payment within 10 days, 2% discount"
+			},
 			"instructions": {
 				"key": "credit-transfer",
 				"detail": "Credit transfer",
@@ -407,8 +426,10 @@
 			},
 			"identities": [
 				{
-					"label": "0088",
-					"code": "7300010000001"
+					"code": "7300010000001",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
 				}
 			],
 			"date": "2017-11-01"

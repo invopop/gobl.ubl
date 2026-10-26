@@ -3,11 +3,8 @@ package ubl
 import (
 	"encoding/xml"
 	"fmt"
-	"strings"
 
 	"github.com/invopop/gobl"
-	"github.com/invopop/gobl.fr.ctc/addon/dgfip"
-	zatca "github.com/invopop/gobl.sa.zatca/addon"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
 	cur "github.com/invopop/gobl/currency"
@@ -44,7 +41,7 @@ type Invoice struct {
 	Extensions         *Extensions `xml:"ext:UBLExtensions,omitempty"`
 	UBLVersionID       string      `xml:"cbc:UBLVersionID,omitempty"`
 	CustomizationID    string      `xml:"cbc:CustomizationID,omitempty"`
-	ProfileID          string      `xml:"cbc:ProfileID,omitempty"`
+	ProfileID          *IDType     `xml:"cbc:ProfileID,omitempty"`
 	ProfileExecutionID string      `xml:"cbc:ProfileExecutionID,omitempty"`
 	ID                 string      `xml:"cbc:ID"`
 	CopyIndicator      bool        `xml:"cbc:CopyIndicator,omitempty"`
@@ -107,19 +104,12 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 	}
 
 	// Determine CustomizationID to use in output
-	customizationID := o.context.CustomizationID
-	if o.context.OutputCustomizationID != "" {
-		customizationID = o.context.OutputCustomizationID
+	customizationID := o.spec.CustomizationID
+	if o.spec.OutputCustomizationID != "" {
+		customizationID = o.spec.OutputCustomizationID
 	}
 
-	// Determine ProfileID to use in output
-	// First check meta field, then fall back to context
-	profileID := o.context.ProfileID
-	if o.context.Is(ContextPeppolFranceCIUS) || o.context.Is(ContextPeppolFranceExtended) {
-		if profile := inv.Tax.GetExt(dgfip.ExtKeyBillingMode); profile != cbc.CodeEmpty {
-			profileID = profile.String()
-		}
-	}
+	profileID := o.spec.ProfileID
 
 	// Create the UBL document
 	out := &Invoice{
@@ -134,41 +124,30 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		EXTNamespace:            NamespaceEXT,
 		SchemaLocation:          SchemaLocationInvoice,
 		CustomizationID:         customizationID,
-		ProfileID:               profileID,
 		ID:                      invoiceNumber(inv.Series, inv.Code),
 		IssueDate:               formatDate(inv.IssueDate),
-		AccountingCost:          "", // TODO: ordering cost
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, o.context)},
-		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, o.context)},
+		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
+		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
+	}
+
+	// ProfileID is omitted when empty; when present it only carries a value here
+	// (a country overlay may add the schemeID/schemeAgencyID attributes).
+	if profileID != "" {
+		out.ProfileID = &IDType{Value: profileID}
 	}
 
 	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate
 	// is available. BT-111 is only added in that case and BR-53 requires
 	// BT-111 whenever BT-6 is present, so the two must be gated identically.
-	if taxCurrency := inv.RegimeDef().Currency; taxCurrency != inv.Currency &&
-		cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency) != nil {
+	taxCurrency := inv.RegimeDef().GetCurrency()
+	taxExchangeRate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency)
+	if taxCurrency != inv.Currency && taxExchangeRate != nil {
 		out.TaxCurrencyCode = string(taxCurrency)
 	}
 
-	docType := inv.Type
-	if o.context.Is(ContextZATCA) {
-		out.SchemaLocation = ""
-		// BR-KSA-03
-		out.UUID = string(inv.UUID)
-		// BR-KSA-70
-		out.IssueTime = inv.IssueTime.String()
-		// BR-KSA-70
-		out.TaxCurrencyCode = string(inv.RegimeDef().Currency)
-		// BR-KSA-06
-		invType := inv.Tax.GetExt(zatca.ExtKeyInvoiceType).String()
-		out.InvoiceTypeCode.Name = &invType
-		// ZATCA treats all documents as invoices
-		docType = bill.InvoiceTypeStandard
-	}
-
-	if docType.In(bill.InvoiceTypeCreditNote) {
+	if inv.Type.In(bill.InvoiceTypeCreditNote) {
 		out.XMLName = xml.Name{Local: "CreditNote"}
 		out.UBLNamespace = NamespaceUBLCreditNote
 		out.SchemaLocation = SchemaLocationCrediteNote
@@ -190,27 +169,22 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		}
 
 		if len(noteTexts) > 0 {
-			if o.context.Is(ContextPeppol) {
-				// Peppol only allows one note, so concatenate all notes
-				out.Note = []string{strings.Join(noteTexts, "\n\n")}
-			} else {
-				out.Note = noteTexts
-			}
+			out.Note = noteTexts
 		}
 	}
 
 	out.addPreceding(inv.Preceding)
-	out.addOrdering(inv.Ordering, o.context)
+	out.addOrdering(inv.Ordering)
 	out.addTaxPoint(inv.Tax)
 	out.addCharges(inv)
-	out.addTotals(inv, o.context)
-	out.addLines(inv, o.context)
+	out.addTotals(inv)
+	out.addLines(inv, o.format.SubLines)
 	out.AddAttachments(inv.Attachments)
 
-	if err = out.addPayment(inv, o.context); err != nil {
+	if err = out.addPayment(inv); err != nil {
 		return nil, err
 	}
-	if d := newDelivery(inv.Delivery, o.context); d != nil {
+	if d := newDelivery(inv.Delivery); d != nil {
 		out.Delivery = []*Delivery{d}
 	}
 
@@ -253,10 +227,10 @@ func invoiceNumber(series cbc.Code, code cbc.Code) string {
 	return fmt.Sprintf("%s-%s", series, code)
 }
 
-// ConvertInvoice is a convenience function that converts a GOBL envelope
+// ExportInvoice is a convenience function that exports a GOBL envelope
 // containing an invoice into a UBL Invoice or CreditNote document.
-func ConvertInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
-	doc, err := Convert(env, opts...)
+func ExportInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
+	doc, err := Export(env, opts...)
 	if err != nil {
 		return nil, err
 	}

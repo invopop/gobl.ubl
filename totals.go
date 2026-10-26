@@ -2,6 +2,7 @@ package ubl
 
 import (
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/cef"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -19,14 +20,15 @@ type TaxTotal struct {
 
 // TaxSubtotal represents a tax subtotal
 type TaxSubtotal struct {
-	TaxableAmount Amount      `xml:"cbc:TaxableAmount,omitempty"`
-	TaxAmount     Amount      `xml:"cbc:TaxAmount"`
-	TaxCategory   TaxCategory `xml:"cac:TaxCategory"`
+	TaxableAmount                Amount      `xml:"cbc:TaxableAmount,omitempty"`
+	TaxAmount                    Amount      `xml:"cbc:TaxAmount"`
+	TransactionCurrencyTaxAmount *Amount     `xml:"cbc:TransactionCurrencyTaxAmount,omitempty"`
+	TaxCategory                  TaxCategory `xml:"cac:TaxCategory"`
 }
 
 // TaxCategory represents a tax category
 type TaxCategory struct {
-	ID                     *string    `xml:"cbc:ID,omitempty"`
+	ID                     *IDType    `xml:"cbc:ID,omitempty"`
 	Percent                *string    `xml:"cbc:Percent,omitempty"`
 	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
 	TaxExemptionReason     *string    `xml:"cbc:TaxExemptionReason,omitempty"`
@@ -45,83 +47,80 @@ type MonetaryTotal struct {
 	PayableAmount         *Amount `xml:"cbc:PayableAmount,omitempty"`
 }
 
-func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
+func (ui *Invoice) addTotals(inv *bill.Invoice) {
 	if inv == nil || inv.Totals == nil {
 		return
 	}
 	t := inv.Totals
 
 	currency := inv.Currency.String()
-	rCurrency := inv.RegimeDef().Currency.String()
+	rCurrency := inv.RegimeDef().GetCurrency().String()
 
+	// BT-106 to BT-115: the document totals, each capped at the currency's
+	// precision by BR-DEC-09 through BR-DEC-18.
 	ui.LegalMonetaryTotal = MonetaryTotal{
-		LineExtensionAmount: Amount{Value: t.Sum.String(), CurrencyID: &currency},
-		TaxExclusiveAmount:  Amount{Value: t.Total.String(), CurrencyID: &currency},
-		TaxInclusiveAmount:  Amount{Value: t.TotalWithTax.String(), CurrencyID: &currency},
-		PayableAmount:       &Amount{Value: t.Payable.String(), CurrencyID: &currency},
+		LineExtensionAmount: newAmount(t.Sum, currency),
+		TaxExclusiveAmount:  newAmount(t.Total, currency),
+		TaxInclusiveAmount:  newAmount(t.TotalWithTax, currency),
+		PayableAmount:       newAmountPtr(t.Payable, currency),
 	}
 
 	if t.Discount != nil {
-		ui.LegalMonetaryTotal.AllowanceTotalAmount = &Amount{Value: t.Discount.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.AllowanceTotalAmount = newAmountPtr(*t.Discount, currency)
 	}
 	if t.Charge != nil {
-		ui.LegalMonetaryTotal.ChargeTotalAmount = &Amount{Value: t.Charge.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.ChargeTotalAmount = newAmountPtr(*t.Charge, currency)
 	}
 	if t.Rounding != nil {
-		ui.LegalMonetaryTotal.PayableRoundingAmount = &Amount{Value: t.Rounding.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PayableRoundingAmount = newAmountPtr(*t.Rounding, currency)
 	}
 	if t.Advances != nil {
-		ui.LegalMonetaryTotal.PrepaidAmount = &Amount{Value: t.Advances.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PrepaidAmount = newAmountPtr(*t.Advances, currency)
 	}
 	if t.Due != nil {
-		ui.LegalMonetaryTotal.PayableAmount = &Amount{Value: t.Due.String(), CurrencyID: &currency}
+		ui.LegalMonetaryTotal.PayableAmount = newAmountPtr(*t.Due, currency)
 	}
 
+	// BT-110: the total VAT amount, capped by BR-DEC-13.
 	ui.TaxTotal = []TaxTotal{
 		{
-			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
+			TaxAmount: newAmount(t.Tax, currency),
 		},
 	}
 
-	// BT-111
-	if inv.Currency.String() != rCurrency {
-		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().Currency); rate != nil {
+	// BT-111: only when the regime currency is known and differs from the document currency.
+	if rCurrency != "" && inv.Currency.String() != rCurrency {
+		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().GetCurrency()); rate != nil {
 			taxInAccCurrency := rate.Convert(t.Tax)
 			accTaxTotal := TaxTotal{
-				TaxAmount: Amount{
-					Value:      taxInAccCurrency.String(),
-					CurrencyID: &rCurrency,
-				},
+				TaxAmount: newAmount(taxInAccCurrency, rCurrency),
 			}
 			ui.TaxTotal = append(ui.TaxTotal, accTaxTotal)
 		}
-	} else if ctx.Is(ContextZATCA) {
-		// BR-KSA-EN16931-09
-		ui.TaxTotal = append(ui.TaxTotal, TaxTotal{
-			TaxAmount: Amount{Value: t.Tax.String(), CurrencyID: &currency},
-		})
 	}
 
 	if t.Taxes != nil && len(t.Taxes.Categories) > 0 {
 		for _, cat := range t.Taxes.Categories {
 			for _, r := range cat.Rates {
+				// BT-116/BT-117: the taxable base and tax amount per
+				// category, capped by BR-DEC-19 and BR-DEC-20.
 				subtotal := TaxSubtotal{
-					TaxAmount: Amount{Value: r.Amount.String(), CurrencyID: &currency},
+					TaxAmount: newAmount(r.Amount, currency),
 				}
 				if r.Base != (num.Amount{}) {
-					subtotal.TaxableAmount = Amount{Value: r.Base.String(), CurrencyID: &currency}
+					subtotal.TaxableAmount = newAmount(r.Base, currency)
 				}
 				taxCat := TaxCategory{}
 
 				if k := r.Ext.Get(untdid.ExtKeyTaxCategory).String(); k != "" {
-					taxCat.ID = &k
+					taxCat.ID = &IDType{Value: k}
 				}
 				if v := r.Ext.Get(cef.ExtKeyVATEX).String(); v != "" {
 					taxCat.TaxExemptionReasonCode = &v
 				}
 
 				if inv.Tax != nil {
-					if note := findTaxNote(inv.Tax.Notes, cat.Code, r); note != nil {
+					if note := findTaxNote(inv.Tax.Notes, cat.Code, r.Ext); note != nil {
 						taxCat.TaxExemptionReason = &note.Text
 					}
 				}
@@ -130,14 +129,14 @@ func (ui *Invoice) addTotals(inv *bill.Invoice, ctx Context) {
 				if r.Percent != nil {
 					p := r.Percent.StringWithoutSymbol()
 					taxCat.Percent = &p
-				} else if taxCat.ID == nil || *taxCat.ID != "O" {
+				} else if taxCat.ID == nil || taxCat.ID.Value != "O" {
 					// Default to 0% when not outside scope
 					p := "0"
 					taxCat.Percent = &p
 				}
 
 				if cat.Code != cbc.CodeEmpty {
-					taxCat.TaxScheme = &TaxScheme{ID: cat.Code.String()}
+					taxCat.TaxScheme = &TaxScheme{ID: IDType{Value: cat.Code.String()}}
 				}
 				subtotal.TaxCategory = taxCat
 				ui.TaxTotal[0].TaxSubtotal = append(ui.TaxTotal[0].TaxSubtotal, subtotal)
@@ -158,8 +157,8 @@ func (ui *Invoice) buildTaxCategoryMap() map[string]*taxCategoryInfo {
 	for _, taxTotal := range ui.TaxTotal {
 		for _, subtotal := range taxTotal.TaxSubtotal {
 			if subtotal.TaxCategory.ID != nil && subtotal.TaxCategory.TaxScheme != nil {
-				schemeID := subtotal.TaxCategory.TaxScheme.ID
-				categoryID := *subtotal.TaxCategory.ID
+				schemeID := subtotal.TaxCategory.TaxScheme.ID.Value
+				categoryID := subtotal.TaxCategory.ID.Value
 				key := buildTaxCategoryKey(schemeID, categoryID, subtotal.TaxCategory.Percent)
 				info := &taxCategoryInfo{}
 				if subtotal.TaxCategory.TaxExemptionReasonCode != nil {
@@ -183,46 +182,50 @@ func (ui *Invoice) goblAddTaxNotes(inv *bill.Invoice) {
 				continue
 			}
 			note := &tax.Note{
-				Category: cbc.Code(tc.TaxScheme.ID),
+				Category: cbc.Code(tc.TaxScheme.ID.Value),
 				Text:     cleanString(*tc.TaxExemptionReason),
-				Ext:      tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTaxCategory: cbc.Code(*tc.ID)}),
+				Ext:      tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyTaxCategory: cbc.Code(tc.ID.Value)}),
 			}
 			inv.Tax = inv.Tax.MergeNotes(note)
 		}
 	}
 }
 
-// findTaxNote finds a tax note that matches the given category code and rate total
-// by comparing category and the UNTDID tax category extension.
-func findTaxNote(notes []*tax.Note, catCode cbc.Code, rate *tax.RateTotal) *tax.Note {
+// findTaxNote finds a tax note that matches the given category code and set of
+// extensions by comparing category and the UNTDID tax category extension.
+func findTaxNote(notes []*tax.Note, catCode cbc.Code, ext tax.Extensions) *tax.Note {
 	for _, n := range notes {
 		if n.Category != catCode {
 			continue
 		}
-		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != cbc.CodeEmpty && nc == rate.Ext.Get(untdid.ExtKeyTaxCategory) {
+		if nc := n.Ext.Get(untdid.ExtKeyTaxCategory); nc != cbc.CodeEmpty && nc == ext.Get(untdid.ExtKeyTaxCategory) {
 			return n
 		}
 	}
 	return nil
 }
 
-// goblExchangeRates derives the exchange rate from two TaxTotal blocks
-// when DocumentCurrencyCode differs from TaxCurrencyCode.
-func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) []*cur.ExchangeRate {
-	if len(taxTotals) < 2 {
+// exchangeRatePrecision is the number of decimals kept when deriving a rate
+// from two rounded totals, so converting BT-110 gives back BT-111.
+const exchangeRatePrecision = 6
+
+// goblExchangeRates derives the exchange rate from BT-111 / BT-110 when
+// DocumentCurrencyCode differs from TaxCurrencyCode.
+func goblExchangeRates(docCurrency, taxCurrency cur.Code, doc, acc *TaxTotal) []*cur.ExchangeRate {
+	if doc == nil || acc == nil {
 		return nil
 	}
 
-	docAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[0].TaxAmount.Value))
+	docAmount, err := num.AmountFromString(normalizeNumericString(doc.TaxAmount.Value))
 	if err != nil || docAmount.IsZero() {
 		return nil
 	}
-	taxAmount, err := num.AmountFromString(normalizeNumericString(taxTotals[1].TaxAmount.Value))
+	taxAmount, err := num.AmountFromString(normalizeNumericString(acc.TaxAmount.Value))
 	if err != nil {
 		return nil
 	}
 
-	rate := taxAmount.Divide(docAmount)
+	rate := taxAmount.RescaleUp(exchangeRatePrecision).Divide(docAmount)
 
 	return []*cur.ExchangeRate{
 		{
@@ -231,4 +234,30 @@ func goblExchangeRates(docCurrency, taxCurrency cur.Code, taxTotals []TaxTotal) 
 			Amount: rate,
 		},
 	}
+}
+
+// goblTaxExchangeRate parses cac:TaxExchangeRate (BT-167/BT-167-1/BT-167-2/
+// EXT-FR-FE-192) into a GOBL exchange rate.
+func goblTaxExchangeRate(er *ExchangeRate) *cur.ExchangeRate {
+	if er.SourceCurrencyCode == nil || er.TargetCurrencyCode == nil || er.CalculationRate == nil {
+		return nil
+	}
+
+	amount, err := num.AmountFromString(normalizeNumericString(*er.CalculationRate))
+	if err != nil {
+		return nil
+	}
+
+	rate := &cur.ExchangeRate{
+		From:   cur.Code(*er.SourceCurrencyCode),
+		To:     cur.Code(*er.TargetCurrencyCode),
+		Amount: amount,
+	}
+	if er.Date != nil {
+		if d, err := parseDate(*er.Date); err == nil {
+			dt := cal.MakeDateTime(d.Year, d.Month, d.Day, 0, 0, 0)
+			rate.At = &dt
+		}
+	}
+	return rate
 }

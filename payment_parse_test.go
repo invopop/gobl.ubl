@@ -1,12 +1,16 @@
 package ubl_test
 
 import (
+	"bytes"
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,8 +37,8 @@ func TestParsePayment(t *testing.T) {
 		assert.Equal(t, cbc.Code("0003434323213231"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "NO9386011117947", payment.Instructions.CreditTransfer[0].IBAN)
-		assert.Equal(t, "DNBANOKK", payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, cbc.Code("NO9386011117947"), payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("DNBANOKK"), payment.Instructions.CreditTransfer[0].BIC)
 
 		// Check Terms
 		require.NotNil(t, payment.Terms)
@@ -78,6 +82,30 @@ func TestParsePaymentPayee(t *testing.T) {
 		assert.Equal(t, org.IdentityScopeLegal, payment.Payee.Identities[0].Scope)
 		assert.Equal(t, cbc.Code("DK16356608"), payment.Payee.Identities[1].Code)
 	})
+
+	t.Run("payee VAT identifier without an address", func(t *testing.T) {
+		// UBL-CR-272 forbids the payee's postal address, so the country of
+		// its VAT identifier can only come from the code's ISO prefix.
+		raw, err := testLoadXML("en16931/ubl-example2.xml")
+		require.NoError(t, err)
+		anchor := []byte("        <cac:PartyLegalEntity>\n            <cbc:CompanyID>989823401</cbc:CompanyID>")
+		data := bytes.Replace(raw, anchor, append([]byte(`        <cac:PartyTaxScheme>
+            <cbc:CompanyID>FR53341200068</cbc:CompanyID>
+            <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+        </cac:PartyTaxScheme>
+`), anchor...), 1)
+		require.NotEqual(t, string(raw), string(data), "payee tax scheme was not inserted")
+
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		env, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		payee := env.Extract().(*bill.Invoice).Payment.Payee
+		require.NotNil(t, payee.TaxID)
+		assert.Equal(t, l10n.TaxCountryCode("FR"), payee.TaxID.Country)
+		assert.Equal(t, cbc.Code("53341200068"), payee.TaxID.Code)
+	})
 }
 
 func TestParsePaymentInstructions(t *testing.T) {
@@ -95,8 +123,8 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Code("0003434323213231"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "NO9386011117947", payment.Instructions.CreditTransfer[0].IBAN)
-		assert.Equal(t, "DNBANOKK", payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, cbc.Code("NO9386011117947"), payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("DNBANOKK"), payment.Instructions.CreditTransfer[0].BIC)
 	})
 
 	t.Run("instructions with direct debit", func(t *testing.T) {
@@ -112,7 +140,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Key("direct-debit"), payment.Instructions.Key)
 		assert.Equal(t, cbc.Code("Payref1"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.DirectDebit)
-		assert.Equal(t, "123456", payment.Instructions.DirectDebit.Ref)
+		assert.Equal(t, cbc.Code("123456"), payment.Instructions.DirectDebit.Ref)
 		assert.Equal(t, "DK1212341234123412", payment.Instructions.DirectDebit.Account)
 	})
 
@@ -129,8 +157,8 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Key("credit-transfer"), payment.Instructions.Key)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "SEXDABCD", payment.Instructions.CreditTransfer[0].BIC)
-		assert.Equal(t, "SE1212341234123412", payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("SEXDABCD"), payment.Instructions.CreditTransfer[0].BIC)
+		assert.Equal(t, cbc.Code("SE1212341234123412"), payment.Instructions.CreditTransfer[0].IBAN)
 	})
 
 	t.Run("instructions with only IBAN", func(t *testing.T) {
@@ -147,7 +175,7 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Code("1100512149"), payment.Instructions.Ref)
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
-		assert.Equal(t, "NL28RBOS0420242228", payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("NL28RBOS0420242228"), payment.Instructions.CreditTransfer[0].IBAN)
 	})
 }
 
@@ -209,7 +237,7 @@ func TestPaymentRoundTrip(t *testing.T) {
 		doc := testInvoiceFrom(t, "invoice-account-number.json")
 
 		// Convert back to GOBL
-		resultEnv, err := doc.Convert()
+		resultEnv, err := ubl.Import(doc)
 		require.NoError(t, err)
 
 		resultInv, ok := resultEnv.Extract().(*bill.Invoice)
@@ -222,11 +250,33 @@ func TestPaymentRoundTrip(t *testing.T) {
 		require.Len(t, resultInv.Payment.Instructions.CreditTransfer, 1)
 
 		// The original has number, not IBAN
-		assert.Equal(t, "123456789", originalInv.Payment.Instructions.CreditTransfer[0].Number)
-		assert.Equal(t, "", originalInv.Payment.Instructions.CreditTransfer[0].IBAN)
+		assert.Equal(t, cbc.Code("123456789"), originalInv.Payment.Instructions.CreditTransfer[0].Number)
+		assert.Equal(t, cbc.Code(""), originalInv.Payment.Instructions.CreditTransfer[0].IBAN)
 
 		// After round-trip, the number should still be in the number field, not IBAN
-		assert.Equal(t, "123456789", resultInv.Payment.Instructions.CreditTransfer[0].Number, "Account number should be preserved in Number field")
-		assert.Equal(t, "", resultInv.Payment.Instructions.CreditTransfer[0].IBAN, "IBAN should be empty when Number was used")
+		assert.Equal(t, cbc.Code("123456789"), resultInv.Payment.Instructions.CreditTransfer[0].Number, "Account number should be preserved in Number field")
+		assert.Equal(t, cbc.Code(""), resultInv.Payment.Instructions.CreditTransfer[0].IBAN, "IBAN should be empty when Number was used")
+	})
+
+	t.Run("payee tax ID round trip", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Payment.Payee.TaxID = &tax.Identity{Country: "FR", Code: "53341200068"}
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+		require.NotNil(t, doc.PayeeParty)
+		require.Nil(t, doc.PayeeParty.PostalAddress, "UBL-CR-272 drops the payee address")
+
+		resultEnv, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		payee := resultEnv.Extract().(*bill.Invoice).Payment.Payee
+		require.NotNil(t, payee.TaxID)
+		assert.Equal(t, l10n.TaxCountryCode("FR"), payee.TaxID.Country)
+		assert.Equal(t, cbc.Code("53341200068"), payee.TaxID.Code)
+		assert.NoError(t, resultEnv.Validate())
 	})
 }

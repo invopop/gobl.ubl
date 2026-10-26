@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>urn:cen.eu:en16931:2017</cbc:CustomizationID>
+  <cbc:ID>LINE-MISMATCH-1</cbc:ID>
+  <cbc:IssueDate>2026-01-01</cbc:IssueDate>
+  <cbc:DueDate>2026-02-01</cbc:DueDate>
+  <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:BuyerReference>REF-1</cbc:BuyerReference>
+  <cac:AccountingSupplierParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="0002">381511039</cbc:EndpointID>
+      <cac:PostalAddress>
+        <cbc:CityName>Paris</cbc:CityName>
+        <cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyTaxScheme>
+        <cbc:CompanyID>FR59381511039</cbc:CompanyID>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:PartyTaxScheme>
+      <cac:PartyLegalEntity><cbc:RegistrationName>Seller SA</cbc:RegistrationName></cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <cac:Party>
+      <cbc:EndpointID schemeID="0002">820731115</cbc:EndpointID>
+      <cac:PostalAddress>
+        <cbc:CityName>Paris</cbc:CityName>
+        <cac:Country><cbc:IdentificationCode>FR</cbc:IdentificationCode></cac:Country>
+      </cac:PostalAddress>
+      <cac:PartyLegalEntity><cbc:RegistrationName>Buyer SA</cbc:RegistrationName></cac:PartyLegalEntity>
+    </cac:Party>
+  </cac:AccountingCustomerParty>
+  <cac:TaxTotal>
+    <cbc:TaxAmount currencyID="EUR">322.97</cbc:TaxAmount>
+    <cac:TaxSubtotal>
+      <cbc:TaxableAmount currencyID="EUR">1614.87</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="EUR">322.97</cbc:TaxAmount>
+      <cac:TaxCategory>
+        <cbc:ID>S</cbc:ID><cbc:Percent>20.00</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:TaxCategory>
+    </cac:TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <cbc:LineExtensionAmount currencyID="EUR">1614.87</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="EUR">1614.87</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="EUR">1937.84</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="EUR">1937.84</cbc:PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <cbc:ID>1</cbc:ID>
+    <cbc:InvoicedQuantity unitCode="EA">2700.00</cbc:InvoicedQuantity>
+    <cbc:LineExtensionAmount currencyID="EUR">1614.87</cbc:LineExtensionAmount>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>false</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReasonCode>95</cbc:AllowanceChargeReasonCode>
+      <cbc:MultiplierFactorNumeric>5.92</cbc:MultiplierFactorNumeric>
+      <cbc:Amount currencyID="EUR">532.27</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:AllowanceCharge>
+      <cbc:ChargeIndicator>true</cbc:ChargeIndicator>
+      <cbc:AllowanceChargeReasonCode>ZZZ</cbc:AllowanceChargeReasonCode>
+      <cbc:Amount currencyID="EUR">21.87</cbc:Amount>
+    </cac:AllowanceCharge>
+    <cac:Item>
+      <cbc:Name>Widget</cbc:Name>
+      <cac:ClassifiedTaxCategory>
+        <cbc:ID>S</cbc:ID><cbc:Percent>20.00</cbc:Percent>
+        <cac:TaxScheme><cbc:ID>VAT</cbc:ID></cac:TaxScheme>
+      </cac:ClassifiedTaxCategory>
+    </cac:Item>
+    <cac:Price><cbc:PriceAmount currencyID="EUR">0.60</cbc:PriceAmount></cac:Price>
+  </cac:InvoiceLine>
+</Invoice>

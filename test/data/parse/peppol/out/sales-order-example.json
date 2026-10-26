@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "08b7db78d63cbb1b8f4ce1b258fc4f04362277ed0fca5c737cd16b02c45f87a4"
+			"val": "7dbe7bf8587f214b899bff88a0bf287fde8e9ad4867dd8507eed5fba218379c3"
 		}
 	},
 	"doc": {
@@ -134,7 +134,10 @@
 					"description": "Description of item",
 					"price": "400.00",
 					"unit": "day",
-					"origin": "NO"
+					"origin": "NO",
+					"ext": {
+						"untdid-unit": "DAY"
+					}
 				},
 				"sum": "2800.00",
 				"taxes": [
@@ -170,7 +173,10 @@
 					"description": "Description 2",
 					"price": "500.00",
 					"unit": "day",
-					"origin": "NO"
+					"origin": "NO",
+					"ext": {
+						"untdid-unit": "DAY"
+					}
 				},
 				"sum": "-1500.00",
 				"taxes": [
@@ -205,11 +211,7 @@
 		],
 		"ordering": {
 			"code": "0150abc",
-			"purchases": [
-				{
-					"code": "NA"
-				}
-			],
+			"cost": "4025:123:4343",
 			"sales": [
 				{
 					"code": "123456"
@@ -258,8 +260,10 @@
 			},
 			"identities": [
 				{
-					"label": "0088",
-					"code": "9483759475923478"
+					"code": "9483759475923478",
+					"ext": {
+						"iso-scheme-id": "0088"
+					}
 				}
 			],
 			"date": "2017-11-01"

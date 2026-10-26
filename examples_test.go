@@ -2,7 +2,6 @@ package ubl_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"flag"
 	"io"
@@ -15,11 +14,9 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/uuid"
-	"github.com/invopop/phive"
+	"github.com/invopop/phorm"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -32,36 +29,26 @@ const (
 // updateOut is a flag that can be set to update example files
 var updateOut = flag.Bool("update", false, "Update the example files in test/data")
 
-// validate is a flag that enables Phive validation
-var validate = flag.Bool("validate", false, "Run Phive validation on generated XML")
+// validate is a flag that enables schematron validation against phorm
+var validate = flag.Bool("validate", false, "Run phorm schematron validation on generated XML")
 
 func TestConvertToInvoice(t *testing.T) {
-	var pc phive.ValidationServiceClient
+	var pc *phorm.Client
 
-	// Only connect to Phive if validation is requested
+	// Only connect to phorm if validation is requested
 	if *validate {
-		conn, err := grpc.NewClient(
-			"127.0.0.1:9090",
-			grpc.WithTransportCredentials(insecure.NewCredentials()),
-		)
-		require.NoError(t, err)
-		defer conn.Close() //nolint:errcheck
-		pc = phive.NewValidationServiceClient(conn)
+		pc = phormClient(t)
 	}
 
 	// Define contexts to test
 	contexts := []struct {
 		name    string
-		context ubl.Context
+		context ubl.Format
 		dir     string
 	}{
-		{"EN16931", ubl.ContextEN16931, "en16931"},
-		{"Peppol", ubl.ContextPeppol, "peppol"},
-		{"PeppolSelfBilled", ubl.ContextPeppolSelfBilled, "peppol-self-billed"},
-		{"XRechnung", ubl.ContextXRechnung, "xrechnung"},
-		{"FranceCIUS", ubl.ContextPeppolFranceCIUS, "france-cius"},
-		{"FranceExtended", ubl.ContextPeppolFranceExtended, "france-extended"},
-		{"ZATCA", ubl.ContextZATCA, "zatca"},
+		{"EN16931", ubl.FormatEN16931, "en16931"},
+		{"Peppol", ubl.FormatPeppol, "peppol"},
+		{"PeppolSelfBilled", ubl.FormatPeppol, "peppol-self-billed"},
 	}
 
 	for _, ctx := range contexts {
@@ -81,7 +68,7 @@ func TestConvertToInvoice(t *testing.T) {
 					doc, err := testInvoiceFromContext(filepath.Join(ctx.dir, inName), ctx.context)
 					require.NoError(t, err)
 
-					data, err := ubl.Bytes(doc)
+					data, err := ubl.Encode(doc)
 					require.NoError(t, err)
 
 					outPath := filepath.Join(getConvertPath(), ctx.dir, "out", outName)
@@ -90,23 +77,15 @@ func TestConvertToInvoice(t *testing.T) {
 						require.NoError(t, err)
 					}
 
-					// Run Phive validation if requested
+					// Run schematron validation if requested
 					if *validate {
 						// Determine VESID based on document type
 						env, err := loadTestEnvelopeFromPath(example)
 						require.NoError(t, err)
 						inv, ok := env.Extract().(*bill.Invoice)
 						require.True(t, ok, "Document should be an invoice")
-						vesid := ctx.context.GetVESID(inv)
 
-						resp, err := pc.ValidateXml(context.Background(), &phive.ValidateXmlRequest{
-							Vesid:      vesid,
-							XmlContent: data,
-						})
-						require.NoError(t, err)
-						results, err := json.MarshalIndent(resp.Results, "", "  ")
-						require.NoError(t, err)
-						require.True(t, resp.Success, "Generated XML should be valid for %s: %s", vesid, string(results))
+						validateXML(t, pc, ctx.context.VESID(inv), data)
 					}
 
 					output, err := os.ReadFile(outPath)
@@ -127,10 +106,6 @@ func TestParseInvoice(t *testing.T) {
 		{"EN16931", "en16931"},
 		{"Peppol", "peppol"},
 		{"PeppolSelfBilled", "peppol-self-billed"},
-		{"XRechnung", "xrechnung"},
-		{"FranceCIUS", "france-cius"},
-		{"FranceExtended", "france-extended"},
-		{"ZATCA", "zatca"},
 	}
 
 	for _, ctx := range contexts {
@@ -152,11 +127,11 @@ func TestParseInvoice(t *testing.T) {
 					require.NoError(t, err)
 
 					// Convert UBL XML to GOBL
-					doc, err := ubl.Parse(xmlData)
+					doc, err := ubl.Decode(xmlData)
 					require.NoError(t, err)
 					inv, ok := doc.(*ubl.Invoice)
 					require.True(t, ok, "Document should be an invoice")
-					env, err := inv.Convert()
+					env, err := ubl.Import(inv)
 					require.NoError(t, err)
 
 					// Unfortunately, the sample UBL documents have lots of errors, including
@@ -224,18 +199,18 @@ func testInvoiceFrom(t *testing.T, name string) *ubl.Invoice {
 
 	env := loadTestEnvelope(t, name)
 
-	doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 	require.NoError(t, err)
 	return doc
 }
 
 // testInvoiceFromContext creates a UBL Invoice from a GOBL file with a specific context
-func testInvoiceFromContext(name string, ctx ubl.Context) (*ubl.Invoice, error) {
+func testInvoiceFromContext(name string, ctx ubl.Format) (*ubl.Invoice, error) {
 	env, err := loadTestEnvelopeFromPath(filepath.Join(getConvertPath(), name))
 	if err != nil {
 		return nil, err
 	}
-	return ubl.ConvertInvoice(env, ubl.WithContext(ctx))
+	return ubl.ExportInvoice(env, ubl.WithFormat(ctx))
 }
 
 // loadTestEnvelopeFromPath loads a GOBL envelope from a specific file path
@@ -307,13 +282,13 @@ func parseXMLInvoice(t *testing.T, name string) *gobl.Envelope {
 	data, err := testLoadXML(name)
 	require.NoError(t, err)
 
-	doc, err := ubl.Parse(data)
+	doc, err := ubl.Decode(data)
 	require.NoError(t, err)
 
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok, "document is not an invoice")
 
-	env, err := inv.Convert()
+	env, err := ubl.Import(inv)
 	require.NoError(t, err)
 	return env
 }

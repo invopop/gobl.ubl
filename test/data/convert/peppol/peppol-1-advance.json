@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f7307fd70bce3789c06c93c00926bb87c0113da524ab0c03d859f5c2f501cfff"
+			"val": "5ee520c2f1f01d887280cb3596bfbebe49e5c63507a1be59257305b0bc9ed9d8"
 		},
 		"from": "iso6523-actorid-upis::9920:B98602642",
 		"to": "iso6523-actorid-upis::9920:54387763P"
@@ -136,22 +136,22 @@
 			"code": "ORDER-2024-ADVANCE"
 		},
 		"payment": {
-			"terms": {
-				"due_dates": [
-					{
-						"date": "2025-01-03",
-						"amount": "1960.20",
-						"percent": "100%"
-					}
-				]
-			},
 			"advances": [
 				{
 					"description": "advance payment",
 					"percent": "10%",
 					"amount": "196.02"
 				}
-			]
+			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2025-01-03",
+						"amount": "1764.18",
+						"percent": "100%"
+					}
+				]
+			}
 		},
 		"totals": {
 			"sum": "1620.00",
