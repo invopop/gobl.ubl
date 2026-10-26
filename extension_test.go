@@ -120,3 +120,52 @@ func TestExtensionXMLOmitsEmpty(t *testing.T) {
 	assert.NotContains(t, xmlStr, "<ext:ExtensionURI>")
 	assert.NotContains(t, xmlStr, "<ext:ExtensionContent>")
 }
+
+func TestExtensionContentRaw(t *testing.T) {
+	t.Run("written verbatim", func(t *testing.T) {
+		const content = `<x:Data xmlns:x="urn:test:x"><x:Flag>yes</x:Flag></x:Data>`
+		exts := &ubl.Extensions{
+			Extension: []ubl.Extension{
+				{ExtensionContent: &ubl.ExtensionContent{Raw: []byte(content)}},
+			},
+		}
+		out, err := xml.Marshal(exts)
+		require.NoError(t, err)
+		assert.Equal(t, "<Extensions><ext:UBLExtension><ext:ExtensionContent>"+content+"</ext:ExtensionContent></ext:UBLExtension></Extensions>", string(out))
+	})
+
+	t.Run("read on decode", func(t *testing.T) {
+		data := []byte(`<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
+	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
+	xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
+	xmlns:x="urn:test:x">
+	<ext:UBLExtensions>
+		<ext:UBLExtension>
+			<ext:ExtensionContent><x:Data><x:Flag>root</x:Flag></x:Data></ext:ExtensionContent>
+		</ext:UBLExtension>
+		<ext:UBLExtension>
+			<ext:ExtensionContent><y:Data xmlns:y="urn:test:x"><y:Flag>local</y:Flag></y:Data></ext:ExtensionContent>
+		</ext:UBLExtension>
+	</ext:UBLExtensions>
+	<cbc:ID>1</cbc:ID>
+</Invoice>`)
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		inv, ok := doc.(*ubl.Invoice)
+		require.True(t, ok)
+		require.NotNil(t, inv.Extensions)
+		require.Len(t, inv.Extensions.Extension, 2)
+
+		for i, want := range []string{"root", "local"} {
+			ec := inv.Extensions.Extension[i].ExtensionContent
+			require.NotNil(t, ec)
+			var x struct {
+				XMLName xml.Name `xml:"urn:test:x Data"`
+				Flag    string   `xml:"urn:test:x Flag"`
+			}
+			require.NoError(t, xml.Unmarshal(ec.Raw, &x), string(ec.Raw))
+			assert.Equal(t, want, x.Flag)
+		}
+	})
+}

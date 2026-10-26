@@ -14,6 +14,13 @@ type Extension struct {
 // ExtensionContent wraps the content of a UBL extension.
 type ExtensionContent struct {
 	UBLDocumentSignatures *DocumentSignatures `xml:"sig:UBLDocumentSignatures"`
+	// Raw holds content not modelled here, such as the data of a regional
+	// format. Set it instead of UBLDocumentSignatures, as an extension holds
+	// one element, and declare the namespaces it uses: it is written as is.
+	// Decoding fills only Raw, with the element re-encoded so that each
+	// element declares its own namespace: fit for reading, not a copy of the
+	// original bytes.
+	Raw []byte `xml:",innerxml"`
 }
 
 // NewExtension creates a new extension

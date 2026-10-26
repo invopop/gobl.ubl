@@ -207,3 +207,25 @@ func TestNewPartyEndpointID(t *testing.T) {
 		assert.Nil(t, doc.AccountingSupplierParty.Party.EndpointID)
 	})
 }
+
+func TestSellerContact(t *testing.T) {
+	doc := mustExportInvoice(t, loadTestEnvelope(t, "invoice-minimal.json"))
+	assert.Nil(t, doc.AccountingSupplierParty.SellerContact, "not exported by default")
+
+	id, name := "OP-1", "Jane Doe"
+	doc.AccountingSupplierParty.SellerContact = &ubl.Contact{ID: &id, Name: &name}
+	data, err := ubl.EncodeCompact(doc)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "</cac:Party><cac:SellerContact><cbc:ID>OP-1</cbc:ID><cbc:Name>Jane Doe</cbc:Name></cac:SellerContact></cac:AccountingSupplierParty>")
+
+	parsed, err := ubl.Decode(data)
+	require.NoError(t, err)
+	out, ok := parsed.(*ubl.Invoice)
+	require.True(t, ok)
+	sc := out.AccountingSupplierParty.SellerContact
+	require.NotNil(t, sc)
+	require.NotNil(t, sc.ID)
+	require.NotNil(t, sc.Name)
+	assert.Equal(t, "OP-1", *sc.ID)
+	assert.Equal(t, "Jane Doe", *sc.Name)
+}
