@@ -172,7 +172,7 @@ for _, a := range res.Attachments {
 
 #### Tax Data Documents
 
-A Peppol Tax Data Document (TDD) reports an invoice to a tax authority, next to the invoice itself. This package has the TDD structures (`TaxData`) and the base profile, the Peppol ViDA TDD 1.1.0 (`TaxDataProfileViDA`). National profiles, such as the Slovak TDD, set their own identifiers and invoice UUID inputs in a `TaxDataProfile`. The TDD is not a UBL format: the app that reports to the tax authority builds it.
+A Peppol Tax Data Document (TDD) reports an invoice to a tax authority, next to the invoice itself. This package has the TDD structures (`TaxData`) and the base profile, the Peppol ViDA TDD 1.1.0 (`TaxDataProfileViDA`). National profiles, such as the Slovak TDD, set their own identifiers and invoice UUID inputs in a `TaxDataProfile`. A TDD is a Peppol document built from UBL components: its root is `pxs:TaxData` from the Peppol TDD schema, and it carries an extract of the UBL invoice. It is not registered as an output format (`Format`) of this package, because it needs values that do not come from the invoice. The app that reports to the tax authority builds it with `ExportTaxData` or `BuildTaxData`.
 
 There are two ways to build a TDD:
 
