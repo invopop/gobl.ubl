@@ -32,6 +32,14 @@ func NewExtension() *Extension {
 	}
 }
 
+// NewRawExtension creates an extension whose content is the given XML
+// element, for data not modelled here. See ExtensionContent.Raw.
+func NewRawExtension(raw []byte) *Extension {
+	return &Extension{
+		ExtensionContent: &ExtensionContent{Raw: raw},
+	}
+}
+
 // AddExtension adds a new extension to the ubl invoice
 func (ui *Invoice) AddExtension(extension *Extension) {
 	if ui.Extensions == nil {

@@ -121,13 +121,22 @@ func TestExtensionXMLOmitsEmpty(t *testing.T) {
 	assert.NotContains(t, xmlStr, "<ext:ExtensionContent>")
 }
 
+func TestNewRawExtension(t *testing.T) {
+	const content = `<x:Data xmlns:x="urn:test:x"><x:Flag>yes</x:Flag></x:Data>`
+	ext := ubl.NewRawExtension([]byte(content))
+
+	require.NotNil(t, ext)
+	assert.Nil(t, ext.ExtensionURI)
+	require.NotNil(t, ext.ExtensionContent)
+	assert.Nil(t, ext.ExtensionContent.UBLDocumentSignatures, "an extension holds one element")
+	assert.Equal(t, content, string(ext.ExtensionContent.Raw))
+}
+
 func TestExtensionContentRaw(t *testing.T) {
 	t.Run("written verbatim", func(t *testing.T) {
 		const content = `<x:Data xmlns:x="urn:test:x"><x:Flag>yes</x:Flag></x:Data>`
 		exts := &ubl.Extensions{
-			Extension: []ubl.Extension{
-				{ExtensionContent: &ubl.ExtensionContent{Raw: []byte(content)}},
-			},
+			Extension: []ubl.Extension{*ubl.NewRawExtension([]byte(content))},
 		}
 		out, err := xml.Marshal(exts)
 		require.NoError(t, err)
