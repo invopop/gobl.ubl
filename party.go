@@ -200,13 +200,10 @@ func NewParty(party *org.Party) *Party {
 // adding the terms EN 16931 only defines for the seller.
 func newSupplierParty(party *org.Party) *Party {
 	p := newParty(party)
-	if p == nil {
-		return nil
-	}
 
 	// BT-33: Seller additional legal information. UBL-CR-244 and UBL-CR-279
 	// warn against it on the customer and the payee.
-	if party.Registration != nil && party.Registration.Other != "" {
+	if p != nil && party.Registration != nil && party.Registration.Other != "" {
 		if p.PartyLegalEntity == nil {
 			p.PartyLegalEntity = &PartyLegalEntity{}
 		}

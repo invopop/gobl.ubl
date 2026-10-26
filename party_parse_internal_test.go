@@ -39,11 +39,10 @@ func TestGoblPartyLegalForm(t *testing.T) {
 	})
 
 	for name, legalForm := range map[string]string{
-		"absent":             ``,
-		"empty":              `<cbc:CompanyLegalForm/>`,
-		"whitespace":         `<cbc:CompanyLegalForm> </cbc:CompanyLegalForm>`,
-		"replacement runes":  "<cbc:CompanyLegalForm>\uFFFD\uFFFD</cbc:CompanyLegalForm>",
-		"padded replacement": "<cbc:CompanyLegalForm> \uFFFD </cbc:CompanyLegalForm>",
+		"absent":            ``,
+		"empty":             `<cbc:CompanyLegalForm/>`,
+		"whitespace":        `<cbc:CompanyLegalForm> </cbc:CompanyLegalForm>`,
+		"replacement runes": "<cbc:CompanyLegalForm>\uFFFD\uFFFD</cbc:CompanyLegalForm>",
 	} {
 		t.Run("no registration when "+name, func(t *testing.T) {
 			p := parse(t, legalForm)

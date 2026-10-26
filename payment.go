@@ -104,7 +104,7 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 		// PartyLegalEntity RegistrationName.
 		if le := ui.PayeeParty.PartyLegalEntity; le != nil {
 			le.RegistrationName = nil
-			if le.CompanyID == nil && le.CompanyLegalForm == nil {
+			if le.CompanyID == nil {
 				ui.PayeeParty.PartyLegalEntity = nil
 			}
 		}
