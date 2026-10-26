@@ -100,13 +100,13 @@ func TestParseDeliveryPaths(t *testing.T) {
 		assert.Nil(t, inv.Delivery.Receiver)
 	})
 
-	t.Run("delivery terms", func(t *testing.T) {
+	t.Run("delivery terms are left to the formats that define them", func(t *testing.T) {
 		in := parsedFixture(t, "peppol/base-example.xml")
 		in.DeliveryTerms = &ubl.DeliveryTerms{ID: "EXW"}
 		inv := convertParsed(t, in)
 		require.NotNil(t, inv.Delivery)
 		require.Len(t, inv.Delivery.Identities, 1)
-		assert.Equal(t, "EXW", inv.Delivery.Identities[0].Code.String())
+		assert.Equal(t, "9483759475923478", inv.Delivery.Identities[0].Code.String())
 	})
 }
 
