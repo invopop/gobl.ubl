@@ -196,6 +196,26 @@ func NewParty(party *org.Party) *Party {
 	return newParty(party)
 }
 
+// newSupplierParty converts the GOBL supplier into the UBL seller party,
+// adding the terms EN 16931 only defines for the seller.
+func newSupplierParty(party *org.Party) *Party {
+	p := newParty(party)
+	if p == nil {
+		return nil
+	}
+
+	// BT-33: Seller additional legal information. UBL-CR-244 and UBL-CR-279
+	// warn against it on the customer and the payee.
+	if party.Registration != nil && party.Registration.Other != "" {
+		if p.PartyLegalEntity == nil {
+			p.PartyLegalEntity = &PartyLegalEntity{}
+		}
+		p.PartyLegalEntity.CompanyLegalForm = &party.Registration.Other
+	}
+
+	return p
+}
+
 func newParty(party *org.Party) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
@@ -213,14 +233,6 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 		p.PartyLegalEntity = &PartyLegalEntity{
 			RegistrationName: &party.Name,
 		}
-	}
-
-	// BT-33: additional legal information (cbc:CompanyLegalForm)
-	if party.Registration != nil && party.Registration.Other != "" {
-		if p.PartyLegalEntity == nil {
-			p.PartyLegalEntity = &PartyLegalEntity{}
-		}
-		p.PartyLegalEntity.CompanyLegalForm = &party.Registration.Other
 	}
 
 	contact := &Contact{}

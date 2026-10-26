@@ -128,7 +128,7 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		IssueDate:               formatDate(inv.IssueDate),
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
+		AccountingSupplierParty: SupplierParty{Party: newSupplierParty(inv.Supplier)},
 		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
 	}
 

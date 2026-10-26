@@ -21,9 +21,9 @@ func goblParty(party *Party) *org.Party {
 	}
 
 	// BT-33: additional legal information (cbc:CompanyLegalForm)
-	if party.PartyLegalEntity != nil && party.PartyLegalEntity.CompanyLegalForm != nil {
-		p.Registration = &org.Registration{
-			Other: cleanString(*party.PartyLegalEntity.CompanyLegalForm),
+	if le := party.PartyLegalEntity; le != nil && le.CompanyLegalForm != nil {
+		if form := strings.TrimSpace(cleanString(*le.CompanyLegalForm)); form != "" {
+			p.Registration = &org.Registration{Other: form}
 		}
 	}
 

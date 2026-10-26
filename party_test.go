@@ -69,7 +69,7 @@ func TestNewParty(t *testing.T) {
 		assert.Equal(t, "0088", *doc.PayeeParty.PartyLegalEntity.CompanyID.SchemeID)
 	})
 
-	t.Run("registration maps to CompanyLegalForm for supplier and customer", func(t *testing.T) {
+	t.Run("registration maps to CompanyLegalForm for the supplier only", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-complete.json")
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
@@ -77,6 +77,13 @@ func TestNewParty(t *testing.T) {
 		// BT-33: additional legal information (cbc:CompanyLegalForm).
 		inv.Supplier.Registration = &org.Registration{Other: "Share capital 100.000 EUR"}
 		inv.Customer.Registration = &org.Registration{Other: "GmbH"}
+		if inv.Payment == nil {
+			inv.Payment = &bill.PaymentDetails{}
+		}
+		inv.Payment.Payee = &org.Party{
+			Name:         "Test Payee",
+			Registration: &org.Registration{Other: "SARL"},
+		}
 
 		require.NoError(t, env.Calculate())
 		doc, err := ubl.ExportInvoice(env)
@@ -86,9 +93,41 @@ func TestNewParty(t *testing.T) {
 		require.NotNil(t, doc.AccountingSupplierParty.Party.PartyLegalEntity.CompanyLegalForm)
 		assert.Equal(t, "Share capital 100.000 EUR", *doc.AccountingSupplierParty.Party.PartyLegalEntity.CompanyLegalForm)
 
+		// UBL-CR-244 and UBL-CR-279: BT-33 is seller information only.
 		require.NotNil(t, doc.AccountingCustomerParty.Party.PartyLegalEntity)
-		require.NotNil(t, doc.AccountingCustomerParty.Party.PartyLegalEntity.CompanyLegalForm)
-		assert.Equal(t, "GmbH", *doc.AccountingCustomerParty.Party.PartyLegalEntity.CompanyLegalForm)
+		assert.Nil(t, doc.AccountingCustomerParty.Party.PartyLegalEntity.CompanyLegalForm)
+		require.NotNil(t, doc.PayeeParty)
+		assert.Nil(t, doc.PayeeParty.PartyLegalEntity)
+	})
+
+	t.Run("no supplier gives no seller party", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		inv.Supplier = nil
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+
+		assert.Nil(t, doc.AccountingSupplierParty.Party)
+	})
+
+	t.Run("supplier without a name still gets CompanyLegalForm", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-complete.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		require.NoError(t, env.Calculate())
+		inv.Supplier.Name = ""
+		inv.Supplier.Registration = &org.Registration{Other: "GmbH"}
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+
+		le := doc.AccountingSupplierParty.Party.PartyLegalEntity
+		require.NotNil(t, le)
+		assert.Nil(t, le.RegistrationName)
+		require.NotNil(t, le.CompanyLegalForm)
+		assert.Equal(t, "GmbH", *le.CompanyLegalForm)
 	})
 
 	t.Run("norwegian VAT numbers carry the MVA suffix", func(t *testing.T) {
