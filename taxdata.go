@@ -145,7 +145,7 @@ type TaxData struct {
 	TaxDataTypeCode         string                `xml:"pxs:TaxDataTypeCode"`
 	DocumentScope           string                `xml:"pxs:DocumentScope"`
 	ReporterRole            string                `xml:"pxs:ReporterRole"`
-	TaxAuthority            TaxDataTaxAuthority   `xml:"pxs:TaxAuthority"`
+	TaxAuthority            *TaxDataTaxAuthority  `xml:"pxs:TaxAuthority,omitempty"`
 	ReportingParty          TaxDataEndpointParty  `xml:"pxs:ReportingParty"`
 	ReceivingParty          TaxDataEndpointParty  `xml:"pxs:ReceivingParty"`
 	ReportersRepresentative TaxDataRepresentative `xml:"pxs:ReportersRepresentative"`
@@ -235,11 +235,7 @@ func newTaxData(inv *Invoice, profile TaxDataProfile, params TaxDataParams) (*Ta
 		TaxDataTypeCode: params.TypeCode,
 		DocumentScope:   params.Scope,
 		ReporterRole:    params.ReporterRole,
-		TaxAuthority: TaxDataTaxAuthority{
-			ID:   params.TaxAuthorityID,
-			Name: params.TaxAuthorityName,
-		},
-		ReportingParty: TaxDataEndpointParty{EndpointID: *reporter},
+		ReportingParty:  TaxDataEndpointParty{EndpointID: *reporter},
 		ReceivingParty: TaxDataEndpointParty{
 			EndpointID: EndpointID{SchemeID: schemeIDSPID, Value: params.ReceiverEndpoint},
 		},
@@ -251,6 +247,9 @@ func newTaxData(inv *Invoice, profile TaxDataProfile, params TaxDataParams) (*Ta
 		ReportedTransaction: TaxDataTransaction{
 			ReportedDocument: taxDataDocument(inv, profile),
 		},
+	}
+	if profile.TaxAuthority {
+		td.TaxAuthority = &TaxDataTaxAuthority{ID: params.TaxAuthorityID, Name: params.TaxAuthorityName}
 	}
 	td.ReportedTransaction.ReportedDocument.UUID = TaxDataInvoiceUUID(name)
 	if profile.TransmissionUUID {

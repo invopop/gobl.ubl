@@ -85,6 +85,19 @@ func TestTaxDataParamsMissing(t *testing.T) {
 		assert.ErrorContains(t, err, msg)
 	}
 
+	t.Run("profile without a tax authority", func(t *testing.T) {
+		profile := ubl.TaxDataProfileViDA
+		profile.TaxAuthority = false
+		p := taxDataParams(profile)
+		p.TaxAuthorityID, p.TaxAuthorityName = "", ""
+		td, err := ubl.ExportTaxData(env, profile, p)
+		require.NoError(t, err)
+		assert.Nil(t, td.TaxAuthority)
+		data, err := ubl.Encode(td)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "<pxs:TaxAuthority")
+	})
+
 	t.Run("profile without invoice UUID method", func(t *testing.T) {
 		profile := ubl.TaxDataProfileViDA
 		profile.InvoiceUUID = nil
