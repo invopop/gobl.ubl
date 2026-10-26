@@ -12,6 +12,7 @@ import (
 	"github.com/invopop/gobl/i18n"
 	"github.com/invopop/gobl/rules"
 	"github.com/invopop/gobl/schema"
+	"github.com/invopop/xmlctx"
 )
 
 // KeyUBL identifies UBL documents that do not declare a known specification.
@@ -209,7 +210,7 @@ func ReadHeader(in *convert.Input) *Header {
 // precede the document ID, stopping at the first other element.
 func readHeader(data []byte) *Header {
 	h := new(Header)
-	d := xml.NewDecoder(bytes.NewReader(data))
+	d := xmlctx.NewXMLDecoder(bytes.NewReader(data))
 	root := false
 	for {
 		tk, err := d.Token()

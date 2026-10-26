@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "19b5ab4616b16332b41ffd30cf76f2d00c8670ffc688e763739a04099d5c7d8e"
+			"val": "775ed6fbe435073ad0e4fdf8c82c22e171aba273fe4df1dc8a454566d7d2fa03"
 		}
 	},
 	"doc": {
@@ -22,7 +22,7 @@
 			{
 				"from": "DKK",
 				"to": "EUR",
-				"amount": "0.93"
+				"amount": "0.931289"
 			}
 		],
 		"preceding": [
