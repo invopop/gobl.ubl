@@ -2,6 +2,7 @@ package ubl_test
 
 import (
 	"encoding/xml"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -74,6 +75,73 @@ func TestTaxDataParams(t *testing.T) {
 	require.ErrorIs(t, err, ubl.ErrTaxDataParams)
 	assert.ErrorContains(t, err, "type code")
 	assert.ErrorContains(t, err, "transmission UUID")
+}
+
+func TestTaxDataParamsMissing(t *testing.T) {
+	env := envFrom("peppol/invoice-complete.json")(t)
+	_, err := ubl.ExportTaxData(env, ubl.TaxDataProfileViDA, ubl.TaxDataParams{})
+	require.ErrorIs(t, err, ubl.ErrTaxDataParams)
+	for _, msg := range []string{"type code", "scope", "reporter role", "tax authority ID", "receiver endpoint", "representative SPID", "transmission UUID"} {
+		assert.ErrorContains(t, err, msg)
+	}
+
+	t.Run("profile without invoice UUID method", func(t *testing.T) {
+		profile := ubl.TaxDataProfileViDA
+		profile.InvoiceUUID = nil
+		_, err := ubl.ExportTaxData(env, profile, taxDataParams(profile))
+		assert.ErrorIs(t, err, ubl.ErrTaxDataParams)
+	})
+}
+
+func TestTaxDataReportingParty(t *testing.T) {
+	env := envFrom("peppol/invoice-complete.json")(t)
+
+	t.Run("set in the parameters", func(t *testing.T) {
+		p := taxDataParams(ubl.TaxDataProfileViDA)
+		p.ReportingParty = &ubl.EndpointID{SchemeID: "0088", Value: "5790000435975"}
+		td, err := ubl.ExportTaxData(env, ubl.TaxDataProfileViDA, p)
+		require.NoError(t, err)
+		assert.Equal(t, *p.ReportingParty, td.ReportingParty.EndpointID)
+	})
+
+	t.Run("without an electronic address", func(t *testing.T) {
+		env := envFrom("peppol/invoice-complete.json")(t)
+		sup := env.Extract().(*bill.Invoice).Supplier
+		sup.Inboxes = nil
+		sup.Endpoints = nil
+		_, err := ubl.ExportTaxData(env, ubl.TaxDataProfileViDA, taxDataParams(ubl.TaxDataProfileViDA))
+		assert.ErrorIs(t, err, ubl.ErrTaxDataParams)
+	})
+}
+
+// TestExportTaxDataSamples reports every Peppol sample of the repository and
+// checks that the TDD only carries the elements its Schematron allows.
+// Samples without a seller VAT identifier are not reportable.
+func TestExportTaxDataSamples(t *testing.T) {
+	samples, err := filepath.Glob(filepath.Join(getConvertPath(), "peppol", "*.json"))
+	require.NoError(t, err)
+	require.NotEmpty(t, samples)
+	for _, sample := range samples {
+		t.Run(filepath.Base(sample), func(t *testing.T) {
+			env, err := loadTestEnvelopeFromPath(sample)
+			require.NoError(t, err)
+			td, err := ubl.ExportTaxData(env, ubl.TaxDataProfileViDA, taxDataParams(ubl.TaxDataProfileViDA))
+			if errors.Is(err, ubl.ErrTaxDataNotReportable) {
+				t.Skip("no seller VAT identifier")
+			}
+			require.NoError(t, err)
+			data, err := ubl.Encode(td)
+			require.NoError(t, err)
+			checkTaxDataElements(t, data, ubl.TaxDataProfileViDA)
+		})
+	}
+}
+
+func TestTaxDataTypeCodeOf(t *testing.T) {
+	code := "380"
+	assert.Equal(t, "380", ubl.TaxDataTypeCodeOf(&ubl.Invoice{InvoiceTypeCode: &ubl.IDType{Value: code}}))
+	assert.Equal(t, "381", ubl.TaxDataTypeCodeOf(&ubl.Invoice{CreditNoteTypeCode: &ubl.IDType{Value: "381"}}))
+	assert.Empty(t, ubl.TaxDataTypeCodeOf(&ubl.Invoice{}))
 }
 
 func TestExportTaxData(t *testing.T) {
