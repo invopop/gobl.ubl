@@ -4,7 +4,6 @@ import (
 	"encoding/xml"
 	"io"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -75,29 +74,6 @@ func TestTaxDataParams(t *testing.T) {
 	require.ErrorIs(t, err, ubl.ErrTaxDataParams)
 	assert.ErrorContains(t, err, "type code")
 	assert.ErrorContains(t, err, "transmission UUID")
-}
-
-// TestBuildTaxData builds the TDD from the UBL XML of the invoice, as the
-// receiver's provider does.
-func TestBuildTaxData(t *testing.T) {
-	env := envFrom("peppol/invoice-complete.json")(t)
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
-	require.NoError(t, err)
-	inv, err := ubl.Encode(doc)
-	require.NoError(t, err)
-
-	td, err := ubl.BuildTaxData(inv, ubl.TaxDataProfileViDA, taxDataParams(ubl.TaxDataProfileViDA))
-	require.NoError(t, err)
-	data, err := ubl.Encode(td)
-	require.NoError(t, err)
-	expected, err := os.ReadFile(filepath.Join(getDataPath(), "taxdata", "vida-invoice.xml"))
-	require.NoError(t, err)
-	assert.Equal(t, string(expected), string(data))
-
-	t.Run("unreadable invoice", func(t *testing.T) {
-		_, err := ubl.BuildTaxData([]byte("<Invoice>broken"), ubl.TaxDataProfileViDA, taxDataParams(ubl.TaxDataProfileViDA))
-		assert.Error(t, err)
-	})
 }
 
 func TestExportTaxData(t *testing.T) {
@@ -224,34 +200,19 @@ func checkTaxDataElements(t *testing.T, data []byte, profile ubl.TaxDataProfile)
 	}
 }
 
-// TestTaxDataSchematron runs the official ViDA TDD Schematron (compiled XSLT
-// 2.0 from the ViDA resource bundle) on the golden files with Saxon. It runs
-// only when the XSLT path is set and the saxon command exists:
-//
-//	VIDA_TDD_XSLT=.../Peppol-ViDA-TDD.xslt go test -run TaxDataSchematron
-func TestTaxDataSchematron(t *testing.T) {
-	saxon, err := exec.LookPath("saxon")
-	if err != nil {
-		t.Skip("saxon not installed")
-	}
-	sets := []struct {
-		env   string
-		files []string
-	}{
-		{"VIDA_TDD_XSLT", []string{"vida-invoice.xml", "vida-credit-note.xml", "vida-invoice-c3.xml"}},
-	}
-	for _, s := range sets {
-		xsl := os.Getenv(s.env)
-		if xsl == "" {
-			t.Logf("%s not set, skipped", s.env)
-			continue
-		}
-		for _, f := range s.files {
-			t.Run(f, func(t *testing.T) {
-				out, err := exec.Command(saxon, "-s:"+filepath.Join(getDataPath(), "taxdata", f), "-xsl:"+xsl).CombinedOutput()
-				require.NoError(t, err, string(out))
-				assert.NotContains(t, string(out), "failed-assert", string(out))
-			})
-		}
+// TestTaxDataValidate checks the expected TDDs against the official rules of
+// their profile in phorm: the XSD and the CEN, Peppol and TDD Schematrons.
+// Run it with -validate.
+func TestTaxDataValidate(t *testing.T) {
+	pc := phormClient(t)
+	files, err := filepath.Glob(filepath.Join(getDataPath(), "taxdata", "vida-*.xml"))
+	require.NoError(t, err)
+	require.NotEmpty(t, files)
+	for _, f := range files {
+		t.Run(filepath.Base(f), func(t *testing.T) {
+			data, err := os.ReadFile(f)
+			require.NoError(t, err)
+			validateXML(t, pc, ubl.TaxDataProfileViDA.VESID, data)
+		})
 	}
 }

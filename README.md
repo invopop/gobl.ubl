@@ -172,12 +172,9 @@ for _, a := range res.Attachments {
 
 #### Tax Data Documents
 
-A Peppol Tax Data Document (TDD) reports an invoice to a tax authority, next to the invoice itself. This package has the TDD structures (`TaxData`) and the base profile, the Peppol ViDA TDD 1.1.0 (`TaxDataProfileViDA`). National profiles, such as the Slovak TDD, set their own identifiers and invoice UUID inputs in a `TaxDataProfile`. A TDD is a Peppol document built from UBL components: its root is `pxs:TaxData` from the Peppol TDD schema, and it carries an extract of the UBL invoice. It is not registered as an output format (`Format`) of this package, because it needs values that do not come from the invoice. The app that reports to the tax authority builds it with `ExportTaxData` or `BuildTaxData`.
+A Peppol Tax Data Document (TDD) reports an invoice to a tax authority, next to the invoice itself. This package has the TDD structures (`TaxData`) and the base profile, the Peppol ViDA TDD 1.1.0 (`TaxDataProfileViDA`). National profiles, such as the Slovak TDD, set their own identifiers and invoice UUID inputs in a `TaxDataProfile`. A TDD is a Peppol document built from UBL components: its root is `pxs:TaxData` from the Peppol TDD schema, and it carries an extract of the UBL invoice. It is not registered as an output format (`Format`) of this package, because it needs values that do not come from the invoice. The app that reports to the tax authority builds it with `ExportTaxData`.
 
-There are two ways to build a TDD:
-
-- **From GOBL.** `ExportTaxData` exports the invoice to Peppol BIS Billing 3.0 first (or the format of a `WithFormat` option), then builds the TDD from that UBL invoice. The report always matches the invoice that is sent.
-- **From UBL.** `BuildTaxData` takes the UBL XML of the invoice as it was sent or received, for example when the receiver's provider (C3) reports.
+The source of a TDD is always a GOBL invoice, also for the receiver's provider (C3), which imports the invoice it receives first. `ExportTaxData` exports the invoice to Peppol BIS Billing 3.0 (or the format of a `WithFormat` option) and copies the TDD values from that export, so the report carries the same values as the invoice that is sent.
 
 ```go
 td, err := ubl.ExportTaxData(env, ubl.TaxDataProfileViDA, ubl.TaxDataParams{
