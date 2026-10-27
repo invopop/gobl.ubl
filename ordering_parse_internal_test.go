@@ -109,35 +109,66 @@ func TestGoblAddOrderingEmptyContract(t *testing.T) {
 }
 
 func TestGoblExchangeRates(t *testing.T) {
-	amount := func(v string) TaxTotal {
-		return TaxTotal{TaxAmount: Amount{Value: v}}
+	amount := func(v string) *TaxTotal {
+		return &TaxTotal{TaxAmount: Amount{Value: v}}
 	}
 
 	t.Run("the rate is derived from the two tax totals", func(t *testing.T) {
-		rates := goblExchangeRates(cur.EUR, cur.USD, []TaxTotal{amount("100.00"), amount("110.00")})
+		rates := goblExchangeRates(cur.EUR, cur.USD, amount("100.00"), amount("110.00"))
 		require.Len(t, rates, 1)
 		assert.Equal(t, cur.EUR, rates[0].From)
 		assert.Equal(t, cur.USD, rates[0].To)
-		assert.Equal(t, "1.10", rates[0].Amount.String())
+		assert.Equal(t, "1.100000", rates[0].Amount.String())
 	})
 
 	t.Run("a single total carries no rate", func(t *testing.T) {
-		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, []TaxTotal{amount("100.00")}))
+		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, amount("100.00"), nil))
 	})
 
 	t.Run("no totals at all", func(t *testing.T) {
-		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, nil))
+		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, nil, nil))
 	})
 
 	t.Run("a zero document amount would divide by zero", func(t *testing.T) {
-		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, []TaxTotal{amount("0.00"), amount("110.00")}))
+		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, amount("0.00"), amount("110.00")))
 	})
 
 	t.Run("an unparseable document amount", func(t *testing.T) {
-		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, []TaxTotal{amount("n/a"), amount("110.00")}))
+		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, amount("n/a"), amount("110.00")))
 	})
 
 	t.Run("an unparseable tax amount", func(t *testing.T) {
-		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, []TaxTotal{amount("100.00"), amount("n/a")}))
+		assert.Nil(t, goblExchangeRates(cur.EUR, cur.USD, amount("100.00"), amount("n/a")))
+	})
+}
+
+func TestGoblTaxTotals(t *testing.T) {
+	total := func(ccy, v string) TaxTotal {
+		return TaxTotal{TaxAmount: Amount{CurrencyID: &ccy, Value: v}}
+	}
+
+	t.Run("BT-110 is the total in the invoice currency, in either order", func(t *testing.T) {
+		for _, totals := range [][]TaxTotal{
+			{total("EUR", "1050.00"), total("RON", "5339.25")},
+			{total("RON", "5339.25"), total("EUR", "1050.00")},
+		} {
+			ui := &Invoice{DocumentCurrencyCode: "EUR", TaxCurrencyCode: "RON", TaxTotal: totals}
+			v, ok := ui.goblDeclaredTaxTotal(cur.EUR)
+			require.True(t, ok)
+			assert.Equal(t, "1050.00", v.String())
+
+			out := new(bill.Invoice)
+			ui.applyExchangeRates(out)
+			require.Len(t, out.ExchangeRates, 1)
+			assert.Equal(t, cur.EUR, out.ExchangeRates[0].From)
+			assert.Equal(t, cur.Code("RON"), out.ExchangeRates[0].To)
+			assert.Equal(t, "5.085000", out.ExchangeRates[0].Amount.String())
+		}
+	})
+
+	t.Run("no total in the invoice currency", func(t *testing.T) {
+		ui := &Invoice{TaxTotal: []TaxTotal{total("RON", "5339.25")}}
+		_, ok := ui.goblDeclaredTaxTotal(cur.EUR)
+		assert.False(t, ok)
 	})
 }

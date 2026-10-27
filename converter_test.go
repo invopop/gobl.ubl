@@ -1,6 +1,7 @@
 package ubl_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -198,4 +199,24 @@ func TestConverterExportAttachments(t *testing.T) {
 		assert.True(t, convert.FormatFor(ubl.FormatEN16931.Key).Attachments)
 		assert.False(t, convert.FormatFor(ubl.KeyUBL).Attachments)
 	})
+}
+
+// A document in a single-byte encoding it declares itself imports like a UTF-8
+// one, its non-ASCII characters intact.
+func TestConverterImportLatin1(t *testing.T) {
+	data, err := testLoadXML("base-example.xml")
+	require.NoError(t, err)
+	doc := strings.Replace(string(data), `encoding="UTF-8"`, `encoding="ISO-8859-1"`, 1)
+	doc = strings.Replace(doc, "SupplierOfficialName Ltd", "Société Démo", 1)
+	latin1 := make([]byte, 0, len(doc))
+	for _, r := range doc {
+		require.Less(t, r, rune(0x100))
+		latin1 = append(latin1, byte(r))
+	}
+
+	res, err := convert.Import(latin1)
+	require.NoError(t, err)
+	inv, ok := res.Envelope.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	assert.Equal(t, "Société Démo", inv.Supplier.Name)
 }

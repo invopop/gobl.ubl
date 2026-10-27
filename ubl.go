@@ -220,7 +220,7 @@ func ensureAddons(env *gobl.Envelope, required []cbc.Key) error {
 }
 
 func extractRootNamespace(data []byte) (string, error) {
-	dc := xml.NewDecoder(bytes.NewReader(data))
+	dc := xmlctx.NewXMLDecoder(bytes.NewReader(data))
 	for {
 		tk, err := dc.Token()
 		if err == io.EOF {
