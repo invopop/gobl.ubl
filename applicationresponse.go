@@ -86,8 +86,8 @@ func ublApplicationResponse(st *bill.Status, o *options) *ApplicationResponse {
 		CustomizationID: o.spec.CustomizationID,
 		ID:              invoiceNumber(st.Series, st.Code),
 		IssueDate:       formatDate(st.IssueDate),
-		SenderParty:     newParty(sender, false),
-		ReceiverParty:   newParty(receiver, false),
+		SenderParty:     newParty(sender),
+		ReceiverParty:   newParty(receiver),
 	}
 	if o.spec.ProfileID != "" {
 		out.ProfileID = &IDType{Value: o.spec.ProfileID}

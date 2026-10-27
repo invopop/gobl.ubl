@@ -128,8 +128,8 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		IssueDate:               formatDate(inv.IssueDate),
 		InvoiceTypeCode:         &IDType{Value: tc},
 		DocumentCurrencyCode:    string(inv.Currency),
-		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier, true)},
-		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer, false)},
+		AccountingSupplierParty: SupplierParty{Party: newParty(inv.Supplier)},
+		AccountingCustomerParty: CustomerParty{Party: newParty(inv.Customer)},
 	}
 
 	// ProfileID is omitted when empty; when present it only carries a value here

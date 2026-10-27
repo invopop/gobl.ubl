@@ -85,13 +85,13 @@ func (ui *Invoice) addOrdering(o *bill.Ordering) {
 		// The party liable for the tax, when not the supplier, is the
 		// BG-11 tax representative.
 		if o.Seller != nil {
-			ui.TaxRepresentativeParty = newParty(o.Seller, false)
+			ui.TaxRepresentativeParty = newParty(o.Seller)
 		}
 
 		// The issuer raising the invoice on the seller's behalf.
 		if o.Issuer != nil && ui.AccountingSupplierParty.Party != nil {
 			ui.AccountingSupplierParty.Party.ServiceProviderParty = &ServiceProviderParty{
-				Party: newParty(o.Issuer, false),
+				Party: newParty(o.Issuer),
 			}
 		}
 

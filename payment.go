@@ -97,14 +97,14 @@ func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	}
 
 	if pymt.Payee != nil {
-		ui.PayeeParty = newParty(pymt.Payee, false)
+		ui.PayeeParty = newParty(pymt.Payee)
 		// UBL-CR-272: A UBL invoice should not include the PayeeParty PostalAddress.
 		ui.PayeeParty.PostalAddress = nil
 		// UBL-CR-275: A UBL invoice should not include the PayeeParty
 		// PartyLegalEntity RegistrationName.
 		if le := ui.PayeeParty.PartyLegalEntity; le != nil {
 			le.RegistrationName = nil
-			if le.CompanyID == nil {
+			if le.CompanyID == nil && le.CompanyLegalForm == nil {
 				ui.PayeeParty.PartyLegalEntity = nil
 			}
 		}
