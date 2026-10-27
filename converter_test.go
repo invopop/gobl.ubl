@@ -19,7 +19,6 @@ func TestConverterContexts(t *testing.T) {
 	for _, k := range []cbc.Key{
 		ubl.KeyUBL,
 		ubl.FormatEN16931.Key,
-		ubl.FormatPeppol.Key,
 	} {
 		ctx := convert.FormatFor(k)
 		require.NotNil(t, ctx, k)
@@ -29,7 +28,6 @@ func TestConverterContexts(t *testing.T) {
 
 	t.Run("layered keys", func(t *testing.T) {
 		assert.Equal(t, cbc.Key("ubl+en16931-v2017"), ubl.FormatEN16931.Key)
-		assert.Equal(t, cbc.Key("ubl+peppol+bis-v3"), ubl.FormatPeppol.Key)
 	})
 }
 
@@ -39,8 +37,6 @@ func TestConverterDetect(t *testing.T) {
 		key  cbc.Key
 	}{
 		{"en16931/ubl-example1.xml", ubl.FormatEN16931.Key},
-		{"peppol/base-example.xml", ubl.FormatPeppol.Key},
-		{"peppol/sg-invoice.xml", ubl.KeyUBL},
 		{"en16931/credit-note1.xml", ubl.KeyUBL},
 	}
 	for _, tt := range tests {
@@ -65,23 +61,23 @@ func TestConverterDetect(t *testing.T) {
 	})
 
 	t.Run("limited to keys", func(t *testing.T) {
-		data, err := testLoadXML("peppol/base-example.xml")
+		data, err := testLoadXML("en16931/ubl-example1.xml")
 		require.NoError(t, err)
-		_, err = convert.Detect(data, ubl.FormatEN16931.Key)
+		_, err = convert.Detect(data, formatSpecsTest.Key)
 		assert.ErrorIs(t, err, convert.ErrUnknownFormat)
 	})
 }
 
 func TestReadDocumentContext(t *testing.T) {
-	data, err := testLoadXML("peppol/base-example.xml")
+	data, err := testLoadXML("en16931/ubl-example2.xml")
 	require.NoError(t, err)
 	in := convert.NewInput(data)
 
 	dc := ubl.ReadHeader(in)
 	require.NoError(t, dc.Err)
 	assert.Equal(t, ubl.NamespaceUBLInvoice, dc.Namespace)
-	assert.Equal(t, ubl.FormatPeppol.CustomizationID, dc.CustomizationID)
-	assert.Equal(t, ubl.FormatPeppol.ProfileID, dc.ProfileID)
+	assert.Equal(t, ubl.FormatEN16931.CustomizationID, dc.CustomizationID)
+	assert.Equal(t, "Invoicing on purchase order", dc.ProfileID)
 	assert.Same(t, dc, ubl.ReadHeader(in), "read only once")
 
 	t.Run("malformed", func(t *testing.T) {
@@ -91,11 +87,11 @@ func TestReadDocumentContext(t *testing.T) {
 }
 
 func TestConverterImport(t *testing.T) {
-	data, err := testLoadXML("peppol/base-example.xml")
+	data, err := testLoadXML("en16931/ubl-example1.xml")
 	require.NoError(t, err)
 	res, err := convert.Import(data)
 	require.NoError(t, err)
-	assert.Equal(t, ubl.FormatPeppol.Key, res.Format.Key)
+	assert.Equal(t, ubl.FormatEN16931.Key, res.Format.Key)
 	inv, ok := res.Envelope.Extract().(*bill.Invoice)
 	require.True(t, ok)
 	assert.Contains(t, inv.GetAddons(), en16931.V2017)
@@ -115,27 +111,27 @@ func TestConverterImportAttachments(t *testing.T) {
 }
 
 func TestConverterExport(t *testing.T) {
-	t.Run("peppol", func(t *testing.T) {
-		env := loadTestEnvelope(t, "peppol/invoice-minimal.json")
-		out, err := convert.Export(env, ubl.FormatPeppol.Key)
+	t.Run("en16931", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		out, err := convert.Export(env, ubl.FormatEN16931.Key)
 		require.NoError(t, err)
-		assert.Equal(t, ubl.FormatPeppol.Key, out.Format.Key)
-		assert.Contains(t, string(out.Data), ubl.FormatPeppol.CustomizationID)
+		assert.Equal(t, ubl.FormatEN16931.Key, out.Format.Key)
+		assert.Contains(t, string(out.Data), ubl.FormatEN16931.CustomizationID)
 
 		ctx, err := convert.Detect(out.Data)
 		require.NoError(t, err)
-		assert.Equal(t, ubl.FormatPeppol.Key, ctx.Key, "detected again")
+		assert.Equal(t, ubl.FormatEN16931.Key, ctx.Key, "detected again")
 	})
 	t.Run("skips format for another schema", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		out, err := convert.Export(env, ubl.FormatEN16931.Key, convert.WithAlternatives(ubl.FormatPeppol.Key))
+		out, err := convert.Export(env, ubl.FormatEN16931.Key, convert.WithAlternatives(formatSpecsTest.Key))
 		require.NoError(t, err)
-		assert.Equal(t, ubl.FormatPeppol.Key, out.Format.Key)
-		assert.Contains(t, string(out.Data), ubl.SpecificationPeppolInvoiceResponse.CustomizationID)
+		assert.Equal(t, formatSpecsTest.Key, out.Format.Key)
+		assert.Contains(t, string(out.Data), specStatusTest.CustomizationID)
 	})
 	t.Run("not supported", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
 		_, err = convert.Export(env, ubl.FormatEN16931.Key, convert.WithAlternatives(ubl.KeyUBL))
 		assert.ErrorIs(t, err, convert.ErrNotSupported)
@@ -143,13 +139,13 @@ func TestConverterExport(t *testing.T) {
 	t.Run("missing specification addon", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 		env.Extract().(*bill.Invoice).SetAddons()
-		_, err := convert.Export(env, ubl.FormatPeppol.Key)
+		_, err := convert.Export(env, ubl.FormatEN16931.Key)
 		assert.ErrorIs(t, err, convert.ErrNotSupported)
 		var ge *gobl.Error
 		require.ErrorAs(t, err, &ge)
 		require.NotNil(t, ge.Faults())
 		f := ge.Faults().First()
-		assert.Equal(t, rules.Code("UBL-PEPPOL-BIS-V3-BILL-INVOICE-01"), f.Code())
+		assert.Equal(t, rules.Code("UBL-EN16931-V2017-BILL-INVOICE-01"), f.Code())
 		assert.Equal(t, []string{"$.$addons"}, f.Paths())
 		assert.Equal(t, "requires addon eu-en16931-v2017", f.Message())
 	})
@@ -169,9 +165,9 @@ func TestConverterExportAttachments(t *testing.T) {
 		Data:        []byte("%PDF-1.7"),
 	}
 	t.Run("embedded in invoices", func(t *testing.T) {
-		env := loadTestEnvelope(t, "peppol/invoice-minimal.json")
+		env := loadTestEnvelope(t, "invoice-minimal.json")
 		csv := &convert.Attachment{Name: "lines.csv", MIME: "text/csv", Data: []byte("a,b")}
-		out, err := convert.Export(env, ubl.FormatPeppol.Key, convert.WithAttachments(pdf, csv))
+		out, err := convert.Export(env, ubl.FormatEN16931.Key, convert.WithAttachments(pdf, csv))
 		require.NoError(t, err)
 
 		doc, err := ubl.Decode(out.Data)
@@ -193,14 +189,14 @@ func TestConverterExportAttachments(t *testing.T) {
 		assert.Equal(t, []byte("a,b"), res.Attachments[1].Data)
 	})
 	t.Run("not embedded in statuses", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		_, err = convert.Export(env, ubl.FormatPeppol.Key, convert.WithAttachments(pdf))
+		_, err = convert.Export(env, formatSpecsTest.Key, convert.WithAttachments(pdf))
 		assert.ErrorIs(t, err, convert.ErrConversion)
 		assert.ErrorContains(t, err, ubl.ErrUnsupportedAttachments.Error())
 	})
 	t.Run("formats embed them", func(t *testing.T) {
-		assert.True(t, convert.FormatFor(ubl.FormatPeppol.Key).Attachments)
+		assert.True(t, convert.FormatFor(ubl.FormatEN16931.Key).Attachments)
 		assert.False(t, convert.FormatFor(ubl.KeyUBL).Attachments)
 	})
 }
@@ -208,7 +204,7 @@ func TestConverterExportAttachments(t *testing.T) {
 // A document in a single-byte encoding it declares itself imports like a UTF-8
 // one, its non-ASCII characters intact.
 func TestConverterImportLatin1(t *testing.T) {
-	data, err := testLoadXML("peppol/base-example.xml")
+	data, err := testLoadXML("base-example.xml")
 	require.NoError(t, err)
 	doc := strings.Replace(string(data), `encoding="UTF-8"`, `encoding="ISO-8859-1"`, 1)
 	doc = strings.Replace(doc, "SupplierOfficialName Ltd", "Société Démo", 1)

@@ -265,7 +265,7 @@ func TestPaymentRoundTrip(t *testing.T) {
 		inv.Payment.Payee.TaxID = &tax.Identity{Country: "FR", Code: "53341200068"}
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.NotNil(t, doc.PayeeParty)
 		require.Nil(t, doc.PayeeParty.PostalAddress, "UBL-CR-272 drops the payee address")
