@@ -424,7 +424,7 @@ func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.
 		}
 
 		if l.Seller != nil {
-			invLine.Item.ManufacturerParty = newParty(l.Seller)
+			invLine.Item.ManufacturerParty = newParty(l.Seller, false)
 		}
 	}
 

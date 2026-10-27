@@ -193,27 +193,12 @@ func (p *Party) CountryCode() string {
 // NewParty converts the GOBL party into a UBL party, without any format
 // specific adjustments.
 func NewParty(party *org.Party) *Party {
-	return newParty(party)
+	return newParty(party, false)
 }
 
-// newSupplierParty converts the GOBL supplier into the UBL seller party,
-// adding the terms EN 16931 only defines for the seller.
-func newSupplierParty(party *org.Party) *Party {
-	p := newParty(party)
-
-	// BT-33: Seller additional legal information. UBL-CR-244 and UBL-CR-279
-	// warn against it on the customer and the payee.
-	if p != nil && party.Registration != nil && party.Registration.Other != "" {
-		if p.PartyLegalEntity == nil {
-			p.PartyLegalEntity = &PartyLegalEntity{}
-		}
-		p.PartyLegalEntity.CompanyLegalForm = &party.Registration.Other
-	}
-
-	return p
-}
-
-func newParty(party *org.Party) *Party { //nolint:gocyclo
+// newParty converts the GOBL party into a UBL party. Set seller for the
+// supplier, to add the terms EN 16931 only defines for the seller.
+func newParty(party *org.Party, seller bool) *Party { //nolint:gocyclo
 	if party == nil {
 		return nil
 	}
@@ -230,6 +215,15 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 		p.PartyLegalEntity = &PartyLegalEntity{
 			RegistrationName: &party.Name,
 		}
+	}
+
+	// BT-33: Seller additional legal information. UBL-CR-244 and UBL-CR-279
+	// warn against it on the customer and the payee.
+	if seller && party.Registration != nil && party.Registration.Other != "" {
+		if p.PartyLegalEntity == nil {
+			p.PartyLegalEntity = &PartyLegalEntity{}
+		}
+		p.PartyLegalEntity.CompanyLegalForm = &party.Registration.Other
 	}
 
 	contact := &Contact{}
