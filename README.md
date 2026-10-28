@@ -170,6 +170,27 @@ for _, a := range res.Attachments {
 }
 ```
 
+#### Tax Data Documents
+
+A Peppol Tax Data Document (TDD) reports an invoice to a tax authority, next to the invoice itself. This package has the TDD structures (`TaxData`) and the base profile, the Peppol ViDA TDD 1.1.0 (`TaxDataProfileViDA`). National profiles, such as the Slovak TDD, set their own identifiers and invoice UUID inputs in a `TaxDataProfile`. A TDD is a Peppol document built from UBL components: its root is `pxs:TaxData` from the Peppol TDD schema, and it carries an extract of the UBL invoice. It is not registered as an output format (`Format`) of this package, because it needs values that do not come from the invoice. The app that reports to the tax authority builds it with `ExportTaxData`.
+
+The source of a TDD is always a GOBL invoice, also for the receiver's provider (C3), which imports the invoice it receives first. `ExportTaxData` exports the invoice to Peppol BIS Billing 3.0 (or the format of a `WithFormat` option) and copies the TDD values from that export, so the report carries the same values as the invoice that is sent.
+
+```go
+td, err := ubl.ExportTaxData(env, ubl.TaxDataProfileViDA, ubl.TaxDataParams{
+    TypeCode:         ubl.TaxDataTypeSubmit,     // S, R or D
+    Scope:            ubl.TaxDataScopeDomestic,  // D, IC or INTL
+    ReporterRole:     ubl.TaxDataReporterSender, // C2 or C3
+    TaxAuthorityID:   "...",                     // from the tax authority
+    ReceiverEndpoint: "...",                     // the tax authority's 0242 participant (C5)
+    Representative:   "...",                     // the provider's SPID
+    TransmissionUUID: "...",                     // the transmission of the invoice
+})
+data, err := ubl.Encode(td)
+```
+
+The values in `TaxDataParams` do not come from the invoice. The tax authority endpoint and the provider's SPID change between the test and production networks. The type code depends on earlier answers from the tax authority, so the caller keeps that state. An invoice without the values its profile needs for the invoice UUID returns `ErrTaxDataNotReportable`.
+
 ## Command Line
 
 This package no longer includes a command-line tool. The `gobl` CLI from [gobl.dev](https://github.com/invopop/gobl.dev) converts between GOBL and every format registered with the GOBL `convert` register, including UBL:
