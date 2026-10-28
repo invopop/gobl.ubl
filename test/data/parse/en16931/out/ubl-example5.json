@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "775ed6fbe435073ad0e4fdf8c82c22e171aba273fe4df1dc8a454566d7d2fa03"
+			"val": "a94b2f57755e9e8f14976448485b8084993e5e3c01ce7e408e6e7a0c95ac4b8c"
 		}
 	},
 	"doc": {
@@ -92,7 +92,10 @@
 				{
 					"num": "+3198989898"
 				}
-			]
+			],
+			"registration": {
+				"other": "Export"
+			}
 		},
 		"customer": {
 			"name": "Buyercompany ltd",

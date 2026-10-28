@@ -215,6 +215,15 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 		}
 	}
 
+	// BT-33: additional legal information (cbc:CompanyLegalForm). EN 16931 only
+	// defines it for the seller, so other parties may raise UBL-CR warnings.
+	if party.Registration != nil && party.Registration.Other != "" {
+		if p.PartyLegalEntity == nil {
+			p.PartyLegalEntity = &PartyLegalEntity{}
+		}
+		p.PartyLegalEntity.CompanyLegalForm = &party.Registration.Other
+	}
+
 	contact := &Contact{}
 
 	if tID := party.TaxID; tID != nil && party.TaxID.Code != "" {
