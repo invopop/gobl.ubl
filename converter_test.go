@@ -101,6 +101,15 @@ func TestConverterImport(t *testing.T) {
 	assert.Contains(t, inv.GetAddons(), en16931.V2017)
 }
 
+func TestConverterImportRouting(t *testing.T) {
+	data, err := testLoadXML("peppol/base-example.xml")
+	require.NoError(t, err)
+	res, err := convert.Import(data, convert.WithRouting("iso6523-actorid-upis::0088:sender", "iso6523-actorid-upis::0088:receiver"))
+	require.NoError(t, err)
+	assert.Equal(t, cbc.URI("iso6523-actorid-upis::0088:sender"), res.Envelope.Head.From)
+	assert.Equal(t, cbc.URI("iso6523-actorid-upis::0088:receiver"), res.Envelope.Head.To)
+}
+
 func TestConverterImportAttachments(t *testing.T) {
 	data, err := testLoadXML("en16931/ubl-example2.xml")
 	require.NoError(t, err)
