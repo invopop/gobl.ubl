@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
+	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -119,4 +120,40 @@ func TestExtensionXMLOmitsEmpty(t *testing.T) {
 	xmlStr := string(out)
 	assert.NotContains(t, xmlStr, "<ext:ExtensionURI>")
 	assert.NotContains(t, xmlStr, "<ext:ExtensionContent>")
+}
+
+// signatureXML is the signature extension as gobl.ubl v0.99.0 writes it.
+// Signed documents depend on these bytes.
+const signatureXML = `<Extensions><ext:UBLExtension><ext:ExtensionURI>urn:oasis:names:specification:ubl:dsig:enveloped:xades</ext:ExtensionURI><ext:ExtensionContent><sig:UBLDocumentSignatures xmlns:sig="urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2" xmlns:sac="urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2" xmlns:sbc="urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2"><sac:SignatureInformation><cbc:ID>urn:oasis:names:specification:ubl:signature:1</cbc:ID><sbc:ReferencedSignatureID>urn:oasis:names:specification:ubl:signature:Invoice</sbc:ReferencedSignatureID><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="signature"><ds:SignedInfo><ds:Reference URI=""><ds:DigestValue>ZGlnZXN0</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="">c2lnbmF0dXJl</ds:SignatureValue></ds:Signature></sac:SignatureInformation></sig:UBLDocumentSignatures></ext:ExtensionContent></ext:UBLExtension></Extensions>`
+
+// signatureExtension builds a signature extension with fixed values.
+func signatureExtension() *ubl.Extension {
+	uri := ubl.SignatureMethod
+	sig := &xmldsig.Signature{
+		DSigNamespace: xmldsig.NamespaceDSig,
+		ID:            "signature",
+		SignedInfo: &xmldsig.SignedInfo{
+			Reference: []*xmldsig.Reference{{URI: "", DigestValue: "ZGlnZXN0"}},
+		},
+		Value: &xmldsig.Value{Value: "c2lnbmF0dXJl"},
+	}
+	ext := ubl.NewExtension()
+	ext.ExtensionURI = &uri
+	ext.ExtensionContent.UBLDocumentSignatures.SIGNamespace = ubl.NamespaceSIG
+	ext.ExtensionContent.UBLDocumentSignatures.SACNamespace = ubl.NamespaceSAC
+	ext.ExtensionContent.UBLDocumentSignatures.SBCNamespace = ubl.NamespaceSBC
+	ext.ExtensionContent.UBLDocumentSignatures.SignatureInformation = &ubl.SignatureInformation{
+		ID:                    ubl.SignatureInformationID,
+		ReferencedSignatureID: ubl.ReferenceSignatureID,
+		Signature:             sig,
+	}
+	return ext
+}
+
+func TestSignatureExtensionXML(t *testing.T) {
+	inv := new(ubl.Invoice)
+	inv.AddExtension(signatureExtension())
+	out, err := xml.Marshal(inv.Extensions)
+	require.NoError(t, err)
+	assert.Equal(t, signatureXML, string(out))
 }
