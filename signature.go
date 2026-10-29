@@ -17,13 +17,14 @@ func init() {
 	RegisterExtensionData(xml.Name{Space: NamespaceSIG, Local: "UBLDocumentSignatures"}, func() ExtensionData { return new(DocumentSignatures) })
 }
 
-// DocumentSignatures contains the signature information block.
+// DocumentSignatures contains the signature information blocks. UBL requires
+// at least one.
 type DocumentSignatures struct {
-	XMLName              xml.Name              `xml:"sig:UBLDocumentSignatures"`
-	SIGNamespace         string                `xml:"xmlns:sig,attr"`
-	SACNamespace         string                `xml:"xmlns:sac,attr"`
-	SBCNamespace         string                `xml:"xmlns:sbc,attr"`
-	SignatureInformation *SignatureInformation `xml:"sac:SignatureInformation"`
+	XMLName              xml.Name               `xml:"sig:UBLDocumentSignatures"`
+	SIGNamespace         string                 `xml:"xmlns:sig,attr"`
+	SACNamespace         string                 `xml:"xmlns:sac,attr"`
+	SBCNamespace         string                 `xml:"xmlns:sbc,attr"`
+	SignatureInformation []SignatureInformation `xml:"sac:SignatureInformation"`
 }
 
 // ExtensionNamespaces implements ExtensionData.

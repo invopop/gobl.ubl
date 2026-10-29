@@ -82,8 +82,8 @@ func TestDecodeExtensionContent(t *testing.T) {
 	require.True(t, ok, "got %T", data[1])
 	assert.Equal(t, ubl.NamespaceSIG, sigs.SIGNamespace)
 	assert.Equal(t, ubl.NamespaceSAC, sigs.SACNamespace)
-	require.NotNil(t, sigs.SignatureInformation)
-	assert.Equal(t, ubl.SignatureInformationID, sigs.SignatureInformation.ID)
+	require.Len(t, sigs.SignatureInformation, 1)
+	assert.Equal(t, ubl.SignatureInformationID, sigs.SignatureInformation[0].ID)
 
 	raw, ok := data[2].(*ubl.RawExtensionData)
 	require.True(t, ok, "got %T", data[2])

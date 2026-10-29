@@ -132,11 +132,11 @@ func signatureExtension() *ubl.Extension {
 		SIGNamespace: ubl.NamespaceSIG,
 		SACNamespace: ubl.NamespaceSAC,
 		SBCNamespace: ubl.NamespaceSBC,
-		SignatureInformation: &ubl.SignatureInformation{
+		SignatureInformation: []ubl.SignatureInformation{{
 			ID:                    ubl.SignatureInformationID,
 			ReferencedSignatureID: ubl.ReferenceSignatureID,
 			Signature:             sig,
-		},
+		}},
 	}
 	ext := ubl.NewExtension(sigs)
 	ext.ExtensionURI = &uri
