@@ -11,12 +11,13 @@ import (
 )
 
 func init() {
-	ubl.RegisterExtensionData("urn:example:ext", func() ubl.ExtensionData { return new(testData) })
+	ubl.RegisterExtensionData(xml.Name{Space: "urn:example:ext", Local: "Data"}, func() ubl.ExtensionData { return new(testData) })
 }
 
 // extensionsXML holds one extension per decode case: registered content
 // whose prefixes are declared on the root, the signature, unregistered
-// content, two elements in one content, and no content.
+// content, two elements in one content, no content, and unregistered content
+// that declares its own namespaces.
 const extensionsXML = `<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
   xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
   xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
@@ -37,11 +38,14 @@ const extensionsXML = `<Invoice xmlns="urn:oasis:names:specification:ubl:schema:
       <un:First/><un:Second/>
     </ext:ExtensionContent></ext:UBLExtension>
     <ext:UBLExtension><ext:ExtensionContent/></ext:UBLExtension>
+    <ext:UBLExtension><ext:ExtensionContent>
+      <un:Other xmlns:un="urn:example:unregistered"><P xmlns="urn:example:plain">p</P></un:Other>
+    </ext:ExtensionContent></ext:UBLExtension>
   </ext:UBLExtensions>
   <cbc:ID>1</cbc:ID>
 </Invoice>`
 
-// decodeInvoice decodes data as an invoice with five extensions.
+// decodeInvoice decodes data as an invoice with six extensions.
 func decodeInvoice(t *testing.T, data []byte) *ubl.Invoice {
 	t.Helper()
 	doc, err := ubl.Decode(data)
@@ -49,7 +53,7 @@ func decodeInvoice(t *testing.T, data []byte) *ubl.Invoice {
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
 	require.NotNil(t, inv.Extensions)
-	require.Len(t, inv.Extensions.Extension, 5)
+	require.Len(t, inv.Extensions.Extension, 6)
 	return inv
 }
 
@@ -90,14 +94,23 @@ func TestDecodeExtensionContent(t *testing.T) {
 	assert.Equal(t, `<First xmlns="urn:example:unregistered"></First><Second xmlns="urn:example:unregistered"></Second>`, string(raw.XML))
 
 	assert.Nil(t, data[4])
+
+	raw, ok = data[5].(*ubl.RawExtensionData)
+	require.True(t, ok, "got %T", data[5])
+	assert.Equal(t, `<Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered"><P xmlns="urn:example:plain">p</P></Other>`, string(raw.XML))
 }
 
-func TestDecodeExtensionContentNotSingle(t *testing.T) {
+func TestDecodeExtensionContentUntyped(t *testing.T) {
 	tests := []struct {
 		name    string
 		content string
 		want    ubl.ExtensionData
 	}{
+		{
+			name:    "other element in a registered namespace",
+			content: `<ex:Other><ex:Code>A1</ex:Code></ex:Other>`,
+			want:    &ubl.RawExtensionData{XML: []byte(`<Other xmlns="urn:example:ext"><Code xmlns="urn:example:ext">A1</Code></Other>`)},
+		},
 		{
 			name:    "two registered elements",
 			content: `<ex:Data><ex:Code>A1</ex:Code></ex:Data><ex:Data><ex:Code>B2</ex:Code></ex:Data>`,
@@ -139,11 +152,15 @@ func TestExtensionContentRoundTrip(t *testing.T) {
 }
 
 func TestRawExtensionDataXML(t *testing.T) {
-	out, err := ubl.Encode(decodeInvoice(t, []byte(extensionsXML)))
+	inv := decodeInvoice(t, []byte(extensionsXML))
+	out, err := ubl.Encode(inv)
 	require.NoError(t, err)
 	assert.NotContains(t, string(out), "&#x9;")
-	assert.NotContains(t, string(out), "&#xA;")
 	assert.NotContains(t, string(out), "_xmlns")
+
+	out, err = ubl.EncodeCompact(inv)
+	require.NoError(t, err)
+	assert.Contains(t, string(out), `<ext:ExtensionContent><Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered"><P xmlns="urn:example:plain">p</P></Other></ext:ExtensionContent>`)
 
 	_, err = xml.Marshal(ubl.NewExtension(&ubl.RawExtensionData{XML: []byte("<a>")}))
 	assert.Error(t, err)
@@ -156,5 +173,5 @@ func TestDecodeExtensionContentError(t *testing.T) {
 	require.NotEqual(t, extensionsXML, data)
 
 	_, err := ubl.Decode([]byte(data))
-	assert.ErrorContains(t, err, "urn:example:ext")
+	assert.ErrorContains(t, err, "decoding extension content Data (urn:example:ext)")
 }

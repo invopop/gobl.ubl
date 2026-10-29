@@ -16,15 +16,16 @@ import (
 // the attribute that declares the default namespace.
 const xmlnsPrefix = "xmlns"
 
-// extensionTypes maps the namespace of an extension content element to the
-// type it decodes into.
-var extensionTypes = map[string]func() ExtensionData{}
+// extensionTypes maps the name of an extension content element to the type
+// it decodes into.
+var extensionTypes = map[xml.Name]func() ExtensionData{}
 
-// RegisterExtensionData registers the type that extension content whose
-// element is in the namespace decodes into. Call it from init; a later
-// registration for the same namespace replaces the earlier one.
-func RegisterExtensionData(namespace string, fn func() ExtensionData) {
-	extensionTypes[namespace] = fn
+// RegisterExtensionData registers the type that extension content decodes
+// into when its element has the name: Space is the element's namespace and
+// Local its local name. Call it from init; a later registration for the same
+// name replaces the earlier one.
+func RegisterExtensionData(name xml.Name, fn func() ExtensionData) {
+	extensionTypes[name] = fn
 }
 
 // RawExtensionData keeps extension content no type is registered for.
@@ -56,9 +57,9 @@ func (r *RawExtensionData) MarshalXML(e *xml.Encoder, _ xml.StartElement) error 
 	}
 }
 
-// UnmarshalXML decodes the content into the type registered for the
-// namespace of its element. Content with no registered type, or that is not
-// a single element, is kept as RawExtensionData.
+// UnmarshalXML decodes the content into the type registered for the name of
+// its element. Content with no registered type, or that is not a single
+// element, is kept as RawExtensionData.
 func (ec *ExtensionContent) UnmarshalXML(d *xml.Decoder, _ xml.StartElement) error {
 	toks, single, err := readExtensionContent(d)
 	if err != nil {
@@ -69,10 +70,10 @@ func (ec *ExtensionContent) UnmarshalXML(d *xml.Decoder, _ xml.StartElement) err
 	}
 	if single {
 		start := toks[0].(xml.StartElement)
-		if fn, ok := extensionTypes[start.Name.Space]; ok {
+		if fn, ok := extensionTypes[start.Name]; ok {
 			data, err := decodeExtensionData(fn(), toks)
 			if err != nil {
-				return fmt.Errorf("decoding extension content %s: %w", start.Name.Space, err)
+				return fmt.Errorf("decoding extension content %s (%s): %w", start.Name.Local, start.Name.Space, err)
 			}
 			ec.Data = data
 			return nil

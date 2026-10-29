@@ -17,7 +17,7 @@ const (
 const prefixCBC = "cbc"
 
 func init() {
-	RegisterExtensionData(NamespaceSIG, func() ExtensionData { return new(DocumentSignatures) })
+	RegisterExtensionData(xml.Name{Space: NamespaceSIG, Local: "UBLDocumentSignatures"}, func() ExtensionData { return new(DocumentSignatures) })
 }
 
 // DocumentSignatures contains the signature information block.
