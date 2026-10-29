@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "f0440e2c61782e8582c45f155da15708dabe71adacaba3be512d4adbc0081cae"
+			"val": "2ac7756b37527bdb78d4162d8299a74c4a3f5139ef22446415cab69975670eb6"
 		}
 	},
 	"doc": {
@@ -72,7 +72,10 @@
 					"code": "GB 123 EW",
 					"country": "GB"
 				}
-			]
+			],
+			"registration": {
+				"other": "AdditionalLegalInformation"
+			}
 		},
 		"customer": {
 			"name": "Buyer Official Name",

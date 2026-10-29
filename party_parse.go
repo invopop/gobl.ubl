@@ -20,6 +20,13 @@ func goblParty(party *Party) *org.Party {
 		p.Name = cleanString(*party.PartyLegalEntity.RegistrationName)
 	}
 
+	// BT-33: additional legal information (cbc:CompanyLegalForm)
+	if le := party.PartyLegalEntity; le != nil && le.CompanyLegalForm != nil {
+		if form := strings.TrimSpace(cleanString(*le.CompanyLegalForm)); form != "" {
+			p.Registration = &org.Registration{Other: form}
+		}
+	}
+
 	if eID := party.EndpointID; eID != nil && eID.Value != "" {
 		oi := new(org.Inbox)
 		switch eID.SchemeID {

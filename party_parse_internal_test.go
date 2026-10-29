@@ -12,6 +12,54 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// TestGoblPartyLegalForm covers BT-33 on the way in: the legal form becomes
+// the party's registration, but only when there is something to keep.
+func TestGoblPartyLegalForm(t *testing.T) {
+	parse := func(t *testing.T, legalForm string) *org.Party {
+		t.Helper()
+		in := `<cac:Party xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+			<cac:PartyLegalEntity>
+				<cbc:RegistrationName>Tvrtka A d.o.o.</cbc:RegistrationName>
+				` + legalForm + `
+			</cac:PartyLegalEntity>
+		</cac:Party>`
+		party := new(Party)
+		require.NoError(t, xmlctx.Unmarshal([]byte(in), party, xmlctx.WithNamespaces(map[string]string{
+			"cac": NamespaceCAC,
+			"cbc": NamespaceCBC,
+		})))
+		return goblParty(party)
+	}
+
+	t.Run("sets the registration", func(t *testing.T) {
+		p := parse(t, `<cbc:CompanyLegalForm>Osnovano na trgovačkom sudu, temeljni kapital</cbc:CompanyLegalForm>`)
+
+		require.NotNil(t, p.Registration)
+		assert.Equal(t, "Osnovano na trgovačkom sudu, temeljni kapital", p.Registration.Other)
+	})
+
+	for name, legalForm := range map[string]string{
+		"absent":            ``,
+		"empty":             `<cbc:CompanyLegalForm/>`,
+		"whitespace":        `<cbc:CompanyLegalForm> </cbc:CompanyLegalForm>`,
+		"replacement runes": "<cbc:CompanyLegalForm>\uFFFD\uFFFD</cbc:CompanyLegalForm>",
+	} {
+		t.Run("no registration when "+name, func(t *testing.T) {
+			p := parse(t, legalForm)
+
+			assert.Nil(t, p.Registration)
+		})
+	}
+
+	t.Run("no registration when blank in a party built in code", func(t *testing.T) {
+		// Unlike the XML decoder, a caller of ParseParty may pass untrimmed text.
+		form := " \uFFFD "
+		p := goblParty(&Party{PartyLegalEntity: &PartyLegalEntity{CompanyLegalForm: &form}})
+
+		assert.Nil(t, p.Registration)
+	})
+}
+
 // TestGoblPartyTaxRegistration covers BT-32 on the way in: a non-VAT scheme
 // is a tax registration identifier, never the party's VAT identifier.
 func TestGoblPartyTaxRegistration(t *testing.T) {

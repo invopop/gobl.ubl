@@ -5,27 +5,19 @@ import (
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
+	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNewExtension(t *testing.T) {
-	ext := ubl.NewExtension()
+	d := &ubl.DocumentSignatures{}
+	ext := ubl.NewExtension(d)
 
 	require.NotNil(t, ext)
 	assert.Nil(t, ext.ExtensionURI)
 	require.NotNil(t, ext.ExtensionContent)
-	require.NotNil(t, ext.ExtensionContent.UBLDocumentSignatures)
-	assert.Nil(t, ext.ExtensionContent.UBLDocumentSignatures.SignatureInformation)
-}
-
-func TestNewExtensionReturnsDistinctInstances(t *testing.T) {
-	a := ubl.NewExtension()
-	b := ubl.NewExtension()
-
-	require.NotSame(t, a, b)
-	require.NotSame(t, a.ExtensionContent, b.ExtensionContent)
-	require.NotSame(t, a.ExtensionContent.UBLDocumentSignatures, b.ExtensionContent.UBLDocumentSignatures)
+	assert.Same(t, d, ext.ExtensionContent.Data)
 }
 
 func TestAddExtension(t *testing.T) {
@@ -33,7 +25,7 @@ func TestAddExtension(t *testing.T) {
 		inv := &ubl.Invoice{}
 		assert.Nil(t, inv.Extensions)
 
-		ext := ubl.NewExtension()
+		ext := ubl.NewExtension(&ubl.DocumentSignatures{})
 		inv.AddExtension(ext)
 
 		require.NotNil(t, inv.Extensions)
@@ -51,7 +43,7 @@ func TestAddExtension(t *testing.T) {
 			},
 		}
 
-		inv.AddExtension(ubl.NewExtension())
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
 
 		require.Len(t, inv.Extensions.Extension, 2)
 		require.NotNil(t, inv.Extensions.Extension[0].ExtensionURI)
@@ -61,9 +53,9 @@ func TestAddExtension(t *testing.T) {
 
 	t.Run("multiple calls accumulate", func(t *testing.T) {
 		inv := &ubl.Invoice{}
-		inv.AddExtension(ubl.NewExtension())
-		inv.AddExtension(ubl.NewExtension())
-		inv.AddExtension(ubl.NewExtension())
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
 
 		require.NotNil(t, inv.Extensions)
 		assert.Len(t, inv.Extensions.Extension, 3)
@@ -71,7 +63,7 @@ func TestAddExtension(t *testing.T) {
 
 	t.Run("stores a copy of the extension", func(t *testing.T) {
 		inv := &ubl.Invoice{}
-		ext := ubl.NewExtension()
+		ext := ubl.NewExtension(&ubl.DocumentSignatures{})
 		inv.AddExtension(ext)
 
 		uri := "urn:mutated"
@@ -90,7 +82,7 @@ func TestExtensionsXML(t *testing.T) {
 			{
 				ExtensionURI: &uri,
 				ExtensionContent: &ubl.ExtensionContent{
-					UBLDocumentSignatures: &ubl.DocumentSignatures{
+					Data: &ubl.DocumentSignatures{
 						SIGNamespace: "urn:sig",
 						SACNamespace: "urn:sac",
 						SBCNamespace: "urn:sbc",
@@ -121,60 +113,64 @@ func TestExtensionXMLOmitsEmpty(t *testing.T) {
 	assert.NotContains(t, xmlStr, "<ext:ExtensionContent>")
 }
 
-func TestNewRawExtension(t *testing.T) {
-	const content = `<x:Data xmlns:x="urn:test:x"><x:Flag>yes</x:Flag></x:Data>`
-	ext := ubl.NewRawExtension([]byte(content))
+// signatureXML is the signature extension as gobl.ubl v0.99.0 writes it.
+// Signed documents depend on these bytes.
+const signatureXML = `<Extensions><ext:UBLExtension><ext:ExtensionURI>urn:oasis:names:specification:ubl:dsig:enveloped:xades</ext:ExtensionURI><ext:ExtensionContent><sig:UBLDocumentSignatures xmlns:sig="urn:oasis:names:specification:ubl:schema:xsd:CommonSignatureComponents-2" xmlns:sac="urn:oasis:names:specification:ubl:schema:xsd:SignatureAggregateComponents-2" xmlns:sbc="urn:oasis:names:specification:ubl:schema:xsd:SignatureBasicComponents-2"><sac:SignatureInformation><cbc:ID>urn:oasis:names:specification:ubl:signature:1</cbc:ID><sbc:ReferencedSignatureID>urn:oasis:names:specification:ubl:signature:Invoice</sbc:ReferencedSignatureID><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="signature"><ds:SignedInfo><ds:Reference URI=""><ds:DigestValue>ZGlnZXN0</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="">c2lnbmF0dXJl</ds:SignatureValue></ds:Signature></sac:SignatureInformation></sig:UBLDocumentSignatures></ext:ExtensionContent></ext:UBLExtension></Extensions>`
 
-	require.NotNil(t, ext)
-	assert.Nil(t, ext.ExtensionURI)
-	require.NotNil(t, ext.ExtensionContent)
-	assert.Nil(t, ext.ExtensionContent.UBLDocumentSignatures, "an extension holds one element")
-	assert.Equal(t, content, string(ext.ExtensionContent.Raw))
+// signatureExtension builds a signature extension with fixed values.
+func signatureExtension() *ubl.Extension {
+	uri := ubl.SignatureMethod
+	sig := &xmldsig.Signature{
+		DSigNamespace: xmldsig.NamespaceDSig,
+		ID:            "signature",
+		SignedInfo: &xmldsig.SignedInfo{
+			Reference: []*xmldsig.Reference{{URI: "", DigestValue: "ZGlnZXN0"}},
+		},
+		Value: &xmldsig.Value{Value: "c2lnbmF0dXJl"},
+	}
+	sigs := &ubl.DocumentSignatures{
+		SIGNamespace: ubl.NamespaceSIG,
+		SACNamespace: ubl.NamespaceSAC,
+		SBCNamespace: ubl.NamespaceSBC,
+		SignatureInformation: &ubl.SignatureInformation{
+			ID:                    ubl.SignatureInformationID,
+			ReferencedSignatureID: ubl.ReferenceSignatureID,
+			Signature:             sig,
+		},
+	}
+	ext := ubl.NewExtension(sigs)
+	ext.ExtensionURI = &uri
+	return ext
 }
 
-func TestExtensionContentRaw(t *testing.T) {
-	t.Run("written verbatim", func(t *testing.T) {
-		const content = `<x:Data xmlns:x="urn:test:x"><x:Flag>yes</x:Flag></x:Data>`
-		exts := &ubl.Extensions{
-			Extension: []ubl.Extension{*ubl.NewRawExtension([]byte(content))},
-		}
-		out, err := xml.Marshal(exts)
-		require.NoError(t, err)
-		assert.Equal(t, "<Extensions><ext:UBLExtension><ext:ExtensionContent>"+content+"</ext:ExtensionContent></ext:UBLExtension></Extensions>", string(out))
-	})
+func TestSignatureExtensionXML(t *testing.T) {
+	inv := new(ubl.Invoice)
+	inv.AddExtension(signatureExtension())
+	out, err := xml.Marshal(inv.Extensions)
+	require.NoError(t, err)
+	assert.Equal(t, signatureXML, string(out))
+}
 
-	t.Run("read on decode", func(t *testing.T) {
-		data := []byte(`<?xml version="1.0" encoding="UTF-8"?>
-<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"
-	xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"
-	xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2"
-	xmlns:x="urn:test:x">
-	<ext:UBLExtensions>
-		<ext:UBLExtension>
-			<ext:ExtensionContent><x:Data><x:Flag>root</x:Flag></x:Data></ext:ExtensionContent>
-		</ext:UBLExtension>
-		<ext:UBLExtension>
-			<ext:ExtensionContent><y:Data xmlns:y="urn:test:x"><y:Flag>local</y:Flag></y:Data></ext:ExtensionContent>
-		</ext:UBLExtension>
-	</ext:UBLExtensions>
-	<cbc:ID>1</cbc:ID>
-</Invoice>`)
-		doc, err := ubl.Decode(data)
-		require.NoError(t, err)
-		inv, ok := doc.(*ubl.Invoice)
-		require.True(t, ok)
-		require.NotNil(t, inv.Extensions)
-		require.Len(t, inv.Extensions.Extension, 2)
+type testData struct {
+	XMLName   xml.Name `xml:"ex:Data"`
+	Namespace string   `xml:"xmlns:ex,attr"`
+	Code      string   `xml:"ex:Code,omitempty"`
+	Count     int      `xml:"ex:Count,omitempty"`
+	Note      string   `xml:"cbc:Note,omitempty"`
+}
 
-		for i, want := range []string{"root", "local"} {
-			ec := inv.Extensions.Extension[i].ExtensionContent
-			require.NotNil(t, ec)
-			var x struct {
-				XMLName xml.Name `xml:"urn:test:x Data"`
-				Flag    string   `xml:"urn:test:x Flag"`
-			}
-			require.NoError(t, xml.Unmarshal(ec.Raw, &x), string(ec.Raw))
-			assert.Equal(t, want, x.Flag)
-		}
-	})
+func (*testData) ExtensionNamespaces() map[string]string {
+	return map[string]string{"ex": "urn:example:ext", "cbc": ubl.NamespaceCBC}
+}
+
+func TestFindExtensionData(t *testing.T) {
+	_, ok := ubl.FindExtensionData[*ubl.DocumentSignatures](nil)
+	assert.False(t, ok)
+	d := &testData{Code: "A1"}
+	exts := &ubl.Extensions{Extension: []ubl.Extension{{}, *ubl.NewExtension(d), *signatureExtension()}}
+	got, ok := ubl.FindExtensionData[*testData](exts)
+	require.True(t, ok)
+	assert.Same(t, d, got)
+	_, ok = ubl.FindExtensionData[*ubl.DocumentSignatures](&ubl.Extensions{Extension: []ubl.Extension{*ubl.NewExtension(d)}})
+	assert.False(t, ok)
 }

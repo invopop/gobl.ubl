@@ -76,14 +76,14 @@ func Decode(data []byte) (Document, error) {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
 		in := new(Invoice)
 		if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(map[string]string{
-			"":     ns,
-			"cbc":  NamespaceCBC,
-			"cac":  NamespaceCAC,
-			"qdt":  NamespaceQDT,
-			"udt":  NamespaceUDT,
-			"ccts": NamespaceCCTS,
-			"xsi":  NamespaceXSI,
-			"ext":  NamespaceEXT,
+			"":        ns,
+			prefixCBC: NamespaceCBC,
+			"cac":     NamespaceCAC,
+			"qdt":     NamespaceQDT,
+			"udt":     NamespaceUDT,
+			"ccts":    NamespaceCCTS,
+			"xsi":     NamespaceXSI,
+			"ext":     NamespaceEXT,
 		})); err != nil {
 			return nil, err
 		}
@@ -92,9 +92,9 @@ func Decode(data []byte) (Document, error) {
 	case NamespaceUBLApplicationResponse:
 		ar := new(ApplicationResponse)
 		if err := xmlctx.Unmarshal(data, ar, xmlctx.WithNamespaces(map[string]string{
-			"":    ns,
-			"cbc": NamespaceCBC,
-			"cac": NamespaceCAC,
+			"":        ns,
+			prefixCBC: NamespaceCBC,
+			"cac":     NamespaceCAC,
 		})); err != nil {
 			return nil, err
 		}
