@@ -11,22 +11,13 @@ import (
 )
 
 func TestNewExtension(t *testing.T) {
-	ext := ubl.NewExtension()
+	d := &ubl.DocumentSignatures{}
+	ext := ubl.NewExtension(d)
 
 	require.NotNil(t, ext)
 	assert.Nil(t, ext.ExtensionURI)
 	require.NotNil(t, ext.ExtensionContent)
-	require.NotNil(t, ext.ExtensionContent.UBLDocumentSignatures)
-	assert.Nil(t, ext.ExtensionContent.UBLDocumentSignatures.SignatureInformation)
-}
-
-func TestNewExtensionReturnsDistinctInstances(t *testing.T) {
-	a := ubl.NewExtension()
-	b := ubl.NewExtension()
-
-	require.NotSame(t, a, b)
-	require.NotSame(t, a.ExtensionContent, b.ExtensionContent)
-	require.NotSame(t, a.ExtensionContent.UBLDocumentSignatures, b.ExtensionContent.UBLDocumentSignatures)
+	assert.Same(t, d, ext.ExtensionContent.Data)
 }
 
 func TestAddExtension(t *testing.T) {
@@ -34,7 +25,7 @@ func TestAddExtension(t *testing.T) {
 		inv := &ubl.Invoice{}
 		assert.Nil(t, inv.Extensions)
 
-		ext := ubl.NewExtension()
+		ext := ubl.NewExtension(&ubl.DocumentSignatures{})
 		inv.AddExtension(ext)
 
 		require.NotNil(t, inv.Extensions)
@@ -52,7 +43,7 @@ func TestAddExtension(t *testing.T) {
 			},
 		}
 
-		inv.AddExtension(ubl.NewExtension())
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
 
 		require.Len(t, inv.Extensions.Extension, 2)
 		require.NotNil(t, inv.Extensions.Extension[0].ExtensionURI)
@@ -62,9 +53,9 @@ func TestAddExtension(t *testing.T) {
 
 	t.Run("multiple calls accumulate", func(t *testing.T) {
 		inv := &ubl.Invoice{}
-		inv.AddExtension(ubl.NewExtension())
-		inv.AddExtension(ubl.NewExtension())
-		inv.AddExtension(ubl.NewExtension())
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
+		inv.AddExtension(ubl.NewExtension(&ubl.DocumentSignatures{}))
 
 		require.NotNil(t, inv.Extensions)
 		assert.Len(t, inv.Extensions.Extension, 3)
@@ -72,7 +63,7 @@ func TestAddExtension(t *testing.T) {
 
 	t.Run("stores a copy of the extension", func(t *testing.T) {
 		inv := &ubl.Invoice{}
-		ext := ubl.NewExtension()
+		ext := ubl.NewExtension(&ubl.DocumentSignatures{})
 		inv.AddExtension(ext)
 
 		uri := "urn:mutated"
@@ -91,7 +82,7 @@ func TestExtensionsXML(t *testing.T) {
 			{
 				ExtensionURI: &uri,
 				ExtensionContent: &ubl.ExtensionContent{
-					UBLDocumentSignatures: &ubl.DocumentSignatures{
+					Data: &ubl.DocumentSignatures{
 						SIGNamespace: "urn:sig",
 						SACNamespace: "urn:sac",
 						SBCNamespace: "urn:sbc",
@@ -137,16 +128,18 @@ func signatureExtension() *ubl.Extension {
 		},
 		Value: &xmldsig.Value{Value: "c2lnbmF0dXJl"},
 	}
-	ext := ubl.NewExtension()
-	ext.ExtensionURI = &uri
-	ext.ExtensionContent.UBLDocumentSignatures.SIGNamespace = ubl.NamespaceSIG
-	ext.ExtensionContent.UBLDocumentSignatures.SACNamespace = ubl.NamespaceSAC
-	ext.ExtensionContent.UBLDocumentSignatures.SBCNamespace = ubl.NamespaceSBC
-	ext.ExtensionContent.UBLDocumentSignatures.SignatureInformation = &ubl.SignatureInformation{
-		ID:                    ubl.SignatureInformationID,
-		ReferencedSignatureID: ubl.ReferenceSignatureID,
-		Signature:             sig,
+	sigs := &ubl.DocumentSignatures{
+		SIGNamespace: ubl.NamespaceSIG,
+		SACNamespace: ubl.NamespaceSAC,
+		SBCNamespace: ubl.NamespaceSBC,
+		SignatureInformation: &ubl.SignatureInformation{
+			ID:                    ubl.SignatureInformationID,
+			ReferencedSignatureID: ubl.ReferenceSignatureID,
+			Signature:             sig,
+		},
 	}
+	ext := ubl.NewExtension(sigs)
+	ext.ExtensionURI = &uri
 	return ext
 }
 
@@ -156,4 +149,28 @@ func TestSignatureExtensionXML(t *testing.T) {
 	out, err := xml.Marshal(inv.Extensions)
 	require.NoError(t, err)
 	assert.Equal(t, signatureXML, string(out))
+}
+
+type testData struct {
+	XMLName   xml.Name `xml:"ex:Data"`
+	Namespace string   `xml:"xmlns:ex,attr"`
+	Code      string   `xml:"ex:Code,omitempty"`
+	Count     int      `xml:"ex:Count,omitempty"`
+	Note      string   `xml:"cbc:Note,omitempty"`
+}
+
+func (*testData) ExtensionNamespaces() map[string]string {
+	return map[string]string{"ex": "urn:example:ext", "cbc": ubl.NamespaceCBC}
+}
+
+func TestFindExtensionData(t *testing.T) {
+	_, ok := ubl.FindExtensionData[*ubl.DocumentSignatures](nil)
+	assert.False(t, ok)
+	d := &testData{Code: "A1"}
+	exts := &ubl.Extensions{Extension: []ubl.Extension{{}, *ubl.NewExtension(d), *signatureExtension()}}
+	got, ok := ubl.FindExtensionData[*testData](exts)
+	require.True(t, ok)
+	assert.Same(t, d, got)
+	_, ok = ubl.FindExtensionData[*ubl.DocumentSignatures](&ubl.Extensions{Extension: []ubl.Extension{*ubl.NewExtension(d)}})
+	assert.False(t, ok)
 }

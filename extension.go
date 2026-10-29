@@ -11,18 +11,41 @@ type Extension struct {
 	ExtensionContent *ExtensionContent `xml:"ext:ExtensionContent"`
 }
 
-// ExtensionContent wraps the content of a UBL extension.
-type ExtensionContent struct {
-	UBLDocumentSignatures *DocumentSignatures `xml:"sig:UBLDocumentSignatures"`
+// ExtensionData is the content of a UBL extension: one element of any
+// namespace other than the extension namespace.
+type ExtensionData interface {
+	// ExtensionNamespaces maps each prefix the type's xml tags use to its
+	// namespace, so the content can be decoded into the type.
+	ExtensionNamespaces() map[string]string
 }
 
-// NewExtension creates a new extension
-func NewExtension() *Extension {
+// ExtensionContent wraps the content of a UBL extension.
+type ExtensionContent struct {
+	Data ExtensionData `xml:",any"`
+}
+
+// NewExtension creates a new extension holding the given data.
+func NewExtension(data ExtensionData) *Extension {
 	return &Extension{
-		ExtensionContent: &ExtensionContent{
-			UBLDocumentSignatures: &DocumentSignatures{},
-		},
+		ExtensionContent: &ExtensionContent{Data: data},
 	}
+}
+
+// FindExtensionData returns the first extension content of type T, if any.
+func FindExtensionData[T ExtensionData](exts *Extensions) (T, bool) {
+	var zero T
+	if exts == nil {
+		return zero, false
+	}
+	for _, ext := range exts.Extension {
+		if ext.ExtensionContent == nil {
+			continue
+		}
+		if d, ok := ext.ExtensionContent.Data.(T); ok {
+			return d, true
+		}
+	}
+	return zero, false
 }
 
 // AddExtension adds a new extension to the ubl invoice

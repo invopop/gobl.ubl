@@ -1,6 +1,10 @@
 package ubl
 
-import "github.com/invopop/xmldsig"
+import (
+	"encoding/xml"
+
+	"github.com/invopop/xmldsig"
+)
 
 // UBL signature constants.
 const (
@@ -9,12 +13,28 @@ const (
 	SignatureMethod        = "urn:oasis:names:specification:ubl:dsig:enveloped:xades"
 )
 
+// prefixCBC is the conventional prefix of the common basic components.
+const prefixCBC = "cbc"
+
 // DocumentSignatures contains the signature information block.
 type DocumentSignatures struct {
+	XMLName              xml.Name              `xml:"sig:UBLDocumentSignatures"`
 	SIGNamespace         string                `xml:"xmlns:sig,attr"`
 	SACNamespace         string                `xml:"xmlns:sac,attr"`
 	SBCNamespace         string                `xml:"xmlns:sbc,attr"`
 	SignatureInformation *SignatureInformation `xml:"sac:SignatureInformation"`
+}
+
+// ExtensionNamespaces implements ExtensionData.
+func (*DocumentSignatures) ExtensionNamespaces() map[string]string {
+	return map[string]string{
+		"sig":     NamespaceSIG,
+		"sac":     NamespaceSAC,
+		"sbc":     NamespaceSBC,
+		prefixCBC: NamespaceCBC,
+		"ds":      xmldsig.NamespaceDSig,
+		"xades":   xmldsig.NamespaceXAdES,
+	}
 }
 
 // SignatureInformation holds the IDs and the ds:Signature.
