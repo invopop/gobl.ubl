@@ -13,9 +13,6 @@ const (
 	SignatureMethod        = "urn:oasis:names:specification:ubl:dsig:enveloped:xades"
 )
 
-// prefixCBC is the conventional prefix of the common basic components.
-const prefixCBC = "cbc"
-
 func init() {
 	RegisterExtensionData(xml.Name{Space: NamespaceSIG, Local: "UBLDocumentSignatures"}, func() ExtensionData { return new(DocumentSignatures) })
 }
@@ -32,13 +29,13 @@ type DocumentSignatures struct {
 // ExtensionNamespaces implements ExtensionData.
 func (*DocumentSignatures) ExtensionNamespaces() map[string]string {
 	return map[string]string{
-		"sig":     NamespaceSIG,
-		"sac":     NamespaceSAC,
-		"sbc":     NamespaceSBC,
-		prefixCBC: NamespaceCBC,
-		"ds":      xmldsig.NamespaceDSig,
-		"dsig11":  xmldsig.NamespaceDSig11,
-		"xades":   xmldsig.NamespaceXAdES,
+		"sig":    NamespaceSIG,
+		"sac":    NamespaceSAC,
+		"sbc":    NamespaceSBC,
+		"cbc":    NamespaceCBC, //nolint:goconst
+		"ds":     xmldsig.NamespaceDSig,
+		"dsig11": xmldsig.NamespaceDSig11,
+		"xades":  xmldsig.NamespaceXAdES,
 	}
 }
 
