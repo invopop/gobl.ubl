@@ -154,10 +154,8 @@ func encodeTokens(toks []xml.Token) ([]byte, error) {
 			return nil, err
 		}
 	}
-	if err := enc.Flush(); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+	err := enc.Flush()
+	return buf.Bytes(), err
 }
 
 // literalDeclarations rewrites the namespace declarations of a start element
