@@ -142,6 +142,15 @@ func TestDecodeExtensionContentUntyped(t *testing.T) {
 	}
 }
 
+func TestDecodeExtensionContentReused(t *testing.T) {
+	ec := new(ubl.ExtensionContent)
+	require.NoError(t, xml.Unmarshal([]byte(`<ExtensionContent><a xmlns="urn:example:unregistered"/></ExtensionContent>`), ec))
+	require.NotNil(t, ec.Data)
+
+	require.NoError(t, xml.Unmarshal([]byte(`<ExtensionContent><!-- none --></ExtensionContent>`), ec))
+	assert.Nil(t, ec.Data)
+}
+
 func TestExtensionContentRoundTrip(t *testing.T) {
 	first := decodeInvoice(t, []byte(extensionsXML))
 	out, err := ubl.Encode(first)

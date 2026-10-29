@@ -60,6 +60,7 @@ func (r *RawExtensionData) MarshalXML(e *xml.Encoder, _ xml.StartElement) error 
 // its element. Content with no registered type, or that is not a single
 // element, is kept as RawExtensionData.
 func (ec *ExtensionContent) UnmarshalXML(d *xml.Decoder, _ xml.StartElement) error {
+	ec.Data = nil
 	toks, single, err := readExtensionContent(d)
 	if err != nil {
 		return err
