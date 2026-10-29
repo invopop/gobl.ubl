@@ -166,6 +166,49 @@ func TestRawExtensionDataXML(t *testing.T) {
 	assert.Error(t, err)
 }
 
+// TestRawExtensionDataAttributes checks that unregistered content with a
+// namespaced attribute declares the attribute's prefix exactly once when
+// encoded, also after a second decode and encode.
+func TestRawExtensionDataAttributes(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+		want    string
+	}{
+		{
+			name:    "prefix declared on the root",
+			content: `<un:Other un:a="1"><un:Value>7</un:Value></un:Other>`,
+			want:    `<Other xmlns="urn:example:unregistered" xmlns:_="urn:example:unregistered" _:a="1"><Value xmlns="urn:example:unregistered">7</Value></Other>`,
+		},
+		{
+			name:    "prefix declared on the element",
+			content: `<un:Other xmlns:un="urn:example:unregistered" un:a="1"/>`,
+			want:    `<Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered" un:a="1"></Other>`,
+		},
+		{
+			name:    "schema instance type",
+			content: `<un:Other xsi:type="Kind"/>`,
+			want:    `<Other xmlns="urn:example:unregistered" xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="Kind"></Other>`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			data := []byte(`<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"` +
+				` xmlns:ext="` + ubl.NamespaceEXT + `" xmlns:xsi="` + ubl.NamespaceXSI + `" xmlns:un="urn:example:unregistered">` +
+				`<ext:UBLExtensions><ext:UBLExtension><ext:ExtensionContent>` + tt.content +
+				`</ext:ExtensionContent></ext:UBLExtension></ext:UBLExtensions></Invoice>`)
+			want := `<ext:ExtensionContent>` + tt.want + `</ext:ExtensionContent>`
+			for range 2 {
+				doc, err := ubl.Decode(data)
+				require.NoError(t, err)
+				data, err = ubl.EncodeCompact(doc)
+				require.NoError(t, err)
+				assert.Contains(t, string(data), want)
+			}
+		})
+	}
+}
+
 func TestDecodeExtensionContentError(t *testing.T) {
 	data := strings.Replace(extensionsXML,
 		`<ex:Data><ex:Code>A1</ex:Code><cbc:Note>kept</cbc:Note></ex:Data>`,

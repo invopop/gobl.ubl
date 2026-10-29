@@ -37,6 +37,7 @@ func (*DocumentSignatures) ExtensionNamespaces() map[string]string {
 		"sbc":     NamespaceSBC,
 		prefixCBC: NamespaceCBC,
 		"ds":      xmldsig.NamespaceDSig,
+		"dsig11":  xmldsig.NamespaceDSig11,
 		"xades":   xmldsig.NamespaceXAdES,
 	}
 }

@@ -12,7 +12,10 @@ type Extension struct {
 }
 
 // ExtensionData is the content of a UBL extension: one element of any
-// namespace other than the extension namespace.
+// namespace other than the extension namespace. An implementation must name
+// its element through an XMLName field, or it encodes as <Data>, and must
+// declare every prefix it writes through xmlns:p,attr fields, or those
+// prefixes come out unbound.
 type ExtensionData interface {
 	// ExtensionNamespaces maps each prefix the type's xml tags use to its
 	// namespace, so the content can be decoded into the type.
@@ -24,7 +27,8 @@ type ExtensionContent struct {
 	Data ExtensionData `xml:",any"`
 }
 
-// NewExtension creates a new extension holding the given data.
+// NewExtension creates a new extension holding the given data. data must not
+// be nil or empty, as UBL requires exactly one element in ext:ExtensionContent.
 func NewExtension(data ExtensionData) *Extension {
 	return &Extension{
 		ExtensionContent: &ExtensionContent{Data: data},

@@ -173,11 +173,20 @@ func encodeTokens(toks []xml.Token) ([]byte, error) {
 // literalDeclarations rewrites the namespace declarations of a start element
 // as literal attributes, which the encoder writes as they are; it would
 // otherwise write them as _xmlns attributes. It drops the default namespace
-// declaration, as the encoder declares the namespace of each element.
+// declaration, as the encoder declares the namespace of each element. An
+// attribute in a namespace the element declares a prefix for is written with
+// that prefix, as the encoder does not see the literal declaration and would
+// declare the namespace a second time.
 func literalDeclarations(tok xml.Token) xml.Token {
 	start, ok := tok.(xml.StartElement)
 	if !ok {
 		return tok
+	}
+	prefixes := make(map[string]string)
+	for _, a := range start.Attr {
+		if a.Name.Space == xmlnsPrefix {
+			prefixes[a.Value] = a.Name.Local
+		}
 	}
 	attrs := make([]xml.Attr, 0, len(start.Attr))
 	for _, a := range start.Attr {
@@ -186,6 +195,8 @@ func literalDeclarations(tok xml.Token) xml.Token {
 			attrs = append(attrs, xml.Attr{Name: xml.Name{Local: xmlnsPrefix + ":" + a.Name.Local}, Value: a.Value})
 		case a.Name.Space == "" && a.Name.Local == xmlnsPrefix:
 			// the encoder declares the element's namespace
+		case prefixes[a.Name.Space] != "":
+			attrs = append(attrs, xml.Attr{Name: xml.Name{Local: prefixes[a.Name.Space] + ":" + a.Name.Local}, Value: a.Value})
 		default:
 			attrs = append(attrs, a)
 		}
