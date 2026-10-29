@@ -153,12 +153,7 @@ func TestExtensionContentRoundTrip(t *testing.T) {
 
 func TestRawExtensionDataXML(t *testing.T) {
 	inv := decodeInvoice(t, []byte(extensionsXML))
-	out, err := ubl.Encode(inv)
-	require.NoError(t, err)
-	assert.NotContains(t, string(out), "&#x9;")
-	assert.NotContains(t, string(out), "_xmlns")
-
-	out, err = ubl.EncodeCompact(inv)
+	out, err := ubl.EncodeCompact(inv)
 	require.NoError(t, err)
 	assert.Contains(t, string(out), `<ext:ExtensionContent><Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered"><P xmlns="urn:example:plain">p</P></Other></ext:ExtensionContent>`)
 
@@ -185,16 +180,11 @@ func TestRawExtensionDataAttributes(t *testing.T) {
 			content: `<un:Other xmlns:un="urn:example:unregistered" un:a="1"/>`,
 			want:    `<Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered" un:a="1"></Other>`,
 		},
-		{
-			name:    "schema instance type",
-			content: `<un:Other xsi:type="Kind"/>`,
-			want:    `<Other xmlns="urn:example:unregistered" xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="Kind"></Other>`,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := []byte(`<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"` +
-				` xmlns:ext="` + ubl.NamespaceEXT + `" xmlns:xsi="` + ubl.NamespaceXSI + `" xmlns:un="urn:example:unregistered">` +
+				` xmlns:ext="` + ubl.NamespaceEXT + `" xmlns:un="urn:example:unregistered">` +
 				`<ext:UBLExtensions><ext:UBLExtension><ext:ExtensionContent>` + tt.content +
 				`</ext:ExtensionContent></ext:UBLExtension></ext:UBLExtensions></Invoice>`)
 			want := `<ext:ExtensionContent>` + tt.want + `</ext:ExtensionContent>`

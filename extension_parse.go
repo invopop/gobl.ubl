@@ -5,7 +5,6 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
-	"maps"
 	"slices"
 
 	"github.com/invopop/xmlctx"
@@ -71,8 +70,8 @@ func (ec *ExtensionContent) UnmarshalXML(d *xml.Decoder, _ xml.StartElement) err
 	if single {
 		start := toks[0].(xml.StartElement)
 		if fn, ok := extensionTypes[start.Name]; ok {
-			data, err := decodeExtensionData(fn(), toks)
-			if err != nil {
+			data := fn()
+			if err := decodeExtensionData(data, toks); err != nil {
 				return fmt.Errorf("decoding extension content %s (%s): %w", start.Name.Local, start.Name.Space, err)
 			}
 			ec.Data = data
@@ -124,35 +123,26 @@ func readExtensionContent(d *xml.Decoder) ([]xml.Token, bool, error) {
 	}
 }
 
-// decodeExtensionData decodes the element in toks into data. It declares on
-// the element the prefixes that data's xml tags use, because the document
-// may declare them on an ancestor.
-func decodeExtensionData(data ExtensionData, toks []xml.Token) (ExtensionData, error) {
+// decodeExtensionData decodes the element in toks into data. It first declares
+// on the element each prefix of data's xml tags that the element does not
+// declare itself, because the document may declare them on an ancestor.
+func decodeExtensionData(data ExtensionData, toks []xml.Token) error {
 	ns := data.ExtensionNamespaces()
-	toks[0] = declarePrefixes(toks[0].(xml.StartElement), ns)
-	raw, err := encodeTokens(toks)
-	if err != nil {
-		return nil, err
-	}
-	if err := xmlctx.Unmarshal(raw, data, xmlctx.WithNamespaces(ns)); err != nil {
-		return nil, err
-	}
-	return data, nil
-}
-
-// declarePrefixes adds to start a declaration for each prefix in ns that it
-// does not declare itself.
-func declarePrefixes(start xml.StartElement, ns map[string]string) xml.StartElement {
-	start = start.Copy()
-	for _, p := range slices.Sorted(maps.Keys(ns)) {
+	start := toks[0].(xml.StartElement)
+	for p, uri := range ns {
 		declared := slices.ContainsFunc(start.Attr, func(a xml.Attr) bool {
 			return a.Name.Space == xmlnsPrefix && a.Name.Local == p
 		})
 		if !declared {
-			start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: xmlnsPrefix + ":" + p}, Value: ns[p]})
+			start.Attr = append(start.Attr, xml.Attr{Name: xml.Name{Local: xmlnsPrefix + ":" + p}, Value: uri})
 		}
 	}
-	return start
+	toks[0] = start
+	raw, err := encodeTokens(toks)
+	if err != nil {
+		return err
+	}
+	return xmlctx.Unmarshal(raw, data, xmlctx.WithNamespaces(ns))
 }
 
 // encodeTokens writes the tokens as XML.
