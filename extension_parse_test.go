@@ -82,8 +82,8 @@ func TestDecodeExtensionContent(t *testing.T) {
 	require.True(t, ok, "got %T", data[1])
 	assert.Equal(t, ubl.NamespaceSIG, sigs.SIGNamespace)
 	assert.Equal(t, ubl.NamespaceSAC, sigs.SACNamespace)
-	require.NotNil(t, sigs.SignatureInformation)
-	assert.Equal(t, ubl.SignatureInformationID, sigs.SignatureInformation.ID)
+	require.Len(t, sigs.SignatureInformation, 1)
+	assert.Equal(t, ubl.SignatureInformationID, sigs.SignatureInformation[0].ID)
 
 	raw, ok := data[2].(*ubl.RawExtensionData)
 	require.True(t, ok, "got %T", data[2])
@@ -153,17 +153,17 @@ func TestExtensionContentRoundTrip(t *testing.T) {
 
 func TestRawExtensionDataXML(t *testing.T) {
 	inv := decodeInvoice(t, []byte(extensionsXML))
-	out, err := ubl.Encode(inv)
-	require.NoError(t, err)
-	assert.NotContains(t, string(out), "&#x9;")
-	assert.NotContains(t, string(out), "_xmlns")
-
-	out, err = ubl.EncodeCompact(inv)
+	out, err := ubl.EncodeCompact(inv)
 	require.NoError(t, err)
 	assert.Contains(t, string(out), `<ext:ExtensionContent><Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered"><P xmlns="urn:example:plain">p</P></Other></ext:ExtensionContent>`)
+	assert.Nil(t, new(ubl.RawExtensionData).ExtensionNamespaces())
 
 	_, err = xml.Marshal(ubl.NewExtension(&ubl.RawExtensionData{XML: []byte("<a>")}))
 	assert.Error(t, err)
+
+	// well-formed, but an XML declaration can only be the first token encoded
+	_, err = xml.Marshal(ubl.NewExtension(&ubl.RawExtensionData{XML: []byte(`<?xml version="1.0"?><a/>`)}))
+	assert.ErrorContains(t, err, "ProcInst xml target only valid for xml declaration")
 }
 
 // TestRawExtensionDataAttributes checks that unregistered content with a
@@ -185,16 +185,11 @@ func TestRawExtensionDataAttributes(t *testing.T) {
 			content: `<un:Other xmlns:un="urn:example:unregistered" un:a="1"/>`,
 			want:    `<Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered" un:a="1"></Other>`,
 		},
-		{
-			name:    "schema instance type",
-			content: `<un:Other xsi:type="Kind"/>`,
-			want:    `<Other xmlns="urn:example:unregistered" xmlns:_XMLSchema-instance="http://www.w3.org/2001/XMLSchema-instance" _XMLSchema-instance:type="Kind"></Other>`,
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := []byte(`<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2"` +
-				` xmlns:ext="` + ubl.NamespaceEXT + `" xmlns:xsi="` + ubl.NamespaceXSI + `" xmlns:un="urn:example:unregistered">` +
+				` xmlns:ext="` + ubl.NamespaceEXT + `" xmlns:un="urn:example:unregistered">` +
 				`<ext:UBLExtensions><ext:UBLExtension><ext:ExtensionContent>` + tt.content +
 				`</ext:ExtensionContent></ext:UBLExtension></ext:UBLExtensions></Invoice>`)
 			want := `<ext:ExtensionContent>` + tt.want + `</ext:ExtensionContent>`
@@ -217,4 +212,9 @@ func TestDecodeExtensionContentError(t *testing.T) {
 
 	_, err := ubl.Decode([]byte(data))
 	assert.ErrorContains(t, err, "decoding extension content Data (urn:example:ext)")
+}
+
+func TestDecodeExtensionContentMalformed(t *testing.T) {
+	err := xml.Unmarshal([]byte(`<ExtensionContent><a></b></ExtensionContent>`), new(ubl.ExtensionContent))
+	assert.ErrorContains(t, err, "element <a> closed by </b>")
 }

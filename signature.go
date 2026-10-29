@@ -13,32 +13,30 @@ const (
 	SignatureMethod        = "urn:oasis:names:specification:ubl:dsig:enveloped:xades"
 )
 
-// prefixCBC is the conventional prefix of the common basic components.
-const prefixCBC = "cbc"
-
 func init() {
 	RegisterExtensionData(xml.Name{Space: NamespaceSIG, Local: "UBLDocumentSignatures"}, func() ExtensionData { return new(DocumentSignatures) })
 }
 
-// DocumentSignatures contains the signature information block.
+// DocumentSignatures contains the signature information blocks. UBL requires
+// at least one.
 type DocumentSignatures struct {
-	XMLName              xml.Name              `xml:"sig:UBLDocumentSignatures"`
-	SIGNamespace         string                `xml:"xmlns:sig,attr"`
-	SACNamespace         string                `xml:"xmlns:sac,attr"`
-	SBCNamespace         string                `xml:"xmlns:sbc,attr"`
-	SignatureInformation *SignatureInformation `xml:"sac:SignatureInformation"`
+	XMLName              xml.Name               `xml:"sig:UBLDocumentSignatures"`
+	SIGNamespace         string                 `xml:"xmlns:sig,attr"`
+	SACNamespace         string                 `xml:"xmlns:sac,attr"`
+	SBCNamespace         string                 `xml:"xmlns:sbc,attr"`
+	SignatureInformation []SignatureInformation `xml:"sac:SignatureInformation"`
 }
 
 // ExtensionNamespaces implements ExtensionData.
 func (*DocumentSignatures) ExtensionNamespaces() map[string]string {
 	return map[string]string{
-		"sig":     NamespaceSIG,
-		"sac":     NamespaceSAC,
-		"sbc":     NamespaceSBC,
-		prefixCBC: NamespaceCBC,
-		"ds":      xmldsig.NamespaceDSig,
-		"dsig11":  xmldsig.NamespaceDSig11,
-		"xades":   xmldsig.NamespaceXAdES,
+		"sig":    NamespaceSIG,
+		"sac":    NamespaceSAC,
+		"sbc":    NamespaceSBC,
+		"cbc":    NamespaceCBC, //nolint:goconst
+		"ds":     xmldsig.NamespaceDSig,
+		"dsig11": xmldsig.NamespaceDSig11,
+		"xades":  xmldsig.NamespaceXAdES,
 	}
 }
 
