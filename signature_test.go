@@ -71,11 +71,11 @@ func TestDocumentSignaturesXML(t *testing.T) {
 		SIGNamespace: "urn:sig",
 		SACNamespace: "urn:sac",
 		SBCNamespace: "urn:sbc",
-		SignatureInformation: &ubl.SignatureInformation{
+		SignatureInformation: []ubl.SignatureInformation{{
 			ID:                    ubl.SignatureInformationID,
 			ReferencedSignatureID: ubl.ReferenceSignatureID,
 			Signature:             &xmldsig.Signature{},
-		},
+		}},
 	}
 
 	out, err := xml.Marshal(ds)
@@ -89,6 +89,23 @@ func TestDocumentSignaturesXML(t *testing.T) {
 	assert.Contains(t, xmlStr, "<cbc:ID>"+ubl.SignatureInformationID+"</cbc:ID>")
 	assert.Contains(t, xmlStr, "<sbc:ReferencedSignatureID>"+ubl.ReferenceSignatureID+"</sbc:ReferencedSignatureID>")
 	assert.Contains(t, xmlStr, "<ds:Signature")
+}
+
+func TestDecodeDocumentSignatures(t *testing.T) {
+	data := `<ExtensionContent xmlns:sig="` + ubl.NamespaceSIG + `" xmlns:sac="` + ubl.NamespaceSAC +
+		`" xmlns:sbc="` + ubl.NamespaceSBC + `" xmlns:cbc="` + ubl.NamespaceCBC + `"><sig:UBLDocumentSignatures>` +
+		`<sac:SignatureInformation><cbc:ID>first</cbc:ID><sbc:ReferencedSignatureID>ref-1</sbc:ReferencedSignatureID></sac:SignatureInformation>` +
+		`<sac:SignatureInformation><cbc:ID>second</cbc:ID></sac:SignatureInformation>` +
+		`</sig:UBLDocumentSignatures></ExtensionContent>`
+	ec := new(ubl.ExtensionContent)
+	require.NoError(t, xml.Unmarshal([]byte(data), ec))
+
+	sigs, ok := ec.Data.(*ubl.DocumentSignatures)
+	require.True(t, ok, "got %T", ec.Data)
+	assert.Equal(t, []ubl.SignatureInformation{
+		{ID: "first", ReferencedSignatureID: "ref-1"},
+		{ID: "second"},
+	}, sigs.SignatureInformation)
 }
 
 func TestSignatureInformationXMLOmitsNilSignature(t *testing.T) {
