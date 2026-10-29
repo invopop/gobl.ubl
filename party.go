@@ -70,7 +70,8 @@ const TaxSchemeTaxRegistration = "LOC"
 
 // SupplierParty represents the supplier party in a transaction
 type SupplierParty struct {
-	Party *Party `xml:"cac:Party"`
+	Party         *Party   `xml:"cac:Party"`
+	SellerContact *Contact `xml:"cac:SellerContact,omitempty"`
 }
 
 // CustomerParty represents the customer party in a transaction
