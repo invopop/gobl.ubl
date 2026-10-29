@@ -156,9 +156,14 @@ func TestRawExtensionDataXML(t *testing.T) {
 	out, err := ubl.EncodeCompact(inv)
 	require.NoError(t, err)
 	assert.Contains(t, string(out), `<ext:ExtensionContent><Other xmlns="urn:example:unregistered" xmlns:un="urn:example:unregistered"><P xmlns="urn:example:plain">p</P></Other></ext:ExtensionContent>`)
+	assert.Nil(t, new(ubl.RawExtensionData).ExtensionNamespaces())
 
 	_, err = xml.Marshal(ubl.NewExtension(&ubl.RawExtensionData{XML: []byte("<a>")}))
 	assert.Error(t, err)
+
+	// well-formed, but an XML declaration can only be the first token encoded
+	_, err = xml.Marshal(ubl.NewExtension(&ubl.RawExtensionData{XML: []byte(`<?xml version="1.0"?><a/>`)}))
+	assert.ErrorContains(t, err, "ProcInst xml target only valid for xml declaration")
 }
 
 // TestRawExtensionDataAttributes checks that unregistered content with a
@@ -207,4 +212,9 @@ func TestDecodeExtensionContentError(t *testing.T) {
 
 	_, err := ubl.Decode([]byte(data))
 	assert.ErrorContains(t, err, "decoding extension content Data (urn:example:ext)")
+}
+
+func TestDecodeExtensionContentMalformed(t *testing.T) {
+	err := xml.Unmarshal([]byte(`<ExtensionContent><a></b></ExtensionContent>`), new(ubl.ExtensionContent))
+	assert.ErrorContains(t, err, "element <a> closed by </b>")
 }
