@@ -61,12 +61,29 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer[0].IBAN = "DK5000400440116243"
 		inv.Payment.Instructions.CreditTransfer[0].BIC = "DABADKKK"
 
-		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
 		assert.Equal(t, "1234567890", *pfa.ID)
 		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
+	})
+
+	t.Run("bank account transfer without a clearing code keeps IBAN and BIC", func(t *testing.T) {
+		env := loadTestEnvelope(t, "peppol/invoice-dk-domestic-transfer.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Payment.Instructions.CreditTransfer[0].IBAN = "BE68539007547034"
+		inv.Payment.Instructions.CreditTransfer[0].BIC = "GKCCBEBB"
+		inv.Payment.Instructions.CreditTransfer[0].Clearing = ""
+
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+
+		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
+		assert.Equal(t, "BE68539007547034", *pfa.ID)
+		assert.Equal(t, "GKCCBEBB", *pfa.FinancialInstitutionBranch.ID)
 	})
 
 	t.Run("SEPA transfer keeps IBAN and BIC when a clearing code is set", func(t *testing.T) {
@@ -80,7 +97,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer[0].Number = "123456789"
 		inv.Payment.Instructions.CreditTransfer[0].Clearing = "1234"
 
-		doc, err := ubl.ConvertInvoice(env)
+		doc, err := ubl.ExportInvoice(env)
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount

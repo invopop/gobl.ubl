@@ -12,8 +12,8 @@ import (
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
-	"github.com/invopop/gobl/tax"
 	"github.com/invopop/gobl/pay"
+	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -207,9 +207,9 @@ func TestParsePaymentInstructions(t *testing.T) {
 		require.NoError(t, err)
 		data = []byte(strings.Replace(string(data), "<cbc:ID>1234</cbc:ID>", "<cbc:ID>GKCCBEBB</cbc:ID>", 1))
 
-		doc, err := ubl.Parse(data)
+		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
-		e, err := doc.(*ubl.Invoice).Convert()
+		e, err := ubl.Import(doc)
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)

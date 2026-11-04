@@ -207,12 +207,13 @@ func isDomesticTransfer(code string) bool {
 
 // newCreditTransferAccount builds the payee account (BG-17) for the payment
 // means code. BT-86 holds either a BIC or a national clearing code, so a
-// domestic transfer takes the account number and clearing code, and any other
-// transfer the IBAN and BIC, each falling back to the other pair.
+// domestic transfer with a clearing code takes the account number and clearing
+// code, and any other transfer the IBAN and BIC, each falling back to the
+// other pair.
 func newCreditTransferAccount(code string, ct *pay.CreditTransfer) *FinancialAccount {
 	id, branch := ct.IBAN, ct.BIC
 	alt, altBranch := ct.Number, ct.Clearing
-	if isDomesticTransfer(code) {
+	if isDomesticTransfer(code) && ct.Clearing != "" {
 		id, branch, alt, altBranch = alt, altBranch, id, branch
 	}
 	if id == "" {
