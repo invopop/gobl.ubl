@@ -219,6 +219,23 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Empty(t, ct.Clearing)
 	})
 
+	t.Run("domestic transfer with only a clearing code keeps the account", func(t *testing.T) {
+		data, err := testLoadXML("peppol/invoice-dk-domestic-transfer.xml")
+		require.NoError(t, err)
+		s := strings.Replace(string(data), "<cbc:ID>1234567890</cbc:ID>", "", 1)
+		s = strings.Replace(s, "<cbc:Name>Danske Bank</cbc:Name>", "", 1)
+
+		doc, err := ubl.Decode([]byte(s))
+		require.NoError(t, err)
+		e, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.Len(t, inv.Payment.Instructions.CreditTransfer, 1)
+		assert.Equal(t, cbc.Code("1234"), inv.Payment.Instructions.CreditTransfer[0].Clearing)
+	})
+
 	t.Run("credit transfer keeps any branch ID as a BIC", func(t *testing.T) {
 		e := parseXMLInvoice(t, "peppol/base-example.xml")
 
