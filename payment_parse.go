@@ -16,7 +16,9 @@ var (
 		"10": pay.MeansKeyCash,
 		"20": pay.MeansKeyCheque,
 		"30": pay.MeansKeyCreditTransfer,
-		"42": pay.MeansKeyDebitTransfer,
+		// Payment to bank account has no typed key, and "other" keeps the
+		// code from being rewritten by the EN 16931 key normalization.
+		"42": pay.MeansKeyOther,
 		"48": pay.MeansKeyCard,
 		"49": pay.MeansKeyDirectDebit,
 		"58": pay.MeansKeyCreditTransfer.With(pay.MeansKeySEPA),
@@ -26,6 +28,10 @@ var (
 	// ibanRegex matches IBAN-like format: starts with 2+ letters followed by digits/alphanumeric
 	// Allows optional whitespace throughout (IBANs are often formatted with spaces)
 	ibanRegex = regexp.MustCompile(`^[A-Z]{2,}\s*[0-9A-Z\s]+$`)
+
+	// bicRegex matches an ISO 9362 BIC: 6 letters followed by 2 or 5
+	// alphanumeric characters
+	bicRegex = regexp.MustCompile(`^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$`)
 )
 
 func (ui *Invoice) goblAddPayment(out *bill.Invoice) error {
@@ -163,8 +169,16 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	if account.Name != nil {
 		creditTransfer.Name = cleanString(*account.Name)
 	}
-	if account.FinancialInstitutionBranch != nil && account.FinancialInstitutionBranch.ID != nil {
-		creditTransfer.BIC = cbc.Code(*account.FinancialInstitutionBranch.ID)
+	if branch := account.FinancialInstitutionBranch; branch != nil && branch.ID != nil {
+		// BT-86 holds a BIC, or on a domestic transfer a national clearing
+		// code such as a Danish reg. no. Some senders still use a BIC with
+		// a domestic transfer code, so the shape decides there.
+		id := *branch.ID
+		if isDomesticTransfer(paymentMeans.PaymentMeansCode.Value) && !isBIC(id) {
+			creditTransfer.Clearing = cbc.Code(id)
+		} else {
+			creditTransfer.BIC = cbc.Code(id)
+		}
 	}
 
 	if creditTransfer.IBAN == "" && creditTransfer.Number == "" && creditTransfer.Name == "" && creditTransfer.BIC == "" {
@@ -180,6 +194,14 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 func isIBAN(s string) bool {
 	s = strings.ToUpper(strings.TrimSpace(s))
 	return ibanRegex.MatchString(s)
+}
+
+// isBIC checks if a string looks like a BIC (ISO 9362): a 4-letter bank code,
+// a 2-letter country code, a 2-character location code and an optional
+// 3-character branch code.
+func isBIC(s string) bool {
+	s = strings.ToUpper(strings.TrimSpace(s))
+	return bicRegex.MatchString(s)
 }
 
 func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.DirectDebit {

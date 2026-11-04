@@ -80,6 +80,12 @@ type PrepaidPayment struct {
 const sepaSchemeID = "SEPA"
 const cardNetworkNotApplicable = "NA"
 
+// UNTDID 4461 payment means codes for transfers to a national bank account.
+const (
+	paymentMeansDebitTransfer = "31"
+	paymentMeansBankAccount   = "42"
+)
+
 func (ui *Invoice) addPayment(inv *bill.Invoice) error {
 	if inv == nil || inv.Payment == nil {
 		return nil
@@ -161,7 +167,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 		ui.PaymentMeans[0].PaymentMeansCode.Name = &instr.Detail
 	}
 	if len(instr.CreditTransfer) > 0 {
-		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(instr.CreditTransfer[0])
+		ui.PaymentMeans[0].PayeeFinancialAccount = newCreditTransferAccount(ui.PaymentMeans[0].PaymentMeansCode.Value, instr.CreditTransfer[0])
 	}
 	if instr.DirectDebit != nil && (instr.DirectDebit.Ref != "" || instr.DirectDebit.Account != "") {
 		// BT-91 must go inside the mandate (BR-DE-31, UBL-CR-680).
@@ -192,21 +198,41 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 	return nil
 }
 
-func newCreditTransferAccount(ct *pay.CreditTransfer) *FinancialAccount {
+// isDomesticTransfer reports whether the UNTDID 4461 payment means code is a
+// transfer to a national bank account, identified by an account number and a
+// clearing code rather than an IBAN and a BIC (DK-R-006).
+func isDomesticTransfer(code string) bool {
+	return code == paymentMeansDebitTransfer || code == paymentMeansBankAccount
+}
+
+// newCreditTransferAccount builds the payee account (BG-17) for the payment
+// means code. BT-86 holds either a BIC or a national clearing code, so a
+// domestic transfer takes the account number and clearing code, and any other
+// transfer the IBAN and BIC, each falling back to the other pair.
+func newCreditTransferAccount(code string, ct *pay.CreditTransfer) *FinancialAccount {
+	id, branch := ct.IBAN, ct.BIC
+	alt, altBranch := ct.Number, ct.Clearing
+	if isDomesticTransfer(code) {
+		id, branch, alt, altBranch = alt, altBranch, id, branch
+	}
+	if id == "" {
+		id = alt
+	}
+	if branch == "" {
+		branch = altBranch
+	}
+
 	pfa := new(FinancialAccount)
-	if ct.IBAN != "" {
-		id := ct.IBAN.String()
-		pfa.ID = &id
-	} else if ct.Number != "" {
-		id := ct.Number.String()
-		pfa.ID = &id
+	if id != "" {
+		s := id.String()
+		pfa.ID = &s
 	}
 	if ct.Name != "" {
 		pfa.Name = &ct.Name
 	}
-	if ct.BIC != "" {
-		bic := ct.BIC.String()
-		pfa.FinancialInstitutionBranch = &Branch{ID: &bic}
+	if branch != "" {
+		s := branch.String()
+		pfa.FinancialInstitutionBranch = &Branch{ID: &s}
 	}
 	return pfa
 }

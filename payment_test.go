@@ -39,6 +39,55 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
 	})
 
+	t.Run("domestic transfer maps the account number and clearing code", func(t *testing.T) {
+		doc := testInvoiceFrom(t, "peppol/invoice-dk-domestic-transfer.json")
+
+		require.NotEmpty(t, doc.PaymentMeans)
+		assert.Equal(t, "42", doc.PaymentMeans[0].PaymentMeansCode.Value)
+		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
+		require.NotNil(t, pfa)
+		assert.Equal(t, "1234567890", *pfa.ID)
+		assert.Equal(t, "Danske Bank", *pfa.Name)
+		// BT-86 takes a national clearing code in place of a BIC (DK-R-006).
+		require.NotNil(t, pfa.FinancialInstitutionBranch)
+		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
+	})
+
+	t.Run("domestic transfer prefers number and clearing over IBAN and BIC", func(t *testing.T) {
+		env := loadTestEnvelope(t, "peppol/invoice-dk-domestic-transfer.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Payment.Instructions.CreditTransfer[0].IBAN = "DK5000400440116243"
+		inv.Payment.Instructions.CreditTransfer[0].BIC = "DABADKKK"
+
+		doc, err := ubl.ConvertInvoice(env, ubl.WithContext(ubl.ContextPeppol))
+		require.NoError(t, err)
+
+		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
+		assert.Equal(t, "1234567890", *pfa.ID)
+		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
+	})
+
+	t.Run("SEPA transfer keeps IBAN and BIC when a clearing code is set", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Payment.Instructions.Ext = inv.Payment.Instructions.Ext.Merge(
+			tax.ExtensionsOf(cbc.CodeMap{untdid.ExtKeyPaymentMeans: "58"}),
+		)
+		inv.Payment.Instructions.CreditTransfer[0].Number = "123456789"
+		inv.Payment.Instructions.CreditTransfer[0].Clearing = "1234"
+
+		doc, err := ubl.ConvertInvoice(env)
+		require.NoError(t, err)
+
+		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
+		assert.Equal(t, "NO9386011117947", *pfa.ID)
+		assert.Equal(t, "DNBANOKK", *pfa.FinancialInstitutionBranch.ID)
+	})
+
 	t.Run("direct debit without mandate reference omits the mandate ID", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 

@@ -2,15 +2,18 @@ package ubl_test
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
+	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
+	"github.com/invopop/gobl/pay"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -176,6 +179,56 @@ func TestParsePaymentInstructions(t *testing.T) {
 		require.NotNil(t, payment.Instructions.CreditTransfer)
 		require.Len(t, payment.Instructions.CreditTransfer, 1)
 		assert.Equal(t, cbc.Code("NL28RBOS0420242228"), payment.Instructions.CreditTransfer[0].IBAN)
+	})
+
+	t.Run("domestic transfer reads the branch ID as a clearing code", func(t *testing.T) {
+		e := parseXMLInvoice(t, "peppol/invoice-dk-domestic-transfer.xml")
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.NotNil(t, inv.Payment)
+		require.NotNil(t, inv.Payment.Instructions)
+		require.Len(t, inv.Payment.Instructions.CreditTransfer, 1)
+
+		ct := inv.Payment.Instructions.CreditTransfer[0]
+		assert.Equal(t, cbc.Code("1234567890"), ct.Number)
+		assert.Equal(t, cbc.Code("1234"), ct.Clearing)
+		assert.Empty(t, ct.BIC)
+
+		// Code 42 has no typed key; "other" keeps the code from being
+		// rewritten by the EN 16931 key normalization.
+		assert.Equal(t, pay.MeansKeyOther, inv.Payment.Instructions.Key)
+		assert.Equal(t, cbc.Code("42"), inv.Payment.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans))
+	})
+
+	t.Run("bank account transfer keeps a BIC-shaped branch ID as a BIC", func(t *testing.T) {
+		// Belgian senders use code 42 with an IBAN and BIC.
+		data, err := testLoadXML("peppol/invoice-dk-domestic-transfer.xml")
+		require.NoError(t, err)
+		data = []byte(strings.Replace(string(data), "<cbc:ID>1234</cbc:ID>", "<cbc:ID>GKCCBEBB</cbc:ID>", 1))
+
+		doc, err := ubl.Parse(data)
+		require.NoError(t, err)
+		e, err := doc.(*ubl.Invoice).Convert()
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		ct := inv.Payment.Instructions.CreditTransfer[0]
+		assert.Equal(t, cbc.Code("GKCCBEBB"), ct.BIC)
+		assert.Empty(t, ct.Clearing)
+	})
+
+	t.Run("credit transfer keeps any branch ID as a BIC", func(t *testing.T) {
+		e := parseXMLInvoice(t, "peppol/base-example.xml")
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		require.Len(t, inv.Payment.Instructions.CreditTransfer, 1)
+
+		ct := inv.Payment.Instructions.CreditTransfer[0]
+		assert.Equal(t, cbc.Code("BIC324098"), ct.BIC)
+		assert.Empty(t, ct.Clearing)
 	})
 }
 
