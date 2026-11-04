@@ -14,7 +14,7 @@ import (
 )
 
 // setEnvelopeRouting records the transport addresses the document was received
-// with (opts' WithRouting) on the envelope's Head.From / Head.To, BEFORE the
+// with (opts' WithTo and WithFrom) on the envelope's Head.From / Head.To, BEFORE the
 // envelope is calculated. The addresses are the fully-qualified participant
 // URIs the routing layer supplies and are recorded verbatim. GOBL's
 // normalizeRouting only fills empty routing fields, so setting them first makes

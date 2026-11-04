@@ -92,7 +92,7 @@ func (c *converter) Import(_ cbc.Key, data []byte, opts *convert.ImportOptions) 
 	if err != nil {
 		return nil, err
 	}
-	env, err := Import(doc, WithRouting(opts.From, opts.To))
+	env, err := Import(doc, WithTo(opts.To), WithFrom(opts.From))
 	if err != nil {
 		return nil, err
 	}
