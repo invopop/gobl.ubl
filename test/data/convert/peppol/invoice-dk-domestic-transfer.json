@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "df061c3f02710c0997c4cd58e987628114c8607eb88a94a6336332df77ef4803"
+			"val": "2c4ee3d2ce7d4a31db3d936ba4e831b2758d466b590eb08a4ac0d0f9abed823c"
 		},
 		"from": "iso6523-actorid-upis::0184:10000009",
 		"to": "iso6523-actorid-upis::0088:5790000000005"
@@ -20,7 +20,7 @@
 		"code": "20260600000001",
 		"issue_date": "2026-06-22",
 		"issue_time": "13:29:04",
-		"currency": "EUR",
+		"currency": "DKK",
 		"tax": {
 			"rounding": "currency",
 			"ext": {
@@ -144,12 +144,15 @@
 			"code": "No information provided"
 		},
 		"payment": {
-			"advances": [
-				{
-					"description": "CreditCard",
-					"amount": "110.00"
-				}
-			],
+			"terms": {
+				"due_dates": [
+					{
+						"date": "2026-07-22",
+						"amount": "110.00",
+						"percent": "100%"
+					}
+				]
+			},
 			"instructions": {
 				"key": "other",
 				"credit_transfer": [
@@ -189,9 +192,7 @@
 			},
 			"tax": "22.00",
 			"total_with_tax": "110.00",
-			"payable": "110.00",
-			"advance": "110.00",
-			"due": "0.00"
+			"payable": "110.00"
 		}
 	}
 }

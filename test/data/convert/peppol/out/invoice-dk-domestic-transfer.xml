@@ -4,8 +4,9 @@
   <cbc:ProfileID>urn:fdc:peppol.eu:2017:poacc:billing:01:1.0</cbc:ProfileID>
   <cbc:ID>20260600000001</cbc:ID>
   <cbc:IssueDate>2026-06-22</cbc:IssueDate>
+  <cbc:DueDate>2026-07-22</cbc:DueDate>
   <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
-  <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
+  <cbc:DocumentCurrencyCode>DKK</cbc:DocumentCurrencyCode>
   <cbc:BuyerReference>No information provided</cbc:BuyerReference>
   <cac:AccountingSupplierParty>
     <cac:Party>
@@ -74,10 +75,10 @@
     </cac:PayeeFinancialAccount>
   </cac:PaymentMeans>
   <cac:TaxTotal>
-    <cbc:TaxAmount currencyID="EUR">22.00</cbc:TaxAmount>
+    <cbc:TaxAmount currencyID="DKK">22.00</cbc:TaxAmount>
     <cac:TaxSubtotal>
-      <cbc:TaxableAmount currencyID="EUR">88.00</cbc:TaxableAmount>
-      <cbc:TaxAmount currencyID="EUR">22.00</cbc:TaxAmount>
+      <cbc:TaxableAmount currencyID="DKK">88.00</cbc:TaxableAmount>
+      <cbc:TaxAmount currencyID="DKK">22.00</cbc:TaxAmount>
       <cac:TaxCategory>
         <cbc:ID>S</cbc:ID>
         <cbc:Percent>25.0</cbc:Percent>
@@ -88,16 +89,15 @@
     </cac:TaxSubtotal>
   </cac:TaxTotal>
   <cac:LegalMonetaryTotal>
-    <cbc:LineExtensionAmount currencyID="EUR">88.00</cbc:LineExtensionAmount>
-    <cbc:TaxExclusiveAmount currencyID="EUR">88.00</cbc:TaxExclusiveAmount>
-    <cbc:TaxInclusiveAmount currencyID="EUR">110.00</cbc:TaxInclusiveAmount>
-    <cbc:PrepaidAmount currencyID="EUR">110.00</cbc:PrepaidAmount>
-    <cbc:PayableAmount currencyID="EUR">0.00</cbc:PayableAmount>
+    <cbc:LineExtensionAmount currencyID="DKK">88.00</cbc:LineExtensionAmount>
+    <cbc:TaxExclusiveAmount currencyID="DKK">88.00</cbc:TaxExclusiveAmount>
+    <cbc:TaxInclusiveAmount currencyID="DKK">110.00</cbc:TaxInclusiveAmount>
+    <cbc:PayableAmount currencyID="DKK">110.00</cbc:PayableAmount>
   </cac:LegalMonetaryTotal>
   <cac:InvoiceLine>
     <cbc:ID>1</cbc:ID>
     <cbc:InvoicedQuantity unitCode="E48">1</cbc:InvoicedQuantity>
-    <cbc:LineExtensionAmount currencyID="EUR">88.00</cbc:LineExtensionAmount>
+    <cbc:LineExtensionAmount currencyID="DKK">88.00</cbc:LineExtensionAmount>
     <cac:Item>
       <cbc:Name>double room</cbc:Name>
       <cac:ClassifiedTaxCategory>
@@ -109,7 +109,7 @@
       </cac:ClassifiedTaxCategory>
     </cac:Item>
     <cac:Price>
-      <cbc:PriceAmount currencyID="EUR">88.00</cbc:PriceAmount>
+      <cbc:PriceAmount currencyID="DKK">88.00</cbc:PriceAmount>
     </cac:Price>
   </cac:InvoiceLine>
 </Invoice>
