@@ -86,6 +86,59 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "GKCCBEBB", *pfa.FinancialInstitutionBranch.ID)
 	})
 
+	t.Run("domestic transfer with an IBAN and no account number keeps the IBAN", func(t *testing.T) {
+		env := loadTestEnvelope(t, "peppol/invoice-dk-domestic-transfer.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Payment.Instructions.CreditTransfer[0].IBAN = "DK5000400440116243"
+		inv.Payment.Instructions.CreditTransfer[0].Number = ""
+
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+
+		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
+		assert.Equal(t, "DK5000400440116243", *pfa.ID)
+		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
+	})
+
+	t.Run("debit transfer maps the account number and clearing code", func(t *testing.T) {
+		env := loadTestEnvelope(t, "peppol/invoice-dk-domestic-transfer.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		// The EN 16931 addon derives code 31 from the key.
+		inv.Payment.Instructions.Key = pay.MeansKeyDebitTransfer
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+
+		assert.Equal(t, "31", doc.PaymentMeans[0].PaymentMeansCode.Value)
+		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
+		assert.Equal(t, "1234567890", *pfa.ID)
+		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
+	})
+
+	t.Run("credit transfer without a BIC puts the clearing code in BT-86", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		// A UK sort code identifies the bank where there is no BIC.
+		inv.Payment.Instructions.CreditTransfer[0].IBAN = "GB33BUKB20201555555555"
+		inv.Payment.Instructions.CreditTransfer[0].BIC = ""
+		inv.Payment.Instructions.CreditTransfer[0].Clearing = "202015"
+
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+
+		assert.Equal(t, "30", doc.PaymentMeans[0].PaymentMeansCode.Value)
+		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
+		assert.Equal(t, "GB33BUKB20201555555555", *pfa.ID)
+		assert.Equal(t, "202015", *pfa.FinancialInstitutionBranch.ID)
+	})
+
 	t.Run("SEPA transfer keeps IBAN and BIC when a clearing code is set", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 
