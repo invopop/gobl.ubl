@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "b690a5d3f2d3f4c140b0efe383f3da01c429314829dffa19cfa2f4c19c863d7a"
+			"val": "862070aa6babf0def1b60da20fe462f5d912827eea573bfa0e03f75b1b6d83f0"
 		}
 	},
 	"doc": {
@@ -171,7 +171,7 @@
 				]
 			},
 			"instructions": {
-				"key": "debit-transfer",
+				"key": "other",
 				"ref": "020250000001",
 				"credit_transfer": [
 					{
@@ -179,7 +179,7 @@
 					}
 				],
 				"ext": {
-					"untdid-payment-means": "31"
+					"untdid-payment-means": "42"
 				}
 			}
 		},
