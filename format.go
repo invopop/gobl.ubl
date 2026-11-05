@@ -259,28 +259,10 @@ func WithFormat(f Format) Option {
 // They are recorded verbatim on the parsed envelope's Head.From / Head.To,
 // regardless of the document type, so a received document is never mislabelled
 // with GOBL's document-derived, outgoing-direction guess. See Import.
-//
-// Deprecated: use WithTo and WithFrom.
 func WithRouting(from, to cbc.URI) Option {
 	return func(o *options) {
-		WithTo(to)(o)
-		WithFrom(from)(o)
-	}
-}
-
-// WithTo supplies the transport address the receiving app was routed to,
-// recorded verbatim on the parsed envelope's Head.To. See Import.
-func WithTo(to cbc.URI) Option {
-	return func(o *options) {
-		o.to = to
-	}
-}
-
-// WithFrom supplies the transport address the receiving app was routed from,
-// recorded verbatim on the parsed envelope's Head.From. See Import.
-func WithFrom(from cbc.URI) Option {
-	return func(o *options) {
 		o.from = from
+		o.to = to
 	}
 }
 

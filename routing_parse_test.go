@@ -9,7 +9,7 @@ import (
 )
 
 // TestConvertRoutingFromArgs verifies that a received UBL document records the
-// transport addresses it was routed with (WithTo and WithFrom) on Head.From / Head.To,
+// transport addresses it was routed with (WithRouting) on Head.From / Head.To,
 // rather than GOBL's document-derived, outgoing-direction guess.
 func TestConvertRoutingFromArgs(t *testing.T) {
 	xmlData, err := testLoadXML("discount-taxes.xml")
@@ -30,15 +30,6 @@ func TestConvertRoutingFromArgs(t *testing.T) {
 			"iso6523-actorid-upis::0192:sender",
 			"iso6523-actorid-upis::0192:receiver",
 		))
-		require.NoError(t, err)
-		assert.Equal(t, "iso6523-actorid-upis::0192:sender", string(env.Head.From))
-		assert.Equal(t, "iso6523-actorid-upis::0192:receiver", string(env.Head.To))
-	})
-	t.Run("routing options are recorded separately", func(t *testing.T) {
-		env, err := ubl.Import(parse(t),
-			ubl.WithTo("iso6523-actorid-upis::0192:receiver"),
-			ubl.WithFrom("iso6523-actorid-upis::0192:sender"),
-		)
 		require.NoError(t, err)
 		assert.Equal(t, "iso6523-actorid-upis::0192:sender", string(env.Head.From))
 		assert.Equal(t, "iso6523-actorid-upis::0192:receiver", string(env.Head.To))
