@@ -201,6 +201,27 @@ func TestParsePaymentInstructions(t *testing.T) {
 		assert.Equal(t, cbc.Code("42"), inv.Payment.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans))
 	})
 
+	t.Run("debit transfer keeps code 31 and reads the branch ID as a clearing code", func(t *testing.T) {
+		data, err := testLoadXML("peppol/invoice-dk-domestic-transfer.xml")
+		require.NoError(t, err)
+		s := strings.Replace(string(data), "<cbc:PaymentMeansCode>42</cbc:PaymentMeansCode>", "<cbc:PaymentMeansCode>31</cbc:PaymentMeansCode>", 1)
+		require.NotEqual(t, string(data), s)
+
+		doc, err := ubl.Decode([]byte(s))
+		require.NoError(t, err)
+		e, err := ubl.Import(doc)
+		require.NoError(t, err)
+
+		inv, ok := e.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		assert.Equal(t, pay.MeansKeyDebitTransfer, inv.Payment.Instructions.Key)
+		assert.Equal(t, cbc.Code("31"), inv.Payment.Instructions.Ext.Get(untdid.ExtKeyPaymentMeans))
+		ct := inv.Payment.Instructions.CreditTransfer[0]
+		assert.Equal(t, cbc.Code("1234567890"), ct.Number)
+		assert.Equal(t, cbc.Code("1234"), ct.Clearing)
+		assert.Empty(t, ct.BIC)
+	})
+
 	t.Run("bank account transfer keeps a BIC-shaped branch ID as a BIC", func(t *testing.T) {
 		// Belgian senders use code 42 with an IBAN and BIC.
 		data, err := testLoadXML("peppol/invoice-dk-domestic-transfer.xml")

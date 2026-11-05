@@ -16,6 +16,7 @@ var (
 		"10": pay.MeansKeyCash,
 		"20": pay.MeansKeyCheque,
 		"30": pay.MeansKeyCreditTransfer,
+		"31": pay.MeansKeyDebitTransfer,
 		// Payment to bank account has no typed key, and "other" keeps the
 		// code from being rewritten by the EN 16931 key normalization.
 		"42": pay.MeansKeyOther,
