@@ -579,3 +579,36 @@ func mustExportInvoice(t *testing.T, env *gobl.Envelope) *ubl.Invoice {
 	require.NoError(t, err)
 	return doc
 }
+
+func TestClassifiedTaxCategoryNameAndExemption(t *testing.T) {
+	doc := mustExportInvoice(t, loadTestEnvelope(t, "invoice-minimal.json"))
+	ctc := doc.InvoiceLines[0].Item.ClassifiedTaxCategory
+	require.NotNil(t, ctc)
+	assert.Nil(t, ctc.Name, "not exported by default")
+	assert.Nil(t, ctc.TaxExemptionReasonCode, "not exported by default")
+	assert.Nil(t, ctc.TaxExemptionReason, "not exported by default")
+
+	percent, name, code, reason := "0", "Exempt", "VATEX-EU-132", "Exempt supply"
+	ctc.ID = &ubl.IDType{Value: "E"}
+	ctc.Percent = &percent
+	ctc.Name = &name
+	ctc.TaxExemptionReasonCode = &code
+	ctc.TaxExemptionReason = &reason
+	data, err := ubl.EncodeCompact(doc)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "<cac:ClassifiedTaxCategory><cbc:ID>E</cbc:ID><cbc:Name>Exempt</cbc:Name><cbc:Percent>0</cbc:Percent>"+
+		"<cbc:TaxExemptionReasonCode>VATEX-EU-132</cbc:TaxExemptionReasonCode><cbc:TaxExemptionReason>Exempt supply</cbc:TaxExemptionReason><cac:TaxScheme>")
+
+	parsed, err := ubl.Decode(data)
+	require.NoError(t, err)
+	out, ok := parsed.(*ubl.Invoice)
+	require.True(t, ok)
+	got := out.InvoiceLines[0].Item.ClassifiedTaxCategory
+	require.NotNil(t, got)
+	require.NotNil(t, got.Name)
+	require.NotNil(t, got.TaxExemptionReasonCode)
+	require.NotNil(t, got.TaxExemptionReason)
+	assert.Equal(t, "Exempt", *got.Name)
+	assert.Equal(t, "VATEX-EU-132", *got.TaxExemptionReasonCode)
+	assert.Equal(t, "Exempt supply", *got.TaxExemptionReason)
+}

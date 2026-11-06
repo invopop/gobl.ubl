@@ -241,4 +241,5 @@ func TestFormatHelpers(t *testing.T) {
 	_, ok = ubl.TaxPointCode("unknown")
 	assert.False(t, ok)
 	assert.Equal(t, "ab", ubl.CleanString("a�b"))
+	assert.Equal(t, "Ana Horvat", ubl.ContactName(&org.Name{Given: "Ana", Surname: "Horvat"}))
 }
