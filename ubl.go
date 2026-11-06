@@ -77,7 +77,7 @@ func Decode(data []byte) (Document, error) {
 		in := new(Invoice)
 		if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(map[string]string{
 			"":     ns,
-			"cbc":  NamespaceCBC,
+			"cbc":  NamespaceCBC, //nolint:goconst
 			"cac":  NamespaceCAC,
 			"qdt":  NamespaceQDT,
 			"udt":  NamespaceUDT,
