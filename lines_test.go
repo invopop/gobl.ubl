@@ -1,6 +1,7 @@
 package ubl_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -578,4 +579,51 @@ func mustExportInvoice(t *testing.T, env *gobl.Envelope) *ubl.Invoice {
 	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 	return doc
+}
+
+func TestItemPriceExtensionEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "ItemPriceExtension")
+	})
+
+	t.Run("written after the price and read back", func(t *testing.T) {
+		aed := "AED"
+		doc.InvoiceLines[0].ItemPriceExtension = &ubl.ItemPriceExtension{
+			Amount: ubl.Amount{CurrencyID: &aed, Value: "105.00"},
+			TaxTotal: []ubl.TaxTotal{
+				{TaxAmount: ubl.Amount{CurrencyID: &aed, Value: "5.00"}},
+			},
+		}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		assert.Contains(t, xml, `<cbc:Amount currencyID="AED">105.00</cbc:Amount>`)
+		assert.Contains(t, xml, `<cbc:TaxAmount currencyID="AED">5.00</cbc:TaxAmount>`)
+		// UBL 2.1 orders ItemPriceExtension after Price, as the last child of the line.
+		price := strings.Index(xml, "</cac:Price>")
+		ext := strings.Index(xml, "<cac:ItemPriceExtension>")
+		lineEnd := strings.Index(xml, "</cac:InvoiceLine>")
+		require.NotEqual(t, -1, price)
+		assert.Greater(t, ext, price)
+		assert.Less(t, ext, lineEnd)
+		extEnd := strings.Index(xml, "</cac:ItemPriceExtension>") + len("</cac:ItemPriceExtension>")
+		assert.Empty(t, strings.TrimSpace(xml[extEnd:lineEnd]), "nothing after ItemPriceExtension in the line")
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		got := out.InvoiceLines[0].ItemPriceExtension
+		require.NotNil(t, got)
+		assert.Equal(t, "105.00", got.Amount.Value)
+		require.Len(t, got.TaxTotal, 1)
+		assert.Equal(t, "5.00", got.TaxTotal[0].TaxAmount.Value)
+	})
 }

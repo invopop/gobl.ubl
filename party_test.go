@@ -247,3 +247,39 @@ func TestNewPartyEndpointID(t *testing.T) {
 		assert.Nil(t, doc.AccountingSupplierParty.Party.EndpointID)
 	})
 }
+
+func TestIDTypeSchemeAgencyNameEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "schemeAgencyName")
+	})
+
+	t.Run("written as an attribute and read back", func(t *testing.T) {
+		agencyID := "TL"
+		agencyName := "Trade License issuing Authority"
+		doc.AccountingSupplierParty.Party.PartyLegalEntity = &ubl.PartyLegalEntity{
+			CompanyID: &ubl.IDType{
+				SchemeAgencyID:   &agencyID,
+				SchemeAgencyName: &agencyName,
+				Value:            "123456",
+			},
+		}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.Contains(t, string(data),
+			`<cbc:CompanyID schemeAgencyID="TL" schemeAgencyName="Trade License issuing Authority">123456</cbc:CompanyID>`)
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		got := out.AccountingSupplierParty.Party.PartyLegalEntity.CompanyID
+		require.NotNil(t, got.SchemeAgencyName)
+		assert.Equal(t, agencyName, *got.SchemeAgencyName)
+	})
+}
