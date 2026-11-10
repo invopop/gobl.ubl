@@ -33,13 +33,16 @@ const (
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
 	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
-	ListAgencyID   *string `xml:"listAgencyID,attr"`
-	ListID         *string `xml:"listID,attr"`
-	ListVersionID  *string `xml:"listVersionID,attr"`
-	SchemeID       *string `xml:"schemeID,attr"`
-	SchemeName     *string `xml:"schemeName,attr"`
-	Name           *string `xml:"name,attr"`
-	Value          string  `xml:",chardata"`
+	// SchemeAgencyName is the name of the agency that issued the ID, e.g. a
+	// licensing authority (PINT AE BTAE-11/12).
+	SchemeAgencyName *string `xml:"schemeAgencyName,attr"`
+	ListAgencyID     *string `xml:"listAgencyID,attr"`
+	ListID           *string `xml:"listID,attr"`
+	ListVersionID    *string `xml:"listVersionID,attr"`
+	SchemeID         *string `xml:"schemeID,attr"`
+	SchemeName       *string `xml:"schemeName,attr"`
+	Name             *string `xml:"name,attr"`
+	Value            string  `xml:",chardata"`
 }
 
 // ExchangeRate represents an exchange rate
