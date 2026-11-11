@@ -1,10 +1,8 @@
 package ubl
 
 import (
-	"cloud.google.com/go/civil"
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/currency"
@@ -163,11 +161,11 @@ func (ui *Invoice) parseInvoiceDates(out *bill.Invoice) error {
 	out.IssueDate = issueDate
 
 	if ui.IssueTime != "" {
-		ct, err := civil.ParseTime(ui.IssueTime)
+		it, err := parseTime(ui.IssueTime)
 		if err != nil {
 			return err
 		}
-		out.IssueTime = &cal.Time{Time: ct}
+		out.IssueTime = it
 	}
 
 	// BT-7: VAT point date
