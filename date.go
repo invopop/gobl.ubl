@@ -9,8 +9,9 @@ import (
 )
 
 // timeZonePattern matches the time zone an xs:time may end with: "Z" or an
-// offset such as "+04:00".
-var timeZonePattern = regexp.MustCompile(`(Z|[+-]\d{2}:\d{2})$`)
+// offset such as "+04:00", within the XML Schema range of -14:00 to +14:00.
+// Anything else is left on the time, so parsing fails.
+var timeZonePattern = regexp.MustCompile(`(Z|[+-]((0\d|1[0-3]):[0-5]\d|14:00))$`)
 
 func formatDate(date cal.Date) string {
 	if date.IsZero() {
