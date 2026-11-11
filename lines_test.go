@@ -627,3 +627,45 @@ func TestItemPriceExtensionEncoding(t *testing.T) {
 		assert.Equal(t, "5.00", got.TaxTotal[0].TaxAmount.Value)
 	})
 }
+
+func TestDiscrepancyResponseEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "credit-note.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "DiscrepancyResponse")
+	})
+
+	t.Run("written after the invoice period and read back", func(t *testing.T) {
+		doc.InvoicePeriod = []ubl.Period{{StartDate: "2025-01-01", EndDate: "2025-01-31"}}
+		doc.DiscrepancyResponse = []ubl.Response{
+			{ResponseCode: &ubl.IDType{Value: "VD"}, Description: []string{"Volume discount"}},
+		}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		assert.Contains(t, xml, "<cbc:ResponseCode>VD</cbc:ResponseCode>")
+		assert.Contains(t, xml, "<cbc:Description>Volume discount</cbc:Description>")
+		// UBL 2.1 orders DiscrepancyResponse after InvoicePeriod and before the
+		// order and billing references.
+		period := strings.Index(xml, "</cac:InvoicePeriod>")
+		resp := strings.Index(xml, "<cac:DiscrepancyResponse>")
+		billing := strings.Index(xml, "<cac:BillingReference>")
+		require.NotEqual(t, -1, period)
+		assert.Greater(t, resp, period)
+		if billing != -1 {
+			assert.Less(t, resp, billing)
+		}
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		require.Len(t, out.DiscrepancyResponse, 1)
+		assert.Equal(t, "VD", out.DiscrepancyResponse[0].ResponseCode.Value)
+	})
+}
