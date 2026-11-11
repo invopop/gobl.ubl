@@ -134,7 +134,7 @@ func TestStatusPaths(t *testing.T) {
 		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		in := parsed.(*ubl.ApplicationResponse)
-		in.IssueTime = "10:20:30"
+		in.IssueTime = "10:20:30Z"
 		in.DocumentResponse[0].DocumentReference.UUID = "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2"
 		in.DocumentResponse[0].Response.Status = append(in.DocumentResponse[0].Response.Status, nil)
 		in.DocumentResponse = append(in.DocumentResponse, nil, &ubl.DocumentResponse{})
