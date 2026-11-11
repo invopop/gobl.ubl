@@ -1,11 +1,8 @@
 package ubl
 
 import (
-	"cloud.google.com/go/civil"
-
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
-	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/schema"
@@ -57,11 +54,11 @@ func (ar *ApplicationResponse) goblStatus(o *options) (*bill.Status, error) {
 	out.IssueDate = issueDate
 
 	if ar.IssueTime != "" {
-		ct, err := civil.ParseTime(ar.IssueTime)
+		it, err := parseTime(ar.IssueTime)
 		if err != nil {
 			return nil, err
 		}
-		out.IssueTime = &cal.Time{Time: ct}
+		out.IssueTime = it
 	}
 
 	for _, n := range ar.Note {

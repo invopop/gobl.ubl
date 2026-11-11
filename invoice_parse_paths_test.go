@@ -41,6 +41,14 @@ func TestParseInvoiceDates(t *testing.T) {
 	inv := convertParsed(t, in)
 	require.NotNil(t, inv.IssueTime)
 	assert.Equal(t, "10:20:30", inv.IssueTime.String())
+
+	t.Run("issue time with a time zone keeps the local time", func(t *testing.T) {
+		in := parsedFixture(t, "en16931/ubl-example1.xml")
+		in.IssueTime = "15:55:00+04:00"
+		inv := convertParsed(t, in)
+		require.NotNil(t, inv.IssueTime)
+		assert.Equal(t, "15:55:00", inv.IssueTime.String())
+	})
 }
 
 func TestParseDeliveryPaths(t *testing.T) {
