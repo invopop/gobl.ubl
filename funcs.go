@@ -107,3 +107,9 @@ func TaxPointCode(point cbc.Key) (string, bool) {
 func CleanString(s string) string {
 	return cleanString(s)
 }
+
+// ContactName provides a person's name the way a party contact (BG-6) is
+// written.
+func ContactName(n *org.Name) string {
+	return contactName(n)
+}
