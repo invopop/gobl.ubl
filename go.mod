@@ -3,7 +3,7 @@ module github.com/invopop/gobl.ubl
 go 1.25.0
 
 require (
-	github.com/invopop/gobl v0.511.2-0.20261105102546-a7ff21776fe7
+	github.com/invopop/gobl v0.512.0
 	github.com/stretchr/testify v1.11.1
 )
 
@@ -23,7 +23,7 @@ require (
 	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/expr-lang/expr v1.17.8 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/invopop/jsonschema v0.14.0 // indirect
 	github.com/invopop/yaml v0.3.1 // indirect
