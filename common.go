@@ -143,6 +143,9 @@ type ItemIdentification struct {
 
 // CommodityClassification represents a commodity classification
 type CommodityClassification struct {
+	// NatureCode is the nature of the item. EN 16931 has no such field, so
+	// only formats that need it fill it in.
+	NatureCode             *string `xml:"cbc:NatureCode,omitempty"`
 	ItemClassificationCode *IDType `xml:"cbc:ItemClassificationCode"`
 }
 
