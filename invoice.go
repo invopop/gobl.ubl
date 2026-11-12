@@ -53,17 +53,20 @@ type Invoice struct {
 	InvoiceTypeCode    *IDType `xml:"cbc:InvoiceTypeCode,omitempty"`
 	CreditNoteTypeCode *IDType `xml:"cbc:CreditNoteTypeCode,omitempty"`
 
-	Note                           []string            `xml:"cbc:Note,omitempty"`
-	TaxPointDate                   string              `xml:"cbc:TaxPointDate,omitempty"`
-	DocumentCurrencyCode           string              `xml:"cbc:DocumentCurrencyCode,omitempty"`
-	TaxCurrencyCode                string              `xml:"cbc:TaxCurrencyCode,omitempty"`
-	PricingCurrencyCode            string              `xml:"cbc:PricingCurrencyCode,omitempty"`
-	PaymentCurrencyCode            string              `xml:"cbc:PaymentCurrencyCode,omitempty"`
-	PaymentAlternativeCurrencyCode string              `xml:"cbc:PaymentAlternativeCurrencyCode,omitempty"`
-	AccountingCost                 string              `xml:"cbc:AccountingCost,omitempty"`
-	LineCountNumeric               int                 `xml:"cbc:LineCountNumeric,omitempty"`
-	BuyerReference                 string              `xml:"cbc:BuyerReference,omitempty"`
-	InvoicePeriod                  []Period            `xml:"cac:InvoicePeriod,omitempty"`
+	Note                           []string `xml:"cbc:Note,omitempty"`
+	TaxPointDate                   string   `xml:"cbc:TaxPointDate,omitempty"`
+	DocumentCurrencyCode           string   `xml:"cbc:DocumentCurrencyCode,omitempty"`
+	TaxCurrencyCode                string   `xml:"cbc:TaxCurrencyCode,omitempty"`
+	PricingCurrencyCode            string   `xml:"cbc:PricingCurrencyCode,omitempty"`
+	PaymentCurrencyCode            string   `xml:"cbc:PaymentCurrencyCode,omitempty"`
+	PaymentAlternativeCurrencyCode string   `xml:"cbc:PaymentAlternativeCurrencyCode,omitempty"`
+	AccountingCost                 string   `xml:"cbc:AccountingCost,omitempty"`
+	LineCountNumeric               int      `xml:"cbc:LineCountNumeric,omitempty"`
+	BuyerReference                 string   `xml:"cbc:BuyerReference,omitempty"`
+	InvoicePeriod                  []Period `xml:"cac:InvoicePeriod,omitempty"`
+	// DiscrepancyResponse is the reason for a credit note. UBL 2.1 only allows it
+	// on credit notes, so formats must leave it empty on invoices.
+	DiscrepancyResponse            []Response          `xml:"cac:DiscrepancyResponse,omitempty"`
 	OrderReference                 *OrderReference     `xml:"cac:OrderReference,omitempty"`
 	BillingReference               []*BillingReference `xml:"cac:BillingReference,omitempty"`
 	DespatchDocumentReference      []Reference         `xml:"cac:DespatchDocumentReference,omitempty"`

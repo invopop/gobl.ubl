@@ -1,6 +1,7 @@
 package ubl_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -578,4 +579,223 @@ func mustExportInvoice(t *testing.T, env *gobl.Envelope) *ubl.Invoice {
 	doc, err := ubl.ExportInvoice(env)
 	require.NoError(t, err)
 	return doc
+}
+
+func TestItemPriceExtensionEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "ItemPriceExtension")
+	})
+
+	t.Run("written after the price and read back", func(t *testing.T) {
+		aed := "AED"
+		doc.InvoiceLines[0].ItemPriceExtension = &ubl.ItemPriceExtension{
+			Amount: ubl.Amount{CurrencyID: &aed, Value: "105.00"},
+			TaxTotal: []ubl.TaxTotal{
+				{TaxAmount: ubl.Amount{CurrencyID: &aed, Value: "5.00"}},
+			},
+		}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		assert.Contains(t, xml, `<cbc:Amount currencyID="AED">105.00</cbc:Amount>`)
+		assert.Contains(t, xml, `<cbc:TaxAmount currencyID="AED">5.00</cbc:TaxAmount>`)
+		// UBL 2.1 orders ItemPriceExtension after Price, as the last child of the line.
+		price := strings.Index(xml, "</cac:Price>")
+		ext := strings.Index(xml, "<cac:ItemPriceExtension>")
+		lineEnd := strings.Index(xml, "</cac:InvoiceLine>")
+		require.NotEqual(t, -1, price)
+		assert.Greater(t, ext, price)
+		assert.Less(t, ext, lineEnd)
+		extEnd := strings.Index(xml, "</cac:ItemPriceExtension>") + len("</cac:ItemPriceExtension>")
+		assert.Empty(t, strings.TrimSpace(xml[extEnd:lineEnd]), "nothing after ItemPriceExtension in the line")
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		got := out.InvoiceLines[0].ItemPriceExtension
+		require.NotNil(t, got)
+		assert.Equal(t, "105.00", got.Amount.Value)
+		require.Len(t, got.TaxTotal, 1)
+		assert.Equal(t, "5.00", got.TaxTotal[0].TaxAmount.Value)
+	})
+}
+
+func TestDiscrepancyResponseEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "credit-note.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "DiscrepancyResponse")
+	})
+
+	t.Run("written after the invoice period and read back", func(t *testing.T) {
+		doc.InvoicePeriod = []ubl.Period{{StartDate: "2025-01-01", EndDate: "2025-01-31"}}
+		doc.DiscrepancyResponse = []ubl.Response{
+			{ResponseCode: &ubl.IDType{Value: "VD"}, Description: []string{"Volume discount"}},
+		}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		assert.Contains(t, xml, "<cbc:ResponseCode>VD</cbc:ResponseCode>")
+		assert.Contains(t, xml, "<cbc:Description>Volume discount</cbc:Description>")
+		// UBL 2.1 orders DiscrepancyResponse after InvoicePeriod and before the
+		// order and billing references.
+		period := strings.Index(xml, "</cac:InvoicePeriod>")
+		resp := strings.Index(xml, "<cac:DiscrepancyResponse>")
+		billing := strings.Index(xml, "<cac:BillingReference>")
+		require.NotEqual(t, -1, period)
+		assert.Greater(t, resp, period)
+		if billing != -1 {
+			assert.Less(t, resp, billing)
+		}
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		require.Len(t, out.DiscrepancyResponse, 1)
+		assert.Equal(t, "VD", out.DiscrepancyResponse[0].ResponseCode.Value)
+	})
+}
+
+func TestClassifiedTaxCategoryExemptionEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "TaxExemptionReasonCode")
+	})
+
+	t.Run("written before the tax scheme and read back", func(t *testing.T) {
+		code := "DL8.46.1"
+		ctc := doc.InvoiceLines[0].Item.ClassifiedTaxCategory
+		require.NotNil(t, ctc)
+		ctc.TaxExemptionReasonCode = &code
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		start := strings.Index(xml, "<cac:ClassifiedTaxCategory>")
+		require.NotEqual(t, -1, start)
+		block := xml[start:]
+		reason := strings.Index(block, "<cbc:TaxExemptionReasonCode>DL8.46.1</cbc:TaxExemptionReasonCode>")
+		scheme := strings.Index(block, "<cac:TaxScheme>")
+		require.NotEqual(t, -1, reason)
+		// UBL 2.1 orders TaxExemptionReasonCode after Percent and before TaxScheme.
+		assert.Less(t, reason, scheme)
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		got := out.InvoiceLines[0].Item.ClassifiedTaxCategory.TaxExemptionReasonCode
+		require.NotNil(t, got)
+		assert.Equal(t, "DL8.46.1", *got)
+	})
+}
+
+func TestCommodityClassificationNatureCodeEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "NatureCode")
+	})
+
+	t.Run("written before the classification code and read back", func(t *testing.T) {
+		code := "DL8.48.3.1"
+		list := "HS"
+		doc.InvoiceLines[0].Item.CommodityClassification = &[]ubl.CommodityClassification{{
+			NatureCode:             &code,
+			ItemClassificationCode: &ubl.IDType{Value: "8471", ListID: &list},
+		}}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		nature := strings.Index(xml, "<cbc:NatureCode>DL8.48.3.1</cbc:NatureCode>")
+		class := strings.Index(xml, "<cbc:ItemClassificationCode")
+		require.NotEqual(t, -1, nature)
+		// UBL 2.1 orders NatureCode before ItemClassificationCode.
+		assert.Less(t, nature, class)
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		cc := out.InvoiceLines[0].Item.CommodityClassification
+		require.NotNil(t, cc)
+		require.NotNil(t, (*cc)[0].NatureCode)
+		assert.Equal(t, "DL8.48.3.1", *(*cc)[0].NatureCode)
+	})
+}
+
+func TestItemCommodityCodeAndAdditionalIdentificationEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "CommodityCode")
+		assert.NotContains(t, string(data), "AdditionalItemIdentification")
+	})
+
+	t.Run("written in UBL 2.1 order and read back", func(t *testing.T) {
+		nature, commodity, list, scheme := "DL8.48.3.1", "G", "HS", "SAC"
+		item := doc.InvoiceLines[0].Item
+		item.AdditionalItemIdentification = []ubl.ItemIdentification{{ID: &ubl.IDType{SchemeID: &scheme, Value: "9983"}}}
+		item.CommodityClassification = &[]ubl.CommodityClassification{{
+			NatureCode:             &nature,
+			CommodityCode:          &commodity,
+			ItemClassificationCode: &ubl.IDType{Value: "2709", ListID: &list},
+		}}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		additional := strings.Index(xml, `<cac:AdditionalItemIdentification>`)
+		classification := strings.Index(xml, "<cac:CommodityClassification>")
+		natureAt := strings.Index(xml, "<cbc:NatureCode>")
+		commodityAt := strings.Index(xml, "<cbc:CommodityCode>G</cbc:CommodityCode>")
+		codeAt := strings.Index(xml, "<cbc:ItemClassificationCode")
+		require.NotEqual(t, -1, additional)
+		require.NotEqual(t, -1, commodityAt)
+		// UBL 2.1 orders AdditionalItemIdentification before
+		// CommodityClassification, and CommodityCode between NatureCode and
+		// ItemClassificationCode.
+		assert.Less(t, additional, classification)
+		assert.Less(t, natureAt, commodityAt)
+		assert.Less(t, commodityAt, codeAt)
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		got := out.InvoiceLines[0].Item
+		require.Len(t, got.AdditionalItemIdentification, 1)
+		assert.Equal(t, "9983", got.AdditionalItemIdentification[0].ID.Value)
+		assert.Equal(t, "SAC", *got.AdditionalItemIdentification[0].ID.SchemeID)
+		require.NotNil(t, (*got.CommodityClassification)[0].CommodityCode)
+		assert.Equal(t, "G", *(*got.CommodityClassification)[0].CommodityCode)
+	})
 }

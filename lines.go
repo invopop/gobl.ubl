@@ -30,6 +30,8 @@ type InvoiceLine struct {
 	TaxTotal          []TaxTotal              `xml:"cac:TaxTotal,omitempty"`
 	Item              *Item                   `xml:"cac:Item"`
 	Price             *Price                  `xml:"cac:Price"`
+	// ItemPriceExtension is the last child of the line in UBL 2.1, after Price.
+	ItemPriceExtension *ItemPriceExtension `xml:"cac:ItemPriceExtension,omitempty"`
 
 	// hierarchy is that self-reference, set on parse.
 	hierarchy *LineBillingReference
@@ -39,6 +41,15 @@ type InvoiceLine struct {
 type LineDocReference struct {
 	ID               IDType  `xml:"cbc:ID"`
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
+}
+
+// ItemPriceExtension is the UBL 2.1 PriceExtensionType: the line amount
+// including taxes, and the taxes charged on the line. No format fills it in
+// by default; PINT AE uses it for the line amount and VAT in AED
+// (BTAE-10, BTAE-08).
+type ItemPriceExtension struct {
+	Amount   Amount     `xml:"cbc:Amount"`
+	TaxTotal []TaxTotal `xml:"cac:TaxTotal"`
 }
 
 // LineBillingReference carries EXT-FR-FE-162/163 when its ID is the invoice's own (BT-1).
