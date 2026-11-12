@@ -708,3 +708,42 @@ func TestClassifiedTaxCategoryExemptionEncoding(t *testing.T) {
 		assert.Equal(t, "DL8.46.1", *got)
 	})
 }
+
+func TestCommodityClassificationNatureCodeEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "NatureCode")
+	})
+
+	t.Run("written before the classification code and read back", func(t *testing.T) {
+		code := "DL8.48.3.1"
+		list := "HS"
+		doc.InvoiceLines[0].Item.CommodityClassification = &[]ubl.CommodityClassification{{
+			NatureCode:             &code,
+			ItemClassificationCode: &ubl.IDType{Value: "8471", ListID: &list},
+		}}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		nature := strings.Index(xml, "<cbc:NatureCode>DL8.48.3.1</cbc:NatureCode>")
+		class := strings.Index(xml, "<cbc:ItemClassificationCode")
+		require.NotEqual(t, -1, nature)
+		// UBL 2.1 orders NatureCode before ItemClassificationCode.
+		assert.Less(t, nature, class)
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		cc := out.InvoiceLines[0].Item.CommodityClassification
+		require.NotNil(t, cc)
+		require.NotNil(t, (*cc)[0].NatureCode)
+		assert.Equal(t, "DL8.48.3.1", *(*cc)[0].NatureCode)
+	})
+}
