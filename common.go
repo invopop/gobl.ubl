@@ -148,9 +148,13 @@ type CommodityClassification struct {
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        *IDType    `xml:"cbc:ID,omitempty"`
-	Percent   *string    `xml:"cbc:Percent,omitempty"`
-	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	ID      *IDType `xml:"cbc:ID,omitempty"`
+	Percent *string `xml:"cbc:Percent,omitempty"`
+	// TaxExemptionReasonCode is the exemption reason of the line's tax category.
+	// EN 16931 has no such field on lines, so only formats that need it fill it
+	// in.
+	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
+	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
