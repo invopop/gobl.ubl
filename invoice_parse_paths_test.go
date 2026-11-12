@@ -6,6 +6,7 @@ import (
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/cef"
+	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -311,5 +312,15 @@ func TestParseDeclaredTotalsBypass(t *testing.T) {
 		inv := convertParsed(t, in)
 		assert.Contains(t, inv.GetTags(), tax.TagBypass)
 		assert.Equal(t, "1.00", inv.Totals.Tax.String())
+	})
+
+	t.Run("keeps the tags the import set", func(t *testing.T) {
+		in := parsedFixture(t, "peppol/self-billed-invoice.xml")
+		assert.Equal(t, []cbc.Key{tax.TagSelfBilled}, convertParsed(t, in).GetTags())
+
+		bypass(in)
+		inv := convertParsed(t, in)
+		assert.Equal(t, []cbc.Key{tax.TagSelfBilled, tax.TagBypass}, inv.GetTags())
+		assert.Equal(t, "999999.99", inv.Totals.Payable.String())
 	})
 }
