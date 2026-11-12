@@ -669,3 +669,42 @@ func TestDiscrepancyResponseEncoding(t *testing.T) {
 		assert.Equal(t, "VD", out.DiscrepancyResponse[0].ResponseCode.Value)
 	})
 }
+
+func TestClassifiedTaxCategoryExemptionEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "TaxExemptionReasonCode")
+	})
+
+	t.Run("written before the tax scheme and read back", func(t *testing.T) {
+		code := "DL8.46.1"
+		ctc := doc.InvoiceLines[0].Item.ClassifiedTaxCategory
+		require.NotNil(t, ctc)
+		ctc.TaxExemptionReasonCode = &code
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		start := strings.Index(xml, "<cac:ClassifiedTaxCategory>")
+		require.NotEqual(t, -1, start)
+		block := xml[start:]
+		reason := strings.Index(block, "<cbc:TaxExemptionReasonCode>DL8.46.1</cbc:TaxExemptionReasonCode>")
+		scheme := strings.Index(block, "<cac:TaxScheme>")
+		require.NotEqual(t, -1, reason)
+		// UBL 2.1 orders TaxExemptionReasonCode after Percent and before TaxScheme.
+		assert.Less(t, reason, scheme)
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		got := out.InvoiceLines[0].Item.ClassifiedTaxCategory.TaxExemptionReasonCode
+		require.NotNil(t, got)
+		assert.Equal(t, "DL8.46.1", *got)
+	})
+}
