@@ -124,16 +124,19 @@ type OrderLineReference struct {
 
 // Item represents an item in an invoice line
 type Item struct {
-	Description                *string                    `xml:"cbc:Description"`
-	Name                       string                     `xml:"cbc:Name"`
-	BuyersItemIdentification   *ItemIdentification        `xml:"cac:BuyersItemIdentification"`
-	SellersItemIdentification  *ItemIdentification        `xml:"cac:SellersItemIdentification"`
-	StandardItemIdentification *ItemIdentification        `xml:"cac:StandardItemIdentification"`
-	OriginCountry              *Country                   `xml:"cac:OriginCountry"`
-	CommodityClassification    *[]CommodityClassification `xml:"cac:CommodityClassification"`
-	ClassifiedTaxCategory      *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
-	AdditionalItemProperty     *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
-	ManufacturerParty          *Party                     `xml:"cac:ManufacturerParty,omitempty"`
+	Description                *string             `xml:"cbc:Description"`
+	Name                       string              `xml:"cbc:Name"`
+	BuyersItemIdentification   *ItemIdentification `xml:"cac:BuyersItemIdentification"`
+	SellersItemIdentification  *ItemIdentification `xml:"cac:SellersItemIdentification"`
+	StandardItemIdentification *ItemIdentification `xml:"cac:StandardItemIdentification"`
+	// AdditionalItemIdentification holds other item identifiers. EN 16931 has
+	// no such field, so only formats that need it fill it in.
+	AdditionalItemIdentification []ItemIdentification       `xml:"cac:AdditionalItemIdentification,omitempty"`
+	OriginCountry                *Country                   `xml:"cac:OriginCountry"`
+	CommodityClassification      *[]CommodityClassification `xml:"cac:CommodityClassification"`
+	ClassifiedTaxCategory        *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
+	AdditionalItemProperty       *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
+	ManufacturerParty            *Party                     `xml:"cac:ManufacturerParty,omitempty"`
 }
 
 // ItemIdentification represents an item identification
@@ -145,7 +148,10 @@ type ItemIdentification struct {
 type CommodityClassification struct {
 	// NatureCode is the nature of the item. EN 16931 has no such field, so
 	// only formats that need it fill it in.
-	NatureCode             *string `xml:"cbc:NatureCode,omitempty"`
+	NatureCode *string `xml:"cbc:NatureCode,omitempty"`
+	// CommodityCode is the commodity of the item. EN 16931 has no such field,
+	// so only formats that need it fill it in.
+	CommodityCode          *string `xml:"cbc:CommodityCode,omitempty"`
 	ItemClassificationCode *IDType `xml:"cbc:ItemClassificationCode"`
 }
 

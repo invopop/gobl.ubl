@@ -747,3 +747,55 @@ func TestCommodityClassificationNatureCodeEncoding(t *testing.T) {
 		assert.Equal(t, "DL8.48.3.1", *(*cc)[0].NatureCode)
 	})
 }
+
+func TestItemCommodityCodeAndAdditionalIdentificationEncoding(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		assert.NotContains(t, string(data), "CommodityCode")
+		assert.NotContains(t, string(data), "AdditionalItemIdentification")
+	})
+
+	t.Run("written in UBL 2.1 order and read back", func(t *testing.T) {
+		nature, commodity, list, scheme := "DL8.48.3.1", "G", "HS", "SAC"
+		item := doc.InvoiceLines[0].Item
+		item.AdditionalItemIdentification = []ubl.ItemIdentification{{ID: &ubl.IDType{SchemeID: &scheme, Value: "9983"}}}
+		item.CommodityClassification = &[]ubl.CommodityClassification{{
+			NatureCode:             &nature,
+			CommodityCode:          &commodity,
+			ItemClassificationCode: &ubl.IDType{Value: "2709", ListID: &list},
+		}}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		additional := strings.Index(xml, `<cac:AdditionalItemIdentification>`)
+		classification := strings.Index(xml, "<cac:CommodityClassification>")
+		natureAt := strings.Index(xml, "<cbc:NatureCode>")
+		commodityAt := strings.Index(xml, "<cbc:CommodityCode>G</cbc:CommodityCode>")
+		codeAt := strings.Index(xml, "<cbc:ItemClassificationCode")
+		require.NotEqual(t, -1, additional)
+		require.NotEqual(t, -1, commodityAt)
+		// UBL 2.1 orders AdditionalItemIdentification before
+		// CommodityClassification, and CommodityCode between NatureCode and
+		// ItemClassificationCode.
+		assert.Less(t, additional, classification)
+		assert.Less(t, natureAt, commodityAt)
+		assert.Less(t, commodityAt, codeAt)
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		out, ok := parsed.(*ubl.Invoice)
+		require.True(t, ok)
+		got := out.InvoiceLines[0].Item
+		require.Len(t, got.AdditionalItemIdentification, 1)
+		assert.Equal(t, "9983", got.AdditionalItemIdentification[0].ID.Value)
+		assert.Equal(t, "SAC", *got.AdditionalItemIdentification[0].ID.SchemeID)
+		require.NotNil(t, (*got.CommodityClassification)[0].CommodityCode)
+		assert.Equal(t, "G", *(*got.CommodityClassification)[0].CommodityCode)
+	})
+}
