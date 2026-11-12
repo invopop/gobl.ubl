@@ -115,8 +115,8 @@ func TestDeliveryTermsEncoding(t *testing.T) {
 		assert.NotContains(t, string(data), "DeliveryTerms")
 	})
 
-	t.Run("written after the delivery party and read back", func(t *testing.T) {
-		doc.Delivery[0].DeliveryTerms = &ubl.DeliveryTerms{ID: "CIF"}
+	t.Run("all terms written after the delivery party and read back", func(t *testing.T) {
+		doc.Delivery[0].DeliveryTerms = []ubl.DeliveryTerms{{ID: "CIF"}, {ID: "FOB"}}
 		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 		xml := string(data)
@@ -134,7 +134,8 @@ func TestDeliveryTermsEncoding(t *testing.T) {
 		require.NoError(t, err)
 		out, ok := parsed.(*ubl.Invoice)
 		require.True(t, ok)
-		require.NotNil(t, out.Delivery[0].DeliveryTerms)
-		assert.Equal(t, "CIF", out.Delivery[0].DeliveryTerms.ID)
+		require.Len(t, out.Delivery[0].DeliveryTerms, 2)
+		assert.Equal(t, "CIF", out.Delivery[0].DeliveryTerms[0].ID)
+		assert.Equal(t, "FOB", out.Delivery[0].DeliveryTerms[1].ID)
 	})
 }
