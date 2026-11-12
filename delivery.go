@@ -15,7 +15,7 @@ type Delivery struct {
 	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
 	// DeliveryTerms are the terms of this delivery. EN 16931 has no such
 	// field, so only formats that need it fill it in.
-	DeliveryTerms *DeliveryTerms `xml:"cac:DeliveryTerms,omitempty"`
+	DeliveryTerms []DeliveryTerms `xml:"cac:DeliveryTerms,omitempty"`
 }
 
 // Location represents a location
