@@ -41,6 +41,7 @@ type IDType struct {
 	ListVersionID    *string `xml:"listVersionID,attr"`
 	SchemeID         *string `xml:"schemeID,attr"`
 	SchemeName       *string `xml:"schemeName,attr"`
+	SchemeVersionID  *string `xml:"schemeVersionID,attr"`
 	Name             *string `xml:"name,attr"`
 	Value            string  `xml:",chardata"`
 }
@@ -120,6 +121,16 @@ type Quantity struct {
 // OrderLineReference represents a reference to an order line
 type OrderLineReference struct {
 	LineID string `xml:"cbc:LineID"`
+	// OrderReference names the order the line belongs to. EN 16931 has no
+	// such field, so only formats that need it fill it in.
+	OrderReference *OrderReference `xml:"cac:OrderReference"`
+}
+
+// LineReference represents a reference to a line of another document, such
+// as a despatch advice.
+type LineReference struct {
+	LineID            string     `xml:"cbc:LineID"`
+	DocumentReference *Reference `xml:"cac:DocumentReference"`
 }
 
 // Item represents an item in an invoice line
@@ -137,6 +148,19 @@ type Item struct {
 	ClassifiedTaxCategory        *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
 	AdditionalItemProperty       *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
 	ManufacturerParty            *Party                     `xml:"cac:ManufacturerParty,omitempty"`
+	// ItemInstance holds the details of the items delivered, such as their
+	// lot. EN 16931 has no such field, so only formats that need it fill it in.
+	ItemInstance []ItemInstance `xml:"cac:ItemInstance,omitempty"`
+}
+
+// ItemInstance represents the items delivered, as opposed to their kind.
+type ItemInstance struct {
+	LotIdentification *LotIdentification `xml:"cac:LotIdentification"`
+}
+
+// LotIdentification identifies the production lot or batch of an item.
+type LotIdentification struct {
+	LotNumberID string `xml:"cbc:LotNumberID"`
 }
 
 // ItemIdentification represents an item identification
@@ -162,8 +186,10 @@ type ClassifiedTaxCategory struct {
 	// TaxExemptionReasonCode is the exemption reason of the line's tax category.
 	// EN 16931 has no such field on lines, so only formats that need it fill it
 	// in.
-	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"`
-	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	TaxExemptionReasonCode *string `xml:"cbc:TaxExemptionReasonCode,omitempty"`
+	// TaxExemptionReason is the text of that reason, likewise.
+	TaxExemptionReason *string    `xml:"cbc:TaxExemptionReason,omitempty"`
+	TaxScheme          *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item

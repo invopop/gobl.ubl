@@ -23,6 +23,9 @@ type InvoiceLine struct {
 	AccountingCost      *string             `xml:"cbc:AccountingCost"`
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
+	// DespatchLineReference refers to a line of a despatch advice. EN 16931
+	// has no such field, so only formats that need it fill it in.
+	DespatchLineReference *LineReference `xml:"cac:DespatchLineReference"`
 	// Only the reference naming the invoice itself carries the sub-line type and parent.
 	BillingReference  []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
 	DocumentReference *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
