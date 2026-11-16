@@ -1,6 +1,7 @@
 package ubl_test
 
 import (
+	"strings"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
@@ -23,9 +24,9 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "2013-07-20", doc.DueDate)
 
 		assert.Equal(t, "30", doc.PaymentMeans[0].PaymentMeansCode.Value)
-		assert.Equal(t, "0003434323213231", *doc.PaymentMeans[0].PaymentID)
+		assert.Equal(t, "0003434323213231", doc.PaymentMeans[0].PaymentID.Value)
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
-		assert.Equal(t, "NO9386011117947", *doc.PaymentMeans[0].PayeeFinancialAccount.ID)
+		assert.Equal(t, "NO9386011117947", doc.PaymentMeans[0].PayeeFinancialAccount.ID.Value)
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
 	})
 
@@ -34,7 +35,7 @@ func TestNewPayment(t *testing.T) {
 
 		// Verify the account number was set in the UBL financial account ID
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
-		assert.Equal(t, "123456789", *doc.PaymentMeans[0].PayeeFinancialAccount.ID)
+		assert.Equal(t, "123456789", doc.PaymentMeans[0].PayeeFinancialAccount.ID.Value)
 		assert.Equal(t, "Test Bank Account", *doc.PaymentMeans[0].PayeeFinancialAccount.Name)
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
 	})
@@ -46,7 +47,7 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "42", doc.PaymentMeans[0].PaymentMeansCode.Value)
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
 		require.NotNil(t, pfa)
-		assert.Equal(t, "1234567890", *pfa.ID)
+		assert.Equal(t, "1234567890", pfa.ID.Value)
 		assert.Equal(t, "Danske Bank", *pfa.Name)
 		// BT-86 takes a national clearing code in place of a BIC (DK-R-006).
 		require.NotNil(t, pfa.FinancialInstitutionBranch)
@@ -65,7 +66,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "1234567890", *pfa.ID)
+		assert.Equal(t, "1234567890", pfa.ID.Value)
 		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -82,7 +83,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "BE68539007547034", *pfa.ID)
+		assert.Equal(t, "BE68539007547034", pfa.ID.Value)
 		assert.Equal(t, "GKCCBEBB", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -98,7 +99,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "DK5000400440116243", *pfa.ID)
+		assert.Equal(t, "DK5000400440116243", pfa.ID.Value)
 		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -116,7 +117,7 @@ func TestNewPayment(t *testing.T) {
 
 		assert.Equal(t, "31", doc.PaymentMeans[0].PaymentMeansCode.Value)
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "1234567890", *pfa.ID)
+		assert.Equal(t, "1234567890", pfa.ID.Value)
 		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -135,7 +136,7 @@ func TestNewPayment(t *testing.T) {
 
 		assert.Equal(t, "30", doc.PaymentMeans[0].PaymentMeansCode.Value)
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "GB33BUKB20201555555555", *pfa.ID)
+		assert.Equal(t, "GB33BUKB20201555555555", pfa.ID.Value)
 		assert.Equal(t, "202015", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -154,7 +155,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "NO9386011117947", *pfa.ID)
+		assert.Equal(t, "NO9386011117947", pfa.ID.Value)
 		assert.Equal(t, "DNBANOKK", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -174,7 +175,7 @@ func TestNewPayment(t *testing.T) {
 		// No reference means the mandate has no ID.
 		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
 		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate.ID)
-		assert.Equal(t, "0667", *doc.PaymentMeans[0].PaymentMandate.PayerFinancialAccount.ID)
+		assert.Equal(t, "0667", doc.PaymentMeans[0].PaymentMandate.PayerFinancialAccount.ID.Value)
 	})
 
 	t.Run("direct debit with mandate reference includes the mandate", func(t *testing.T) {
@@ -220,7 +221,7 @@ func TestNewPayment(t *testing.T) {
 		require.NotNil(t, pm.PaymentMandate.ID)
 		assert.Equal(t, "MAND-2024-001", pm.PaymentMandate.ID.Value)
 		assert.NotNil(t, pm.PaymentMandate.PayerFinancialAccount)
-		assert.Equal(t, "DE89370400440532013000", *pm.PaymentMandate.PayerFinancialAccount.ID)
+		assert.Equal(t, "DE89370400440532013000", pm.PaymentMandate.PayerFinancialAccount.ID.Value)
 		assert.Nil(t, pm.PayerFinancialAccount, "BT-91 must not appear at PaymentMeans level (UBL-CR-680)")
 	})
 
@@ -303,5 +304,72 @@ func TestNewPayment(t *testing.T) {
 		require.NotNil(t, outInv.Payment.Payee)
 		require.NotEmpty(t, outInv.Payment.Payee.Inboxes)
 		assert.Equal(t, "payee@example.com", outInv.Payment.Payee.Inboxes[0].Email)
+	})
+}
+
+func TestPaymentPINTFieldsEncoding(t *testing.T) {
+	doc := testInvoiceFrom(t, "peppol-self-billed/self-billed-invoice.json")
+
+	t.Run("omitted by default", func(t *testing.T) {
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+		assert.NotContains(t, xml, "PaymentMeansID")
+		assert.NotContains(t, xml, "InstallmentDueDate")
+		assert.NotContains(t, xml, "<cac:PaymentMeans>\n    <cbc:ID>")
+		assert.NotContains(t, xml, `schemeID="IBAN"`)
+		assert.NotContains(t, xml, `<cbc:PaymentID schemeID`)
+	})
+
+	t.Run("written in UBL 2.1 order and read back", func(t *testing.T) {
+		id, scheme, street, city := "1", "IBAN", "Sheikh Zayed Road", "Dubai"
+		pm := &doc.PaymentMeans[0]
+		pm.ID = &id
+		refScheme := "ABA"
+		pm.PaymentID.SchemeID = &refScheme
+		pm.PayeeFinancialAccount.ID.SchemeID = &scheme
+		pm.PayeeFinancialAccount.FinancialInstitutionBranch.Address = &ubl.PostalAddress{
+			StreetName: &street,
+			CityName:   &city,
+			Country:    &ubl.Country{IdentificationCode: "AE"},
+		}
+		ccy := "NOK"
+		doc.PaymentTerms = &ubl.PaymentTerms{
+			PaymentMeansID:     id,
+			Note:               "Net 30",
+			Amount:             &ubl.Amount{CurrencyID: &ccy, Value: "100.00"},
+			InstallmentDueDate: "2013-07-20",
+		}
+		data, err := ubl.Encode(doc)
+		require.NoError(t, err)
+		xml := string(data)
+
+		at := func(s string) int {
+			i := strings.Index(xml, s)
+			require.NotEqual(t, -1, i, s)
+			return i
+		}
+		assert.Less(t, at("<cac:PaymentMeans>"), at("<cbc:ID>1</cbc:ID>"))
+		assert.Less(t, at("<cbc:ID>1</cbc:ID>"), at("<cbc:PaymentMeansCode"))
+		at(`<cbc:ID schemeID="IBAN">NO9386011117947</cbc:ID>`)
+		at(`<cbc:PaymentID schemeID="ABA">`)
+		assert.Less(t, at("<cac:FinancialInstitutionBranch>"), at("<cbc:StreetName>Sheikh Zayed Road<"))
+		assert.Less(t, at("<cbc:StreetName>Sheikh Zayed Road<"), at("</cac:FinancialInstitutionBranch>"))
+		assert.Less(t, at("<cbc:PaymentMeansID>1<"), at("<cbc:Note>Net 30<"))
+		assert.Less(t, at("<cbc:Note>Net 30<"), at(`<cbc:Amount currencyID="NOK">100.00<`))
+		assert.Less(t, at(`<cbc:Amount currencyID="NOK">100.00<`), at("<cbc:InstallmentDueDate>2013-07-20<"))
+
+		parsed, err := ubl.Decode(data)
+		require.NoError(t, err)
+		env, err := ubl.Import(parsed)
+		require.NoError(t, err)
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		assert.Equal(t, cbc.Code(pm.PaymentID.Value), inv.Payment.Instructions.Ref)
+		ct := inv.Payment.Instructions.CreditTransfer[0]
+		assert.Equal(t, cbc.Code("NO9386011117947"), ct.IBAN)
+		require.NotNil(t, ct.Branch, "the branch address is read back")
+		assert.Equal(t, "Sheikh Zayed Road", ct.Branch.Street)
+		assert.Equal(t, "Dubai", ct.Branch.Locality)
 	})
 }

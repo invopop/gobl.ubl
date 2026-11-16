@@ -137,7 +137,7 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	}
 
 	if paymentMeans.PaymentID != nil {
-		instructions.Ref = cbc.Code(*paymentMeans.PaymentID)
+		instructions.Ref = cbc.Code(paymentMeans.PaymentID.Value)
 	}
 
 	if paymentMeans.PayeeFinancialAccount != nil {
@@ -160,7 +160,7 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 	account := paymentMeans.PayeeFinancialAccount
 
 	if account.ID != nil {
-		id := *account.ID
+		id := account.ID.Value
 		if isIBAN(id) {
 			creditTransfer.IBAN = cbc.Code(id)
 		} else {
@@ -184,6 +184,9 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 
 	if creditTransfer.IBAN == "" && creditTransfer.Number == "" && creditTransfer.Name == "" && creditTransfer.BIC == "" && creditTransfer.Clearing == "" {
 		return nil
+	}
+	if branch := account.FinancialInstitutionBranch; branch != nil {
+		creditTransfer.Branch = parseAddress(branch.Address)
 	}
 	return []*pay.CreditTransfer{creditTransfer}
 }
@@ -212,7 +215,7 @@ func goblInvoiceDirectDebit(out *bill.Invoice, paymentMeans *PaymentMeans) *pay.
 		directDebit.Ref = cbc.Code(paymentMeans.PaymentMandate.ID.Value)
 	}
 	if paymentMeans.PaymentMandate.PayerFinancialAccount != nil && paymentMeans.PaymentMandate.PayerFinancialAccount.ID != nil {
-		directDebit.Account = *paymentMeans.PaymentMandate.PayerFinancialAccount.ID
+		directDebit.Account = paymentMeans.PaymentMandate.PayerFinancialAccount.ID.Value
 	}
 	seller := out.Supplier
 	if seller != nil {

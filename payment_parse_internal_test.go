@@ -90,7 +90,7 @@ func TestGoblInvoiceDirectDebit(t *testing.T) {
 		dd := goblInvoiceDirectDebit(&bill.Invoice{}, &PaymentMeans{
 			PaymentMandate: &PaymentMandate{
 				ID:                    &IDType{Value: "MANDATE-1"},
-				PayerFinancialAccount: &FinancialAccount{ID: &account},
+				PayerFinancialAccount: &FinancialAccount{ID: &IDType{Value: account}},
 			},
 		})
 		require.NotNil(t, dd)

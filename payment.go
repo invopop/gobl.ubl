@@ -11,12 +11,16 @@ import (
 
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
+	// ID identifies the payment means, so that payment terms can refer to
+	// them. EN 16931 has no such field, so only formats that need it fill it
+	// in.
+	ID                    *string           `xml:"cbc:ID"`
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
 	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
 	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
-	PaymentID             *string           `xml:"cbc:PaymentID"`
+	PaymentID             *IDType           `xml:"cbc:PaymentID"`
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
@@ -40,7 +44,7 @@ type CardAccount struct {
 
 // FinancialAccount represents a financial account
 type FinancialAccount struct {
-	ID                         *string `xml:"cbc:ID"`
+	ID                         *IDType `xml:"cbc:ID"`
 	Name                       *string `xml:"cbc:Name"`
 	FinancialInstitutionBranch *Branch `xml:"cac:FinancialInstitutionBranch"`
 	AccountTypeCode            *string `xml:"cbc:AccountTypeCode"`
@@ -51,6 +55,9 @@ type Branch struct {
 	ID                   *string               `xml:"cbc:ID"`
 	Name                 *string               `xml:"cbc:Name"`
 	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
+	// Address is the address of the branch. EN 16931 has no such field, so
+	// only formats that need it fill it in.
+	Address *PostalAddress `xml:"cac:Address"`
 }
 
 // FinancialInstitution identifies a financial institution by its BIC in cbc:ID.
@@ -65,8 +72,14 @@ type CreditAccount struct {
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	Note   string  `xml:"cbc:Note,omitempty"`
-	Amount *Amount `xml:"cbc:Amount,omitempty"`
+	// PaymentMeansID refers to the payment means the terms are settled with.
+	// EN 16931 has no such field, so only formats that need it fill it in.
+	PaymentMeansID string  `xml:"cbc:PaymentMeansID,omitempty"`
+	Note           string  `xml:"cbc:Note,omitempty"`
+	Amount         *Amount `xml:"cbc:Amount,omitempty"`
+	// InstallmentDueDate is the date the amount is due by. EN 16931 has no
+	// such field, so only formats that need it fill it in.
+	InstallmentDueDate string `xml:"cbc:InstallmentDueDate,omitempty"`
 }
 
 // PrepaidPayment represents a prepaid payment
@@ -161,7 +174,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 		},
 	}
 	if ref := instr.Ref.String(); ref != "" {
-		ui.PaymentMeans[0].PaymentID = &ref
+		ui.PaymentMeans[0].PaymentID = &IDType{Value: ref}
 	}
 	if instr.Detail != "" {
 		ui.PaymentMeans[0].PaymentMeansCode.Name = &instr.Detail
@@ -177,7 +190,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 		}
 		if instr.DirectDebit.Account != "" {
 			ui.PaymentMeans[0].PaymentMandate.PayerFinancialAccount = &FinancialAccount{
-				ID: &instr.DirectDebit.Account,
+				ID: &IDType{Value: instr.DirectDebit.Account},
 			}
 		}
 	}
@@ -225,8 +238,7 @@ func newCreditTransferAccount(code string, ct *pay.CreditTransfer) *FinancialAcc
 
 	pfa := new(FinancialAccount)
 	if id != "" {
-		s := id.String()
-		pfa.ID = &s
+		pfa.ID = &IDType{Value: id.String()}
 	}
 	if ct.Name != "" {
 		pfa.Name = &ct.Name
