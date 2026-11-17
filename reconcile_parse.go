@@ -326,9 +326,7 @@ func (ui *Invoice) applyDeclaredTotals(out *bill.Invoice, srcs []lineSource) err
 
 	// The invoice keeps the tags the import already gave it, such as
 	// self-billed.
-	if !out.HasTags(tax.TagBypass) {
-		out.SetTags(append(out.GetTags(), tax.TagBypass)...)
-	}
+	out.SetTags(append(out.GetTags(), tax.TagBypass)...)
 	return out.Calculate()
 }
 
