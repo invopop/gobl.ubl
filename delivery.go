@@ -25,7 +25,7 @@ type Location struct {
 
 // DeliveryTerms represents the terms of delivery
 type DeliveryTerms struct {
-	ID               string    `xml:"cbc:ID"`
+	ID               IDType    `xml:"cbc:ID"`
 	DeliveryLocation *Location `xml:"cac:DeliveryLocation,omitempty"`
 }
 

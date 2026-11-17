@@ -111,7 +111,7 @@ func TestParseDeliveryPaths(t *testing.T) {
 
 	t.Run("delivery terms are left to the formats that define them", func(t *testing.T) {
 		in := parsedFixture(t, "peppol/base-example.xml")
-		in.DeliveryTerms = &ubl.DeliveryTerms{ID: "EXW"}
+		in.DeliveryTerms = &ubl.DeliveryTerms{ID: ubl.IDType{Value: "EXW"}}
 		inv := convertParsed(t, in)
 		require.NotNil(t, inv.Delivery)
 		require.Len(t, inv.Delivery.Identities, 1)
