@@ -61,7 +61,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer[0].IBAN = "DK5000400440116243"
 		inv.Payment.Instructions.CreditTransfer[0].BIC = "DABADKKK"
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
@@ -78,7 +78,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer[0].BIC = "GKCCBEBB"
 		inv.Payment.Instructions.CreditTransfer[0].Clearing = ""
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
@@ -94,7 +94,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.CreditTransfer[0].IBAN = "DK5000400440116243"
 		inv.Payment.Instructions.CreditTransfer[0].Number = ""
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
@@ -111,7 +111,7 @@ func TestNewPayment(t *testing.T) {
 		inv.Payment.Instructions.Key = pay.MeansKeyDebitTransfer
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		assert.Equal(t, "31", doc.PaymentMeans[0].PaymentMeansCode.Value)

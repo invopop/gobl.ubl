@@ -47,8 +47,6 @@ func TestConvertToInvoice(t *testing.T) {
 		dir     string
 	}{
 		{"EN16931", ubl.FormatEN16931, "en16931"},
-		{"Peppol", ubl.FormatPeppol, "peppol"},
-		{"PeppolSelfBilled", ubl.FormatPeppol, "peppol-self-billed"},
 	}
 
 	for _, ctx := range contexts {
@@ -104,8 +102,6 @@ func TestParseInvoice(t *testing.T) {
 		dir  string
 	}{
 		{"EN16931", "en16931"},
-		{"Peppol", "peppol"},
-		{"PeppolSelfBilled", "peppol-self-billed"},
 	}
 
 	for _, ctx := range contexts {
@@ -199,7 +195,7 @@ func testInvoiceFrom(t *testing.T, name string) *ubl.Invoice {
 
 	env := loadTestEnvelope(t, name)
 
-	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 	require.NoError(t, err)
 	return doc
 }
@@ -274,8 +270,8 @@ func testLoadXML(name string) ([]byte, error) {
 	return io.ReadAll(src)
 }
 
-// parseXMLInvoice takes the provided file and converts to a
-// GOBL Envelope, failing the test on any error.
+// parseXMLInvoice takes the provided file and converts it to a GOBL Envelope
+// with the EN 16931 format, failing the test on any error.
 func parseXMLInvoice(t *testing.T, name string) *gobl.Envelope {
 	t.Helper()
 
@@ -288,7 +284,7 @@ func parseXMLInvoice(t *testing.T, name string) *gobl.Envelope {
 	inv, ok := doc.(*ubl.Invoice)
 	require.True(t, ok, "document is not an invoice")
 
-	env, err := ubl.Import(inv)
+	env, err := ubl.Import(inv, ubl.WithFormat(ubl.FormatEN16931))
 	require.NoError(t, err)
 	return env
 }

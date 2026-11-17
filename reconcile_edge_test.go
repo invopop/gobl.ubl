@@ -223,7 +223,7 @@ func TestDocumentChargeBaseRoundTrip(t *testing.T) {
 	require.NoError(t, err)
 	in, ok := doc.(*ubl.Invoice)
 	require.True(t, ok)
-	env, err := ubl.Import(in)
+	env, err := ubl.Import(in, ubl.WithFormat(ubl.FormatEN16931))
 	require.NoError(t, err)
 
 	inv, ok := env.Extract().(*bill.Invoice)
