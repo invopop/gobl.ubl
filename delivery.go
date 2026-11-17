@@ -7,15 +7,13 @@ import (
 
 // Delivery represents delivery information
 type Delivery struct {
-	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
-	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
-	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
-	RequestedDeliveryPeriod *Period   `xml:"cac:RequestedDeliveryPeriod"`
-	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
-	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
-	// DeliveryTerms are the terms of this delivery. EN 16931 has no such
-	// field, so only formats that need it fill it in.
-	DeliveryTerms []DeliveryTerms `xml:"cac:DeliveryTerms,omitempty"`
+	ActualDeliveryDate      *string         `xml:"cbc:ActualDeliveryDate"`
+	LatestDeliveryDate      *string         `xml:"cbc:LatestDeliveryDate"`
+	DeliveryLocation        *Location       `xml:"cac:DeliveryLocation"`
+	RequestedDeliveryPeriod *Period         `xml:"cac:RequestedDeliveryPeriod"`
+	EstimatedDeliveryPeriod *Period         `xml:"cac:EstimatedDeliveryPeriod"`
+	DeliveryParty           *Party          `xml:"cac:DeliveryParty"`
+	DeliveryTerms           []DeliveryTerms `xml:"cac:DeliveryTerms,omitempty"` // not in EN 16931
 }
 
 // Location represents a location

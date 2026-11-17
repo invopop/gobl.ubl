@@ -13,12 +13,9 @@ import (
 
 // TaxTotal represents a tax total
 type TaxTotal struct {
-	TaxAmount      Amount  `xml:"cbc:TaxAmount"`
-	RoundingAmount *Amount `xml:"cbc:RoundingAmount,omitempty"`
-	// TaxIncludedIndicator tells whether the document's prices and amounts
-	// include tax. EN 16931 has no such field, so only formats that need it
-	// fill it in.
-	TaxIncludedIndicator *bool         `xml:"cbc:TaxIncludedIndicator"`
+	TaxAmount            Amount        `xml:"cbc:TaxAmount"`
+	RoundingAmount       *Amount       `xml:"cbc:RoundingAmount,omitempty"`
+	TaxIncludedIndicator *bool         `xml:"cbc:TaxIncludedIndicator"` // not in EN 16931
 	TaxSubtotal          []TaxSubtotal `xml:"cac:TaxSubtotal"`
 }
 

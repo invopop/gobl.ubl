@@ -15,26 +15,23 @@ import (
 
 // InvoiceLine represents a line item in an invoice and credit note
 type InvoiceLine struct {
-	ID                  string              `xml:"cbc:ID"`
-	Note                []string            `xml:"cbc:Note"`
-	InvoicedQuantity    *Quantity           `xml:"cbc:InvoicedQuantity,omitempty"` // or CreditNoteQuantity
-	CreditedQuantity    *Quantity           `xml:"cbc:CreditedQuantity,omitempty"`
-	LineExtensionAmount Amount              `xml:"cbc:LineExtensionAmount"`
-	AccountingCost      *string             `xml:"cbc:AccountingCost"`
-	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
-	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
-	// DespatchLineReference refers to a line of a despatch advice. EN 16931
-	// has no such field, so only formats that need it fill it in.
-	DespatchLineReference *LineReference `xml:"cac:DespatchLineReference"`
+	ID                    string              `xml:"cbc:ID"`
+	Note                  []string            `xml:"cbc:Note"`
+	InvoicedQuantity      *Quantity           `xml:"cbc:InvoicedQuantity,omitempty"` // or CreditNoteQuantity
+	CreditedQuantity      *Quantity           `xml:"cbc:CreditedQuantity,omitempty"`
+	LineExtensionAmount   Amount              `xml:"cbc:LineExtensionAmount"`
+	AccountingCost        *string             `xml:"cbc:AccountingCost"`
+	InvoicePeriod         *Period             `xml:"cac:InvoicePeriod"`
+	OrderLineReference    *OrderLineReference `xml:"cac:OrderLineReference"`
+	DespatchLineReference *LineReference      `xml:"cac:DespatchLineReference"` // not in EN 16931
 	// Only the reference naming the invoice itself carries the sub-line type and parent.
-	BillingReference  []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
-	DocumentReference *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
-	AllowanceCharge   []*AllowanceCharge      `xml:"cac:AllowanceCharge"`
-	TaxTotal          []TaxTotal              `xml:"cac:TaxTotal,omitempty"`
-	Item              *Item                   `xml:"cac:Item"`
-	Price             *Price                  `xml:"cac:Price"`
-	// ItemPriceExtension is the last child of the line in UBL 2.1, after Price.
-	ItemPriceExtension *ItemPriceExtension `xml:"cac:ItemPriceExtension,omitempty"`
+	BillingReference   []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
+	DocumentReference  *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
+	AllowanceCharge    []*AllowanceCharge      `xml:"cac:AllowanceCharge"`
+	TaxTotal           []TaxTotal              `xml:"cac:TaxTotal,omitempty"`
+	Item               *Item                   `xml:"cac:Item"`
+	Price              *Price                  `xml:"cac:Price"`
+	ItemPriceExtension *ItemPriceExtension     `xml:"cac:ItemPriceExtension,omitempty"` // not in EN 16931
 
 	// hierarchy is that self-reference, set on parse.
 	hierarchy *LineBillingReference
@@ -46,10 +43,7 @@ type LineDocReference struct {
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
 }
 
-// ItemPriceExtension is the UBL 2.1 PriceExtensionType: the line amount
-// including taxes, and the taxes charged on the line. No format fills it in
-// by default; PINT AE uses it for the line amount and VAT in AED
-// (BTAE-10, BTAE-08).
+// ItemPriceExtension represents the line amount including taxes
 type ItemPriceExtension struct {
 	Amount   Amount     `xml:"cbc:Amount"`
 	TaxTotal []TaxTotal `xml:"cac:TaxTotal"`

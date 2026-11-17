@@ -11,10 +11,7 @@ import (
 
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
-	// ID identifies the payment means, so that payment terms can refer to
-	// them. EN 16931 has no such field, so only formats that need it fill it
-	// in.
-	ID                    *string           `xml:"cbc:ID"`
+	ID                    *string           `xml:"cbc:ID"` // not in EN 16931
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
 	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
 	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
@@ -55,9 +52,7 @@ type Branch struct {
 	ID                   *string               `xml:"cbc:ID"`
 	Name                 *string               `xml:"cbc:Name"`
 	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
-	// Address is the address of the branch. EN 16931 has no such field, so
-	// only formats that need it fill it in.
-	Address *PostalAddress `xml:"cac:Address"`
+	Address              *PostalAddress        `xml:"cac:Address"` // not in EN 16931
 }
 
 // FinancialInstitution identifies a financial institution by its BIC in cbc:ID.
@@ -72,14 +67,10 @@ type CreditAccount struct {
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	// PaymentMeansID refers to the payment means the terms are settled with.
-	// EN 16931 has no such field, so only formats that need it fill it in.
-	PaymentMeansID string  `xml:"cbc:PaymentMeansID,omitempty"`
-	Note           string  `xml:"cbc:Note,omitempty"`
-	Amount         *Amount `xml:"cbc:Amount,omitempty"`
-	// InstallmentDueDate is the date the amount is due by. EN 16931 has no
-	// such field, so only formats that need it fill it in.
-	InstallmentDueDate string `xml:"cbc:InstallmentDueDate,omitempty"`
+	PaymentMeansID     string  `xml:"cbc:PaymentMeansID,omitempty"` // not in EN 16931
+	Note               string  `xml:"cbc:Note,omitempty"`
+	Amount             *Amount `xml:"cbc:Amount,omitempty"`
+	InstallmentDueDate string  `xml:"cbc:InstallmentDueDate,omitempty"` // not in EN 16931
 }
 
 // PrepaidPayment represents a prepaid payment

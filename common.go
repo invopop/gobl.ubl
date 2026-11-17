@@ -32,10 +32,8 @@ const (
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
-	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
-	// SchemeAgencyName is the name of the agency that issued the ID, e.g. a
-	// licensing authority (PINT AE BTAE-11/12).
-	SchemeAgencyName *string `xml:"schemeAgencyName,attr"`
+	SchemeAgencyID   *string `xml:"schemeAgencyID,attr"`
+	SchemeAgencyName *string `xml:"schemeAgencyName,attr"` // not in EN 16931
 	ListAgencyID     *string `xml:"listAgencyID,attr"`
 	ListID           *string `xml:"listID,attr"`
 	ListVersionID    *string `xml:"listVersionID,attr"`
@@ -120,10 +118,8 @@ type Quantity struct {
 
 // OrderLineReference represents a reference to an order line
 type OrderLineReference struct {
-	LineID string `xml:"cbc:LineID"`
-	// OrderReference names the order the line belongs to. EN 16931 has no
-	// such field, so only formats that need it fill it in.
-	OrderReference *OrderReference `xml:"cac:OrderReference"`
+	LineID         string          `xml:"cbc:LineID"`
+	OrderReference *OrderReference `xml:"cac:OrderReference"` // not in EN 16931
 }
 
 // LineReference represents a reference to a line of another document, such
@@ -135,22 +131,18 @@ type LineReference struct {
 
 // Item represents an item in an invoice line
 type Item struct {
-	Description                *string             `xml:"cbc:Description"`
-	Name                       string              `xml:"cbc:Name"`
-	BuyersItemIdentification   *ItemIdentification `xml:"cac:BuyersItemIdentification"`
-	SellersItemIdentification  *ItemIdentification `xml:"cac:SellersItemIdentification"`
-	StandardItemIdentification *ItemIdentification `xml:"cac:StandardItemIdentification"`
-	// AdditionalItemIdentification holds other item identifiers. EN 16931 has
-	// no such field, so only formats that need it fill it in.
-	AdditionalItemIdentification []ItemIdentification       `xml:"cac:AdditionalItemIdentification,omitempty"`
+	Description                  *string                    `xml:"cbc:Description"`
+	Name                         string                     `xml:"cbc:Name"`
+	BuyersItemIdentification     *ItemIdentification        `xml:"cac:BuyersItemIdentification"`
+	SellersItemIdentification    *ItemIdentification        `xml:"cac:SellersItemIdentification"`
+	StandardItemIdentification   *ItemIdentification        `xml:"cac:StandardItemIdentification"`
+	AdditionalItemIdentification []ItemIdentification       `xml:"cac:AdditionalItemIdentification,omitempty"` // not in EN 16931
 	OriginCountry                *Country                   `xml:"cac:OriginCountry"`
 	CommodityClassification      *[]CommodityClassification `xml:"cac:CommodityClassification"`
 	ClassifiedTaxCategory        *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
 	AdditionalItemProperty       *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
 	ManufacturerParty            *Party                     `xml:"cac:ManufacturerParty,omitempty"`
-	// ItemInstance holds the details of the items delivered, such as their
-	// lot. EN 16931 has no such field, so only formats that need it fill it in.
-	ItemInstance []ItemInstance `xml:"cac:ItemInstance,omitempty"`
+	ItemInstance                 []ItemInstance             `xml:"cac:ItemInstance,omitempty"` // not in EN 16931
 }
 
 // ItemInstance represents the items delivered, as opposed to their kind.
@@ -170,26 +162,18 @@ type ItemIdentification struct {
 
 // CommodityClassification represents a commodity classification
 type CommodityClassification struct {
-	// NatureCode is the nature of the item. EN 16931 has no such field, so
-	// only formats that need it fill it in.
-	NatureCode *string `xml:"cbc:NatureCode,omitempty"`
-	// CommodityCode is the commodity of the item. EN 16931 has no such field,
-	// so only formats that need it fill it in.
-	CommodityCode          *string `xml:"cbc:CommodityCode,omitempty"`
+	NatureCode             *string `xml:"cbc:NatureCode,omitempty"`    // not in EN 16931
+	CommodityCode          *string `xml:"cbc:CommodityCode,omitempty"` // not in EN 16931
 	ItemClassificationCode *IDType `xml:"cbc:ItemClassificationCode"`
 }
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID      *IDType `xml:"cbc:ID,omitempty"`
-	Percent *string `xml:"cbc:Percent,omitempty"`
-	// TaxExemptionReasonCode is the exemption reason of the line's tax category.
-	// EN 16931 has no such field on lines, so only formats that need it fill it
-	// in.
-	TaxExemptionReasonCode *string `xml:"cbc:TaxExemptionReasonCode,omitempty"`
-	// TaxExemptionReason is the text of that reason, likewise.
-	TaxExemptionReason *string    `xml:"cbc:TaxExemptionReason,omitempty"`
-	TaxScheme          *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	ID                     *IDType    `xml:"cbc:ID,omitempty"`
+	Percent                *string    `xml:"cbc:Percent,omitempty"`
+	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"` // not in EN 16931
+	TaxExemptionReason     *string    `xml:"cbc:TaxExemptionReason,omitempty"`     // not in EN 16931
+	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item
