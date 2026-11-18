@@ -14,6 +14,7 @@ import (
 	"github.com/invopop/gobl/note"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/invopop/gobl/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,6 +51,39 @@ func TestConvertTaxCurrencyTotal(t *testing.T) {
 	require.Len(t, doc.TaxTotal, 2)
 	assert.Equal(t, "EUR", *doc.TaxTotal[1].TaxAmount.CurrencyID)
 	assert.Equal(t, "EUR", doc.TaxCurrencyCode)
+}
+
+func TestConvertTaxCurrencyTotalWithoutRate(t *testing.T) {
+	t.Run("omitted when there is VAT to convert", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Currency = currency.USD
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+		require.Len(t, doc.TaxTotal, 1)
+		assert.Empty(t, doc.TaxCurrencyCode)
+	})
+
+	t.Run("zero when there is no VAT", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Currency = currency.USD
+		inv.Lines[0].Taxes = tax.Set{{Category: tax.CategoryVAT, Key: tax.KeyExempt}}
+		require.NoError(t, env.Calculate())
+		require.True(t, inv.Totals.Tax.IsZero())
+
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, "EUR", doc.TaxCurrencyCode)
+		require.Len(t, doc.TaxTotal, 2)
+		assert.Equal(t, "USD", *doc.TaxTotal[0].TaxAmount.CurrencyID)
+		assert.Equal(t, "EUR", *doc.TaxTotal[1].TaxAmount.CurrencyID)
+		assert.Equal(t, "0.00", doc.TaxTotal[1].TaxAmount.Value)
+	})
 }
 
 func TestConvertAttachmentDetails(t *testing.T) {
