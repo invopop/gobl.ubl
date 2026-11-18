@@ -17,7 +17,7 @@ type PaymentMeans struct {
 	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
-	PaymentID             *IDType           `xml:"cbc:PaymentID"`
+	PaymentID             *IDType           `xml:"cbc:PaymentID"` // TODO: may revert to *string: IDType only writes the optional IBT-083-1 scheme, which no PINT AE rule checks, and breaks gobl.dk.oioubl
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
@@ -41,7 +41,7 @@ type CardAccount struct {
 
 // FinancialAccount represents a financial account
 type FinancialAccount struct {
-	ID                         *IDType `xml:"cbc:ID"`
+	ID                         *IDType `xml:"cbc:ID"` // TODO: may revert to *string: IDType only writes the optional IBT-084-1 IBAN scheme, which no PINT AE rule checks, and breaks gobl.dk.oioubl
 	Name                       *string `xml:"cbc:Name"`
 	FinancialInstitutionBranch *Branch `xml:"cac:FinancialInstitutionBranch"`
 	AccountTypeCode            *string `xml:"cbc:AccountTypeCode"`
