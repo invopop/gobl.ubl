@@ -15,15 +15,14 @@ import (
 
 // InvoiceLine represents a line item in an invoice and credit note
 type InvoiceLine struct {
-	ID                    string              `xml:"cbc:ID"`
-	Note                  []string            `xml:"cbc:Note"`
-	InvoicedQuantity      *Quantity           `xml:"cbc:InvoicedQuantity,omitempty"` // or CreditNoteQuantity
-	CreditedQuantity      *Quantity           `xml:"cbc:CreditedQuantity,omitempty"`
-	LineExtensionAmount   Amount              `xml:"cbc:LineExtensionAmount"`
-	AccountingCost        *string             `xml:"cbc:AccountingCost"`
-	InvoicePeriod         *Period             `xml:"cac:InvoicePeriod"`
-	OrderLineReference    *OrderLineReference `xml:"cac:OrderLineReference"`
-	DespatchLineReference *LineReference      `xml:"cac:DespatchLineReference"` // not in EN 16931
+	ID                  string              `xml:"cbc:ID"`
+	Note                []string            `xml:"cbc:Note"`
+	InvoicedQuantity    *Quantity           `xml:"cbc:InvoicedQuantity,omitempty"` // or CreditNoteQuantity
+	CreditedQuantity    *Quantity           `xml:"cbc:CreditedQuantity,omitempty"`
+	LineExtensionAmount Amount              `xml:"cbc:LineExtensionAmount"`
+	AccountingCost      *string             `xml:"cbc:AccountingCost"`
+	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
+	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
 	// Only the reference naming the invoice itself carries the sub-line type and parent.
 	BillingReference   []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
 	DocumentReference  *LineDocReference       `xml:"cac:DocumentReference,omitempty"`

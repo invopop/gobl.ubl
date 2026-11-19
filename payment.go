@@ -11,13 +11,12 @@ import (
 
 // PaymentMeans represents the means of payment
 type PaymentMeans struct {
-	ID                    *string           `xml:"cbc:ID"` // not in EN 16931
 	PaymentMeansCode      IDType            `xml:"cbc:PaymentMeansCode"`
 	PaymentDueDate        *string           `xml:"cbc:PaymentDueDate"`
 	PaymentChannelCode    *IDType           `xml:"cbc:PaymentChannelCode,omitempty"`
 	InstructionID         *string           `xml:"cbc:InstructionID"`
 	InstructionNote       []string          `xml:"cbc:InstructionNote,omitempty"`
-	PaymentID             *IDType           `xml:"cbc:PaymentID"` // TODO: may revert to *string: IDType only writes the optional IBT-083-1 scheme, which no PINT AE rule checks, and breaks gobl.dk.oioubl
+	PaymentID             *string           `xml:"cbc:PaymentID"`
 	CardAccount           *CardAccount      `xml:"cac:CardAccount"`
 	PayerFinancialAccount *FinancialAccount `xml:"cac:PayerFinancialAccount"`
 	PayeeFinancialAccount *FinancialAccount `xml:"cac:PayeeFinancialAccount"`
@@ -41,7 +40,7 @@ type CardAccount struct {
 
 // FinancialAccount represents a financial account
 type FinancialAccount struct {
-	ID                         *IDType `xml:"cbc:ID"` // TODO: may revert to *string: IDType only writes the optional IBT-084-1 IBAN scheme, which no PINT AE rule checks, and breaks gobl.dk.oioubl
+	ID                         *IDType `xml:"cbc:ID"` // TODO: may revert to *string: IDType only writes the optional IBT-084-1 IBAN scheme, which no PINT AE rule checks
 	Name                       *string `xml:"cbc:Name"`
 	FinancialInstitutionBranch *Branch `xml:"cac:FinancialInstitutionBranch"`
 	AccountTypeCode            *string `xml:"cbc:AccountTypeCode"`
@@ -67,10 +66,8 @@ type CreditAccount struct {
 
 // PaymentTerms represents the terms of payment
 type PaymentTerms struct {
-	PaymentMeansID     string  `xml:"cbc:PaymentMeansID,omitempty"` // not in EN 16931
-	Note               string  `xml:"cbc:Note,omitempty"`
-	Amount             *Amount `xml:"cbc:Amount,omitempty"`
-	InstallmentDueDate string  `xml:"cbc:InstallmentDueDate,omitempty"` // not in EN 16931
+	Note   string  `xml:"cbc:Note,omitempty"`
+	Amount *Amount `xml:"cbc:Amount,omitempty"`
 }
 
 // PrepaidPayment represents a prepaid payment
@@ -165,7 +162,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 		},
 	}
 	if ref := instr.Ref.String(); ref != "" {
-		ui.PaymentMeans[0].PaymentID = &IDType{Value: ref}
+		ui.PaymentMeans[0].PaymentID = &ref
 	}
 	if instr.Detail != "" {
 		ui.PaymentMeans[0].PaymentMeansCode.Name = &instr.Detail

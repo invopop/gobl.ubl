@@ -137,7 +137,7 @@ func goblInvoiceInstructions(out *bill.Invoice, paymentMeans *PaymentMeans) *pay
 	}
 
 	if paymentMeans.PaymentID != nil {
-		instructions.Ref = cbc.Code(paymentMeans.PaymentID.Value)
+		instructions.Ref = cbc.Code(*paymentMeans.PaymentID)
 	}
 
 	if paymentMeans.PayeeFinancialAccount != nil {

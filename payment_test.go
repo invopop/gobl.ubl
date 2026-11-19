@@ -24,7 +24,7 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "2013-07-20", doc.DueDate)
 
 		assert.Equal(t, "30", doc.PaymentMeans[0].PaymentMeansCode.Value)
-		assert.Equal(t, "0003434323213231", doc.PaymentMeans[0].PaymentID.Value)
+		assert.Equal(t, "0003434323213231", *doc.PaymentMeans[0].PaymentID)
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
 		assert.Equal(t, "NO9386011117947", doc.PaymentMeans[0].PayeeFinancialAccount.ID.Value)
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
@@ -314,31 +314,17 @@ func TestPaymentPINTFieldsEncoding(t *testing.T) {
 		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 		xml := string(data)
-		assert.NotContains(t, xml, "PaymentMeansID")
-		assert.NotContains(t, xml, "InstallmentDueDate")
-		assert.NotContains(t, xml, "<cac:PaymentMeans>\n    <cbc:ID>")
 		assert.NotContains(t, xml, `schemeID="IBAN"`)
-		assert.NotContains(t, xml, `<cbc:PaymentID schemeID`)
 	})
 
 	t.Run("written in UBL 2.1 order and read back", func(t *testing.T) {
-		id, scheme, street, city := "1", "IBAN", "Sheikh Zayed Road", "Dubai"
+		scheme, street, city := "IBAN", "Sheikh Zayed Road", "Dubai"
 		pm := &doc.PaymentMeans[0]
-		pm.ID = &id
-		refScheme := "ABA"
-		pm.PaymentID.SchemeID = &refScheme
 		pm.PayeeFinancialAccount.ID.SchemeID = &scheme
 		pm.PayeeFinancialAccount.FinancialInstitutionBranch.Address = &ubl.PostalAddress{
 			StreetName: &street,
 			CityName:   &city,
 			Country:    &ubl.Country{IdentificationCode: "AE"},
-		}
-		ccy := "NOK"
-		doc.PaymentTerms = &ubl.PaymentTerms{
-			PaymentMeansID:     id,
-			Note:               "Net 30",
-			Amount:             &ubl.Amount{CurrencyID: &ccy, Value: "100.00"},
-			InstallmentDueDate: "2013-07-20",
 		}
 		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
@@ -349,15 +335,9 @@ func TestPaymentPINTFieldsEncoding(t *testing.T) {
 			require.NotEqual(t, -1, i, s)
 			return i
 		}
-		assert.Less(t, at("<cac:PaymentMeans>"), at("<cbc:ID>1</cbc:ID>"))
-		assert.Less(t, at("<cbc:ID>1</cbc:ID>"), at("<cbc:PaymentMeansCode"))
 		at(`<cbc:ID schemeID="IBAN">NO9386011117947</cbc:ID>`)
-		at(`<cbc:PaymentID schemeID="ABA">`)
 		assert.Less(t, at("<cac:FinancialInstitutionBranch>"), at("<cbc:StreetName>Sheikh Zayed Road<"))
 		assert.Less(t, at("<cbc:StreetName>Sheikh Zayed Road<"), at("</cac:FinancialInstitutionBranch>"))
-		assert.Less(t, at("<cbc:PaymentMeansID>1<"), at("<cbc:Note>Net 30<"))
-		assert.Less(t, at("<cbc:Note>Net 30<"), at(`<cbc:Amount currencyID="NOK">100.00<`))
-		assert.Less(t, at(`<cbc:Amount currencyID="NOK">100.00<`), at("<cbc:InstallmentDueDate>2013-07-20<"))
 
 		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
@@ -365,7 +345,7 @@ func TestPaymentPINTFieldsEncoding(t *testing.T) {
 		require.NoError(t, err)
 		inv, ok := env.Extract().(*bill.Invoice)
 		require.True(t, ok)
-		assert.Equal(t, cbc.Code(pm.PaymentID.Value), inv.Payment.Instructions.Ref)
+		assert.Equal(t, cbc.Code(*pm.PaymentID), inv.Payment.Instructions.Ref)
 		ct := inv.Payment.Instructions.CreditTransfer[0]
 		assert.Equal(t, cbc.Code("NO9386011117947"), ct.IBAN)
 		require.NotNil(t, ct.Branch, "the branch address is read back")

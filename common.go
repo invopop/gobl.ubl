@@ -39,7 +39,6 @@ type IDType struct {
 	ListVersionID    *string `xml:"listVersionID,attr"`
 	SchemeID         *string `xml:"schemeID,attr"`
 	SchemeName       *string `xml:"schemeName,attr"`
-	SchemeVersionID  *string `xml:"schemeVersionID,attr"`
 	Name             *string `xml:"name,attr"`
 	Value            string  `xml:",chardata"`
 }
@@ -118,15 +117,7 @@ type Quantity struct {
 
 // OrderLineReference represents a reference to an order line
 type OrderLineReference struct {
-	LineID         string          `xml:"cbc:LineID"`
-	OrderReference *OrderReference `xml:"cac:OrderReference"` // not in EN 16931
-}
-
-// LineReference represents a reference to a line of another document, such
-// as a despatch advice.
-type LineReference struct {
-	LineID            string     `xml:"cbc:LineID"`
-	DocumentReference *Reference `xml:"cac:DocumentReference"`
+	LineID string `xml:"cbc:LineID"`
 }
 
 // Item represents an item in an invoice line
@@ -142,17 +133,6 @@ type Item struct {
 	ClassifiedTaxCategory        *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
 	AdditionalItemProperty       *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
 	ManufacturerParty            *Party                     `xml:"cac:ManufacturerParty,omitempty"`
-	ItemInstance                 []ItemInstance             `xml:"cac:ItemInstance,omitempty"` // not in EN 16931
-}
-
-// ItemInstance represents the items delivered, as opposed to their kind.
-type ItemInstance struct {
-	LotIdentification *LotIdentification `xml:"cac:LotIdentification"`
-}
-
-// LotIdentification identifies the production lot or batch of an item.
-type LotIdentification struct {
-	LotNumberID string `xml:"cbc:LotNumberID"`
 }
 
 // ItemIdentification represents an item identification

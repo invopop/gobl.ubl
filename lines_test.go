@@ -821,31 +821,16 @@ func TestItemPINTFieldsEncoding(t *testing.T) {
 		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
 		assert.NotContains(t, string(data), "TaxExemptionReason")
-		assert.NotContains(t, string(data), "ItemInstance")
-		assert.NotContains(t, string(data), "schemeVersionID")
-		assert.NotContains(t, string(data), "OrderLineReference")
-		assert.NotContains(t, string(data), "DespatchLineReference")
 	})
 
 	t.Run("written in UBL 2.1 order and read back", func(t *testing.T) {
-		code, reason, scheme, version := "DL8.46.1", "Local passenger transport", "SAC", "1.0"
+		code, reason, scheme := "DL8.46.1", "Local passenger transport", "SAC"
 		item := doc.InvoiceLines[0].Item
 		require.NotNil(t, item.ClassifiedTaxCategory)
 		item.ClassifiedTaxCategory.TaxExemptionReasonCode = &code
 		item.ClassifiedTaxCategory.TaxExemptionReason = &reason
 		item.AdditionalItemIdentification = []ubl.ItemIdentification{
-			{ID: &ubl.IDType{SchemeID: &scheme, SchemeVersionID: &version, Value: "998314"}},
-		}
-		item.ItemInstance = []ubl.ItemInstance{
-			{LotIdentification: &ubl.LotIdentification{LotNumberID: "Lot 1"}},
-		}
-		doc.InvoiceLines[0].OrderLineReference = &ubl.OrderLineReference{
-			LineID:         "3",
-			OrderReference: &ubl.OrderReference{ID: "PO-001"},
-		}
-		doc.InvoiceLines[0].DespatchLineReference = &ubl.LineReference{
-			LineID:            "NA",
-			DocumentReference: &ubl.Reference{ID: ubl.IDType{Value: "DA-001"}},
+			{ID: &ubl.IDType{SchemeID: &scheme, Value: "998314"}},
 		}
 		data, err := ubl.Encode(doc)
 		require.NoError(t, err)
@@ -856,34 +841,18 @@ func TestItemPINTFieldsEncoding(t *testing.T) {
 			require.NotEqual(t, -1, i, s)
 			return i
 		}
-		// The order follows its line, and the despatch line reference the
-		// order one, before the item.
-		assert.Less(t, at("<cbc:LineID>3<"), at("<cbc:ID>PO-001<"))
-		assert.Less(t, at("</cac:OrderLineReference>"), at("<cac:DespatchLineReference>"))
-		assert.Less(t, at("<cbc:LineID>NA<"), at("<cbc:ID>DA-001<"))
-		assert.Less(t, at("</cac:DespatchLineReference>"), at("<cac:Item>"))
-		// The reason text follows its code, before the tax scheme, and the
-		// item instance closes the item.
+		// The reason text follows its code, before the tax scheme.
 		assert.Less(t, at("<cbc:TaxExemptionReasonCode>DL8.46.1<"), at("<cbc:TaxExemptionReason>Local passenger transport<"))
 		assert.Less(t, at("<cbc:TaxExemptionReason>Local passenger transport<"), at("<cac:ClassifiedTaxCategory>")+strings.Index(xml[at("<cac:ClassifiedTaxCategory>"):], "<cac:TaxScheme>"))
-		assert.Less(t, at("</cac:ClassifiedTaxCategory>"), at("<cbc:LotNumberID>Lot 1</cbc:LotNumberID>"))
-		at(`schemeVersionID="1.0"`)
 
 		parsed, err := ubl.Decode(data)
 		require.NoError(t, err)
 		out, ok := parsed.(*ubl.Invoice)
 		require.True(t, ok)
-		line := out.InvoiceLines[0]
-		require.NotNil(t, line.OrderLineReference.OrderReference)
-		assert.Equal(t, "PO-001", line.OrderLineReference.OrderReference.ID)
-		require.NotNil(t, line.DespatchLineReference.DocumentReference)
-		assert.Equal(t, "DA-001", line.DespatchLineReference.DocumentReference.ID.Value)
-		got := line.Item
+		got := out.InvoiceLines[0].Item
 		require.NotNil(t, got.ClassifiedTaxCategory.TaxExemptionReason)
 		assert.Equal(t, "Local passenger transport", *got.ClassifiedTaxCategory.TaxExemptionReason)
-		require.Len(t, got.ItemInstance, 1)
-		assert.Equal(t, "Lot 1", got.ItemInstance[0].LotIdentification.LotNumberID)
-		require.NotNil(t, got.AdditionalItemIdentification[0].ID.SchemeVersionID)
-		assert.Equal(t, "1.0", *got.AdditionalItemIdentification[0].ID.SchemeVersionID)
+		require.NotNil(t, got.AdditionalItemIdentification[0].ID)
+		assert.Equal(t, "998314", got.AdditionalItemIdentification[0].ID.Value)
 	})
 }
