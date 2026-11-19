@@ -14,6 +14,7 @@ import (
 	"github.com/invopop/gobl/note"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 	"github.com/invopop/gobl/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -50,6 +51,39 @@ func TestConvertTaxCurrencyTotal(t *testing.T) {
 	require.Len(t, doc.TaxTotal, 2)
 	assert.Equal(t, "EUR", *doc.TaxTotal[1].TaxAmount.CurrencyID)
 	assert.Equal(t, "EUR", doc.TaxCurrencyCode)
+}
+
+func TestConvertTaxCurrencyTotalWithoutRate(t *testing.T) {
+	t.Run("omitted when there is VAT to convert", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Currency = currency.USD
+		require.NoError(t, env.Calculate())
+
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+		require.Len(t, doc.TaxTotal, 1)
+		assert.Empty(t, doc.TaxCurrencyCode)
+	})
+
+	t.Run("zero when there is no VAT", func(t *testing.T) {
+		env := loadTestEnvelope(t, "invoice-minimal.json")
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+		inv.Currency = currency.USD
+		inv.Lines[0].Taxes = tax.Set{{Category: tax.CategoryVAT, Key: tax.KeyExempt}}
+		require.NoError(t, env.Calculate())
+		require.True(t, inv.Totals.Tax.IsZero())
+
+		doc, err := ubl.ExportInvoice(env)
+		require.NoError(t, err)
+		assert.Equal(t, "EUR", doc.TaxCurrencyCode)
+		require.Len(t, doc.TaxTotal, 2)
+		assert.Equal(t, "USD", *doc.TaxTotal[0].TaxAmount.CurrencyID)
+		assert.Equal(t, "EUR", *doc.TaxTotal[1].TaxAmount.CurrencyID)
+		assert.Equal(t, "0.00", doc.TaxTotal[1].TaxAmount.Value)
+	})
 }
 
 func TestConvertAttachmentDetails(t *testing.T) {
@@ -110,7 +144,7 @@ func TestParseMalformed(t *testing.T) {
 }
 
 func TestStatusPaths(t *testing.T) {
-	st := basePeppolStatus()
+	st := baseStatus()
 	st.IssueTime = cal.NewTime(10, 20, 30)
 	st.Lines[0].Doc.UUID = uuid.UUID("0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2")
 	st.Lines[0].Doc.IssueDate = cal.NewDate(2026, 5, 1)
@@ -119,7 +153,7 @@ func TestStatusPaths(t *testing.T) {
 	env, err := gobl.Envelop(st)
 	require.NoError(t, err)
 
-	doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
+	doc, err := ubl.Export(env, ubl.WithFormat(formatTest))
 	require.NoError(t, err)
 	ar, ok := doc.(*ubl.ApplicationResponse)
 	require.True(t, ok)
@@ -176,9 +210,9 @@ func TestStatusPaths(t *testing.T) {
 
 func TestConverterPaths(t *testing.T) {
 	t.Run("import application response", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		out, err := convert.Export(env, ubl.FormatPeppol.Key)
+		out, err := convert.Export(env, formatTest.Key)
 		require.NoError(t, err)
 
 		imported, err := convert.Import(out.Data)
@@ -212,12 +246,12 @@ func TestConverterPaths(t *testing.T) {
 }
 
 func TestContextIs(t *testing.T) {
-	assert.True(t, ubl.FormatPeppol.Is(ubl.FormatPeppol))
-	assert.False(t, ubl.FormatPeppol.Is(ubl.FormatEN16931))
+	assert.True(t, formatTest.Is(formatTest))
+	assert.False(t, formatTest.Is(ubl.FormatEN16931))
 }
 
 func TestFindContextProfileMismatch(t *testing.T) {
-	assert.Nil(t, ubl.FindFormat(ubl.FormatPeppol.CustomizationID, "urn:example:other-process"))
+	assert.Nil(t, ubl.FindFormat(formatTest.CustomizationID, "urn:example:other-process"))
 }
 
 func TestParsePartyPaths(t *testing.T) {

@@ -7,7 +7,6 @@ import (
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cbc"
-	cur "github.com/invopop/gobl/currency"
 	"github.com/invopop/gobl/tax"
 )
 
@@ -138,12 +137,10 @@ func ublInvoice(inv *bill.Invoice, o *options) (*Invoice, error) {
 		out.ProfileID = &IDType{Value: profileID}
 	}
 
-	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when a matching exchange rate
-	// is available. BT-111 is only added in that case and BR-53 requires
-	// BT-111 whenever BT-6 is present, so the two must be gated identically.
-	taxCurrency := inv.RegimeDef().GetCurrency()
-	taxExchangeRate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, taxCurrency)
-	if taxCurrency != inv.Currency && taxExchangeRate != nil {
+	// PEPPOL-EN16931-R005 / BR-53: only map BT-6 when BT-111 can be given,
+	// as BR-53 requires BT-111 whenever BT-6 is present. Both are gated by
+	// accountingTax.
+	if _, taxCurrency, ok := accountingTax(inv); ok {
 		out.TaxCurrencyCode = string(taxCurrency)
 	}
 
