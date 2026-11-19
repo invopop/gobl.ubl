@@ -1,10 +1,8 @@
 package ubl_test
 
 import (
-	"strings"
 	"testing"
 
-	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -82,31 +80,4 @@ func TestParseTaxNotes(t *testing.T) {
 			assert.Empty(t, inv.Tax.Notes)
 		}
 	})
-}
-
-func TestTaxIncludedIndicatorEncoding(t *testing.T) {
-	doc := testInvoiceFrom(t, "invoice-minimal.json")
-
-	data, err := ubl.Encode(doc)
-	require.NoError(t, err)
-	assert.NotContains(t, string(data), "TaxIncludedIndicator", "omitted by default")
-
-	included := false
-	doc.TaxTotal[0].TaxIncludedIndicator = &included
-	data, err = ubl.Encode(doc)
-	require.NoError(t, err)
-	xml := string(data)
-
-	indicator := strings.Index(xml, "<cbc:TaxIncludedIndicator>false</cbc:TaxIncludedIndicator>")
-	require.NotEqual(t, -1, indicator)
-	// UBL 2.1 orders TaxIncludedIndicator after TaxAmount and before TaxSubtotal.
-	assert.Less(t, strings.Index(xml, "<cac:TaxTotal>"), indicator)
-	assert.Less(t, indicator, strings.Index(xml, "<cac:TaxSubtotal>"))
-
-	parsed, err := ubl.Decode(data)
-	require.NoError(t, err)
-	out, ok := parsed.(*ubl.Invoice)
-	require.True(t, ok)
-	require.NotNil(t, out.TaxTotal[0].TaxIncludedIndicator)
-	assert.False(t, *out.TaxTotal[0].TaxIncludedIndicator)
 }

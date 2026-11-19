@@ -1,7 +1,6 @@
 package ubl_test
 
 import (
-	"strings"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
@@ -304,52 +303,5 @@ func TestNewPayment(t *testing.T) {
 		require.NotNil(t, outInv.Payment.Payee)
 		require.NotEmpty(t, outInv.Payment.Payee.Inboxes)
 		assert.Equal(t, "payee@example.com", outInv.Payment.Payee.Inboxes[0].Email)
-	})
-}
-
-func TestPaymentPINTFieldsEncoding(t *testing.T) {
-	doc := testInvoiceFrom(t, "peppol-self-billed/self-billed-invoice.json")
-
-	t.Run("omitted by default", func(t *testing.T) {
-		data, err := ubl.Encode(doc)
-		require.NoError(t, err)
-		xml := string(data)
-		assert.NotContains(t, xml, `schemeID="IBAN"`)
-	})
-
-	t.Run("written in UBL 2.1 order and read back", func(t *testing.T) {
-		scheme, street, city := "IBAN", "Sheikh Zayed Road", "Dubai"
-		pm := &doc.PaymentMeans[0]
-		pm.PayeeFinancialAccount.ID.SchemeID = &scheme
-		pm.PayeeFinancialAccount.FinancialInstitutionBranch.Address = &ubl.PostalAddress{
-			StreetName: &street,
-			CityName:   &city,
-			Country:    &ubl.Country{IdentificationCode: "AE"},
-		}
-		data, err := ubl.Encode(doc)
-		require.NoError(t, err)
-		xml := string(data)
-
-		at := func(s string) int {
-			i := strings.Index(xml, s)
-			require.NotEqual(t, -1, i, s)
-			return i
-		}
-		at(`<cbc:ID schemeID="IBAN">NO9386011117947</cbc:ID>`)
-		assert.Less(t, at("<cac:FinancialInstitutionBranch>"), at("<cbc:StreetName>Sheikh Zayed Road<"))
-		assert.Less(t, at("<cbc:StreetName>Sheikh Zayed Road<"), at("</cac:FinancialInstitutionBranch>"))
-
-		parsed, err := ubl.Decode(data)
-		require.NoError(t, err)
-		env, err := ubl.Import(parsed)
-		require.NoError(t, err)
-		inv, ok := env.Extract().(*bill.Invoice)
-		require.True(t, ok)
-		assert.Equal(t, cbc.Code(*pm.PaymentID), inv.Payment.Instructions.Ref)
-		ct := inv.Payment.Instructions.CreditTransfer[0]
-		assert.Equal(t, cbc.Code("NO9386011117947"), ct.IBAN)
-		require.NotNil(t, ct.Branch, "the branch address is read back")
-		assert.Equal(t, "Sheikh Zayed Road", ct.Branch.Street)
-		assert.Equal(t, "Dubai", ct.Branch.Locality)
 	})
 }

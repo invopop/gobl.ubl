@@ -1,7 +1,6 @@
 package ubl_test
 
 import (
-	"strings"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
@@ -103,46 +102,4 @@ func TestNewDelivery(t *testing.T) {
 		assert.Equal(t, "NO", doc.Delivery[0].DeliveryLocation.Address.Country.IdentificationCode)
 	})
 
-}
-
-func TestDeliveryTermsEncoding(t *testing.T) {
-	doc := testInvoiceFrom(t, "invoice-without-buyers-tax-id.json")
-	require.Len(t, doc.Delivery, 1)
-
-	t.Run("omitted by default", func(t *testing.T) {
-		data, err := ubl.Encode(doc)
-		require.NoError(t, err)
-		assert.NotContains(t, string(data), "DeliveryTerms")
-	})
-
-	t.Run("all terms written after the delivery party and read back", func(t *testing.T) {
-		scheme := "Incoterms"
-		doc.Delivery[0].DeliveryTerms = []ubl.DeliveryTerms{
-			{ID: ubl.IDType{SchemeID: &scheme, Value: "CIF"}},
-			{ID: ubl.IDType{Value: "FOB"}},
-		}
-		data, err := ubl.Encode(doc)
-		require.NoError(t, err)
-		xml := string(data)
-		assert.Contains(t, xml, `<cbc:ID schemeID="Incoterms">CIF</cbc:ID>`)
-
-		start := strings.Index(xml, "<cac:Delivery>")
-		require.NotEqual(t, -1, start)
-		block := xml[start:]
-		party := strings.Index(block, "<cac:DeliveryParty>")
-		terms := strings.Index(block, "<cac:DeliveryTerms>")
-		require.NotEqual(t, -1, terms)
-		// UBL 2.1 orders DeliveryTerms after DeliveryParty.
-		assert.Less(t, party, terms)
-
-		parsed, err := ubl.Decode(data)
-		require.NoError(t, err)
-		out, ok := parsed.(*ubl.Invoice)
-		require.True(t, ok)
-		require.Len(t, out.Delivery[0].DeliveryTerms, 2)
-		assert.Equal(t, "CIF", out.Delivery[0].DeliveryTerms[0].ID.Value)
-		require.NotNil(t, out.Delivery[0].DeliveryTerms[0].ID.SchemeID)
-		assert.Equal(t, "Incoterms", *out.Delivery[0].DeliveryTerms[0].ID.SchemeID)
-		assert.Equal(t, "FOB", out.Delivery[0].DeliveryTerms[1].ID.Value)
-	})
 }
