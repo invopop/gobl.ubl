@@ -32,14 +32,15 @@ const (
 
 // IDType represents an ID with optional scheme attributes
 type IDType struct {
-	SchemeAgencyID *string `xml:"schemeAgencyID,attr"`
-	ListAgencyID   *string `xml:"listAgencyID,attr"`
-	ListID         *string `xml:"listID,attr"`
-	ListVersionID  *string `xml:"listVersionID,attr"`
-	SchemeID       *string `xml:"schemeID,attr"`
-	SchemeName     *string `xml:"schemeName,attr"`
-	Name           *string `xml:"name,attr"`
-	Value          string  `xml:",chardata"`
+	SchemeAgencyID   *string `xml:"schemeAgencyID,attr"`
+	SchemeAgencyName *string `xml:"schemeAgencyName,attr"` // not in EN 16931
+	ListAgencyID     *string `xml:"listAgencyID,attr"`
+	ListID           *string `xml:"listID,attr"`
+	ListVersionID    *string `xml:"listVersionID,attr"`
+	SchemeID         *string `xml:"schemeID,attr"`
+	SchemeName       *string `xml:"schemeName,attr"`
+	Name             *string `xml:"name,attr"`
+	Value            string  `xml:",chardata"`
 }
 
 // ExchangeRate represents an exchange rate
@@ -121,16 +122,17 @@ type OrderLineReference struct {
 
 // Item represents an item in an invoice line
 type Item struct {
-	Description                *string                    `xml:"cbc:Description"`
-	Name                       string                     `xml:"cbc:Name"`
-	BuyersItemIdentification   *ItemIdentification        `xml:"cac:BuyersItemIdentification"`
-	SellersItemIdentification  *ItemIdentification        `xml:"cac:SellersItemIdentification"`
-	StandardItemIdentification *ItemIdentification        `xml:"cac:StandardItemIdentification"`
-	OriginCountry              *Country                   `xml:"cac:OriginCountry"`
-	CommodityClassification    *[]CommodityClassification `xml:"cac:CommodityClassification"`
-	ClassifiedTaxCategory      *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
-	AdditionalItemProperty     *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
-	ManufacturerParty          *Party                     `xml:"cac:ManufacturerParty,omitempty"`
+	Description                  *string                    `xml:"cbc:Description"`
+	Name                         string                     `xml:"cbc:Name"`
+	BuyersItemIdentification     *ItemIdentification        `xml:"cac:BuyersItemIdentification"`
+	SellersItemIdentification    *ItemIdentification        `xml:"cac:SellersItemIdentification"`
+	StandardItemIdentification   *ItemIdentification        `xml:"cac:StandardItemIdentification"`
+	AdditionalItemIdentification []ItemIdentification       `xml:"cac:AdditionalItemIdentification,omitempty"` // not in EN 16931
+	OriginCountry                *Country                   `xml:"cac:OriginCountry"`
+	CommodityClassification      *[]CommodityClassification `xml:"cac:CommodityClassification"`
+	ClassifiedTaxCategory        *ClassifiedTaxCategory     `xml:"cac:ClassifiedTaxCategory"`
+	AdditionalItemProperty       *[]AdditionalItemProperty  `xml:"cac:AdditionalItemProperty"`
+	ManufacturerParty            *Party                     `xml:"cac:ManufacturerParty,omitempty"`
 }
 
 // ItemIdentification represents an item identification
@@ -140,14 +142,18 @@ type ItemIdentification struct {
 
 // CommodityClassification represents a commodity classification
 type CommodityClassification struct {
+	NatureCode             *string `xml:"cbc:NatureCode,omitempty"`    // not in EN 16931
+	CommodityCode          *string `xml:"cbc:CommodityCode,omitempty"` // not in EN 16931
 	ItemClassificationCode *IDType `xml:"cbc:ItemClassificationCode"`
 }
 
 // ClassifiedTaxCategory represents a classified tax category
 type ClassifiedTaxCategory struct {
-	ID        *IDType    `xml:"cbc:ID,omitempty"`
-	Percent   *string    `xml:"cbc:Percent,omitempty"`
-	TaxScheme *TaxScheme `xml:"cac:TaxScheme,omitempty"`
+	ID                     *IDType    `xml:"cbc:ID,omitempty"`
+	Percent                *string    `xml:"cbc:Percent,omitempty"`
+	TaxExemptionReasonCode *string    `xml:"cbc:TaxExemptionReasonCode,omitempty"` // not in EN 16931
+	TaxExemptionReason     *string    `xml:"cbc:TaxExemptionReason,omitempty"`     // not in EN 16931
+	TaxScheme              *TaxScheme `xml:"cac:TaxScheme,omitempty"`
 }
 
 // AdditionalItemProperty represents an additional property of an item

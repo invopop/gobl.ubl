@@ -51,6 +51,7 @@ type Branch struct {
 	ID                   *string               `xml:"cbc:ID"`
 	Name                 *string               `xml:"cbc:Name"`
 	FinancialInstitution *FinancialInstitution `xml:"cac:FinancialInstitution"`
+	Address              *PostalAddress        `xml:"cac:Address"` // not in EN 16931
 }
 
 // FinancialInstitution identifies a financial institution by its BIC in cbc:ID.

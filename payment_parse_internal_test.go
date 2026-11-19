@@ -136,3 +136,22 @@ func TestGoblInvoiceDirectDebit(t *testing.T) {
 		assert.Equal(t, "SUPPLIER", dd.Creditor)
 	})
 }
+
+func TestGoblCreditTransferBranchAddress(t *testing.T) {
+	city := "Dubai"
+	t.Run("a branch address alone is kept", func(t *testing.T) {
+		got := goblCreditTransfer(&PaymentMeans{PayeeFinancialAccount: &FinancialAccount{
+			FinancialInstitutionBranch: &Branch{Address: &PostalAddress{CityName: &city}},
+		}})
+		require.Len(t, got, 1)
+		require.NotNil(t, got[0].Branch)
+		assert.Equal(t, "Dubai", got[0].Branch.Locality)
+	})
+
+	t.Run("an empty account yields no transfer", func(t *testing.T) {
+		got := goblCreditTransfer(&PaymentMeans{PayeeFinancialAccount: &FinancialAccount{
+			FinancialInstitutionBranch: &Branch{},
+		}})
+		assert.Nil(t, got)
+	})
+}

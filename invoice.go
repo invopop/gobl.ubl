@@ -63,6 +63,7 @@ type Invoice struct {
 	LineCountNumeric               int                 `xml:"cbc:LineCountNumeric,omitempty"`
 	BuyerReference                 string              `xml:"cbc:BuyerReference,omitempty"`
 	InvoicePeriod                  []Period            `xml:"cac:InvoicePeriod,omitempty"`
+	DiscrepancyResponse            []Response          `xml:"cac:DiscrepancyResponse,omitempty"` // not in EN 16931, credit notes only
 	OrderReference                 *OrderReference     `xml:"cac:OrderReference,omitempty"`
 	BillingReference               []*BillingReference `xml:"cac:BillingReference,omitempty"`
 	DespatchDocumentReference      []Reference         `xml:"cac:DespatchDocumentReference,omitempty"`
