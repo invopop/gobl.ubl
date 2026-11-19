@@ -9,7 +9,7 @@ jobs:
       # Schematron validation service. The image bundles every rule set, so it
       # is large and slow to boot - hence the readiness loop below.
       phorm:
-        image: phelger/phorm:2.2.4
+        image: phelger/phorm:2.2.11
         ports:
           - 8080:8080
 
