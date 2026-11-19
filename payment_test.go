@@ -25,7 +25,7 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "30", doc.PaymentMeans[0].PaymentMeansCode.Value)
 		assert.Equal(t, "0003434323213231", *doc.PaymentMeans[0].PaymentID)
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
-		assert.Equal(t, "NO9386011117947", doc.PaymentMeans[0].PayeeFinancialAccount.ID.Value)
+		assert.Equal(t, "NO9386011117947", *doc.PaymentMeans[0].PayeeFinancialAccount.ID)
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
 	})
 
@@ -34,7 +34,7 @@ func TestNewPayment(t *testing.T) {
 
 		// Verify the account number was set in the UBL financial account ID
 		assert.NotEmpty(t, doc.PaymentMeans[0].PayeeFinancialAccount)
-		assert.Equal(t, "123456789", doc.PaymentMeans[0].PayeeFinancialAccount.ID.Value)
+		assert.Equal(t, "123456789", *doc.PaymentMeans[0].PayeeFinancialAccount.ID)
 		assert.Equal(t, "Test Bank Account", *doc.PaymentMeans[0].PayeeFinancialAccount.Name)
 		assert.Equal(t, "DNBANOKK", *doc.PaymentMeans[0].PayeeFinancialAccount.FinancialInstitutionBranch.ID)
 	})
@@ -46,7 +46,7 @@ func TestNewPayment(t *testing.T) {
 		assert.Equal(t, "42", doc.PaymentMeans[0].PaymentMeansCode.Value)
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
 		require.NotNil(t, pfa)
-		assert.Equal(t, "1234567890", pfa.ID.Value)
+		assert.Equal(t, "1234567890", *pfa.ID)
 		assert.Equal(t, "Danske Bank", *pfa.Name)
 		// BT-86 takes a national clearing code in place of a BIC (DK-R-006).
 		require.NotNil(t, pfa.FinancialInstitutionBranch)
@@ -65,7 +65,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "1234567890", pfa.ID.Value)
+		assert.Equal(t, "1234567890", *pfa.ID)
 		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -82,7 +82,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "BE68539007547034", pfa.ID.Value)
+		assert.Equal(t, "BE68539007547034", *pfa.ID)
 		assert.Equal(t, "GKCCBEBB", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -98,7 +98,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "DK5000400440116243", pfa.ID.Value)
+		assert.Equal(t, "DK5000400440116243", *pfa.ID)
 		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -116,7 +116,7 @@ func TestNewPayment(t *testing.T) {
 
 		assert.Equal(t, "31", doc.PaymentMeans[0].PaymentMeansCode.Value)
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "1234567890", pfa.ID.Value)
+		assert.Equal(t, "1234567890", *pfa.ID)
 		assert.Equal(t, "1234", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -135,7 +135,7 @@ func TestNewPayment(t *testing.T) {
 
 		assert.Equal(t, "30", doc.PaymentMeans[0].PaymentMeansCode.Value)
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "GB33BUKB20201555555555", pfa.ID.Value)
+		assert.Equal(t, "GB33BUKB20201555555555", *pfa.ID)
 		assert.Equal(t, "202015", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -154,7 +154,7 @@ func TestNewPayment(t *testing.T) {
 		require.NoError(t, err)
 
 		pfa := doc.PaymentMeans[0].PayeeFinancialAccount
-		assert.Equal(t, "NO9386011117947", pfa.ID.Value)
+		assert.Equal(t, "NO9386011117947", *pfa.ID)
 		assert.Equal(t, "DNBANOKK", *pfa.FinancialInstitutionBranch.ID)
 	})
 
@@ -174,7 +174,7 @@ func TestNewPayment(t *testing.T) {
 		// No reference means the mandate has no ID.
 		require.NotNil(t, doc.PaymentMeans[0].PaymentMandate)
 		assert.Nil(t, doc.PaymentMeans[0].PaymentMandate.ID)
-		assert.Equal(t, "0667", doc.PaymentMeans[0].PaymentMandate.PayerFinancialAccount.ID.Value)
+		assert.Equal(t, "0667", *doc.PaymentMeans[0].PaymentMandate.PayerFinancialAccount.ID)
 	})
 
 	t.Run("direct debit with mandate reference includes the mandate", func(t *testing.T) {
@@ -220,7 +220,7 @@ func TestNewPayment(t *testing.T) {
 		require.NotNil(t, pm.PaymentMandate.ID)
 		assert.Equal(t, "MAND-2024-001", pm.PaymentMandate.ID.Value)
 		assert.NotNil(t, pm.PaymentMandate.PayerFinancialAccount)
-		assert.Equal(t, "DE89370400440532013000", pm.PaymentMandate.PayerFinancialAccount.ID.Value)
+		assert.Equal(t, "DE89370400440532013000", *pm.PaymentMandate.PayerFinancialAccount.ID)
 		assert.Nil(t, pm.PayerFinancialAccount, "BT-91 must not appear at PaymentMeans level (UBL-CR-680)")
 	})
 

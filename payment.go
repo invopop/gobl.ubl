@@ -40,7 +40,7 @@ type CardAccount struct {
 
 // FinancialAccount represents a financial account
 type FinancialAccount struct {
-	ID                         *IDType `xml:"cbc:ID"` // TODO: may revert to *string: IDType only writes the optional IBT-084-1 IBAN scheme, which no PINT AE rule checks
+	ID                         *string `xml:"cbc:ID"`
 	Name                       *string `xml:"cbc:Name"`
 	FinancialInstitutionBranch *Branch `xml:"cac:FinancialInstitutionBranch"`
 	AccountTypeCode            *string `xml:"cbc:AccountTypeCode"`
@@ -178,7 +178,7 @@ func (ui *Invoice) addPaymentInstructions(inv *bill.Invoice) error {
 		}
 		if instr.DirectDebit.Account != "" {
 			ui.PaymentMeans[0].PaymentMandate.PayerFinancialAccount = &FinancialAccount{
-				ID: &IDType{Value: instr.DirectDebit.Account},
+				ID: &instr.DirectDebit.Account,
 			}
 		}
 	}
@@ -226,7 +226,8 @@ func newCreditTransferAccount(code string, ct *pay.CreditTransfer) *FinancialAcc
 
 	pfa := new(FinancialAccount)
 	if id != "" {
-		pfa.ID = &IDType{Value: id.String()}
+		s := id.String()
+		pfa.ID = &s
 	}
 	if ct.Name != "" {
 		pfa.Name = &ct.Name
