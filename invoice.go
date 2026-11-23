@@ -241,6 +241,23 @@ func ExportInvoice(env *gobl.Envelope, opts ...Option) (*Invoice, error) {
 // Some countries don't differentiate between Invoice and notes
 // treating all the same. This helper returns the invoice type
 // based on XML name instead of gobl's invoice type key
+// setNamespaces declares the namespaces the encoder writes, as Export does,
+// so a decoded document encodes to valid XML. Decoding only fills the fields
+// for prefixes the source declares on its root, and an empty field is written
+// as an empty declaration. It also keeps the root namespace in XMLName, which
+// the encoder would declare a second time next to UBLNamespace.
+func (ui *Invoice) setNamespaces(ns string) {
+	ui.XMLName.Space = ""
+	ui.UBLNamespace = ns
+	ui.CACNamespace = NamespaceCAC
+	ui.CBCNamespace = NamespaceCBC
+	ui.QDTNamespace = NamespaceQDT
+	ui.UDTNamespace = NamespaceUDT
+	ui.CCTSNamespace = NamespaceCCTS
+	ui.XSINamespace = NamespaceXSI
+	ui.EXTNamespace = NamespaceEXT
+}
+
 func (ui *Invoice) getInvoiceTypeBasedOnXMLName() cbc.Key {
 	switch ui.XMLName.Local {
 	case "CreditNote":
