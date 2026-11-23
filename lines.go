@@ -384,10 +384,6 @@ func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.
 					continue
 				}
 
-				if it.BuyersItemIdentification != nil && it.StandardItemIdentification != nil {
-					break
-				}
-
 				// Map first identity without extension to BuyersItemIdentification
 				s := id.Ext.Get(iso.ExtKeySchemeID).String()
 				if s == "" {

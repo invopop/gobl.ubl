@@ -6,6 +6,7 @@ import (
 	"github.com/invopop/gobl"
 	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
+	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
@@ -131,6 +132,36 @@ func TestLineNoteSubjectCodeRoundTrip(t *testing.T) {
 	n := outInv.Lines[0].Notes[0]
 	assert.Equal(t, "Handle with care", n.Text)
 	assert.Equal(t, cbc.Code("AAI"), n.Ext.Get(untdid.ExtKeyTextSubject))
+}
+
+// An item classification (BT-158) is written wherever it comes in the item's
+// identities, also after more identifiers than the buyer's and standard
+// identifier slots can hold.
+func TestItemClassificationAfterExtraIdentifiers(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+
+	inv.Lines[0].Item.Identities = []*org.Identity{
+		{Code: "A1"},
+		{Code: "1234567890128", Ext: tax.ExtensionsOf(cbc.CodeMap{iso.ExtKeySchemeID: "0160"})},
+		{Code: "A2"},
+		{Label: "CG", Code: "62.20.20"},
+	}
+
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+
+	it := doc.InvoiceLines[0].Item
+	require.NotNil(t, it.BuyersItemIdentification)
+	assert.Equal(t, "A1", it.BuyersItemIdentification.ID.Value)
+	require.NotNil(t, it.StandardItemIdentification)
+	assert.Equal(t, "1234567890128", it.StandardItemIdentification.ID.Value)
+	require.NotNil(t, it.CommodityClassification)
+	require.Len(t, *it.CommodityClassification, 1)
+	cc := (*it.CommodityClassification)[0].ItemClassificationCode
+	assert.Equal(t, "62.20.20", cc.Value)
+	assert.Equal(t, "CG", *cc.ListID)
 }
 
 func TestItemAttributeRoundTrip(t *testing.T) {
