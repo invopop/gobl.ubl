@@ -87,6 +87,7 @@ func Decode(data []byte) (Document, error) {
 		})); err != nil {
 			return nil, err
 		}
+		in.setNamespaces(ns)
 		return in, nil
 
 	case NamespaceUBLApplicationResponse:
@@ -98,6 +99,7 @@ func Decode(data []byte) (Document, error) {
 		})); err != nil {
 			return nil, err
 		}
+		ar.setNamespaces(ns)
 		return ar, nil
 
 	default:

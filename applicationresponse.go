@@ -143,3 +143,12 @@ func responseDescription(line *bill.StatusLine) string {
 	}
 	return ""
 }
+
+// setNamespaces declares the namespaces the encoder writes, as the export
+// does, so a decoded response encodes to valid XML. See Invoice.setNamespaces.
+func (ar *ApplicationResponse) setNamespaces(ns string) {
+	ar.XMLName.Space = ""
+	ar.UBLNamespace = ns
+	ar.CACNamespace = NamespaceCAC
+	ar.CBCNamespace = NamespaceCBC
+}
