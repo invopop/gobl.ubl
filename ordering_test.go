@@ -181,7 +181,7 @@ func TestOrderingCost(t *testing.T) {
 func TestContractReferenceType(t *testing.T) {
 	env := loadTestEnvelope(t, "peppol/invoice-with-contract-ref.json")
 
-	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+	doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 	require.NoError(t, err)
 
 	require.NotEmpty(t, doc.ContractDocumentReference)

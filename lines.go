@@ -258,6 +258,12 @@ func newInvoiceLine(l *bill.Line, id string, inv *bill.Invoice, invoiceType cbc.
 		}
 	}
 
+	// BT-133: Invoice line buyer accounting reference
+	if l.Cost != "" {
+		cost := l.Cost.String()
+		invLine.AccountingCost = &cost
+	}
+
 	// BT-128: Invoice line object identifier
 	if l.Identifier != nil {
 		typeCode := "130"
