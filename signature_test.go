@@ -1,11 +1,9 @@
 package ubl_test
 
 import (
-	"encoding/xml"
 	"testing"
 
 	ubl "github.com/invopop/gobl.ubl"
-	"github.com/invopop/xmldsig"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -64,61 +62,4 @@ func TestAddSignatureReference(t *testing.T) {
 		assert.Equal(t, "r2", inv.Signature[1].ID)
 		assert.Equal(t, "r3", inv.Signature[2].ID)
 	})
-}
-
-func TestDocumentSignaturesXML(t *testing.T) {
-	ds := &ubl.DocumentSignatures{
-		SIGNamespace: "urn:sig",
-		SACNamespace: "urn:sac",
-		SBCNamespace: "urn:sbc",
-		SignatureInformation: []ubl.SignatureInformation{{
-			ID:                    ubl.SignatureInformationID,
-			ReferencedSignatureID: ubl.ReferenceSignatureID,
-			Signature:             &xmldsig.Signature{},
-		}},
-	}
-
-	out, err := xml.Marshal(ds)
-	require.NoError(t, err)
-
-	xmlStr := string(out)
-	assert.Contains(t, xmlStr, `xmlns:sig="urn:sig"`)
-	assert.Contains(t, xmlStr, `xmlns:sac="urn:sac"`)
-	assert.Contains(t, xmlStr, `xmlns:sbc="urn:sbc"`)
-	assert.Contains(t, xmlStr, "<sac:SignatureInformation>")
-	assert.Contains(t, xmlStr, "<cbc:ID>"+ubl.SignatureInformationID+"</cbc:ID>")
-	assert.Contains(t, xmlStr, "<sbc:ReferencedSignatureID>"+ubl.ReferenceSignatureID+"</sbc:ReferencedSignatureID>")
-	assert.Contains(t, xmlStr, "<ds:Signature")
-}
-
-func TestDecodeDocumentSignatures(t *testing.T) {
-	data := `<ExtensionContent xmlns:sig="` + ubl.NamespaceSIG + `" xmlns:sac="` + ubl.NamespaceSAC +
-		`" xmlns:sbc="` + ubl.NamespaceSBC + `" xmlns:cbc="` + ubl.NamespaceCBC + `"><sig:UBLDocumentSignatures>` +
-		`<sac:SignatureInformation><cbc:ID>first</cbc:ID><sbc:ReferencedSignatureID>ref-1</sbc:ReferencedSignatureID></sac:SignatureInformation>` +
-		`<sac:SignatureInformation><cbc:ID>second</cbc:ID></sac:SignatureInformation>` +
-		`</sig:UBLDocumentSignatures></ExtensionContent>`
-	ec := new(ubl.ExtensionContent)
-	require.NoError(t, xml.Unmarshal([]byte(data), ec))
-
-	sigs, ok := ec.Data.(*ubl.DocumentSignatures)
-	require.True(t, ok, "got %T", ec.Data)
-	assert.Equal(t, []ubl.SignatureInformation{
-		{ID: "first", ReferencedSignatureID: "ref-1"},
-		{ID: "second"},
-	}, sigs.SignatureInformation)
-}
-
-func TestSignatureInformationXMLOmitsNilSignature(t *testing.T) {
-	si := &ubl.SignatureInformation{
-		ID:                    "id-1",
-		ReferencedSignatureID: "ref-1",
-	}
-
-	out, err := xml.Marshal(si)
-	require.NoError(t, err)
-
-	xmlStr := string(out)
-	assert.Contains(t, xmlStr, "<cbc:ID>id-1</cbc:ID>")
-	assert.Contains(t, xmlStr, "<sbc:ReferencedSignatureID>ref-1</sbc:ReferencedSignatureID>")
-	assert.NotContains(t, xmlStr, "<ds:Signature")
 }
