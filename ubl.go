@@ -6,6 +6,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"maps"
 
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
@@ -75,16 +76,7 @@ func Decode(data []byte) (Document, error) {
 	switch ns {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
 		in := new(Invoice)
-		if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(map[string]string{
-			"":     ns,
-			"cbc":  NamespaceCBC,
-			"cac":  NamespaceCAC,
-			"qdt":  NamespaceQDT,
-			"udt":  NamespaceUDT,
-			"ccts": NamespaceCCTS,
-			"xsi":  NamespaceXSI,
-			"ext":  NamespaceEXT,
-		})); err != nil {
+		if err := in.decode(data, ns); err != nil {
 			return nil, err
 		}
 		return in, nil
@@ -103,6 +95,18 @@ func Decode(data []byte) (Document, error) {
 	default:
 		return nil, ErrUnknownDocumentType
 	}
+}
+
+// decode reads the invoice from data, whose root is in the ns namespace, and
+// records the namespace declarations its extension content depends on.
+func (ui *Invoice) decode(data []byte, ns string) error {
+	namespaces := maps.Clone(rootNamespaces)
+	namespaces[""] = ns
+	if err := xmlctx.Unmarshal(data, ui, xmlctx.WithNamespaces(namespaces)); err != nil {
+		return err
+	}
+	ui.setExtensionScopes(data)
+	return nil
 }
 
 // Import converts the UBL document into a GOBL envelope. The format is
@@ -245,10 +249,7 @@ func Encode(doc Document) ([]byte, error) {
 		return nil, err
 	}
 
-	// Go's xml.Marshal encodes single quotes as &#39,
-	// this is a quick fix
-	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
-	return append([]byte(xml.Header), b...), nil
+	return append([]byte(xml.Header), plainApostrophes(doc, b)...), nil
 }
 
 // EncodeCompact returns the raw XML of the UBL document without
@@ -258,6 +259,21 @@ func EncodeCompact(doc Document) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	b = bytes.ReplaceAll(b, []byte("&#39;"), []byte("'"))
-	return append([]byte(xml.Header), b...), nil
+	return append([]byte(xml.Header), plainApostrophes(doc, b)...), nil
+}
+
+// plainApostrophes writes apostrophes as they are, as xml.Marshal encodes
+// them as &#39;. The output is left as it is when the source bytes of an
+// extension hold that reference, since they must not change: inside an
+// attribute in single quotes, an apostrophe would end the value.
+func plainApostrophes(doc Document, b []byte) []byte {
+	ref := []byte("&#39;")
+	if inv, ok := doc.(*Invoice); ok && inv.Extensions != nil {
+		for _, ext := range inv.Extensions.Extension {
+			if ec := ext.ExtensionContent; ec != nil && ec.Value == nil && bytes.Contains(ec.Inner, ref) {
+				return b
+			}
+		}
+	}
+	return bytes.ReplaceAll(b, ref, []byte("'"))
 }
