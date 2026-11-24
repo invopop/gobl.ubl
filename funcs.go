@@ -59,11 +59,16 @@ func (f *Format) runReconciledImportFuncs(doc Document, env *gobl.Envelope) erro
 	if err := env.Calculate(); err != nil {
 		return err
 	}
+	// A function may have replaced the document, so check the one there now.
+	after, ok := env.Extract().(*bill.Invoice)
+	if !ok {
+		return fmt.Errorf("format %s: reconciled import replaced the invoice with %T", f.Key, env.Extract())
+	}
 	// Only what the buyer owes is compared, not every declared total: a
 	// restatement can rightly move an amount from the tax-exclusive total
 	// (BT-109) into the taxes, which the reconciliation check would report
 	// as a mismatch.
-	t := inv.Totals
+	t := after.Totals
 	if !t.TotalWithTax.Equals(totalWithTax) || !t.Payable.Equals(payable) {
 		return fmt.Errorf("format %s: reconciled import changed the amounts owed: total with tax %s to %s, payable %s to %s",
 			f.Key, totalWithTax, t.TotalWithTax, payable, t.Payable)

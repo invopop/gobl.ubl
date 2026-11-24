@@ -1,6 +1,7 @@
 package ubl_test
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -13,6 +14,7 @@ import (
 	"github.com/invopop/gobl/convert"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -204,6 +206,23 @@ func addCharge(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
 	return nil
 }
 
+// replaceWithCharge replaces the envelope's invoice with a copy, and adds the
+// charge to the copy.
+func replaceWithCharge(f *ubl.Format, doc ubl.Document, env *gobl.Envelope) error {
+	data, err := json.Marshal(env.Extract())
+	if err != nil {
+		return err
+	}
+	inv := new(bill.Invoice)
+	if err := json.Unmarshal(data, inv); err != nil {
+		return err
+	}
+	if env.Document, err = schema.NewObject(inv); err != nil {
+		return err
+	}
+	return addCharge(f, doc, env)
+}
+
 // addDiscount adds an untaxed document discount of 10.00.
 func addDiscount(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
 	inv := env.Extract().(*bill.Invoice)
@@ -266,13 +285,32 @@ func TestReconciledImportFuncs(t *testing.T) {
 		assert.Equal(t, before.Totals.Payable.String(), inv.Totals.Payable.String())
 	})
 
-	t.Run("a change to the amounts owed is an error", func(t *testing.T) {
-		f := formatWithReconciledFuncs(addCharge)
+	for _, tc := range []struct {
+		name string
+		fn   ubl.ImportFunc
+	}{
+		{"in place", addCharge},
+		{"in a replacement", replaceWithCharge},
+	} {
+		t.Run("a change to the amounts owed is an error: "+tc.name, func(t *testing.T) {
+			f := formatWithReconciledFuncs(tc.fn)
+			_, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(f))
+			require.Error(t, err)
+			assert.ErrorContains(t, err, f.Key.String())
+			assert.ErrorContains(t, err, fmt.Sprintf("payable %s to %s",
+				before.Totals.Payable, before.Totals.Payable.Add(ten)))
+		})
+	}
+
+	t.Run("a document that is no longer an invoice is an error", func(t *testing.T) {
+		f := formatWithReconciledFuncs(func(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
+			var err error
+			env.Document, err = schema.NewObject(basePeppolStatus())
+			return err
+		})
 		_, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(f))
 		require.Error(t, err)
 		assert.ErrorContains(t, err, f.Key.String())
-		assert.ErrorContains(t, err, fmt.Sprintf("payable %s to %s",
-			before.Totals.Payable, before.Totals.Payable.Add(ten)))
 	})
 
 	t.Run("an error stops the import", func(t *testing.T) {
