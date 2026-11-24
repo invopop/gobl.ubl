@@ -1,12 +1,15 @@
 package ubl
 
 import (
+	"fmt"
+
 	"github.com/invopop/gobl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/cal"
 	"github.com/invopop/gobl/cbc"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/tax"
 )
 
 // ExportFunc adjusts the UBL document exported from the GOBL envelope for a
@@ -36,18 +39,36 @@ func (f *Format) runImportFuncs(doc Document, env *gobl.Envelope) error {
 	return nil
 }
 
-// runReconciledImportFuncs runs the format's reconciled import functions and,
-// when it has any, calculates the envelope again so its totals reflect them.
+// runReconciledImportFuncs runs the format's reconciled import functions on an
+// invoice not tagged for bypass, calculates the envelope again, and checks
+// that the amounts the buyer owes did not change.
 func (f *Format) runReconciledImportFuncs(doc Document, env *gobl.Envelope) error {
 	if len(f.ReconciledImportFuncs) == 0 {
 		return nil
 	}
+	inv, ok := env.Extract().(*bill.Invoice)
+	if !ok || inv.HasTags(tax.TagBypass) {
+		return nil
+	}
+	totalWithTax, payable := inv.Totals.TotalWithTax, inv.Totals.Payable
 	for _, fn := range f.ReconciledImportFuncs {
 		if err := fn(f, doc, env); err != nil {
 			return err
 		}
 	}
-	return env.Calculate()
+	if err := env.Calculate(); err != nil {
+		return err
+	}
+	// Only what the buyer owes is compared, not every declared total: a
+	// restatement can rightly move an amount from the tax-exclusive total
+	// (BT-109) into the taxes, which the reconciliation check would report
+	// as a mismatch.
+	t := inv.Totals
+	if !t.TotalWithTax.Equals(totalWithTax) || !t.Payable.Equals(payable) {
+		return fmt.Errorf("format %s: reconciled import changed the amounts owed: total with tax %s to %s, payable %s to %s",
+			f.Key, totalWithTax, t.TotalWithTax, payable, t.Payable)
+	}
+	return nil
 }
 
 // PartyPair links a GOBL party with the UBL party it maps to.

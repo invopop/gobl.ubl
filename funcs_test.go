@@ -2,6 +2,7 @@ package ubl_test
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -169,7 +170,6 @@ func TestFormatFuncErrors(t *testing.T) {
 type importCall struct {
 	name       string
 	calculated bool
-	bypass     bool
 }
 
 // importRecorder collects the calls of the import functions it builds, in
@@ -182,11 +182,7 @@ func (r *importRecorder) fn(name string) ubl.ImportFunc {
 		if !ok {
 			return nil
 		}
-		*r = append(*r, importCall{
-			name:       name,
-			calculated: inv.Totals != nil,
-			bypass:     inv.HasTags(tax.TagBypass),
-		})
+		*r = append(*r, importCall{name: name, calculated: inv.Totals != nil})
 		return nil
 	}
 }
@@ -208,57 +204,75 @@ func addCharge(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
 	return nil
 }
 
+// addDiscount adds an untaxed document discount of 10.00.
+func addDiscount(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
+	inv := env.Extract().(*bill.Invoice)
+	inv.Discounts = append(inv.Discounts, &bill.Discount{
+		Reason: "Restated",
+		Amount: num.MakeAmount(1000, 2),
+	})
+	return nil
+}
+
 func TestReconciledImportFuncs(t *testing.T) {
-	tests := []struct {
-		name    string
-		fixture string
-		bypass  bool
-	}{
-		{"invoice", "peppol/base-example.xml", false},
-		{"credit note", "peppol/base-creditnote-correction.xml", false},
-		{"totals tagged for bypass", "en16931/line-totals-mismatch.xml", true},
-	}
-	for _, tc := range tests {
+	const fixture = "peppol/base-example.xml"
+	ten := num.MakeAmount(1000, 2)
+	env, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(ubl.FormatEN16931))
+	require.NoError(t, err)
+	before := env.Extract().(*bill.Invoice)
+	require.NotNil(t, before.Totals.Charge)
+
+	for _, tc := range []struct{ name, path string }{
+		{"invoice", fixture},
+		{"credit note", "peppol/base-creditnote-correction.xml"},
+	} {
 		t.Run("run in order after reconciliation: "+tc.name, func(t *testing.T) {
 			var r importRecorder
 			f := formatWithReconciledFuncs(r.fn("reconciled-a"), r.fn("reconciled-b"))
 			f.ImportFuncs = []ubl.ImportFunc{r.fn("import-a"), r.fn("import-b")}
 
-			_, err := ubl.Import(parsedFixture(t, tc.fixture), ubl.WithFormat(f))
+			_, err := ubl.Import(parsedFixture(t, tc.path), ubl.WithFormat(f))
 			require.NoError(t, err)
 			assert.Equal(t, importRecorder{
 				{name: "import-a"},
 				{name: "import-b"},
-				{name: "reconciled-a", calculated: true, bypass: tc.bypass},
-				{name: "reconciled-b", calculated: true, bypass: tc.bypass},
+				{name: "reconciled-a", calculated: true},
+				{name: "reconciled-b", calculated: true},
 			}, r)
 		})
 	}
 
-	t.Run("totals are calculated again", func(t *testing.T) {
-		const fixture = "peppol/base-example.xml"
-		env, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(ubl.FormatEN16931))
-		require.NoError(t, err)
-		before := env.Extract().(*bill.Invoice)
-		require.NotNil(t, before.Totals.Charge)
+	t.Run("bypassed invoices do not run them", func(t *testing.T) {
+		var r importRecorder
+		f := formatWithReconciledFuncs(r.fn("reconciled"), addCharge)
+		f.ImportFuncs = []ubl.ImportFunc{r.fn("import")}
 
-		env, err = ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(formatWithReconciledFuncs(addCharge)))
-		require.NoError(t, err)
-		inv := env.Extract().(*bill.Invoice)
-		ten := num.MakeAmount(1000, 2)
-		assert.Equal(t, before.Totals.Charge.Add(ten).String(), inv.Totals.Charge.String())
-		assert.Equal(t, before.Totals.Sum.String(), inv.Totals.Sum.String())
-		assert.Equal(t, before.Totals.Payable.Add(ten).String(), inv.Totals.Payable.String())
-	})
-
-	t.Run("a bypassed invoice keeps the declared totals", func(t *testing.T) {
-		f := formatWithReconciledFuncs(addCharge)
 		env, err := ubl.Import(parsedFixture(t, "en16931/line-totals-mismatch.xml"), ubl.WithFormat(f))
 		require.NoError(t, err)
 		inv := env.Extract().(*bill.Invoice)
 		require.True(t, inv.HasTags(tax.TagBypass))
-		assert.Len(t, inv.Charges, 1)
-		assert.Equal(t, "1937.84", inv.Totals.Payable.String())
+		assert.Equal(t, importRecorder{{name: "import"}}, r)
+		assert.Empty(t, inv.Charges)
+	})
+
+	t.Run("totals are calculated again", func(t *testing.T) {
+		f := formatWithReconciledFuncs(addCharge, addDiscount)
+		env, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(f))
+		require.NoError(t, err)
+		inv := env.Extract().(*bill.Invoice)
+		assert.Equal(t, before.Totals.Charge.Add(ten).String(), inv.Totals.Charge.String())
+		require.NotNil(t, inv.Totals.Discount)
+		assert.Equal(t, "10.00", inv.Totals.Discount.String())
+		assert.Equal(t, before.Totals.Payable.String(), inv.Totals.Payable.String())
+	})
+
+	t.Run("a change to the amounts owed is an error", func(t *testing.T) {
+		f := formatWithReconciledFuncs(addCharge)
+		_, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(f))
+		require.Error(t, err)
+		assert.ErrorContains(t, err, f.Key.String())
+		assert.ErrorContains(t, err, fmt.Sprintf("payable %s to %s",
+			before.Totals.Payable, before.Totals.Payable.Add(ten)))
 	})
 
 	t.Run("an error stops the import", func(t *testing.T) {
