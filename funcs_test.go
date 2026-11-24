@@ -343,7 +343,7 @@ func TestReconciledImportFuncs(t *testing.T) {
 	t.Run("a document that is no longer an invoice is an error", func(t *testing.T) {
 		f := formatWithReconciledFuncs(func(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
 			var err error
-			env.Document, err = schema.NewObject(basePeppolStatus())
+			env.Document, err = schema.NewObject(baseStatus())
 			return err
 		})
 		_, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(f))
@@ -363,14 +363,13 @@ func TestReconciledImportFuncs(t *testing.T) {
 	})
 
 	t.Run("application responses do not run them", func(t *testing.T) {
-		env, err := gobl.Envelop(basePeppolStatus())
+		env, err := gobl.Envelop(baseStatus())
 		require.NoError(t, err)
-		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.Export(env)
 		require.NoError(t, err)
-		f := ubl.FormatPeppol
-		f.ReconciledImportFuncs = []ubl.ImportFunc{
+		f := formatWithReconciledFuncs(
 			func(*ubl.Format, ubl.Document, *gobl.Envelope) error { return errFuncs },
-		}
+		)
 		_, err = ubl.Import(doc, ubl.WithFormat(f))
 		assert.NoError(t, err)
 	})
