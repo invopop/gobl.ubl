@@ -14,7 +14,8 @@ import (
 type ExportFunc func(f *Format, env *gobl.Envelope, doc Document) error
 
 // ImportFunc adjusts the GOBL envelope imported from the UBL document for a
-// format, before the envelope is calculated.
+// format. Format.ImportFuncs and Format.ReconciledImportFuncs say when it
+// runs.
 type ImportFunc func(f *Format, doc Document, env *gobl.Envelope) error
 
 func (f *Format) runExportFuncs(env *gobl.Envelope, doc Document) error {
@@ -33,6 +34,20 @@ func (f *Format) runImportFuncs(doc Document, env *gobl.Envelope) error {
 		}
 	}
 	return nil
+}
+
+// runReconciledImportFuncs runs the format's reconciled import functions and,
+// when it has any, calculates the envelope again so its totals reflect them.
+func (f *Format) runReconciledImportFuncs(doc Document, env *gobl.Envelope) error {
+	if len(f.ReconciledImportFuncs) == 0 {
+		return nil
+	}
+	for _, fn := range f.ReconciledImportFuncs {
+		if err := fn(f, doc, env); err != nil {
+			return err
+		}
+	}
+	return env.Calculate()
 }
 
 // PartyPair links a GOBL party with the UBL party it maps to.

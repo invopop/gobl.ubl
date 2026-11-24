@@ -66,6 +66,12 @@ func (ui *Invoice) importEnvelope(opts []Option) (*gobl.Envelope, error) {
 	if err := env.Calculate(); err != nil {
 		return nil, err
 	}
+	// The totals now agree with the declared ones, or are the declared ones
+	// under bypass, so a format can restate an amount without hiding a
+	// mismatch.
+	if err := o.format.runReconciledImportFuncs(ui, env); err != nil {
+		return nil, err
+	}
 	return env, nil
 }
 

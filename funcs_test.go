@@ -165,6 +165,127 @@ func TestFormatFuncErrors(t *testing.T) {
 	})
 }
 
+// importCall records what an import function saw of the imported invoice.
+type importCall struct {
+	name       string
+	calculated bool
+	bypass     bool
+}
+
+// importRecorder collects the calls of the import functions it builds, in
+// the order they run.
+type importRecorder []importCall
+
+func (r *importRecorder) fn(name string) ubl.ImportFunc {
+	return func(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
+		inv, ok := env.Extract().(*bill.Invoice)
+		if !ok {
+			return nil
+		}
+		*r = append(*r, importCall{
+			name:       name,
+			calculated: inv.Totals != nil,
+			bypass:     inv.HasTags(tax.TagBypass),
+		})
+		return nil
+	}
+}
+
+// formatWithReconciledFuncs is EN 16931 with the reconciled import functions.
+func formatWithReconciledFuncs(fns ...ubl.ImportFunc) ubl.Format {
+	f := ubl.FormatEN16931
+	f.ReconciledImportFuncs = fns
+	return f
+}
+
+// addCharge adds an untaxed document charge of 10.00.
+func addCharge(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
+	inv := env.Extract().(*bill.Invoice)
+	inv.Charges = append(inv.Charges, &bill.Charge{
+		Reason: "Restated",
+		Amount: num.MakeAmount(1000, 2),
+	})
+	return nil
+}
+
+func TestReconciledImportFuncs(t *testing.T) {
+	tests := []struct {
+		name    string
+		fixture string
+		bypass  bool
+	}{
+		{"invoice", "peppol/base-example.xml", false},
+		{"credit note", "peppol/base-creditnote-correction.xml", false},
+		{"totals tagged for bypass", "en16931/line-totals-mismatch.xml", true},
+	}
+	for _, tc := range tests {
+		t.Run("run in order after reconciliation: "+tc.name, func(t *testing.T) {
+			var r importRecorder
+			f := formatWithReconciledFuncs(r.fn("reconciled-a"), r.fn("reconciled-b"))
+			f.ImportFuncs = []ubl.ImportFunc{r.fn("import-a"), r.fn("import-b")}
+
+			_, err := ubl.Import(parsedFixture(t, tc.fixture), ubl.WithFormat(f))
+			require.NoError(t, err)
+			assert.Equal(t, importRecorder{
+				{name: "import-a"},
+				{name: "import-b"},
+				{name: "reconciled-a", calculated: true, bypass: tc.bypass},
+				{name: "reconciled-b", calculated: true, bypass: tc.bypass},
+			}, r)
+		})
+	}
+
+	t.Run("totals are calculated again", func(t *testing.T) {
+		const fixture = "peppol/base-example.xml"
+		env, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(ubl.FormatEN16931))
+		require.NoError(t, err)
+		before := env.Extract().(*bill.Invoice)
+		require.NotNil(t, before.Totals.Charge)
+
+		env, err = ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(formatWithReconciledFuncs(addCharge)))
+		require.NoError(t, err)
+		inv := env.Extract().(*bill.Invoice)
+		ten := num.MakeAmount(1000, 2)
+		assert.Equal(t, before.Totals.Charge.Add(ten).String(), inv.Totals.Charge.String())
+		assert.Equal(t, before.Totals.Sum.String(), inv.Totals.Sum.String())
+		assert.Equal(t, before.Totals.Payable.Add(ten).String(), inv.Totals.Payable.String())
+	})
+
+	t.Run("a bypassed invoice keeps the declared totals", func(t *testing.T) {
+		f := formatWithReconciledFuncs(addCharge)
+		env, err := ubl.Import(parsedFixture(t, "en16931/line-totals-mismatch.xml"), ubl.WithFormat(f))
+		require.NoError(t, err)
+		inv := env.Extract().(*bill.Invoice)
+		require.True(t, inv.HasTags(tax.TagBypass))
+		assert.Len(t, inv.Charges, 1)
+		assert.Equal(t, "1937.84", inv.Totals.Payable.String())
+	})
+
+	t.Run("an error stops the import", func(t *testing.T) {
+		var r importRecorder
+		f := formatWithReconciledFuncs(
+			func(*ubl.Format, ubl.Document, *gobl.Envelope) error { return errFuncs },
+			r.fn("after"),
+		)
+		_, err := ubl.Import(parsedFixture(t, "peppol/base-creditnote-correction.xml"), ubl.WithFormat(f))
+		assert.ErrorIs(t, err, errFuncs)
+		assert.Empty(t, r)
+	})
+
+	t.Run("application responses do not run them", func(t *testing.T) {
+		env, err := gobl.Envelop(basePeppolStatus())
+		require.NoError(t, err)
+		doc, err := ubl.Export(env, ubl.WithFormat(ubl.FormatPeppol))
+		require.NoError(t, err)
+		f := ubl.FormatPeppol
+		f.ReconciledImportFuncs = []ubl.ImportFunc{
+			func(*ubl.Format, ubl.Document, *gobl.Envelope) error { return errFuncs },
+		}
+		_, err = ubl.Import(doc, ubl.WithFormat(f))
+		assert.NoError(t, err)
+	})
+}
+
 func TestFindFormatMatching(t *testing.T) {
 	t.Run("match before customization", func(t *testing.T) {
 		f := ubl.FindFormat(ubl.FormatEN16931.CustomizationID, testProfileID)

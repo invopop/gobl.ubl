@@ -95,6 +95,18 @@ type Format struct {
 	// ImportFuncs adjust the GOBL envelope imported from UBL, in order, after
 	// the base import and before the document is calculated.
 	ImportFuncs []ImportFunc
+	// ReconciledImportFuncs adjust the GOBL envelope imported from a UBL
+	// invoice or credit note, in order, once its totals agree with those the
+	// sender declared or it has been tagged for bypass (tax.TagBypass). A
+	// format uses them to restate a declared amount in GOBL's own model, such
+	// as a tax the specification carries as a document charge, without
+	// changing the amounts reconciliation checked. The envelope is calculated
+	// once more after the last of them. GOBL stops calculating an invoice
+	// tagged for bypass, so that leaves its declared totals unchanged: each
+	// function checks the tag itself and should leave a bypassed invoice
+	// alone. They must not modify the UBL document. They never run for
+	// application responses, which declare no totals.
+	ReconciledImportFuncs []ImportFunc
 	// Specifications lists the other specifications of the format, for GOBL
 	// documents its own identifiers do not cover. On export, the first that
 	// applies to the document is used, or else the format's own identifiers.
