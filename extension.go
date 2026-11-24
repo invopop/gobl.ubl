@@ -195,21 +195,6 @@ func (ui *Invoice) AddExtension(extension *Extension) {
 	ui.Extensions.Extension = append(ui.Extensions.Extension, *extension)
 }
 
-// FindExtension returns the first extension with the URI, or nil when there
-// is none. An empty uri finds the first extension that has no URI.
-func (ui *Invoice) FindExtension(uri string) *Extension {
-	if ui.Extensions == nil {
-		return nil
-	}
-	for i := range ui.Extensions.Extension {
-		ext := &ui.Extensions.Extension[i]
-		if (ext.ExtensionURI == nil && uri == "") || (ext.ExtensionURI != nil && *ext.ExtensionURI == uri) {
-			return ext
-		}
-	}
-	return nil
-}
-
 // setExtensionScopes records, on the content of each extension, the namespace
 // declarations of its ancestors: the root, ext:UBLExtensions and
 // ext:UBLExtension. The source bytes of the content may use their prefixes.

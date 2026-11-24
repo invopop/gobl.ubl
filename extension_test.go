@@ -84,6 +84,14 @@ func encodeExtensions(t *testing.T, exts *ubl.Extensions, indent bool) string {
 	return string(out)
 }
 
+// extensionAt returns the extension of the invoice at index i.
+func extensionAt(t *testing.T, inv *ubl.Invoice, i int) *ubl.Extension {
+	t.Helper()
+	require.NotNil(t, inv.Extensions)
+	require.Greater(t, len(inv.Extensions.Extension), i)
+	return &inv.Extensions.Extension[i]
+}
+
 func decodeInvoice(t *testing.T, data string) *ubl.Invoice {
 	t.Helper()
 	doc, err := ubl.Decode([]byte(data))
@@ -182,31 +190,6 @@ func TestAddExtension(t *testing.T) {
 
 		require.NotNil(t, inv.Extensions.Extension[0].ExtensionURI,
 			"AddExtension should copy the extension by value, decoupling later mutations")
-	})
-}
-
-func TestFindExtension(t *testing.T) {
-	t.Run("no extensions", func(t *testing.T) {
-		assert.Nil(t, new(ubl.Invoice).FindExtension(testURI))
-	})
-
-	inv := new(ubl.Invoice)
-	inv.AddExtension(ubl.NewExtension("", &testData{Code: "none"}))
-	inv.AddExtension(ubl.NewExtension(testURI, &testData{Code: "first"}))
-	inv.AddExtension(ubl.NewExtension(testURI, &testData{Code: "second"}))
-
-	t.Run("first with the URI", func(t *testing.T) {
-		ext := inv.FindExtension(testURI)
-		require.NotNil(t, ext)
-		assert.Same(t, &inv.Extensions.Extension[1], ext)
-	})
-	t.Run("empty URI finds the extension with none", func(t *testing.T) {
-		ext := inv.FindExtension("")
-		require.NotNil(t, ext)
-		assert.Same(t, &inv.Extensions.Extension[0], ext)
-	})
-	t.Run("unknown URI", func(t *testing.T) {
-		assert.Nil(t, inv.FindExtension("urn:example:other"))
 	})
 }
 
@@ -338,7 +321,7 @@ func TestDecodeExtensionSignature(t *testing.T) {
 	for _, p := range signaturePlacements {
 		t.Run("prefixes declared "+p.name, func(t *testing.T) {
 			inv := decodeInvoice(t, invoiceXML(p.content, p.attrs...))
-			ext := inv.FindExtension(testURI)
+			ext := extensionAt(t, inv, 0)
 			require.NotNil(t, ext)
 			assert.Equal(t, p.content, string(ext.ExtensionContent.Inner), "source bytes")
 			assertSignature(t, ext.ExtensionContent)
@@ -348,7 +331,7 @@ func TestDecodeExtensionSignature(t *testing.T) {
 	t.Run("another prefix for a root namespace", func(t *testing.T) {
 		content := strings.ReplaceAll(signatureContent(signatureDeclarations), "cbc:", "b:")
 		inv := decodeInvoice(t, invoiceXML(content, `xmlns:b="`+ubl.NamespaceCBC+`"`))
-		ext := inv.FindExtension(testURI)
+		ext := extensionAt(t, inv, 0)
 		assertSignature(t, ext.ExtensionContent)
 
 		out := encodeExtensions(t, inv.Extensions, false)
@@ -372,7 +355,7 @@ func TestExtensionContentRoundTrip(t *testing.T) {
 				assertExtensionPrefixes(t, out)
 
 				again := decodeInvoice(t, out)
-				ext := again.FindExtension(testURI)
+				ext := extensionAt(t, again, 0)
 				require.NotNil(t, ext)
 				assert.Equal(t, p.content, string(ext.ExtensionContent.Inner))
 				assertSignature(t, ext.ExtensionContent)
@@ -406,7 +389,7 @@ func TestExtensionContentSourceBytes(t *testing.T) {
 			}
 			t.Run(name, func(t *testing.T) {
 				inv := decodeInvoice(t, invoiceXML(content))
-				ext := inv.FindExtension(testURI)
+				ext := extensionAt(t, inv, 0)
 				require.NotNil(t, ext)
 				assert.Equal(t, content, string(ext.ExtensionContent.Inner))
 				assert.Nil(t, ext.ExtensionContent.Value)
@@ -415,7 +398,7 @@ func TestExtensionContentSourceBytes(t *testing.T) {
 				assert.Contains(t, out, `<ext:ExtensionContent>`+content+`</ext:ExtensionContent>`)
 
 				again := decodeInvoice(t, out)
-				assert.Equal(t, content, string(again.FindExtension(testURI).ExtensionContent.Inner))
+				assert.Equal(t, content, string(extensionAt(t, again, 0).ExtensionContent.Inner))
 				assert.Equal(t, out, encodeExtensions(t, again.Extensions, indent))
 			})
 		}
@@ -424,7 +407,7 @@ func TestExtensionContentSourceBytes(t *testing.T) {
 	t.Run("empty element", func(t *testing.T) {
 		data := strings.Replace(invoiceXML(""), `<ext:ExtensionContent></ext:ExtensionContent>`, `<ext:ExtensionContent/>`, 1)
 		inv := decodeInvoice(t, data)
-		ec := inv.FindExtension(testURI).ExtensionContent
+		ec := extensionAt(t, inv, 0).ExtensionContent
 		require.NotNil(t, ec)
 		assert.Empty(t, ec.Inner)
 	})
@@ -442,10 +425,10 @@ func TestExtensionContentSourceBytes(t *testing.T) {
 		require.Len(t, inv.Extensions.Extension, 3)
 		assert.Nil(t, inv.Extensions.Extension[1].ExtensionContent)
 
-		first, err := ubl.DecodeExtension[testData](inv.FindExtension("").ExtensionContent, map[string]string{"ex": "urn:example:first"})
+		first, err := ubl.DecodeExtension[testData](extensionAt(t, inv, 0).ExtensionContent, map[string]string{"ex": "urn:example:first"})
 		require.NoError(t, err)
 		assert.Equal(t, "urn:example:first", first.XMLName.Space)
-		third, err := ubl.DecodeExtension[testData](inv.FindExtension(testURI).ExtensionContent, map[string]string{"ex": "urn:example:third"})
+		third, err := ubl.DecodeExtension[testData](extensionAt(t, inv, 2).ExtensionContent, map[string]string{"ex": "urn:example:third"})
 		require.NoError(t, err)
 		assert.Equal(t, "urn:example:third", third.XMLName.Space)
 
@@ -474,7 +457,7 @@ func TestExtensionContentSourceBytes(t *testing.T) {
 		}
 
 		// a value is written by the encoder, so its apostrophes are plain
-		inv.FindExtension(testURI).ExtensionContent.Value = &testData{Namespace: testNamespace, Code: "it's"}
+		extensionAt(t, inv, 0).ExtensionContent.Value = &testData{Namespace: testNamespace, Code: "it's"}
 		out, err := ubl.EncodeCompact(inv)
 		require.NoError(t, err)
 		assert.Contains(t, string(out), `<ex:Code>it's</ex:Code>`)
@@ -524,7 +507,7 @@ func TestExtensionContentXML(t *testing.T) {
 
 	t.Run("value is written instead of the source bytes", func(t *testing.T) {
 		inv := decodeInvoice(t, invoiceXML(`<ex:Data xmlns:ex="`+testNamespace+`"><ex:Code>old</ex:Code></ex:Data>`))
-		ec := inv.FindExtension(testURI).ExtensionContent
+		ec := extensionAt(t, inv, 0).ExtensionContent
 		ec.Value = &testData{Namespace: testNamespace, Code: "new"}
 
 		out := encodeExtensions(t, inv.Extensions, false)
@@ -557,7 +540,7 @@ func TestDecodeExtension(t *testing.T) {
 	t.Run("content with no element", func(t *testing.T) {
 		for _, content := range []string{``, "\n  ", `<!-- nothing -->`, `text`} {
 			inv := decodeInvoice(t, invoiceXML(content))
-			_, err := ubl.DecodeExtension[testData](inv.FindExtension(testURI).ExtensionContent, testNamespaces)
+			_, err := ubl.DecodeExtension[testData](extensionAt(t, inv, 0).ExtensionContent, testNamespaces)
 			assert.ErrorIs(t, err, ubl.ErrNoExtensionContent, "content %q", content)
 		}
 	})

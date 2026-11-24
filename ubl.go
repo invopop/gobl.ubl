@@ -76,12 +76,9 @@ func Decode(data []byte) (Document, error) {
 	switch ns {
 	case NamespaceUBLInvoice, NamespaceUBLCreditNote:
 		in := new(Invoice)
-		namespaces := maps.Clone(rootNamespaces)
-		namespaces[""] = ns
-		if err := xmlctx.Unmarshal(data, in, xmlctx.WithNamespaces(namespaces)); err != nil {
+		if err := in.decode(data, ns); err != nil {
 			return nil, err
 		}
-		in.setExtensionScopes(data)
 		return in, nil
 
 	case NamespaceUBLApplicationResponse:
@@ -98,6 +95,18 @@ func Decode(data []byte) (Document, error) {
 	default:
 		return nil, ErrUnknownDocumentType
 	}
+}
+
+// decode reads the invoice from data, whose root is in the ns namespace, and
+// records the namespace declarations its extension content depends on.
+func (ui *Invoice) decode(data []byte, ns string) error {
+	namespaces := maps.Clone(rootNamespaces)
+	namespaces[""] = ns
+	if err := xmlctx.Unmarshal(data, ui, xmlctx.WithNamespaces(namespaces)); err != nil {
+		return err
+	}
+	ui.setExtensionScopes(data)
+	return nil
 }
 
 // Import converts the UBL document into a GOBL envelope. The format is
