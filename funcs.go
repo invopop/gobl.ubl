@@ -50,7 +50,7 @@ func (f *Format) runReconciledImportFuncs(doc Document, env *gobl.Envelope) erro
 	if !ok || inv.HasTags(tax.TagBypass) {
 		return nil
 	}
-	totalWithTax, payable := inv.Totals.TotalWithTax, inv.Totals.Payable
+	before := amountsOwedBy(inv.Totals)
 	for _, fn := range f.ReconciledImportFuncs {
 		if err := fn(f, doc, env); err != nil {
 			return err
@@ -68,12 +68,46 @@ func (f *Format) runReconciledImportFuncs(doc Document, env *gobl.Envelope) erro
 	// restatement can rightly move an amount from the tax-exclusive total
 	// (BT-109) into the taxes, which the reconciliation check would report
 	// as a mismatch.
-	t := after.Totals
-	if !t.TotalWithTax.Equals(totalWithTax) || !t.Payable.Equals(payable) {
-		return fmt.Errorf("format %s: reconciled import changed the amounts owed: total with tax %s to %s, payable %s to %s",
-			f.Key, totalWithTax, t.TotalWithTax, payable, t.Payable)
+	if now := amountsOwedBy(after.Totals); !now.equals(before) {
+		return fmt.Errorf("format %s: reconciled import changed the amounts owed: was %s; now %s", f.Key, before, now)
 	}
 	return nil
+}
+
+// amountsOwed holds the totals a reconciled import must leave as they were.
+type amountsOwed struct {
+	totalWithTax num.Amount
+	payable      num.Amount
+	due          *num.Amount
+}
+
+func amountsOwedBy(t *bill.Totals) amountsOwed {
+	o := amountsOwed{totalWithTax: t.TotalWithTax, payable: t.Payable}
+	if t.Due != nil {
+		due := *t.Due
+		o.due = &due
+	}
+	return o
+}
+
+// equals reports whether both hold the same amounts, with no amount due on
+// either counting as the same.
+func (o amountsOwed) equals(o2 amountsOwed) bool {
+	if !o.totalWithTax.Equals(o2.totalWithTax) || !o.payable.Equals(o2.payable) {
+		return false
+	}
+	if o.due == nil || o2.due == nil {
+		return o.due == nil && o2.due == nil
+	}
+	return o.due.Equals(*o2.due)
+}
+
+func (o amountsOwed) String() string {
+	due := "none"
+	if o.due != nil {
+		due = o.due.String()
+	}
+	return fmt.Sprintf("total with tax %s, payable %s, due %s", o.totalWithTax, o.payable, due)
 }
 
 // PartyPair links a GOBL party with the UBL party it maps to.

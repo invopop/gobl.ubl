@@ -3,7 +3,6 @@ package ubl_test
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/invopop/gobl"
@@ -14,6 +13,7 @@ import (
 	"github.com/invopop/gobl/convert"
 	"github.com/invopop/gobl/num"
 	"github.com/invopop/gobl/org"
+	"github.com/invopop/gobl/pay"
 	"github.com/invopop/gobl/schema"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -168,9 +168,11 @@ func TestFormatFuncErrors(t *testing.T) {
 	})
 }
 
-// importCall records what an import function saw of the imported invoice.
+// importCall records what an import function saw: whether the invoice had
+// been reconciled, and whether the envelope had been calculated.
 type importCall struct {
 	name       string
+	reconciled bool
 	calculated bool
 }
 
@@ -184,7 +186,11 @@ func (r *importRecorder) fn(name string) ubl.ImportFunc {
 		if !ok {
 			return nil
 		}
-		*r = append(*r, importCall{name: name, calculated: inv.Totals != nil})
+		*r = append(*r, importCall{
+			name:       name,
+			reconciled: inv.Totals != nil,
+			calculated: env.Head.Digest != nil,
+		})
 		return nil
 	}
 }
@@ -223,6 +229,35 @@ func replaceWithCharge(f *ubl.Format, doc ubl.Document, env *gobl.Envelope) erro
 	return addCharge(f, doc, env)
 }
 
+// roundDown rounds the amount payable down by 0.01.
+func roundDown(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
+	inv := env.Extract().(*bill.Invoice)
+	rounding := num.MakeAmount(-1, 2)
+	inv.Totals.Rounding = &rounding
+	return nil
+}
+
+// addRoundedCharge adds an untaxed document charge of 0.01 and rounds the
+// amount payable down by as much.
+func addRoundedCharge(f *ubl.Format, doc ubl.Document, env *gobl.Envelope) error {
+	inv := env.Extract().(*bill.Invoice)
+	inv.Charges = append(inv.Charges, &bill.Charge{
+		Reason: "Restated",
+		Amount: num.MakeAmount(1, 2),
+	})
+	return roundDown(f, doc, env)
+}
+
+// addAdvance adds an advance payment of 100.00.
+func addAdvance(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
+	inv := env.Extract().(*bill.Invoice)
+	inv.Payment.Advances = append(inv.Payment.Advances, &pay.Record{
+		Description: "Restated",
+		Amount:      num.MakeAmount(10000, 2),
+	})
+	return nil
+}
+
 // addDiscount adds an untaxed document discount of 10.00.
 func addDiscount(_ *ubl.Format, _ ubl.Document, env *gobl.Envelope) error {
 	inv := env.Extract().(*bill.Invoice)
@@ -255,8 +290,8 @@ func TestReconciledImportFuncs(t *testing.T) {
 			assert.Equal(t, importRecorder{
 				{name: "import-a"},
 				{name: "import-b"},
-				{name: "reconciled-a", calculated: true},
-				{name: "reconciled-b", calculated: true},
+				{name: "reconciled-a", reconciled: true, calculated: true},
+				{name: "reconciled-b", reconciled: true, calculated: true},
 			}, r)
 		})
 	}
@@ -288,17 +323,20 @@ func TestReconciledImportFuncs(t *testing.T) {
 	for _, tc := range []struct {
 		name string
 		fn   ubl.ImportFunc
+		now  string
 	}{
-		{"in place", addCharge},
-		{"in a replacement", replaceWithCharge},
+		{"in place", addCharge, "total with tax 1666.25, payable 1666.25, due none"},
+		{"in a replacement", replaceWithCharge, "total with tax 1666.25, payable 1666.25, due none"},
+		{"total with tax only", addRoundedCharge, "total with tax 1656.26, payable 1656.25, due none"},
+		{"amount payable only", roundDown, "total with tax 1656.25, payable 1656.24, due none"},
+		{"amount due only", addAdvance, "total with tax 1656.25, payable 1656.25, due 1556.25"},
 	} {
 		t.Run("a change to the amounts owed is an error: "+tc.name, func(t *testing.T) {
 			f := formatWithReconciledFuncs(tc.fn)
 			_, err := ubl.Import(parsedFixture(t, fixture), ubl.WithFormat(f))
 			require.Error(t, err)
-			assert.ErrorContains(t, err, f.Key.String())
-			assert.ErrorContains(t, err, fmt.Sprintf("payable %s to %s",
-				before.Totals.Payable, before.Totals.Payable.Add(ten)))
+			assert.EqualError(t, err, "format "+f.Key.String()+": reconciled import changed the amounts owed: "+
+				"was total with tax 1656.25, payable 1656.25, due none; now "+tc.now)
 		})
 	}
 

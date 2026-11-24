@@ -100,13 +100,14 @@ type Format struct {
 	// sender declared. A format uses them to restate a declared amount in
 	// GOBL's own model, such as a tax the specification carries as a
 	// document charge. The envelope is calculated once more after the last
-	// of them, and the import fails if that changed the total with tax or
-	// the amount payable. They never run on an invoice tagged for bypass
-	// (tax.TagBypass), whose amounts GOBL no longer calculates, nor on
-	// application responses, which declare no totals. They must not modify
-	// the UBL document, nor pair GOBL lines with UBL lines by position
-	// without checking: sub-lines may be folded into their parent line or
-	// re-read flat by reconciliation, and lines without a price are dropped.
+	// of them, and the import fails if that changed the total with tax, the
+	// amount payable or the amount due. They never run on an invoice tagged
+	// for bypass (tax.TagBypass), whose amounts GOBL no longer calculates,
+	// nor on application responses, which declare no totals. They must not
+	// modify the UBL document, nor pair GOBL lines with UBL lines by
+	// position without checking: sub-lines may be folded into their parent
+	// line or re-read flat by reconciliation, and lines without a price are
+	// dropped.
 	ReconciledImportFuncs []ImportFunc
 	// Specifications lists the other specifications of the format, for GOBL
 	// documents its own identifiers do not cover. On export, the first that
