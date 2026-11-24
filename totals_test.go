@@ -3,6 +3,7 @@ package ubl_test
 import (
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/untdid"
 	"github.com/invopop/gobl/cbc"
@@ -51,6 +52,28 @@ func TestNewTotals(t *testing.T) {
 		require.NotNil(t, tc.TaxExemptionReason)
 		assert.Equal(t, "Reverse Charge / Umkehr der Steuerschuld.", *tc.TaxExemptionReason)
 	})
+}
+
+func TestTaxCategoryName(t *testing.T) {
+	doc := mustExportInvoice(t, loadTestEnvelope(t, "invoice-minimal.json"))
+	require.Len(t, doc.TaxTotal, 1)
+	require.Len(t, doc.TaxTotal[0].TaxSubtotal, 1)
+	tc := &doc.TaxTotal[0].TaxSubtotal[0].TaxCategory
+	assert.Nil(t, tc.Name, "not exported by default")
+
+	name := "Standard rate"
+	tc.Name = &name
+	data, err := ubl.EncodeCompact(doc)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "<cac:TaxCategory><cbc:ID>S</cbc:ID><cbc:Name>Standard rate</cbc:Name><cbc:Percent>19</cbc:Percent>")
+
+	parsed, err := ubl.Decode(data)
+	require.NoError(t, err)
+	out, ok := parsed.(*ubl.Invoice)
+	require.True(t, ok)
+	got := out.TaxTotal[0].TaxSubtotal[0].TaxCategory.Name
+	require.NotNil(t, got)
+	assert.Equal(t, "Standard rate", *got)
 }
 
 func TestParseTaxNotes(t *testing.T) {
