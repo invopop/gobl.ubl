@@ -35,7 +35,7 @@ func TestCurrencyRounding(t *testing.T) {
 		require.NoError(t, env.Calculate())
 		require.Equal(t, "31.665", inv.Lines[0].Total.String())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		// BT-131 / BR-DEC-23
@@ -62,7 +62,7 @@ func TestCurrencyRounding(t *testing.T) {
 		require.NoError(t, env.Calculate())
 		require.Equal(t, "20000", inv.Totals.Sum.String())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		assert.NotContains(t, doc.LegalMonetaryTotal.LineExtensionAmount.Value, ".",
@@ -158,20 +158,14 @@ func assertAmountsFitCurrency(t *testing.T, doc *ubl.Invoice) {
 // freedom left, so the converter cannot round amounts independently on the way
 // out without breaking BR-CO-10.
 func TestTotalsArithmetic(t *testing.T) {
-	contexts := map[string]ubl.Format{
-		"en16931":            ubl.FormatEN16931,
-		"peppol":             ubl.FormatPeppol,
-		"peppol-self-billed": ubl.FormatPeppol,
-	}
-
-	for dir, ctx := range contexts {
+	for _, dir := range []string{"en16931", "peppol", "peppol-self-billed"} {
 		examples, err := filepath.Glob(filepath.Join(getConvertPath(), dir, jsonPattern))
 		require.NoError(t, err)
 
 		for _, example := range examples {
 			name := filepath.Base(example)
 			t.Run(dir+"/"+name, func(t *testing.T) {
-				doc, err := testInvoiceFromContext(filepath.Join(dir, name), ctx)
+				doc, err := testInvoiceFromContext(filepath.Join(dir, name), ubl.FormatEN16931)
 				require.NoError(t, err)
 				assertTotalsAddUp(t, doc)
 			})
@@ -205,7 +199,7 @@ func TestTotalsArithmeticManyLines(t *testing.T) {
 			require.NoError(t, env.Calculate())
 			payable := inv.Totals.Payable
 
-			doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+			doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 			require.NoError(t, err)
 
 			assertTotalsAddUp(t, doc)

@@ -9,6 +9,7 @@ import (
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFormatDate(t *testing.T) {
@@ -19,6 +20,36 @@ func TestFormatDate(t *testing.T) {
 	t.Run("a zero date is written as nothing", func(t *testing.T) {
 		assert.Equal(t, "", formatDate(cal.Date{}))
 	})
+}
+
+func TestParseTime(t *testing.T) {
+	tests := map[string]string{
+		"15:55:00":           "15:55:00",
+		"15:55:00.5":         "15:55:00.500000000",
+		"15:55:00Z":          "15:55:00",
+		"15:55:00+04:00":     "15:55:00",
+		"15:55:00-05:30":     "15:55:00",
+		"15:55:00+14:00":     "15:55:00",
+		"15:55:00-12:45":     "15:55:00",
+		"15:55:00.123+04:00": "15:55:00.123000000",
+	}
+	for in, want := range tests {
+		t.Run(in, func(t *testing.T) {
+			got, err := parseTime(in)
+			require.NoError(t, err)
+			assert.Equal(t, want, got.String())
+		})
+	}
+
+	for _, in := range []string{
+		"", "bad", "15:55", "25:00:00", "15:55:00+04", "15:55:00 +04:00",
+		"15:55:00+14:30", "15:55:00+15:00", "15:55:00+04:60", "15:55:00+99:99", "15:55:00z",
+	} {
+		t.Run("invalid "+in, func(t *testing.T) {
+			_, err := parseTime(in)
+			assert.Error(t, err)
+		})
+	}
 }
 
 func TestFormatDatePtr(t *testing.T) {
