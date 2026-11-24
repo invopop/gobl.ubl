@@ -125,6 +125,15 @@ func TestGoblLinePriceDetails(t *testing.T) {
 		assert.Equal(t, "120.00", item.List.String())
 		assert.Nil(t, item.Discount)
 	})
+	t.Run("a list price with fewer decimals than the discount", func(t *testing.T) {
+		p := price("4.90")
+		p.AllowanceCharge = allowance("0.1", "5")
+		item, err := read(p)
+		require.NoError(t, err)
+		require.NotNil(t, item.List)
+		assert.Equal(t, "5", item.List.String())
+		assert.Equal(t, "0.1", item.Discount.String())
+	})
 	t.Run("a list price that does not come to the net price", func(t *testing.T) {
 		p := price("100.00")
 		p.AllowanceCharge = allowance("12.00", "120.00")

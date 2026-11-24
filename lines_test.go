@@ -612,3 +612,15 @@ func TestClassifiedTaxCategoryNameAndExemption(t *testing.T) {
 	assert.Equal(t, "VATEX-EU-132", *got.TaxExemptionReasonCode)
 	assert.Equal(t, "Exempt supply", *got.TaxExemptionReason)
 }
+
+func TestInvoiceLineAccountingCost(t *testing.T) {
+	env := loadTestEnvelope(t, "invoice-minimal.json")
+	inv, ok := env.Extract().(*bill.Invoice)
+	require.True(t, ok)
+	inv.Lines[0].Cost = "CS-024"
+
+	doc, err := ubl.ExportInvoice(env)
+	require.NoError(t, err)
+	require.NotNil(t, doc.InvoiceLines[0].AccountingCost)
+	assert.Equal(t, "CS-024", *doc.InvoiceLines[0].AccountingCost)
+}

@@ -70,7 +70,7 @@ func TestParseOrderingNotApplicable(t *testing.T) {
 	t.Run("an invoice with no ordering gains none on a round trip", func(t *testing.T) {
 		env := loadTestEnvelope(t, "invoice-minimal.json")
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.Equal(t, "NA", doc.OrderReference.ID)
 

@@ -48,6 +48,25 @@ type MonetaryTotal struct {
 	PayableAmount         *Amount `xml:"cbc:PayableAmount,omitempty"`
 }
 
+// accountingTax provides the total VAT amount in the regime's currency
+// (BT-111) and that currency (BT-6), when it is known and differs from the
+// document currency. An exchange rate is needed to convert the amount, unless
+// there is no VAT to convert: zero is zero in any currency.
+func accountingTax(inv *bill.Invoice) (num.Amount, cur.Code, bool) {
+	to := inv.RegimeDef().GetCurrency()
+	if to == cur.CodeEmpty || to == inv.Currency || inv.Totals == nil {
+		return num.AmountZero, to, false
+	}
+	tax := inv.Totals.Tax
+	if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, to); rate != nil {
+		return rate.Convert(tax), to, true
+	}
+	if tax.IsZero() {
+		return tax, to, true
+	}
+	return num.AmountZero, to, false
+}
+
 func (ui *Invoice) addTotals(inv *bill.Invoice) {
 	if inv == nil || inv.Totals == nil {
 		return
@@ -55,7 +74,6 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 	t := inv.Totals
 
 	currency := inv.Currency.String()
-	rCurrency := inv.RegimeDef().GetCurrency().String()
 
 	// BT-106 to BT-115: the document totals, each capped at the currency's
 	// precision by BR-DEC-09 through BR-DEC-18.
@@ -89,15 +107,11 @@ func (ui *Invoice) addTotals(inv *bill.Invoice) {
 		},
 	}
 
-	// BT-111: only when the regime currency is known and differs from the document currency.
-	if rCurrency != "" && inv.Currency.String() != rCurrency {
-		if rate := cur.MatchExchangeRate(inv.ExchangeRates, inv.Currency, inv.RegimeDef().GetCurrency()); rate != nil {
-			taxInAccCurrency := rate.Convert(t.Tax)
-			accTaxTotal := TaxTotal{
-				TaxAmount: newAmount(taxInAccCurrency, rCurrency),
-			}
-			ui.TaxTotal = append(ui.TaxTotal, accTaxTotal)
-		}
+	// BT-111: the total VAT amount in the accounting currency.
+	if accTax, accCurrency, ok := accountingTax(inv); ok {
+		ui.TaxTotal = append(ui.TaxTotal, TaxTotal{
+			TaxAmount: newAmount(accTax, accCurrency.String()),
+		})
 	}
 
 	if t.Taxes != nil && len(t.Taxes.Categories) > 0 {

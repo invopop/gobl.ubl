@@ -62,7 +62,7 @@ func TestParseDelivery(t *testing.T) {
 		assert.Empty(t, id.Label)
 
 		// The scheme must survive a round trip back to UBL (BT-71-1).
-		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.Len(t, out.Delivery, 1)
 		loc := out.Delivery[0].DeliveryLocation
@@ -82,7 +82,7 @@ func TestParseDelivery(t *testing.T) {
 
 		doc, err := ubl.Decode(data)
 		require.NoError(t, err)
-		e, err := ubl.Import(doc)
+		e, err := ubl.Import(doc, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 
 		inv, ok := e.Extract().(*bill.Invoice)
@@ -94,7 +94,7 @@ func TestParseDelivery(t *testing.T) {
 		assert.Empty(t, id.Ext)
 		assert.Empty(t, id.Label)
 
-		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatPeppol))
+		out, err := ubl.ExportInvoice(e, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		require.Len(t, out.Delivery, 1)
 		require.NotNil(t, out.Delivery[0].DeliveryLocation)

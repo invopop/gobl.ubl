@@ -249,7 +249,7 @@ func parseWithTypeCode(t *testing.T, name, from, to string) *bill.Invoice {
 
 	doc, err := ubl.Decode(data)
 	require.NoError(t, err)
-	env, err := ubl.Import(doc)
+	env, err := ubl.Import(doc, ubl.WithFormat(ubl.FormatEN16931))
 	require.NoError(t, err)
 	inv, ok := env.Extract().(*bill.Invoice)
 	require.True(t, ok)

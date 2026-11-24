@@ -456,7 +456,7 @@ func goblLinePriceDetails(p *Price, item *org.Item) error {
 			return err
 		}
 	}
-	if !list.Subtract(discount).Equals(*item.Price) {
+	if !list.MatchPrecision(discount).Subtract(discount).Equals(*item.Price) {
 		return nil
 	}
 	item.List = &list

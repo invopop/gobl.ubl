@@ -191,7 +191,7 @@ func TestNewPartyEndpointID(t *testing.T) {
 		apply(inv)
 		require.NoError(t, env.Calculate())
 
-		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatPeppol))
+		doc, err := ubl.ExportInvoice(env, ubl.WithFormat(ubl.FormatEN16931))
 		require.NoError(t, err)
 		return doc
 	}
