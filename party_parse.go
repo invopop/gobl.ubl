@@ -205,9 +205,9 @@ func extractValidTaxSchemes(schemes []PartyTaxScheme) []PartyTaxScheme {
 }
 
 func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
-	country := l10n.TaxCountryCode(countryCode)
+	country := taxCountryFromVATCode(pts.CompanyID.Value)
 	if country.Empty() {
-		country = taxCountryFromVATCode(pts.CompanyID.Value)
+		country = l10n.TaxCountryCode(countryCode)
 	}
 	p.TaxID = &tax.Identity{
 		Country: country,
@@ -226,9 +226,10 @@ func setTaxIDFromScheme(pts PartyTaxScheme, p *org.Party, countryCode string) {
 }
 
 // taxCountryFromVATCode extracts the ISO country prefix that BR-CO-09 requires
-// on a VAT identifier. It is the only hint left when the party carries no
-// postal address, as is the case for the payee (UBL-CR-272). A code without a
-// usable prefix gives no country, so validation still rejects it.
+// on a VAT identifier. It takes precedence over the postal address country so
+// parties registered for VAT in another country preserve both countries, and
+// also handles parties with no postal address such as the payee (UBL-CR-272).
+// A code without a usable prefix gives no country.
 func taxCountryFromVATCode(code string) l10n.TaxCountryCode {
 	code = strings.ToUpper(strings.TrimSpace(code))
 	if len(code) < 3 {

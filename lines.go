@@ -24,12 +24,13 @@ type InvoiceLine struct {
 	InvoicePeriod       *Period             `xml:"cac:InvoicePeriod"`
 	OrderLineReference  *OrderLineReference `xml:"cac:OrderLineReference"`
 	// Only the reference naming the invoice itself carries the sub-line type and parent.
-	BillingReference  []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
-	DocumentReference *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
-	AllowanceCharge   []*AllowanceCharge      `xml:"cac:AllowanceCharge"`
-	TaxTotal          []TaxTotal              `xml:"cac:TaxTotal,omitempty"`
-	Item              *Item                   `xml:"cac:Item"`
-	Price             *Price                  `xml:"cac:Price"`
+	BillingReference   []*LineBillingReference `xml:"cac:BillingReference,omitempty"`
+	DocumentReference  *LineDocReference       `xml:"cac:DocumentReference,omitempty"`
+	AllowanceCharge    []*AllowanceCharge      `xml:"cac:AllowanceCharge"`
+	TaxTotal           []TaxTotal              `xml:"cac:TaxTotal,omitempty"`
+	Item               *Item                   `xml:"cac:Item"`
+	Price              *Price                  `xml:"cac:Price"`
+	ItemPriceExtension *ItemPriceExtension     `xml:"cac:ItemPriceExtension,omitempty"` // not in EN 16931
 
 	// hierarchy is that self-reference, set on parse.
 	hierarchy *LineBillingReference
@@ -39,6 +40,12 @@ type InvoiceLine struct {
 type LineDocReference struct {
 	ID               IDType  `xml:"cbc:ID"`
 	DocumentTypeCode *string `xml:"cbc:DocumentTypeCode,omitempty"`
+}
+
+// ItemPriceExtension represents the line amount including taxes
+type ItemPriceExtension struct {
+	Amount   Amount     `xml:"cbc:Amount"`
+	TaxTotal []TaxTotal `xml:"cac:TaxTotal"`
 }
 
 // LineBillingReference carries EXT-FR-FE-162/163 when its ID is the invoice's own (BT-1).

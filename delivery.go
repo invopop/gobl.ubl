@@ -7,12 +7,13 @@ import (
 
 // Delivery represents delivery information
 type Delivery struct {
-	ActualDeliveryDate      *string   `xml:"cbc:ActualDeliveryDate"`
-	LatestDeliveryDate      *string   `xml:"cbc:LatestDeliveryDate"`
-	DeliveryLocation        *Location `xml:"cac:DeliveryLocation"`
-	RequestedDeliveryPeriod *Period   `xml:"cac:RequestedDeliveryPeriod"`
-	EstimatedDeliveryPeriod *Period   `xml:"cac:EstimatedDeliveryPeriod"`
-	DeliveryParty           *Party    `xml:"cac:DeliveryParty"`
+	ActualDeliveryDate      *string         `xml:"cbc:ActualDeliveryDate"`
+	LatestDeliveryDate      *string         `xml:"cbc:LatestDeliveryDate"`
+	DeliveryLocation        *Location       `xml:"cac:DeliveryLocation"`
+	RequestedDeliveryPeriod *Period         `xml:"cac:RequestedDeliveryPeriod"`
+	EstimatedDeliveryPeriod *Period         `xml:"cac:EstimatedDeliveryPeriod"`
+	DeliveryParty           *Party          `xml:"cac:DeliveryParty"`
+	DeliveryTerms           []DeliveryTerms `xml:"cac:DeliveryTerms,omitempty"` // not in EN 16931
 }
 
 // Location represents a location
@@ -24,7 +25,7 @@ type Location struct {
 
 // DeliveryTerms represents the terms of delivery
 type DeliveryTerms struct {
-	ID               string    `xml:"cbc:ID"`
+	ID               IDType    `xml:"cbc:ID"`
 	DeliveryLocation *Location `xml:"cac:DeliveryLocation,omitempty"`
 }
 

@@ -13,9 +13,10 @@ import (
 
 // TaxTotal represents a tax total
 type TaxTotal struct {
-	TaxAmount      Amount        `xml:"cbc:TaxAmount"`
-	RoundingAmount *Amount       `xml:"cbc:RoundingAmount,omitempty"`
-	TaxSubtotal    []TaxSubtotal `xml:"cac:TaxSubtotal"`
+	TaxAmount            Amount        `xml:"cbc:TaxAmount"`
+	RoundingAmount       *Amount       `xml:"cbc:RoundingAmount,omitempty"`
+	TaxIncludedIndicator *bool         `xml:"cbc:TaxIncludedIndicator"` // not in EN 16931
+	TaxSubtotal          []TaxSubtotal `xml:"cac:TaxSubtotal"`
 }
 
 // TaxSubtotal represents a tax subtotal

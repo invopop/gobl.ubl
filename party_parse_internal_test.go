@@ -182,4 +182,44 @@ func TestGoblPartyVATCountry(t *testing.T) {
 			assert.Empty(t, p.Identities)
 		})
 	}
+
+	t.Run("prefers VAT prefix over postal address country", func(t *testing.T) {
+		p := goblParty(&Party{
+			PostalAddress: &PostalAddress{
+				Country: &Country{IdentificationCode: "CH"},
+			},
+			PartyTaxScheme: []PartyTaxScheme{
+				{
+					CompanyID: &IDType{Value: "DE282741168"},
+					TaxScheme: &TaxScheme{ID: IDType{Value: TaxSchemeVAT}},
+				},
+			},
+		})
+
+		require.NotNil(t, p.TaxID)
+		assert.Equal(t, l10n.TaxCountryCode("DE"), p.TaxID.Country)
+		assert.Equal(t, cbc.Code("DE282741168"), p.TaxID.Code)
+		require.Len(t, p.Addresses, 1)
+		assert.Equal(t, l10n.ISOCountryCode("CH"), p.Addresses[0].Country)
+	})
+
+	t.Run("falls back to postal address country when VAT code has no prefix", func(t *testing.T) {
+		p := goblParty(&Party{
+			PostalAddress: &PostalAddress{
+				Country: &Country{IdentificationCode: "AE"},
+			},
+			PartyTaxScheme: []PartyTaxScheme{
+				{
+					CompanyID: &IDType{Value: "100000000000003"},
+					TaxScheme: &TaxScheme{ID: IDType{Value: TaxSchemeVAT}},
+				},
+			},
+		})
+
+		require.NotNil(t, p.TaxID)
+		assert.Equal(t, l10n.TaxCountryCode("AE"), p.TaxID.Country)
+		assert.Equal(t, cbc.Code("100000000000003"), p.TaxID.Code)
+		require.Len(t, p.Addresses, 1)
+		assert.Equal(t, l10n.ISOCountryCode("AE"), p.Addresses[0].Country)
+	})
 }

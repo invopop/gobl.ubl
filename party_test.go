@@ -7,6 +7,7 @@ import (
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
+	"github.com/invopop/gobl/l10n"
 	"github.com/invopop/gobl/org"
 	"github.com/invopop/gobl/tax"
 	"github.com/stretchr/testify/assert"
@@ -127,6 +128,71 @@ func TestNewParty(t *testing.T) {
 		doc, err = ubl.ExportInvoice(env)
 		require.NoError(t, err)
 		assert.Equal(t, "NO923456783MVA", doc.AccountingSupplierParty.Party.PartyTaxScheme[0].CompanyID.Value)
+	})
+
+	t.Run("preserves postal address country when different from TaxID country", func(t *testing.T) {
+		party := &org.Party{
+			Name: "Cross-border Co",
+			TaxID: &tax.Identity{
+				Country: "AE",
+				Code:    "100000000000003",
+			},
+			Addresses: []*org.Address{
+				{
+					Street:   "Al Qurum Street",
+					Locality: "Muscat",
+					Country:  l10n.OM.ISO(),
+				},
+			},
+		}
+
+		p := ubl.NewParty(party)
+		require.NotNil(t, p)
+		require.NotNil(t, p.PostalAddress)
+		require.NotNil(t, p.PostalAddress.Country)
+		assert.Equal(t, "OM", p.PostalAddress.Country.IdentificationCode)
+		require.Len(t, p.PartyTaxScheme, 1)
+		assert.Equal(t, "AE100000000000003", p.PartyTaxScheme[0].CompanyID.Value)
+	})
+
+	t.Run("falls back to TaxID country when party has no address", func(t *testing.T) {
+		party := &org.Party{
+			Name: "No Address Co",
+			TaxID: &tax.Identity{
+				Country: "AE",
+				Code:    "100000000000003",
+			},
+		}
+
+		p := ubl.NewParty(party)
+		require.NotNil(t, p)
+		require.NotNil(t, p.PostalAddress)
+		require.NotNil(t, p.PostalAddress.Country)
+		assert.Equal(t, "AE", p.PostalAddress.Country.IdentificationCode)
+	})
+
+	t.Run("falls back to TaxID country when address has no country", func(t *testing.T) {
+		party := &org.Party{
+			Name: "No Country Address Co",
+			TaxID: &tax.Identity{
+				Country: "AE",
+				Code:    "100000000000003",
+			},
+			Addresses: []*org.Address{
+				{
+					Street:   "Sheikh Zayed Road",
+					Locality: "Dubai",
+				},
+			},
+		}
+
+		p := ubl.NewParty(party)
+		require.NotNil(t, p)
+		require.NotNil(t, p.PostalAddress)
+		require.NotNil(t, p.PostalAddress.CityName)
+		assert.Equal(t, "Dubai", *p.PostalAddress.CityName)
+		require.NotNil(t, p.PostalAddress.Country)
+		assert.Equal(t, "AE", p.PostalAddress.Country.IdentificationCode)
 	})
 }
 

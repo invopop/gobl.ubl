@@ -182,7 +182,11 @@ func goblCreditTransfer(paymentMeans *PaymentMeans) []*pay.CreditTransfer {
 		}
 	}
 
-	if creditTransfer.IBAN == "" && creditTransfer.Number == "" && creditTransfer.Name == "" && creditTransfer.BIC == "" && creditTransfer.Clearing == "" {
+	if branch := account.FinancialInstitutionBranch; branch != nil {
+		creditTransfer.Branch = parseAddress(branch.Address)
+	}
+
+	if creditTransfer.IBAN == "" && creditTransfer.Number == "" && creditTransfer.Name == "" && creditTransfer.BIC == "" && creditTransfer.Clearing == "" && creditTransfer.Branch == nil {
 		return nil
 	}
 	return []*pay.CreditTransfer{creditTransfer}

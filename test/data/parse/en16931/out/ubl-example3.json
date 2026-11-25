@@ -4,7 +4,7 @@
 		"uuid": "0195ce71-dc9c-72c8-bf2c-9890a4a9f0a2",
 		"dig": {
 			"alg": "sha256",
-			"val": "bc7f184067b9e7219ab7dd3454ce6d2939186fa36ce7d47eb0fec2fed24a51fa"
+			"val": "d2dc8e2f62334733ef8f6b1ef854fa093e62e2f3bcc64a1af333a403966495b8"
 		}
 	},
 	"doc": {
@@ -62,8 +62,8 @@
 		"customer": {
 			"name": "Buyercompany ltd",
 			"tax_id": {
-				"country": "DK",
-				"code": "NO987654321MVA"
+				"country": "NO",
+				"code": "987654321MVA"
 			},
 			"identities": [
 				{
