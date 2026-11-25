@@ -247,12 +247,14 @@ func newParty(party *org.Party) *Party { //nolint:gocyclo
 		}
 
 		p.PartyTaxScheme = []PartyTaxScheme{taxScheme}
-		// Override the company address's country code
+		// Fall back to the tax ID's country when the postal address has none.
 		if p.PostalAddress == nil {
 			p.PostalAddress = new(PostalAddress)
 		}
-		p.PostalAddress.Country = &Country{
-			IdentificationCode: tID.Country.String(),
+		if p.PostalAddress.Country == nil || p.PostalAddress.Country.IdentificationCode == "" {
+			p.PostalAddress.Country = &Country{
+				IdentificationCode: tID.Country.String(),
+			}
 		}
 	}
 

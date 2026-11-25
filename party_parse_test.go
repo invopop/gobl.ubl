@@ -1,8 +1,11 @@
 package ubl_test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
+	ubl "github.com/invopop/gobl.ubl"
 	"github.com/invopop/gobl/bill"
 	"github.com/invopop/gobl/catalogues/iso"
 	"github.com/invopop/gobl/cbc"
@@ -103,12 +106,38 @@ func TestParseParty(t *testing.T) {
 		customer := inv.Customer
 		require.NotNil(t, customer)
 		assert.Equal(t, "Buyercompany ltd", customer.Name)
-		assert.Equal(t, cbc.Code("NO987654321MVA"), customer.TaxID.Code)
-		assert.Equal(t, l10n.TaxCountryCode("DK"), customer.TaxID.Country)
+		assert.Equal(t, cbc.Code("987654321MVA"), customer.TaxID.Code)
+		assert.Equal(t, l10n.TaxCountryCode("NO"), customer.TaxID.Country)
 		assert.Equal(t, "Anystreet, Building 1", customer.Addresses[0].Street)
 		assert.Equal(t, "Anytown", customer.Addresses[0].Locality)
 		assert.Equal(t, cbc.Code("101"), customer.Addresses[0].Code)
 		assert.Equal(t, l10n.ISOCountryCode("DK"), customer.Addresses[0].Country)
+	})
+
+	t.Run("cross-border tax ID country differs from postal address country", func(t *testing.T) {
+		xmlPath := filepath.Join(getConvertPath(), "en16931", "out", "invoice-export-zero-rated.xml")
+		data, err := os.ReadFile(xmlPath)
+		require.NoError(t, err)
+
+		doc, err := ubl.Decode(data)
+		require.NoError(t, err)
+		ublInv, ok := doc.(*ubl.Invoice)
+		require.True(t, ok)
+
+		env, err := ubl.Import(ublInv, ubl.WithFormat(ubl.FormatEN16931))
+		require.NoError(t, err)
+		require.NoError(t, env.Validate())
+
+		inv, ok := env.Extract().(*bill.Invoice)
+		require.True(t, ok)
+
+		customer := inv.Customer
+		require.NotNil(t, customer)
+		require.NotNil(t, customer.TaxID)
+		assert.Equal(t, l10n.TaxCountryCode("DE"), customer.TaxID.Country)
+		assert.Equal(t, cbc.Code("282741168"), customer.TaxID.Code)
+		require.Len(t, customer.Addresses, 1)
+		assert.Equal(t, l10n.ISOCountryCode("CH"), customer.Addresses[0].Country)
 	})
 
 	t.Run("invoice-peppol.xml", func(t *testing.T) {

@@ -45,7 +45,7 @@
         <cbc:CityName>München</cbc:CityName>
         <cbc:PostalZone>80939</cbc:PostalZone>
         <cac:Country>
-          <cbc:IdentificationCode>DE</cbc:IdentificationCode>
+          <cbc:IdentificationCode>CH</cbc:IdentificationCode>
         </cac:Country>
       </cac:PostalAddress>
       <cac:PartyTaxScheme>
